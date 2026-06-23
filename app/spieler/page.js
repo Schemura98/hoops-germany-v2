@@ -7,7 +7,9 @@ import { FaSearch, FaBasketballBall, FaUser, FaMapMarkerAlt } from "react-icons/
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
+import CityRadiusFilter from "@/components/CityRadiusFilter";
 import { BUNDESLAENDER } from "@/lib/constants";
+import { loadCities, cityCoords, haversineKm } from "@/lib/geo";
 
 const POSITIONS = ["Alle", "PG", "SG", "SF", "PF", "C"];
 
@@ -18,6 +20,13 @@ export default function SpielerPage() {
   const [query, setQuery] = useState("");
   const [position, setPosition] = useState("Alle");
   const [land, setLand] = useState("");
+  const [geo, setGeo] = useState({ center: null, radiusKm: 50 });
+  const [cityMap, setCityMap] = useState(null);
+
+  // Städte-Datensatz nur laden, wenn der Umkreis-Filter genutzt wird
+  useEffect(() => {
+    if (geo.center && !cityMap) loadCities().then(({ map }) => setCityMap(map));
+  }, [geo.center, cityMap]);
 
   useEffect(() => {
     let active = true;
@@ -47,9 +56,20 @@ export default function SpielerPage() {
         p.teamId?.teamName?.toLowerCase().includes(q);
       const matchesPosition = position === "Alle" || p.position === position;
       const matchesLand = !land || p.bundesland === land;
-      return matchesQuery && matchesPosition && matchesLand;
+      let matchesGeo = true;
+      if (geo.center) {
+        if (!cityMap) matchesGeo = true; // Datensatz lädt noch
+        else {
+          const coords = cityCoords(cityMap, p.hometown);
+          matchesGeo =
+            !!coords &&
+            haversineKm(geo.center.lat, geo.center.lng, coords.lat, coords.lng) <=
+              geo.radiusKm;
+        }
+      }
+      return matchesQuery && matchesPosition && matchesLand && matchesGeo;
     });
-  }, [players, query, position, land]);
+  }, [players, query, position, land, geo, cityMap]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -85,6 +105,7 @@ export default function SpielerPage() {
               </option>
             ))}
           </select>
+          <CityRadiusFilter value={geo} onChange={setGeo} />
           <div className="flex gap-2 flex-wrap">
             {POSITIONS.map((pos) => (
               <button

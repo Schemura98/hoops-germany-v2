@@ -7,7 +7,9 @@ import { FaUsers, FaSearch, FaBasketballBall, FaMapMarkerAlt } from "react-icons
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
+import CityRadiusFilter from "@/components/CityRadiusFilter";
 import { BUNDESLAENDER } from "@/lib/constants";
+import { loadCities, cityCoords, haversineKm } from "@/lib/geo";
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState([]);
@@ -15,6 +17,12 @@ export default function TeamsPage() {
   const [error, setError] = useState(false);
   const [query, setQuery] = useState("");
   const [land, setLand] = useState("");
+  const [geo, setGeo] = useState({ center: null, radiusKm: 50 });
+  const [cityMap, setCityMap] = useState(null);
+
+  useEffect(() => {
+    if (geo.center && !cityMap) loadCities().then(({ map }) => setCityMap(map));
+  }, [geo.center, cityMap]);
 
   useEffect(() => {
     let active = true;
@@ -41,9 +49,20 @@ export default function TeamsPage() {
         t.teamName?.toLowerCase().includes(q) ||
         t.region?.toLowerCase().includes(q);
       const matchesLand = !land || t.bundesland === land;
-      return matchesQuery && matchesLand;
+      let matchesGeo = true;
+      if (geo.center) {
+        if (!cityMap) matchesGeo = true;
+        else {
+          const coords = cityCoords(cityMap, t.region);
+          matchesGeo =
+            !!coords &&
+            haversineKm(geo.center.lat, geo.center.lng, coords.lat, coords.lng) <=
+              geo.radiusKm;
+        }
+      }
+      return matchesQuery && matchesLand && matchesGeo;
     });
-  }, [teams, query, land]);
+  }, [teams, query, land, geo, cityMap]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -78,6 +97,7 @@ export default function TeamsPage() {
               </option>
             ))}
           </select>
+          <CityRadiusFilter value={geo} onChange={setGeo} />
         </div>
 
         {!loading && !error && (
