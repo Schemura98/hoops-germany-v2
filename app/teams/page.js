@@ -6,6 +6,7 @@ import axios from "axios";
 import { FaUsers, FaSearch, FaBasketballBall, FaMapMarkerAlt } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState([]);
@@ -34,9 +35,7 @@ export default function TeamsPage() {
     const q = query.trim().toLowerCase();
     if (!q) return teams;
     return teams.filter(
-      (t) =>
-        t.teamName?.toLowerCase().includes(q) ||
-        t.region?.toLowerCase().includes(q)
+      (t) => t.teamName?.toLowerCase().includes(q) || t.region?.toLowerCase().includes(q)
     );
   }, [teams, query]);
 
@@ -44,64 +43,69 @@ export default function TeamsPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
 
+      <PageHeader
+        eyebrow="Vereine"
+        title="Teams entdecken"
+        subtitle="Finde Vereine und Mannschaften, folge ihnen und bleib am Ball."
+      />
+
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Teams</h1>
-            <p className="text-sm text-gray-500">Entdecke Vereine und Mannschaften.</p>
-          </div>
-          <div className="relative">
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Team oder Region suchen…"
-              className="w-full sm:w-72 rounded-lg border border-gray-300 pl-9 pr-4 py-2.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-            />
-          </div>
+        <div className="relative mb-6 max-w-md">
+          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Team oder Region suchen…"
+            className="w-full rounded-xl border border-gray-200 pl-9 pr-4 py-3 text-sm text-gray-900 outline-none focus:border-brand-400 bg-white shadow-sm"
+          />
         </div>
 
+        {!loading && !error && (
+          <p className="text-xs text-gray-400 font-medium mb-4 uppercase tracking-wide">
+            {filtered.length} Teams
+          </p>
+        )}
+
         {loading ? (
-          <div className="flex justify-center py-16">
+          <div className="flex justify-center py-24">
             <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
           </div>
         ) : error ? (
-          <p className="text-center text-gray-500 py-16">
-            Teams konnten nicht geladen werden.
-          </p>
+          <p className="text-center text-gray-500 py-16">Teams konnten nicht geladen werden.</p>
         ) : filtered.length === 0 ? (
-          <p className="text-center text-gray-500 py-16">
-            {query ? "Keine Teams gefunden." : "Noch keine Teams registriert."}
-          </p>
+          <div className="text-center py-20">
+            <FaUsers className="text-5xl text-gray-200 mx-auto mb-4" />
+            <p className="text-gray-500 font-semibold">Keine Teams gefunden</p>
+            <p className="text-gray-400 text-sm mt-1">
+              {query ? "Versuche einen anderen Suchbegriff." : "Noch keine Teams registriert."}
+            </p>
+          </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filtered.map((t) => (
               <Link
                 key={t._id}
                 href={`/team/team-detail/${t.slug}`}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 transition-all"
+                className="group bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-brand-200 transition-all duration-200 overflow-hidden flex flex-col"
               >
-                <div className="flex items-center gap-3">
+                <div className="bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center h-40 w-full">
                   {t.logo ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={t.logo}
-                      alt={t.teamName}
-                      className="h-12 w-12 rounded-full object-cover"
-                    />
+                    <img src={t.logo} alt={t.teamName} className="h-28 w-28 object-contain" />
                   ) : (
-                    <span className="h-12 w-12 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
-                      <FaUsers />
-                    </span>
+                    <FaUsers className="text-5xl text-slate-500" />
                   )}
-                  <div className="min-w-0">
-                    <p className="font-semibold text-gray-900 truncate">{t.teamName}</p>
-                    {t.region && (
-                      <p className="text-xs text-gray-500 flex items-center gap-1">
-                        <FaMapMarkerAlt /> {t.region}
-                      </p>
-                    )}
-                  </div>
+                </div>
+                <div className="p-4 flex flex-col flex-1">
+                  <h2 className="font-bold text-gray-900 text-base leading-tight group-hover:text-brand-600 transition-colors truncate">
+                    {t.teamName}
+                  </h2>
+                  {t.region && (
+                    <div className="flex items-center gap-1.5 mt-1.5 text-gray-500 text-xs">
+                      <FaMapMarkerAlt className="flex-shrink-0 text-brand-400" />
+                      <span className="truncate">{t.region}</span>
+                    </div>
+                  )}
                 </div>
               </Link>
             ))}
