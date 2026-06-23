@@ -1,8 +1,53 @@
 import { getTokenFromRequest, verifyToken } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Match from "@/models/Match";
+import Team from "@/models/Team";
+import Player from "@/models/Player";
 import { getTeamFromToken } from "@/lib/serverAuth";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
+
+// Benachrichtigt die Follower beider Teams über ein bestätigtes Ergebnis.
+async function notifyFollowers(match) {
+  const [tA, tB] = await Promise.all([
+    Team.findById(match.teamA).select("teamName slug followers"),
+    Team.findById(match.teamB).select("teamName slug followers"),
+  ]);
+  if (!tA || !tB) return;
+
+  const a = match.teamAResult || {};
+  const message = `${tA.teamName} ${a.ownPoints}:${a.opponentPoints} ${tB.teamName}`;
+
+  // Eindeutige Follower beider Teams sammeln (mit ihrem "Heimat"-Team für den Link)
+  const seen = new Map(); // playerId -> { team }
+  for (const team of [tA, tB]) {
+    for (const fid of team.followers || []) {
+      const key = String(fid);
+      if (!seen.has(key)) seen.set(key, team);
+    }
+  }
+
+  await Promise.all(
+    [...seen.entries()].map(([pid, team]) =>
+      Player.updateOne(
+        { _id: pid },
+        {
+          $push: {
+            notifications: {
+              type: "match_result",
+              teamId: team._id,
+              teamName: team.teamName,
+              teamSlug: team.slug,
+              matchId: match._id,
+              message,
+              read: false,
+              createdAt: new Date(),
+            },
+          },
+        }
+      )
+    )
+  );
+}
 
 // POST /api/team/submit-match-result – Ergebnis einreichen + Abgleich (Dual-Auth).
 // Jedes Team meldet eigene + gegnerische Punkte. Stimmen beide Meldungen überein,
@@ -58,6 +103,7 @@ async function handler(req) {
   const bothSubmitted =
     a && b && a.ownPoints != null && b.ownPoints != null;
 
+  let justConfirmed = false;
   if (bothSubmitted) {
     const consistent =
       a.ownPoints === b.opponentPoints && a.opponentPoints === b.ownPoints;
@@ -65,6 +111,7 @@ async function handler(req) {
     if (consistent) {
       match.resultStatus = "confirmed";
       match.status = "completed";
+      justConfirmed = true;
 
       const aPts = a.ownPoints;
       const bPts = a.opponentPoints;
@@ -85,6 +132,15 @@ async function handler(req) {
   }
 
   await match.save();
+
+  // Follower beider Teams über das bestätigte Ergebnis benachrichtigen
+  if (justConfirmed) {
+    try {
+      await notifyFollowers(match);
+    } catch (err) {
+      console.error("[MATCH RESULT NOTIFY ERROR]", err);
+    }
+  }
 
   return ok({
     resultStatus: match.resultStatus,
