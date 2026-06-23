@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import { FaCheck } from "react-icons/fa";
+import { FaCheck, FaStar } from "react-icons/fa";
 import AdminShell from "@/components/layout/AdminShell";
 import { getAdminToken } from "@/lib/clientAuth";
 import { timeAgo } from "@/lib/timeAgo";
@@ -78,6 +78,28 @@ export default function AdminFeedbackPage() {
                   </button>
                 )}
               </div>
+              {(f.rating || (f.areas && f.areas.length > 0)) && (
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  {f.rating > 0 && (
+                    <span className="inline-flex items-center gap-0.5 text-amber-400">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <FaStar
+                          key={i}
+                          className={i < f.rating ? "text-amber-400" : "text-gray-200"}
+                        />
+                      ))}
+                    </span>
+                  )}
+                  {(f.areas || []).map((a) => (
+                    <span
+                      key={a}
+                      className="text-xs font-medium bg-slate-100 text-slate-600 rounded-full px-2 py-0.5"
+                    >
+                      {a}
+                    </span>
+                  ))}
+                </div>
+              )}
               <p className="mt-2 text-sm text-gray-700 whitespace-pre-line">{f.message}</p>
             </div>
           ))}
