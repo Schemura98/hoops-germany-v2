@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaCopy, FaCheck, FaLink } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
+import { BUNDESLAENDER } from "@/lib/constants";
 import ImageUpload from "@/components/ImageUpload";
 
 const inputClass =
@@ -23,6 +24,7 @@ export default function EinstellungenTab({ team, reload }) {
   const [form, setForm] = useState({
     teamName: team?.teamName || "",
     region: team?.region || "",
+    bundesland: team?.bundesland || "",
     about: team?.about || "",
     logo: team?.logo || "",
     banner: team?.banner || "",
@@ -124,7 +126,7 @@ export default function EinstellungenTab({ team, reload }) {
               className={inputClass}
             />
           </Field>
-          <Field label="Region">
+          <Field label="Stadt/Region">
             <input
               name="region"
               value={form.region}
@@ -132,6 +134,21 @@ export default function EinstellungenTab({ team, reload }) {
               className={inputClass}
               placeholder="z.B. Berlin"
             />
+          </Field>
+          <Field label="Bundesland">
+            <select
+              name="bundesland"
+              value={form.bundesland}
+              onChange={onChange}
+              className={inputClass}
+            >
+              <option value="">– wählen –</option>
+              {BUNDESLAENDER.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+            </select>
           </Field>
         </div>
 

@@ -7,7 +7,7 @@ import axios from "axios";
 import { FaBasketballBall } from "react-icons/fa";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { getPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
-import { POSITIONS } from "@/lib/constants";
+import { POSITIONS, BUNDESLAENDER } from "@/lib/constants";
 import PlayerNav from "@/components/layout/PlayerNav";
 import ImageUpload from "@/components/ImageUpload";
 
@@ -26,6 +26,7 @@ const FIELDS = [
   "nationality",
   "country",
   "hometown",
+  "bundesland",
   "preferredLeague",
   "instagram",
   "fibaLink",
@@ -180,6 +181,17 @@ export default function PlayerEditProfilePage() {
               <input name="hometown" value={form.hometown} onChange={onChange} className={inputClass} />
             </Field>
           </div>
+
+          <Field label="Bundesland">
+            <select name="bundesland" value={form.bundesland} onChange={onChange} className={inputClass}>
+              <option value="">– wählen –</option>
+              {BUNDESLAENDER.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+            </select>
+          </Field>
 
           <Field label="Bevorzugte Liga">
             <input name="preferredLeague" value={form.preferredLeague} onChange={onChange} className={inputClass} />

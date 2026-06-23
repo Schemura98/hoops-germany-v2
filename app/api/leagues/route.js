@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 async function list() {
   await connectDB();
   const leagues = await League.find({ active: true })
-    .select("name season teams")
+    .select("name season bundesland teams")
     .sort({ createdAt: -1 });
 
   return ok({
@@ -19,6 +19,7 @@ async function list() {
       _id: l._id,
       name: l.name,
       season: l.season,
+      bundesland: l.bundesland || "",
       teamCount: l.teams?.length || 0,
     })),
   });

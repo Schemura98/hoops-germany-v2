@@ -19,6 +19,7 @@ async function handler(req) {
 
   const teamName = body.teamName?.trim();
   const region = body.region?.trim() || "";
+  const bundesland = body.bundesland?.trim() || "";
   const about = body.about?.trim() || "";
   if (!teamName) {
     return fail("Bitte einen Teamnamen angeben", 400);
@@ -39,6 +40,7 @@ async function handler(req) {
   const team = await Team.create({
     teamName,
     region,
+    bundesland,
     about,
     slug,
     adminPlayerId: player._id,

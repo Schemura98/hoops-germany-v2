@@ -15,6 +15,7 @@ const STRING_FIELDS = [
   "nationality",
   "country",
   "hometown",
+  "bundesland",
   "aboutPlayer",
   "instagram",
   "fibaLink",

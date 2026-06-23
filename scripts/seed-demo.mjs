@@ -58,10 +58,10 @@ const daysAgo = (d) => new Date(now.getTime() - d * 86400000);
 
 // ----- Teams -----
 const teamDefs = [
-  { name: "Test Baskets", region: "Berlin", about: "Unser Verein aus der Hauptstadt – Basketball mit Herz." },
-  { name: "Rhein Ballers", region: "Köln", about: "Ballers vom Rhein. Schnell, jung, hungrig." },
-  { name: "Munich Hoops", region: "München", about: "Tradition trifft Moderne im Süden." },
-  { name: "Hamburg Towers United", region: "Hamburg", about: "Vom Hafen auf das Parkett." },
+  { name: "Test Baskets", region: "Berlin", bundesland: "Berlin", about: "Unser Verein aus der Hauptstadt – Basketball mit Herz." },
+  { name: "Rhein Ballers", region: "Köln", bundesland: "Nordrhein-Westfalen", about: "Ballers vom Rhein. Schnell, jung, hungrig." },
+  { name: "Munich Hoops", region: "München", bundesland: "Bayern", about: "Tradition trifft Moderne im Süden." },
+  { name: "Hamburg Towers United", region: "Hamburg", bundesland: "Hamburg", about: "Vom Hafen auf das Parkett." },
 ];
 // Spieler-geführte Teams (kein eigener Team-Login). adminPlayerId wird nach
 // dem Anlegen der Spieler gesetzt.
@@ -69,6 +69,7 @@ const teams = teamDefs.map((t) => ({
   _id: oid(),
   teamName: t.name,
   region: t.region,
+  bundesland: t.bundesland,
   about: t.about,
   slug: slugify(t.name),
   logo: null,
@@ -112,6 +113,7 @@ teams.forEach((team, ti) => {
       age: rnd(18, 32),
       nationality: pick(NAT),
       hometown: team.region,
+      bundesland: team.bundesland,
       aboutPlayer: "Leidenschaftlicher Basketballer, immer bereit für das nächste Spiel.",
       followers: [],
       following: [],
@@ -128,8 +130,13 @@ teams.forEach((team, ti) => {
 });
 
 // 2 Free Agents (transfermarkt)
+const faCities = [
+  { city: "Leipzig", land: "Sachsen" },
+  { city: "Stuttgart", land: "Baden-Württemberg" },
+];
 ["Sven Adler", "Jay Carter"].forEach((full, i) => {
   const [firstName, lastName] = full.split(" ");
+  const loc = faCities[i % faCities.length];
   nameIdx++;
   players.push({
     _id: oid(),
@@ -145,7 +152,8 @@ teams.forEach((team, ti) => {
     weight: `${rnd(80, 105)} kg`,
     age: rnd(19, 30),
     nationality: pick(NAT),
-    hometown: pick(["Leipzig", "Stuttgart", "Bremen"]),
+    hometown: loc.city,
+    bundesland: loc.land,
     aboutPlayer: "Suche ein neues Team für die kommende Saison.",
     followers: [],
     following: [],
@@ -193,6 +201,7 @@ const superDocs = superAdminDefs.map((s, i) => ({
   height: `${rnd(185, 200)} cm`,
   nationality: "Deutschland",
   hometown: i === 0 ? "Berlin" : "Hamburg",
+  bundesland: i === 0 ? "Berlin" : "Hamburg",
   aboutPlayer: "Hoops Germany Team.",
   followers: [],
   following: [],
@@ -238,6 +247,7 @@ const league = {
   _id: oid(),
   name: "Regionalliga Süd",
   season: "2025/26",
+  bundesland: "Bayern",
   teams: teams.map((t) => t._id),
   matches: [],
   active: true,

@@ -7,6 +7,7 @@ import { FaSearch, FaBasketballBall, FaUser, FaMapMarkerAlt } from "react-icons/
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
+import { BUNDESLAENDER } from "@/lib/constants";
 
 const POSITIONS = ["Alle", "PG", "SG", "SF", "PF", "C"];
 
@@ -16,6 +17,7 @@ export default function SpielerPage() {
   const [error, setError] = useState(false);
   const [query, setQuery] = useState("");
   const [position, setPosition] = useState("Alle");
+  const [land, setLand] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -44,9 +46,10 @@ export default function SpielerPage() {
         p.hometown?.toLowerCase().includes(q) ||
         p.teamId?.teamName?.toLowerCase().includes(q);
       const matchesPosition = position === "Alle" || p.position === position;
-      return matchesQuery && matchesPosition;
+      const matchesLand = !land || p.bundesland === land;
+      return matchesQuery && matchesPosition && matchesLand;
     });
-  }, [players, query, position]);
+  }, [players, query, position, land]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -70,6 +73,18 @@ export default function SpielerPage() {
               className="w-full border border-gray-200 rounded-xl pl-9 pr-4 py-3 text-sm text-gray-900 outline-none focus:border-brand-400 bg-white shadow-sm"
             />
           </div>
+          <select
+            value={land}
+            onChange={(e) => setLand(e.target.value)}
+            className="rounded-xl border border-gray-200 px-3 py-3 text-sm text-gray-700 bg-white shadow-sm outline-none focus:border-brand-400"
+          >
+            <option value="">Alle Bundesländer</option>
+            {BUNDESLAENDER.map((b) => (
+              <option key={b} value={b}>
+                {b}
+              </option>
+            ))}
+          </select>
           <div className="flex gap-2 flex-wrap">
             {POSITIONS.map((pos) => (
               <button

@@ -7,6 +7,7 @@ import axios from "axios";
 import { FaBasketballBall, FaUsers } from "react-icons/fa";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { getPlayerToken } from "@/lib/clientAuth";
+import { BUNDESLAENDER } from "@/lib/constants";
 import PlayerNav from "@/components/layout/PlayerNav";
 
 const inputClass =
@@ -15,7 +16,7 @@ const inputClass =
 export default function TeamCreatePage() {
   const router = useRouter();
   const { player, status } = useCurrentPlayer();
-  const [form, setForm] = useState({ teamName: "", region: "", about: "" });
+  const [form, setForm] = useState({ teamName: "", region: "", bundesland: "", about: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -88,17 +89,37 @@ export default function TeamCreatePage() {
               placeholder="z.B. Baskets Berlin"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Region <span className="text-gray-400">(optional)</span>
-            </label>
-            <input
-              name="region"
-              value={form.region}
-              onChange={onChange}
-              className={inputClass}
-              placeholder="z.B. Berlin"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Stadt/Region <span className="text-gray-400">(optional)</span>
+              </label>
+              <input
+                name="region"
+                value={form.region}
+                onChange={onChange}
+                className={inputClass}
+                placeholder="z.B. Berlin"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Bundesland <span className="text-gray-400">(optional)</span>
+              </label>
+              <select
+                name="bundesland"
+                value={form.bundesland}
+                onChange={onChange}
+                className={inputClass}
+              >
+                <option value="">– wählen –</option>
+                {BUNDESLAENDER.map((b) => (
+                  <option key={b} value={b}>
+                    {b}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

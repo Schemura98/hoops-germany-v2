@@ -6,7 +6,7 @@ import { ok, withErrorHandling } from "@/lib/apiResponse";
 async function handler() {
   await connectDB();
   const teams = await Team.find({})
-    .select("teamName slug logo region")
+    .select("teamName slug logo region bundesland")
     .sort({ teamName: 1 });
 
   return ok({ teams });

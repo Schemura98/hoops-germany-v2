@@ -5,7 +5,7 @@ import { getTeamFromToken, TEAM_PUBLIC_FIELDS } from "@/lib/serverAuth";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // Felder, die ein Team-Admin ändern darf.
-const STRING_FIELDS = ["region", "about", "logo", "banner"];
+const STRING_FIELDS = ["region", "bundesland", "about", "logo", "banner"];
 
 // POST /api/team/update-team – Team-Stammdaten ändern (Dual-Auth).
 async function handler(req) {

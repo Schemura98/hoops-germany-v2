@@ -7,12 +7,14 @@ import { FaUsers, FaSearch, FaBasketballBall, FaMapMarkerAlt } from "react-icons
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
+import { BUNDESLAENDER } from "@/lib/constants";
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [query, setQuery] = useState("");
+  const [land, setLand] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -33,11 +35,15 @@ export default function TeamsPage() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return teams;
-    return teams.filter(
-      (t) => t.teamName?.toLowerCase().includes(q) || t.region?.toLowerCase().includes(q)
-    );
-  }, [teams, query]);
+    return teams.filter((t) => {
+      const matchesQuery =
+        !q ||
+        t.teamName?.toLowerCase().includes(q) ||
+        t.region?.toLowerCase().includes(q);
+      const matchesLand = !land || t.bundesland === land;
+      return matchesQuery && matchesLand;
+    });
+  }, [teams, query, land]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -50,14 +56,28 @@ export default function TeamsPage() {
       />
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
-        <div className="relative mb-6 max-w-md">
-          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Team oder Region suchen…"
-            className="w-full rounded-xl border border-gray-200 pl-9 pr-4 py-3 text-sm text-gray-900 outline-none focus:border-brand-400 bg-white shadow-sm"
-          />
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          <div className="relative flex-1 max-w-md">
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Team oder Stadt suchen…"
+              className="w-full rounded-xl border border-gray-200 pl-9 pr-4 py-3 text-sm text-gray-900 outline-none focus:border-brand-400 bg-white shadow-sm"
+            />
+          </div>
+          <select
+            value={land}
+            onChange={(e) => setLand(e.target.value)}
+            className="rounded-xl border border-gray-200 px-3 py-3 text-sm text-gray-700 bg-white shadow-sm outline-none focus:border-brand-400"
+          >
+            <option value="">Alle Bundesländer</option>
+            {BUNDESLAENDER.map((b) => (
+              <option key={b} value={b}>
+                {b}
+              </option>
+            ))}
+          </select>
         </div>
 
         {!loading && !error && (

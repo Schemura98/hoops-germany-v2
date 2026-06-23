@@ -46,6 +46,7 @@ const playerSchema = new mongoose.Schema(
     birthdate: String,
     country: String,
     hometown: String,
+    bundesland: String,
     fibaLink: String,
     position: String,
     nationality: String,

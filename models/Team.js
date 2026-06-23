@@ -25,6 +25,7 @@ const teamSchema = new mongoose.Schema(
     password: String,
     about: String,
     region: String,
+    bundesland: String,
     logo: String,
     banner: String,
     slug: { type: String, unique: true },
