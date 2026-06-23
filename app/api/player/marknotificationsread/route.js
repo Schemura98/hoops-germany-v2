@@ -1,0 +1,26 @@
+import { getTokenFromRequest, verifyToken } from "@/lib/auth";
+import { connectDB } from "@/lib/db";
+import Player from "@/models/Player";
+import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
+
+// POST /api/player/marknotificationsread – alle Benachrichtigungen als gelesen markieren.
+async function handler(req) {
+  const body = await req.json().catch(() => ({}));
+  const token = getTokenFromRequest(req, body.token);
+
+  const decoded = verifyToken(token);
+  const id = decoded?.id || decoded?.playerId;
+  if (!id) {
+    return fail("Nicht authentifiziert", 401);
+  }
+
+  await connectDB();
+  await Player.updateOne(
+    { _id: id },
+    { $set: { "notifications.$[].read": true } }
+  );
+
+  return ok({ message: "Als gelesen markiert" });
+}
+
+export const POST = withErrorHandling(handler);
