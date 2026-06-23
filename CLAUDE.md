@@ -3,47 +3,62 @@
 
 ---
 
-## 0. AKTUELLER STAND (Stand: 23.06.2026)
+## 0. AKTUELLER STAND (Stand: 24.06.2026 – Redesign-Phase)
 
-> Der Neustart ist **lokal vollständig neu gebaut** und funktionsfähig. Noch **nichts auf den VPS deployed** — `hoopsgermany.de` zeigt weiterhin die ALTE Version.
+> v2 ist lokal funktionsfähig. **Laufendes Großprojekt:** das alte Live-Design von
+> `hoopsgermany.de` (dunkles Navy/Slate + Orange + Canva-Logo) wird Seite für Seite
+> originalgetreu auf die saubere v2-Architektur übertragen. Noch **nichts auf VPS deployed**.
 
 ### Projektort & Umgebung
-- **Lokaler Pfad: `C:\dev\hoops-germany-v2`** (aus OneDrive herausverschoben, da OneDrive die `.next`-Dateien sperrte → `EBUSY`/`readlink`-Fehler bei `build`/`dev`). **Projekt NICHT zurück nach OneDrive legen.**
+- **Lokaler Pfad: `C:\dev\hoops-germany-v2`** (NICHT zurück nach OneDrive – OneDrive sperrt `.next`).
 - Next.js **14.2.35**, App Router, JavaScript (kein TS), Tailwind.
-- `.env` lokal vorhanden mit echter **MongoDB-Atlas**-Verbindung (DB `hoopsgermany`), generiertem `SECRET_KEY` + `CRON_SECRET`, `NEXTAUTH_URL=http://localhost:3000`. SMTP/Google noch leer (optional).
-- Start: `npm run dev` → http://localhost:3000. Verbindungstest: `node scripts/dbcheck.mjs`.
-- Test-Accounts in DB: Admin `admin`/`geheim1234`, Spieler `max@test.de`/`test123`, Team `team@test.de`/`test123`.
+- `.env` lokal vorhanden (MongoDB-Atlas DB `hoopsgermany`, `SECRET_KEY`, `CRON_SECRET`, `NEXTAUTH_URL=http://localhost:3000`). SMTP/Google noch leer.
+- Start: `npm run dev` → http://localhost:3000. DB-Test: `node scripts/dbcheck.mjs`.
+- **Demo-Daten befüllen: `node scripts/seed-demo.mjs`** (4 Teams, 18 Spieler, Liga mit
+  abgeschlossenen Spielen + Box-Scores, Posts, Follower → Stats/Topscorer/Tabelle/Spielplan gefüllt).
+- **Test-Accounts (alle PW `test123`):** Spieler `max@test.de` (= Team-Admin „Test Baskets"),
+  weitere Spieler `@test.de`, Free Agents `sven.adler@test.de`/`jay.carter@test.de`.
+  Super-Admin `admin`/`geheim1234`. **`team@test.de` existiert NICHT mehr** (s.u.).
+
+### Versionierung / Backup
+- **Off-Machine-Backup: privates GitHub-Repo `github.com/Schemura98/hoops-germany-v2`.**
+- Branches: **`main`** = sauberer Wiederherstellungspunkt (v2 vor Redesign), **`redesign`** = aktiver Arbeits-Branch (hier wird gearbeitet, nach jedem Meilenstein committen + pushen).
+- `.env` ist gitignored; nur `.env.example` (leer) ist eingecheckt.
 
 ### Architektur-Konventionen (etabliert, bitte beibehalten)
-- **lib/**: `db.js` (cached Mongoose), `auth.js` (JWT sign/verify), `serverAuth.js` (`getPlayerFromToken`, `getTeamFromToken` = Dual-Auth, `getAdminFromToken`), `clientAuth.js` (localStorage-Token mit Null-Checks), `apiResponse.js` (`ok`/`fail`/`withErrorHandling`), `slug.js`, `baseUrl.js`, `matchScore.js`, `timeAgo.js`, `uploadFile.js`, `constants.js`, `useCurrentPlayer/Team/Admin.js` (Auth-Guard-Hooks).
-- **API-Pattern**: jeder Handler `connectDB()` → Eingaben prüfen → Logik → `ok()/fail()`, gewrappt in `withErrorHandling`. Referenz: `app/api/player/playerlogin/route.js`.
-- **Modelle**: immer `mongoose.models.X || mongoose.model("X", …)`.
-- **Dual-Auth**: Team-Admin-Endpunkte akzeptieren Team-Token ODER Player-Token mit `isTeamAdmin`/`teamAdminOf`.
-- **Design**: Orange als `brand-*` (`brand-500` = `#f97316`) in `tailwind.config.js`, Inter-Font, Cards `rounded-2xl shadow-sm`.
-- Token-Keys in localStorage: `playerAuthToken`, `teamAuthToken`, `adminAuthToken`.
-- Bild-Upload schreibt nach `public/players` & `public/team` (in `.gitignore`).
+- **lib/**: `db.js`, `auth.js`, `serverAuth.js` (`getPlayerFromToken`, `getTeamFromToken`=Dual-Auth, `getAdminFromToken`), `clientAuth.js`, `apiResponse.js` (`ok`/`fail`/`withErrorHandling`), `slug.js`, `matchScore.js`, `timeAgo.js`, `constants.js`, `useCurrentPlayer/Team/Admin.js`.
+- **API-Pattern**: `connectDB()` → prüfen → Logik → `ok()/fail()`, in `withErrorHandling`.
+- **Modelle**: immer `mongoose.models.X || mongoose.model("X", …)`. ⚠️ Schema-Änderungen an Modellen greifen erst nach **Dev-Server-Neustart** (mongoose cached das Model).
+- **Teams sind spieler-geführt (NEU, 24.06.):** kein eigener Team-Login mehr. Ein Spieler
+  gründet ein Team via `/team/create` → wird Admin (`adminPlayerId`, `isTeamAdmin`,
+  `teamAdminOf`, eigenes `teamId`). Verwaltung von `/team/admin` läuft über den **Spieler-Token**
+  (Dual-Auth). `/team/login` & `/team/register` sind nur noch Redirects. `Team.email` ist optional (sparse).
+- **Design-Sprache (Redesign):** helle Seiten (`gray-50`) + **Navy-Flächen** (`bg-gradient-to-r from-slate-950 to-slate-800`) + Orange-Akzente (`brand-*`, `brand-500=#f97316`) + `font-black`-Headlines + Inter. Echte Assets in `public/images/` (`logo.svg` = weiße Wortmarke für Navy-Navbar; `logo-hoops.svg` = dunkel für helle Auth-Seiten; `login image.jpg`/`signupImage.jpg`/`registerimage.jpg` = Hero-Motive).
+- **Wiederverwendbare Redesign-Bausteine:** `components/layout/AuthShell.js` (Split-Screen Auth), `components/layout/PageHeader.js` (Navy-Banner für Listen), `components/player/ProfileHero.js` (Navy-Profil-Hero), `components/layout/Navbar.js` (öffentlich, login-bewusst).
+- Token-Keys in localStorage: `playerAuthToken`, `teamAuthToken` (legacy, kaum noch genutzt), `adminAuthToken`.
 
-### Fertig & funktional (lokal getestet)
-- **Auth**: Spieler Login/Signup, Google OAuth (Routen fertig, braucht Keys), Passwort-Reset, geschützte Seiten.
-- **Spieler**: Profil ansehen/bearbeiten (+Foto-Upload), Passwort ändern, öffentliche Liste/Profile, Karriere-Stats, Follower-System (folgen/Listen/Feed), Posts auf Profil, Transfermarkt.
-- **Teams**: Login/Register, öffentliche Liste/Profile, **Team-Admin-Panel mit allen 6 Tabs** (Kader inkl. Claim-/Einladungssystem, Anfragen, Spielplan, Ergebnisse mit Verifikation + Spieler-Stats, Tryouts, Einstellungen + Logo/Banner-Upload + Einladungslink).
-- **Spiele/Ligen**: Spielplan, Ergebnis-Verifikation (mismatch/confirmed), Spieler-Stats, `/spiele`, `/match/[id]`, Ligen + berechnete Tabellen (`/ligen`, `/ligen/[id]`).
-- **Tryouts**: Team schreibt aus + Bewerberliste; öffentlich `/tryouts`, `/tryouts/[id]` mit Bewerbung.
-- **Community**: Newsfeed (Entdecken/Folge-ich), Posts (Like/Kommentar), Benachrichtigungen (Glocke), Topscorer.
-- **Super-Admin** (`/admin/*`, eigener Token): Login, Dashboard, Spieler (löschen + Team-Admin vergeben via `setteamadmin`), Teams (löschen), Spiele (Ergebniskorrektur `updatematch`), Ligen-CRUD, Moderation (`deletepost`), Analytics, Feedback-Inbox. Erster Admin per `POST /api/admin/adminregister` bootstrappen (erster ohne Auth).
-- **Sonstiges**: Kontakt + Feedback (Mailer), Rechtsseiten (`/about`, `/impressum`, `/datenschutz` – Platzhalter `[…]` ausfüllen!), RSS-News-Widget (`/api/news/rss`), Analytics-Tracking (`AnalyticsTracker` im Layout), Pending-Results-Cron (`/api/admin/notify-pending-results`, per `CRON_SECRET`).
+### Redesign-Fortschritt (Branch `redesign`)
+✅ **Fertig & im Browser verifiziert:**
+- Theme-Fundament, **globale Navbar** (Navy+Logo+Suche+Glocke+Login-State+Mobile)
+- **Landing** (Vollbild-Hero, Features, „So funktionierts", News, CTA)
+- **Auth** (login, signup, reset-password – via `AuthShell`)
+- **Spieler**: Liste (Positions-Filter), öffentl. + eigenes Profil (`ProfileHero`), edit-profile; **PlayerNav → Navy**
+- **Teams**: Liste (Navy-Banner, Logo-Karten), **Team-Detail** (Navy-Hero + Tabs Kader/Spielplan/News), **Team-Admin-Panel** (TeamNav→Navy, 6 Tabs); **KaderTab zeigt echte Mitglieder + Slots**
+- **Spieler-geführte Teams** komplett umgesetzt (s.o.) inkl. `/team/create`, `/api/team/create`, `/api/team/remove-member`
+- **Demo-Seed-Skript** + **Bugfix** Liga-Tabelle (`status` fehlte im Query)
+
+🔜 **Noch offen (Reihenfolge):**
+1. `/team/dashboard` & `/team/edit-team` im neuen Modell prüfen/anpassen
+2. **Spiele / Match-Detail** (Box-Scores) / Tryouts / Transfermarkt restylen
+3. Community (Newsfeed/Posts/Notifications) + **Super-Admin-Panel** restylen
+4. Rechtsseiten (Impressum/Datenschutz – `[…]`-Platzhalter mit echten Betreiberdaten füllen)
+5. Production-Build grünziehen, voller Smoke-Test, **VPS-Deployment**
 
 ### Bekannte Einschränkungen / offen
-- **Kein VPS-Deployment** erfolgt (s. Abschnitt 12). Live-Site noch alt.
-- **Profilbild/Logo/Banner**: Datei-Upload fertig; URL-Feld bleibt als Alternative.
-- **Ligen** sind aktuell **team-admin-erstellbar** (Teams treten implizit über Liga-Spiele bei) statt super-admin-only — bewusste Abweichung für Nutzbarkeit ohne Admin.
-- **SMTP/Google** Keys fehlen lokal → Reset-/Einladungs-Mails & Google-Login erst mit echten Werten testbar.
-- Build-/Dev-Locks gibt es nur unter OneDrive; in `C:\dev` stabil.
-
-### Sinnvolle nächste Schritte
-1. Browser-Smoke-Test lokal abschließen.
-2. **VPS-Deployment** vorbereiten (Repo, `.env` auf Server, Build, PM2). Achtung: aktuelles `package.json`/Struktur weicht vom alten Repo `sports-website` ab → ggf. neues Repo/Branch.
-3. Impressum/Datenschutz-Platzhalter füllen; SMTP- & Google-OAuth-Keys eintragen.
+- **Kein VPS-Deployment** erfolgt. Live-Site noch alt.
+- **SMTP/Google**-Keys fehlen lokal → Reset-/Einladungs-Mails & Google-Login erst mit echten Werten testbar.
+- Impressum/Datenschutz-Platzhalter noch ungefüllt (brauchen rechtliche Betreiberdaten).
+- Schema-Änderungen erfordern Dev-Neustart (mongoose-Model-Cache).
 
 ---
 
