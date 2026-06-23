@@ -14,6 +14,201 @@ function authorLink(player) {
     : "#";
 }
 
+// Wiederverwendbarer Like-Button für Kommentare und Antworten.
+function LikeButton({ liked, count, busy, onToggle }) {
+  return (
+    <button
+      onClick={onToggle}
+      disabled={busy}
+      className={`inline-flex items-center gap-1 text-xs ${
+        liked ? "text-brand-600" : "text-gray-400 hover:text-brand-600"
+      }`}
+    >
+      {liked ? <FaHeart /> : <FaRegHeart />}
+      {count > 0 && <span>{count}</span>}
+    </button>
+  );
+}
+
+// Eine Antwort auf einen Kommentar (eingerückt, ebenfalls likebar).
+function ReplyItem({ reply, postId, commentId, currentPlayerId }) {
+  const [liked, setLiked] = useState(
+    (reply.likes || []).some((l) => String(l) === String(currentPlayerId))
+  );
+  const [likeCount, setLikeCount] = useState((reply.likes || []).length);
+  const [busy, setBusy] = useState(false);
+
+  async function toggleLike() {
+    if (busy) return;
+    setBusy(true);
+    const prev = { liked, likeCount };
+    setLiked(!liked);
+    setLikeCount((c) => c + (liked ? -1 : 1));
+    try {
+      const token = getPlayerToken();
+      const { data } = await axios.post("/api/posts/likecomment", {
+        token,
+        postId,
+        commentId,
+        replyId: reply._id,
+      });
+      setLiked(data.liked);
+      setLikeCount(data.likeCount);
+    } catch {
+      setLiked(prev.liked);
+      setLikeCount(prev.likeCount);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="flex gap-2">
+      <Link href={authorLink(reply.player)}>
+        <Avatar player={reply.player} className="h-7 w-7" />
+      </Link>
+      <div className="flex-1">
+        <div className="bg-gray-50 rounded-2xl px-3 py-2">
+          <Link
+            href={authorLink(reply.player)}
+            className="text-sm font-medium text-gray-900 hover:text-brand-600"
+          >
+            {reply.player?.firstName} {reply.player?.lastName}
+          </Link>
+          <p className="text-sm text-gray-700">{reply.text}</p>
+        </div>
+        <div className="mt-1 pl-3">
+          <LikeButton liked={liked} count={likeCount} busy={busy} onToggle={toggleLike} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Ein Kommentar inkl. Like, Antworten-Liste und Antwort-Eingabe.
+function CommentItem({ comment, postId, currentPlayerId }) {
+  const [liked, setLiked] = useState(
+    (comment.likes || []).some((l) => String(l) === String(currentPlayerId))
+  );
+  const [likeCount, setLikeCount] = useState((comment.likes || []).length);
+  const [likeBusy, setLikeBusy] = useState(false);
+
+  const [replies, setReplies] = useState(comment.replies || []);
+  const [showReply, setShowReply] = useState(false);
+  const [replyText, setReplyText] = useState("");
+  const [replying, setReplying] = useState(false);
+
+  async function toggleLike() {
+    if (likeBusy) return;
+    setLikeBusy(true);
+    const prev = { liked, likeCount };
+    setLiked(!liked);
+    setLikeCount((c) => c + (liked ? -1 : 1));
+    try {
+      const token = getPlayerToken();
+      const { data } = await axios.post("/api/posts/likecomment", {
+        token,
+        postId,
+        commentId: comment._id,
+      });
+      setLiked(data.liked);
+      setLikeCount(data.likeCount);
+    } catch {
+      setLiked(prev.liked);
+      setLikeCount(prev.likeCount);
+    } finally {
+      setLikeBusy(false);
+    }
+  }
+
+  async function addReply() {
+    if (!replyText.trim() || replying) return;
+    setReplying(true);
+    try {
+      const token = getPlayerToken();
+      const { data } = await axios.post("/api/posts/addreply", {
+        token,
+        postId,
+        commentId: comment._id,
+        text: replyText,
+      });
+      setReplies((r) => [...r, data.reply]);
+      setReplyText("");
+      setShowReply(false);
+    } catch {
+      /* belassen */
+    } finally {
+      setReplying(false);
+    }
+  }
+
+  return (
+    <div className="flex gap-2">
+      <Link href={authorLink(comment.player)}>
+        <Avatar player={comment.player} className="h-8 w-8" />
+      </Link>
+      <div className="flex-1 min-w-0">
+        <div className="bg-gray-50 rounded-2xl px-3 py-2">
+          <Link
+            href={authorLink(comment.player)}
+            className="text-sm font-medium text-gray-900 hover:text-brand-600"
+          >
+            {comment.player?.firstName} {comment.player?.lastName}
+          </Link>
+          <p className="text-sm text-gray-700">{comment.text}</p>
+        </div>
+
+        {/* Aktionen */}
+        <div className="mt-1 pl-3 flex items-center gap-4">
+          <LikeButton liked={liked} count={likeCount} busy={likeBusy} onToggle={toggleLike} />
+          <button
+            onClick={() => setShowReply((v) => !v)}
+            className="text-xs font-medium text-gray-400 hover:text-brand-600"
+          >
+            Antworten
+          </button>
+        </div>
+
+        {/* Antworten */}
+        {replies.length > 0 && (
+          <div className="mt-2 space-y-2">
+            {replies.map((r) => (
+              <ReplyItem
+                key={r._id}
+                reply={r}
+                postId={postId}
+                commentId={comment._id}
+                currentPlayerId={currentPlayerId}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Antwort-Eingabe */}
+        {showReply && (
+          <div className="mt-2 flex gap-2">
+            <input
+              autoFocus
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addReply()}
+              placeholder="Antworten…"
+              className="flex-1 rounded-full border border-gray-200 px-4 py-1.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+            />
+            <button
+              onClick={addReply}
+              disabled={replying || !replyText.trim()}
+              className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-full px-4 py-1.5 text-sm font-medium"
+            >
+              Senden
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function PostCard({ post, currentPlayerId }) {
   const initialLiked = (post.likes || []).some(
     (l) => String(l) === String(currentPlayerId)
@@ -25,6 +220,11 @@ export default function PostCard({ post, currentPlayerId }) {
   const [commentText, setCommentText] = useState("");
   const [liking, setLiking] = useState(false);
   const [commenting, setCommenting] = useState(false);
+
+  // Gesamtzahl Kommentare inkl. Antworten (für den Zähler).
+  const commentTotal =
+    comments.length +
+    comments.reduce((sum, c) => sum + (c.replies?.length || 0), 0);
 
   async function toggleLike() {
     if (liking) return;
@@ -115,7 +315,7 @@ export default function PostCard({ post, currentPlayerId }) {
           onClick={() => setShowComments((v) => !v)}
           className="inline-flex items-center gap-1.5 hover:text-brand-600"
         >
-          <FaRegComment /> {comments.length}
+          <FaRegComment /> {commentTotal}
         </button>
       </div>
 
@@ -123,20 +323,12 @@ export default function PostCard({ post, currentPlayerId }) {
       {showComments && (
         <div className="mt-3 space-y-3">
           {comments.map((c) => (
-            <div key={c._id} className="flex gap-2">
-              <Link href={authorLink(c.player)}>
-                <Avatar player={c.player} className="h-8 w-8" />
-              </Link>
-              <div className="bg-gray-50 rounded-2xl px-3 py-2 flex-1">
-                <Link
-                  href={authorLink(c.player)}
-                  className="text-sm font-medium text-gray-900 hover:text-brand-600"
-                >
-                  {c.player?.firstName} {c.player?.lastName}
-                </Link>
-                <p className="text-sm text-gray-700">{c.text}</p>
-              </div>
-            </div>
+            <CommentItem
+              key={c._id}
+              comment={c}
+              postId={post._id}
+              currentPlayerId={currentPlayerId}
+            />
           ))}
 
           <div className="flex gap-2">

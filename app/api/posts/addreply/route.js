@@ -4,7 +4,8 @@ import Post from "@/models/Post";
 import { getPlayerFromToken } from "@/lib/serverAuth";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
-// POST /api/posts/addcomment – Kommentar hinzufügen (Spieler-Auth).
+// POST /api/posts/addreply – Antwort auf einen Kommentar hinzufügen (Spieler-Auth).
+// Body: { token, postId, commentId, text }
 async function handler(req) {
   const body = await req.json().catch(() => ({}));
   const token = getTokenFromRequest(req, body.token);
@@ -16,7 +17,7 @@ async function handler(req) {
 
   const text = body.text?.trim();
   if (!text) {
-    return fail("Der Kommentar darf nicht leer sein", 400);
+    return fail("Die Antwort darf nicht leer sein", 400);
   }
 
   await connectDB();
@@ -25,17 +26,21 @@ async function handler(req) {
     return fail("Beitrag nicht gefunden", 404);
   }
 
-  post.comments.push({ player: player._id, text, createdAt: new Date() });
+  const comment = post.comments.id(body.commentId);
+  if (!comment) {
+    return fail("Kommentar nicht gefunden", 404);
+  }
+
+  comment.replies.push({ player: player._id, text, likes: [], createdAt: new Date() });
   await post.save();
 
-  const c = post.comments[post.comments.length - 1];
+  const r = comment.replies[comment.replies.length - 1];
   return ok({
-    comment: {
-      _id: c._id,
-      text: c.text,
+    reply: {
+      _id: r._id,
+      text: r.text,
       likes: [],
-      replies: [],
-      createdAt: c.createdAt,
+      createdAt: r.createdAt,
       player: {
         _id: player._id,
         firstName: player.firstName,
