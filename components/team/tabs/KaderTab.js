@@ -125,6 +125,7 @@ export default function KaderTab({ team, reload }) {
       await axios.post("/api/team/roster/approve-claim", { token, slotId });
       flash("ok", "Anspruch bestätigt.");
       reload?.();
+      loadMembers();
     } catch (err) {
       flash("err", err.response?.data?.message || "Bestätigung fehlgeschlagen.");
     } finally {
