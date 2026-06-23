@@ -5,42 +5,67 @@ export const metadata = { title: "Impressum – Hoops Germany" };
 export default function ImpressumPage() {
   return (
     <LegalShell title="Impressum">
-      <p className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-amber-700">
-        Hinweis: Bitte die mit <code>[…]</code> markierten Platzhalter vor dem Go-Live durch
-        die echten Angaben des Betreibers ersetzen.
-      </p>
-
       <LegalHeading>Angaben gemäß § 5 TMG</LegalHeading>
       <p>
-        [Vor- und Nachname / Firmenname]
+        Patrick Schemura
         <br />
-        [Straße und Hausnummer]
+        Robend 116
         <br />
-        [PLZ und Ort]
+        41748 Viersen
+        <br />
+        Deutschland
       </p>
 
       <LegalHeading>Kontakt</LegalHeading>
       <p>
-        Telefon: [Telefonnummer]
+        Telefon: +49 176 62310523
         <br />
-        E-Mail: info@hoopsgermany.de
+        E-Mail:{" "}
+        <a href="mailto:info@hoopsgermany.de" className="text-brand-600 hover:underline">
+          info@hoopsgermany.de
+        </a>
+        <br />
+        Website:{" "}
+        <a
+          href="https://www.hoopsgermany.de"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-brand-600 hover:underline"
+        >
+          www.hoopsgermany.de
+        </a>
       </p>
 
-      <LegalHeading>Vertreten durch</LegalHeading>
-      <p>[Name der vertretungsberechtigten Person]</p>
-
-      <LegalHeading>Umsatzsteuer-ID</LegalHeading>
+      <LegalHeading>Umsatzsteuer</LegalHeading>
       <p>
-        Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:
-        <br />
-        [USt-IdNr., falls vorhanden]
+        Gemäß § 19 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung). Eine
+        Umsatzsteuer-Identifikationsnummer liegt derzeit nicht vor.
       </p>
 
       <LegalHeading>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</LegalHeading>
       <p>
-        [Vor- und Nachname]
+        Patrick Schemura
         <br />
-        [Anschrift wie oben]
+        Robend 116
+        <br />
+        41748 Viersen
+      </p>
+
+      <LegalHeading>Haftung für Inhalte</LegalHeading>
+      <p>
+        Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene Inhalte auf diesen Seiten
+        nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als
+        Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde
+        Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige
+        Tätigkeit hinweisen.
+      </p>
+
+      <LegalHeading>Haftung für Links</LegalHeading>
+      <p>
+        Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen
+        Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr
+        übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder
+        Betreiber der Seiten verantwortlich.
       </p>
 
       <LegalHeading>Streitschlichtung</LegalHeading>
@@ -55,8 +80,8 @@ export default function ImpressumPage() {
         >
           https://ec.europa.eu/consumers/odr
         </a>
-        . Wir sind nicht verpflichtet und nicht bereit, an Streitbeilegungsverfahren vor
-        einer Verbraucherschlichtungsstelle teilzunehmen.
+        . Wir sind nicht verpflichtet und nicht bereit, an Streitbeilegungsverfahren vor einer
+        Verbraucherschlichtungsstelle teilzunehmen.
       </p>
     </LegalShell>
   );

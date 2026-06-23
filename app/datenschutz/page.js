@@ -5,19 +5,20 @@ export const metadata = { title: "Datenschutz – Hoops Germany" };
 export default function DatenschutzPage() {
   return (
     <LegalShell title="Datenschutzerklärung">
-      <p className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-amber-700">
-        Hinweis: Diese Datenschutzerklärung ist eine Vorlage und ersetzt keine
-        Rechtsberatung. Bitte vor dem Go-Live durch eine fachkundige Person prüfen und die
-        <code> […]</code>-Platzhalter ergänzen.
-      </p>
-
       <LegalHeading>1. Verantwortlicher</LegalHeading>
       <p>
         Verantwortlich für die Datenverarbeitung auf dieser Website ist:
         <br />
-        [Name und Anschrift des Betreibers]
+        Patrick Schemura
         <br />
-        E-Mail: info@hoopsgermany.de
+        Robend 116
+        <br />
+        41748 Viersen, Deutschland
+        <br />
+        E-Mail:{" "}
+        <a href="mailto:info@hoopsgermany.de" className="text-brand-600 hover:underline">
+          info@hoopsgermany.de
+        </a>
       </p>
 
       <LegalHeading>2. Erhebung und Verarbeitung personenbezogener Daten</LegalHeading>
@@ -74,7 +75,24 @@ export default function DatenschutzPage() {
         einen begrenzten Zeitraum erhalten bleiben.
       </p>
 
-      <p className="text-xs text-gray-400 pt-2">Stand: [Datum einsetzen]</p>
+      <LegalHeading>9. Auftragsverarbeiter &amp; eingebundene Dienste</LegalHeading>
+      <p>
+        Zur Bereitstellung der Plattform setzen wir sorgfältig ausgewählte Dienstleister ein:
+      </p>
+      <ul className="list-disc pl-5 space-y-1">
+        <li>Hosting unseres Servers (VPS)</li>
+        <li>MongoDB Atlas (Datenbank)</li>
+        <li>E-Mail-Versand (transaktionale E-Mails)</li>
+        <li>Sportschau-RSS-Feed (Anzeige aktueller Basketball-News)</li>
+      </ul>
+      <p>
+        Server-Logs werden zur Sicherheit kurzfristig gespeichert und anschließend
+        automatisch anonymisiert bzw. gelöscht.
+      </p>
+
+      <p className="text-xs text-gray-400 pt-2">
+        Stand: Juni 2026. Diese Datenschutzerklärung ersetzt keine Rechtsberatung.
+      </p>
     </LegalShell>
   );
 }

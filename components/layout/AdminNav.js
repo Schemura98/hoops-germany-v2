@@ -26,22 +26,22 @@ export default function AdminNav() {
   }
 
   return (
-    <nav className="bg-gray-900 text-white sticky top-0 z-50">
+    <nav className="bg-gradient-to-r from-slate-950 to-slate-800 text-white sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-6 flex items-center justify-between h-14">
         <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold">
-          <FaShieldAlt className="text-brand-500" />
+          <FaShieldAlt className="text-orange-400" />
           Admin
         </Link>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 overflow-x-auto">
           {links.map((l) => {
             const active = pathname === l.href;
             return (
               <Link
                 key={l.href}
                 href={l.href}
-                className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                  active ? "bg-brand-500 text-white" : "text-gray-300 hover:bg-gray-800"
+                className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                  active ? "bg-brand-500 text-white" : "text-gray-300 hover:bg-slate-800"
                 }`}
               >
                 {l.label}
@@ -50,7 +50,7 @@ export default function AdminNav() {
           })}
           <button
             onClick={logout}
-            className="ml-2 text-gray-400 hover:text-brand-400"
+            className="ml-2 text-gray-400 hover:text-orange-400"
             aria-label="Abmelden"
             title="Abmelden"
           >

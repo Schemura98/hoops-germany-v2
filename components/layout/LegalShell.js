@@ -1,13 +1,14 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import PageHeader from "@/components/layout/PageHeader";
 
 // Gemeinsame Hülle für Inhalts-/Rechtsseiten.
-export default function LegalShell({ title, children }) {
+export default function LegalShell({ title, eyebrow = "Rechtliches", children }) {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
-      <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-12">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">{title}</h1>
+      <PageHeader eyebrow={eyebrow} title={title} />
+      <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-10">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-4 text-sm text-gray-600 leading-relaxed">
           {children}
         </div>
