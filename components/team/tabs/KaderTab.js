@@ -9,6 +9,8 @@ import {
   FaCheck,
   FaEnvelope,
   FaUserCheck,
+  FaUserMinus,
+  FaUser,
 } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import { POSITIONS } from "@/lib/constants";
@@ -27,6 +29,40 @@ export default function KaderTab({ team, reload }) {
 
   const [origin, setOrigin] = useState("");
   const [msg, setMsg] = useState(null); // { type, text }
+
+  // Tatsächliche Mitglieder (Account-Spieler mit teamId)
+  const [members, setMembers] = useState([]);
+  const [removingId, setRemovingId] = useState(null);
+
+  async function loadMembers() {
+    try {
+      const token = getTeamAuthToken();
+      const { data } = await axios.post("/api/team/roster-players", { token });
+      setMembers(data.players || []);
+    } catch {
+      /* ignorieren */
+    }
+  }
+
+  useEffect(() => {
+    loadMembers();
+  }, []);
+
+  async function removeMember(playerId) {
+    if (!window.confirm("Diesen Spieler aus dem Team entfernen?")) return;
+    setRemovingId(playerId);
+    setMsg(null);
+    try {
+      const token = getTeamAuthToken();
+      await axios.post("/api/team/remove-member", { token, playerId });
+      flash("ok", "Spieler entfernt.");
+      loadMembers();
+    } catch (err) {
+      flash("err", err.response?.data?.message || "Entfernen fehlgeschlagen.");
+    } finally {
+      setRemovingId(null);
+    }
+  }
 
   // Slot hinzufügen
   const [showAdd, setShowAdd] = useState(false);
@@ -132,7 +168,7 @@ export default function KaderTab({ team, reload }) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-900">
-          Kader <span className="text-sm font-normal text-gray-500">· {slots.length} Slots</span>
+          Kader <span className="text-sm font-normal text-gray-500">· {members.length} Spieler</span>
         </h2>
         <button
           onClick={() => setShowAdd((v) => !v)}
@@ -153,6 +189,42 @@ export default function KaderTab({ team, reload }) {
           {msg.text}
         </div>
       )}
+
+      {/* Mitglieder (Account-Spieler) */}
+      {members.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-100">
+          {members.map((m) => (
+            <div key={m.playerId} className="px-5 py-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="h-9 w-9 flex-shrink-0 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center">
+                  <FaUser className="text-sm" />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-medium text-gray-900 truncate">{m.name}</p>
+                  <p className="text-xs text-gray-500">{m.position || "Position offen"}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <span className="text-xs font-medium rounded-full px-3 py-1 bg-green-100 text-green-700">
+                  Mitglied
+                </span>
+                <button
+                  onClick={() => removeMember(m.playerId)}
+                  disabled={removingId === m.playerId}
+                  className="text-gray-400 hover:text-red-600 disabled:opacity-60 p-1.5"
+                  title="Aus Team entfernen"
+                >
+                  <FaUserMinus className="text-sm" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <h3 className="text-sm font-semibold text-gray-700 pt-2">
+        Einladungen &amp; offene Plätze
+      </h3>
 
       {/* Formular: Slot hinzufügen */}
       {showAdd && (

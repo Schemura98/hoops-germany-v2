@@ -111,7 +111,7 @@ export default function LandingHero() {
                 href="/team/register"
                 className="border-2 border-white hover:bg-white hover:text-gray-900 text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center"
               >
-                Als Team registrieren
+                Team gründen
               </Link>
               <Link
                 href="/teams"

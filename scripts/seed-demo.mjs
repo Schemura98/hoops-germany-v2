@@ -47,6 +47,9 @@ const Leagues = db.collection("leagues");
 
 // ----- Alte Demo-Daten entfernen (admins bleiben) -----
 for (const c of [Teams, Players, Matches, Posts, Leagues]) await c.deleteMany({});
+// Legacy-Indizes auf teams entfernen (früherer nicht-sparser unique-Index auf email);
+// Mongoose legt die aktuellen (sparse) Indizes beim nächsten App-Start neu an.
+await Teams.dropIndexes().catch(() => {});
 console.log("🧹 players/teams/matches/posts/leagues geleert");
 
 const pw = await bcrypt.hash("test123", 10);
@@ -55,16 +58,16 @@ const daysAgo = (d) => new Date(now.getTime() - d * 86400000);
 
 // ----- Teams -----
 const teamDefs = [
-  { name: "Test Baskets", email: "team@test.de", region: "Berlin", about: "Unser Verein aus der Hauptstadt – Basketball mit Herz." },
-  { name: "Rhein Ballers", email: "rhein@test.de", region: "Köln", about: "Ballers vom Rhein. Schnell, jung, hungrig." },
-  { name: "Munich Hoops", email: "munich@test.de", region: "München", about: "Tradition trifft Moderne im Süden." },
-  { name: "Hamburg Towers United", email: "hamburg@test.de", region: "Hamburg", about: "Vom Hafen auf das Parkett." },
+  { name: "Test Baskets", region: "Berlin", about: "Unser Verein aus der Hauptstadt – Basketball mit Herz." },
+  { name: "Rhein Ballers", region: "Köln", about: "Ballers vom Rhein. Schnell, jung, hungrig." },
+  { name: "Munich Hoops", region: "München", about: "Tradition trifft Moderne im Süden." },
+  { name: "Hamburg Towers United", region: "Hamburg", about: "Vom Hafen auf das Parkett." },
 ];
+// Spieler-geführte Teams (kein eigener Team-Login). adminPlayerId wird nach
+// dem Anlegen der Spieler gesetzt.
 const teams = teamDefs.map((t) => ({
   _id: oid(),
   teamName: t.name,
-  email: t.email,
-  password: pw,
   region: t.region,
   about: t.about,
   slug: slugify(t.name),
@@ -89,6 +92,7 @@ let nameIdx = 0;
 teams.forEach((team, ti) => {
   for (let i = 0; i < 4; i++) {
     const isMax = ti === 0 && i === 0;
+    const isAdmin = i === 0; // erster Spieler je Team ist Team-Admin
     const firstName = isMax ? "Max" : firstNames[nameIdx % firstNames.length];
     const lastName = isMax ? "Mustermann" : lastNames[nameIdx % lastNames.length];
     nameIdx++;
@@ -114,8 +118,8 @@ teams.forEach((team, ti) => {
       followingTeams: [],
       notifications: [],
       transferStatus: "nicht_verfuegbar",
-      isTeamAdmin: isMax,
-      teamAdminOf: isMax ? team._id : null,
+      isTeamAdmin: isAdmin,
+      teamAdminOf: isAdmin ? team._id : null,
       isSuperAdmin: false,
       createdAt: now,
       updatedAt: now,
@@ -159,6 +163,15 @@ teams.forEach((team, ti) => {
 });
 await Players.insertMany(players);
 console.log(`👤 ${players.length} Spieler`);
+
+// Team-Admin (erster Spieler je Team) als adminPlayerId eintragen
+for (const team of teams) {
+  const admin = players.find(
+    (p) => p.teamId && p.teamId.equals(team._id) && p.isTeamAdmin
+  );
+  if (admin) await Teams.updateOne({ _id: team._id }, { $set: { adminPlayerId: admin._id } });
+}
+console.log("👑 Team-Admins gesetzt");
 
 // ----- Follower-Beziehungen -----
 for (const p of players) {
@@ -305,6 +318,7 @@ await Posts.insertMany(postDocs);
 console.log(`📝 ${postDocs.length} Posts`);
 
 console.log("\n✅ Seed abgeschlossen!");
-console.log("   Logins: max@test.de / test123 · team@test.de / test123 (alle Test-Accounts: test123)");
+console.log("   Teams sind spieler-geführt (kein Team-Login).");
+console.log("   Team-Admin Test Baskets: max@test.de / test123 (alle Spieler-Logins: test123)");
 await mongoose.disconnect();
 process.exit(0);

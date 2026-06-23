@@ -19,7 +19,9 @@ const rosterSlotSchema = new mongoose.Schema(
 const teamSchema = new mongoose.Schema(
   {
     teamName: { type: String, unique: true, required: true },
-    email: { type: String, unique: true, required: true },
+    // E-Mail/Passwort optional: Teams sind spieler-geführt (adminPlayerId).
+    // Felder bleiben für Altbestände/optionale Team-Accounts erhalten.
+    email: { type: String, unique: true, sparse: true },
     password: String,
     about: String,
     region: String,

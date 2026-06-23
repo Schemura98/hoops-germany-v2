@@ -33,7 +33,8 @@ function LoginForm() {
       const { data } = await axios.post("/api/player/playerlogin", form);
       setPlayerToken(data.token);
       setStoredPlayer(data.player);
-      router.push("/player/newsfeed");
+      const next = new URLSearchParams(window.location.search).get("next");
+      router.push(next || "/player/newsfeed");
     } catch (err) {
       setError(err.response?.data?.message || "Login fehlgeschlagen. Bitte erneut versuchen.");
     } finally {

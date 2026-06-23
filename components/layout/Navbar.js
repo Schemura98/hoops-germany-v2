@@ -271,6 +271,14 @@ export default function Navbar() {
                         <FaTrophy className="w-4 h-4" /> Team-Admin
                       </Link>
                     )}
+                    {!me?.isTeamAdmin && !me?.isSuperAdmin && (
+                      <Link
+                        href="/team/create"
+                        className="text-sm text-gray-300 hover:text-white transition-colors"
+                      >
+                        Team gründen
+                      </Link>
+                    )}
                     {teamSlug && (
                       <Link
                         href={`/team/team-detail/${teamSlug}`}
@@ -378,6 +386,16 @@ export default function Navbar() {
                   >
                     <FaTrophy className="w-4 h-4 flex-shrink-0" />
                     <span className="text-sm font-medium">Team-Admin</span>
+                  </Link>
+                )}
+                {!me?.isTeamAdmin && !me?.isSuperAdmin && (
+                  <Link
+                    href="/team/create"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-5 py-3.5 text-white hover:bg-slate-800 transition-colors"
+                  >
+                    <FaUsers className="text-orange-400 w-4 h-4 flex-shrink-0" />
+                    <span className="text-sm font-medium">Team gründen</span>
                   </Link>
                 )}
                 <button

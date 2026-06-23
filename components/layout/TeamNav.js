@@ -3,14 +3,16 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FaUsers, FaSignOutAlt, FaExternalLinkAlt } from "react-icons/fa";
-import { clearTeamToken } from "@/lib/clientAuth";
+import { clearTeamToken, clearPlayerToken } from "@/lib/clientAuth";
 
 export default function TeamNav({ team }) {
   const router = useRouter();
 
   function logout() {
+    // Teams sind spieler-geführt: vollständig abmelden
     clearTeamToken();
-    router.replace("/team/login");
+    clearPlayerToken();
+    router.replace("/login");
   }
 
   return (
