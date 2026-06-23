@@ -23,7 +23,7 @@ async function handler(req, ctx) {
 
   // Standings aus abgeschlossenen Liga-Spielen berechnen
   const matches = await Match.find({ leagueId: id, status: "completed" }).select(
-    "teamA teamB winningTeam winningTeamPoints losingTeamPoints"
+    "status teamA teamB winningTeam winningTeamPoints losingTeamPoints"
   );
 
   const table = new Map();
