@@ -2,6 +2,7 @@ import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Player from "@/models/Player";
 import { getTeamFromToken } from "@/lib/serverAuth";
+import { recordTransfer } from "@/lib/recordTransfer";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/team/handlejoinrequest – Beitrittsanfrage genehmigen/ablehnen (Dual-Auth).
@@ -30,6 +31,7 @@ async function handler(req) {
   }
 
   player.teamJoinRequest = undefined;
+  const prevTeam = player.teamId || null;
 
   if (action === "approve") {
     player.teamId = team._id;
@@ -45,6 +47,14 @@ async function handler(req) {
   }
 
   await player.save();
+
+  if (action === "approve") {
+    await recordTransfer({
+      player: player._id,
+      fromTeam: prevTeam,
+      toTeam: team._id,
+    });
+  }
 
   return ok({
     message:

@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Team from "@/models/Team";
 import Player from "@/models/Player";
 import { getTeamFromToken, TEAM_PUBLIC_FIELDS } from "@/lib/serverAuth";
+import { recordTransfer } from "@/lib/recordTransfer";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/team/roster/approve-claim – Slot-Anspruch genehmigen (Dual-Auth).
@@ -43,6 +44,9 @@ async function handler(req) {
 
   // Spieler mit Team verknüpfen + Benachrichtigung
   if (slot.claimedBy) {
+    const claimer = await Player.findById(slot.claimedBy).select("teamId");
+    const prevTeam = claimer?.teamId || null;
+
     await Player.findByIdAndUpdate(slot.claimedBy, {
       $set: { teamId: team._id },
       $push: {
@@ -56,6 +60,12 @@ async function handler(req) {
           createdAt: new Date(),
         },
       },
+    });
+
+    await recordTransfer({
+      player: slot.claimedBy,
+      fromTeam: prevTeam,
+      toTeam: team._id,
     });
   }
 

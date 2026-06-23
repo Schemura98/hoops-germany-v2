@@ -4,6 +4,7 @@ import Team from "@/models/Team";
 import Player from "@/models/Player";
 import { getPlayerFromToken } from "@/lib/serverAuth";
 import { uniqueSlug } from "@/lib/slug";
+import { recordTransfer } from "@/lib/recordTransfer";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/team/create – ein eingeloggter Spieler gründet ein Team und wird
@@ -51,6 +52,13 @@ async function handler(req) {
     isTeamAdmin: true,
     teamAdminOf: team._id,
     teamId: team._id,
+  });
+
+  await recordTransfer({
+    player: player._id,
+    fromTeam: player.teamId || null,
+    toTeam: team._id,
+    type: "found",
   });
 
   return ok(

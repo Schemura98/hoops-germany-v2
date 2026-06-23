@@ -44,9 +44,11 @@ const Players = db.collection("players");
 const Matches = db.collection("matches");
 const Posts = db.collection("posts");
 const Leagues = db.collection("leagues");
+const TransferEvents = db.collection("transferevents");
 
 // ----- Alte Demo-Daten entfernen (admins bleiben) -----
-for (const c of [Teams, Players, Matches, Posts, Leagues]) await c.deleteMany({});
+for (const c of [Teams, Players, Matches, Posts, Leagues, TransferEvents])
+  await c.deleteMany({});
 // Legacy-Indizes auf teams entfernen (früherer nicht-sparser unique-Index auf email);
 // Mongoose legt die aktuellen (sparse) Indizes beim nächsten App-Start neu an.
 await Teams.dropIndexes().catch(() => {});
@@ -392,6 +394,36 @@ league.matches = matchDocs
 prevLeague.matches = prevMatchDocs.map((m) => m._id);
 await Leagues.insertMany([league, prevLeague]);
 console.log(`📅 ${matchDocs.length} Spiele · 2 Ligen (inkl. Vorsaison-Transfer für Max)`);
+
+// ----- Transfer-Events (Transfer-Feed) -----
+// Alle betreffen Test Baskets (teams[0]) → für Max im Feed sichtbar.
+const tbMembers = players.filter((p) => p.teamId && p.teamId.equals(teams[0]._id));
+const transferDocs = [
+  // Max wechselte zur Vorsaison von Rhein Ballers zu Test Baskets (passt zur Story).
+  {
+    _id: oid(),
+    player: maxPlayer._id,
+    fromTeam: teams[1]._id,
+    toTeam: teams[0]._id,
+    type: "move",
+    createdAt: daysAgo(385),
+    updatedAt: now,
+  },
+];
+// Zwei weitere Mitglieder traten Test Baskets bei.
+for (const p of tbMembers.filter((p) => !p._id.equals(maxPlayer._id)).slice(0, 2)) {
+  transferDocs.push({
+    _id: oid(),
+    player: p._id,
+    fromTeam: null,
+    toTeam: teams[0]._id,
+    type: "join",
+    createdAt: daysAgo(rnd(4, 30)),
+    updatedAt: now,
+  });
+}
+await TransferEvents.insertMany(transferDocs);
+console.log(`🔁 ${transferDocs.length} Transfer-Events`);
 
 // ----- Posts -----
 const postTexts = [

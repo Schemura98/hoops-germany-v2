@@ -2,6 +2,7 @@ import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Player from "@/models/Player";
 import { getTeamFromToken } from "@/lib/serverAuth";
+import { recordTransfer } from "@/lib/recordTransfer";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/team/remove-member – Team-Admin entfernt ein Mitglied (Dual-Auth).
@@ -33,6 +34,13 @@ async function handler(req) {
 
   player.teamId = null;
   await player.save();
+
+  await recordTransfer({
+    player: player._id,
+    fromTeam: team._id,
+    toTeam: null,
+    type: "leave",
+  });
 
   return ok({ message: "Spieler aus dem Team entfernt." });
 }
