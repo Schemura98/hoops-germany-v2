@@ -4,28 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
 import { FaBasketballBall } from "react-icons/fa";
+import AuthShell from "@/components/layout/AuthShell";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
-
-function Shell({ children }) {
-  return (
-    <main className="min-h-screen flex items-center justify-center px-6 py-12">
-      <div className="w-full max-w-md">
-        <Link
-          href="/"
-          className="flex items-center justify-center gap-2 font-bold text-gray-900 mb-8"
-        >
-          <FaBasketballBall className="text-brand-500 text-xl" />
-          Hoops Germany
-        </Link>
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          {children}
-        </div>
-      </div>
-    </main>
-  );
-}
 
 // Modus 1: Reset-Link per E-Mail anfordern
 function RequestForm() {
@@ -50,27 +32,28 @@ function RequestForm() {
   }
 
   return (
-    <>
-      <h1 className="text-2xl font-bold text-gray-900">Passwort vergessen</h1>
-      <p className="mt-1 text-sm text-gray-500">
-        Gib deine E-Mail-Adresse ein – wir senden dir einen Link zum Zurücksetzen.
-      </p>
-
+    <AuthShell
+      title="Passwort vergessen"
+      subtitle="Gib deine E-Mail-Adresse ein – wir senden dir einen Link zum Zurücksetzen."
+      footer={
+        <Link href="/login" className="text-brand-600 font-medium hover:underline">
+          Zurück zum Login
+        </Link>
+      }
+    >
       {message ? (
-        <div className="mt-6 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
+        <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
           {message}
         </div>
       ) : (
-        <form onSubmit={onSubmit} className="mt-6 space-y-4">
+        <form onSubmit={onSubmit} className="space-y-4">
           {error && (
             <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
               {error}
             </div>
           )}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              E-Mail
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">E-Mail</label>
             <input
               type="email"
               required
@@ -89,13 +72,7 @@ function RequestForm() {
           </button>
         </form>
       )}
-
-      <p className="mt-6 text-center text-sm text-gray-500">
-        <Link href="/login" className="text-brand-600 font-medium hover:underline">
-          Zurück zum Login
-        </Link>
-      </p>
-    </>
+    </AuthShell>
   );
 }
 
@@ -106,8 +83,7 @@ function ResetForm({ token }) {
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const onChange = (e) =>
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -139,9 +115,8 @@ function ResetForm({ token }) {
 
   if (done) {
     return (
-      <>
-        <h1 className="text-2xl font-bold text-gray-900">Erledigt 🎉</h1>
-        <div className="mt-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
+      <AuthShell title="Erledigt 🎉">
+        <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
           Dein Passwort wurde zurückgesetzt.
         </div>
         <Link
@@ -150,25 +125,20 @@ function ResetForm({ token }) {
         >
           Jetzt anmelden
         </Link>
-      </>
+      </AuthShell>
     );
   }
 
   return (
-    <>
-      <h1 className="text-2xl font-bold text-gray-900">Neues Passwort</h1>
-      <p className="mt-1 text-sm text-gray-500">Wähle ein neues Passwort für dein Konto.</p>
-
-      <form onSubmit={onSubmit} className="mt-6 space-y-4">
+    <AuthShell title="Neues Passwort" subtitle="Wähle ein neues Passwort für dein Konto.">
+      <form onSubmit={onSubmit} className="space-y-4">
         {error && (
           <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
             {error}
           </div>
         )}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Neues Passwort
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Neues Passwort</label>
           <input
             type="password"
             name="newPassword"
@@ -203,12 +173,11 @@ function ResetForm({ token }) {
           {loading ? "Speichern…" : "Passwort zurücksetzen"}
         </button>
       </form>
-    </>
+    </AuthShell>
   );
 }
 
 export default function ResetPasswordPage() {
-  // Token clientseitig aus der URL lesen (vermeidet zusätzliche Suspense-Grenze)
   const [token, setToken] = useState(undefined); // undefined = noch nicht geprüft
 
   useEffect(() => {
@@ -223,5 +192,5 @@ export default function ResetPasswordPage() {
     );
   }
 
-  return <Shell>{token ? <ResetForm token={token} /> : <RequestForm />}</Shell>;
+  return token ? <ResetForm token={token} /> : <RequestForm />;
 }

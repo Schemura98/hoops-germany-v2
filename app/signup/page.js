@@ -4,8 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
-import { FaBasketballBall, FaGoogle } from "react-icons/fa";
+import { FaGoogle } from "react-icons/fa";
 import { setPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
+import AuthShell from "@/components/layout/AuthShell";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
@@ -22,8 +23,7 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const onChange = (e) =>
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -51,8 +51,7 @@ export default function SignupPage() {
       router.push("/player/newsfeed");
     } catch (err) {
       setError(
-        err.response?.data?.message ||
-          "Registrierung fehlgeschlagen. Bitte erneut versuchen."
+        err.response?.data?.message || "Registrierung fehlgeschlagen. Bitte erneut versuchen."
       );
     } finally {
       setLoading(false);
@@ -60,139 +59,119 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6 py-12">
-      <div className="w-full max-w-md">
-        <Link
-          href="/"
-          className="flex items-center justify-center gap-2 font-bold text-gray-900 mb-8"
-        >
-          <FaBasketballBall className="text-brand-500 text-xl" />
-          Hoops Germany
-        </Link>
-
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          <h1 className="text-2xl font-bold text-gray-900">Registrieren</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Erstelle dein kostenloses Spielerprofil.
-          </p>
-
-          {error && (
-            <div className="mt-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={onSubmit} className="mt-6 space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Vorname
-                </label>
-                <input
-                  name="firstName"
-                  autoComplete="given-name"
-                  required
-                  value={form.firstName}
-                  onChange={onChange}
-                  className={inputClass}
-                  placeholder="Max"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nachname
-                </label>
-                <input
-                  name="lastName"
-                  autoComplete="family-name"
-                  required
-                  value={form.lastName}
-                  onChange={onChange}
-                  className={inputClass}
-                  placeholder="Mustermann"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                E-Mail
-              </label>
-              <input
-                type="email"
-                name="email"
-                autoComplete="email"
-                required
-                value={form.email}
-                onChange={onChange}
-                className={inputClass}
-                placeholder="name@beispiel.de"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Passwort
-              </label>
-              <input
-                type="password"
-                name="password"
-                autoComplete="new-password"
-                required
-                value={form.password}
-                onChange={onChange}
-                className={inputClass}
-                placeholder="Mind. 6 Zeichen"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Passwort bestätigen
-              </label>
-              <input
-                type="password"
-                name="confirm"
-                autoComplete="new-password"
-                required
-                value={form.confirm}
-                onChange={onChange}
-                className={inputClass}
-                placeholder="••••••••"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
-            >
-              {loading ? "Konto wird erstellt…" : "Konto erstellen"}
-            </button>
-          </form>
-
-          <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-gray-200" />
-            <span className="text-xs text-gray-400">oder</span>
-            <div className="h-px flex-1 bg-gray-200" />
-          </div>
-
-          <a
-            href="/api/auth/google"
-            className="w-full flex items-center justify-center gap-2 border border-gray-300 hover:border-brand-500 text-gray-700 rounded-lg px-4 py-2.5 font-medium transition-colors"
-          >
-            <FaGoogle className="text-brand-500" />
-            Mit Google registrieren
-          </a>
-        </div>
-
-        <p className="mt-6 text-center text-sm text-gray-500">
+    <AuthShell
+      image="/images/signupImage.jpg"
+      title="Registrieren"
+      subtitle="Erstelle dein kostenloses Spielerprofil."
+      footer={
+        <>
           Bereits ein Konto?{" "}
           <Link href="/login" className="text-brand-600 font-medium hover:underline">
             Jetzt anmelden
           </Link>
-        </p>
+        </>
+      }
+    >
+      {error && (
+        <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={onSubmit} className="space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Vorname</label>
+            <input
+              name="firstName"
+              autoComplete="given-name"
+              required
+              value={form.firstName}
+              onChange={onChange}
+              className={inputClass}
+              placeholder="Max"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nachname</label>
+            <input
+              name="lastName"
+              autoComplete="family-name"
+              required
+              value={form.lastName}
+              onChange={onChange}
+              className={inputClass}
+              placeholder="Mustermann"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">E-Mail</label>
+          <input
+            type="email"
+            name="email"
+            autoComplete="email"
+            required
+            value={form.email}
+            onChange={onChange}
+            className={inputClass}
+            placeholder="name@beispiel.de"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Passwort</label>
+          <input
+            type="password"
+            name="password"
+            autoComplete="new-password"
+            required
+            value={form.password}
+            onChange={onChange}
+            className={inputClass}
+            placeholder="Mind. 6 Zeichen"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Passwort bestätigen
+          </label>
+          <input
+            type="password"
+            name="confirm"
+            autoComplete="new-password"
+            required
+            value={form.confirm}
+            onChange={onChange}
+            className={inputClass}
+            placeholder="••••••••"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
+        >
+          {loading ? "Konto wird erstellt…" : "Konto erstellen"}
+        </button>
+      </form>
+
+      <div className="my-6 flex items-center gap-3">
+        <div className="h-px flex-1 bg-gray-200" />
+        <span className="text-xs text-gray-400">oder</span>
+        <div className="h-px flex-1 bg-gray-200" />
       </div>
-    </main>
+
+      <a
+        href="/api/auth/google"
+        className="w-full flex items-center justify-center gap-2 border border-gray-300 hover:border-brand-500 text-gray-700 rounded-lg px-4 py-2.5 font-medium transition-colors"
+      >
+        <FaGoogle className="text-brand-500" />
+        Mit Google registrieren
+      </a>
+    </AuthShell>
   );
 }
