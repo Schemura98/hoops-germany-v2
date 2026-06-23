@@ -16,7 +16,7 @@ function formatDate(d) {
   }
 }
 
-export default function NewsWidget() {
+export default function NewsWidget({ compact = false }) {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,7 +25,7 @@ export default function NewsWidget() {
     (async () => {
       try {
         const { data } = await axios.get("/api/news/rss");
-        if (active) setNews((data.news || []).slice(0, 6));
+        if (active) setNews((data.news || []).slice(0, compact ? 5 : 6));
       } catch {
         /* ignorieren */
       } finally {
@@ -35,9 +35,44 @@ export default function NewsWidget() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [compact]);
 
   if (!loading && news.length === 0) return null;
+
+  // Kompakte Variante für die Feed-Seitenleiste (vertikale Liste in einer Karte).
+  if (compact) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+        <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-3">
+          <FaNewspaper className="text-brand-500" /> Basketball-News
+        </h3>
+        {loading ? (
+          <p className="text-xs text-gray-400 py-2">Lädt…</p>
+        ) : (
+          <ul className="space-y-3">
+            {news.map((n, i) => (
+              <li key={i}>
+                <a
+                  href={n.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group block"
+                >
+                  <p className="text-sm font-medium text-gray-800 leading-snug line-clamp-2 group-hover:text-brand-600">
+                    {n.title}
+                  </p>
+                  <div className="mt-1 flex items-center gap-1.5 text-[11px] text-gray-400">
+                    <span className="truncate">{n.source || "News"}</span>
+                    <span className="flex-shrink-0">· {formatDate(n.pubDate)}</span>
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  }
 
   return (
     <section className="max-w-5xl mx-auto px-6 py-12">
