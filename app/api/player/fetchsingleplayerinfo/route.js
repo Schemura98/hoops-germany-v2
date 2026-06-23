@@ -5,7 +5,7 @@ import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // Öffentliche Profilfelder (keine E-Mail, kein Passwort, keine Tokens).
 const PUBLIC_FIELDS =
-  "firstName lastName slug position profileImage nationality height weight age birthdate country hometown aboutPlayer instagram fibaLink preferredLeague transferStatus teamId";
+  "firstName lastName slug position profileImage nationality height weight age birthdate country hometown bundesland aboutPlayer instagram fibaLink preferredLeague transferStatus teamId";
 
 // POST /api/player/fetchsingleplayerinfo – Einzelprofil per Slug (oder _id als Fallback).
 async function handler(req) {
