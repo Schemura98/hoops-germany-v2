@@ -8,7 +8,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import Avatar from "@/components/Avatar";
-import { teamScores } from "@/lib/matchScore";
+import { teamScores, matchVerification } from "@/lib/matchScore";
 
 function TeamSide({ team, align = "left" }) {
   return (
@@ -37,6 +37,7 @@ function formatDate(d) {
 
 function MatchCard({ match }) {
   const score = teamScores(match);
+  const verify = matchVerification(match);
   return (
     <Link
       href={`/match/${match._id}`}
@@ -63,6 +64,17 @@ function MatchCard({ match }) {
           </span>
         )}
       </div>
+      {verify && (verify.state === "unverified" || verify.state === "mismatch") && (
+        <div
+          className={`mt-2 text-center text-[11px] font-medium rounded-full px-3 py-1 ${
+            verify.state === "mismatch"
+              ? "bg-red-50 text-red-600"
+              : "bg-amber-50 text-amber-700"
+          }`}
+        >
+          {verify.label}
+        </div>
+      )}
     </Link>
   );
 }

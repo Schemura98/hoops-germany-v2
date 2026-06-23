@@ -6,7 +6,7 @@ import Player from "@/models/Player";
 import { getTeamFromToken } from "@/lib/serverAuth";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
-// Benachrichtigt die Follower beider Teams über ein bestätigtes Ergebnis.
+// Benachrichtigt die Follower beider Teams über ein eingetragenes Ergebnis.
 async function notifyFollowers(match) {
   const [tA, tB] = await Promise.all([
     Team.findById(match.teamA).select("teamName slug followers"),
@@ -14,8 +14,13 @@ async function notifyFollowers(match) {
   ]);
   if (!tA || !tB) return;
 
-  const a = match.teamAResult || {};
-  const message = `${tA.teamName} ${a.ownPoints}:${a.opponentPoints} ${tB.teamName}`;
+  // Punkte je Seite aus dem (vorläufigen) Endstand ableiten
+  const winId = String(match.winningTeam || "");
+  const w = match.winningTeamPoints;
+  const l = match.losingTeamPoints;
+  const aPts = !winId || winId === String(match.teamA) ? w : l;
+  const bPts = !winId || winId === String(match.teamA) ? l : w;
+  const message = `${tA.teamName} ${aPts}:${bPts} ${tB.teamName}`;
 
   // Eindeutige Follower beider Teams sammeln (mit ihrem "Heimat"-Team für den Link)
   const seen = new Map(); // playerId -> { team }
@@ -88,6 +93,8 @@ async function handler(req) {
     return fail("Das Ergebnis ist bereits bestätigt", 409);
   }
 
+  const wasCompleted = match.status === "completed";
+
   const submission = {
     ownPoints,
     opponentPoints,
@@ -97,44 +104,45 @@ async function handler(req) {
   if (isA) match.teamAResult = submission;
   else match.teamBResult = submission;
 
-  // Abgleich, sobald beide Teams gemeldet haben
+  // Endstand (Punkte aus teamA-Sicht) setzen → Spiel gilt sofort als gespielt.
+  function setOutcome(aPts, bPts) {
+    if (aPts === bPts) {
+      match.winningTeam = undefined;
+      match.winningTeamPoints = aPts;
+      match.losingTeamPoints = bPts;
+    } else {
+      match.winningTeam = aPts > bPts ? match.teamA : match.teamB;
+      match.winningTeamPoints = Math.max(aPts, bPts);
+      match.losingTeamPoints = Math.min(aPts, bPts);
+    }
+  }
+
   const a = match.teamAResult;
   const b = match.teamBResult;
-  const bothSubmitted =
-    a && b && a.ownPoints != null && b.ownPoints != null;
+  const aSub = a && a.ownPoints != null;
+  const bSub = b && b.ownPoints != null;
 
-  let justConfirmed = false;
-  if (bothSubmitted) {
+  if (aSub && bSub) {
+    // Beide gemeldet → bestätigt (übereinstimmend) oder strittig
     const consistent =
       a.ownPoints === b.opponentPoints && a.opponentPoints === b.ownPoints;
-
-    if (consistent) {
-      match.resultStatus = "confirmed";
-      match.status = "completed";
-      justConfirmed = true;
-
-      const aPts = a.ownPoints;
-      const bPts = a.opponentPoints;
-      if (aPts === bPts) {
-        match.winningTeam = undefined;
-        match.winningTeamPoints = aPts;
-        match.losingTeamPoints = bPts;
-      } else {
-        match.winningTeam = aPts > bPts ? match.teamA : match.teamB;
-        match.winningTeamPoints = Math.max(aPts, bPts);
-        match.losingTeamPoints = Math.min(aPts, bPts);
-      }
-    } else {
-      match.resultStatus = "mismatch";
-    }
+    match.resultStatus = consistent ? "confirmed" : "mismatch";
+    setOutcome(a.ownPoints, a.opponentPoints);
   } else {
+    // Einseitig → gilt vorläufig sofort, wartet auf Bestätigung des Gegners
     match.resultStatus = "pending";
+    const aPts = aSub ? a.ownPoints : b.opponentPoints;
+    const bPts = aSub ? a.opponentPoints : b.ownPoints;
+    setOutcome(aPts, bPts);
   }
+
+  // Sobald mindestens ein Ergebnis vorliegt, zählt das Spiel (Stats/Tabelle/Profil).
+  match.status = "completed";
 
   await match.save();
 
-  // Follower beider Teams über das bestätigte Ergebnis benachrichtigen
-  if (justConfirmed) {
+  // Follower beider Teams benachrichtigen, sobald das Spiel erstmals ein Ergebnis hat
+  if (!wasCompleted) {
     try {
       await notifyFollowers(match);
     } catch (err) {
@@ -149,7 +157,7 @@ async function handler(req) {
         ? "Ergebnis bestätigt – beide Angaben stimmen überein."
         : match.resultStatus === "mismatch"
         ? "Die Angaben widersprechen sich. Bitte abstimmen und erneut einreichen."
-        : "Ergebnis eingereicht – warte auf die Bestätigung des Gegners.",
+        : "Ergebnis eingetragen – es gilt vorläufig und wartet auf die Bestätigung des Gegners.",
   });
 }
 

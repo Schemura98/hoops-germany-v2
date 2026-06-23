@@ -7,7 +7,7 @@ import { FaBasketballBall, FaMapMarkerAlt } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Avatar from "@/components/Avatar";
-import { teamScores } from "@/lib/matchScore";
+import { teamScores, matchVerification } from "@/lib/matchScore";
 
 function formatDate(d) {
   try {
@@ -150,6 +150,7 @@ export default function MatchIdPage({ params }) {
 
   const score = teamScores(match);
   const completed = match.status === "completed";
+  const verify = matchVerification(match);
   const statsA = (match.playerStats || []).filter(
     (s) => String(s.team) === String(match.teamA?._id)
   );
@@ -204,6 +205,17 @@ export default function MatchIdPage({ params }) {
             {match.location && (
               <span className="flex items-center gap-1">
                 <FaMapMarkerAlt className="text-orange-400" /> {match.location}
+              </span>
+            )}
+            {verify && (verify.state === "unverified" || verify.state === "mismatch") && (
+              <span
+                className={`mt-2 text-xs font-medium rounded-full px-3 py-1 ${
+                  verify.state === "mismatch"
+                    ? "bg-red-500/20 text-red-300"
+                    : "bg-amber-500/20 text-amber-300"
+                }`}
+              >
+                {verify.label}
               </span>
             )}
           </div>
