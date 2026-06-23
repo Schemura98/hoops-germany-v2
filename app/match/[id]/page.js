@@ -27,17 +27,21 @@ function TeamBadge({ team }) {
   return (
     <Link
       href={team?.slug ? `/team/team-detail/${team.slug}` : "#"}
-      className="flex flex-col items-center gap-2 flex-1 min-w-0"
+      className="flex flex-col items-center gap-2 flex-1 min-w-0 group"
     >
       {team?.logo ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={team.logo} alt="" className="h-14 w-14 rounded-full object-cover" />
+        <img
+          src={team.logo}
+          alt=""
+          className="h-16 w-16 rounded-2xl object-cover bg-white ring-2 ring-white/10"
+        />
       ) : (
-        <span className="h-14 w-14 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
-          <FaUsers />
+        <span className="h-16 w-16 rounded-2xl bg-white/10 text-brand-300 flex items-center justify-center ring-2 ring-white/10">
+          <FaUsers className="text-xl" />
         </span>
       )}
-      <span className="text-sm font-medium text-gray-900 text-center truncate w-full">
+      <span className="text-sm font-semibold text-white text-center truncate w-full group-hover:text-orange-300 transition-colors">
         {team?.teamName || "Unbekannt"}
       </span>
     </Link>
@@ -49,6 +53,8 @@ function StatTable({ stats }) {
   if (playing.length === 0) {
     return <p className="text-sm text-gray-400 py-2">Keine Statistiken erfasst.</p>;
   }
+  const sorted = [...playing].sort((a, b) => (b.points ?? 0) - (a.points ?? 0));
+  const topPoints = sorted[0]?.points ?? 0;
   return (
     <table className="w-full text-sm">
       <thead>
@@ -60,25 +66,35 @@ function StatTable({ stats }) {
         </tr>
       </thead>
       <tbody>
-        {playing.map((s) => {
+        {sorted.map((s) => {
           const name = s.player
             ? `${s.player.firstName} ${s.player.lastName}`
             : s.playerName || "—";
+          const isTop = topPoints > 0 && (s.points ?? 0) === topPoints;
           return (
             <tr key={s._id} className="border-t border-gray-100">
               <td className="py-2">
-                {s.player?.slug ? (
-                  <Link
-                    href={`/player/view-player/${s.player.slug}`}
-                    className="text-gray-900 hover:text-brand-600"
-                  >
-                    {name}
-                  </Link>
-                ) : (
-                  <span className="text-gray-900">{name}</span>
-                )}
+                <span className="inline-flex items-center gap-1.5">
+                  {s.player?.slug ? (
+                    <Link
+                      href={`/player/view-player/${s.player.slug}`}
+                      className="text-gray-900 hover:text-brand-600"
+                    >
+                      {name}
+                    </Link>
+                  ) : (
+                    <span className="text-gray-900">{name}</span>
+                  )}
+                  {isTop && (
+                    <span className="text-[10px] font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded">
+                      Top
+                    </span>
+                  )}
+                </span>
               </td>
-              <td className="py-2 text-center font-medium">{s.points ?? 0}</td>
+              <td className={`py-2 text-center font-semibold ${isTop ? "text-orange-600" : "text-gray-900"}`}>
+                {s.points ?? 0}
+              </td>
               <td className="py-2 text-center text-gray-600">{s.assists ?? 0}</td>
               <td className="py-2 text-center text-gray-600">{s.rebounds ?? 0}</td>
             </tr>
@@ -148,30 +164,36 @@ export default function MatchIdPage({ params }) {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
-        {/* Scoreboard */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      {/* Navy-Scoreboard-Hero */}
+      <div className="bg-gradient-to-r from-slate-950 to-slate-800">
+        <div className="max-w-2xl mx-auto px-4 py-10">
           {match.leagueId?.name && (
-            <p className="text-center text-xs font-medium text-brand-600 mb-4">
+            <p className="text-center text-xs font-semibold text-orange-400 uppercase tracking-widest mb-6">
               {match.leagueId.name}
               {match.leagueId.season ? ` · ${match.leagueId.season}` : ""}
             </p>
           )}
-          <div className="flex items-center gap-4">
+          <div className="flex items-start gap-4">
             <TeamBadge team={match.teamA} />
-            <div className="text-center px-2">
+            <div className="text-center px-2 pt-3">
               {score ? (
-                <div className="text-3xl font-bold text-gray-900 whitespace-nowrap">
-                  {score.a} : {score.b}
+                <div className="text-4xl font-black whitespace-nowrap">
+                  <span className={score.a >= score.b ? "text-white" : "text-slate-500"}>
+                    {score.a}
+                  </span>
+                  <span className="text-slate-600 mx-1">:</span>
+                  <span className={score.b >= score.a ? "text-white" : "text-slate-500"}>
+                    {score.b}
+                  </span>
                 </div>
               ) : (
-                <div className="text-xl font-semibold text-gray-400">vs</div>
+                <div className="text-xl font-semibold text-slate-400 pt-3">vs</div>
               )}
               <span
-                className={`mt-2 inline-block text-xs font-medium rounded-full px-3 py-1 ${
+                className={`mt-3 inline-block text-xs font-medium rounded-full px-3 py-1 ${
                   completed
-                    ? "bg-green-100 text-green-700"
-                    : "bg-blue-100 text-blue-700"
+                    ? "bg-green-500/20 text-green-300"
+                    : "bg-blue-500/20 text-blue-300"
                 }`}
               >
                 {completed ? "Beendet" : "Geplant"}
@@ -180,16 +202,18 @@ export default function MatchIdPage({ params }) {
             <TeamBadge team={match.teamB} />
           </div>
 
-          <div className="mt-6 flex flex-col items-center gap-1 text-sm text-gray-500">
+          <div className="mt-6 flex flex-col items-center gap-1 text-sm text-slate-400">
             <span>{formatDate(match.date)}</span>
             {match.location && (
               <span className="flex items-center gap-1">
-                <FaMapMarkerAlt /> {match.location}
+                <FaMapMarkerAlt className="text-orange-400" /> {match.location}
               </span>
             )}
           </div>
         </div>
+      </div>
 
+      <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
         {/* Spieler-Stats */}
         {completed && (
           <div className="mt-6 grid gap-4 sm:grid-cols-2">

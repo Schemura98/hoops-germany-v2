@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
 import Match from "@/models/Match";
+// Referenzierte Modelle importieren, damit populate sie registriert findet
+// (sonst MissingSchemaError, wenn keine andere Route sie vorher geladen hat).
+import "@/models/Team";
+import "@/models/League";
+import "@/models/Player";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // GET /api/match/[id] – Spiel-Detail inkl. Teams, Liga und Spieler-Stats.

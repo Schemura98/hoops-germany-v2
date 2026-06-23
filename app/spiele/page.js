@@ -6,6 +6,7 @@ import axios from "axios";
 import { FaUsers, FaBasketballBall, FaMapMarkerAlt } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import PageHeader from "@/components/layout/PageHeader";
 import { teamScores } from "@/lib/matchScore";
 
 function TeamSide({ team, align = "left" }) {
@@ -106,10 +107,13 @@ export default function SpielePage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Spiele</h1>
-        <p className="text-sm text-gray-500 mb-6">Anstehende Partien und Ergebnisse.</p>
+      <PageHeader
+        eyebrow="Wettbewerb"
+        title="Spiele"
+        subtitle="Anstehende Partien und aktuelle Ergebnisse."
+      />
 
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
         {loading ? (
           <div className="flex justify-center py-16">
             <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
