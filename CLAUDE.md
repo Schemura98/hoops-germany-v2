@@ -12,13 +12,24 @@
 ### Projektort & Umgebung
 - **Lokaler Pfad: `C:\dev\hoops-germany-v2`** (NICHT zurück nach OneDrive – OneDrive sperrt `.next`).
 - Next.js **14.2.35**, App Router, JavaScript (kein TS), Tailwind.
-- `.env` lokal vorhanden (MongoDB-Atlas DB `hoopsgermany`, `SECRET_KEY`, `CRON_SECRET`, `NEXTAUTH_URL=http://localhost:3000`). SMTP/Google noch leer.
+- `.env` lokal vorhanden (MongoDB-Atlas, `SECRET_KEY`, `CRON_SECRET`, `NEXTAUTH_URL=http://localhost:3000`). SMTP/Google noch leer.
 - Start: `npm run dev` → http://localhost:3000. DB-Test: `node scripts/dbcheck.mjs`.
-- **Demo-Daten befüllen: `node scripts/seed-demo.mjs`** (4 Teams, 18 Spieler, Liga mit
-  abgeschlossenen Spielen + Box-Scores, Posts, Follower → Stats/Topscorer/Tabelle/Spielplan gefüllt).
-- **Test-Accounts (alle PW `test123`):** Spieler `max@test.de` (= Team-Admin „Test Baskets"),
-  weitere Spieler `@test.de`, Free Agents `sven.adler@test.de`/`jay.carter@test.de`.
-  Super-Admin `admin`/`geheim1234`. **`team@test.de` existiert NICHT mehr** (s.u.).
+- **Demo-Daten befüllen: `node scripts/seed-demo.mjs`** (4 Teams, 18 Spieler + 2 Super-Admins,
+  Liga 2025/26 + Vorsaison-Transfer für Max, abgeschlossene Spiele + Box-Scores, Posts, Follower,
+  Bundesländer/Städte → Stats/Topscorer/Tabelle/Spielplan/Stationen/Geo-Filter gefüllt).
+- **Test-Accounts (alle PW `test123`):** Spieler `max@test.de` (= Team-Admin „Test Baskets",
+  hat FIBA/Instagram + Vorsaison-Transfer), weitere `@test.de`, Free Agents `sven.adler@test.de`/`jay.carter@test.de`.
+  **Super-Admins** (Spieler-Login): `p.schemura@gmail.com`, `jonatanbaenavides@gmail.com`;
+  /admin-Panel: `admin`/`geheim1234` ODER `patrick`/`test123` · `jonatan`/`test123`. **`team@test.de` existiert NICHT mehr**.
+
+### ⚠️ Datenbanken (KRITISCH – vor schreibenden DB-Aktionen lesen)
+Cluster `hoops.tbhsg.mongodb.net` hat ZWEI getrennte DBs:
+- **`hoopsgermany`** = lokale **Dev-DB** des v2-Neubaus (lokales `.env`). `seed-demo.mjs` darf hier löschen/neu anlegen.
+- **`test`** = **PRODUKTIV-DB der alten Live-Seite** (alter Code verbindet ohne DB-Namen → Default `test`).
+  Echte Nutzer/Feedback. **NIEMALS schreiben/löschen.** Geprüft 24.06.: Seeds liefen nur gegen `hoopsgermany`.
+- **Launch-Entscheidung (final mit Patrick & Jonatan):** kompletter Neustart, **keine Migration**.
+  v2 startet mit frischer DB, beide registrieren sich neu. Alte `test`-Daten erst beim **Cutover** löschen
+  (alte Live-Seite läuft bis dahin als Fallback).
 
 ### Versionierung / Backup
 - **Off-Machine-Backup: privates GitHub-Repo `github.com/Schemura98/hoops-germany-v2`.**
@@ -34,31 +45,48 @@
   `teamAdminOf`, eigenes `teamId`). Verwaltung von `/team/admin` läuft über den **Spieler-Token**
   (Dual-Auth). `/team/login` & `/team/register` sind nur noch Redirects. `Team.email` ist optional (sparse).
 - **Design-Sprache (Redesign):** helle Seiten (`gray-50`) + **Navy-Flächen** (`bg-gradient-to-r from-slate-950 to-slate-800`) + Orange-Akzente (`brand-*`, `brand-500=#f97316`) + `font-black`-Headlines + Inter. Echte Assets in `public/images/` (`logo.svg` = weiße Wortmarke für Navy-Navbar; `logo-hoops.svg` = dunkel für helle Auth-Seiten; `login image.jpg`/`signupImage.jpg`/`registerimage.jpg` = Hero-Motive).
-- **Wiederverwendbare Redesign-Bausteine:** `components/layout/AuthShell.js` (Split-Screen Auth), `components/layout/PageHeader.js` (Navy-Banner für Listen), `components/player/ProfileHero.js` (Navy-Profil-Hero), `components/layout/Navbar.js` (öffentlich, login-bewusst).
+- **Wiederverwendbare Redesign-Bausteine:** `components/layout/AuthShell.js` (Split-Screen Auth),
+  `components/layout/PageHeader.js` (Navy-Banner für Listen), `components/Avatar.js`
+  (generiertes Initialen-Logo mit deterministischer Namensfarbe – Fallback für Spieler & Teams, überall),
+  `components/player/PlayerProfileView.js` (komplettes Spieler-Profil: Stats-Leiste, Tabs,
+  Karriere-Bilanz, Karriere-Verlauf/Transfers, Spielerstationen, Saison-Filter),
+  `components/CityInput.js` (Stadt-Typeahead), `components/CityRadiusFilter.js` (Umkreis-Filter),
+  `components/layout/Navbar.js` (öffentlich, login-bewusst). (`ProfileHero`/`CareerStats`/`FollowList` entfernt.)
+- **Geo-Suche:** Feld `bundesland` an Player/Team/League; `lib/geo.js` + `public/data/de-cities.json`
+  (16.172 Orte mit lat/lng, lazy geladen) für Stadt+Umkreis (Haversine). Stadt-Eingabe per Typeahead
+  setzt das Bundesland automatisch.
 - Token-Keys in localStorage: `playerAuthToken`, `teamAuthToken` (legacy, kaum noch genutzt), `adminAuthToken`.
 
-### Redesign-Fortschritt (Branch `redesign`)
-✅ **Fertig & im Browser verifiziert:**
-- Theme-Fundament, **globale Navbar** (Navy+Logo+Suche+Glocke+Login-State+Mobile)
-- **Landing** (Vollbild-Hero, Features, „So funktionierts", News, CTA)
-- **Auth** (login, signup, reset-password – via `AuthShell`)
-- **Spieler**: Liste (Positions-Filter), öffentl. + eigenes Profil (`ProfileHero`), edit-profile; **PlayerNav → Navy**
-- **Teams**: Liste (Navy-Banner, Logo-Karten), **Team-Detail** (Navy-Hero + Tabs Kader/Spielplan/News), **Team-Admin-Panel** (TeamNav→Navy, 6 Tabs); **KaderTab zeigt echte Mitglieder + Slots**
-- **Spieler-geführte Teams** komplett umgesetzt (s.o.) inkl. `/team/create`, `/api/team/create`, `/api/team/remove-member`
-- **Demo-Seed-Skript** + **Bugfix** Liga-Tabelle (`status` fehlte im Query)
+### Redesign-Fortschritt (Branch `redesign`) – Production-Build grün (119 Seiten)
+✅ **Fertig & im Browser verifiziert – alle Hauptbereiche im Navy/Orange-Look:**
+- Theme, **globale Navbar** (Navy+Logo+Suche+Glocke+Login-State+Mobile), **Landing** (Vollbild-Hero)
+- **Auth** (login/signup/reset/team-login+register → via `AuthShell`; team-login/register sind Redirects)
+- **Spieler**: Liste (Bundesland-/Umkreis-/Positions-Filter, generierte Logos), **Profil neu** (`PlayerProfileView`:
+  Stats-Leiste, Tabs Stats/Steckbrief/Beiträge, Karriere-Bilanz, **Karriere-Verlauf mit Transfer-Markierung**,
+  **Spielerstationen** nach Team+Liga, **Saison-Filter**, **Follower-Zeile**, FIBA/Instagram); edit-profile; PlayerNav→Navy
+- **Teams**: Liste (Navy-Banner, generierte Logos), Team-Detail (Navy-Hero + Tabs), **Team-Admin-Panel** (6 Tabs,
+  KaderTab zeigt echte Mitglieder + Slots); **spieler-geführte Teams** (`/team/create`, `/api/team/create`, `remove-member`)
+- **Wettbewerb**: `/spiele` (Navy-Banner), **Match-Detail** (Navy-Scoreboard + Box-Scores + Top-Scorer),
+  Topscorer, Ligen (Liste+Tabelle, Bundesland-Filter), Tryouts, Transfermarkt
+- **Community**: Newsfeed (`/home`→`/player/newsfeed`), Posts/Like/Kommentar, **Team-Folgen mit Inhalt**
+  (gefolgte Teams im „Folge ich"-Feed + `match_result`-Benachrichtigung an Follower), Suche
+- **Super-Admin-Panel** (AdminNav→Navy), **Rechtsseiten** mit echten Betreiberdaten (Patrick Schemura, Viersen)
+- **Geo-Suche** Stufe 1 (Bundesland) + Stufe 2 (Stadt+Umkreis), City-Typeahead in Formularen mit Bundesland-Autofill
+- **Strukturiertes Feedback-Formular** (`/feedback`: Sterne, Art-Chips, Themen-Chips, gezielte Fragen → DB + Admin-Inbox)
+- **Generierte Namens-Logos** überall (Listen, Profile, Spielplan, Match, Navbar-Suche, Post-Avatare)
+- **3 latente Bugs gefixt**: Liga-Tabellen-Query (`status` fehlte), Match-Detail `populate` (MissingSchemaError → 500),
+  `/home`-Platzhalter; außerdem „Mein Profil"-Navbar-Link zeigte fälschlich auf den Newsfeed → gefixt
 
-🔜 **Noch offen (Reihenfolge):**
-1. `/team/dashboard` & `/team/edit-team` im neuen Modell prüfen/anpassen
-2. **Spiele / Match-Detail** (Box-Scores) / Tryouts / Transfermarkt restylen
-3. Community (Newsfeed/Posts/Notifications) + **Super-Admin-Panel** restylen
-4. Rechtsseiten (Impressum/Datenschutz – `[…]`-Platzhalter mit echten Betreiberdaten füllen)
-5. Production-Build grünziehen, voller Smoke-Test, **VPS-Deployment**
+🔜 **Noch offen (Pre-Live-Roadmap):**
+1. **SMTP + Google-Keys** (User liefert `SMTP_PASS`, `GOOGLE_CLIENT_ID/SECRET`) → Reset-/Einladungs-/Feedback-Mails + Google-Login
+2. **Flows tief testen** (Ergebnis-Verifikation beider Teams, Beitrittsanfrage, Tryout-Bewerbung, Slot-Einladung) + Funktionen durchsprechen
+3. Optional: Stationen/Stats-Leiste weiter verfeinern
+4. **VPS-Deployment** (frische DB, beide registrieren neu, dann `test` löschen)
 
 ### Bekannte Einschränkungen / offen
-- **Kein VPS-Deployment** erfolgt. Live-Site noch alt.
+- **Kein VPS-Deployment** erfolgt. Live-Site (`hoopsgermany.de`) läuft noch auf altem Code + DB `test`.
 - **SMTP/Google**-Keys fehlen lokal → Reset-/Einladungs-Mails & Google-Login erst mit echten Werten testbar.
-- Impressum/Datenschutz-Platzhalter noch ungefüllt (brauchen rechtliche Betreiberdaten).
-- Schema-Änderungen erfordern Dev-Neustart (mongoose-Model-Cache).
+- Schema-Änderungen erfordern Dev-Neustart (mongoose-Model-Cache). Nach Dev-Server-Lock ggf. `.next` löschen vor `npm run build`.
 
 ---
 
