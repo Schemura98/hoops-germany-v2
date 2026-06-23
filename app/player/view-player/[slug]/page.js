@@ -5,13 +5,13 @@ import Link from "next/link";
 import axios from "axios";
 import {
   FaBasketballBall,
-  FaUsers,
   FaInstagram,
   FaExternalLinkAlt,
 } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CareerStats from "@/components/player/CareerStats";
+import ProfileHero from "@/components/player/ProfileHero";
 import FollowButton from "@/components/FollowButton";
 import FollowList from "@/components/player/FollowList";
 import PlayerPosts from "@/components/posts/PlayerPosts";
@@ -78,80 +78,34 @@ export default function PlayerViewPlayerSlugPage({ params }) {
     );
   }
 
-  const initials =
-    `${player.firstName?.[0] || ""}${player.lastName?.[0] || ""}`.toUpperCase();
-  const team = player.teamId;
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
-        {/* Kopf */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center gap-4">
-            {player.profileImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={player.profileImage}
-                alt={initials}
-                className="h-20 w-20 rounded-full object-cover"
-              />
-            ) : (
-              <span className="h-20 w-20 rounded-full bg-brand-100 text-brand-700 text-2xl font-bold flex items-center justify-center">
-                {initials || "?"}
-              </span>
-            )}
-            <div className="min-w-0">
-              <h1 className="text-2xl font-bold text-gray-900 truncate">
-                {player.firstName} {player.lastName}
-              </h1>
-              <p className="text-sm text-gray-500">
-                {player.position || "Position nicht angegeben"}
-                {player.nationality ? ` · ${player.nationality}` : ""}
-              </p>
-              {player.transferStatus === "verfuegbar" && (
-                <span className="mt-1 inline-block text-xs font-medium bg-green-100 text-green-700 rounded-full px-2 py-0.5">
-                  Transferbereit
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Folgen + Team + Socials */}
-          <div className="mt-4 flex flex-wrap items-center gap-3">
+      <ProfileHero
+        player={player}
+        actions={
+          <>
             {viewerId !== String(player._id) && (
               <FollowButton type="player" targetId={player._id} />
-            )}
-            {team && (
-              <Link
-                href={`/team/team-detail/${team.slug}`}
-                className="inline-flex items-center gap-2 border border-gray-300 hover:border-brand-500 text-gray-700 rounded-lg px-4 py-2 text-sm font-medium"
-              >
-                {team.logo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={team.logo} alt="" className="h-5 w-5 rounded-full object-cover" />
-                ) : (
-                  <FaUsers className="text-brand-500" />
-                )}
-                {team.teamName}
-              </Link>
             )}
             {player.instagram && (
               <a
                 href={`https://instagram.com/${player.instagram.replace(/^@/, "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 border border-gray-300 hover:border-brand-500 text-gray-700 rounded-lg px-4 py-2 text-sm font-medium"
+                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors"
               >
                 <FaInstagram /> Instagram
               </a>
             )}
-          </div>
-        </div>
+          </>
+        }
+      />
 
+      <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
         {/* Follower / Folgt */}
-        <div className="mt-6">
+        <div>
           <FollowList playerId={player._id} />
         </div>
 

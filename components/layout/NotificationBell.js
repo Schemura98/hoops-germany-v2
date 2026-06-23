@@ -70,7 +70,7 @@ export default function NotificationBell() {
     <div className="relative">
       <button
         onClick={toggle}
-        className="relative text-gray-400 hover:text-brand-600 transition-colors"
+        className="relative text-white/80 hover:text-orange-400 transition-colors"
         aria-label="Benachrichtigungen"
       >
         <FaBell className="text-lg" />

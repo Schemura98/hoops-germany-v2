@@ -10,6 +10,7 @@ import {
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import PlayerNav from "@/components/layout/PlayerNav";
 import CareerStats from "@/components/player/CareerStats";
+import ProfileHero from "@/components/player/ProfileHero";
 import TransferControl from "@/components/player/TransferControl";
 import FollowList from "@/components/player/FollowList";
 import PlayerPosts from "@/components/posts/PlayerPosts";
@@ -49,42 +50,14 @@ export default function PlayerPlayerDetailPage() {
     );
   }
 
-  const initials =
-    `${player?.firstName?.[0] || ""}${player?.lastName?.[0] || ""}`.toUpperCase() ||
-    "?";
-
   return (
     <div className="min-h-screen bg-gray-50">
       <PlayerNav player={player} />
 
-      <main className="max-w-2xl mx-auto px-4 py-8">
-        {/* Kopf */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center gap-4">
-            {player?.profileImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={player.profileImage}
-                alt={initials}
-                className="h-20 w-20 rounded-full object-cover"
-              />
-            ) : (
-              <span className="h-20 w-20 rounded-full bg-brand-100 text-brand-700 text-2xl font-bold flex items-center justify-center">
-                {initials}
-              </span>
-            )}
-            <div className="min-w-0">
-              <h1 className="text-2xl font-bold text-gray-900 truncate">
-                {player?.firstName} {player?.lastName}
-              </h1>
-              <p className="text-sm text-gray-500">
-                {player?.position || "Position nicht angegeben"}
-                {player?.nationality ? ` · ${player.nationality}` : ""}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-4 flex items-center gap-3">
+      <ProfileHero
+        player={player}
+        actions={
+          <>
             <Link
               href="/player/edit-profile"
               className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors"
@@ -96,25 +69,27 @@ export default function PlayerPlayerDetailPage() {
                 href={`https://instagram.com/${player.instagram.replace(/^@/, "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 border border-gray-300 hover:border-brand-500 text-gray-700 rounded-lg px-4 py-2 text-sm font-medium"
+                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors"
               >
                 <FaInstagram /> Instagram
               </a>
             )}
-          </div>
+          </>
+        }
+      />
 
-          <div className="mt-3">
-            <Link
-              href="/player/update-password"
-              className="text-sm text-gray-500 hover:text-brand-600"
-            >
-              Passwort ändern
-            </Link>
-          </div>
+      <main className="max-w-2xl mx-auto px-4 py-8">
+        <div className="text-center sm:text-right -mt-2 mb-2">
+          <Link
+            href="/player/update-password"
+            className="text-sm text-gray-500 hover:text-brand-600"
+          >
+            Passwort ändern
+          </Link>
         </div>
 
         {/* Follower / Folgt */}
-        <div className="mt-6">
+        <div className="mt-2">
           <FollowList playerId={player?._id} />
         </div>
 

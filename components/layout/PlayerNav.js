@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FaBasketballBall, FaSignOutAlt } from "react-icons/fa";
+import { FaSignOutAlt } from "react-icons/fa";
 import { clearPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
 import NotificationBell from "@/components/layout/NotificationBell";
 
@@ -28,14 +28,10 @@ export default function PlayerNav({ player }) {
     "?";
 
   return (
-    <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
+    <nav className="bg-gradient-to-r from-slate-950 to-slate-800 sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-6 flex items-center justify-between h-16">
-        <Link
-          href="/player/newsfeed"
-          className="flex items-center gap-2 font-bold text-gray-900"
-        >
-          <FaBasketballBall className="text-brand-500" />
-          Hoops Germany
+        <Link href="/player/newsfeed" className="flex items-center hover:opacity-80 transition-opacity">
+          <img src="/images/logo.svg" alt="Hoops Germany" className="h-9 w-auto object-contain" />
         </Link>
 
         <div className="hidden md:flex items-center gap-6">
@@ -43,7 +39,7 @@ export default function PlayerNav({ player }) {
             <Link
               key={l.href}
               href={l.href}
-              className="text-sm text-gray-600 hover:text-brand-600 transition-colors"
+              className="text-sm text-gray-300 hover:text-white transition-colors"
             >
               {l.label}
             </Link>
@@ -58,20 +54,18 @@ export default function PlayerNav({ player }) {
               <img
                 src={player.profileImage}
                 alt={initials}
-                className="h-8 w-8 rounded-full object-cover"
+                className="h-8 w-8 rounded-full object-cover ring-2 ring-white/15"
               />
             ) : (
-              <span className="h-8 w-8 rounded-full bg-brand-100 text-brand-700 text-xs font-semibold flex items-center justify-center">
+              <span className="h-8 w-8 rounded-full bg-brand-500/20 text-brand-300 text-xs font-semibold flex items-center justify-center">
                 {initials}
               </span>
             )}
-            <span className="hidden sm:block text-sm text-gray-700">
-              {player?.firstName}
-            </span>
+            <span className="hidden sm:block text-sm text-gray-200">{player?.firstName}</span>
           </div>
           <button
             onClick={logout}
-            className="text-gray-400 hover:text-brand-600 transition-colors"
+            className="text-white/80 hover:text-orange-400 transition-colors"
             aria-label="Abmelden"
             title="Abmelden"
           >
