@@ -6,6 +6,7 @@ import axios from "axios";
 import { FaBasketballBall, FaTrophy } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import PageHeader from "@/components/layout/PageHeader";
 
 const RANK_COLOR = {
   1: "text-amber-500",
@@ -39,15 +40,13 @@ export default function TopscorerPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
-        <div className="flex items-center gap-2 mb-1">
-          <FaTrophy className="text-brand-500" />
-          <h1 className="text-2xl font-bold text-gray-900">Topscorer</h1>
-        </div>
-        <p className="text-sm text-gray-500 mb-6">
-          Rangliste nach erzielten Punkten (bestätigte Spiele).
-        </p>
+      <PageHeader
+        eyebrow="Bestenliste"
+        title="Topscorer"
+        subtitle="Rangliste nach erzielten Punkten (bestätigte Spiele)."
+      />
 
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
         {loading ? (
           <div className="flex justify-center py-16">
             <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />

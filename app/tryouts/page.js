@@ -6,6 +6,7 @@ import axios from "axios";
 import { FaBasketballBall, FaBullhorn, FaMapMarkerAlt, FaUsers } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import PageHeader from "@/components/layout/PageHeader";
 
 function formatDate(d) {
   try {
@@ -47,13 +48,13 @@ export default function TryoutsPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
 
+      <PageHeader
+        eyebrow="Probetraining"
+        title="Tryouts"
+        subtitle="Offene Probetrainings – finde dein nächstes Team."
+      />
+
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1 flex items-center gap-2">
-          <FaBullhorn className="text-brand-500" /> Tryouts
-        </h1>
-        <p className="text-sm text-gray-500 mb-6">
-          Offene Probetrainings – finde dein nächstes Team.
-        </p>
 
         {loading ? (
           <div className="flex justify-center py-16">

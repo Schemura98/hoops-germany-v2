@@ -6,6 +6,7 @@ import axios from "axios";
 import { FaBasketballBall, FaTrophy, FaUsers } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function LigenPage() {
   const [leagues, setLeagues] = useState([]);
@@ -33,12 +34,9 @@ export default function LigenPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1 flex items-center gap-2">
-          <FaTrophy className="text-brand-500" /> Ligen
-        </h1>
-        <p className="text-sm text-gray-500 mb-6">Tabellen und Wettbewerbe.</p>
+      <PageHeader eyebrow="Wettbewerb" title="Ligen" subtitle="Tabellen und Wettbewerbe." />
 
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
         {loading ? (
           <div className="flex justify-center py-16">
             <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />

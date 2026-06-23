@@ -6,6 +6,7 @@ import axios from "axios";
 import { FaUsers, FaBasketballBall } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function LigaDetailPage({ params }) {
   const id = params.id;
@@ -59,11 +60,10 @@ export default function LigaDetailPage({ params }) {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-900">{league.name}</h1>
-        {league.season && <p className="text-sm text-gray-500 mb-6">{league.season}</p>}
+      <PageHeader eyebrow="Liga-Tabelle" title={league.name} subtitle={league.season} />
 
-        <div className="mt-4 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

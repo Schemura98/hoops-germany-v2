@@ -6,6 +6,7 @@ import axios from "axios";
 import { FaSearch, FaBasketballBall, FaExchangeAlt } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function TransfermarktPage() {
   const [players, setPlayers] = useState([]);
@@ -45,14 +46,14 @@ export default function TransfermarktPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
 
+      <PageHeader
+        eyebrow="Wechselbörse"
+        title="Transfermarkt"
+        subtitle="Spieler, die einen neuen Verein suchen."
+      />
+
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <FaExchangeAlt className="text-brand-500" /> Transfermarkt
-            </h1>
-            <p className="text-sm text-gray-500">Spieler, die einen neuen Verein suchen.</p>
-          </div>
           <div className="relative">
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
             <input
