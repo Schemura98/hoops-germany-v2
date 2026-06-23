@@ -10,6 +10,7 @@ import PageHeader from "@/components/layout/PageHeader";
 import CityRadiusFilter from "@/components/CityRadiusFilter";
 import { BUNDESLAENDER } from "@/lib/constants";
 import { loadCities, cityCoords, haversineKm } from "@/lib/geo";
+import { colorFor, initialsFor } from "@/components/Avatar";
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState([]);
@@ -133,7 +134,13 @@ export default function TeamsPage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={t.logo} alt={t.teamName} className="h-28 w-28 object-contain" />
                   ) : (
-                    <FaUsers className="text-5xl text-slate-500" />
+                    <div
+                      className={`h-24 w-24 rounded-2xl ${colorFor(
+                        t.teamName
+                      )} flex items-center justify-center text-white text-3xl font-black`}
+                    >
+                      {initialsFor(t.teamName)}
+                    </div>
                   )}
                 </div>
                 <div className="p-4 flex flex-col flex-1">

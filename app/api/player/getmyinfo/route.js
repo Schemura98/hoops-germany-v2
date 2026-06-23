@@ -23,6 +23,8 @@ async function handler(req) {
   if (player.teamId) {
     out.team = await Team.findById(player.teamId).select("teamName slug logo");
   }
+  out.followersCount = out.followers?.length || 0;
+  out.followingCount = out.following?.length || 0;
 
   return ok({ player: out });
 }

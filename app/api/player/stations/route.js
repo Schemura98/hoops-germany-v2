@@ -59,6 +59,7 @@ async function handler(req) {
       ppg: g ? round1(r.points / g) : 0,
       apg: g ? round1(r.assists / g) : 0,
       rpg: g ? round1(r.rebounds / g) : 0,
+      lastDate: r.lastDate || null,
     };
   });
 

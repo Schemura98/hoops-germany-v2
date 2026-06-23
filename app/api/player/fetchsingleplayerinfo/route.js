@@ -5,7 +5,7 @@ import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // Öffentliche Profilfelder (keine E-Mail, kein Passwort, keine Tokens).
 const PUBLIC_FIELDS =
-  "firstName lastName slug position profileImage nationality height weight age birthdate country hometown bundesland aboutPlayer instagram fibaLink preferredLeague transferStatus teamId";
+  "firstName lastName slug position profileImage nationality height weight age birthdate country hometown bundesland aboutPlayer instagram fibaLink preferredLeague transferStatus teamId followers following";
 
 // POST /api/player/fetchsingleplayerinfo – Einzelprofil per Slug (oder _id als Fallback).
 async function handler(req) {
@@ -32,7 +32,13 @@ async function handler(req) {
     return fail("Spieler nicht gefunden", 404);
   }
 
-  return ok({ player });
+  const out = player.toObject();
+  out.followersCount = out.followers?.length || 0;
+  out.followingCount = out.following?.length || 0;
+  delete out.followers;
+  delete out.following;
+
+  return ok({ player: out });
 }
 
 export const POST = withErrorHandling(handler);

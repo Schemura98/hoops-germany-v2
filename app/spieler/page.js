@@ -3,13 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaSearch, FaBasketballBall, FaUser, FaMapMarkerAlt } from "react-icons/fa";
+import { FaSearch, FaBasketballBall, FaMapMarkerAlt } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import CityRadiusFilter from "@/components/CityRadiusFilter";
 import { BUNDESLAENDER } from "@/lib/constants";
 import { loadCities, cityCoords, haversineKm } from "@/lib/geo";
+import { colorFor, initialsFor } from "@/components/Avatar";
 
 const POSITIONS = ["Alle", "PG", "SG", "SF", "PF", "C"];
 
@@ -155,7 +156,7 @@ export default function SpielerPage() {
                 href={`/player/view-player/${p.slug || p._id}`}
                 className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-brand-200 transition-all group overflow-hidden"
               >
-                <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center overflow-hidden">
+                <div className="aspect-square flex items-center justify-center overflow-hidden">
                   {p.profileImage ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -164,7 +165,13 @@ export default function SpielerPage() {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                     />
                   ) : (
-                    <FaUser className="text-4xl text-slate-300" />
+                    <div
+                      className={`w-full h-full ${colorFor(
+                        `${p.firstName} ${p.lastName}`
+                      )} flex items-center justify-center text-white text-4xl font-bold`}
+                    >
+                      {initialsFor(`${p.firstName} ${p.lastName}`)}
+                    </div>
                   )}
                 </div>
                 <div className="p-3">

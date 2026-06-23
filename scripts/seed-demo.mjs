@@ -328,10 +328,66 @@ for (let i = 0; i < 2; i++) {
   });
 }
 
+// Demo-Transfer: Max spielte in der Vorsaison (2024/25) noch für Rhein Ballers
+// → erzeugt zwei Spielerstationen + sichtbaren Vereinswechsel im Karriere-Verlauf.
+const prevLeague = {
+  _id: oid(),
+  name: "Regionalliga Süd",
+  season: "2024/25",
+  bundesland: "Bayern",
+  teams: [teams[1]._id, teams[2]._id],
+  matches: [],
+  active: false,
+  createdAt: now,
+  updatedAt: now,
+};
+const prevMatchDocs = [];
+const maxPlayer = players[0]; // Max Mustermann
+for (let i = 0; i < 2; i++) {
+  const date = daysAgo(380 - i * 7);
+  const maxPts = rnd(10, 22);
+  const ownPts = maxPts + rnd(32, 50);
+  const oppPts = ownPts + (i === 0 ? -7 : 9);
+  const aWins = ownPts > oppPts;
+  prevMatchDocs.push({
+    _id: oid(),
+    teamA: teams[1]._id, // Rhein Ballers (Max' Ex-Team)
+    teamB: teams[2]._id, // Munich Hoops
+    date,
+    location: "Köln Arena",
+    leagueId: prevLeague._id,
+    status: "completed",
+    resultStatus: "confirmed",
+    winningTeam: aWins ? teams[1]._id : teams[2]._id,
+    winningTeamPoints: Math.max(ownPts, oppPts),
+    losingTeamPoints: Math.min(ownPts, oppPts),
+    playerStats: [
+      {
+        _id: oid(),
+        player: maxPlayer._id,
+        team: teams[1]._id,
+        points: maxPts,
+        assists: rnd(1, 6),
+        rebounds: rnd(2, 8),
+        didNotPlay: false,
+      },
+    ],
+    teamAResult: { ownPoints: ownPts, opponentPoints: oppPts, submittedBy: null, submittedAt: date },
+    teamBResult: { ownPoints: oppPts, opponentPoints: ownPts, submittedBy: null, submittedAt: date },
+    notifiedPendingResult: false,
+    createdAt: date,
+    updatedAt: date,
+  });
+}
+matchDocs.push(...prevMatchDocs);
+
 await Matches.insertMany(matchDocs);
-league.matches = matchDocs.map((m) => m._id);
-await Leagues.insertOne(league);
-console.log(`📅 ${matchDocs.length} Spiele · 1 Liga`);
+league.matches = matchDocs
+  .filter((m) => String(m.leagueId) === String(league._id))
+  .map((m) => m._id);
+prevLeague.matches = prevMatchDocs.map((m) => m._id);
+await Leagues.insertMany([league, prevLeague]);
+console.log(`📅 ${matchDocs.length} Spiele · 2 Ligen (inkl. Vorsaison-Transfer für Max)`);
 
 // ----- Posts -----
 const postTexts = [

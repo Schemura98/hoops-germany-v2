@@ -18,6 +18,7 @@ import FollowButton from "@/components/FollowButton";
 import { teamScores } from "@/lib/matchScore";
 import { timeAgo } from "@/lib/timeAgo";
 import { getPlayerToken } from "@/lib/clientAuth";
+import Avatar from "@/components/Avatar";
 
 const TABS = [
   { key: "kader", label: "Kader", icon: FaUsers },
@@ -125,18 +126,14 @@ export default function TeamTeamDetailSlugPage({ params }) {
       >
         {team.banner && <div className="absolute inset-0 bg-slate-950/70" />}
         <div className="relative max-w-3xl mx-auto px-4 py-10 flex flex-col sm:flex-row items-center sm:items-end gap-5 text-center sm:text-left">
-          {team.logo ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={team.logo}
-              alt={team.teamName}
-              className="h-24 w-24 rounded-2xl object-cover bg-white ring-4 ring-white/10 flex-shrink-0"
-            />
-          ) : (
-            <span className="h-24 w-24 rounded-2xl bg-brand-500/20 text-brand-300 text-3xl flex items-center justify-center ring-4 ring-white/10 flex-shrink-0">
-              <FaUsers />
-            </span>
-          )}
+          <Avatar
+            name={team.teamName}
+            src={team.logo}
+            className="h-24 w-24"
+            textClass="text-3xl"
+            square
+            ring="ring-4 ring-white/10"
+          />
           <div className="min-w-0 flex-1">
             <h1 className="text-3xl sm:text-4xl font-black text-white">{team.teamName}</h1>
             <div className="mt-1 flex flex-wrap items-center justify-center sm:justify-start gap-3 text-sm text-slate-300">
@@ -222,14 +219,12 @@ export default function TeamTeamDetailSlugPage({ params }) {
                       href={`/player/view-player/${m.slug || m._id}`}
                       className="flex items-center gap-3 py-3 hover:bg-gray-50 -mx-2 px-2 rounded-lg transition-colors"
                     >
-                      {m.profileImage ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={m.profileImage} alt="" className="h-10 w-10 rounded-full object-cover" />
-                      ) : (
-                        <span className="h-10 w-10 rounded-full bg-brand-100 text-brand-700 text-xs font-semibold flex items-center justify-center">
-                          {initials || "?"}
-                        </span>
-                      )}
+                      <Avatar
+                        name={`${m.firstName} ${m.lastName}`}
+                        src={m.profileImage}
+                        className="h-10 w-10"
+                        textClass="text-xs"
+                      />
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-gray-900 truncate">
                           {m.firstName} {m.lastName}
