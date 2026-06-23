@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { FaBasketballBall } from "react-icons/fa";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
@@ -21,20 +21,24 @@ export default function PlayerNewsfeedPage() {
   const { player, status } = useCurrentPlayer();
   const [posts, setPosts] = useState([]);
   const [feedLoading, setFeedLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
   const [mode, setMode] = useState("discover");
+
+  const feedUrl = (which) =>
+    which === "following" ? "/api/player/getfollowingposts" : "/api/posts/feed";
 
   const loadFeed = useCallback(async (which) => {
     setFeedLoading(true);
+    setHasMore(false);
     try {
       const token = getPlayerToken();
-      const url =
-        which === "following"
-          ? "/api/player/getfollowingposts"
-          : "/api/posts/feed";
-      const { data } = await axios.post(url, { token });
+      const { data } = await axios.post(feedUrl(which), { token });
       setPosts(data.posts || []);
+      setHasMore(!!data.hasMore);
     } catch {
       setPosts([]);
+      setHasMore(false);
     } finally {
       setFeedLoading(false);
     }
@@ -43,6 +47,46 @@ export default function PlayerNewsfeedPage() {
   useEffect(() => {
     loadFeed(mode);
   }, [mode, loadFeed]);
+
+  // Ältere Beiträge nachladen (Cursor = createdAt des ältesten geladenen Posts).
+  const loadingMoreRef = useRef(false);
+  const loadMore = useCallback(async () => {
+    if (loadingMoreRef.current || !hasMore) return;
+    loadingMoreRef.current = true;
+    setLoadingMore(true);
+    try {
+      const token = getPlayerToken();
+      const before = posts[posts.length - 1]?.createdAt;
+      const { data } = await axios.post(feedUrl(mode), { token, before });
+      setPosts((prev) => {
+        const seen = new Set(prev.map((p) => p._id));
+        const fresh = (data.posts || []).filter((p) => !seen.has(p._id));
+        return [...prev, ...fresh];
+      });
+      setHasMore(!!data.hasMore);
+    } catch {
+      /* Bestand belassen */
+    } finally {
+      loadingMoreRef.current = false;
+      setLoadingMore(false);
+    }
+  }, [hasMore, mode, posts]);
+
+  // Infinite Scroll: nachladen, sobald der Sentinel sichtbar wird.
+  const sentinelRef = useRef(null);
+  useEffect(() => {
+    if (!hasMore || feedLoading) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) loadMore();
+      },
+      { rootMargin: "300px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [hasMore, feedLoading, loadMore]);
 
   function handleCreated(post) {
     setPosts((p) => [post, ...p]);
@@ -116,9 +160,33 @@ export default function PlayerNewsfeedPage() {
                 </p>
               </div>
             ) : (
-              posts.map((post) => (
-                <PostCard key={post._id} post={post} currentPlayerId={player?._id} />
-              ))
+              <>
+                {posts.map((post) => (
+                  <PostCard key={post._id} post={post} currentPlayerId={player?._id} />
+                ))}
+
+                {hasMore ? (
+                  <div ref={sentinelRef} className="flex justify-center py-2">
+                    <button
+                      onClick={loadMore}
+                      disabled={loadingMore}
+                      className="inline-flex items-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-700 disabled:opacity-60"
+                    >
+                      {loadingMore ? (
+                        <>
+                          <FaBasketballBall className="animate-bounce" /> Lädt…
+                        </>
+                      ) : (
+                        "Mehr laden"
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-center text-xs text-gray-400 py-2">
+                    Das war alles.
+                  </p>
+                )}
+              </>
             )}
           </main>
 

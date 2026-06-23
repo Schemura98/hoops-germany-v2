@@ -5,11 +5,15 @@ import Player from "@/models/Player";
 import { getPlayerFromToken } from "@/lib/serverAuth";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
+const DEFAULT_LIMIT = 10;
+const MAX_LIMIT = 50;
+
 // POST /api/player/getfollowingposts – Feed aus Beiträgen gefolgter Spieler,
-// Mitglieder gefolgter Teams (+ eigene).
+// Mitglieder gefolgter Teams (+ eigene). Paginiert über `before` (createdAt).
 async function handler(req) {
   const body = await req.json().catch(() => ({}));
   const token = getTokenFromRequest(req, body.token);
+  const limit = Math.min(Number(body.limit) || DEFAULT_LIMIT, MAX_LIMIT);
 
   const me = await getPlayerFromToken(token);
   if (!me) {
@@ -32,13 +36,22 @@ async function handler(req) {
     ),
   ];
 
-  const posts = await Post.find({ player: { $in: ids } })
+  const query = { player: { $in: ids } };
+  if (body.before) {
+    const d = new Date(body.before);
+    if (!Number.isNaN(d.getTime())) query.createdAt = { $lt: d };
+  }
+
+  const fetched = await Post.find(query)
     .sort({ createdAt: -1 })
-    .limit(50)
+    .limit(limit + 1)
     .populate("player", "firstName lastName slug profileImage")
     .populate("comments.player", "firstName lastName slug profileImage");
 
-  return ok({ posts });
+  const hasMore = fetched.length > limit;
+  const posts = hasMore ? fetched.slice(0, limit) : fetched;
+
+  return ok({ posts, hasMore });
 }
 
 export const POST = withErrorHandling(handler);
