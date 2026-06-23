@@ -173,6 +173,53 @@ for (const team of teams) {
 }
 console.log("👑 Team-Admins gesetzt");
 
+// ----- Super-Admins (persistent in der Dev-DB) -----
+// Patrick & Jonatan als Super-Admin-Spieler + /admin-Accounts. Dev-Passwort: test123.
+// (Die Produktiv-Accounts in der DB 'test' bleiben davon unberührt.)
+const superAdminDefs = [
+  { firstName: "Patrick", lastName: "Schemura", email: "p.schemura@gmail.com", username: "patrick" },
+  { firstName: "Jonatan", lastName: "Baena Vides III", email: "jonatanbaenavides@gmail.com", username: "jonatan" },
+];
+const superDocs = superAdminDefs.map((s, i) => ({
+  _id: oid(),
+  firstName: s.firstName,
+  lastName: s.lastName,
+  email: s.email,
+  slug: slugify(`${s.firstName}-${s.lastName}`),
+  password: pw,
+  status: "active",
+  teamId: null,
+  position: pick(POS),
+  height: `${rnd(185, 200)} cm`,
+  nationality: "Deutschland",
+  hometown: i === 0 ? "Berlin" : "Hamburg",
+  aboutPlayer: "Hoops Germany Team.",
+  followers: [],
+  following: [],
+  followingTeams: [],
+  notifications: [],
+  transferStatus: "nicht_verfuegbar",
+  isTeamAdmin: false,
+  teamAdminOf: null,
+  isSuperAdmin: true,
+  createdAt: now,
+  updatedAt: now,
+}));
+await Players.insertMany(superDocs);
+
+const Admins = db.collection("admins");
+for (const s of superAdminDefs) {
+  await Admins.updateOne(
+    { username: s.username },
+    {
+      $set: { username: s.username, email: s.email, password: pw, firstName: s.firstName, lastName: s.lastName, updatedAt: now },
+      $setOnInsert: { createdAt: now },
+    },
+    { upsert: true }
+  );
+}
+console.log("🛡️  Super-Admins gesetzt: Patrick & Jonatan (Spieler isSuperAdmin + /admin-Login)");
+
 // ----- Follower-Beziehungen -----
 for (const p of players) {
   const others = players.filter((x) => !x._id.equals(p._id));
@@ -320,5 +367,7 @@ console.log(`📝 ${postDocs.length} Posts`);
 console.log("\n✅ Seed abgeschlossen!");
 console.log("   Teams sind spieler-geführt (kein Team-Login).");
 console.log("   Team-Admin Test Baskets: max@test.de / test123 (alle Spieler-Logins: test123)");
+console.log("   Super-Admins (Spieler-Login, test123): p.schemura@gmail.com · jonatanbaenavides@gmail.com");
+console.log("   /admin-Panel: admin/geheim1234 ODER patrick/test123 · jonatan/test123");
 await mongoose.disconnect();
 process.exit(0);
