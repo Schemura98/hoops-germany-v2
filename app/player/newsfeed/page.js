@@ -9,6 +9,7 @@ import PlayerNav from "@/components/layout/PlayerNav";
 import PostComposer from "@/components/posts/PostComposer";
 import PostCard from "@/components/posts/PostCard";
 import TeamMatchesWidget from "@/components/feed/TeamMatchesWidget";
+import TopTeamsWidget from "@/components/feed/TopTeamsWidget";
 import NewsWidget from "@/components/NewsWidget";
 
 const TABS = [
@@ -78,6 +79,7 @@ export default function PlayerNewsfeedPage() {
           {/* Linke Leiste: Spiele von eigenem/gefolgten Teams */}
           <aside className="space-y-4 order-2 lg:order-1 lg:sticky lg:top-24">
             <TeamMatchesWidget />
+            <TopTeamsWidget />
           </aside>
 
           {/* Mitte: Composer + Feed */}

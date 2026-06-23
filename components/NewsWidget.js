@@ -49,7 +49,7 @@ export default function NewsWidget({ compact = false }) {
         {loading ? (
           <p className="text-xs text-gray-400 py-2">Lädt…</p>
         ) : (
-          <ul className="space-y-3">
+          <ul className="space-y-3 max-h-80 overflow-y-auto -mr-1 pr-1">
             {news.map((n, i) => (
               <li key={i}>
                 <a

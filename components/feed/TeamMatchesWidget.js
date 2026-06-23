@@ -194,7 +194,7 @@ export default function TeamMatchesWidget() {
         ))}
       </div>
 
-      <div className="mt-3 space-y-2">
+      <div className="mt-3 space-y-2 max-h-80 overflow-y-auto -mr-1 pr-1">
         {loading ? (
           <div className="flex justify-center py-6">
             <FaBasketballBall className="text-brand-500 text-xl animate-bounce" />
