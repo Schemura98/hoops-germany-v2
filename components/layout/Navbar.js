@@ -1,81 +1,499 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { FaBars, FaTimes, FaBasketballBall } from "react-icons/fa";
+import { useState, useEffect, useRef, useCallback } from "react";
+import axios from "axios";
+import {
+  FaSearch,
+  FaBell,
+  FaTimes,
+  FaBars,
+  FaUser,
+  FaUsers,
+  FaShieldAlt,
+  FaTrophy,
+  FaBasketballBall,
+  FaCalendarAlt,
+  FaChevronDown,
+} from "react-icons/fa";
+import {
+  getPlayerToken,
+  clearPlayerToken,
+  clearTeamToken,
+  clearAdminToken,
+} from "@/lib/clientAuth";
+import { timeAgo } from "@/lib/timeAgo";
 
-const links = [
-  { href: "/spieler", label: "Spieler" },
-  { href: "/teams", label: "Teams" },
-  { href: "/spiele", label: "Spiele" },
-  { href: "/ligen", label: "Ligen" },
-  { href: "/tryouts", label: "Tryouts" },
-  { href: "/transfermarkt", label: "Transfermarkt" },
-  { href: "/topscorer", label: "Topscorer" },
+// Öffentliche, login-bewusste Navigation im Navy-Look mit Wortmarken-Logo.
+// Saubere Neuimplementierung in v2-Architektur (Original-Design, ohne Altlasten).
+const PUBLIC_LINKS = [
+  { href: "/ligen", label: "Ligen", icon: FaTrophy },
+  { href: "/spiele", label: "Spiele", icon: FaCalendarAlt },
+  { href: "/topscorer", label: "Topscorer", icon: FaBasketballBall },
+  { href: "/teams", label: "Teams", icon: FaUsers },
 ];
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
+  const [me, setMe] = useState(null); // null = unbekannt/ausgeloggt
+  const [checked, setChecked] = useState(false);
+
+  // Suche
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [results, setResults] = useState([]);
+  const [searchData, setSearchData] = useState(null); // {players, teams}
+  const searchInputRef = useRef(null);
+
+  // Benachrichtigungen
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifs, setNotifs] = useState([]);
+  const [unread, setUnread] = useState(0);
+  const notifRef = useRef(null);
+
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const isLoggedIn = !!me;
+
+  // Eigenes Profil + Benachrichtigungen laden
+  useEffect(() => {
+    const token = getPlayerToken();
+    if (!token) {
+      setChecked(true);
+      return;
+    }
+    let active = true;
+    (async () => {
+      try {
+        const { data } = await axios.post("/api/player/getmyinfo", { token });
+        if (active) setMe(data.player || null);
+      } catch {
+        if (active) setMe(null);
+      } finally {
+        if (active) setChecked(true);
+      }
+      try {
+        const { data } = await axios.post("/api/player/getnotifications", { token });
+        if (active) {
+          setNotifs(data.notifications || []);
+          setUnread(data.unreadCount || 0);
+        }
+      } catch {
+        /* ignorieren */
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Klick außerhalb schließt Dropdowns
+  useEffect(() => {
+    const onClick = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
+
+  function logout() {
+    clearPlayerToken();
+    clearTeamToken();
+    clearAdminToken();
+    window.location.href = "/";
+  }
+
+  const openSearch = useCallback(async () => {
+    setSearchOpen(true);
+    setTimeout(() => searchInputRef.current?.focus(), 50);
+    if (!searchData) {
+      try {
+        const [p, t] = await Promise.all([
+          axios.post("/api/player/fetchall"),
+          axios.post("/api/team/fetchteams"),
+        ]);
+        setSearchData({
+          players: p.data.players || [],
+          teams: t.data.teams || [],
+        });
+      } catch {
+        setSearchData({ players: [], teams: [] });
+      }
+    }
+  }, [searchData]);
+
+  function onSearchChange(e) {
+    const term = e.target.value;
+    setSearchTerm(term);
+    if (!term || !searchData) {
+      setResults([]);
+      return;
+    }
+    const q = term.toLowerCase();
+    const players = (searchData.players || [])
+      .filter((p) => `${p.firstName} ${p.lastName}`.toLowerCase().includes(q))
+      .slice(0, 5)
+      .map((p) => ({ ...p, _type: "player" }));
+    const teams = (searchData.teams || [])
+      .filter((t) => t.teamName?.toLowerCase().includes(q))
+      .slice(0, 3)
+      .map((t) => ({ ...t, _type: "team" }));
+    setResults([...players, ...teams]);
+  }
+
+  function closeSearch() {
+    setSearchOpen(false);
+    setSearchTerm("");
+    setResults([]);
+  }
+
+  async function toggleNotif() {
+    const next = !notifOpen;
+    setNotifOpen(next);
+    if (next && unread > 0) {
+      setUnread(0);
+      setNotifs((list) => list.map((n) => ({ ...n, read: true })));
+      try {
+        const token = getPlayerToken();
+        await axios.post("/api/player/marknotificationsread", { token });
+      } catch {
+        /* ignorieren */
+      }
+    }
+  }
+
+  const teamSlug = me?.team?.slug || null;
+  const teamName = me?.team?.teamName || null;
 
   return (
-    <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
-        <Link href="/" className="flex items-center gap-2 font-bold text-gray-900">
-          <FaBasketballBall className="text-brand-500" />
-          Hoops Germany
-        </Link>
-
-        {/* Desktop */}
-        <div className="hidden md:flex items-center gap-6">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="text-sm text-gray-600 hover:text-brand-600 transition-colors"
-            >
-              {l.label}
-            </Link>
-          ))}
+    <>
+      <nav className="sticky top-0 z-50 bg-gradient-to-r from-slate-950 to-slate-800 text-white">
+        <div className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 h-16">
+          {/* Logo */}
           <Link
-            href="/login"
-            className="bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+            href={isLoggedIn ? "/home" : "/"}
+            className="flex items-center hover:opacity-80 transition-opacity"
           >
-            Login
+            <img
+              src="/images/logo.svg"
+              alt="Hoops Germany"
+              className="h-9 sm:h-11 w-auto object-contain"
+            />
           </Link>
+
+          {/* Desktop-Navigation */}
+          <div className="hidden md:flex items-center gap-5">
+            {PUBLIC_LINKS.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="text-sm text-gray-300 hover:text-white transition-colors"
+              >
+                {l.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Aktionen rechts */}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={openSearch}
+              className="text-white hover:text-orange-400 transition-colors"
+              aria-label="Suche öffnen"
+            >
+              <FaSearch className="w-5 h-5" />
+            </button>
+
+            {isLoggedIn && (
+              <div className="relative" ref={notifRef}>
+                <button
+                  onClick={toggleNotif}
+                  className="relative text-white hover:text-orange-400 transition-colors"
+                  aria-label="Benachrichtigungen"
+                >
+                  <FaBell className="w-5 h-5" />
+                  {unread > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center leading-none">
+                      {unread > 9 ? "9+" : unread}
+                    </span>
+                  )}
+                </button>
+
+                {notifOpen && (
+                  <div className="fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-9 sm:w-80 bg-white rounded-2xl shadow-2xl z-50 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <h3 className="font-bold text-gray-900 text-sm">Benachrichtigungen</h3>
+                    </div>
+                    <div className="max-h-80 overflow-y-auto divide-y divide-gray-50">
+                      {notifs.length === 0 ? (
+                        <p className="px-4 py-8 text-center text-gray-400 text-sm">
+                          Keine Benachrichtigungen
+                        </p>
+                      ) : (
+                        notifs.map((n, i) => (
+                          <div
+                            key={n._id || i}
+                            className={`flex gap-3 px-4 py-3 ${n.read ? "" : "bg-orange-50"}`}
+                          >
+                            <span className="h-8 w-8 flex-shrink-0 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
+                              <FaBasketballBall className="text-sm" />
+                            </span>
+                            <div className="min-w-0">
+                              <p className="text-sm text-gray-800 leading-snug">{n.message}</p>
+                              <p className="text-xs text-gray-400 mt-0.5">{timeAgo(n.createdAt)}</p>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Desktop: Login-State */}
+            {checked && (
+              <div className="hidden md:flex items-center gap-4">
+                {isLoggedIn ? (
+                  <>
+                    {me?.isSuperAdmin && (
+                      <Link
+                        href="/admin/dashboard"
+                        className="flex items-center gap-1.5 text-orange-400 hover:text-orange-300 text-sm font-medium"
+                      >
+                        <FaShieldAlt className="w-4 h-4" /> Admin
+                      </Link>
+                    )}
+                    {me?.isTeamAdmin && !me?.isSuperAdmin && (
+                      <Link
+                        href="/team/admin"
+                        className="flex items-center gap-1.5 text-orange-400 hover:text-orange-300 text-sm font-medium"
+                      >
+                        <FaTrophy className="w-4 h-4" /> Team-Admin
+                      </Link>
+                    )}
+                    {teamSlug && (
+                      <Link
+                        href={`/team/team-detail/${teamSlug}`}
+                        className="text-sm text-gray-300 hover:text-white transition-colors"
+                        title={teamName || "Mein Team"}
+                      >
+                        Mein Team
+                      </Link>
+                    )}
+                    <Link
+                      href="/player/newsfeed"
+                      className="text-sm text-gray-300 hover:text-white transition-colors"
+                    >
+                      Mein Profil
+                    </Link>
+                    <button
+                      onClick={logout}
+                      className="text-sm text-gray-300 hover:text-white transition-colors"
+                    >
+                      Abmelden
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      className="text-sm text-gray-300 hover:text-white transition-colors"
+                    >
+                      Anmelden
+                    </Link>
+                    <Link
+                      href="/signup"
+                      className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-4 py-1.5 text-sm font-medium transition-colors"
+                    >
+                      Registrieren
+                    </Link>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Mobile-Toggle */}
+            <button
+              onClick={() => setMobileOpen((v) => !v)}
+              className="md:hidden text-white hover:text-orange-400 transition-colors"
+              aria-label="Menü öffnen"
+            >
+              {mobileOpen ? <FaTimes className="w-5 h-5" /> : <FaBars className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
 
-        {/* Mobile Toggle */}
-        <button
-          className="md:hidden text-gray-700 text-xl"
-          onClick={() => setOpen((v) => !v)}
-          aria-label="Menü"
-        >
-          {open ? <FaTimes /> : <FaBars />}
-        </button>
-      </div>
+        {/* Mobile-Menü */}
+        {mobileOpen && (
+          <div className="md:hidden bg-slate-900 border-t border-slate-700 divide-y divide-slate-700/60">
+            {PUBLIC_LINKS.map((l) => {
+              const Icon = l.icon;
+              return (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 px-5 py-3.5 text-white hover:bg-slate-800 transition-colors"
+                >
+                  <Icon className="text-orange-400 w-4 h-4 flex-shrink-0" />
+                  <span className="text-sm font-medium">{l.label}</span>
+                </Link>
+              );
+            })}
+            {isLoggedIn ? (
+              <>
+                {teamSlug && (
+                  <Link
+                    href={`/team/team-detail/${teamSlug}`}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-5 py-3.5 text-white hover:bg-slate-800 transition-colors"
+                  >
+                    <FaBasketballBall className="text-orange-400 w-4 h-4 flex-shrink-0" />
+                    <span className="text-sm font-medium">Mein Team</span>
+                  </Link>
+                )}
+                <Link
+                  href="/player/newsfeed"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 px-5 py-3.5 text-white hover:bg-slate-800 transition-colors"
+                >
+                  <FaUser className="text-orange-400 w-4 h-4 flex-shrink-0" />
+                  <span className="text-sm font-medium">Mein Profil</span>
+                </Link>
+                {me?.isSuperAdmin && (
+                  <Link
+                    href="/admin/dashboard"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-5 py-3.5 text-orange-400 hover:bg-slate-800 transition-colors"
+                  >
+                    <FaShieldAlt className="w-4 h-4 flex-shrink-0" />
+                    <span className="text-sm font-medium">Super Admin</span>
+                  </Link>
+                )}
+                {me?.isTeamAdmin && !me?.isSuperAdmin && (
+                  <Link
+                    href="/team/admin"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-5 py-3.5 text-orange-400 hover:bg-slate-800 transition-colors"
+                  >
+                    <FaTrophy className="w-4 h-4 flex-shrink-0" />
+                    <span className="text-sm font-medium">Team-Admin</span>
+                  </Link>
+                )}
+                <button
+                  onClick={() => {
+                    logout();
+                    setMobileOpen(false);
+                  }}
+                  className="flex items-center gap-3 px-5 py-3.5 w-full text-left text-gray-400 hover:bg-slate-800 transition-colors"
+                >
+                  <FaTimes className="w-4 h-4 flex-shrink-0" />
+                  <span className="text-sm font-medium">Abmelden</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 px-5 py-3.5 text-white hover:bg-slate-800 transition-colors"
+                >
+                  <FaUser className="text-orange-400 w-4 h-4 flex-shrink-0" />
+                  <span className="text-sm font-medium">Anmelden</span>
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 px-5 py-3.5 text-orange-400 hover:bg-slate-800 transition-colors"
+                >
+                  <FaBasketballBall className="w-4 h-4 flex-shrink-0" />
+                  <span className="text-sm font-bold">Registrieren</span>
+                </Link>
+              </>
+            )}
+          </div>
+        )}
+      </nav>
 
-      {/* Mobile Menu */}
-      {open && (
-        <div className="md:hidden border-t border-gray-100 px-6 py-4 flex flex-col gap-3">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="text-gray-600 hover:text-brand-600"
-              onClick={() => setOpen(false)}
-            >
-              {l.label}
-            </Link>
-          ))}
-          <Link
-            href="/login"
-            className="bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2 text-sm font-medium text-center"
-            onClick={() => setOpen(false)}
-          >
-            Login
-          </Link>
+      {/* Such-Overlay */}
+      {searchOpen && (
+        <div className="fixed inset-0 z-[999] bg-black/60 flex items-start justify-center pt-20 px-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+              <FaSearch className="text-gray-400 flex-shrink-0" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Spieler oder Team suchen…"
+                className="flex-1 outline-none text-sm text-gray-800 placeholder-gray-400"
+                value={searchTerm}
+                onChange={onSearchChange}
+              />
+              <button
+                onClick={closeSearch}
+                className="text-gray-400 hover:text-gray-700 transition-colors"
+                aria-label="Suche schließen"
+              >
+                <FaTimes className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="max-h-80 overflow-y-auto divide-y divide-gray-50">
+              {searchTerm && results.length === 0 && (
+                <div className="px-4 py-6 text-center text-gray-400 text-sm">
+                  {searchData ? "Keine Ergebnisse" : "Lädt…"}
+                </div>
+              )}
+              {results.map((item) =>
+                item._type === "team" ? (
+                  <Link
+                    key={`t-${item._id}`}
+                    href={`/team/team-detail/${item.slug}`}
+                    onClick={closeSearch}
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                  >
+                    {item.logo ? (
+                      <img src={item.logo} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
+                        <FaUsers className="text-slate-400 text-sm" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{item.teamName}</p>
+                      <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                        Team
+                      </span>
+                    </div>
+                  </Link>
+                ) : (
+                  <Link
+                    key={`p-${item._id}`}
+                    href={item.slug ? `/player/view-player/${item.slug}` : "#"}
+                    onClick={closeSearch}
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                  >
+                    {item.profileImage ? (
+                      <img src={item.profileImage} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                        <FaUser className="text-orange-400 text-sm" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate">
+                        {item.firstName} {item.lastName}
+                      </p>
+                      <span className="text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                        Spieler
+                      </span>
+                    </div>
+                  </Link>
+                )
+              )}
+            </div>
+          </div>
         </div>
       )}
-    </nav>
+    </>
   );
 }

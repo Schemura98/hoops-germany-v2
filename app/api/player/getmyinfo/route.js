@@ -1,5 +1,6 @@
 import { getTokenFromRequest } from "@/lib/auth";
 import { getPlayerFromToken } from "@/lib/serverAuth";
+import Team from "@/models/Team";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/player/getmyinfo – eigenes Profil anhand des Tokens laden.
@@ -16,7 +17,14 @@ async function handler(req) {
     return fail("Sitzung ungültig oder abgelaufen", 401);
   }
 
-  return ok({ player });
+  // Rückwärtskompatibel: teamId bleibt unverändert (ObjectId), zusätzlich
+  // ein populiertes `team`-Objekt (für Navbar "Mein Team" o.ä.).
+  const out = player.toObject();
+  if (player.teamId) {
+    out.team = await Team.findById(player.teamId).select("teamName slug logo");
+  }
+
+  return ok({ player: out });
 }
 
 export const POST = withErrorHandling(handler);
