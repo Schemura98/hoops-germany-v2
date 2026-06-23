@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaUsers, FaBasketballBall, FaMapMarkerAlt } from "react-icons/fa";
+import { FaBasketballBall, FaMapMarkerAlt } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import Avatar from "@/components/Avatar";
 import { teamScores } from "@/lib/matchScore";
 
 function formatDate(d) {
@@ -29,18 +30,14 @@ function TeamBadge({ team }) {
       href={team?.slug ? `/team/team-detail/${team.slug}` : "#"}
       className="flex flex-col items-center gap-2 flex-1 min-w-0 group"
     >
-      {team?.logo ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={team.logo}
-          alt=""
-          className="h-16 w-16 rounded-2xl object-cover bg-white ring-2 ring-white/10"
-        />
-      ) : (
-        <span className="h-16 w-16 rounded-2xl bg-white/10 text-brand-300 flex items-center justify-center ring-2 ring-white/10">
-          <FaUsers className="text-xl" />
-        </span>
-      )}
+      <Avatar
+        name={team?.teamName}
+        src={team?.logo}
+        className="h-16 w-16"
+        textClass="text-xl"
+        square
+        ring="ring-2 ring-white/10"
+      />
       <span className="text-sm font-semibold text-white text-center truncate w-full group-hover:text-orange-300 transition-colors">
         {team?.teamName || "Unbekannt"}
       </span>

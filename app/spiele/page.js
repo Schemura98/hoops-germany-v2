@@ -3,23 +3,17 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaUsers, FaBasketballBall, FaMapMarkerAlt } from "react-icons/fa";
+import { FaBasketballBall, FaMapMarkerAlt } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
+import Avatar from "@/components/Avatar";
 import { teamScores } from "@/lib/matchScore";
 
 function TeamSide({ team, align = "left" }) {
   return (
     <div className={`flex items-center gap-2 min-w-0 ${align === "right" ? "flex-row-reverse text-right" : ""}`}>
-      {team?.logo ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={team.logo} alt="" className="h-8 w-8 rounded-full object-cover flex-shrink-0" />
-      ) : (
-        <span className="h-8 w-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center flex-shrink-0">
-          <FaUsers className="text-xs" />
-        </span>
-      )}
+      <Avatar name={team?.teamName} src={team?.logo} className="h-8 w-8" textClass="text-[10px]" square />
       <span className="text-sm font-medium text-gray-900 truncate">
         {team?.teamName || "Unbekannt"}
       </span>

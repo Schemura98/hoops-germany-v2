@@ -15,6 +15,7 @@ import {
   FaBasketballBall,
   FaCalendarAlt,
   FaChevronDown,
+  FaRegNewspaper,
 } from "react-icons/fa";
 import {
   getPlayerToken,
@@ -23,6 +24,7 @@ import {
   clearAdminToken,
 } from "@/lib/clientAuth";
 import { timeAgo } from "@/lib/timeAgo";
+import Avatar from "@/components/Avatar";
 
 // Öffentliche, login-bewusste Navigation im Navy-Look mit Wortmarken-Logo.
 // Saubere Neuimplementierung in v2-Architektur (Original-Design, ohne Altlasten).
@@ -292,6 +294,12 @@ export default function Navbar() {
                       href="/player/newsfeed"
                       className="text-sm text-gray-300 hover:text-white transition-colors"
                     >
+                      Feed
+                    </Link>
+                    <Link
+                      href="/player/player-detail"
+                      className="text-sm text-gray-300 hover:text-white transition-colors"
+                    >
                       Mein Profil
                     </Link>
                     <button
@@ -362,6 +370,14 @@ export default function Navbar() {
                 )}
                 <Link
                   href="/player/newsfeed"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 px-5 py-3.5 text-white hover:bg-slate-800 transition-colors"
+                >
+                  <FaRegNewspaper className="text-orange-400 w-4 h-4 flex-shrink-0" />
+                  <span className="text-sm font-medium">Feed</span>
+                </Link>
+                <Link
+                  href="/player/player-detail"
                   onClick={() => setMobileOpen(false)}
                   className="flex items-center gap-3 px-5 py-3.5 text-white hover:bg-slate-800 transition-colors"
                 >
@@ -469,13 +485,7 @@ export default function Navbar() {
                     onClick={closeSearch}
                     className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
                   >
-                    {item.logo ? (
-                      <img src={item.logo} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
-                    ) : (
-                      <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
-                        <FaUsers className="text-slate-400 text-sm" />
-                      </div>
-                    )}
+                    <Avatar name={item.teamName} src={item.logo} className="w-9 h-9" textClass="text-xs" square />
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-gray-900 truncate">{item.teamName}</p>
                       <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
@@ -490,13 +500,12 @@ export default function Navbar() {
                     onClick={closeSearch}
                     className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
                   >
-                    {item.profileImage ? (
-                      <img src={item.profileImage} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
-                    ) : (
-                      <div className="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
-                        <FaUser className="text-orange-400 text-sm" />
-                      </div>
-                    )}
+                    <Avatar
+                      name={`${item.firstName} ${item.lastName}`}
+                      src={item.profileImage}
+                      className="w-9 h-9"
+                      textClass="text-xs"
+                    />
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-gray-900 truncate">
                         {item.firstName} {item.lastName}
