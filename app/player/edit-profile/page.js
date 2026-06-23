@@ -10,6 +10,7 @@ import { getPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
 import { POSITIONS, BUNDESLAENDER } from "@/lib/constants";
 import PlayerNav from "@/components/layout/PlayerNav";
 import ImageUpload from "@/components/ImageUpload";
+import CityInput from "@/components/CityInput";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
@@ -178,7 +179,14 @@ export default function PlayerEditProfilePage() {
               <input name="country" value={form.country} onChange={onChange} className={inputClass} />
             </Field>
             <Field label="Heimatstadt">
-              <input name="hometown" value={form.hometown} onChange={onChange} className={inputClass} />
+              <CityInput
+                value={form.hometown}
+                onChange={(v) => setForm((f) => ({ ...f, hometown: v }))}
+                onPick={(c) =>
+                  setForm((f) => ({ ...f, hometown: c.n, bundesland: c.s || f.bundesland }))
+                }
+                placeholder="Stadt eingeben…"
+              />
             </Field>
           </div>
 

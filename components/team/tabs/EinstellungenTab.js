@@ -6,6 +6,7 @@ import { FaCopy, FaCheck, FaLink } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import { BUNDESLAENDER } from "@/lib/constants";
 import ImageUpload from "@/components/ImageUpload";
+import CityInput from "@/components/CityInput";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
@@ -127,11 +128,12 @@ export default function EinstellungenTab({ team, reload }) {
             />
           </Field>
           <Field label="Stadt/Region">
-            <input
-              name="region"
+            <CityInput
               value={form.region}
-              onChange={onChange}
-              className={inputClass}
+              onChange={(v) => setForm((f) => ({ ...f, region: v }))}
+              onPick={(c) =>
+                setForm((f) => ({ ...f, region: c.n, bundesland: c.s || f.bundesland }))
+              }
               placeholder="z.B. Berlin"
             />
           </Field>

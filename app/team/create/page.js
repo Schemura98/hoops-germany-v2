@@ -9,6 +9,7 @@ import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { getPlayerToken } from "@/lib/clientAuth";
 import { BUNDESLAENDER } from "@/lib/constants";
 import PlayerNav from "@/components/layout/PlayerNav";
+import CityInput from "@/components/CityInput";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
@@ -94,11 +95,12 @@ export default function TeamCreatePage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Stadt/Region <span className="text-gray-400">(optional)</span>
               </label>
-              <input
-                name="region"
+              <CityInput
                 value={form.region}
-                onChange={onChange}
-                className={inputClass}
+                onChange={(v) => setForm((f) => ({ ...f, region: v }))}
+                onPick={(c) =>
+                  setForm((f) => ({ ...f, region: c.n, bundesland: c.s || f.bundesland }))
+                }
                 placeholder="z.B. Berlin"
               />
             </div>
