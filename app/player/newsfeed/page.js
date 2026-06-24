@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { FaBasketballBall } from "react-icons/fa";
+import { FaBasketballBall, FaTrophy, FaExchangeAlt, FaNewspaper } from "react-icons/fa";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 import { getPlayerToken } from "@/lib/clientAuth";
 import PlayerNav from "@/components/layout/PlayerNav";
 import PostComposer from "@/components/posts/PostComposer";
@@ -11,6 +12,7 @@ import PostCard from "@/components/posts/PostCard";
 import TeamMatchesWidget from "@/components/feed/TeamMatchesWidget";
 import TopTeamsWidget from "@/components/feed/TopTeamsWidget";
 import TransferFeedWidget from "@/components/feed/TransferFeedWidget";
+import CollapsibleWidget from "@/components/feed/CollapsibleWidget";
 import NewsWidget from "@/components/NewsWidget";
 
 const TABS = [
@@ -20,6 +22,7 @@ const TABS = [
 
 export default function PlayerNewsfeedPage() {
   const { player, status } = useCurrentPlayer();
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [posts, setPosts] = useState([]);
   const [feedLoading, setFeedLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -120,19 +123,12 @@ export default function PlayerNewsfeedPage() {
       <PlayerNav player={player} />
 
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-[260px_minmax(0,1fr)_300px] gap-6 items-start">
-          {/* Linke Leiste: Spiele von eigenem/gefolgten Teams */}
-          <aside className="space-y-4 order-2 lg:order-1 lg:sticky lg:top-24">
-            <TeamMatchesWidget />
-            <TopTeamsWidget />
-          </aside>
-
-          {/* Mitte: Composer + Feed */}
-          <main className="order-1 lg:order-2 space-y-6 min-w-0">
-            <PostComposer player={player} onCreated={handleCreated} />
-
-            {/* Feed-Umschaltung */}
-            <div className="flex gap-1 border-b border-gray-200">
+        {(() => {
+          const composer = <PostComposer player={player} onCreated={handleCreated} />;
+          const feed = (
+            <>
+              {/* Feed-Umschaltung */}
+              <div className="flex gap-1 border-b border-gray-200">
               {TABS.map((t) => (
                 <button
                   key={t.key}
@@ -189,14 +185,69 @@ export default function PlayerNewsfeedPage() {
                 )}
               </>
             )}
-          </main>
+            </>
+          );
 
-          {/* Rechte Leiste: News (Sponsorfläche folgt mit #6) */}
-          <aside className="space-y-4 order-3 lg:sticky lg:top-24">
-            <TransferFeedWidget />
-            <NewsWidget compact />
-          </aside>
-        </div>
+          if (isDesktop) {
+            return (
+              <div className="grid lg:grid-cols-[260px_minmax(0,1fr)_300px] gap-6 items-start">
+                {/* Linke Leiste: Spiele von eigenem/gefolgten Teams */}
+                <aside className="space-y-4 lg:sticky lg:top-24">
+                  <TeamMatchesWidget />
+                  <TopTeamsWidget />
+                </aside>
+
+                {/* Mitte: Composer + Feed */}
+                <main className="space-y-6 min-w-0">
+                  {composer}
+                  {feed}
+                </main>
+
+                {/* Rechte Leiste: News (Sponsorfläche folgt mit #6) */}
+                <aside className="space-y-4 lg:sticky lg:top-24">
+                  <TransferFeedWidget />
+                  <NewsWidget compact />
+                </aside>
+              </div>
+            );
+          }
+
+          // Mobil: Widgets als einklappbare Akkordeons über dem Feed,
+          // damit sie nicht hinter dem Infinite-Scroll-Feed verschwinden.
+          return (
+            <div className="space-y-6">
+              {composer}
+              <div className="space-y-3">
+                <CollapsibleWidget
+                  icon={<FaBasketballBall className="text-brand-500" />}
+                  title="Spiele"
+                  defaultOpen
+                >
+                  <TeamMatchesWidget />
+                </CollapsibleWidget>
+                <CollapsibleWidget
+                  icon={<FaTrophy className="text-brand-500" />}
+                  title="Top-Teams"
+                >
+                  <TopTeamsWidget />
+                </CollapsibleWidget>
+                <CollapsibleWidget
+                  icon={<FaExchangeAlt className="text-brand-500" />}
+                  title="Transfers"
+                >
+                  <TransferFeedWidget />
+                </CollapsibleWidget>
+                <CollapsibleWidget
+                  icon={<FaNewspaper className="text-brand-500" />}
+                  title="Basketball-News"
+                >
+                  <NewsWidget compact />
+                </CollapsibleWidget>
+              </div>
+              {feed}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
