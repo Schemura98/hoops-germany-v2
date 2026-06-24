@@ -80,6 +80,11 @@ export default function AdminMatchesPage() {
                       <span className={`text-xs font-medium rounded-full px-2 py-0.5 ${badge.cls}`}>
                         {badge.label}
                       </span>
+                      {m.resultStatus === "mismatch" && (
+                        <span className="ml-1.5 text-xs font-medium rounded-full px-2 py-0.5 bg-red-100 text-red-700">
+                          Strittig
+                        </span>
+                      )}
                     </td>
                     <td className="py-3 pr-4 text-right">
                       <Link

@@ -4,7 +4,74 @@ import Match from "@/models/Match";
 import Team from "@/models/Team";
 import Player from "@/models/Player";
 import { getTeamFromToken } from "@/lib/serverAuth";
+import { sendMail } from "@/lib/mailer";
+import { resultMismatchEmail } from "@/lib/emailTemplates";
+import { getBaseUrl } from "@/lib/baseUrl";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
+
+// Benachrichtigt beide Team-Admins + alle Super-Admins über ein strittiges Ergebnis
+// (In-App-Notiz immer; Mail an die jeweilige Adresse). Wird nur beim Übergang in
+// "mismatch" aufgerufen, damit erneutes Einreichen nicht spammt.
+async function notifyMismatch(match, baseUrl) {
+  const [tA, tB] = await Promise.all([
+    Team.findById(match.teamA).select("teamName slug adminPlayerId"),
+    Team.findById(match.teamB).select("teamName slug adminPlayerId"),
+  ]);
+  if (!tA || !tB) return;
+
+  const a = match.teamAResult || {};
+  const b = match.teamBResult || {};
+  // Beide Meldungen einheitlich als "TeamA:TeamB" darstellen.
+  const reportA = `${a.ownPoints}:${a.opponentPoints}`;
+  const reportB = `${b.opponentPoints}:${b.ownPoints}`;
+  const message = `Strittiges Ergebnis ${tA.teamName} vs ${tB.teamName}: ${tA.teamName} meldet ${reportA}, ${tB.teamName} meldet ${reportB}.`;
+
+  const superAdmins = await Player.find({ isSuperAdmin: true }).select("email firstName");
+  const teamAdminIds = [tA.adminPlayerId, tB.adminPlayerId].filter(Boolean);
+
+  // In-App-Benachrichtigung an alle Beteiligten (Team-Admins + Super-Admins), dedupliziert.
+  const recipientIds = [
+    ...new Set([...teamAdminIds, ...superAdmins.map((s) => s._id)].map(String)),
+  ];
+  await Player.updateMany(
+    { _id: { $in: recipientIds } },
+    {
+      $push: {
+        notifications: {
+          type: "result_mismatch",
+          teamId: tA._id,
+          teamName: tA.teamName,
+          teamSlug: tA.slug,
+          matchId: match._id,
+          message,
+          read: false,
+          createdAt: new Date(),
+        },
+      },
+    }
+  );
+
+  // Mails: Team-Admins (korrigieren) + Super-Admins (auflösen).
+  const teamAdmins = await Player.find({ _id: { $in: teamAdminIds } }).select("email");
+  const send = (to, forSuperAdmin) => {
+    if (!to) return Promise.resolve();
+    const { subject, html, text } = resultMismatchEmail({
+      teamAName: tA.teamName,
+      teamBName: tB.teamName,
+      reportA,
+      reportB,
+      baseUrl,
+      forSuperAdmin,
+    });
+    return sendMail({ to, subject, html, text }).catch((err) =>
+      console.error("[MISMATCH MAIL ERROR]", err?.message || err)
+    );
+  };
+  await Promise.all([
+    ...teamAdmins.map((p) => send(p.email, false)),
+    ...superAdmins.map((s) => send(s.email, true)),
+  ]);
+}
 
 // Benachrichtigt die Follower beider Teams über ein eingetragenes Ergebnis.
 async function notifyFollowers(match) {
@@ -94,6 +161,7 @@ async function handler(req) {
   }
 
   const wasCompleted = match.status === "completed";
+  const prevResultStatus = match.resultStatus;
 
   const submission = {
     ownPoints,
@@ -147,6 +215,15 @@ async function handler(req) {
       await notifyFollowers(match);
     } catch (err) {
       console.error("[MATCH RESULT NOTIFY ERROR]", err);
+    }
+  }
+
+  // Strittiges Ergebnis: nur beim Übergang in "mismatch" alle Beteiligten alarmieren.
+  if (match.resultStatus === "mismatch" && prevResultStatus !== "mismatch") {
+    try {
+      await notifyMismatch(match, getBaseUrl(req));
+    } catch (err) {
+      console.error("[MISMATCH NOTIFY ERROR]", err);
     }
   }
 

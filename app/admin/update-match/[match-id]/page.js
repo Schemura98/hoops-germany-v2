@@ -97,6 +97,50 @@ export default function AdminUpdateMatchPage({ params }) {
           </div>
         )}
 
+        {match.resultStatus === "mismatch" && (
+          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
+            <p className="text-sm font-semibold text-red-700">
+              Widersprüchliche Meldungen – bitte richtiges Ergebnis festlegen
+            </p>
+            <div className="mt-3 space-y-2">
+              {[
+                {
+                  label: match.teamA?.teamName,
+                  a: match.teamAResult?.ownPoints,
+                  b: match.teamAResult?.opponentPoints,
+                },
+                {
+                  label: match.teamB?.teamName,
+                  a: match.teamBResult?.opponentPoints,
+                  b: match.teamBResult?.ownPoints,
+                },
+              ].map((r, i) =>
+                r.a != null && r.b != null ? (
+                  <div key={i} className="flex items-center justify-between gap-3">
+                    <span className="text-sm text-gray-700">
+                      <strong>{r.label}</strong> meldet{" "}
+                      <span className="font-semibold text-gray-900">
+                        {r.a} : {r.b}
+                      </span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStatus("completed");
+                        setAPts(String(r.a));
+                        setBPts(String(r.b));
+                      }}
+                      className="text-xs border border-red-300 hover:border-red-500 text-red-700 rounded-lg px-3 py-1"
+                    >
+                      Übernehmen
+                    </button>
+                  </div>
+                ) : null
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="mt-5">
           <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
           <select
