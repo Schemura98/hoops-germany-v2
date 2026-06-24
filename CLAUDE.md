@@ -77,15 +77,47 @@ Cluster `hoops.tbhsg.mongodb.net` hat ZWEI getrennte DBs:
 - **3 latente Bugs gefixt**: Liga-Tabellen-Query (`status` fehlte), Match-Detail `populate` (MissingSchemaError → 500),
   `/home`-Platzhalter; außerdem „Mein Profil"-Navbar-Link zeigte fälschlich auf den Newsfeed → gefixt
 
+#### Update (Stand jetzt) – alle Flows getestet, Newsfeed ausgebaut, Mail-System erweitert
+- **Alle Mehrstufen-Flows verifiziert** (Ergebnis-Verifikation, Beitritt, Tryout, Like/Kommentar,
+  **Slot-Claim**): Kader-Tab-Fix (Mitgliederliste aktualisiert nach Slot-Genehmigung sofort).
+- **Newsfeed → 3-Spalten-App-Layout** (mobil gestapelt) mit scrollbaren Widget-Clustern:
+  - **Spiele-Widget** (links): nächste Spiele + letzte Ergebnisse des eigenen/gefolgten Teams,
+    Tabs + Bereichs-Toggle (`/api/player/my-matches`).
+  - **Top-Teams-Widget** (links): Rangliste (W/L + Korbdiff) mit Liga-/Bundesland-Filter
+    (`/api/teams/standings`); Vollansicht-Seite **`/rangliste`**.
+  - **Transfer-Widget** (rechts): Transfers gefolgter Personen/Teams (`/api/player/transfer-feed`),
+    gespeist aus neuem Modell **`TransferEvent`** + Helper `lib/recordTransfer.js` (geschrieben bei
+    team/create, handlejoinrequest, roster/approve-claim, remove-member; benachrichtigt Follower).
+  - **News-Widget** (rechts): kompakte Variante (`/api/news/rss`).
+  - **Feed-Pagination**: `before`-Cursor in `/api/posts/feed` + `/api/player/getfollowingposts`,
+    Infinite Scroll + „Mehr laden".
+  - **Kommentare**: jetzt likebar + beantwortbar (Post-Modell `comments.likes[]`/`replies[]`,
+    `/api/posts/likecomment`, `/api/posts/addreply`).
+- **Mail-System** (Vorlagen zentral in `lib/emailTemplates.js` mit `emailLayout`, echtes Logo via
+  gehostete `public/images/logo-email.png`; SMTP lokal nicht testbar → verifiziert über In-App + Trigger-Log):
+  - **Willkommensmail** bei Registrierung (`welcomeEmail`, Anreiz-Karten).
+  - **Pending-Result-Erinnerung** geht jetzt an die **Admin-Spieler-Mail** (vorher leeres `team.email`);
+    **Opt-out** `Player.emailPendingResult` (Default an, Toggle in edit-profile). In-App bleibt immer.
+  - **Mismatch-Alert**: `submit-match-result` benachrichtigt beim Übergang in „mismatch" **beide
+    Team-Admins + alle Super-Admins** (In-App `result_mismatch` + Mail `resultMismatchEmail`);
+    `/admin/matches` zeigt „Strittig"-Badge, `/admin/update-match` zeigt beide Meldungen + „Übernehmen".
+  - **Stats-Modell bestätigt korrekt**: Admin trägt PKT/AST/REB je eigenem Spieler + Gesamtpunkte
+    beider Teams ein.
+- **Logos geprüft**: Navbar (`logo.svg` weiß) / Auth (`logo-hoops.svg` schwarz) / Favicon
+  (`public/icon.svg` + `app/icon.svg`) sind die korrekten Canva-Logos; Mail-Logo gefixt (war Emoji-Platzhalter).
+
 🔜 **Noch offen (Pre-Live-Roadmap):**
-1. **SMTP + Google-Keys** (User liefert `SMTP_PASS`, `GOOGLE_CLIENT_ID/SECRET`) → Reset-/Einladungs-/Feedback-Mails + Google-Login
-2. **Flows tief testen** (Ergebnis-Verifikation beider Teams, Beitrittsanfrage, Tryout-Bewerbung, Slot-Einladung) + Funktionen durchsprechen
-3. Optional: Stationen/Stats-Leiste weiter verfeinern
-4. **VPS-Deployment** (frische DB, beide registrieren neu, dann `test` löschen)
+1. **Mail #4 – Invite-Flow erweitern**: Slot-Einladung per **WhatsApp** teilen + **Account direkt
+   über den Claim-Link anlegen** (Passwort+Mail setzen → optional Profil bearbeiten).
+2. **Monetarisierung (#6)** – BLOCKIERT bis **Gewerbeanmeldung** des Users (Amazon-Affiliate +
+   Sponsorfläche; AdSense erst bei genug Traffic + Consent-Banner).
+3. **SMTP + Google-Keys** (User liefert `SMTP_PASS`, `GOOGLE_CLIENT_ID/SECRET`) → echter Mailversand + Google-Login.
+4. **Hostinger-Deployment**: frische DB, Patrick & Jonatan registrieren neu; **Rollback zur alten
+   Seite jederzeit möglich halten**, **Test-Environment während der Testphase drin lassen**; danach `test` löschen.
 
 ### Bekannte Einschränkungen / offen
 - **Kein VPS-Deployment** erfolgt. Live-Site (`hoopsgermany.de`) läuft noch auf altem Code + DB `test`.
-- **SMTP/Google**-Keys fehlen lokal → Reset-/Einladungs-Mails & Google-Login erst mit echten Werten testbar.
+- **SMTP/Google**-Keys fehlen lokal → Reset-/Einladungs-/Willkommens-/Mismatch-Mails & Google-Login erst mit echten Werten testbar.
 - Schema-Änderungen erfordern Dev-Neustart (mongoose-Model-Cache). Nach Dev-Server-Lock ggf. `.next` löschen vor `npm run build`.
 
 ---
