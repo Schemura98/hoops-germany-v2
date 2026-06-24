@@ -36,6 +36,12 @@ Cluster `hoops.tbhsg.mongodb.net` hat ZWEI getrennte DBs:
 - Branches: **`main`** = sauberer Wiederherstellungspunkt (v2 vor Redesign), **`redesign`** = aktiver Arbeits-Branch (hier wird gearbeitet, nach jedem Meilenstein committen + pushen).
 - `.env` ist gitignored; nur `.env.example` (leer) ist eingecheckt.
 
+> 📌 **KONVENTION (verbindlich): Fortschritt IMMER hier dokumentieren.** Nach **jedem Meilenstein/
+> Commit** ist dieser **Abschnitt 0** zu aktualisieren (was umgesetzt wurde + Datei-/Endpoint-Namen +
+> Commit-Hash, Roadmap pflegen). CLAUDE.md ist die **kanonische, session-übergreifende Quelle** –
+> das private Session-Gedächtnis ersetzt sie nicht. Dafür gibt es die Skill **`log-progress`**
+> (`.claude/skills/log-progress/`). So fehlt auch bei einem späteren Umbau der Live-Seite nichts.
+
 ### Architektur-Konventionen (etabliert, bitte beibehalten)
 - **lib/**: `db.js`, `auth.js`, `serverAuth.js` (`getPlayerFromToken`, `getTeamFromToken`=Dual-Auth, `getAdminFromToken`), `clientAuth.js`, `apiResponse.js` (`ok`/`fail`/`withErrorHandling`), `slug.js`, `matchScore.js`, `timeAgo.js`, `constants.js`, `useCurrentPlayer/Team/Admin.js`.
 - **API-Pattern**: `connectDB()` → prüfen → Logik → `ok()/fail()`, in `withErrorHandling`.
@@ -106,14 +112,27 @@ Cluster `hoops.tbhsg.mongodb.net` hat ZWEI getrennte DBs:
 - **Logos geprüft**: Navbar (`logo.svg` weiß) / Auth (`logo-hoops.svg` schwarz) / Favicon
   (`public/icon.svg` + `app/icon.svg`) sind die korrekten Canva-Logos; Mail-Logo gefixt (war Emoji-Platzhalter).
 
+#### Update (26.06.2026) – Mail-System komplett, Invite-Flow, Design-Politur, Doku-Skill
+- **Einheitliches Mail-Design-System** (`5cc2729`): `lib/emailTemplates.js` tabellenbasiert
+  (Outlook/Gmail), mobile-first, `emailLayout(accent/badge/title/intro/cta)`; **alle 8 Mails** darüber
+  (auch Einladung/Reset/Feedback/Kontakt). Status-Akzent+Badge je Typ, Basketball-Kontext-Badges,
+  große zentrierte Orange-CTAs. Builder: `welcomeEmail`, `pendingResultEmail`, `resultMismatchEmail`,
+  `inviteEmail`, `passwordResetEmail`, `feedbackEmail`, `contactEmail`.
+- **Invite-Flow erweitert** (`42b9f34`): KaderTab **WhatsApp-Button** (wa.me); Claim-Seite
+  `/team/claim/[token]` erlaubt **Account-Anlage direkt** (Name aus Slot vorbefüllt → `playerregister`
+  → `request-claim`) + danach optional Profil vervollständigen.
+- **Mail-Politur** (`b6bee6c`): Titel/Intro **zentriert** (Tabellen/Karten bleiben links), **Logo 150→190px**.
+- **Mail-Export für User** (Review in Canva/AI): `C:\Users\schem\OneDrive\Desktop\Hoops-Mail-Vorlagen\`
+  (8 HTML-Dateien + index, Logo eingebettet) – via Builder neu generierbar.
+- **Doku-Konvention + Skill `log-progress`** angelegt (Fortschritt immer hier in Abschnitt 0 festhalten).
+
 🔜 **Noch offen (Pre-Live-Roadmap):**
-1. **Mail #4 – Invite-Flow erweitern**: Slot-Einladung per **WhatsApp** teilen + **Account direkt
-   über den Claim-Link anlegen** (Passwort+Mail setzen → optional Profil bearbeiten).
-2. **Monetarisierung (#6)** – BLOCKIERT bis **Gewerbeanmeldung** des Users (Amazon-Affiliate +
+1. **Hostinger-Deployment** (IN ARBEIT): Production-Build grün → VPS-Setup (PM2, Domain/Subdomain
+   fürs **Test-Environment**) → **Rollback zur alten Seite jederzeit möglich halten** → `.env` mit echten
+   Keys. Frische DB, Patrick & Jonatan registrieren neu; alte DB `test` erst beim Cutover löschen.
+2. **SMTP + Google-Keys** (User liefert `SMTP_PASS`, `GOOGLE_CLIENT_ID/SECRET`) → echter Mailversand + Google-Login.
+3. **Monetarisierung (#6)** – BLOCKIERT bis **Gewerbeanmeldung** des Users (Amazon-Affiliate +
    Sponsorfläche; AdSense erst bei genug Traffic + Consent-Banner).
-3. **SMTP + Google-Keys** (User liefert `SMTP_PASS`, `GOOGLE_CLIENT_ID/SECRET`) → echter Mailversand + Google-Login.
-4. **Hostinger-Deployment**: frische DB, Patrick & Jonatan registrieren neu; **Rollback zur alten
-   Seite jederzeit möglich halten**, **Test-Environment während der Testphase drin lassen**; danach `test` löschen.
 
 ### Bekannte Einschränkungen / offen
 - **Kein VPS-Deployment** erfolgt. Live-Site (`hoopsgermany.de`) läuft noch auf altem Code + DB `test`.
