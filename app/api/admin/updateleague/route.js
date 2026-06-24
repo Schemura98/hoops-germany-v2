@@ -1,9 +1,33 @@
 import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import League from "@/models/League";
+import Match from "@/models/Match";
+import { teamScores } from "@/lib/matchScore";
 import { getAdminFromToken } from "@/lib/serverAuth";
 import { findDuplicateLeague } from "@/lib/leagues";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
+
+// Tabellen-Ersten einer Liga aus abgeschlossenen Spielen ermitteln (teamId-String).
+async function computeChampionId(league) {
+  const matches = await Match.find({ leagueId: league._id, status: "completed" }).select(
+    "teamA teamB winningTeamPoints losingTeamPoints winningTeam"
+  );
+  const table = new Map();
+  for (const t of league.teams || [])
+    table.set(String(t), { teamId: String(t), wins: 0, pf: 0, pa: 0 });
+  for (const m of matches) {
+    const s = teamScores(m);
+    if (!s) continue;
+    const a = table.get(String(m.teamA));
+    const b = table.get(String(m.teamB));
+    if (a) { a.pf += s.a; a.pa += s.b; if (s.a > s.b) a.wins++; }
+    if (b) { b.pf += s.b; b.pa += s.a; if (s.b > s.a) b.wins++; }
+  }
+  const sorted = [...table.values()].sort(
+    (x, y) => y.wins - x.wins || (y.pf - y.pa) - (x.pf - x.pa) || y.pf - x.pf
+  );
+  return sorted[0]?.teamId || null;
+}
 
 // POST /api/admin/updateleague – Liga bearbeiten (Name, Saison, aktiv).
 async function handler(req) {
@@ -48,11 +72,20 @@ async function handler(req) {
     }
   }
 
+  // Beim Abschließen den Meister festschreiben: expliziter champion hat Vorrang,
+  // sonst automatisch der Tabellenführer (einmalig eingefroren).
+  if (updates.finished === true) {
+    const explicit = body.champion ? body.champion : null;
+    if (!explicit) {
+      updates.champion = await computeChampionId(current);
+    }
+  }
+
   const league = await League.findByIdAndUpdate(
     body.leagueId,
     { $set: updates },
     { new: true }
-  ).select("name season bundesland active");
+  ).select("name season bundesland active finished champion");
 
   return ok({ league });
 }

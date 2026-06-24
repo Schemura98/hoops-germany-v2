@@ -8,14 +8,33 @@ import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 // DB-Zugriff erst zur Laufzeit.
 export const dynamic = "force-dynamic";
 
-// GET /api/leagues – aktive Ligen auflisten.
-async function list() {
+// GET /api/leagues – Ligen auflisten.
+//   (ohne Param)        → aktive Ligen (laufender Betrieb; Standardverhalten).
+//   ?season=2024/25     → alle Ligen dieser Saison INKL. archivierter (Archiv-Browser).
+// Antwort enthält zusätzlich `seasons` (alle vorhandenen Saisons, neueste zuerst).
+async function list(req) {
   await connectDB();
-  const leagues = await League.find({ active: true })
-    .select("name season bundesland level gender ageGroup region official teams finished")
+  const season = (() => {
+    try {
+      return new URL(req.url).searchParams.get("season");
+    } catch {
+      return null;
+    }
+  })();
+
+  const query = season ? { season } : { active: true };
+  const leagues = await League.find(query)
+    .select("name season bundesland level gender ageGroup region official teams finished champion active")
+    .populate("champion", "teamName slug")
     .sort({ createdAt: -1 });
 
+  const seasons = (await League.distinct("season"))
+    .filter(Boolean)
+    .sort()
+    .reverse();
+
   return ok({
+    seasons,
     leagues: leagues.map((l) => ({
       _id: l._id,
       name: l.name,
@@ -26,7 +45,9 @@ async function list() {
       ageGroup: l.ageGroup || "",
       region: l.region || "",
       official: !!l.official,
+      active: l.active,
       finished: !!l.finished,
+      champion: l.champion ? { teamName: l.champion.teamName, slug: l.champion.slug } : null,
       teams: (l.teams || []).map((t) => String(t)),
       teamCount: l.teams?.length || 0,
     })),

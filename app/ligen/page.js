@@ -16,8 +16,10 @@ import {
 
 export default function LigenPage() {
   const [leagues, setLeagues] = useState([]);
+  const [seasons, setSeasons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [season, setSeason] = useState(""); // "" = aktuell (aktive Ligen)
   const [land, setLand] = useState("");
   const [gender, setGender] = useState("");
   const [ageGroup, setAgeGroup] = useState("");
@@ -25,10 +27,17 @@ export default function LigenPage() {
 
   useEffect(() => {
     let active = true;
+    setLoading(true);
+    setError(false);
     (async () => {
       try {
-        const { data } = await axios.get("/api/leagues");
-        if (active) setLeagues(data.leagues || []);
+        const { data } = await axios.get("/api/leagues", {
+          params: season ? { season } : {},
+        });
+        if (active) {
+          setLeagues(data.leagues || []);
+          if (data.seasons) setSeasons(data.seasons);
+        }
       } catch {
         if (active) setError(true);
       } finally {
@@ -38,7 +47,7 @@ export default function LigenPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [season]);
 
   // Welche Bundesländer haben bereits Ligen? (für „folgt in Kürze"-Hinweis,
   // wächst automatisch mit, sobald weitere Länder geseedet werden)
@@ -69,8 +78,22 @@ export default function LigenPage() {
       <PageHeader eyebrow="Wettbewerb" title="Ligen" subtitle="Tabellen und Wettbewerbe." />
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
-        {!loading && !error && leagues.length > 0 && (
+        {!error && seasons.length > 0 && (
           <div className="mb-6 flex flex-wrap gap-3">
+            <select
+              value={season}
+              onChange={(e) => setSeason(e.target.value)}
+              className={selectCls}
+              aria-label="Saison"
+            >
+              <option value="">Aktuelle Saison</option>
+              {seasons.map((s) => (
+                <option key={s} value={s}>
+                  Saison {s}
+                </option>
+              ))}
+            </select>
+
             <select
               value={land}
               onChange={(e) => setLand(e.target.value)}
@@ -172,6 +195,11 @@ export default function LigenPage() {
                   {(l.gender || l.ageGroup || l.region) && (
                     <p className="mt-1 text-xs text-gray-500">
                       {[l.gender, l.ageGroup, l.region].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
+                  {l.finished && l.champion && (
+                    <p className="mt-1 text-xs font-medium text-amber-700 flex items-center gap-1">
+                      <FaTrophy className="text-[9px]" /> Meister: {l.champion.teamName}
                     </p>
                   )}
                   <p className="mt-2 text-xs text-gray-400 flex items-center gap-3">
