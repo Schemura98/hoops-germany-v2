@@ -37,10 +37,21 @@ export default function TransfermarktPage() {
   const [cityMap, setCityMap] = useState(null);
 
   const [loggedIn, setLoggedIn] = useState(false);
+  const [me, setMe] = useState(null);
   const [joinState, setJoinState] = useState({}); // { [teamId]: { busy, msg, type } }
 
   useEffect(() => {
-    setLoggedIn(!!getPlayerToken());
+    const token = getPlayerToken();
+    setLoggedIn(!!token);
+    if (!token) return;
+    let active = true;
+    axios
+      .post("/api/player/getmyinfo", { token })
+      .then(({ data }) => active && setMe(data.player || null))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -134,6 +145,41 @@ export default function TransfermarktPage() {
 
   const list = view === "players" ? filteredPlayers : filteredTeams;
 
+  // Matching: Vereine, die zum eingeloggten (transferbereiten) Spieler passen.
+  const matchTeams = useMemo(() => {
+    if (!me || me.transferStatus !== "verfuegbar") return [];
+    const myPos = positionLabel(me.position);
+    return teams
+      .filter((t) => String(t._id) !== String(me.teamAdminOf || ""))
+      .filter((t) => {
+        const posMatch = myPos && (t.positions || []).map(positionLabel).includes(myPos);
+        const regionMatch = me.bundesland && t.bundesland === me.bundesland;
+        return posMatch || regionMatch;
+      })
+      .slice(0, 4);
+  }, [teams, me]);
+
+  // Mein eigenes Team (falls es aktiv sucht) aus der recruiting-list.
+  const myRecruitingTeam = useMemo(
+    () => (me?.teamAdminOf ? teams.find((t) => String(t._id) === String(me.teamAdminOf)) : null),
+    [teams, me]
+  );
+
+  // Matching: transferbereite Spieler, die zur Suche meines Teams passen.
+  const matchPlayers = useMemo(() => {
+    if (!myRecruitingTeam) return [];
+    const sought = (myRecruitingTeam.positions || []).map(positionLabel);
+    return players
+      .filter((p) => String(p.teamId?._id || p.teamId || "") !== String(myRecruitingTeam._id))
+      .filter((p) => {
+        const posMatch = sought.includes(positionLabel(p.position));
+        const regionMatch =
+          myRecruitingTeam.bundesland && p.bundesland === myRecruitingTeam.bundesland;
+        return posMatch || regionMatch;
+      })
+      .slice(0, 4);
+  }, [players, myRecruitingTeam]);
+
   const selectCls =
     "rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-700 bg-white shadow-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
 
@@ -148,6 +194,61 @@ export default function TransfermarktPage() {
       />
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
+        {/* Passende Treffer (personalisiert) */}
+        {(matchTeams.length > 0 || matchPlayers.length > 0) && (
+          <div className="mb-6 rounded-2xl border border-brand-200 bg-brand-50/50 p-5">
+            <h2 className="text-sm font-bold text-brand-700 mb-3">Passende Treffer für dich</h2>
+
+            {matchTeams.length > 0 && (
+              <div className="mb-2">
+                <p className="text-xs text-gray-500 mb-2">Vereine, die jemanden wie dich suchen:</p>
+                <div className="grid sm:grid-cols-2 gap-2">
+                  {matchTeams.map((t) => (
+                    <Link
+                      key={t._id}
+                      href={`/team/team-detail/${t.slug}`}
+                      className="flex items-center gap-2 bg-white rounded-xl border border-gray-100 px-3 py-2 hover:border-brand-300"
+                    >
+                      <Avatar name={t.teamName} src={t.logo} className="h-8 w-8" textClass="text-[10px]" square />
+                      <span className="min-w-0">
+                        <span className="block text-sm font-medium text-gray-900 truncate">{t.teamName}</span>
+                        <span className="block text-xs text-gray-400 truncate">
+                          {(t.positions || []).map(positionLabel).join(", ") || t.bundesland}
+                        </span>
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {matchPlayers.length > 0 && (
+              <div>
+                <p className="text-xs text-gray-500 mb-2">Spieler, die zu eurer Suche passen:</p>
+                <div className="grid sm:grid-cols-2 gap-2">
+                  {matchPlayers.map((p) => (
+                    <Link
+                      key={p._id}
+                      href={`/player/view-player/${p.slug || p._id}`}
+                      className="flex items-center gap-2 bg-white rounded-xl border border-gray-100 px-3 py-2 hover:border-brand-300"
+                    >
+                      <Avatar name={`${p.firstName} ${p.lastName}`} src={p.profileImage} className="h-8 w-8" textClass="text-[10px]" />
+                      <span className="min-w-0">
+                        <span className="block text-sm font-medium text-gray-900 truncate">
+                          {p.firstName} {p.lastName}
+                        </span>
+                        <span className="block text-xs text-gray-400 truncate">
+                          {[positionLabel(p.position), p.bundesland].filter(Boolean).join(" · ")}
+                        </span>
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Tabs */}
         <div className="flex gap-2 mb-5 border-b border-gray-200">
           {TABS.map((t) => (
