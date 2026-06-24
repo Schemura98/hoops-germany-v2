@@ -3,6 +3,9 @@ import { connectDB } from "@/lib/db";
 import Player from "@/models/Player";
 import { signPlayerToken } from "@/lib/auth";
 import { uniqueSlug } from "@/lib/slug";
+import { sendMail } from "@/lib/mailer";
+import { welcomeEmail } from "@/lib/emailTemplates";
+import { getBaseUrl } from "@/lib/baseUrl";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -44,6 +47,15 @@ async function handler(req) {
   });
 
   const token = signPlayerToken({ id: player._id.toString() });
+
+  // Willkommensmail – fire-and-forget, darf die Registrierung nie blockieren.
+  const { subject, html, text } = welcomeEmail({
+    firstName,
+    baseUrl: getBaseUrl(req),
+  });
+  sendMail({ to: email, subject, html, text }).catch((err) =>
+    console.error("[WELCOME MAIL ERROR]", err?.message || err)
+  );
 
   return ok(
     {
