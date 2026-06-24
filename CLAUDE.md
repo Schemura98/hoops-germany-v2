@@ -127,9 +127,14 @@ Cluster `hoops.tbhsg.mongodb.net` hat ZWEI getrennte DBs:
 - **Doku-Konvention + Skill `log-progress`** angelegt (Fortschritt immer hier in Abschnitt 0 festhalten).
 
 🔜 **Noch offen (Pre-Live-Roadmap):**
-1. **Hostinger-Deployment** (IN ARBEIT): Production-Build grün → VPS-Setup (PM2, Domain/Subdomain
-   fürs **Test-Environment**) → **Rollback zur alten Seite jederzeit möglich halten** → `.env` mit echten
-   Keys. Frische DB, Patrick & Jonatan registrieren neu; alte DB `test` erst beim Cutover löschen.
+1. **Hostinger-Deployment** (IN ARBEIT): **Production-Build lokal grün** ✓ (119 Seiten, 26.06.).
+   **Entscheidung (User):** v2 geht **direkt auf `hoopsgermany.de`** (kein Subdomain-Test-Env). Sicherheit
+   per **Blue-Green**: alte Seite (`/root/sports/`, DB `test`) bleibt unberührt + gesichert, v2 in neuem
+   Verzeichnis `/root/hoops-v2/` auf eigenem **Port 3001** + eigener DB **`hoops_prod`** (Atlas, mit
+   Demo-Daten geseedet); Cutover = Nginx-Switch, Rollback = Nginx zurück. **Runbook: `DEPLOYMENT.md`**
+   (Phasen 0–7 + Rollback). Claude hat KEINEN SSH-Zugang → User führt aus, Claude begleitet.
+   ⚠️ MONGODB_URI muss auf `/hoops_prod` zeigen (NIE `test` / Dev-DB `hoopsgermany`). Offen: User braucht
+   echte Keys (SMTP_PASS, Google) + VPS-Zugang.
 2. **SMTP + Google-Keys** (User liefert `SMTP_PASS`, `GOOGLE_CLIENT_ID/SECRET`) → echter Mailversand + Google-Login.
 3. **Monetarisierung (#6)** – BLOCKIERT bis **Gewerbeanmeldung** des Users (Amazon-Affiliate +
    Sponsorfläche; AdSense erst bei genug Traffic + Consent-Banner).
