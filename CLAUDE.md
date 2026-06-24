@@ -190,10 +190,22 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
   Titel/Rahmen. Verifiziert im Preview (Desktop 3-spaltig + Mobil 375px Toggle).
 - **Geprüft, kein Handlungsbedarf:** Landing, Spieler-Liste, Spielerprofil (Stats-Leiste mobil bewusst
   `overflow-x-auto`), Desktop-Newsfeed wirken sauber/konsistent.
+- **Footer + Geburtstag + Karriere-Verlauf + aktive Nav** (`fbbe06a`):
+  - **Footer** (mit Impressum/Datenschutz) auf `player-detail`, `edit-profile`, `update-password`,
+    `team/admin`, `team/create` ergänzt (Rechtsseiten via `LegalShell` hatten ihn schon; Auth-Seiten
+    über `AuthShell` + Admin-Panel bewusst ohne; Newsfeed bewusst ohne wegen Infinite-Scroll).
+  - **Geburtstag statt Alter:** `edit-profile` nutzt jetzt ein Datumsfeld; das Alter wird via neuem
+    `lib/age.js` (`ageFromBirthdate`/`formatBirthdate`/`toDateInputValue`) **live aus dem Geburtsdatum
+    berechnet** → aktualisiert sich automatisch am Geburtstag, kein Cron. Anzeige in `PlayerProfileView`
+    (Stats-Leiste + Steckbrief) abgeleitet; `update-profile`-Route speichert das abgeleitete Alter als
+    Snapshot (Rückwärtskompatibilität). Altdaten (Freitext TT.MM.JJJJ) werden weiterhin geparst.
+  - **Karriere-Verlauf** vom Stats- in den **Steckbrief-Tab** verschoben (`PlayerProfileView`).
+  - **Aktive Seite markiert** in `Navbar` (Desktop + Hamburger) und `PlayerNav` via `usePathname` +
+    `aria-current="page"` (orange Border/Highlight, konsistente Borders → kein Layout-Shift).
 
 > **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
 > Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).
-> ⚠️ `c813d56` ist committet (Branch `redesign`), aber **noch nicht gepusht/deployt** – vor Deploy `npm run build` (Prod-Runtime) testen.
+> ✅ `c813d56` (Akkordeon) **und** `fbbe06a` (Footer/Geburtstag/Karriere-Verlauf/aktive Nav) sind gepusht **und live deployt** (Prod-Build grün getestet).
 
 🔜 **Noch offen (nach Go-Live):**
 1. **`/admin`-Temp-Passwort** (`A1cGmhwN-1To`) auf ein eigenes ändern (oder Legacy-`/admin`-Login ganz entfernen,
