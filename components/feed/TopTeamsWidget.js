@@ -105,7 +105,7 @@ export default function TopTeamsWidget() {
             Noch keine Ergebnisse für diese Auswahl.
           </p>
         ) : (
-          <ol className="space-y-1">
+          <ol className="space-y-1 pb-1">
             {rows.map((t, i) => (
               <li key={t.teamId}>
                 <Link
@@ -134,6 +134,15 @@ export default function TopTeamsWidget() {
           </ol>
         )}
       </div>
+
+      {!loading && rows.length > 0 && (
+        <Link
+          href="/rangliste"
+          className="mt-2 block text-center text-xs font-medium text-brand-600 hover:text-brand-700"
+        >
+          Komplette Rangliste
+        </Link>
+      )}
     </div>
   );
 }
