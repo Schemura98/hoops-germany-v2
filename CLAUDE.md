@@ -385,10 +385,13 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
      SpielplanTab-Playoff-Formular, Team-Liga-Karte – alle sauber. **Fix:** Rangliste- + Topscorer-Tabelle
      hatten keinen horizontalen Scroll-Container → bei 375px wurden rechte Spalten abgeschnitten (jetzt
      `overflow-x-auto`, konsistent mit Liga-Detail).
-   - 🐞 **„Folgen"-System prüfen** (Tester-Fund): Spieler **und** Teams folgen erhöhte den **Follower-Zähler
-     nicht**. Komplettes Follow-System end-to-end checken: `followplayer`/`followteam`,
-     `getfollowlist`/`checkfollowing`, `FollowButton`-Zähler, Follower-Anzeige auf Profilen/Team-Seite,
-     **Newsfeed-Anbindung** (gefolgte Spieler/Teams → „Folge ich"-Feed + Benachrichtigungen).
+   - ✅ **„Folgen"-System geprüft + Bug behoben** (`87fe0ec`, live): Ursache = **reiner Anzeige-Bug** auf dem
+     **Spielerprofil** (`view-player`): `FollowButton` ohne `onCountChange` → angezeigter `followersCount`
+     blieb beim Folgen stehen (Button wechselte, Zahl nicht). Fix: `onCountChange` → `setPlayer` aktualisiert
+     den Count live. **Backend war korrekt** (Count/DB/Toggle stimmten). Team-Detailseite war bereits korrekt
+     verdrahtet (live verifiziert). End-to-end geprüft: `followplayer`/`followteam` (Count+DB+Toggle),
+     `checkfollowing`, Follow-Notification, **„Folge ich"-Feed** (gefolgte Spieler + Mitglieder gefolgter Teams –
+     empirisch bestätigt). Offen/optional: Team-Follow erzeugt **keine** Benachrichtigung (Design, kein Bug).
 5. **Liga-Katalog Jugend** ✅ **weibliche Jugend ergänzt** (`2a95624`, live): U18w/U16w/U14w/U12w (10 Ligen,
    `gender:"Damen"`). Stufen aus der WBV-„Ligenstruktur Jugend" (gilt lt. Doku für weibl./männl./offen),
    gespiegelt zur männlichen 2025/26-Struktur (exakte weibliche 2025/26-Einteilung war nicht auffindbar).
