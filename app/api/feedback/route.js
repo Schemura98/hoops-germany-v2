@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/db";
 import Feedback from "@/models/Feedback";
+import Player from "@/models/Player";
 import { sendMail } from "@/lib/mailer";
 import { feedbackEmail } from "@/lib/emailTemplates";
 import { getBaseUrl } from "@/lib/baseUrl";
@@ -46,8 +47,16 @@ async function handler(req) {
     status: "new",
   });
 
-  // Benachrichtigung an Admin – Fehler hier nicht nach außen geben.
+  // Benachrichtigung an die Super-Admins (Fallback: info@). Fehler nicht nach außen geben.
   try {
+    const admins = await Player.find({ isSuperAdmin: true })
+      .select("email")
+      .lean();
+    const recipients = admins.map((a) => a.email).filter(Boolean);
+    const to = recipients.length
+      ? recipients.join(", ")
+      : process.env.SMTP_USER || "info@hoopsgermany.de";
+
     const mail = feedbackEmail({
       type,
       rating,
@@ -59,7 +68,7 @@ async function handler(req) {
       baseUrl: getBaseUrl(req),
     });
     await sendMail({
-      to: process.env.SMTP_USER || "info@hoopsgermany.de",
+      to,
       subject: mail.subject,
       html: mail.html,
       text: mail.text,
