@@ -309,13 +309,21 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > - **Team-Selbsterstellung entfernt**: das „Liga erstellen"-Formular + die Region-Vorschläge in
 >   `SpielplanTab` sind raus (Match-Form behält das Liga-Dropdown aus dem Katalog), stattdessen der Melde-Link.
 >
-> **➡️ NÄCHSTE SESSION HIER STARTEN (Schritt 5 – Datenschritt):** Mit **Punkt 1** beginnen (vom User so
-> entschieden): zuerst die **~31 NRW-Herren-Verbandsligen oberhalb Kreisliga** extrahieren
-> (1. Regionalliga West, 2× 2. Regionalliga, 4 Oberligen, 8 Landesligen, 16 Bezirksligen) für **Saison
-> 2025/26** und über `/api/admin/createleague` bzw. einen Seed einseeden (`official:true`, `bundesland:
-> "Nordrhein-Westfalen"`, passende `level`/`region`). Quellen: WBV-Ausschreibung 2025/26 (PDF) +
-> basketball-bund.net/TeamSL. **Danach** Kreisligen, dann Damen + Jugend (NRW komplett). Realistisch
-> partiell → ggf. Korrektur-Check mit dem User.
+> **Schritt 5 (Datenschritt) – Punkt 1 erledigt: 31 NRW-Herren-Verbandsligen 2025/26** (`7c68f9b`):
+> Idempotentes Seed `scripts/seed-nrw-leagues.mjs` legt den offiziellen WBV-Katalog oberhalb der Kreisliga
+> an: **1. Regionalliga · 2× 2. Regionalliga Gruppe 1/2 · Oberliga Gruppe 1–4 · Landesliga Gruppe 1–8 ·
+> Bezirksliga Gruppe 1–16** (= 31). Felder: `official:true`, `bundesland:"Nordrhein-Westfalen"`,
+> `gender:"Herren"`, `ageGroup:"Senioren"`, `season:"2025/26"`, `level` je Stufe. **Upsert (Match auf
+> name+season+gender), löscht nichts** → sicher für Dev (hoopsgermany) **und** Prod (hoops_prod);
+> `--dry` für Vorschau. Quelle: WBV „Ligenstruktur Senioren" + vorläufige Ligeneinteilung 2025/26
+> (basketball.nrw). **Auf Dev geseedet + Idempotenz verifiziert** (2. Lauf: 0 neu, 31 aktualisiert).
+> ⚠️ **`region` (RP-Bezirk Köln/Düsseldorf/Arnsberg/Münster/Detmold) je Landes-/Bezirksliga-Gruppe noch
+> leer** – exakte Gruppen↔Bezirk-Zuordnung ist über TeamSL nicht zuverlässig extrahierbar → Korrektur-Check
+> mit User offen. **Noch NICHT auf Prod geseedet** (bewusst – erst nach Freigabe/Region-Klärung).
+>
+> **➡️ NÄCHSTE SESSION HIER STARTEN:** (a) `region` der 8 Landes-/16 Bezirksligen mit dem User klären und im
+> Seed ergänzen, (b) auf **Prod** seeden (`node scripts/seed-nrw-leagues.mjs` auf dem VPS gegen hoops_prod),
+> (c) **danach** Kreisligen, dann Damen + Jugend (NRW komplett). Realistisch partiell → Korrektur-Check.
 > **Weiter offen:** (6) Demo-Liga `Regionalliga Süd` (Bayern) durch echte NRW-Ligen ersetzen / entfernen;
 > (optional) Liga-Auswahl nachträglich im Team-Einstellungen-Tab änderbar machen.
 >
