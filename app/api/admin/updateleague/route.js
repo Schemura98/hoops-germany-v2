@@ -1,10 +1,28 @@
 import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import League from "@/models/League";
+import Match from "@/models/Match";
 import { computeStandings } from "@/lib/standings";
 import { getAdminFromToken } from "@/lib/serverAuth";
 import { findDuplicateLeague } from "@/lib/leagues";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
+
+// Meister beim Abschließen ermitteln: Sieger des (letzten) abgeschlossenen Finales,
+// sonst Tabellenführer der Hauptrunde.
+async function resolveChampionId(league) {
+  const finale = await Match.findOne({
+    leagueId: league._id,
+    stage: "Playoffs",
+    playoffRound: "Finale",
+    status: "completed",
+    winningTeam: { $ne: null },
+  })
+    .sort({ date: -1 })
+    .select("winningTeam");
+  if (finale?.winningTeam) return String(finale.winningTeam);
+  const standings = await computeStandings(league._id, league.teams);
+  return standings[0]?.teamId || null;
+}
 
 // POST /api/admin/updateleague – Liga bearbeiten (Name, Saison, aktiv).
 async function handler(req) {
@@ -54,8 +72,7 @@ async function handler(req) {
   if (updates.finished === true) {
     const explicit = body.champion ? body.champion : null;
     if (!explicit) {
-      const standings = await computeStandings(current._id, current.teams);
-      updates.champion = standings[0]?.teamId || null;
+      updates.champion = await resolveChampionId(current);
     }
   }
 

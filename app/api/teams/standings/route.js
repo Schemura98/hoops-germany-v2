@@ -19,6 +19,7 @@ async function handler(req) {
     status: "completed",
     winningTeam: { $ne: null },
     winningTeamPoints: { $ne: null },
+    stage: { $ne: "Playoffs" }, // Playoffs zählen nicht für die Tabellen-Rangliste
   };
   // Liga-Filter ist spezifischer als Saison; sonst Saison über die Ligen der Saison.
   if (leagueId && leagueId !== "all") {

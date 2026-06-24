@@ -5,6 +5,7 @@ import Team from "@/models/Team";
 import Match from "@/models/Match";
 import League from "@/models/League";
 import { getTeamFromToken } from "@/lib/serverAuth";
+import { PLAYOFF_ROUNDS } from "@/lib/constants";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/team/matches/create – Spiel eintragen (Dual-Auth).
@@ -46,6 +47,18 @@ async function handler(req) {
     if (league) leagueId = league._id;
   }
 
+  // Playoffs nur innerhalb einer Liga; gültige Runde Pflicht.
+  let stage = "Hauptrunde";
+  let playoffRound;
+  if (body.stage === "Playoffs" && leagueId) {
+    const round = String(body.playoffRound || "").trim();
+    if (!PLAYOFF_ROUNDS.includes(round)) {
+      return fail("Bitte eine gültige Playoff-Runde wählen", 400);
+    }
+    stage = "Playoffs";
+    playoffRound = round;
+  }
+
   const match = await Match.create({
     teamA: team._id,
     teamB: opponentId,
@@ -53,6 +66,8 @@ async function handler(req) {
     location: location?.trim() || "",
     status: "scheduled",
     leagueId,
+    stage,
+    playoffRound,
   });
 
   // Beide Teams der Liga hinzufügen und Spiel verknüpfen

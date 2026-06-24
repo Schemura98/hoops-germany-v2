@@ -54,8 +54,16 @@ export default function LigaDetailPage({ params }) {
     );
   }
 
-  const { league, standings, champion } = data;
+  const { league, standings, champion, playoffs = [] } = data;
   const championId = champion?.teamId ? String(champion.teamId) : null;
+
+  // Playoffs nach Runde gruppieren (API liefert sie bereits in Runden-Reihenfolge).
+  const playoffRounds = [];
+  for (const p of playoffs) {
+    const last = playoffRounds[playoffRounds.length - 1];
+    if (last && last.round === p.round) last.games.push(p);
+    else playoffRounds.push({ round: p.round, games: [p] });
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -155,8 +163,55 @@ export default function LigaDetailPage({ params }) {
 
         <p className="mt-3 text-xs text-gray-400">
           Sp = Spiele · S = Siege · N = Niederlagen · Diff = Korbdifferenz. Tabelle aus
-          bestätigten Ergebnissen.
+          bestätigten Ergebnissen der Hauptrunde.
         </p>
+
+        {/* Playoffs */}
+        {playoffRounds.length > 0 && (
+          <div className="mt-8">
+            <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900 mb-3">
+              <FaTrophy className="text-amber-500" /> Playoffs
+            </h2>
+            <div className="space-y-5">
+              {playoffRounds.map(({ round, games }) => (
+                <div key={round}>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
+                    {round}
+                  </p>
+                  <div className="space-y-2">
+                    {games.map((g) => {
+                      const done = g.scoreA != null && g.scoreB != null;
+                      const aWon = g.winnerSide === "A";
+                      const bWon = g.winnerSide === "B";
+                      return (
+                        <Link
+                          key={g._id}
+                          href={`/match/${g._id}`}
+                          className="block bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3 hover:border-brand-200 hover:shadow-md transition-all"
+                        >
+                          <div className="flex items-center justify-between gap-3 text-sm">
+                            <span className={`min-w-0 truncate ${aWon ? "font-bold text-gray-900" : "text-gray-700"}`}>
+                              {g.teamA?.teamName || "—"}
+                            </span>
+                            <span className="shrink-0 font-bold text-gray-900 tabular-nums">
+                              {done ? `${g.scoreA} : ${g.scoreB}` : "–"}
+                            </span>
+                            <span className={`min-w-0 truncate text-right ${bWon ? "font-bold text-gray-900" : "text-gray-700"}`}>
+                              {g.teamB?.teamName || "—"}
+                            </span>
+                          </div>
+                          {!done && (
+                            <p className="mt-1 text-[11px] text-amber-600">Anstehend</p>
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
 
       <Footer />

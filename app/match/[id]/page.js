@@ -166,9 +166,20 @@ export default function MatchIdPage({ params }) {
       <div className="bg-gradient-to-r from-slate-950 to-slate-800">
         <div className="max-w-2xl mx-auto px-4 py-10">
           {match.leagueId?.name && (
-            <p className="text-center text-xs font-semibold text-orange-400 uppercase tracking-widest mb-6">
+            <p
+              className={`text-center text-xs font-semibold text-orange-400 uppercase tracking-widest ${
+                match.stage === "Playoffs" ? "mb-2" : "mb-6"
+              }`}
+            >
               {match.leagueId.name}
               {match.leagueId.season ? ` · ${match.leagueId.season}` : ""}
+            </p>
+          )}
+          {match.stage === "Playoffs" && (
+            <p className="flex justify-center mb-6">
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/15 text-amber-300 text-xs font-semibold px-3 py-1">
+                🏆 Playoffs{match.playoffRound ? ` · ${match.playoffRound}` : ""}
+              </span>
             </p>
           )}
           <div className="flex items-start gap-4">

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { FaPlus, FaTrash, FaMapMarkerAlt, FaBasketballBall } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
-import { BUNDESLAENDER } from "@/lib/constants";
+import { BUNDESLAENDER, MATCH_STAGES, PLAYOFF_ROUNDS } from "@/lib/constants";
 import LeagueReportLink from "@/components/team/LeagueReportLink";
 
 const inputClass =
@@ -40,7 +40,14 @@ export default function SpielplanTab({ team }) {
   const [msg, setMsg] = useState(null);
 
   const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState({ opponentId: "", date: "", location: "", leagueId: "" });
+  const [form, setForm] = useState({
+    opponentId: "",
+    date: "",
+    location: "",
+    leagueId: "",
+    stage: "Hauptrunde",
+    playoffRound: "",
+  });
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState(null);
 
@@ -91,7 +98,7 @@ export default function SpielplanTab({ team }) {
     try {
       const token = getTeamAuthToken();
       await axios.post("/api/team/matches/create", { token, ...form });
-      setForm({ opponentId: "", date: "", location: "", leagueId: "" });
+      setForm({ opponentId: "", date: "", location: "", leagueId: "", stage: "Hauptrunde", playoffRound: "" });
       setShowAdd(false);
       await loadMatches();
     } catch (err) {
@@ -285,7 +292,15 @@ export default function SpielplanTab({ team }) {
               </label>
               <select
                 value={form.leagueId}
-                onChange={(e) => setForm((f) => ({ ...f, leagueId: e.target.value }))}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    leagueId: e.target.value,
+                    // ohne Liga keine Playoffs
+                    stage: e.target.value ? f.stage : "Hauptrunde",
+                    playoffRound: e.target.value ? f.playoffRound : "",
+                  }))
+                }
                 className={inputClass}
               >
                 <option value="">– Freundschaftsspiel –</option>
@@ -299,6 +314,50 @@ export default function SpielplanTab({ team }) {
             </div>
           </div>
 
+          {/* Spieltyp (nur mit Liga): Hauptrunde vs. Playoffs + Runde */}
+          {form.leagueId && (
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Spieltyp</label>
+                <select
+                  value={form.stage}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      stage: e.target.value,
+                      playoffRound: e.target.value === "Playoffs" ? f.playoffRound : "",
+                    }))
+                  }
+                  className={inputClass}
+                >
+                  {MATCH_STAGES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {form.stage === "Playoffs" && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Playoff-Runde</label>
+                  <select
+                    required
+                    value={form.playoffRound}
+                    onChange={(e) => setForm((f) => ({ ...f, playoffRound: e.target.value }))}
+                    className={inputClass}
+                  >
+                    <option value="">– Runde wählen –</option>
+                    {PLAYOFF_ROUNDS.map((r) => (
+                      <option key={r} value={r}>
+                        {r}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Ligen werden nicht mehr selbst angelegt – nur aus dem Katalog gewählt. */}
           <div className="text-xs text-gray-500">
             Fehlt deine Liga in der Auswahl?{" "}
@@ -308,7 +367,12 @@ export default function SpielplanTab({ team }) {
           <div className="flex justify-end">
             <button
               type="submit"
-              disabled={saving || !form.opponentId || !form.date}
+              disabled={
+                saving ||
+                !form.opponentId ||
+                !form.date ||
+                (form.stage === "Playoffs" && !form.playoffRound)
+              }
               className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-6 py-2 text-sm font-medium"
             >
               {saving ? "Speichern…" : "Spiel eintragen"}

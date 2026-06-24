@@ -31,6 +31,9 @@ const matchSchema = new mongoose.Schema(
     date: Date,
     location: String,
     leagueId: { type: mongoose.Schema.Types.ObjectId, ref: "leagues" },
+    // Spielabschnitt: "Hauptrunde" (zählt für die Tabelle) | "Playoffs".
+    stage: { type: String, default: "Hauptrunde" },
+    playoffRound: String, // nur bei stage="Playoffs" (z. B. "Halbfinale", "Finale")
     status: {
       type: String,
       enum: ["scheduled", "completed", "cancelled"],
