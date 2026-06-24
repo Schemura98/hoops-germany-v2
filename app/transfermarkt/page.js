@@ -382,7 +382,7 @@ export default function TransfermarktPage() {
                     <div className="mt-3 border-t border-gray-100 pt-3 space-y-1">
                       {p.preferredLeague && (
                         <p className="text-xs text-gray-500">
-                          <span className="font-medium text-gray-700">Wunschliga:</span>{" "}
+                          <span className="font-medium text-gray-700">Spielklasse:</span>{" "}
                           {p.preferredLeague}
                         </p>
                       )}

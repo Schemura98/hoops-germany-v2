@@ -4,6 +4,7 @@ import { useState } from "react";
 import axios from "axios";
 import { FaExchangeAlt } from "react-icons/fa";
 import { getPlayerToken } from "@/lib/clientAuth";
+import { LEAGUE_LEVELS } from "@/lib/constants";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
@@ -77,14 +78,20 @@ export default function TransferControl({ player }) {
         <div className="mt-4 space-y-3">
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">
-              Bevorzugte Liga
+              Bevorzugte Spielklasse
             </label>
-            <input
+            <select
               value={league}
               onChange={(e) => setLeague(e.target.value)}
               className={inputClass}
-              placeholder="z.B. Regionalliga"
-            />
+            >
+              <option value="">– keine Angabe –</option>
+              {LEAGUE_LEVELS.map((lv) => (
+                <option key={lv} value={lv}>
+                  {lv}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">

@@ -7,7 +7,7 @@ import axios from "axios";
 import { FaBasketballBall } from "react-icons/fa";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { getPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
-import { POSITIONS, PLAYER_ROLES, BUNDESLAENDER, positionLabel } from "@/lib/constants";
+import { POSITIONS, PLAYER_ROLES, BUNDESLAENDER, LEAGUE_LEVELS, positionLabel } from "@/lib/constants";
 import { ageFromBirthdate, toDateInputValue } from "@/lib/age";
 import PlayerNav from "@/components/layout/PlayerNav";
 import Footer from "@/components/layout/Footer";
@@ -228,8 +228,15 @@ export default function PlayerEditProfilePage() {
             </Field>
           </div>
 
-          <Field label="Bevorzugte Liga">
-            <input name="preferredLeague" value={form.preferredLeague} onChange={onChange} className={inputClass} />
+          <Field label="Bevorzugte Spielklasse">
+            <select name="preferredLeague" value={form.preferredLeague} onChange={onChange} className={inputClass}>
+              <option value="">– keine Angabe –</option>
+              {LEAGUE_LEVELS.map((lv) => (
+                <option key={lv} value={lv}>
+                  {lv}
+                </option>
+              ))}
+            </select>
           </Field>
 
           <div className="grid grid-cols-2 gap-3">
