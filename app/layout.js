@@ -2,6 +2,7 @@ import "./globals.css";
 import { inter } from "@/lib/fonts";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import FeedbackButton from "@/components/FeedbackButton";
+import TestPhaseBanner from "@/components/TestPhaseBanner";
 
 export const metadata = {
   title: "Hoops Germany – Amateur-Basketball Community",
@@ -17,6 +18,7 @@ export default function RootLayout({ children }) {
         className={`${inter.variable} font-sans antialiased bg-gray-50 text-gray-900`}
       >
         <AnalyticsTracker />
+        <TestPhaseBanner />
         {children}
         <FeedbackButton />
       </body>
