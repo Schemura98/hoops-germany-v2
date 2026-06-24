@@ -376,8 +376,12 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 6. **Saisonende + Meister** ✅ **erledigt** (`b33c65f`, live): `League.finished` + `champion`; Admin
    (`/admin/leagues`) setzt „Saison abgeschlossen" + Meister (Auto-Tabellenführer oder explizit =
    Playoff-Sieger); `/ligen/[id]` zeigt Meister-Banner + Krone, `/ligen`-Liste „Abgeschlossen"-Badge.
+   **Saison-Archiv-Browser** ✅ **erledigt** (`21c35d3`, live): `/api/leagues?season=` (inkl. archivierter
+   Ligen) + `seasons`-Liste; `/ligen` hat einen **Saison-Switcher** („Aktuelle Saison" = aktive, je Saison =
+   alle inkl. Archiv), Meister wird auf abgeschlossenen Karten gezeigt; `updateleague` friert den Meister beim
+   Abschließen ein (Tabellenführer automatisch oder explizit).
    **Noch offen (optional, später):** echte **Playoff-Brackets/Serien** (separat markierte Spiele/Bracket) –
-   aktuell deckt der Champion-Override den Sieger ab. Saison-**Archiv-Browser** (vergangene Saisons ansehen).
+   aktuell deckt der Champion-Override den Sieger ab.
 7. **Liga-Wechsel im Team-Einstellungen-Tab** ✅ **erledigt** (`25c8628`, live): `/api/team/set-league` +
    Picker in `EinstellungenTab` (pflegt `League.teams` beidseitig). Teams können sich nach dem Season-Rollover
    der neuen Saison zuordnen.
