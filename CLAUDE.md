@@ -202,6 +202,14 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
   - **Karriere-Verlauf** vom Stats- in den **Steckbrief-Tab** verschoben (`PlayerProfileView`).
   - **Aktive Seite markiert** in `Navbar` (Desktop + Hamburger) und `PlayerNav` via `usePathname` +
     `aria-current="page"` (orange Border/Highlight, konsistente Borders → kein Layout-Shift).
+- **Tiefer UX-Durchgang (mobil)** – Team-Admin-Panel, Match-Detail, Tryouts, Auth-Flows geprüft;
+  fast alles poliert. Ein echter Fix:
+  - **Verwaiste Tryouts robust** (`tryouts` filtern): Wird ein Team gelöscht (`teamId` null), zeigte die
+    Tryout-Liste/-Detail generisch „Team"/„Tryout". Jetzt blendet `/api/tryouts` verwaiste Einträge aus,
+    `/api/tryouts/[id]` liefert 404 (→ saubere Leer-/„nicht gefunden"-Zustände).
+  - **Offen/bewusst nicht gemacht:** vollständiges Cascade-Cleanup beim Team-Löschen (Matches/Posts/
+    `player.teamId`) – `deleteteam` löscht weiterhin nur das Team; Auto-Scroll zum aktiven Tab im
+    Team-Admin-Tab-Balken (kosmetisch).
 
 > **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
 > Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).

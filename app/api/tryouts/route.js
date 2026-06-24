@@ -14,7 +14,10 @@ async function handler() {
     .sort({ date: 1 });
 
   return ok({
-    tryouts: tryouts.map((t) => ({
+    // Verwaiste Tryouts (Team zwischenzeitlich gelöscht → teamId null) ausblenden.
+    tryouts: tryouts
+      .filter((t) => t.teamId)
+      .map((t) => ({
       _id: t._id,
       team: t.teamId,
       date: t.date,

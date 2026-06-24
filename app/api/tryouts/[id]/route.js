@@ -12,7 +12,8 @@ async function handler(req, ctx) {
 
   await connectDB();
   const t = await Tryout.findById(id).populate("teamId", "teamName slug logo region");
-  if (!t) {
+  // Verwaiste Tryouts (Team gelöscht) gelten als nicht mehr verfügbar.
+  if (!t || !t.teamId) {
     return fail("Tryout nicht gefunden", 404);
   }
 
