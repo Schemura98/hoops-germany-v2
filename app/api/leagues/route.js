@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 async function list() {
   await connectDB();
   const leagues = await League.find({ active: true })
-    .select("name season bundesland level gender ageGroup region official teams")
+    .select("name season bundesland level gender ageGroup region official teams finished")
     .sort({ createdAt: -1 });
 
   return ok({
@@ -26,6 +26,7 @@ async function list() {
       ageGroup: l.ageGroup || "",
       region: l.region || "",
       official: !!l.official,
+      finished: !!l.finished,
       teams: (l.teams || []).map((t) => String(t)),
       teamCount: l.teams?.length || 0,
     })),

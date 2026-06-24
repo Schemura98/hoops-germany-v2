@@ -14,6 +14,11 @@ const leagueSchema = new mongoose.Schema(
     teams: [{ type: mongoose.Schema.Types.ObjectId, ref: "teams" }],
     matches: [{ type: mongoose.Schema.Types.ObjectId, ref: "matches" }],
     active: { type: Boolean, default: true },
+    // Saison-Abschluss: finished = Saison vorbei (Tabelle final, Meister gekürt).
+    // champion optional: explizit gesetzter Meister (z. B. Playoff-Sieger) überschreibt
+    // den Tabellen-Ersten; sonst ist der Meister automatisch Platz 1 der Endtabelle.
+    finished: { type: Boolean, default: false },
+    champion: { type: mongoose.Schema.Types.ObjectId, ref: "teams" },
   },
   { timestamps: true }
 );

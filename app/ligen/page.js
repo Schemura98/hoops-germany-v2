@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaBasketballBall, FaUsers } from "react-icons/fa";
+import { FaBasketballBall, FaUsers, FaTrophy } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
@@ -160,7 +160,14 @@ export default function LigenPage() {
                   href={`/ligen/${l._id}`}
                   className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 transition-all"
                 >
-                  <p className="font-semibold text-gray-900">{l.name}</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-semibold text-gray-900">{l.name}</p>
+                    {l.finished && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-amber-700 bg-amber-100 rounded-full px-2 py-0.5 shrink-0">
+                        <FaTrophy className="text-[9px]" /> Abgeschlossen
+                      </span>
+                    )}
+                  </div>
                   {l.season && <p className="text-xs text-gray-500">{l.season}</p>}
                   {(l.gender || l.ageGroup || l.region) && (
                     <p className="mt-1 text-xs text-gray-500">

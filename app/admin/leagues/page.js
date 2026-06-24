@@ -50,6 +50,8 @@ export default function AdminLeaguesPage() {
         gender: l.gender || "Herren",
         ageGroup: l.ageGroup || "Senioren",
         region: l.region || "",
+        finished: !!l.finished,
+        champion: l.champion || "",
       };
     setEdits(e);
   }, []);
@@ -339,6 +341,36 @@ export default function AdminLeaguesPage() {
                     placeholder="Bezirk/Kreis"
                   />
                 </div>
+              </div>
+
+              {/* Saison-Abschluss + Meister */}
+              <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-gray-50">
+                <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={!!edits[l._id]?.finished}
+                    onChange={(e) => setField(l._id, "finished", e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500"
+                  />
+                  Saison abgeschlossen
+                </label>
+                {edits[l._id]?.finished && (
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs font-medium text-gray-600">Meister</label>
+                    <select
+                      value={edits[l._id]?.champion || ""}
+                      onChange={(e) => setField(l._id, "champion", e.target.value)}
+                      className={`${inputClass}`}
+                    >
+                      <option value="">– Tabellenführer automatisch –</option>
+                      {(l.teams || []).map((t) => (
+                        <option key={t._id} value={t._id}>
+                          {t.teamName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center justify-between gap-2 pt-1 border-t border-gray-50">

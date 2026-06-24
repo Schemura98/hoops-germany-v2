@@ -71,9 +71,38 @@ async function handler(req, ctx) {
         y.wins - x.wins || y.diff - x.diff || y.pointsFor - x.pointsFor
     );
 
+  // Meister: nur wenn Saison abgeschlossen. Expliziter champion (z. B. Playoff-Sieger)
+  // überschreibt den Tabellen-Ersten; sonst Platz 1 der Endtabelle.
+  let champion = null;
+  if (league.finished) {
+    const championId = league.champion
+      ? String(league.champion)
+      : standings[0]?.teamId
+      ? String(standings[0].teamId)
+      : null;
+    if (championId) {
+      const t = league.teams.find((x) => String(x._id) === championId);
+      const fromStandings = standings.find((s) => String(s.teamId) === championId);
+      if (t || fromStandings) {
+        champion = {
+          teamId: championId,
+          teamName: t?.teamName || fromStandings?.teamName || "",
+          slug: t?.slug || fromStandings?.slug || "",
+          logo: t?.logo || fromStandings?.logo || "",
+        };
+      }
+    }
+  }
+
   return ok({
-    league: { _id: league._id, name: league.name, season: league.season },
+    league: {
+      _id: league._id,
+      name: league.name,
+      season: league.season,
+      finished: !!league.finished,
+    },
     standings,
+    champion,
   });
 }
 

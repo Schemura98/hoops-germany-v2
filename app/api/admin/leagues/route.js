@@ -12,7 +12,8 @@ async function handler(req) {
 
   await connectDB();
   const leagues = await League.find({})
-    .select("name season bundesland level gender ageGroup region official teams active")
+    .select("name season bundesland level gender ageGroup region official teams active finished champion")
+    .populate("teams", "teamName")
     .sort({ createdAt: -1 });
 
   return ok({
@@ -27,6 +28,9 @@ async function handler(req) {
       region: l.region || "",
       official: !!l.official,
       active: l.active,
+      finished: !!l.finished,
+      champion: l.champion ? String(l.champion) : "",
+      teams: (l.teams || []).map((t) => ({ _id: String(t._id), teamName: t.teamName })),
       teamCount: l.teams?.length || 0,
     })),
   });

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaUsers, FaBasketballBall } from "react-icons/fa";
+import { FaUsers, FaBasketballBall, FaTrophy, FaCrown } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
@@ -54,7 +54,8 @@ export default function LigaDetailPage({ params }) {
     );
   }
 
-  const { league, standings } = data;
+  const { league, standings, champion } = data;
+  const championId = champion?.teamId ? String(champion.teamId) : null;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -63,6 +64,30 @@ export default function LigaDetailPage({ params }) {
       <PageHeader eyebrow="Liga-Tabelle" title={league.name} subtitle={league.season} />
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+        {league.finished && (
+          <div className="mb-4 flex items-center gap-3 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 px-5 py-4">
+            <FaTrophy className="text-amber-500 text-2xl shrink-0" />
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
+                Saison abgeschlossen
+              </p>
+              {champion ? (
+                <p className="text-sm font-bold text-gray-900">
+                  Meister:{" "}
+                  <Link
+                    href={`/team/team-detail/${champion.slug}`}
+                    className="text-amber-700 hover:underline"
+                  >
+                    {champion.teamName}
+                  </Link>
+                </p>
+              ) : (
+                <p className="text-sm text-gray-600">Kein Meister hinterlegt.</p>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -82,7 +107,13 @@ export default function LigaDetailPage({ params }) {
                     key={s.teamId}
                     className="border-b border-gray-50 last:border-0 hover:bg-gray-50"
                   >
-                    <td className="py-3 pl-4 font-semibold text-gray-400">{i + 1}</td>
+                    <td className="py-3 pl-4 font-semibold text-gray-400">
+                      {championId && String(s.teamId) === championId ? (
+                        <FaCrown className="text-amber-500" title="Meister" />
+                      ) : (
+                        i + 1
+                      )}
+                    </td>
                     <td className="py-3">
                       <Link
                         href={`/team/team-detail/${s.slug}`}

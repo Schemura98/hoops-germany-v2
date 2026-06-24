@@ -26,6 +26,9 @@ async function handler(req) {
   if (body.ageGroup !== undefined) updates.ageGroup = String(body.ageGroup).trim();
   if (body.region !== undefined) updates.region = String(body.region).trim();
   if (body.active !== undefined) updates.active = !!body.active;
+  if (body.finished !== undefined) updates.finished = !!body.finished;
+  if (body.champion !== undefined)
+    updates.champion = body.champion ? body.champion : null; // "" / null → Meister löschen
 
   if (Object.keys(updates).length === 0) {
     return fail("Keine Änderungen übermittelt", 400);
