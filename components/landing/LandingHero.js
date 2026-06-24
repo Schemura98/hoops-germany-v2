@@ -78,13 +78,13 @@ export default function LandingHero() {
               Was möchtest du heute machen?
             </p>
             <div className="space-y-3 max-w-2xl mx-auto">
-              {/* Obere Reihe: 3 Buttons */}
+              {/* Obere Reihe: 3 Buttons – primärer „Zum Feed" mittig */}
               <div className="flex flex-col sm:flex-row justify-center gap-3">
-                <Link href="/home" className={`${HERO_PRIMARY} ${HERO_W}`}>
-                  <FaNewspaper /> Zum Feed
-                </Link>
                 <Link href="/player/player-detail" className={`${HERO_GHOST} ${HERO_W}`}>
                   <FaUser /> Mein Profil
+                </Link>
+                <Link href="/home" className={`${HERO_PRIMARY} ${HERO_W}`}>
+                  <FaNewspaper /> Zum Feed
                 </Link>
                 <Link
                   href={teamSlug ? `/team/team-detail/${teamSlug}` : "/teams"}
