@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaEye, FaUserSecret } from "react-icons/fa";
+import { FaEye, FaUserSecret, FaUsers, FaShieldAlt, FaTrophy, FaExchangeAlt, FaUserPlus } from "react-icons/fa";
 import AdminShell from "@/components/layout/AdminShell";
 import { getAdminToken } from "@/lib/clientAuth";
 
@@ -35,6 +35,32 @@ export default function AdminAnalyticsPage() {
         <p className="text-gray-500">Keine Daten verfügbar.</p>
       ) : (
         <div className="space-y-6">
+          {/* Plattform-Überblick (Reichweite – für Sponsoren-Präsentation) */}
+          {summary.platform && (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+              <h2 className="text-sm font-semibold text-gray-900 mb-1">Plattform-Überblick</h2>
+              <p className="text-xs text-gray-400 mb-4">Reichweite & Aktivität der Plattform</p>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                {[
+                  { icon: FaUsers, label: "Spieler", value: summary.platform.players },
+                  { icon: FaShieldAlt, label: "Teams", value: summary.platform.teams },
+                  { icon: FaTrophy, label: "Offizielle Ligen", value: summary.platform.leagues },
+                  { icon: FaExchangeAlt, label: "Transferbereit", value: summary.platform.transferAvailable },
+                  { icon: FaUserPlus, label: "Suchende Vereine", value: summary.platform.recruitingTeams },
+                ].map((s) => {
+                  const Icon = s.icon;
+                  return (
+                    <div key={s.label} className="rounded-xl bg-gray-50 border border-gray-100 p-3 text-center">
+                      <Icon className="text-brand-500 mx-auto" />
+                      <p className="mt-1.5 text-xl font-bold text-gray-900">{s.value}</p>
+                      <p className="text-[11px] text-gray-500 leading-tight">{s.label}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Kennzahlen */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">

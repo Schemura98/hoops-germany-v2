@@ -31,6 +31,8 @@ const AREAS = [
   "Teams & Kader",
   "Spiele & Ergebnisse",
   "Ligen & Tabellen",
+  "Transfermarkt & Scouting",
+  "Tryouts",
   "Suche & Filter",
   "Newsfeed & Community",
   "Mobile / Handy",

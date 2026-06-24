@@ -1,6 +1,9 @@
 import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import AnalyticsEvent from "@/models/AnalyticsEvent";
+import Player from "@/models/Player";
+import Team from "@/models/Team";
+import League from "@/models/League";
 import { getAdminFromToken } from "@/lib/serverAuth";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
@@ -40,7 +43,18 @@ async function handler(req) {
     },
   };
 
-  const [totalViews, sessions, topPaths, sections, daily] = await Promise.all([
+  const [
+    totalViews,
+    sessions,
+    topPaths,
+    sections,
+    daily,
+    playerCount,
+    teamCount,
+    leagueCount,
+    transferAvailable,
+    recruitingTeams,
+  ] = await Promise.all([
     AnalyticsEvent.countDocuments({ eventType: "pageview" }),
     AnalyticsEvent.distinct("sessionId"),
     AnalyticsEvent.aggregate([
@@ -64,6 +78,11 @@ async function handler(req) {
       },
       { $sort: { _id: 1 } },
     ]),
+    Player.countDocuments({}),
+    Team.countDocuments({}),
+    League.countDocuments({ official: true }),
+    Player.countDocuments({ transferStatus: "verfuegbar" }),
+    Team.countDocuments({ recruiting: true }),
   ]);
 
   return ok({
@@ -73,6 +92,14 @@ async function handler(req) {
       topPaths: topPaths.map((p) => ({ path: p._id, count: p.count })),
       sections: sections.map((s) => ({ section: s._id, count: s.count })),
       daily: daily.map((d) => ({ date: d._id, count: d.count })),
+      // Plattform-Überblick (Reichweite/Aktivität – für Sponsoren & Verbesserungen)
+      platform: {
+        players: playerCount,
+        teams: teamCount,
+        leagues: leagueCount,
+        transferAvailable,
+        recruitingTeams,
+      },
     },
   });
 }

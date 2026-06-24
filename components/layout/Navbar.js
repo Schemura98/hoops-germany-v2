@@ -17,6 +17,7 @@ import {
   FaCalendarAlt,
   FaChevronDown,
   FaRegNewspaper,
+  FaExchangeAlt,
 } from "react-icons/fa";
 import {
   getPlayerToken,
@@ -33,8 +34,10 @@ import Avatar from "@/components/Avatar";
 const PUBLIC_LINKS = [
   { href: "/ligen", label: "Ligen", icon: FaTrophy },
   { href: "/spiele", label: "Spiele", icon: FaCalendarAlt },
-  { href: "/topscorer", label: "Topscorer", icon: FaBasketballBall },
   { href: "/teams", label: "Teams", icon: FaUsers },
+  { href: "/spieler", label: "Spieler", icon: FaUser },
+  { href: "/transfermarkt", label: "Transfermarkt", icon: FaExchangeAlt },
+  { href: "/topscorer", label: "Topscorer", icon: FaBasketballBall },
 ];
 
 export default function Navbar() {
@@ -215,7 +218,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop-Navigation */}
-          <div className="hidden md:flex items-center gap-5">
+          <div className="hidden lg:flex items-center gap-5">
             {PUBLIC_LINKS.map((l) => (
               <Link
                 key={l.href}
@@ -298,7 +301,7 @@ export default function Navbar() {
 
             {/* Desktop: Login-State */}
             {checked && (
-              <div className="hidden md:flex items-center gap-4">
+              <div className="hidden lg:flex items-center gap-4">
                 {isLoggedIn ? (
                   <>
                     {me?.isSuperAdmin && (
@@ -382,7 +385,7 @@ export default function Navbar() {
             {/* Mobile-Toggle */}
             <button
               onClick={() => setMobileOpen((v) => !v)}
-              className="md:hidden text-white hover:text-orange-400 transition-colors"
+              className="lg:hidden text-white hover:text-orange-400 transition-colors"
               aria-label="Menü öffnen"
             >
               {mobileOpen ? <FaTimes className="w-5 h-5" /> : <FaBars className="w-5 h-5" />}
@@ -392,7 +395,7 @@ export default function Navbar() {
 
         {/* Mobile-Menü */}
         {mobileOpen && (
-          <div className="md:hidden bg-slate-900 border-t border-slate-700 divide-y divide-slate-700/60">
+          <div className="lg:hidden bg-slate-900 border-t border-slate-700 divide-y divide-slate-700/60">
             {PUBLIC_LINKS.map((l) => {
               const Icon = l.icon;
               return (
