@@ -380,6 +380,12 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 3. **Monetarisierung (#6)** – BLOCKIERT bis **Gewerbeanmeldung** des Users (Amazon-Affiliate +
    Sponsorfläche; AdSense erst bei genug Traffic + Consent-Banner).
 4. Weitere UX-Feinschliffe nach Tester-Feedback.
+   - **UX-Durchgang über die neuen Liga-Features** (Filter/Saison-Switcher/Archiv/Meister/Team-Liga-Karte/
+     Saison-Stats) – mobil + Konsistenz prüfen.
+   - 🐞 **„Folgen"-System prüfen** (Tester-Fund): Spieler **und** Teams folgen erhöhte den **Follower-Zähler
+     nicht**. Komplettes Follow-System end-to-end checken: `followplayer`/`followteam`,
+     `getfollowlist`/`checkfollowing`, `FollowButton`-Zähler, Follower-Anzeige auf Profilen/Team-Seite,
+     **Newsfeed-Anbindung** (gefolgte Spieler/Teams → „Folge ich"-Feed + Benachrichtigungen).
 5. **Liga-Katalog Jugend** ✅ **weibliche Jugend ergänzt** (`2a95624`, live): U18w/U16w/U14w/U12w (10 Ligen,
    `gender:"Damen"`). Stufen aus der WBV-„Ligenstruktur Jugend" (gilt lt. Doku für weibl./männl./offen),
    gespiegelt zur männlichen 2025/26-Struktur (exakte weibliche 2025/26-Einteilung war nicht auffindbar).
