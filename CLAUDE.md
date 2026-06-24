@@ -227,6 +227,16 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
     zu eng. Logout auf Mobil ins Hamburger-Menü verschoben (eigener „Abmelden"-Eintrag), im Top-Bar
     nur noch ab Desktop (`hidden lg:block`); größere Touch-Flächen (`p-2`) + mehr Abstand;
     `NotificationBell`-Badge bleibt per relativem Wrapper am Icon verankert.
+- **Stats-Logik geprüft + Spielerhistorie mit Einzelspielen**:
+  - **PPG/APG/RPG + Spiele-Counter verifiziert** (Code-Review + Funktionstest): `match-stats/save`
+    speichert `didNotPlay` je Spieler; `careerstats` und `stations` filtern `didNotPlay: {$ne:true}`,
+    `games = $sum 1` nur über gespielte Spiele, Schnitt = Summe/Spiele. DNP zählt korrekt **nicht** hoch
+    (live getestet: 5→4 Spiele, 65→44 Pkt, 13→11 PPG nach DNP-Markierung; danach wiederhergestellt).
+  - **„Spielerstationen" → „Spielerhistorie"** umbenannt; Stationen sind jetzt **ausklappbar**
+    (`PlayerProfileView`): Klick zeigt die Einzelspiele der Saison/Liga mit Gegner, Datum, Endstand,
+    W/L und eigenen PKT·AST·REB (DNP markiert), verlinkt aufs Match. Neue API
+    `app/api/player/station-matches/route.js` (Score via `lib/matchScore.teamScores`);
+    `stations` liefert zusätzlich `teamId`/`leagueId` für die Detail-Abfrage.
 
 > **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
 > Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).

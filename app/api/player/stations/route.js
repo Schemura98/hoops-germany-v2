@@ -47,6 +47,8 @@ async function handler(req) {
   const stations = rows.map((r) => {
     const g = r.games || 0;
     return {
+      teamId: r._id.team ? String(r._id.team) : null,
+      leagueId: r._id.league ? String(r._id.league) : null,
       teamName: r.team?.teamName || "Unbekanntes Team",
       teamSlug: r.team?.slug || null,
       teamLogo: r.team?.logo || null,
