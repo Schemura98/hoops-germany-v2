@@ -89,6 +89,7 @@ export default function TopscorerPage() {
           </p>
         ) : (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-xs text-gray-400 text-left border-b border-gray-100">
@@ -131,6 +132,7 @@ export default function TopscorerPage() {
                 })}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </main>

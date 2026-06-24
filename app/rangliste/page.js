@@ -143,6 +143,7 @@ export default function RanglistePage() {
           </p>
         ) : (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-xs uppercase tracking-wide text-gray-400 border-b border-gray-100">
@@ -208,6 +209,7 @@ export default function RanglistePage() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </main>
