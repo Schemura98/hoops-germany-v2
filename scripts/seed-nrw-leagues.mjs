@@ -113,20 +113,39 @@ const damen = [
 // WBV-zentrale Klassen (Regionalliga/Oberliga/Landesliga); transiente "…Qualifikation"-
 // Pools sind KEINE Saison-Ligen → nicht im Katalog. Jugend-Ligen sind NRW-weite Pools
 // (alle Bezirke gemischt) → region leer. U18/U16 = männlich (gender Herren),
-// U14/U12 = offen (gender Mixed). Name mit Altersklassen-Präfix (offizielle Bezeichnung).
-// ⚠️ Weibliche Jugend (U18w/U16w/U14w/U12w) + U10 noch offen (Einteilung "vorläufig",
-//    PDF-Links der Artikelseiten nicht automatisiert greifbar) → folgt separat.
+// U14/U12 offen = gender Mixed; weibliche Jugend = gender Damen. Name mit
+// Altersklassen-Präfix (offizielle Bezeichnung).
+//
+// Männlich/offen (10): aus der WBV-Einteilung "offene und männliche Jugend" 2025/26.
+// Weiblich (10): Stufen aus der offiziellen WBV-"Ligenstruktur Jugend" (gilt lt. Doku für
+//   weibliche/männliche/offene Jugend) gespiegelt zur männlichen 2025/26-Struktur; Recherche
+//   bestätigt u. a. Regionalliga bei U16w/U14w. ⚠️ Exakte weibliche 2025/26-Einteilung war
+//   nicht auffindbar → Stufen sind struktur-basiert; bei Abweichung per Admin/„Liga melden"
+//   korrigieren. U10 (beide) noch offen.
 const jugend = [
+  // männlich
   { name: "U18 Regionalliga", level: "Regionalliga", gender: "Herren", ageGroup: "U18" },
   { name: "U18 Oberliga", level: "Oberliga", gender: "Herren", ageGroup: "U18" },
   { name: "U16 Regionalliga", level: "Regionalliga", gender: "Herren", ageGroup: "U16" },
   { name: "U16 Oberliga", level: "Oberliga", gender: "Herren", ageGroup: "U16" },
   { name: "U16 Landesliga", level: "Landesliga", gender: "Herren", ageGroup: "U16" },
+  // offen
   { name: "U14 Regionalliga", level: "Regionalliga", gender: "Mixed", ageGroup: "U14" },
   { name: "U14 Oberliga", level: "Oberliga", gender: "Mixed", ageGroup: "U14" },
   { name: "U14 Landesliga", level: "Landesliga", gender: "Mixed", ageGroup: "U14" },
   { name: "U12 Oberliga", level: "Oberliga", gender: "Mixed", ageGroup: "U12" },
   { name: "U12 Landesliga", level: "Landesliga", gender: "Mixed", ageGroup: "U12" },
+  // weiblich
+  { name: "U18 Regionalliga", level: "Regionalliga", gender: "Damen", ageGroup: "U18" },
+  { name: "U18 Oberliga", level: "Oberliga", gender: "Damen", ageGroup: "U18" },
+  { name: "U16 Regionalliga", level: "Regionalliga", gender: "Damen", ageGroup: "U16" },
+  { name: "U16 Oberliga", level: "Oberliga", gender: "Damen", ageGroup: "U16" },
+  { name: "U16 Landesliga", level: "Landesliga", gender: "Damen", ageGroup: "U16" },
+  { name: "U14 Regionalliga", level: "Regionalliga", gender: "Damen", ageGroup: "U14" },
+  { name: "U14 Oberliga", level: "Oberliga", gender: "Damen", ageGroup: "U14" },
+  { name: "U14 Landesliga", level: "Landesliga", gender: "Damen", ageGroup: "U14" },
+  { name: "U12 Oberliga", level: "Oberliga", gender: "Damen", ageGroup: "U12" },
+  { name: "U12 Landesliga", level: "Landesliga", gender: "Damen", ageGroup: "U12" },
 ].map((c) => ({ ...c, region: "" }));
 
 const catalog = [
@@ -214,7 +233,7 @@ for (const [key, names] of groups) {
 }
 
 console.log(
-  `✅ Fertig: ${created} angelegt, ${updated} aktualisiert, ${removed} leere Alt-Einträge entfernt (${catalog.length} Katalog-Ligen: ${herren.length} Herren-Senioren + ${damen.length} Damen-Senioren + ${jugend.length} Jugend m/o, Saison ${SEASON}).`
+  `✅ Fertig: ${created} angelegt, ${updated} aktualisiert, ${removed} leere Alt-Einträge entfernt (${catalog.length} Katalog-Ligen: ${herren.length} Herren-Senioren + ${damen.length} Damen-Senioren + ${jugend.length} Jugend (m/o/w), Saison ${SEASON}).`
 );
 await mongoose.disconnect();
 process.exit(0);
