@@ -126,15 +126,25 @@ Cluster `hoops.tbhsg.mongodb.net` hat ZWEI getrennte DBs:
   (8 HTML-Dateien + index, Logo eingebettet) – via Builder neu generierbar.
 - **Doku-Konvention + Skill `log-progress`** angelegt (Fortschritt immer hier in Abschnitt 0 festhalten).
 
-🔜 **Noch offen (Pre-Live-Roadmap):**
-1. **Hostinger-Deployment** (IN ARBEIT): **Production-Build lokal grün** ✓ (119 Seiten, 26.06.).
-   **Entscheidung (User):** v2 geht **direkt auf `hoopsgermany.de`** (kein Subdomain-Test-Env). Sicherheit
-   per **Blue-Green**: alte Seite (`/root/sports/`, DB `test`) bleibt unberührt + gesichert, v2 in neuem
-   Verzeichnis `/root/hoops-v2/` auf eigenem **Port 3001** + eigener DB **`hoops_prod`** (Atlas, mit
-   Demo-Daten geseedet); Cutover = Nginx-Switch, Rollback = Nginx zurück. **Runbook: `DEPLOYMENT.md`**
-   (Phasen 0–7 + Rollback). Claude hat KEINEN SSH-Zugang → User führt aus, Claude begleitet.
-   ⚠️ MONGODB_URI muss auf `/hoops_prod` zeigen (NIE `test` / Dev-DB `hoopsgermany`). Offen: User braucht
-   echte Keys (SMTP_PASS, Google) + VPS-Zugang.
+#### 🟢 LIVE seit 24.06.2026 – v2 läuft auf https://hoopsgermany.de
+- **Deployment durchgeführt** (Claude per SSH-Key auf den Hostinger-VPS `92.113.25.249`, Ubuntu 24.04):
+  v2 in `/root/hoops-v2/` (Branch `redesign`), PM2-Prozess **`hoops-v2` auf Port 3001**, DB **`hoops_prod`**
+  (Atlas, demo-geseedet). **Alte Seite läuft unberührt weiter** (PM2 `sports`, Port 3000, DB `test`) →
+  **Rollback = Nginx zurück auf 3000**. Nginx-Config `/etc/nginx/sites-available/default` (proxy_pass 3001;
+  Backup `.bak-pre-cutover`). Code-Backup `/root/backup-sports-2026-06-24.tar.gz`.
+- **.env auf VPS** aus alter `/root/sports/.env` übernommen (Mongo-PW/SMTP_PASS/Google/SECRET_KEY/CRON_SECRET),
+  DB-Name → `hoops_prod`, `NEXTAUTH_URL=https://hoopsgermany.de`. SMTP (smtp.hostinger.com:465) + Google sind gesetzt.
+- **Updates:** `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2`. VPS-Repo-Zugang via
+  Deploy-Key (`~/.ssh/github_hoops`, SSH-Alias `github-hoops`). Claude-SSH-Key: `~/.ssh/hoops_vps` (lokal).
+- **Prod-Bug gefixt** (`7a61cfa`): `models/registerModels.js` registriert alle Modelle bei `connectDB`
+  → behebt `MissingSchemaError` beim populate im Production-Build (Dev-Server zeigte ihn nicht!).
+  **Lehre: vor Deploy immer `npm start` (Production-Runtime) testen, nicht nur `next dev`.**
+
+🔜 **Noch offen (nach Go-Live):**
+0. **⚠️ SICHERHEIT (dringend):** Demo-Seed legte schwache, bekannte Logins an (`/admin`: admin/geheim1234,
+   patrick/jonatan = test123; Super-Admin-Spieler p.schemura@/jonatanbaenavides@ = test123). Auf der
+   öffentlichen Seite ändern! (Super-Admins via „Passwort vergessen", SMTP läuft jetzt.)
+1. **Live-Tests:** Willkommens-/Reset-/Mismatch-Mail (echtes SMTP), Google-Login, Registrierung, Flows.
 2. **SMTP + Google-Keys** (User liefert `SMTP_PASS`, `GOOGLE_CLIENT_ID/SECRET`) → echter Mailversand + Google-Login.
 3. **Monetarisierung (#6)** – BLOCKIERT bis **Gewerbeanmeldung** des Users (Amazon-Affiliate +
    Sponsorfläche; AdSense erst bei genug Traffic + Consent-Banner).
