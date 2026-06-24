@@ -3,16 +3,32 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaSearch, FaBasketballBall, FaExchangeAlt } from "react-icons/fa";
+import { FaSearch, FaBasketballBall, FaMapMarkerAlt } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
+import CityRadiusFilter from "@/components/CityRadiusFilter";
+import {
+  BUNDESLAENDER,
+  POSITIONS,
+  PLAYER_ROLES,
+  positionLabel,
+} from "@/lib/constants";
+import { loadCities, cityCoords, haversineKm } from "@/lib/geo";
 
 export default function TransfermarktPage() {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [query, setQuery] = useState("");
+  const [position, setPosition] = useState(""); // "" = Alle
+  const [land, setLand] = useState("");
+  const [geo, setGeo] = useState({ center: null, radiusKm: 50 });
+  const [cityMap, setCityMap] = useState(null);
+
+  useEffect(() => {
+    if (geo.center && !cityMap) loadCities().then(({ map }) => setCityMap(map));
+  }, [geo.center, cityMap]);
 
   useEffect(() => {
     let active = true;
@@ -33,14 +49,32 @@ export default function TransfermarktPage() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return players;
-    return players.filter(
-      (p) =>
+    return players.filter((p) => {
+      const matchesQuery =
+        !q ||
         `${p.firstName} ${p.lastName}`.toLowerCase().includes(q) ||
-        p.position?.toLowerCase().includes(q) ||
-        p.preferredLeague?.toLowerCase().includes(q)
-    );
-  }, [players, query]);
+        positionLabel(p.position).toLowerCase().includes(q) ||
+        p.preferredLeague?.toLowerCase().includes(q) ||
+        p.hometown?.toLowerCase().includes(q);
+      const matchesPosition = !position || positionLabel(p.position) === position;
+      const matchesLand = !land || p.bundesland === land;
+      let matchesGeo = true;
+      if (geo.center) {
+        if (!cityMap) matchesGeo = true;
+        else {
+          const coords = cityCoords(cityMap, p.hometown);
+          matchesGeo =
+            !!coords &&
+            haversineKm(geo.center.lat, geo.center.lng, coords.lat, coords.lng) <=
+              geo.radiusKm;
+        }
+      }
+      return matchesQuery && matchesPosition && matchesLand && matchesGeo;
+    });
+  }, [players, query, position, land, geo, cityMap]);
+
+  const selectCls =
+    "rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-700 bg-white shadow-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -49,21 +83,64 @@ export default function TransfermarktPage() {
       <PageHeader
         eyebrow="Wechselbörse"
         title="Transfermarkt"
-        subtitle="Spieler, die einen neuen Verein suchen."
+        subtitle="Spieler, Coaches & Funktionäre, die einen neuen Verein suchen."
       />
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div className="relative">
+        {/* Filter */}
+        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mb-6">
+          <div className="relative flex-1 min-w-[200px]">
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Name, Position oder Liga…"
-              className="w-full sm:w-72 rounded-lg border border-gray-300 pl-9 pr-4 py-2.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              placeholder="Name, Rolle, Liga oder Stadt…"
+              className="w-full rounded-lg border border-gray-300 pl-9 pr-4 py-2.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
           </div>
+          <select
+            value={position}
+            onChange={(e) => setPosition(e.target.value)}
+            className={selectCls}
+            aria-label="Position oder Rolle"
+          >
+            <option value="">Alle Positionen &amp; Rollen</option>
+            <optgroup label="Spielposition">
+              {POSITIONS.map((pos) => (
+                <option key={pos} value={pos}>
+                  {pos}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Funktion">
+              {PLAYER_ROLES.map((pos) => (
+                <option key={pos} value={pos}>
+                  {pos}
+                </option>
+              ))}
+            </optgroup>
+          </select>
+          <select
+            value={land}
+            onChange={(e) => setLand(e.target.value)}
+            className={selectCls}
+            aria-label="Bundesland"
+          >
+            <option value="">Alle Bundesländer</option>
+            {BUNDESLAENDER.map((b) => (
+              <option key={b} value={b}>
+                {b}
+              </option>
+            ))}
+          </select>
+          <CityRadiusFilter value={geo} onChange={setGeo} />
         </div>
+
+        {!loading && !error && (
+          <p className="text-xs text-gray-400 font-medium mb-4 uppercase tracking-wide">
+            {filtered.length} {filtered.length === 1 ? "Eintrag" : "Einträge"}
+          </p>
+        )}
 
         {loading ? (
           <div className="flex justify-center py-16">
@@ -75,9 +152,9 @@ export default function TransfermarktPage() {
           </p>
         ) : filtered.length === 0 ? (
           <p className="text-center text-gray-500 py-16">
-            {query
-              ? "Keine passenden Spieler gefunden."
-              : "Aktuell ist kein Spieler als transferbereit gelistet."}
+            {query || position || land || geo.center
+              ? "Keine passenden Einträge gefunden."
+              : "Aktuell ist niemand als transferbereit gelistet."}
           </p>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
@@ -108,9 +185,15 @@ export default function TransfermarktPage() {
                         {p.firstName} {p.lastName}
                       </p>
                       <p className="text-xs text-gray-500 truncate">
-                        {p.position || "Position offen"}
+                        {positionLabel(p.position) || "Position offen"}
                         {p.teamId?.teamName ? ` · aktuell: ${p.teamId.teamName}` : ""}
                       </p>
+                      {(p.hometown || p.bundesland) && (
+                        <p className="text-xs text-gray-400 truncate flex items-center gap-1 mt-0.5">
+                          <FaMapMarkerAlt className="flex-shrink-0 text-gray-300" />
+                          {[p.hometown, p.bundesland].filter(Boolean).join(" · ")}
+                        </p>
+                      )}
                     </div>
                   </div>
 
