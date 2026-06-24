@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { FaPlus, FaTrash, FaMapMarkerAlt, FaBasketballBall } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
+import { BUNDESLAENDER } from "@/lib/constants";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
@@ -41,6 +42,10 @@ export default function SpielplanTab({ team }) {
   const [form, setForm] = useState({ opponentId: "", date: "", location: "", leagueId: "" });
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState(null);
+
+  // Gegner-Filter (damit das Dropdown bei vielen Teams übersichtlich bleibt)
+  const [filterBundesland, setFilterBundesland] = useState("");
+  const [filterLeagueId, setFilterLeagueId] = useState("");
 
   // Liga erstellen
   const [newLeague, setNewLeague] = useState({ name: "", season: "" });
@@ -141,6 +146,33 @@ export default function SpielplanTab({ team }) {
 
   const opponents = teams.filter((t) => String(t._id) !== String(team?._id));
 
+  // Nur tatsächlich vertretene Bundesländer anbieten (in kanonischer Reihenfolge).
+  const availableBL = useMemo(() => {
+    const present = new Set(opponents.map((t) => t.bundesland).filter(Boolean));
+    return BUNDESLAENDER.filter((b) => present.has(b));
+  }, [opponents]);
+
+  const filteredOpponents = useMemo(() => {
+    let list = opponents;
+    if (filterBundesland) list = list.filter((t) => t.bundesland === filterBundesland);
+    if (filterLeagueId) {
+      const lg = leagues.find((l) => String(l._id) === String(filterLeagueId));
+      const ids = new Set((lg?.teams || []).map(String));
+      list = list.filter((t) => ids.has(String(t._id)));
+    }
+    return list;
+  }, [opponents, leagues, filterBundesland, filterLeagueId]);
+
+  // Ausgewählten Gegner zurücksetzen, falls er aus dem Filter fällt.
+  useEffect(() => {
+    if (
+      form.opponentId &&
+      !filteredOpponents.some((t) => String(t._id) === String(form.opponentId))
+    ) {
+      setForm((f) => ({ ...f, opponentId: "" }));
+    }
+  }, [filteredOpponents, form.opponentId]);
+
   if (loading) {
     return (
       <div className="flex justify-center py-12">
@@ -180,9 +212,48 @@ export default function SpielplanTab({ team }) {
           onSubmit={addMatch}
           className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3"
         >
+          {/* Gegner eingrenzen (Bundesland/Liga) – hält das Dropdown übersichtlich */}
+          {opponents.length > 0 && (availableBL.length > 0 || leagues.length > 0) && (
+            <div className="rounded-lg bg-gray-50 border border-gray-100 p-3">
+              <p className="text-xs font-medium text-gray-600 mb-2">Gegner eingrenzen (optional)</p>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <select
+                  value={filterBundesland}
+                  onChange={(e) => setFilterBundesland(e.target.value)}
+                  className={inputClass}
+                  aria-label="Nach Bundesland filtern"
+                >
+                  <option value="">Alle Bundesländer</option>
+                  {availableBL.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={filterLeagueId}
+                  onChange={(e) => setFilterLeagueId(e.target.value)}
+                  className={inputClass}
+                  aria-label="Nach Liga filtern"
+                >
+                  <option value="">Alle Ligen</option>
+                  {leagues.map((l) => (
+                    <option key={l._id} value={l._id}>
+                      {l.name}
+                      {l.season ? ` (${l.season})` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
           <div className="grid sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Gegner</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Gegner{" "}
+                <span className="text-gray-400 font-normal">· {filteredOpponents.length}</span>
+              </label>
               <select
                 required
                 value={form.opponentId}
@@ -190,17 +261,22 @@ export default function SpielplanTab({ team }) {
                 className={inputClass}
               >
                 <option value="">– Team wählen –</option>
-                {opponents.map((t) => (
+                {filteredOpponents.map((t) => (
                   <option key={t._id} value={t._id}>
                     {t.teamName}
+                    {t.region ? ` · ${t.region}` : ""}
                   </option>
                 ))}
               </select>
-              {opponents.length === 0 && (
+              {opponents.length === 0 ? (
                 <p className="mt-1 text-xs text-gray-400">
                   Noch keine anderen Teams registriert.
                 </p>
-              )}
+              ) : filteredOpponents.length === 0 ? (
+                <p className="mt-1 text-xs text-gray-400">
+                  Keine Teams für diesen Filter – Auswahl anpassen.
+                </p>
+              ) : null}
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Datum & Uhrzeit</label>

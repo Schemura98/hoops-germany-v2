@@ -20,6 +20,7 @@ async function list() {
       name: l.name,
       season: l.season,
       bundesland: l.bundesland || "",
+      teams: (l.teams || []).map((t) => String(t)),
       teamCount: l.teams?.length || 0,
     })),
   });
