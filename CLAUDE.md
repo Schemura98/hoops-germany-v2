@@ -373,12 +373,14 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
    Einteilung noch „4. vorläufig"). **Wenn der PDF-Link/die Datei vorliegt:** im selben Muster wie Jugend m/o
    in `scripts/seed-nrw-leagues.mjs` ergänzen (`gender:"Damen"` bzw. Mixed für U10, reale Stufen je
    Altersklasse – nicht raten) → Dev + Prod seeden. (optional) NRW-**Kreisligen** (pro Basketballkreis, niedrige Prio).
-6. **Saisonende + Playoffs** (noch KEINE Logik vorhanden – Saison „endet" im Code nie, kein Meister/Archiv,
-   Spiele haben kein Playoff-Konzept). Geplant: (a) Liga auf „abgeschlossen" setzen → Endtabelle einfrieren +
-   **Meister-Badge** Platz 1; (b) Playoffs/Aufstiegsrunden als separat markierte Spiele oder simples Bracket
-   (eigenes Feature, später). Hängt mit dem Season-Rollover (s. u.) zusammen.
-7. **Liga-Auswahl im Team-Einstellungen-Tab** nachträglich änderbar machen – nötig, damit Teams sich nach
-   dem Season-Rollover für die neue Saison neu zuordnen können (Auf-/Abstieg).
+6. **Saisonende + Meister** ✅ **erledigt** (`b33c65f`, live): `League.finished` + `champion`; Admin
+   (`/admin/leagues`) setzt „Saison abgeschlossen" + Meister (Auto-Tabellenführer oder explizit =
+   Playoff-Sieger); `/ligen/[id]` zeigt Meister-Banner + Krone, `/ligen`-Liste „Abgeschlossen"-Badge.
+   **Noch offen (optional, später):** echte **Playoff-Brackets/Serien** (separat markierte Spiele/Bracket) –
+   aktuell deckt der Champion-Override den Sieger ab. Saison-**Archiv-Browser** (vergangene Saisons ansehen).
+7. **Liga-Wechsel im Team-Einstellungen-Tab** ✅ **erledigt** (`25c8628`, live): `/api/team/set-league` +
+   Picker in `EinstellungenTab` (pflegt `League.teams` beidseitig). Teams können sich nach dem Season-Rollover
+   der neuen Saison zuordnen.
 
 ### Bekannte Einschränkungen / offen
 - **Lokale Dev-Umgebung:** SMTP/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS
