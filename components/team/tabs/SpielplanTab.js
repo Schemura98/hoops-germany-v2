@@ -123,6 +123,24 @@ export default function SpielplanTab({ team }) {
     }
   }
 
+  // Bereits vorhandene aktive Ligen im gewählten Bundesland – damit nicht aus
+  // Versehen eine Dublette mit leicht abweichendem Namen angelegt wird.
+  const regionLeagues = useMemo(
+    () =>
+      newLeague.bundesland
+        ? leagues.filter((l) => l.bundesland === newLeague.bundesland)
+        : [],
+    [leagues, newLeague.bundesland]
+  );
+
+  // Eine vorgeschlagene bestehende Liga übernehmen, statt eine neue anzulegen.
+  function pickExistingLeague(l) {
+    setForm((f) => ({ ...f, leagueId: l._id }));
+    setShowLeagueForm(false);
+    setNewLeague({ name: "", season: "", bundesland: "" });
+    setMsg({ type: "ok", text: `Liga „${l.name}" ausgewählt – du musst sie nicht neu anlegen.` });
+  }
+
   async function removeMatch(matchId) {
     if (!window.confirm("Dieses Spiel wirklich entfernen?")) return;
     setBusyId(matchId);
@@ -323,48 +341,85 @@ export default function SpielplanTab({ team }) {
 
           {/* Liga erstellen */}
           {showLeagueForm ? (
-            <div className="rounded-lg bg-gray-50 border border-gray-100 p-3 flex flex-wrap items-end gap-2">
-              <div className="flex-1 min-w-[140px]">
-                <label className="block text-xs font-medium text-gray-600 mb-1">Liga-Name</label>
-                <input
-                  value={newLeague.name}
-                  onChange={(e) => setNewLeague((l) => ({ ...l, name: e.target.value }))}
-                  className={inputClass}
-                  placeholder="z.B. Stadtliga"
-                />
-              </div>
-              <div className="w-28">
-                <label className="block text-xs font-medium text-gray-600 mb-1">Saison</label>
-                <input
-                  value={newLeague.season}
-                  onChange={(e) => setNewLeague((l) => ({ ...l, season: e.target.value }))}
-                  className={inputClass}
-                  placeholder="2025/26"
-                />
-              </div>
-              <div className="w-40">
-                <label className="block text-xs font-medium text-gray-600 mb-1">Bundesland</label>
-                <select
-                  value={newLeague.bundesland}
-                  onChange={(e) => setNewLeague((l) => ({ ...l, bundesland: e.target.value }))}
-                  className={inputClass}
+            <div className="rounded-lg bg-gray-50 border border-gray-100 p-3 space-y-3">
+              <p className="text-xs text-gray-500">
+                Wähle zuerst das Bundesland – falls es deine Liga dort schon gibt, übernimm sie,
+                statt sie neu anzulegen.
+              </p>
+              <div className="flex flex-wrap items-end gap-2">
+                <div className="w-40">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Bundesland</label>
+                  <select
+                    value={newLeague.bundesland}
+                    onChange={(e) => setNewLeague((l) => ({ ...l, bundesland: e.target.value }))}
+                    className={inputClass}
+                  >
+                    <option value="">– wählen –</option>
+                    {BUNDESLAENDER.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex-1 min-w-[140px]">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Liga-Name</label>
+                  <input
+                    value={newLeague.name}
+                    onChange={(e) => setNewLeague((l) => ({ ...l, name: e.target.value }))}
+                    className={inputClass}
+                    placeholder="z.B. Stadtliga"
+                  />
+                </div>
+                <div className="w-28">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Saison</label>
+                  <input
+                    value={newLeague.season}
+                    onChange={(e) => setNewLeague((l) => ({ ...l, season: e.target.value }))}
+                    className={inputClass}
+                    placeholder="2025/26"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={createLeague}
+                  disabled={creatingLeague || !newLeague.name.trim()}
+                  className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2 text-sm font-medium h-[38px]"
                 >
-                  <option value="">– wählen –</option>
-                  {BUNDESLAENDER.map((b) => (
-                    <option key={b} value={b}>
-                      {b}
-                    </option>
-                  ))}
-                </select>
+                  {creatingLeague ? "…" : "Erstellen"}
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={createLeague}
-                disabled={creatingLeague || !newLeague.name.trim()}
-                className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2 text-sm font-medium h-[38px]"
-              >
-                {creatingLeague ? "…" : "Erstellen"}
-              </button>
+
+              {newLeague.bundesland && (
+                <div className="rounded-lg bg-amber-50 border border-amber-200 p-3">
+                  {regionLeagues.length === 0 ? (
+                    <p className="text-xs text-amber-800">
+                      In {newLeague.bundesland} gibt es noch keine Liga – du kannst eine neue anlegen.
+                    </p>
+                  ) : (
+                    <>
+                      <p className="text-xs text-amber-800 mb-2">
+                        In {newLeague.bundesland} gibt es bereits{" "}
+                        {regionLeagues.length === 1 ? "diese Liga" : "diese Ligen"} – bitte übernimm
+                        eine davon, falls es dieselbe ist:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {regionLeagues.map((l) => (
+                          <button
+                            key={l._id}
+                            type="button"
+                            onClick={() => pickExistingLeague(l)}
+                            className="inline-flex items-center gap-1.5 rounded-full bg-white border border-amber-300 hover:border-brand-400 hover:bg-brand-50 px-3 py-1.5 text-xs font-medium text-gray-800"
+                          >
+                            {l.name}
+                            {l.season ? ` · ${l.season}` : ""}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           ) : (
             <button

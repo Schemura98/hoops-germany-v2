@@ -274,6 +274,11 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
   - **Admin kann Ligen erstellen**: neuer Endpunkt `/api/admin/createleague` (Super-Admin, startet ohne
     Teams) + „Neue Liga erstellen"-Formular auf `/admin/leagues` (Name/Saison/Bundesland) inkl.
     Bundesland-Bearbeitung je Zeile. Funktional verifiziert (Dublette 409, Bundesland gespeichert) + Dev-DB bereinigt.
+  - **Region-Vorschläge gegen „weiche" Dubletten** (Tippfehler/abweichender Name): Im Team-Liga-Formular
+    (`SpielplanTab`) erscheinen nach **Bundesland-Auswahl** die bereits vorhandenen **aktiven Ligen der
+    Region** als anklickbare Chips („bitte übernimm eine davon, falls es dieselbe ist") – Klick wählt die
+    bestehende Liga fürs Spiel und schließt die Anlage. Keine Liga in der Region → Hinweis „du kannst eine
+    neue anlegen". Rein clientseitig (`/api/leagues` liefert `bundesland` schon mit). Verifiziert end-to-end.
 
 > **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
 > Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).
