@@ -21,6 +21,10 @@ async function handler(req) {
   }
   if (body.season !== undefined) updates.season = String(body.season).trim();
   if (body.bundesland !== undefined) updates.bundesland = String(body.bundesland).trim();
+  if (body.level !== undefined) updates.level = String(body.level).trim();
+  if (body.gender !== undefined) updates.gender = String(body.gender).trim();
+  if (body.ageGroup !== undefined) updates.ageGroup = String(body.ageGroup).trim();
+  if (body.region !== undefined) updates.region = String(body.region).trim();
   if (body.active !== undefined) updates.active = !!body.active;
 
   if (Object.keys(updates).length === 0) {

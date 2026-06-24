@@ -6,12 +6,25 @@ import axios from "axios";
 import { FaTrash, FaUsers, FaPlus } from "react-icons/fa";
 import AdminShell from "@/components/layout/AdminShell";
 import { getAdminToken } from "@/lib/clientAuth";
-import { BUNDESLAENDER } from "@/lib/constants";
+import {
+  BUNDESLAENDER,
+  LEAGUE_LEVELS,
+  LEAGUE_GENDERS,
+  LEAGUE_AGE_GROUPS,
+} from "@/lib/constants";
 
 const inputClass =
   "rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
 
-const EMPTY_NEW = { name: "", season: "", bundesland: "" };
+const EMPTY_NEW = {
+  name: "",
+  season: "",
+  bundesland: "Nordrhein-Westfalen",
+  level: "",
+  gender: "Herren",
+  ageGroup: "Senioren",
+  region: "",
+};
 
 export default function AdminLeaguesPage() {
   const [leagues, setLeagues] = useState([]);
@@ -29,7 +42,15 @@ export default function AdminLeaguesPage() {
     setLeagues(list);
     const e = {};
     for (const l of list)
-      e[l._id] = { name: l.name, season: l.season || "", bundesland: l.bundesland || "" };
+      e[l._id] = {
+        name: l.name,
+        season: l.season || "",
+        bundesland: l.bundesland || "",
+        level: l.level || "",
+        gender: l.gender || "Herren",
+        ageGroup: l.ageGroup || "Senioren",
+        region: l.region || "",
+      };
     setEdits(e);
   }, []);
 
@@ -123,17 +144,32 @@ export default function AdminLeaguesPage() {
       {/* Neue Liga erstellen */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-5">
         <h2 className="text-sm font-semibold text-gray-900 mb-3">Neue Liga erstellen</h2>
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="flex-1 min-w-[160px]">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="col-span-2">
             <label className="block text-xs font-medium text-gray-600 mb-1">Name</label>
             <input
               value={newLeague.name}
               onChange={(e) => setNewLeague((l) => ({ ...l, name: e.target.value }))}
               className={`${inputClass} w-full`}
-              placeholder="z.B. Regionalliga Süd"
+              placeholder="z.B. Oberliga 1"
             />
           </div>
-          <div className="w-32">
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Stufe</label>
+            <select
+              value={newLeague.level}
+              onChange={(e) => setNewLeague((l) => ({ ...l, level: e.target.value }))}
+              className={`${inputClass} w-full`}
+            >
+              <option value="">– wählen –</option>
+              {LEAGUE_LEVELS.map((x) => (
+                <option key={x} value={x}>
+                  {x}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Saison</label>
             <input
               value={newLeague.season}
@@ -142,7 +178,35 @@ export default function AdminLeaguesPage() {
               placeholder="2025/26"
             />
           </div>
-          <div className="w-48">
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Geschlecht</label>
+            <select
+              value={newLeague.gender}
+              onChange={(e) => setNewLeague((l) => ({ ...l, gender: e.target.value }))}
+              className={`${inputClass} w-full`}
+            >
+              {LEAGUE_GENDERS.map((x) => (
+                <option key={x} value={x}>
+                  {x}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Altersklasse</label>
+            <select
+              value={newLeague.ageGroup}
+              onChange={(e) => setNewLeague((l) => ({ ...l, ageGroup: e.target.value }))}
+              className={`${inputClass} w-full`}
+            >
+              {LEAGUE_AGE_GROUPS.map((x) => (
+                <option key={x} value={x}>
+                  {x}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Bundesland</label>
             <select
               value={newLeague.bundesland}
@@ -157,12 +221,25 @@ export default function AdminLeaguesPage() {
               ))}
             </select>
           </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Region <span className="text-gray-400">(Bezirk/Kreis)</span>
+            </label>
+            <input
+              value={newLeague.region}
+              onChange={(e) => setNewLeague((l) => ({ ...l, region: e.target.value }))}
+              className={`${inputClass} w-full`}
+              placeholder="z.B. Bezirk Köln/Aachen"
+            />
+          </div>
+        </div>
+        <div className="mt-3">
           <button
             onClick={createLeague}
             disabled={creating || !newLeague.name.trim()}
             className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2 text-sm font-medium"
           >
-            <FaPlus className="text-xs" /> {creating ? "…" : "Erstellen"}
+            <FaPlus className="text-xs" /> {creating ? "…" : "Liga erstellen"}
           </button>
         </div>
       </div>
@@ -176,72 +253,137 @@ export default function AdminLeaguesPage() {
           {leagues.map((l) => (
             <div
               key={l._id}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-wrap items-end gap-3"
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3"
             >
-              <div className="flex-1 min-w-[160px]">
-                <label className="block text-xs font-medium text-gray-600 mb-1">Name</label>
-                <input
-                  value={edits[l._id]?.name || ""}
-                  onChange={(e) => setField(l._id, "name", e.target.value)}
-                  className={`${inputClass} w-full`}
-                />
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="col-span-2">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Name</label>
+                  <input
+                    value={edits[l._id]?.name || ""}
+                    onChange={(e) => setField(l._id, "name", e.target.value)}
+                    className={`${inputClass} w-full`}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Stufe</label>
+                  <select
+                    value={edits[l._id]?.level || ""}
+                    onChange={(e) => setField(l._id, "level", e.target.value)}
+                    className={`${inputClass} w-full`}
+                  >
+                    <option value="">– keine –</option>
+                    {LEAGUE_LEVELS.map((x) => (
+                      <option key={x} value={x}>
+                        {x}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Saison</label>
+                  <input
+                    value={edits[l._id]?.season || ""}
+                    onChange={(e) => setField(l._id, "season", e.target.value)}
+                    className={`${inputClass} w-full`}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Geschlecht</label>
+                  <select
+                    value={edits[l._id]?.gender || "Herren"}
+                    onChange={(e) => setField(l._id, "gender", e.target.value)}
+                    className={`${inputClass} w-full`}
+                  >
+                    {LEAGUE_GENDERS.map((x) => (
+                      <option key={x} value={x}>
+                        {x}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Altersklasse</label>
+                  <select
+                    value={edits[l._id]?.ageGroup || "Senioren"}
+                    onChange={(e) => setField(l._id, "ageGroup", e.target.value)}
+                    className={`${inputClass} w-full`}
+                  >
+                    {LEAGUE_AGE_GROUPS.map((x) => (
+                      <option key={x} value={x}>
+                        {x}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Bundesland</label>
+                  <select
+                    value={edits[l._id]?.bundesland || ""}
+                    onChange={(e) => setField(l._id, "bundesland", e.target.value)}
+                    className={`${inputClass} w-full`}
+                  >
+                    <option value="">– keins –</option>
+                    {BUNDESLAENDER.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Region</label>
+                  <input
+                    value={edits[l._id]?.region || ""}
+                    onChange={(e) => setField(l._id, "region", e.target.value)}
+                    className={`${inputClass} w-full`}
+                    placeholder="Bezirk/Kreis"
+                  />
+                </div>
               </div>
-              <div className="w-28">
-                <label className="block text-xs font-medium text-gray-600 mb-1">Saison</label>
-                <input
-                  value={edits[l._id]?.season || ""}
-                  onChange={(e) => setField(l._id, "season", e.target.value)}
-                  className={`${inputClass} w-full`}
-                />
-              </div>
-              <div className="w-44">
-                <label className="block text-xs font-medium text-gray-600 mb-1">Bundesland</label>
-                <select
-                  value={edits[l._id]?.bundesland || ""}
-                  onChange={(e) => setField(l._id, "bundesland", e.target.value)}
-                  className={`${inputClass} w-full`}
-                >
-                  <option value="">– keins –</option>
-                  {BUNDESLAENDER.map((b) => (
-                    <option key={b} value={b}>
-                      {b}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <Link
-                href={`/ligen/${l._id}`}
-                className="text-xs text-gray-500 hover:text-brand-600 inline-flex items-center gap-1 pb-2"
-              >
-                <FaUsers /> {l.teamCount}
-              </Link>
 
-              <button
-                onClick={() => toggleActive(l)}
-                disabled={busyId === l._id}
-                className={`text-xs rounded-lg px-3 py-2 font-medium disabled:opacity-60 ${
-                  l.active
-                    ? "bg-green-100 text-green-700 hover:bg-green-200"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                {l.active ? "Aktiv" : "Inaktiv"}
-              </button>
-              <button
-                onClick={() => save(l._id)}
-                disabled={busyId === l._id}
-                className="text-xs bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2 font-medium"
-              >
-                Speichern
-              </button>
-              <button
-                onClick={() => remove(l._id, l.name)}
-                disabled={busyId === l._id}
-                className="text-gray-400 hover:text-red-600 disabled:opacity-60 p-2"
-                title="Löschen"
-              >
-                <FaTrash />
-              </button>
+              <div className="flex items-center justify-between gap-2 pt-1 border-t border-gray-50">
+                <div className="flex items-center gap-3">
+                  <Link
+                    href={`/ligen/${l._id}`}
+                    className="text-xs text-gray-500 hover:text-brand-600 inline-flex items-center gap-1"
+                  >
+                    <FaUsers /> {l.teamCount} Teams
+                  </Link>
+                  {l.official && (
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-brand-600 bg-brand-50 rounded-full px-2 py-0.5">
+                      Offiziell
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => toggleActive(l)}
+                    disabled={busyId === l._id}
+                    className={`text-xs rounded-lg px-3 py-2 font-medium disabled:opacity-60 ${
+                      l.active
+                        ? "bg-green-100 text-green-700 hover:bg-green-200"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    {l.active ? "Aktiv" : "Inaktiv"}
+                  </button>
+                  <button
+                    onClick={() => save(l._id)}
+                    disabled={busyId === l._id}
+                    className="text-xs bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2 font-medium"
+                  >
+                    Speichern
+                  </button>
+                  <button
+                    onClick={() => remove(l._id, l.name)}
+                    disabled={busyId === l._id}
+                    className="text-gray-400 hover:text-red-600 disabled:opacity-60 p-2"
+                    title="Löschen"
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
+              </div>
             </div>
           ))}
         </div>

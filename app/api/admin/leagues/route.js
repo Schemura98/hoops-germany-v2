@@ -12,7 +12,7 @@ async function handler(req) {
 
   await connectDB();
   const leagues = await League.find({})
-    .select("name season bundesland teams active")
+    .select("name season bundesland level gender ageGroup region official teams active")
     .sort({ createdAt: -1 });
 
   return ok({
@@ -21,6 +21,11 @@ async function handler(req) {
       name: l.name,
       season: l.season,
       bundesland: l.bundesland || "",
+      level: l.level || "",
+      gender: l.gender || "",
+      ageGroup: l.ageGroup || "",
+      region: l.region || "",
+      official: !!l.official,
       active: l.active,
       teamCount: l.teams?.length || 0,
     })),

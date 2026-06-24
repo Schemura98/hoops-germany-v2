@@ -28,22 +28,17 @@ async function handler(req) {
     name,
     season,
     bundesland,
+    level: String(body.level || "").trim(),
+    gender: String(body.gender || "Herren").trim(),
+    ageGroup: String(body.ageGroup || "Senioren").trim(),
+    region: String(body.region || "").trim(),
+    official: true,
     teams: [],
     matches: [],
     active: true,
   });
 
-  return ok(
-    {
-      league: {
-        _id: league._id,
-        name: league.name,
-        season: league.season,
-        bundesland: league.bundesland,
-      },
-    },
-    201
-  );
+  return ok({ league: { _id: league._id, name: league.name } }, 201);
 }
 
 export const POST = withErrorHandling(handler);

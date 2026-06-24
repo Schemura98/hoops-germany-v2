@@ -279,6 +279,29 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
     Region** als anklickbare Chips („bitte übernimm eine davon, falls es dieselbe ist") – Klick wählt die
     bestehende Liga fürs Spiel und schließt die Anlage. Keine Liga in der Region → Hinweis „du kannst eine
     neue anlegen". Rein clientseitig (`/api/leagues` liefert `bundesland` schon mit). Verifiziert end-to-end.
+- **Feedback-Mail-Fix** (`fcb7f51`): Feedback-Benachrichtigung ging an `info@hoopsgermany.de` (unbeobachtet) →
+  jetzt an alle **Super-Admin-Mails** (`Player.isSuperAdmin`), Fallback info@. Ursache bestätigt: 1 Feedback war
+  in `hoops_prod` gespeichert, Mail lief nur an info@. Live-Test gesendet.
+
+#### 🔄 Liga-Umbau (PIVOT, mit Partner entschieden) – Framework wird gebaut
+> **Neue Logik:** Ligen werden **nicht** mehr von Teams/Admins frei erstellt. Es gibt einen **offiziellen
+> Katalog** (echte Verbands-Ligen). Teams **wählen** bei der Gründung ihre Liga (Filter Stadt/Bundesland →
+> Stufe → Liga). Nur im Notfall „**Liga melden**" an Super-Admins. **Datenquelle:** WBV/NRW (TeamSL auf
+> basketball-bund.net, WBV-Ausschreibung 2025/26) – keine offene API, Katalog wird extrahiert. **Umfang
+> Start: NRW komplett** (Herren/Damen/Jugend). Vorgehen: **Framework zuerst**, echte Daten danach.
+>
+> **Schritt 1 erledigt – Liga-Katalog-Fundament** (additive Modell-/Admin-Änderung, deployt):
+> - `models/League.js` um `level` (Regionalliga/Oberliga/Landesliga/Bezirksliga/Kreisliga), `gender`
+>   (Herren/Damen/Mixed), `ageGroup` (Senioren/U18…), `region` (Bezirk/Kreis), `official` erweitert;
+>   Konstanten in `lib/constants.js` (`LEAGUE_LEVELS`/`LEAGUE_GENDERS`/`LEAGUE_AGE_GROUPS`).
+> - `/api/admin/createleague` + `updateleague` + Admin-Liste tragen die neuen Felder; `official:true` bei
+>   Admin-Anlage. **Admin-Katalog-UI** (`/admin/leagues`) erweitert (Erstell-Raster + Karten mit „Offiziell").
+>   `/api/leagues` GET liefert die Felder für die spätere Team-Auswahl. Funktional + UI verifiziert.
+>
+> **Noch offen (nächste Schritte):** (2) `Team.leagueId` + **Liga-Auswahl bei Team-Gründung** (`/team/create`,
+> Filter Bundesland→Stufe→Liga) + Team in `League.teams`; (3) **„Liga melden"-Flow** an Super-Admins;
+> (4) Team-Selbsterstellung von Ligen in `SpielplanTab` **entfernen**; (5) **NRW-Katalog extrahieren & seeden**;
+> (6) Demo-Ligen (`Regionalliga Süd`) durch echte ersetzen.
 
 > **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
 > Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).
