@@ -48,7 +48,7 @@ export default function SpielplanTab({ team }) {
   const [filterLeagueId, setFilterLeagueId] = useState("");
 
   // Liga erstellen
-  const [newLeague, setNewLeague] = useState({ name: "", season: "" });
+  const [newLeague, setNewLeague] = useState({ name: "", season: "", bundesland: "" });
   const [showLeagueForm, setShowLeagueForm] = useState(false);
   const [creatingLeague, setCreatingLeague] = useState(false);
 
@@ -111,7 +111,7 @@ export default function SpielplanTab({ team }) {
     try {
       const token = getTeamAuthToken();
       const { data } = await axios.post("/api/leagues", { token, ...newLeague });
-      setNewLeague({ name: "", season: "" });
+      setNewLeague({ name: "", season: "", bundesland: "" });
       setShowLeagueForm(false);
       await loadLeagues();
       // Neue Liga direkt im Spielformular vorauswählen
@@ -341,6 +341,21 @@ export default function SpielplanTab({ team }) {
                   className={inputClass}
                   placeholder="2025/26"
                 />
+              </div>
+              <div className="w-40">
+                <label className="block text-xs font-medium text-gray-600 mb-1">Bundesland</label>
+                <select
+                  value={newLeague.bundesland}
+                  onChange={(e) => setNewLeague((l) => ({ ...l, bundesland: e.target.value }))}
+                  className={inputClass}
+                >
+                  <option value="">– wählen –</option>
+                  {BUNDESLAENDER.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
               </div>
               <button
                 type="button"

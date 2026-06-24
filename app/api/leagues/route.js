@@ -2,6 +2,7 @@ import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import League from "@/models/League";
 import { getTeamFromToken } from "@/lib/serverAuth";
+import { findDuplicateLeague } from "@/lib/leagues";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // DB-Zugriff erst zur Laufzeit.
@@ -40,17 +41,32 @@ async function create(req) {
   if (!name) {
     return fail("Bitte einen Liga-Namen angeben", 400);
   }
+  const season = body.season?.trim() || "";
 
   await connectDB();
+
+  // Dublettenschutz: gleiche Liga (Name + Saison) nicht doppelt anlegen.
+  const dup = await findDuplicateLeague(name, season);
+  if (dup) {
+    return fail(
+      "Eine Liga mit diesem Namen und dieser Saison gibt es bereits – bitte wähle sie oben in der Liste aus, statt sie neu anzulegen.",
+      409
+    );
+  }
+
   const league = await League.create({
     name,
-    season: body.season?.trim() || "",
+    season,
+    bundesland: body.bundesland?.trim() || "",
     teams: [team._id],
     matches: [],
     active: true,
   });
 
-  return ok({ league: { _id: league._id, name: league.name, season: league.season } }, 201);
+  return ok(
+    { league: { _id: league._id, name: league.name, season: league.season } },
+    201
+  );
 }
 
 export const GET = withErrorHandling(list);

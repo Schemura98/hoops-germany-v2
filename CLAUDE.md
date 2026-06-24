@@ -263,6 +263,17 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
     jetzt login-bewusst (`components/landing/LandingHowItWorks.js`): ausgeloggt Onboarding-Schritte,
     eingeloggt **personalisierte „Deine nächsten Schritte"** (Profil / Team verwalten|ansehen|gründen
     je nach Rolle / Ligen & Topscorer – als klickbare Links).
+- **Liga-Erstellung gehärtet (3 Punkte)**:
+  - **Dublettenschutz**: neuer Helper `lib/leagues.js` (`findDuplicateLeague`, Name case-insensitiv +
+    Saison). Greift bei Team-Erstellung (`/api/leagues`, 409), Admin-Erstellung und Admin-Umbenennen
+    (`updateleague`, mit `excludeId`). Gleiche Liga (Name+Saison) kann nicht doppelt angelegt werden;
+    andere Saison ist erlaubt.
+  - **`bundesland` bei der Erstellung**: Team-Formular (`SpielplanTab` „Liga erstellen") und Admin
+    bekommen ein Bundesland-Dropdown; wird gespeichert → Liga-Bundesland-Filter auf `/ligen` greift jetzt
+    auch für selbst erstellte Ligen. `updateleague` + Admin-Liste tragen `bundesland`.
+  - **Admin kann Ligen erstellen**: neuer Endpunkt `/api/admin/createleague` (Super-Admin, startet ohne
+    Teams) + „Neue Liga erstellen"-Formular auf `/admin/leagues` (Name/Saison/Bundesland) inkl.
+    Bundesland-Bearbeitung je Zeile. Funktional verifiziert (Dublette 409, Bundesland gespeichert) + Dev-DB bereinigt.
 
 > **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
 > Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).
