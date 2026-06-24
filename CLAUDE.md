@@ -375,11 +375,13 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 3. **Monetarisierung (#6)** – BLOCKIERT bis **Gewerbeanmeldung** des Users (Amazon-Affiliate +
    Sponsorfläche; AdSense erst bei genug Traffic + Consent-Banner).
 4. Weitere UX-Feinschliffe nach Tester-Feedback.
-5. **Liga-Katalog: weibliche Jugend (U18w/U16w/U14w/U12w) + U10 ergänzen** (Datenschritt-Rest).
-   Aufgeschoben: WBV-Einteilungs-PDF der weibl. Jugend nicht auffindbar/abrufbar (Artikelseiten 404,
-   Einteilung noch „4. vorläufig"). **Wenn der PDF-Link/die Datei vorliegt:** im selben Muster wie Jugend m/o
-   in `scripts/seed-nrw-leagues.mjs` ergänzen (`gender:"Damen"` bzw. Mixed für U10, reale Stufen je
-   Altersklasse – nicht raten) → Dev + Prod seeden. (optional) NRW-**Kreisligen** (pro Basketballkreis, niedrige Prio).
+5. **Liga-Katalog Jugend** ✅ **weibliche Jugend ergänzt** (`2a95624`, live): U18w/U16w/U14w/U12w (10 Ligen,
+   `gender:"Damen"`). Stufen aus der WBV-„Ligenstruktur Jugend" (gilt lt. Doku für weibl./männl./offen),
+   gespiegelt zur männlichen 2025/26-Struktur (exakte weibliche 2025/26-Einteilung war nicht auffindbar).
+   **⚠️ struktur-basiert** → bei realer Abweichung per Admin (`/admin/leagues`) / „Liga melden" korrigieren.
+   Katalog gesamt **67** (31 Herren + 16 Damen + 20 Jugend m/o/w). **Noch offen:** **U10** (beide; WBV noch
+   „offen"); (optional) NRW-**Kreisligen** (pro Basketballkreis, niedrige Prio); weibliche Jugend gegen die
+   finale WBV-Einteilung gegenprüfen, falls sie später auftaucht.
 6. **Saisonende + Meister** ✅ **erledigt** (`b33c65f`, live): `League.finished` + `champion`; Admin
    (`/admin/leagues`) setzt „Saison abgeschlossen" + Meister (Auto-Tabellenführer oder explizit =
    Playoff-Sieger); `/ligen/[id]` zeigt Meister-Banner + Krone, `/ligen`-Liste „Abgeschlossen"-Badge.
