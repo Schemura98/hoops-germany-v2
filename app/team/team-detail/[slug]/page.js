@@ -11,6 +11,7 @@ import {
   FaNewspaper,
   FaHeart,
   FaRegComment,
+  FaTrophy,
 } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -113,7 +114,12 @@ export default function TeamTeamDetailSlugPage({ params }) {
     );
   }
 
-  const { team, members, matches = [], posts = [] } = data;
+  const { team, members, matches = [], posts = [], league = null } = data;
+  const leagueMeta = league
+    ? [league.gender, league.ageGroup !== "Senioren" ? league.ageGroup : null, league.region]
+        .filter(Boolean)
+        .join(" · ")
+    : "";
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -179,6 +185,48 @@ export default function TeamTeamDetailSlugPage({ params }) {
           >
             {joinMsg.text}
           </div>
+        )}
+
+        {/* Liga + Platzierung */}
+        {league && (
+          <Link
+            href={`/ligen/${league._id}`}
+            className="mb-6 block bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 transition-all"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                  Liga{league.season ? ` · ${league.season}` : ""}
+                </p>
+                <p className="font-semibold text-gray-900 truncate">{league.name}</p>
+                {leagueMeta && <p className="text-xs text-gray-500">{leagueMeta}</p>}
+              </div>
+              {league.isChampion ? (
+                <span className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-100 rounded-full px-3 py-1">
+                  <FaTrophy className="text-[10px]" /> Meister
+                </span>
+              ) : league.rank ? (
+                <div className="shrink-0 text-right">
+                  <p className="text-xl font-black text-gray-900 leading-none">
+                    {league.rank}.
+                  </p>
+                  <p className="text-[11px] text-gray-400">von {league.totalTeams}</p>
+                </div>
+              ) : null}
+            </div>
+            {league.record && league.record.games > 0 && (
+              <p className="mt-2 text-xs text-gray-500">
+                {league.record.wins}S · {league.record.losses}N
+                <span className="text-gray-400">
+                  {" "}
+                  · Korbdiff {league.record.diff > 0 ? `+${league.record.diff}` : league.record.diff}
+                </span>
+                {league.finished && (
+                  <span className="ml-2 text-amber-700 font-medium">Saison abgeschlossen</span>
+                )}
+              </p>
+            )}
+          </Link>
         )}
 
         {team.about && (

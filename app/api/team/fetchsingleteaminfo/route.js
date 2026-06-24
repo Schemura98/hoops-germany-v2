@@ -3,6 +3,8 @@ import Team from "@/models/Team";
 import Player from "@/models/Player";
 import Match from "@/models/Match";
 import Post from "@/models/Post";
+import League from "@/models/League";
+import { computeStandings } from "@/lib/standings";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/team/fetchsingleteaminfo – öffentliches Team-Profil per Slug.
@@ -17,10 +19,42 @@ async function handler(req) {
 
   await connectDB();
   const team = await Team.findOne({ slug }).select(
-    "teamName slug about region logo banner rosterSlots followers adminPlayerId"
+    "teamName slug about region logo banner rosterSlots followers adminPlayerId leagueId"
   );
   if (!team) {
     return fail("Team nicht gefunden", 404);
+  }
+
+  // Liga des Teams + Platzierung (Tabelle) ermitteln.
+  let league = null;
+  if (team.leagueId) {
+    const lg = await League.findById(team.leagueId).select(
+      "name season level gender ageGroup region finished champion teams active"
+    );
+    if (lg) {
+      const standings = await computeStandings(lg._id, lg.teams);
+      const idx = standings.findIndex((s) => s.teamId === String(team._id));
+      const me = idx >= 0 ? standings[idx] : null;
+      const championId = lg.champion
+        ? String(lg.champion)
+        : standings[0]?.teamId || null;
+      league = {
+        _id: lg._id,
+        name: lg.name,
+        season: lg.season || "",
+        level: lg.level || "",
+        gender: lg.gender || "",
+        ageGroup: lg.ageGroup || "",
+        region: lg.region || "",
+        finished: !!lg.finished,
+        rank: idx >= 0 ? idx + 1 : null,
+        totalTeams: standings.length,
+        record: me
+          ? { games: me.games, wins: me.wins, losses: me.losses, diff: me.diff }
+          : null,
+        isChampion: !!lg.finished && championId === String(team._id),
+      };
+    }
   }
 
   // Spieler mit Account, die dem Team angehören
@@ -63,6 +97,7 @@ async function handler(req) {
       // Nur belegte Slots öffentlich zeigen
       rosterSlots: (team.rosterSlots || []).filter((s) => s.status !== "empty"),
     },
+    league,
     members,
     matches,
     posts,
