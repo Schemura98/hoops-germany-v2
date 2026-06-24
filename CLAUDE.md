@@ -250,6 +250,11 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
     **Neu:** `summary` bündelt Pfade serverseitig per `$switch` in Bereiche (Spielerprofile, Teams,
     Spiele, Newsfeed …) → `/admin/analytics` zeigt „Traffic nach Bereich" (Balken). Dynamische Routen
     (z. B. einzelne Spielerprofile) werden so sponsoren-tauglich gebündelt statt zersplittert.
+  - **Eingeloggte Startseite ausgebaut**: `LandingHero` (eingeloggt) hat jetzt 5 Schnellaktionen –
+    Zum Feed, Mein Profil, **Mein Team** (nur mit Team, sonst „Teams"), **Spielplan** (`/spiele`),
+    **Feedback** (`/feedback`); kompakter + `flex-wrap`. Der untere CTA „Bereit loszulegen" wird für
+    eingeloggte User ausgeblendet (neue Client-Komponente `components/landing/LandingCTA.js`, in
+    `app/page.js` statt des inline-CTA – nur für ausgeloggte Besucher).
 
 > **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
 > Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).

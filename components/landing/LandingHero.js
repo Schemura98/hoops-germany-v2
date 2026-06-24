@@ -3,7 +3,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaArrowRight, FaUsers, FaNewspaper } from "react-icons/fa";
+import {
+  FaArrowRight,
+  FaUsers,
+  FaUser,
+  FaNewspaper,
+  FaCalendarAlt,
+  FaCommentDots,
+} from "react-icons/fa";
 import { getPlayerToken } from "@/lib/clientAuth";
 
 // Vollbild-Hero mit Hintergrundbild + dunklem Overlay.
@@ -62,24 +69,36 @@ export default function LandingHero() {
             <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto leading-relaxed">
               Was möchtest du heute machen?
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-wrap gap-3 justify-center max-w-3xl mx-auto">
               <Link
                 href="/home"
-                className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center gap-2"
+                className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 px-6 rounded-lg text-base flex items-center justify-center gap-2"
               >
                 <FaNewspaper /> Zum Feed
               </Link>
               <Link
                 href="/player/player-detail"
-                className="border-2 border-white hover:bg-white hover:text-gray-900 text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center gap-2"
+                className="border-2 border-white hover:bg-white hover:text-gray-900 text-white font-bold py-3.5 px-6 rounded-lg text-base flex items-center justify-center gap-2"
               >
-                <FaUsers /> Mein Profil
+                <FaUser /> Mein Profil
               </Link>
               <Link
                 href={teamSlug ? `/team/team-detail/${teamSlug}` : "/teams"}
-                className="border-2 border-orange-400 hover:bg-orange-400 text-orange-300 hover:text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center gap-2"
+                className="border-2 border-orange-400 hover:bg-orange-400 text-orange-300 hover:text-white font-bold py-3.5 px-6 rounded-lg text-base flex items-center justify-center gap-2"
               >
                 <FaUsers /> {teamSlug ? "Mein Team" : "Teams"}
+              </Link>
+              <Link
+                href="/spiele"
+                className="border-2 border-white hover:bg-white hover:text-gray-900 text-white font-bold py-3.5 px-6 rounded-lg text-base flex items-center justify-center gap-2"
+              >
+                <FaCalendarAlt /> Spielplan
+              </Link>
+              <Link
+                href="/feedback"
+                className="border-2 border-white hover:bg-white hover:text-gray-900 text-white font-bold py-3.5 px-6 rounded-lg text-base flex items-center justify-center gap-2"
+              >
+                <FaCommentDots /> Feedback
               </Link>
             </div>
           </>
