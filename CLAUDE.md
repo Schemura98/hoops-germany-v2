@@ -355,6 +355,13 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > `seasons`; `/topscorer` + `/rangliste` haben ein Saison-Dropdown („Alle Saisons" + je Saison), Rangliste
 > grenzt die Liga-Optionen auf die Saison ein. Wichtig ab mehreren Saisons (nach Rollover).
 >
+> **Positionen ausgeschrieben + neue Rollen** (`9055bd3`, live): `lib/constants` – `POSITIONS` jetzt
+> ausgeschrieben (Point Guard … Center), neue `PLAYER_ROLES` (Coach/Manager/Sportliche Leitung/Fan),
+> `ALL_ROLES`, `positionLabel()` (mappt alte Kürzel PG… rückwärtskompatibel). Profil-Auswahl (edit-profile)
+> + Spielerfilter (`/spieler`) als **gruppiertes Dropdown** (Spielposition/Funktion); alle Anzeige-Stellen
+> über `positionLabel`. `scripts/migrate-positions.mjs` hat Bestandsdaten (Dev+Prod) kanonisiert.
+> **Fundament fürs Scouting** (Vereine suchen auch Trainer/Funktionäre).
+>
 > **Liga auf Team-Seite** (`e68486c`, live): Team-Detailseite (`/team/team-detail/[slug]`) zeigt eine
 > Liga-Karte (aktuelle Liga + Platz X/Y + S/N/Korbdiff, bei abgeschlossener Saison Meister-Badge), verlinkt
 > zur Liga. `fetchsingleteaminfo` liefert dafür `league` inkl. `rank`/`record`/`isChampion`. **Tabellen-Logik
