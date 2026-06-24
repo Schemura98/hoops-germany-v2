@@ -321,12 +321,12 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > bezirksübergreifend → leer. **Upsert (Match name+season+gender), löscht nichts** + Selbstheilung (leere
 > Alt-Einträge früherer Seed-Varianten werden entfernt, Ligen mit Teams/Spielen geschützt) → sicher für
 > Dev **und** Prod; `--dry` für Vorschau. **Auf Dev geseedet + verifiziert** (31, keine Reste, Idempotenz ok).
-> **Noch NICHT auf Prod geseedet** (bewusst – Live-Katalog erst auf Freigabe).
+> **✅ Auf Prod (hoops_prod) geseedet + verifiziert** (Dry-Run → Lauf → 2. Lauf idempotent; 31 official
+> NRW-Herren-Ligen live, Katalog gesamt 33 inkl. 2 Demo „Regionalliga Süd"/Bayern). Re-Run jederzeit gefahrlos.
 >
-> **➡️ NÄCHSTE SESSION HIER STARTEN:** (a) auf **Prod** seeden – auf dem VPS `cd /root/hoops-v2 && git pull &&
-> node scripts/seed-nrw-leagues.mjs` (läuft gegen hoops_prod, additiv/idempotent); danach im Liga-Picker
-> (`/team/create`) gegenprüfen. (b) **Danach** NRW-Kreisligen, dann Damen + Jugend (NRW komplett) – jeweils
-> eigene Einteilungs-PDFs der WBV. Realistisch partiell → Korrektur-Check.
+> **➡️ NÄCHSTE SESSION HIER STARTEN:** NRW-**Kreisligen**, dann **Damen** + **Jugend** (NRW komplett) – jeweils
+> eigene WBV-Einteilungs-PDFs (gleiches Muster: PDF lesen → Namen/Bezirk extrahieren → Seed erweitern oder
+> Schwester-Skript). Realistisch partiell → Korrektur-Check. Im Liga-Picker (`/team/create`) live gegenprüfen.
 > **Weiter offen:** (6) Demo-Liga `Regionalliga Süd` (Bayern) durch echte NRW-Ligen ersetzen / entfernen;
 > (optional) Liga-Auswahl nachträglich im Team-Einstellungen-Tab änderbar machen.
 >
