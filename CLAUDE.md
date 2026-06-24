@@ -400,6 +400,15 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > **Plattform-Überblick** (Spieler/Teams/offizielle Ligen/transferbereit/suchende Vereine) für Sponsoren-
 > Präsentation + Bereichs-Traffic (deckt alle neuen Bereiche ab). Desktop+Mobil + Prod-Smoke-Test grün.
 >
+> **NRW-Demo-Environment + Testphase-Banner** (live auf Prod): `scripts/seed-nrw-demo.mjs` legt **additiv** ein
+> gefülltes NRW-Set an (Tag `seedTag:"nrw-demo"`, fasst echte Tester-Daten NICHT an): 6 fiktive NRW-Teams an
+> echte NRW-Ligen gekoppelt, 30 Spieler (inkl. Coach/Manager-Rollen), 12 transferbereit, 3 suchende Vereine,
+> 3 Beitrittsanfragen + 1 Tryout mit 4 Bewerbern, 8 Spiele (Oberliga 1 → Tabelle/Topscorer), Posts, Follower.
+> **Demo-Team-Admin-Login** (für die Anfragen/Bewerber-Sicht): `demo.coach@nrw-demo.de` / `test123` (Köln Comets).
+> **Entfernen nach der Testphase:** `node scripts/seed-nrw-demo.mjs --purge` (löscht NUR die getaggten Demo-Daten).
+> `components/TestPhaseBanner.js` im Root-Layout: schlanker, immer sichtbarer „Testbetrieb/Beispieldaten"-Hinweis
+> + Feedback-Link (rechtliche Absicherung). ⚠️ Roadmap #2 (Demo→echt) = u. a. dieses `--purge` ausführen.
+>
 > **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
 > Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).
 > ✅ `c813d56` (Akkordeon) **und** `fbbe06a` (Footer/Geburtstag/Karriere-Verlauf/aktive Nav) sind gepusht **und live deployt** (Prod-Build grün getestet).
