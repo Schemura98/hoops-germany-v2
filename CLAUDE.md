@@ -320,14 +320,24 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > abgeleitet aus den Vereins-IDs der Einteilung (3. Ziffer = Bezirk); bezirksübergreifende/gemischte Ligen →
 > leer. **Upsert (Match name+season+gender+ageGroup), löscht nichts** + Selbstheilung pro Geschlecht/
 > Altersklasse (leere Alt-Einträge raus, Ligen mit Teams/Spielen geschützt) → sicher Dev **und** Prod;
-> `--dry` für Vorschau. **✅ Auf Dev + Prod (hoops_prod) geseedet + verifiziert** (47 official, Idempotenz ok;
-> Prod-Katalog gesamt 49 inkl. 2 Demo „Regionalliga Süd"/Bayern). Re-Run jederzeit gefahrlos.
+> `--dry` für Vorschau. **✅ Senioren (47) + Jugend männlich/offen (10) auf Dev + Prod geseedet + verifiziert**
+> (`942cc69`; 57 official, Idempotenz ok; Prod-Katalog gesamt 59 inkl. 2 Demo „Regionalliga Süd"/Bayern).
+> **Jugend m/o (10):** U18 männl. (Regio, Oberliga) · U16 männl. (Regio, Oberliga, Landesliga) · U14 offen
+> (Regio, Oberliga, Landesliga) · U12 offen (Oberliga, Landesliga) – gender Herren (männl.) bzw. Mixed
+> (offen), `ageGroup` U18/U16/U14/U12, Name mit Altersklassen-Präfix, transiente „…Qualifikation"-Pools
+> ausgelassen, `region` leer (NRW-weite Pools). Quelle: WBV-Jugend-Einteilung „offene und männliche Jugend"
+> (Stand 23.05.2025, `…/images/Jugend/20252026/vorlaeufigeligeneinteilung_jugend_230525-1.pdf`). Re-Run gefahrlos.
 >
-> **➡️ NÄCHSTE SESSION HIER STARTEN:** NRW-**Jugend** (U18–U10 m/w, WBV-Einteilungs-PDFs – Achtung: tlw. noch
-> „vorläufig", U10 offen; ggf. nur fertige Altersklassen seeden). **Danach** ggf. NRW-**Kreisligen** (werden
-> von den 22 Basketballkreisen separat verwaltet, KEINE zentrale WBV-PDF → fragmentiert/aufwändig, eigene
-> Quellen je Kreis). Gleiches Muster: PDF lesen → Namen/Bezirk extrahieren → Seed erweitern. Im Liga-Picker
-> (`/team/create`) live gegenprüfen.
+> **➡️ NÄCHSTE SESSION HIER STARTEN – noch offen am Datenschritt:**
+> 1. **Weibliche Jugend (U18w/U16w/U14w/U12w) + U10** seeden. **Blocker:** die WBV-Artikelseiten blocken den
+>    automatischen Abruf (404 für WebFetch), nur direkte `/images/Jugend/20252026/*.pdf`-URLs gehen, und der
+>    Dateiname der weiblichen/U10-Einteilung ist unbekannt; Einteilung steht zudem bei „4. vorläufig"
+>    (Artikel 4841). **Lösung:** User holt den PDF-Link (oder die Datei) der weiblichen Jugend-Einteilung von
+>    basketball.nrw → dann gleiches Muster wie Jugend m/o ins Seed (`gender:"Damen"`, je Altersklasse die real
+>    existierenden Stufen – nicht raten!).
+> 2. (optional) NRW-**Kreisligen** – von den 22 Basketballkreisen separat verwaltet, KEINE zentrale WBV-PDF →
+>    fragmentiert/aufwändig, eigene Quellen je Kreis. Niedrige Prio.
+> Im Liga-Picker (`/team/create`) live gegenprüfen.
 > **Weiter offen:** (6) Demo-Liga `Regionalliga Süd` (Bayern) durch echte NRW-Ligen ersetzen / entfernen;
 > (optional) Liga-Auswahl nachträglich im Team-Einstellungen-Tab änderbar machen.
 >
