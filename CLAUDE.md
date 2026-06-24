@@ -371,8 +371,12 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > `/api/team/set-recruiting`); öffentliche `/api/team/recruiting-list`. **Transfermarkt hat 2 Tabs**:
 > „Spieler suchen Verein" + „Vereine suchen Spieler" (Team-Karten mit gesuchten Rollen/Region/Notiz);
 > Filter (Position/Rolle, Bundesland, Umkreis) gelten je aktivem Tab. End-to-end verifiziert.
-> **Phase C offen (später):** Wunschliga/gesuchte Liga aus dem Katalog wählbar (statt Freitext),
-> Matching-Vorschläge (Position+Region), Direktkontakt/Anfrage aus dem Transfermarkt.
+> **Phase C erledigt** (live): **C1 Direktanfrage** (`Vereine suchen`-Tab: „Beitritt anfragen" je Team via
+> requestjoin) – Commit `…` C1; **C2 Matching** (personalisierter „Passende Treffer"-Block: suchende Vereine
+> für transferbereite Spieler, passende Spieler für suchende Team-Admins; Match über Position/Rolle oder
+> Bundesland, Kontext via `getmyinfo`); **C3 bevorzugte Spielklasse** (`preferredLeague` jetzt
+> `LEAGUE_LEVELS`-Dropdown in edit-profile + `TransferControl` statt Freitext, Anzeige „Spielklasse").
+> Alle drei verifiziert + deployt. **Scouting/Transfermarkt-Initiative damit abgeschlossen** (A+B+C).
 >
 > **Liga auf Team-Seite** (`e68486c`, live): Team-Detailseite (`/team/team-detail/[slug]`) zeigt eine
 > Liga-Karte (aktuelle Liga + Platz X/Y + S/N/Korbdiff, bei abgeschlossener Saison Meister-Badge), verlinkt
