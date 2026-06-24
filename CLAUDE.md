@@ -145,6 +145,13 @@ ohne Hamburger) → Hamburger-Menü ergänzt. `NotificationBell`-Dropdown war li
 (`absolute right-0 w-80`) → responsiv gemacht (`fixed left-2 right-2 top-16 sm:absolute…`, Muster aus
 `Navbar.js`). TeamNav (keine Haupt-Links) + AdminNav (`overflow-x-auto`) sind mobil ok.
 
+**✅ Nav-/Admin-Fix (24.06.):** `PlayerNav` um **Ligen, Topscorer** + rollenbasierten **„Super Admin"/
+„Team-Admin"-Link** erweitert (Inline ab `lg`, sonst Hamburger). **Super-Admin-Spieler brauchen keinen
+separaten Admin-Login mehr:** `getAdminToken()` (clientAuth) fällt auf den Spieler-Token zurück,
+`getAdminFromToken()` (serverAuth) akzeptiert Super-Admin-Spieler-Token (→ alle Admin-Seiten/-APIs
+dual-auth). `/admin/login` macht keinen Auto-Redirect → kein Loop. Verifiziert: Super-Admin landet direkt
+im Dashboard (Daten laden).
+
 **✅ Live verifiziert (24.06.):** **SMTP funktioniert** (Passwort-Reset-Mail kam an, Reset durchgeführt) →
 alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = einsatzbereit.
 **Super-Admin-Spieler abgesichert** (Patrick & Jonatan haben eigene Passwörter gesetzt; test123 deaktiviert).

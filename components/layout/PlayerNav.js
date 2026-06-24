@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FaSignOutAlt, FaBars, FaTimes } from "react-icons/fa";
+import {
+  FaSignOutAlt,
+  FaBars,
+  FaTimes,
+  FaShieldAlt,
+  FaTrophy,
+} from "react-icons/fa";
 import { clearPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
 import NotificationBell from "@/components/layout/NotificationBell";
 
@@ -12,6 +18,8 @@ const links = [
   { href: "/spieler", label: "Spieler" },
   { href: "/teams", label: "Teams" },
   { href: "/spiele", label: "Spiele" },
+  { href: "/ligen", label: "Ligen" },
+  { href: "/topscorer", label: "Topscorer" },
   { href: "/player/player-detail", label: "Mein Profil" },
 ];
 
@@ -29,6 +37,14 @@ export default function PlayerNav({ player }) {
     `${player?.firstName?.[0] || ""}${player?.lastName?.[0] || ""}`.toUpperCase() ||
     "?";
 
+  // Admin-Verknüpfung je nach Rolle (Super-Admin > Team-Admin).
+  const adminLink = player?.isSuperAdmin
+    ? { href: "/admin/dashboard", label: "Super Admin", Icon: FaShieldAlt }
+    : player?.isTeamAdmin
+    ? { href: "/team/admin", label: "Team-Admin", Icon: FaTrophy }
+    : null;
+  const AdminIcon = adminLink?.Icon;
+
   return (
     <nav className="bg-gradient-to-r from-slate-950 to-slate-800 sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
@@ -36,7 +52,8 @@ export default function PlayerNav({ player }) {
           <img src="/images/logo.svg" alt="Hoops Germany" className="h-9 w-auto object-contain" />
         </Link>
 
-        <div className="hidden md:flex items-center gap-6">
+        {/* Inline-Navigation ab großen Screens, sonst Hamburger */}
+        <div className="hidden lg:flex items-center gap-5">
           {links.map((l) => (
             <Link
               key={l.href}
@@ -46,6 +63,14 @@ export default function PlayerNav({ player }) {
               {l.label}
             </Link>
           ))}
+          {adminLink && (
+            <Link
+              href={adminLink.href}
+              className="flex items-center gap-1.5 text-orange-400 hover:text-orange-300 text-sm font-medium"
+            >
+              <AdminIcon className="w-4 h-4" /> {adminLink.label}
+            </Link>
+          )}
         </div>
 
         <div className="flex items-center gap-3 sm:gap-4">
@@ -76,7 +101,7 @@ export default function PlayerNav({ player }) {
           {/* Mobile-Hamburger */}
           <button
             onClick={() => setMobileOpen((v) => !v)}
-            className="md:hidden text-white/80 hover:text-orange-400 transition-colors"
+            className="lg:hidden text-white/80 hover:text-orange-400 transition-colors"
             aria-label="Menü"
           >
             {mobileOpen ? <FaTimes className="w-5 h-5" /> : <FaBars className="w-5 h-5" />}
@@ -86,7 +111,7 @@ export default function PlayerNav({ player }) {
 
       {/* Mobile-Menü */}
       {mobileOpen && (
-        <div className="md:hidden bg-slate-900 border-t border-slate-700 divide-y divide-slate-700/60">
+        <div className="lg:hidden bg-slate-900 border-t border-slate-700 divide-y divide-slate-700/60">
           {links.map((l) => (
             <Link
               key={l.href}
@@ -97,6 +122,16 @@ export default function PlayerNav({ player }) {
               {l.label}
             </Link>
           ))}
+          {adminLink && (
+            <Link
+              href={adminLink.href}
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-3 px-5 py-3.5 text-orange-400 hover:bg-slate-800 transition-colors"
+            >
+              <AdminIcon className="w-4 h-4 flex-shrink-0" />
+              <span className="text-sm font-medium">{adminLink.label}</span>
+            </Link>
+          )}
         </div>
       )}
     </nav>
