@@ -380,8 +380,11 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 3. **Monetarisierung (#6)** – BLOCKIERT bis **Gewerbeanmeldung** des Users (Amazon-Affiliate +
    Sponsorfläche; AdSense erst bei genug Traffic + Consent-Banner).
 4. Weitere UX-Feinschliffe nach Tester-Feedback.
-   - **UX-Durchgang über die neuen Liga-Features** (Filter/Saison-Switcher/Archiv/Meister/Team-Liga-Karte/
-     Saison-Stats) – mobil + Konsistenz prüfen.
+   - ✅ **UX-Durchgang über die neuen Liga-Features** (`b39a35d`, mobil 375px): /ligen-Filter+Saison-Switcher,
+     Liga-Detail (Tabelle+Playoffs), Topscorer, EinstellungenTab-Liga-Picker, Admin-Liga-Steuerung,
+     SpielplanTab-Playoff-Formular, Team-Liga-Karte – alle sauber. **Fix:** Rangliste- + Topscorer-Tabelle
+     hatten keinen horizontalen Scroll-Container → bei 375px wurden rechte Spalten abgeschnitten (jetzt
+     `overflow-x-auto`, konsistent mit Liga-Detail).
    - 🐞 **„Folgen"-System prüfen** (Tester-Fund): Spieler **und** Teams folgen erhöhte den **Follower-Zähler
      nicht**. Komplettes Follow-System end-to-end checken: `followplayer`/`followteam`,
      `getfollowlist`/`checkfollowing`, `FollowButton`-Zähler, Follower-Anzeige auf Profilen/Team-Seite,
