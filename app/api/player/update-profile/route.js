@@ -43,6 +43,10 @@ async function handler(req) {
     const age = parseInt(body.age, 10);
     updates.age = Number.isFinite(age) ? age : undefined;
   }
+  // Mail-Einstellung (Team-Admin): „Ergebnis eintragen"-Erinnerung an/aus.
+  if (body.emailPendingResult !== undefined) {
+    updates.emailPendingResult = !!body.emailPendingResult;
+  }
 
   if (Object.keys(updates).length === 0) {
     return fail("Keine Änderungen übermittelt", 400);

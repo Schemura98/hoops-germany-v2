@@ -67,6 +67,8 @@ const playerSchema = new mongoose.Schema(
 
     isTeamAdmin: { type: Boolean, default: false },
     teamAdminOf: { type: mongoose.Schema.Types.ObjectId, ref: "teams" },
+    // Mail-Einstellung: „Ergebnis eintragen"-Erinnerung an Team-Admins (Standard an).
+    emailPendingResult: { type: Boolean, default: true },
     isSuperAdmin: { type: Boolean, default: false },
     teamJoinRequest: { type: mongoose.Schema.Types.ObjectId, ref: "teams" },
     followingTeams: [{ type: mongoose.Schema.Types.ObjectId, ref: "teams" }],

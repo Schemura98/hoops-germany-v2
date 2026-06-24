@@ -56,6 +56,8 @@ export default function PlayerEditProfilePage() {
     if (player && !form) {
       const initial = {};
       for (const f of FIELDS) initial[f] = player[f] ?? "";
+      // Mail-Einstellung (Standard an, wenn nicht explizit abgeschaltet)
+      initial.emailPendingResult = player.emailPendingResult !== false;
       setForm(initial);
     }
   }, [player, form]);
@@ -241,6 +243,30 @@ export default function PlayerEditProfilePage() {
               placeholder="Erzähl etwas über deinen Spielstil, deine Erfahrung…"
             />
           </Field>
+
+          {player.isTeamAdmin && (
+            <div className="border-t border-gray-100 pt-4">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.emailPendingResult}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, emailPendingResult: e.target.checked }))
+                  }
+                  className="mt-0.5 h-4 w-4 accent-brand-500"
+                />
+                <span>
+                  <span className="block text-sm font-medium text-gray-800">
+                    E-Mail-Erinnerung bei ausstehenden Ergebnissen
+                  </span>
+                  <span className="block text-xs text-gray-500">
+                    Als Team-Admin bekommst du eine Mail, wenn nach einem Spiel noch das
+                    Ergebnis fehlt. Die Glocken-Benachrichtigung bleibt unabhängig davon.
+                  </span>
+                </span>
+              </label>
+            </div>
+          )}
 
           <div className="flex justify-end gap-3 pt-2">
             <Link
