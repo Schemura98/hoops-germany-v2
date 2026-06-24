@@ -180,8 +180,20 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
   („Viersen Hoops II" = Patrick Test) · Spiel+Ergebnis (Gegnerfilter) · **Mismatch** (Rhein 22:19) →
   In-App + Mails an **beide Team-Admins UND beide Super-Admins** → im Admin-Panel **aufgelöst** (20:17, confirmed).
 
+#### Update (UX-Feinschliff, 24.06.) – mobiler Newsfeed reparierbar
+- **Mobiler Newsfeed: Seiten-Widgets als einklappbare Akkordeons** (`c813d56`): Mobil lagen die
+  Widgets (Spiele, Top-Teams, Transfers, News) per `order`-Klassen **unter** dem Infinite-Scroll-Feed
+  und waren praktisch unerreichbar. Jetzt breakpoint-abhängiges Rendern statt CSS-Reorder
+  (`lib/useMediaQuery.js`, `(min-width:1024px)`): **Desktop unverändert 3-spaltig**, **Mobil**
+  Composer → einklappbare Widgets (`components/feed/CollapsibleWidget.js`, „Spiele" offen) → Feed.
+  Der Wrapper neutralisiert die eigene Karte/`h3` der Widgets via `[&>div]`-Overrides → keine doppelten
+  Titel/Rahmen. Verifiziert im Preview (Desktop 3-spaltig + Mobil 375px Toggle).
+- **Geprüft, kein Handlungsbedarf:** Landing, Spieler-Liste, Spielerprofil (Stats-Leiste mobil bewusst
+  `overflow-x-auto`), Desktop-Newsfeed wirken sauber/konsistent.
+
 > **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
 > Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).
+> ⚠️ `c813d56` ist committet (Branch `redesign`), aber **noch nicht gepusht/deployt** – vor Deploy `npm run build` (Prod-Runtime) testen.
 
 🔜 **Noch offen (nach Go-Live):**
 1. **`/admin`-Temp-Passwort** (`A1cGmhwN-1To`) auf ein eigenes ändern (oder Legacy-`/admin`-Login ganz entfernen,
