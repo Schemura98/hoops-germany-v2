@@ -350,6 +350,13 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > Spielklasse (aus `lib/constants`); Bundesland-Dropdown zeigt Länder ohne Ligen als „<Land> – folgt in
 > Kürze" (disabled, dynamisch aus geladenen Ligen → wächst automatisch mit). Karten zeigen gender/ageGroup/region.
 >
+> **Liga auf Team-Seite** (`e68486c`, live): Team-Detailseite (`/team/team-detail/[slug]`) zeigt eine
+> Liga-Karte (aktuelle Liga + Platz X/Y + S/N/Korbdiff, bei abgeschlossener Saison Meister-Badge), verlinkt
+> zur Liga. `fetchsingleteaminfo` liefert dafür `league` inkl. `rank`/`record`/`isChampion`. **Tabellen-Logik
+> jetzt zentral in `lib/standings.js` (`computeStandings`)** – genutzt von `/api/leagues/[id]`, `updateleague`
+> (Meister-Einfrieren) und `fetchsingleteaminfo`. ⚠️ `computeStandings` muss `status` selektieren (teamScores
+> prüft `status==="completed"`), sonst 0 Spiele.
+>
 > **Season-Rollover-Tool** (`scripts/rollover-season.mjs`): klont die offiziellen Liga-**Hüllen** einer
 > Saison in die nächste (Namen sind jahresstabil, keine Verbands-Kader nötig). Idempotent, `--from`/`--to`,
 > `--dry`, `--deactivate-old` (alte Saison → `active:false`/Archiv). **Einmal jährlich (≈Juli)** ausführen +
