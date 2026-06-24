@@ -11,6 +11,7 @@ import {
   FaUserCheck,
   FaUserMinus,
   FaUser,
+  FaWhatsapp,
 } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import { POSITIONS } from "@/lib/constants";
@@ -142,6 +143,14 @@ export default function KaderTab({ team, reload }) {
     } catch {
       /* Clipboard nicht verfügbar */
     }
+  }
+
+  function shareWhatsApp(slot) {
+    const link = `${origin}/team/claim/${slot.claimToken}`;
+    const text = `Du bist eingeladen, dem Kader von ${team?.teamName || "unserem Team"} beizutreten${
+      slot.position ? ` (Position: ${slot.position})` : ""
+    }: ${link}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener");
   }
 
   async function sendInvite(slotId) {
@@ -343,6 +352,12 @@ export default function KaderTab({ team, reload }) {
                         <FaCopy />
                       )}
                       {copiedId === slot._id ? "Link kopiert" : "Claim-Link"}
+                    </button>
+                    <button
+                      onClick={() => shareWhatsApp(slot)}
+                      className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-green-500 hover:text-green-700 text-gray-600 rounded-lg px-3 py-1.5 text-xs font-medium"
+                    >
+                      <FaWhatsapp className="text-green-600" /> WhatsApp
                     </button>
                     <button
                       onClick={() =>

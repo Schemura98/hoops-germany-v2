@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
 import { FaBasketballBall, FaUsers } from "react-icons/fa";
-import { getPlayerToken } from "@/lib/clientAuth";
+import { getPlayerToken, setPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
 
 function Shell({ children }) {
   return (
@@ -30,6 +30,15 @@ const SLOT_STATUS_TEXT = {
   confirmed: "Dieser Platz ist bereits vergeben.",
 };
 
+const inputClass =
+  "w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+
+// Vollen Slot-Namen in Vor-/Nachname aufteilen (zum Vorbefüllen).
+function splitName(name) {
+  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+  return { firstName: parts[0] || "", lastName: parts.slice(1).join(" ") || "" };
+}
+
 export default function TeamClaimTokenPage({ params }) {
   const claimToken = params.token;
 
@@ -38,6 +47,10 @@ export default function TeamClaimTokenPage({ params }) {
   const [loggedIn, setLoggedIn] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [error, setError] = useState("");
+
+  // Register-on-Claim (nicht eingeloggte Eingeladene)
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "" });
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     setLoggedIn(!!getPlayerToken());
@@ -48,6 +61,9 @@ export default function TeamClaimTokenPage({ params }) {
         const { data } = await axios.post("/api/team/roster/slot-info", { claimToken });
         if (!active) return;
         setInfo(data);
+        // Namen aus dem Slot vorbefüllen
+        const { firstName, lastName } = splitName(data?.slot?.name);
+        setForm((f) => ({ ...f, firstName, lastName }));
         setState("ready");
       } catch {
         if (!active) return;
@@ -60,6 +76,7 @@ export default function TeamClaimTokenPage({ params }) {
     };
   }, [claimToken]);
 
+  // Eingeloggter Spieler beansprucht direkt.
   async function claim() {
     setError("");
     setClaiming(true);
@@ -68,10 +85,40 @@ export default function TeamClaimTokenPage({ params }) {
       await axios.post("/api/team/roster/request-claim", { token, claimToken });
       setState("done");
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Anspruch konnte nicht gesendet werden."
-      );
+      setError(err.response?.data?.message || "Anspruch konnte nicht gesendet werden.");
       setClaiming(false);
+    }
+  }
+
+  // Konto anlegen + Platz in einem Schritt beanspruchen.
+  async function registerAndClaim(e) {
+    e.preventDefault();
+    setError("");
+    if (form.password.length < 6) {
+      setError("Das Passwort muss mindestens 6 Zeichen lang sein.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { data } = await axios.post("/api/player/playerregister", {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        password: form.password,
+      });
+      setPlayerToken(data.token);
+      setStoredPlayer(data.player);
+      await axios.post("/api/team/roster/request-claim", {
+        token: data.token,
+        claimToken,
+      });
+      setState("done");
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Konto konnte nicht erstellt werden. Bitte erneut versuchen."
+      );
+      setSubmitting(false);
     }
   }
 
@@ -107,13 +154,20 @@ export default function TeamClaimTokenPage({ params }) {
         <h1 className="text-xl font-bold text-gray-900">Anspruch gesendet 🎉</h1>
         <p className="mt-2 text-sm text-gray-500">
           Deine Anfrage wurde an <strong>{info?.team?.teamName}</strong> gesendet. Sobald
-          das Team dich bestätigt, erscheinst du im Kader.
+          das Team dich bestätigt, erscheinst du im Kader. Vervollständige in der
+          Zwischenzeit gern dein Profil.
         </p>
         <Link
-          href="/player/newsfeed"
+          href="/player/edit-profile"
           className="mt-6 block text-center bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2.5 font-medium"
         >
-          Zum Newsfeed
+          Profil jetzt vervollständigen
+        </Link>
+        <Link
+          href="/player/newsfeed"
+          className="mt-3 block text-center text-sm text-gray-500 hover:text-brand-600"
+        >
+          Später – zum Newsfeed
         </Link>
       </Shell>
     );
@@ -167,28 +221,57 @@ export default function TeamClaimTokenPage({ params }) {
           {claiming ? "Senden…" : "Platz beanspruchen"}
         </button>
       ) : (
-        <div className="mt-6">
-          <p className="text-sm text-gray-500 text-center">
-            Melde dich als Spieler an, um den Platz zu beanspruchen.
+        <form onSubmit={registerAndClaim} className="mt-6 space-y-3">
+          <p className="text-sm text-gray-600">
+            Erstelle in wenigen Sekunden dein Konto und übernimm deinen Platz im Kader:
           </p>
-          <div className="mt-4 flex gap-3">
-            <Link
-              href="/login"
-              className="flex-1 text-center bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2.5 font-medium"
-            >
-              Anmelden
-            </Link>
-            <Link
-              href="/signup"
-              className="flex-1 text-center border border-gray-300 hover:border-brand-500 text-gray-700 rounded-lg px-4 py-2.5 font-medium"
-            >
-              Registrieren
-            </Link>
+          <div className="grid grid-cols-2 gap-3">
+            <input
+              value={form.firstName}
+              onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
+              className={inputClass}
+              placeholder="Vorname"
+              required
+            />
+            <input
+              value={form.lastName}
+              onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
+              className={inputClass}
+              placeholder="Nachname"
+              required
+            />
           </div>
-          <p className="mt-3 text-center text-xs text-gray-400">
-            Danach kehre einfach zu diesem Link zurück.
+          <input
+            type="email"
+            value={form.email}
+            onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+            className={inputClass}
+            placeholder="E-Mail"
+            required
+          />
+          <input
+            type="password"
+            value={form.password}
+            onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+            className={inputClass}
+            placeholder="Passwort (mind. 6 Zeichen)"
+            required
+          />
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
+          >
+            {submitting ? "Konto wird erstellt…" : "Konto erstellen & Platz annehmen"}
+          </button>
+          <p className="text-center text-xs text-gray-400">
+            Du hast schon ein Konto?{" "}
+            <Link href="/login" className="text-brand-600 font-medium">
+              Anmelden
+            </Link>{" "}
+            und dann zu diesem Link zurückkehren.
           </p>
-        </div>
+        </form>
       )}
     </Shell>
   );
