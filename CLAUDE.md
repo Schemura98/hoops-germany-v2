@@ -362,6 +362,13 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > über `positionLabel`. `scripts/migrate-positions.mjs` hat Bestandsdaten (Dev+Prod) kanonisiert.
 > **Fundament fürs Scouting** (Vereine suchen auch Trainer/Funktionäre).
 >
+> **Scouting/Transfermarkt – Phase A** (`a257650`, live): `/transfermarkt` ist Scouting-Hub mit
+> strukturierten Filtern (Position/Rolle gruppiert inkl. Coach/Manager/…, Bundesland, Stadt+Umkreis);
+> Anzeige ausgeschrieben (`positionLabel`), Standort je Eintrag; `transferlist`-API liefert `bundesland`/
+> `hometown`. **Phase B offen (mit User abzustimmen):** „Vereine suchen" – Teams als rekrutierend listen
+> (`Team.recruiting` + gesuchte Positionen/Rollen + Notiz; Team-Scouting-Tab; 2. Bereich im Transfermarkt
+> „Vereine suchen Spieler"). **Phase C (später):** Wunschliga aus Katalog, Matching-Vorschläge, Direktkontakt.
+>
 > **Liga auf Team-Seite** (`e68486c`, live): Team-Detailseite (`/team/team-detail/[slug]`) zeigt eine
 > Liga-Karte (aktuelle Liga + Platz X/Y + S/N/Korbdiff, bei abgeschlossener Saison Meister-Badge), verlinkt
 > zur Liga. `fetchsingleteaminfo` liefert dafür `league` inkl. `rank`/`record`/`isChampion`. **Tabellen-Logik
