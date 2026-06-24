@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
@@ -22,6 +22,12 @@ export default function SignupPage() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleHref, setGoogleHref] = useState("/api/auth/google");
+
+  useEffect(() => {
+    const next = new URLSearchParams(window.location.search).get("next");
+    if (next) setGoogleHref(`/api/auth/google?next=${encodeURIComponent(next)}`);
+  }, []);
 
   const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
@@ -48,7 +54,8 @@ export default function SignupPage() {
       });
       setPlayerToken(data.token);
       setStoredPlayer(data.player);
-      router.push("/player/newsfeed");
+      const next = new URLSearchParams(window.location.search).get("next");
+      router.push(next || "/player/newsfeed");
     } catch (err) {
       setError(
         err.response?.data?.message || "Registrierung fehlgeschlagen. Bitte erneut versuchen."
@@ -166,7 +173,7 @@ export default function SignupPage() {
       </div>
 
       <a
-        href="/api/auth/google"
+        href={googleHref}
         className="w-full flex items-center justify-center gap-2 border border-gray-300 hover:border-brand-500 text-gray-700 rounded-lg px-4 py-2.5 font-medium transition-colors"
       >
         <FaGoogle className="text-brand-500" />

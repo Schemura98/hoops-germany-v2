@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { FaShieldAlt, FaSignOutAlt } from "react-icons/fa";
+import { FaShieldAlt, FaSignOutAlt, FaArrowLeft } from "react-icons/fa";
 import { clearAdminToken } from "@/lib/clientAuth";
 
 const links = [
@@ -48,9 +48,16 @@ export default function AdminNav() {
               </Link>
             );
           })}
+          <Link
+            href="/player/newsfeed"
+            className="ml-2 inline-flex items-center gap-1.5 whitespace-nowrap text-gray-300 hover:text-white text-sm"
+            title="Zurück zur Seite"
+          >
+            <FaArrowLeft className="text-xs" /> Zur Seite
+          </Link>
           <button
             onClick={logout}
-            className="ml-2 text-gray-400 hover:text-orange-400"
+            className="ml-1 text-gray-400 hover:text-orange-400"
             aria-label="Abmelden"
             title="Abmelden"
           >

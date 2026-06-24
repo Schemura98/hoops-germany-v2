@@ -4,6 +4,8 @@ import Player from "@/models/Player";
 import { signPlayerToken } from "@/lib/auth";
 import { uniqueSlug } from "@/lib/slug";
 import { getBaseUrl, googleRedirectUri } from "@/lib/baseUrl";
+import { sendMail } from "@/lib/mailer";
+import { welcomeEmail } from "@/lib/emailTemplates";
 
 // Dekodiert das JWT-Payload eines Google id_token (ohne Signaturprüfung –
 // der Token stammt direkt vom Google-Token-Endpunkt über TLS).
@@ -76,6 +78,7 @@ export async function GET(req) {
     let player = await Player.findOne({
       $or: [{ googleId }, { email }],
     });
+    let isNewPlayer = false;
 
     if (player) {
       // Bestehenden Account mit Google verknüpfen, falls noch nicht geschehen
@@ -98,14 +101,30 @@ export async function GET(req) {
         profileImage: profile.picture || "",
         status: "active",
       });
+      isNewPlayer = true;
     }
 
-    // 3. JWT erstellen und zum OAuth-Landing weiterleiten
+    // Willkommensmail nur für neu via Google angelegte Konten (fire-and-forget).
+    if (isNewPlayer) {
+      const { subject, html, text } = welcomeEmail({
+        firstName: player.firstName,
+        baseUrl: base,
+      });
+      sendMail({ to: player.email, subject, html, text }).catch((err) =>
+        console.error("[WELCOME MAIL ERROR]", err?.message || err)
+      );
+    }
+
+    // 3. JWT erstellen und zum OAuth-Landing weiterleiten (Zielort erhalten)
     const token = signPlayerToken({ id: player._id.toString() });
-    const res = NextResponse.redirect(
-      `${base}/oauth-landing?token=${encodeURIComponent(token)}`
-    );
+    const nextDest = req.cookies.get("g_oauth_next")?.value;
+    let landing = `${base}/oauth-landing?token=${encodeURIComponent(token)}`;
+    if (nextDest && nextDest.startsWith("/") && !nextDest.startsWith("//")) {
+      landing += `&next=${encodeURIComponent(nextDest)}`;
+    }
+    const res = NextResponse.redirect(landing);
     res.cookies.delete("g_oauth_state");
+    res.cookies.delete("g_oauth_next");
     return res;
   } catch (err) {
     console.error("[GOOGLE OAUTH CALLBACK ERROR]", err);

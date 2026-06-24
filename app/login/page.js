@@ -17,10 +17,15 @@ function LoginForm() {
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleHref, setGoogleHref] = useState("/api/auth/google");
 
   useEffect(() => {
-    const reason = new URLSearchParams(window.location.search).get("error");
-    if (reason) setError("Google-Anmeldung fehlgeschlagen. Bitte erneut versuchen.");
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error")) {
+      setError("Google-Anmeldung fehlgeschlagen. Bitte erneut versuchen.");
+    }
+    const next = params.get("next");
+    if (next) setGoogleHref(`/api/auth/google?next=${encodeURIComponent(next)}`);
   }, []);
 
   const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -120,7 +125,7 @@ function LoginForm() {
       </div>
 
       <a
-        href="/api/auth/google"
+        href={googleHref}
         className="w-full flex items-center justify-center gap-2 border border-gray-300 hover:border-brand-500 text-gray-700 rounded-lg px-4 py-2.5 font-medium transition-colors"
       >
         <FaGoogle className="text-brand-500" />

@@ -15,6 +15,13 @@ export async function GET(req) {
   const base = getBaseUrl(req);
   const state = randomUUID();
 
+  // Zielort nach dem Login merken (nur interne Pfade zulassen).
+  const nextParam = new URL(req.url).searchParams.get("next");
+  const safeNext =
+    nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//")
+      ? nextParam
+      : null;
+
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: googleRedirectUri(req),
@@ -36,5 +43,14 @@ export async function GET(req) {
     path: "/",
     maxAge: 600,
   });
+  if (safeNext) {
+    res.cookies.set("g_oauth_next", safeNext, {
+      httpOnly: true,
+      secure: base.startsWith("https"),
+      sameSite: "lax",
+      path: "/",
+      maxAge: 600,
+    });
+  }
   return res;
 }

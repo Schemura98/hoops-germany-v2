@@ -152,6 +152,12 @@ separaten Admin-Login mehr:** `getAdminToken()` (clientAuth) fällt auf den Spie
 dual-auth). `/admin/login` macht keinen Auto-Redirect → kein Loop. Verifiziert: Super-Admin landet direkt
 im Dashboard (Daten laden).
 
+**✅ OAuth-/UX-Fixes (24.06.):** Google-Login **erhält jetzt den Zielort** (`next`-Kette: `useCurrentPlayer`
+→ `/login?next=…` → Google-Button trägt `next` → google route speichert Cookie → callback reicht weiter →
+`oauth-landing` leitet dorthin). So landet „Team gründen" → Google-Login wieder bei `/team/create` statt
+Newsfeed. **Neue Google-Nutzer bekommen jetzt die Willkommensmail** (callback rief sie vorher nicht auf).
+`AdminNav` hat einen **„← Zur Seite"-Link** (Newsfeed). Login/Signup-E-Mail-Login + Google honorieren `next`.
+
 **✅ Live verifiziert (24.06.):** **SMTP funktioniert** (Passwort-Reset-Mail kam an, Reset durchgeführt) →
 alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = einsatzbereit.
 **Super-Admin-Spieler abgesichert** (Patrick & Jonatan haben eigene Passwörter gesetzt; test123 deaktiviert).

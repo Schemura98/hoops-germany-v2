@@ -18,7 +18,12 @@ function OauthLandingInner() {
       return () => clearTimeout(t);
     }
     setPlayerToken(token);
-    router.replace("/player/newsfeed");
+    const next = searchParams.get("next");
+    const dest =
+      next && next.startsWith("/") && !next.startsWith("//")
+        ? next
+        : "/player/newsfeed";
+    router.replace(dest);
   }, [searchParams, router]);
 
   return (
