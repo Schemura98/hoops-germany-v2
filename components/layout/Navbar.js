@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import {
@@ -56,6 +57,36 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const isLoggedIn = !!me;
+
+  const pathname = usePathname();
+  // Aktive Seite markieren (exakt oder als Unterpfad).
+  const isActive = (href) =>
+    pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
+  // Klassen-Helfer (konsistente Borders → kein Layout-Shift zwischen aktiv/inaktiv).
+  const deskClass = (href) =>
+    `text-sm transition-colors border-b-2 pb-0.5 ${
+      isActive(href)
+        ? "text-white font-semibold border-brand-500"
+        : "text-gray-300 hover:text-white border-transparent"
+    }`;
+  const deskAdminClass = (href) =>
+    `flex items-center gap-1.5 text-sm font-medium border-b-2 pb-0.5 ${
+      isActive(href)
+        ? "text-orange-300 border-brand-500"
+        : "text-orange-400 hover:text-orange-300 border-transparent"
+    }`;
+  const mobClass = (href) =>
+    `flex items-center gap-3 px-5 py-3.5 border-l-4 transition-colors ${
+      isActive(href)
+        ? "bg-slate-800 text-white border-brand-500"
+        : "text-white hover:bg-slate-800 border-transparent"
+    }`;
+  const mobAdminClass = (href) =>
+    `flex items-center gap-3 px-5 py-3.5 border-l-4 transition-colors ${
+      isActive(href)
+        ? "bg-slate-800 text-orange-300 border-brand-500"
+        : "text-orange-400 hover:bg-slate-800 border-transparent"
+    }`;
 
   // Eigenes Profil + Benachrichtigungen laden
   useEffect(() => {
@@ -189,7 +220,8 @@ export default function Navbar() {
               <Link
                 key={l.href}
                 href={l.href}
-                className="text-sm text-gray-300 hover:text-white transition-colors"
+                aria-current={isActive(l.href) ? "page" : undefined}
+                className={deskClass(l.href)}
               >
                 {l.label}
               </Link>
@@ -272,7 +304,8 @@ export default function Navbar() {
                     {me?.isSuperAdmin && (
                       <Link
                         href="/admin/dashboard"
-                        className="flex items-center gap-1.5 text-orange-400 hover:text-orange-300 text-sm font-medium"
+                        aria-current={isActive("/admin/dashboard") ? "page" : undefined}
+                        className={deskAdminClass("/admin/dashboard")}
                       >
                         <FaShieldAlt className="w-4 h-4" /> Admin
                       </Link>
@@ -280,7 +313,8 @@ export default function Navbar() {
                     {me?.isTeamAdmin && !me?.isSuperAdmin && (
                       <Link
                         href="/team/admin"
-                        className="flex items-center gap-1.5 text-orange-400 hover:text-orange-300 text-sm font-medium"
+                        aria-current={isActive("/team/admin") ? "page" : undefined}
+                        className={deskAdminClass("/team/admin")}
                       >
                         <FaTrophy className="w-4 h-4" /> Team-Admin
                       </Link>
@@ -288,7 +322,8 @@ export default function Navbar() {
                     {!me?.isTeamAdmin && !me?.isSuperAdmin && (
                       <Link
                         href="/team/create"
-                        className="text-sm text-gray-300 hover:text-white transition-colors"
+                        aria-current={isActive("/team/create") ? "page" : undefined}
+                        className={deskClass("/team/create")}
                       >
                         Team gründen
                       </Link>
@@ -296,7 +331,8 @@ export default function Navbar() {
                     {teamSlug && (
                       <Link
                         href={`/team/team-detail/${teamSlug}`}
-                        className="text-sm text-gray-300 hover:text-white transition-colors"
+                        aria-current={isActive(`/team/team-detail/${teamSlug}`) ? "page" : undefined}
+                        className={deskClass(`/team/team-detail/${teamSlug}`)}
                         title={teamName || "Mein Team"}
                       >
                         Mein Team
@@ -304,13 +340,15 @@ export default function Navbar() {
                     )}
                     <Link
                       href="/player/newsfeed"
-                      className="text-sm text-gray-300 hover:text-white transition-colors"
+                      aria-current={isActive("/player/newsfeed") ? "page" : undefined}
+                      className={deskClass("/player/newsfeed")}
                     >
                       Feed
                     </Link>
                     <Link
                       href="/player/player-detail"
-                      className="text-sm text-gray-300 hover:text-white transition-colors"
+                      aria-current={isActive("/player/player-detail") ? "page" : undefined}
+                      className={deskClass("/player/player-detail")}
                     >
                       Mein Profil
                     </Link>
@@ -325,7 +363,8 @@ export default function Navbar() {
                   <>
                     <Link
                       href="/login"
-                      className="text-sm text-gray-300 hover:text-white transition-colors"
+                      aria-current={isActive("/login") ? "page" : undefined}
+                      className={deskClass("/login")}
                     >
                       Anmelden
                     </Link>
@@ -361,7 +400,8 @@ export default function Navbar() {
                   key={l.href}
                   href={l.href}
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-5 py-3.5 text-white hover:bg-slate-800 transition-colors"
+                  aria-current={isActive(l.href) ? "page" : undefined}
+                  className={mobClass(l.href)}
                 >
                   <Icon className="text-orange-400 w-4 h-4 flex-shrink-0" />
                   <span className="text-sm font-medium">{l.label}</span>
@@ -374,7 +414,8 @@ export default function Navbar() {
                   <Link
                     href={`/team/team-detail/${teamSlug}`}
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 px-5 py-3.5 text-white hover:bg-slate-800 transition-colors"
+                    aria-current={isActive(`/team/team-detail/${teamSlug}`) ? "page" : undefined}
+                    className={mobClass(`/team/team-detail/${teamSlug}`)}
                   >
                     <FaBasketballBall className="text-orange-400 w-4 h-4 flex-shrink-0" />
                     <span className="text-sm font-medium">Mein Team</span>
@@ -383,7 +424,8 @@ export default function Navbar() {
                 <Link
                   href="/player/newsfeed"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-5 py-3.5 text-white hover:bg-slate-800 transition-colors"
+                  aria-current={isActive("/player/newsfeed") ? "page" : undefined}
+                  className={mobClass("/player/newsfeed")}
                 >
                   <FaRegNewspaper className="text-orange-400 w-4 h-4 flex-shrink-0" />
                   <span className="text-sm font-medium">Feed</span>
@@ -391,7 +433,8 @@ export default function Navbar() {
                 <Link
                   href="/player/player-detail"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-5 py-3.5 text-white hover:bg-slate-800 transition-colors"
+                  aria-current={isActive("/player/player-detail") ? "page" : undefined}
+                  className={mobClass("/player/player-detail")}
                 >
                   <FaUser className="text-orange-400 w-4 h-4 flex-shrink-0" />
                   <span className="text-sm font-medium">Mein Profil</span>
@@ -400,7 +443,8 @@ export default function Navbar() {
                   <Link
                     href="/admin/dashboard"
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 px-5 py-3.5 text-orange-400 hover:bg-slate-800 transition-colors"
+                    aria-current={isActive("/admin/dashboard") ? "page" : undefined}
+                    className={mobAdminClass("/admin/dashboard")}
                   >
                     <FaShieldAlt className="w-4 h-4 flex-shrink-0" />
                     <span className="text-sm font-medium">Super Admin</span>
@@ -410,7 +454,8 @@ export default function Navbar() {
                   <Link
                     href="/team/admin"
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 px-5 py-3.5 text-orange-400 hover:bg-slate-800 transition-colors"
+                    aria-current={isActive("/team/admin") ? "page" : undefined}
+                    className={mobAdminClass("/team/admin")}
                   >
                     <FaTrophy className="w-4 h-4 flex-shrink-0" />
                     <span className="text-sm font-medium">Team-Admin</span>
@@ -420,7 +465,8 @@ export default function Navbar() {
                   <Link
                     href="/team/create"
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 px-5 py-3.5 text-white hover:bg-slate-800 transition-colors"
+                    aria-current={isActive("/team/create") ? "page" : undefined}
+                    className={mobClass("/team/create")}
                   >
                     <FaUsers className="text-orange-400 w-4 h-4 flex-shrink-0" />
                     <span className="text-sm font-medium">Team gründen</span>
@@ -442,7 +488,8 @@ export default function Navbar() {
                 <Link
                   href="/login"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-5 py-3.5 text-white hover:bg-slate-800 transition-colors"
+                  aria-current={isActive("/login") ? "page" : undefined}
+                  className={mobClass("/login")}
                 >
                   <FaUser className="text-orange-400 w-4 h-4 flex-shrink-0" />
                   <span className="text-sm font-medium">Anmelden</span>

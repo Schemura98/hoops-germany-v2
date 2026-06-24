@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   FaSignOutAlt,
   FaBars,
@@ -25,7 +25,12 @@ const links = [
 
 export default function PlayerNav({ player }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Aktive Seite markieren (exakt oder als Unterpfad).
+  const isActive = (href) =>
+    pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
 
   function logout() {
     clearPlayerToken();
@@ -58,7 +63,12 @@ export default function PlayerNav({ player }) {
             <Link
               key={l.href}
               href={l.href}
-              className="text-sm text-gray-300 hover:text-white transition-colors"
+              aria-current={isActive(l.href) ? "page" : undefined}
+              className={`text-sm transition-colors border-b-2 pb-0.5 ${
+                isActive(l.href)
+                  ? "text-white font-semibold border-brand-500"
+                  : "text-gray-300 hover:text-white border-transparent"
+              }`}
             >
               {l.label}
             </Link>
@@ -66,7 +76,12 @@ export default function PlayerNav({ player }) {
           {adminLink && (
             <Link
               href={adminLink.href}
-              className="flex items-center gap-1.5 text-orange-400 hover:text-orange-300 text-sm font-medium"
+              aria-current={isActive(adminLink.href) ? "page" : undefined}
+              className={`flex items-center gap-1.5 text-sm font-medium border-b-2 pb-0.5 ${
+                isActive(adminLink.href)
+                  ? "text-orange-300 border-brand-500"
+                  : "text-orange-400 hover:text-orange-300 border-transparent"
+              }`}
             >
               <AdminIcon className="w-4 h-4" /> {adminLink.label}
             </Link>
@@ -117,7 +132,12 @@ export default function PlayerNav({ player }) {
               key={l.href}
               href={l.href}
               onClick={() => setMobileOpen(false)}
-              className="block px-5 py-3.5 text-sm font-medium text-gray-200 hover:bg-slate-800 hover:text-white transition-colors"
+              aria-current={isActive(l.href) ? "page" : undefined}
+              className={`block px-5 py-3.5 text-sm font-medium border-l-4 transition-colors ${
+                isActive(l.href)
+                  ? "bg-slate-800 text-white border-brand-500"
+                  : "text-gray-200 hover:bg-slate-800 hover:text-white border-transparent"
+              }`}
             >
               {l.label}
             </Link>
@@ -126,7 +146,12 @@ export default function PlayerNav({ player }) {
             <Link
               href={adminLink.href}
               onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-3 px-5 py-3.5 text-orange-400 hover:bg-slate-800 transition-colors"
+              aria-current={isActive(adminLink.href) ? "page" : undefined}
+              className={`flex items-center gap-3 px-5 py-3.5 border-l-4 transition-colors ${
+                isActive(adminLink.href)
+                  ? "bg-slate-800 text-orange-300 border-brand-500"
+                  : "text-orange-400 hover:bg-slate-800 border-transparent"
+              }`}
             >
               <AdminIcon className="w-4 h-4 flex-shrink-0" />
               <span className="text-sm font-medium">{adminLink.label}</span>

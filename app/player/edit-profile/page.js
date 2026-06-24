@@ -8,7 +8,9 @@ import { FaBasketballBall } from "react-icons/fa";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { getPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
 import { POSITIONS, BUNDESLAENDER } from "@/lib/constants";
+import { ageFromBirthdate, toDateInputValue } from "@/lib/age";
 import PlayerNav from "@/components/layout/PlayerNav";
+import Footer from "@/components/layout/Footer";
 import ImageUpload from "@/components/ImageUpload";
 import CityInput from "@/components/CityInput";
 
@@ -22,7 +24,6 @@ const FIELDS = [
   "position",
   "height",
   "weight",
-  "age",
   "birthdate",
   "nationality",
   "country",
@@ -56,6 +57,8 @@ export default function PlayerEditProfilePage() {
     if (player && !form) {
       const initial = {};
       for (const f of FIELDS) initial[f] = player[f] ?? "";
+      // Geburtsdatum für <input type="date"> normalisieren (akzeptiert auch Altdaten)
+      initial.birthdate = toDateInputValue(player.birthdate);
       // Mail-Einstellung (Standard an, wenn nicht explizit abgeschaltet)
       initial.emailPendingResult = player.emailPendingResult !== false;
       setForm(initial);
@@ -108,6 +111,8 @@ export default function PlayerEditProfilePage() {
     );
   }
 
+  const computedAge = ageFromBirthdate(form.birthdate);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <PlayerNav player={player} />
@@ -153,8 +158,20 @@ export default function PlayerEditProfilePage() {
                 ))}
               </select>
             </Field>
-            <Field label="Alter">
-              <input type="number" min="0" name="age" value={form.age} onChange={onChange} className={inputClass} />
+            <Field label="Geburtsdatum">
+              <input
+                type="date"
+                name="birthdate"
+                value={form.birthdate}
+                onChange={onChange}
+                max={new Date().toISOString().slice(0, 10)}
+                className={inputClass}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                {computedAge != null
+                  ? `Alter: ${computedAge} Jahre (wird automatisch aktualisiert)`
+                  : "Dein Alter wird daraus berechnet."}
+              </p>
             </Field>
           </div>
 
@@ -168,18 +185,15 @@ export default function PlayerEditProfilePage() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Geburtsdatum">
-              <input name="birthdate" value={form.birthdate} onChange={onChange} className={inputClass} placeholder="TT.MM.JJJJ" />
-            </Field>
             <Field label="Nationalität">
               <input name="nationality" value={form.nationality} onChange={onChange} className={inputClass} />
+            </Field>
+            <Field label="Land">
+              <input name="country" value={form.country} onChange={onChange} className={inputClass} />
             </Field>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Land">
-              <input name="country" value={form.country} onChange={onChange} className={inputClass} />
-            </Field>
             <Field label="Heimatstadt">
               <CityInput
                 value={form.hometown}
@@ -190,18 +204,17 @@ export default function PlayerEditProfilePage() {
                 placeholder="Stadt eingeben…"
               />
             </Field>
+            <Field label="Bundesland">
+              <select name="bundesland" value={form.bundesland} onChange={onChange} className={inputClass}>
+                <option value="">– wählen –</option>
+                {BUNDESLAENDER.map((b) => (
+                  <option key={b} value={b}>
+                    {b}
+                  </option>
+                ))}
+              </select>
+            </Field>
           </div>
-
-          <Field label="Bundesland">
-            <select name="bundesland" value={form.bundesland} onChange={onChange} className={inputClass}>
-              <option value="">– wählen –</option>
-              {BUNDESLAENDER.map((b) => (
-                <option key={b} value={b}>
-                  {b}
-                </option>
-              ))}
-            </select>
-          </Field>
 
           <Field label="Bevorzugte Liga">
             <input name="preferredLeague" value={form.preferredLeague} onChange={onChange} className={inputClass} />
@@ -285,6 +298,8 @@ export default function PlayerEditProfilePage() {
           </div>
         </form>
       </main>
+
+      <Footer />
     </div>
   );
 }

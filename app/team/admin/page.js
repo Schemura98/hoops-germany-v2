@@ -12,6 +12,7 @@ import {
 } from "react-icons/fa";
 import { useCurrentTeam } from "@/lib/useCurrentTeam";
 import TeamNav from "@/components/layout/TeamNav";
+import Footer from "@/components/layout/Footer";
 import KaderTab from "@/components/team/tabs/KaderTab";
 import AnfragenTab from "@/components/team/tabs/AnfragenTab";
 import SpielplanTab from "@/components/team/tabs/SpielplanTab";
@@ -100,6 +101,8 @@ export default function TeamAdminPage() {
         {/* Tab-Inhalt */}
         <ActiveComp team={team} reload={reload} />
       </main>
+
+      <Footer />
     </div>
   );
 }

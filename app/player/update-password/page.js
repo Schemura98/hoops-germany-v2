@@ -7,6 +7,7 @@ import { FaBasketballBall } from "react-icons/fa";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { getPlayerToken } from "@/lib/clientAuth";
 import PlayerNav from "@/components/layout/PlayerNav";
+import Footer from "@/components/layout/Footer";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
@@ -173,6 +174,8 @@ export default function PlayerUpdatePasswordPage() {
           </p>
         </form>
       </main>
+
+      <Footer />
     </div>
   );
 }

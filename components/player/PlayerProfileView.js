@@ -15,6 +15,7 @@ import {
 } from "react-icons/fa";
 import PlayerPosts from "@/components/posts/PlayerPosts";
 import Avatar from "@/components/Avatar";
+import { ageFromBirthdate, formatBirthdate } from "@/lib/age";
 
 const round1 = (n) => Math.round(n * 10) / 10;
 
@@ -190,7 +191,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
               <StatCell label="RPG" value={stats ? stats.rpg.toFixed(1) : "–"} />
               <div className="grid grid-cols-1 divide-y divide-white/10 min-w-[120px]">
                 <StatCell label="Größe" value={player?.height} />
-                <StatCell label="Alter" value={player?.age} />
+                <StatCell label="Alter" value={ageFromBirthdate(player?.birthdate) ?? player?.age} />
               </div>
               <div className="grid grid-cols-1 divide-y divide-white/10 min-w-[120px]">
                 <StatCell label="Gewicht" value={player?.weight} />
@@ -251,40 +252,6 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
         {tab === "stats" && (
           <>
-            {/* Karriere-Verlauf / Transfers */}
-            {teamHistory.length > 0 && (
-              <SectionCard title="Karriere-Verlauf">
-                <div className="flex items-center gap-1 overflow-x-auto pb-1">
-                  {teamHistory.map((h, i) => (
-                    <div key={i} className="flex items-center gap-1 flex-shrink-0">
-                      {i > 0 && (
-                        <div className="flex flex-col items-center px-1 text-brand-500">
-                          <FaExchangeAlt className="text-xs" />
-                          <span className="text-[9px] font-semibold uppercase tracking-wide">Wechsel</span>
-                        </div>
-                      )}
-                      <div className="flex flex-col items-center gap-1 px-2 py-1 min-w-[88px]">
-                        {h.teamSlug ? (
-                          <Link href={`/team/team-detail/${h.teamSlug}`}>
-                            <Avatar name={h.teamName} src={h.teamLogo} className="h-11 w-11" textClass="text-sm" square />
-                          </Link>
-                        ) : (
-                          <Avatar name={h.teamName} src={h.teamLogo} className="h-11 w-11" textClass="text-sm" square />
-                        )}
-                        <span className="text-xs font-medium text-gray-900 text-center leading-tight truncate max-w-[88px]">
-                          {h.teamName}
-                        </span>
-                        {h.season && <span className="text-[10px] text-gray-400">{h.season}</span>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                {teamHistory.length === 1 && (
-                  <p className="mt-2 text-xs text-gray-400">Noch kein Vereinswechsel.</p>
-                )}
-              </SectionCard>
-            )}
-
             <SectionCard
               title="Karriere-Bilanz"
               action={
@@ -407,8 +374,8 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
             <SectionCard title="Steckbrief">
               <InfoRow label="Größe" value={player?.height} />
               <InfoRow label="Gewicht" value={player?.weight} />
-              <InfoRow label="Alter" value={player?.age} />
-              <InfoRow label="Geburtsdatum" value={player?.birthdate} />
+              <InfoRow label="Alter" value={ageFromBirthdate(player?.birthdate) ?? player?.age} />
+              <InfoRow label="Geburtsdatum" value={formatBirthdate(player?.birthdate)} />
               <InfoRow label="Position" value={player?.position} />
               <InfoRow label="Nationalität" value={player?.nationality} />
               <InfoRow label="Land" value={player?.country} />
@@ -416,6 +383,40 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
               <InfoRow label="Bundesland" value={player?.bundesland} />
               <InfoRow label="Bevorzugte Liga" value={player?.preferredLeague} />
             </SectionCard>
+
+            {/* Karriere-Verlauf / Transfers */}
+            {teamHistory.length > 0 && (
+              <SectionCard title="Karriere-Verlauf">
+                <div className="flex items-center gap-1 overflow-x-auto pb-1">
+                  {teamHistory.map((h, i) => (
+                    <div key={i} className="flex items-center gap-1 flex-shrink-0">
+                      {i > 0 && (
+                        <div className="flex flex-col items-center px-1 text-brand-500">
+                          <FaExchangeAlt className="text-xs" />
+                          <span className="text-[9px] font-semibold uppercase tracking-wide">Wechsel</span>
+                        </div>
+                      )}
+                      <div className="flex flex-col items-center gap-1 px-2 py-1 min-w-[88px]">
+                        {h.teamSlug ? (
+                          <Link href={`/team/team-detail/${h.teamSlug}`}>
+                            <Avatar name={h.teamName} src={h.teamLogo} className="h-11 w-11" textClass="text-sm" square />
+                          </Link>
+                        ) : (
+                          <Avatar name={h.teamName} src={h.teamLogo} className="h-11 w-11" textClass="text-sm" square />
+                        )}
+                        <span className="text-xs font-medium text-gray-900 text-center leading-tight truncate max-w-[88px]">
+                          {h.teamName}
+                        </span>
+                        {h.season && <span className="text-[10px] text-gray-400">{h.season}</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {teamHistory.length === 1 && (
+                  <p className="mt-2 text-xs text-gray-400">Noch kein Vereinswechsel.</p>
+                )}
+              </SectionCard>
+            )}
           </>
         )}
 

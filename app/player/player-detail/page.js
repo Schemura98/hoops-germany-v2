@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FaBasketballBall, FaPen } from "react-icons/fa";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import PlayerNav from "@/components/layout/PlayerNav";
+import Footer from "@/components/layout/Footer";
 import PlayerProfileView from "@/components/player/PlayerProfileView";
 import TransferControl from "@/components/player/TransferControl";
 
@@ -61,6 +62,8 @@ export default function PlayerPlayerDetailPage() {
       <div className="max-w-4xl mx-auto px-4 pb-10 -mt-2">
         <TransferControl player={player} />
       </div>
+
+      <Footer />
     </div>
   );
 }

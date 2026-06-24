@@ -9,6 +9,7 @@ import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { getPlayerToken } from "@/lib/clientAuth";
 import { BUNDESLAENDER } from "@/lib/constants";
 import PlayerNav from "@/components/layout/PlayerNav";
+import Footer from "@/components/layout/Footer";
 import CityInput from "@/components/CityInput";
 
 const inputClass =
@@ -152,6 +153,8 @@ export default function TeamCreatePage() {
           </Link>
         </p>
       </main>
+
+      <Footer />
     </div>
   );
 }
