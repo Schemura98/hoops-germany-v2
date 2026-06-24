@@ -345,6 +345,17 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > `Team.leagueId`), Admin-Katalog (`/admin/leagues`), Liga-Picker bei Team-Gründung (`/team/create`),
 > Melde-Flow (`LeagueReportLink` → `/api/leagues/report`), Team-Selbsterstellung entfernt. Test-Logins
 > wie gehabt (`max@test.de`/test123 = Team-Admin; `admin`/`geheim1234` = Admin-Panel).
+>
+> **Ligen-Seite Filter** (`faa8b95`, live): `/ligen` filtert clientseitig nach Geschlecht/Altersklasse/
+> Spielklasse (aus `lib/constants`); Bundesland-Dropdown zeigt Länder ohne Ligen als „<Land> – folgt in
+> Kürze" (disabled, dynamisch aus geladenen Ligen → wächst automatisch mit). Karten zeigen gender/ageGroup/region.
+>
+> **Season-Rollover-Tool** (`scripts/rollover-season.mjs`): klont die offiziellen Liga-**Hüllen** einer
+> Saison in die nächste (Namen sind jahresstabil, keine Verbands-Kader nötig). Idempotent, `--from`/`--to`,
+> `--dry`, `--deactivate-old` (alte Saison → `active:false`/Archiv). **Einmal jährlich (≈Juli)** ausführen +
+> 10-Min-Sanity-Check (selten ändert der WBV die Gruppenzahl). Auf Dev getestet (57 geklont, idempotent),
+> **noch NICHT auf Prod ausgeführt** (Tool für die nächste Saison; Skript ist nur deployt/verfügbar).
+> ⚠️ Voraussetzung fürs echte Rollover: Roadmap-Punkt 7 (Teams müssen Liga in neuer Saison neu wählen).
 
 > **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
 > Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).
@@ -362,6 +373,12 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
    Einteilung noch „4. vorläufig"). **Wenn der PDF-Link/die Datei vorliegt:** im selben Muster wie Jugend m/o
    in `scripts/seed-nrw-leagues.mjs` ergänzen (`gender:"Damen"` bzw. Mixed für U10, reale Stufen je
    Altersklasse – nicht raten) → Dev + Prod seeden. (optional) NRW-**Kreisligen** (pro Basketballkreis, niedrige Prio).
+6. **Saisonende + Playoffs** (noch KEINE Logik vorhanden – Saison „endet" im Code nie, kein Meister/Archiv,
+   Spiele haben kein Playoff-Konzept). Geplant: (a) Liga auf „abgeschlossen" setzen → Endtabelle einfrieren +
+   **Meister-Badge** Platz 1; (b) Playoffs/Aufstiegsrunden als separat markierte Spiele oder simples Bracket
+   (eigenes Feature, später). Hängt mit dem Season-Rollover (s. u.) zusammen.
+7. **Liga-Auswahl im Team-Einstellungen-Tab** nachträglich änderbar machen – nötig, damit Teams sich nach
+   dem Season-Rollover für die neue Saison neu zuordnen können (Auf-/Abstieg).
 
 ### Bekannte Einschränkungen / offen
 - **Lokale Dev-Umgebung:** SMTP/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS
