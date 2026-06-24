@@ -223,6 +223,10 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
     dem Team-Load gerendert wird (sonst feuert der Deeplink-Scroll ins Leere). Klick + Deeplink verifiziert.
   - **Weiterhin offen (bewusst):** TransferEvents bleiben beim Team-Löschen als historische Einträge
     erhalten (verweisen ggf. auf gelöschtes Team).
+  - **Mobile PlayerNav-Icons entzerrt** (`ba5ed9b`): Glocke/Avatar/Logout/Hamburger lagen auf Mobil
+    zu eng. Logout auf Mobil ins Hamburger-Menü verschoben (eigener „Abmelden"-Eintrag), im Top-Bar
+    nur noch ab Desktop (`hidden lg:block`); größere Touch-Flächen (`p-2`) + mehr Abstand;
+    `NotificationBell`-Badge bleibt per relativem Wrapper am Icon verankert.
 
 > **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
 > Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).
