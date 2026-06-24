@@ -140,6 +140,11 @@ Cluster `hoops.tbhsg.mongodb.net` hat ZWEI getrennte DBs:
   → behebt `MissingSchemaError` beim populate im Production-Build (Dev-Server zeigte ihn nicht!).
   **Lehre: vor Deploy immer `npm start` (Production-Runtime) testen, nicht nur `next dev`.**
 
+**✅ Mobile-Fix (24.06., nach Go-Live):** `PlayerNav` hatte auf Mobil keine Navigation (`hidden md:flex`
+ohne Hamburger) → Hamburger-Menü ergänzt. `NotificationBell`-Dropdown war links abgeschnitten
+(`absolute right-0 w-80`) → responsiv gemacht (`fixed left-2 right-2 top-16 sm:absolute…`, Muster aus
+`Navbar.js`). TeamNav (keine Haupt-Links) + AdminNav (`overflow-x-auto`) sind mobil ok.
+
 **✅ Live verifiziert (24.06.):** **SMTP funktioniert** (Passwort-Reset-Mail kam an, Reset durchgeführt) →
 alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = einsatzbereit.
 **Super-Admin-Spieler abgesichert** (Patrick & Jonatan haben eigene Passwörter gesetzt; test123 deaktiviert).

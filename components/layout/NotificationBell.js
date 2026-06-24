@@ -85,7 +85,7 @@ export default function NotificationBell() {
         <>
           {/* Klick-außerhalb-Backdrop */}
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-white rounded-2xl shadow-lg border border-gray-100 z-50">
+          <div className="fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80 max-h-[70vh] sm:max-h-96 overflow-y-auto bg-white rounded-2xl shadow-lg border border-gray-100 z-50">
             <div className="px-4 py-3 border-b border-gray-100">
               <h3 className="text-sm font-semibold text-gray-900">Benachrichtigungen</h3>
             </div>
