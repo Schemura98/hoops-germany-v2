@@ -69,7 +69,14 @@ export default function PlayerViewPlayerSlugPage({ params }) {
           viewerId={viewerId}
           actions={
             viewerId !== String(player._id) ? (
-              <FollowButton type="player" targetId={player._id} />
+              <FollowButton
+                type="player"
+                targetId={player._id}
+                onCountChange={(count) =>
+                  typeof count === "number" &&
+                  setPlayer((p) => ({ ...p, followersCount: count }))
+                }
+              />
             ) : null
           }
         />
