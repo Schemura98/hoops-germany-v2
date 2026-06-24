@@ -400,8 +400,13 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
    Ligen) + `seasons`-Liste; `/ligen` hat einen **Saison-Switcher** („Aktuelle Saison" = aktive, je Saison =
    alle inkl. Archiv), Meister wird auf abgeschlossenen Karten gezeigt; `updateleague` friert den Meister beim
    Abschließen ein (Tabellenführer automatisch oder explizit).
-   **Noch offen (optional, später):** echte **Playoff-Brackets/Serien** (separat markierte Spiele/Bracket) –
-   aktuell deckt der Champion-Override den Sieger ab.
+   ✅ **Playoffs erledigt** (`54ac62d`, live): `Match.stage` (Hauptrunde|Playoffs) + `playoffRound`
+   (`lib/constants.PLAYOFF_ROUNDS`). Spiel-Anlage (`SpielplanTab`/`matches/create`) erlaubt bei gewählter Liga
+   Spieltyp + Runde (Playoffs nur mit Liga). **Tabelle zählt nur Hauptrunde** (`computeStandings` +
+   `standings`-API schließen Playoffs aus). `/ligen/[id]` zeigt einen **Playoff-Abschnitt nach Runde**
+   (verlinkt aufs Match); Match-Detail zeigt „Playoffs · Runde"-Badge. **Meister-Automatik bevorzugt den
+   Finalsieger**, sonst Tabellenführer (`updateleague.resolveChampionId`).
+   **Noch offen (optional):** Best-of-Serien (mehrere Spiele je Paarung), echte Bracket-Grafik.
 7. **Liga-Wechsel im Team-Einstellungen-Tab** ✅ **erledigt** (`25c8628`, live): `/api/team/set-league` +
    Picker in `EinstellungenTab` (pflegt `League.teams` beidseitig). Teams können sich nach dem Season-Rollover
    der neuen Saison zuordnen.
