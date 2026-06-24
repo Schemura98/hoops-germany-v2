@@ -9,7 +9,9 @@ import {
   LEAGUE_LEVELS,
   LEAGUE_GENDERS,
   LEAGUE_AGE_GROUPS,
+  ALL_ROLES,
 } from "@/lib/constants";
+import { FaUserPlus } from "react-icons/fa";
 import ImageUpload from "@/components/ImageUpload";
 import CityInput from "@/components/CityInput";
 import LeagueReportLink from "@/components/team/LeagueReportLink";
@@ -45,6 +47,41 @@ export default function EinstellungenTab({ team, reload }) {
   const [leagueFilter, setLeagueFilter] = useState({ level: "", gender: "", ageGroup: "" });
   const [leagueSaving, setLeagueSaving] = useState(false);
   const [leagueMsg, setLeagueMsg] = useState(null);
+
+  // Scouting: Verstärkung suchen
+  const [recruiting, setRecruiting] = useState(!!team?.recruiting);
+  const [recruitPositions, setRecruitPositions] = useState(team?.recruitingPositions || []);
+  const [recruitNote, setRecruitNote] = useState(team?.recruitingNote || "");
+  const [recruitSaving, setRecruitSaving] = useState(false);
+  const [recruitMsg, setRecruitMsg] = useState(null);
+
+  const toggleRecruitPos = (p) =>
+    setRecruitPositions((list) =>
+      list.includes(p) ? list.filter((x) => x !== p) : [...list, p]
+    );
+
+  async function saveRecruiting(nextRecruiting) {
+    setRecruitSaving(true);
+    setRecruitMsg(null);
+    try {
+      const token = getTeamAuthToken();
+      await axios.post("/api/team/set-recruiting", {
+        token,
+        recruiting: nextRecruiting,
+        positions: recruitPositions,
+        recruitingNote: recruitNote,
+      });
+      setRecruitMsg({ type: "ok", text: "Gespeichert." });
+      reload?.();
+    } catch (err) {
+      setRecruitMsg({
+        type: "err",
+        text: err.response?.data?.message || "Speichern fehlgeschlagen.",
+      });
+    } finally {
+      setRecruitSaving(false);
+    }
+  }
 
   useEffect(() => {
     let active = true;
@@ -365,6 +402,100 @@ export default function EinstellungenTab({ team, reload }) {
             {leagueSaving ? "Speichern…" : "Liga speichern"}
           </button>
         </div>
+      </div>
+
+      {/* Verstärkung suchen (Scouting) */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <FaUserPlus className="text-brand-500" /> Verstärkung suchen
+          </h2>
+          <button
+            type="button"
+            onClick={() => {
+              const next = !recruiting;
+              setRecruiting(next);
+              saveRecruiting(next);
+            }}
+            disabled={recruitSaving}
+            role="switch"
+            aria-checked={recruiting}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${
+              recruiting ? "bg-brand-500" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                recruiting ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+        <p className="text-sm text-gray-500">
+          {recruiting
+            ? 'Dein Team erscheint im Transfermarkt-Tab „Vereine suchen Spieler".'
+            : "Aktiviere den Schalter, um dein Team im Transfermarkt als suchend zu listen."}
+        </p>
+
+        {recruitMsg && (
+          <div
+            className={`rounded-lg border px-4 py-3 text-sm ${
+              recruitMsg.type === "ok"
+                ? "bg-green-50 border-green-200 text-green-700"
+                : "bg-red-50 border-red-200 text-red-700"
+            }`}
+          >
+            {recruitMsg.text}
+          </div>
+        )}
+
+        {recruiting && (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-2">
+                Gesuchte Positionen / Rollen
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {ALL_ROLES.map((p) => {
+                  const active = recruitPositions.includes(p);
+                  return (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => toggleRecruitPos(p)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                        active
+                          ? "bg-brand-500 text-white border-brand-500"
+                          : "bg-white text-gray-600 border-gray-200 hover:border-brand-300"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <Field label="Notiz (optional)">
+              <textarea
+                value={recruitNote}
+                onChange={(e) => setRecruitNote(e.target.value)}
+                rows={2}
+                className={`${inputClass} resize-none`}
+                placeholder="Was sucht ihr? Spielklasse, Trainingszeiten, Region…"
+              />
+            </Field>
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => saveRecruiting(true)}
+                disabled={recruitSaving}
+                className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-6 py-2.5 font-medium transition-colors"
+              >
+                {recruitSaving ? "Speichern…" : "Speichern"}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Einladungslink */}

@@ -35,6 +35,10 @@ const teamSchema = new mongoose.Schema(
     adminPlayerId: { type: mongoose.Schema.Types.ObjectId, ref: "players" },
     inviteToken: String,
     rosterSlots: [rosterSlotSchema],
+    // Scouting / Transfermarkt (Team-Seite): Verein sucht Verstärkung.
+    recruiting: { type: Boolean, default: false },
+    recruitingPositions: [String], // gesuchte Positionen/Rollen (ALL_ROLES)
+    recruitingNote: String,
   },
   { timestamps: true }
 );

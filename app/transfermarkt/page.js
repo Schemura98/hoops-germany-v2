@@ -3,11 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaSearch, FaBasketballBall, FaMapMarkerAlt } from "react-icons/fa";
+import { FaSearch, FaBasketballBall, FaMapMarkerAlt, FaUsers } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import CityRadiusFilter from "@/components/CityRadiusFilter";
+import Avatar from "@/components/Avatar";
 import {
   BUNDESLAENDER,
   POSITIONS,
@@ -16,12 +17,20 @@ import {
 } from "@/lib/constants";
 import { loadCities, cityCoords, haversineKm } from "@/lib/geo";
 
+const TABS = [
+  { key: "players", label: "Spieler suchen Verein" },
+  { key: "teams", label: "Vereine suchen Spieler" },
+];
+
 export default function TransfermarktPage() {
+  const [view, setView] = useState("players");
   const [players, setPlayers] = useState([]);
+  const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+
   const [query, setQuery] = useState("");
-  const [position, setPosition] = useState(""); // "" = Alle
+  const [position, setPosition] = useState("");
   const [land, setLand] = useState("");
   const [geo, setGeo] = useState({ center: null, radiusKm: 50 });
   const [cityMap, setCityMap] = useState(null);
@@ -34,8 +43,14 @@ export default function TransfermarktPage() {
     let active = true;
     (async () => {
       try {
-        const { data } = await axios.post("/api/player/transferlist", {});
-        if (active) setPlayers(data.players || []);
+        const [pRes, tRes] = await Promise.all([
+          axios.post("/api/player/transferlist", {}),
+          axios.post("/api/team/recruiting-list", {}),
+        ]);
+        if (active) {
+          setPlayers(pRes.data.players || []);
+          setTeams(tRes.data.teams || []);
+        }
       } catch {
         if (active) setError(true);
       } finally {
@@ -47,7 +62,17 @@ export default function TransfermarktPage() {
     };
   }, []);
 
-  const filtered = useMemo(() => {
+  const geoOk = (cityName) => {
+    if (!geo.center) return true;
+    if (!cityMap) return true;
+    const coords = cityCoords(cityMap, cityName);
+    return (
+      !!coords &&
+      haversineKm(geo.center.lat, geo.center.lng, coords.lat, coords.lng) <= geo.radiusKm
+    );
+  };
+
+  const filteredPlayers = useMemo(() => {
     const q = query.trim().toLowerCase();
     return players.filter((p) => {
       const matchesQuery =
@@ -58,20 +83,27 @@ export default function TransfermarktPage() {
         p.hometown?.toLowerCase().includes(q);
       const matchesPosition = !position || positionLabel(p.position) === position;
       const matchesLand = !land || p.bundesland === land;
-      let matchesGeo = true;
-      if (geo.center) {
-        if (!cityMap) matchesGeo = true;
-        else {
-          const coords = cityCoords(cityMap, p.hometown);
-          matchesGeo =
-            !!coords &&
-            haversineKm(geo.center.lat, geo.center.lng, coords.lat, coords.lng) <=
-              geo.radiusKm;
-        }
-      }
-      return matchesQuery && matchesPosition && matchesLand && matchesGeo;
+      return matchesQuery && matchesPosition && matchesLand && geoOk(p.hometown);
     });
   }, [players, query, position, land, geo, cityMap]);
+
+  const filteredTeams = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return teams.filter((t) => {
+      const posLabels = (t.positions || []).map(positionLabel);
+      const matchesQuery =
+        !q ||
+        t.teamName?.toLowerCase().includes(q) ||
+        t.note?.toLowerCase().includes(q) ||
+        posLabels.join(" ").toLowerCase().includes(q) ||
+        t.region?.toLowerCase().includes(q);
+      const matchesPosition = !position || posLabels.includes(position);
+      const matchesLand = !land || t.bundesland === land;
+      return matchesQuery && matchesPosition && matchesLand && geoOk(t.region);
+    });
+  }, [teams, query, position, land, geo, cityMap]);
+
+  const list = view === "players" ? filteredPlayers : filteredTeams;
 
   const selectCls =
     "rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-700 bg-white shadow-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
@@ -83,10 +115,27 @@ export default function TransfermarktPage() {
       <PageHeader
         eyebrow="Wechselbörse"
         title="Transfermarkt"
-        subtitle="Spieler, Coaches & Funktionäre, die einen neuen Verein suchen."
+        subtitle="Finde einen Verein – oder die passende Verstärkung."
       />
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
+        {/* Tabs */}
+        <div className="flex gap-2 mb-5 border-b border-gray-200">
+          {TABS.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setView(t.key)}
+              className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                view === t.key
+                  ? "border-brand-500 text-brand-600"
+                  : "border-transparent text-gray-500 hover:text-gray-800"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
         {/* Filter */}
         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mb-6">
           <div className="relative flex-1 min-w-[200px]">
@@ -94,7 +143,7 @@ export default function TransfermarktPage() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Name, Rolle, Liga oder Stadt…"
+              placeholder={view === "players" ? "Name, Rolle, Liga oder Stadt…" : "Team, Rolle oder Stadt…"}
               className="w-full rounded-lg border border-gray-300 pl-9 pr-4 py-2.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
           </div>
@@ -104,7 +153,7 @@ export default function TransfermarktPage() {
             className={selectCls}
             aria-label="Position oder Rolle"
           >
-            <option value="">Alle Positionen &amp; Rollen</option>
+            <option value="">{view === "players" ? "Alle Positionen & Rollen" : "Alle gesuchten Rollen"}</option>
             <optgroup label="Spielposition">
               {POSITIONS.map((pos) => (
                 <option key={pos} value={pos}>
@@ -138,7 +187,7 @@ export default function TransfermarktPage() {
 
         {!loading && !error && (
           <p className="text-xs text-gray-400 font-medium mb-4 uppercase tracking-wide">
-            {filtered.length} {filtered.length === 1 ? "Eintrag" : "Einträge"}
+            {list.length} {list.length === 1 ? "Eintrag" : "Einträge"}
           </p>
         )}
 
@@ -150,15 +199,17 @@ export default function TransfermarktPage() {
           <p className="text-center text-gray-500 py-16">
             Transferliste konnte nicht geladen werden.
           </p>
-        ) : filtered.length === 0 ? (
+        ) : list.length === 0 ? (
           <p className="text-center text-gray-500 py-16">
             {query || position || land || geo.center
               ? "Keine passenden Einträge gefunden."
-              : "Aktuell ist niemand als transferbereit gelistet."}
+              : view === "players"
+              ? "Aktuell ist niemand als transferbereit gelistet."
+              : "Aktuell sucht kein Verein öffentlich Verstärkung."}
           </p>
-        ) : (
+        ) : view === "players" ? (
           <div className="grid gap-4 sm:grid-cols-2">
-            {filtered.map((p) => {
+            {filteredPlayers.map((p) => {
               const initials =
                 `${p.firstName?.[0] || ""}${p.lastName?.[0] || ""}`.toUpperCase();
               return (
@@ -213,6 +264,48 @@ export default function TransfermarktPage() {
                 </Link>
               );
             })}
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {filteredTeams.map((t) => (
+              <Link
+                key={t._id}
+                href={`/team/team-detail/${t.slug}`}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar name={t.teamName} src={t.logo} className="h-12 w-12" textClass="text-sm" square />
+                  <div className="min-w-0">
+                    <p className="font-semibold text-gray-900 truncate">{t.teamName}</p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {t.league?.name ? t.league.name : "Verein"}
+                    </p>
+                    {(t.region || t.bundesland) && (
+                      <p className="text-xs text-gray-400 truncate flex items-center gap-1 mt-0.5">
+                        <FaMapMarkerAlt className="flex-shrink-0 text-gray-300" />
+                        {[t.region, t.bundesland].filter(Boolean).join(" · ")}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {t.positions?.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-1">
+                    {t.positions.map((p) => (
+                      <span
+                        key={p}
+                        className="text-xs font-medium bg-brand-50 text-brand-700 rounded-full px-2 py-0.5"
+                      >
+                        {positionLabel(p)}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {t.note && (
+                  <p className="mt-2 text-sm text-gray-600 border-t border-gray-100 pt-2">{t.note}</p>
+                )}
+              </Link>
+            ))}
           </div>
         )}
       </main>
