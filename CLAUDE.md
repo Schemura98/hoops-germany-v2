@@ -350,6 +350,11 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > Spielklasse (aus `lib/constants`); Bundesland-Dropdown zeigt Länder ohne Ligen als „<Land> – folgt in
 > Kürze" (disabled, dynamisch aus geladenen Ligen → wächst automatisch mit). Karten zeigen gender/ageGroup/region.
 >
+> **Topscorer + Rangliste saison-fähig** (`4e0c42d`, live): `/api/player/topscorer` (POST `season`) und
+> `/api/teams/standings` (`?season=`) filtern Spiele über die Ligen der Saison (`leagueId $in`) und liefern
+> `seasons`; `/topscorer` + `/rangliste` haben ein Saison-Dropdown („Alle Saisons" + je Saison), Rangliste
+> grenzt die Liga-Optionen auf die Saison ein. Wichtig ab mehreren Saisons (nach Rollover).
+>
 > **Liga auf Team-Seite** (`e68486c`, live): Team-Detailseite (`/team/team-detail/[slug]`) zeigt eine
 > Liga-Karte (aktuelle Liga + Platz X/Y + S/N/Korbdiff, bei abgeschlossener Saison Meister-Badge), verlinkt
 > zur Liga. `fetchsingleteaminfo` liefert dafür `league` inkl. `rank`/`record`/`isChampion`. **Tabellen-Logik
