@@ -236,7 +236,9 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
     (`PlayerProfileView`): Klick zeigt die Einzelspiele der Saison/Liga mit Gegner, Datum, Endstand,
     W/L und eigenen PKT·AST·REB (DNP markiert), verlinkt aufs Match. Neue API
     `app/api/player/station-matches/route.js` (Score via `lib/matchScore.teamScores`);
-    `stations` liefert zusätzlich `teamId`/`leagueId` für die Detail-Abfrage.
+    `stations` liefert zusätzlich `teamId`/`leagueId` für die Detail-Abfrage. **DNP-Partien werden in
+    der Detailliste ausgeblendet** (Query-`$elemMatch` mit `didNotPlay: {$ne:true}`) → deckt sich
+    exakt mit der „Sp."-Zahl der Station (funktional verifiziert: DNP → Detail 3→2 = Sp. 2).
 
 > **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
 > Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).

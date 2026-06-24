@@ -23,7 +23,9 @@ async function handler(req) {
 
   const query = {
     status: "completed",
-    playerStats: { $elemMatch: { player: pid, team: tid } },
+    // Nur Spiele, in denen der Spieler für dieses Team auch gespielt hat
+    // (DNP ausblenden → deckt sich mit der „Sp."-Zahl der Station).
+    playerStats: { $elemMatch: { player: pid, team: tid, didNotPlay: { $ne: true } } },
   };
   if (leagueId && mongoose.isValidObjectId(leagueId)) {
     query.leagueId = new mongoose.Types.ObjectId(leagueId);
