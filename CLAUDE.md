@@ -140,11 +140,16 @@ Cluster `hoops.tbhsg.mongodb.net` hat ZWEI getrennte DBs:
   → behebt `MissingSchemaError` beim populate im Production-Build (Dev-Server zeigte ihn nicht!).
   **Lehre: vor Deploy immer `npm start` (Production-Runtime) testen, nicht nur `next dev`.**
 
+**✅ Live verifiziert (24.06.):** **SMTP funktioniert** (Passwort-Reset-Mail kam an, Reset durchgeführt) →
+alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = einsatzbereit.
+**Super-Admin-Spieler abgesichert** (Patrick & Jonatan haben eigene Passwörter gesetzt; test123 deaktiviert).
+`/admin`-Panel-Konten haben ein temporäres starkes Passwort (sollte noch auf ein eigenes geändert werden).
+
 🔜 **Noch offen (nach Go-Live):**
-0. **⚠️ SICHERHEIT (dringend):** Demo-Seed legte schwache, bekannte Logins an (`/admin`: admin/geheim1234,
-   patrick/jonatan = test123; Super-Admin-Spieler p.schemura@/jonatanbaenavides@ = test123). Auf der
-   öffentlichen Seite ändern! (Super-Admins via „Passwort vergessen", SMTP läuft jetzt.)
-1. **Live-Tests:** Willkommens-/Reset-/Mismatch-Mail (echtes SMTP), Google-Login, Registrierung, Flows.
+1. **Live-Tests Rest:** Google-Login (Redirect-URI `https://hoopsgermany.de/api/auth/google/callback` prüfen),
+   kompletter Flow-Durchlauf (Registrierung→Willkommensmail, Team gründen, Ergebnis/Mismatch).
+2. **`/admin`-Temp-Passwort** auf ein eigenes ändern.
+3. **Demo-Daten** später durch echte ersetzen (frischer Seed / Bereinigung).
 2. **SMTP + Google-Keys** (User liefert `SMTP_PASS`, `GOOGLE_CLIENT_ID/SECRET`) → echter Mailversand + Google-Login.
 3. **Monetarisierung (#6)** – BLOCKIERT bis **Gewerbeanmeldung** des Users (Amazon-Affiliate +
    Sponsorfläche; AdSense erst bei genug Traffic + Consent-Banner).
