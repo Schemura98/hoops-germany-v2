@@ -5,9 +5,10 @@
 
 ## 0. AKTUELLER STAND (Stand: 24.06.2026 – Redesign-Phase)
 
-> v2 ist lokal funktionsfähig. **Laufendes Großprojekt:** das alte Live-Design von
-> `hoopsgermany.de` (dunkles Navy/Slate + Orange + Canva-Logo) wird Seite für Seite
-> originalgetreu auf die saubere v2-Architektur übertragen. Noch **nichts auf VPS deployed**.
+> 🟢 **v2 IST LIVE auf https://hoopsgermany.de** (seit 24.06.2026, Hostinger-VPS, DB `hoops_prod`).
+> Das Redesign (Navy/Slate + Orange + Canva-Logo) ist abgeschlossen und im Produktivbetrieb;
+> Hauptflow live verifiziert. Details + offene Punkte siehe unten (Go-Live-Block + Roadmap).
+> Alte Seite läuft als Rollback-Fallback weiter (PM2 `sports`, Port 3000, DB `test`).
 
 ### Projektort & Umgebung
 - **Lokaler Pfad: `C:\dev\hoops-germany-v2`** (NICHT zurück nach OneDrive – OneDrive sperrt `.next`).
@@ -163,19 +164,38 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 **Super-Admin-Spieler abgesichert** (Patrick & Jonatan haben eigene Passwörter gesetzt; test123 deaktiviert).
 `/admin`-Panel-Konten haben ein temporäres starkes Passwort (sollte noch auf ein eigenes geändert werden).
 
+#### Update (Live-Testphase, 24.06.) – Feedback live umgesetzt, kompletter Flow durchgespielt
+- **Willkommensmail** (`44eaba0`): Intro für ALLE Neuen (nicht nur Team-Admins), „Leg gleich los" zentriert.
+  Neue **Google-Nutzer bekommen die Willkommensmail** (Callback ergänzt).
+- **Spielplan-Gegnerfilter** (`5ef767b`): Gegner-Dropdown nach **Bundesland/Liga** filterbar (skaliert).
+  `/api/leagues` liefert dafür `teams` je Liga.
+- **Ergebnisse-Tab** (`221887b`): Spieler-Statistiken **standardmäßig aufgeklappt**; Ergebnis-Eingabe erst
+  **nach Spielbeginn** (Client-Hinweis + Server-Guard in `submit-match-result`, außer Meldung liegt bereits vor).
+- **Benachrichtigungen klickbar** (`e3d0370`): `lib/notifications.js` (`notificationHref(n, me)`) leitet
+  rollen-/typgerecht (Mismatch → Super-Admin `/admin/matches`, Team-Admin `/team/admin?tab=ergebnisse`;
+  pending_result → Ergebnisse-Tab; join_request → Anfragen-Tab; match_result → `/match/[id]`). NotificationBell
+  + Navbar-Dropdown verlinken; **Team-Admin-Panel Tab-Deeplinks** `?tab=…`; Mail-CTAs → `?tab=ergebnisse`.
+- **Bereinigt:** versehentliches Team „Viersen Hoops" (Super-Admin/Google-Test) gelöscht.
+- **✅ KOMPLETTER LIVE-FLOW durchgespielt:** Registrierung→Willkommensmail · **Google-Login** · Team gründen
+  („Viersen Hoops II" = Patrick Test) · Spiel+Ergebnis (Gegnerfilter) · **Mismatch** (Rhein 22:19) →
+  In-App + Mails an **beide Team-Admins UND beide Super-Admins** → im Admin-Panel **aufgelöst** (20:17, confirmed).
+
+> **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
+> Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).
+
 🔜 **Noch offen (nach Go-Live):**
-1. **Live-Tests Rest:** Google-Login (Redirect-URI `https://hoopsgermany.de/api/auth/google/callback` prüfen),
-   kompletter Flow-Durchlauf (Registrierung→Willkommensmail, Team gründen, Ergebnis/Mismatch).
-2. **`/admin`-Temp-Passwort** auf ein eigenes ändern.
-3. **Demo-Daten** später durch echte ersetzen (frischer Seed / Bereinigung).
-2. **SMTP + Google-Keys** (User liefert `SMTP_PASS`, `GOOGLE_CLIENT_ID/SECRET`) → echter Mailversand + Google-Login.
+1. **`/admin`-Temp-Passwort** (`A1cGmhwN-1To`) auf ein eigenes ändern (oder Legacy-`/admin`-Login ganz entfernen,
+   da Super-Admin-Spieler eh direkt reinkommen).
+2. **Demo-Daten** nach der Testphase durch echte ersetzen (frischer Seed / Bereinigung); dann alte DB `test` löschen.
 3. **Monetarisierung (#6)** – BLOCKIERT bis **Gewerbeanmeldung** des Users (Amazon-Affiliate +
    Sponsorfläche; AdSense erst bei genug Traffic + Consent-Banner).
+4. Weitere UX-Feinschliffe nach Tester-Feedback.
 
 ### Bekannte Einschränkungen / offen
-- **Kein VPS-Deployment** erfolgt. Live-Site (`hoopsgermany.de`) läuft noch auf altem Code + DB `test`.
-- **SMTP/Google**-Keys fehlen lokal → Reset-/Einladungs-/Willkommens-/Mismatch-Mails & Google-Login erst mit echten Werten testbar.
+- **Lokale Dev-Umgebung:** SMTP/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS
+  (hoops_prod) live testbar; lokal über In-App-Notifs + Trigger-Logs verifizieren.
 - Schema-Änderungen erfordern Dev-Neustart (mongoose-Model-Cache). Nach Dev-Server-Lock ggf. `.next` löschen vor `npm run build`.
+- **Vor Deploy immer Production-Runtime testen** (`npm start`/VPS-Build), nicht nur `next dev` (s. populate-Bug).
 
 ---
 
