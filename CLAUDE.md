@@ -207,9 +207,22 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
   - **Verwaiste Tryouts robust** (`tryouts` filtern): Wird ein Team gelöscht (`teamId` null), zeigte die
     Tryout-Liste/-Detail generisch „Team"/„Tryout". Jetzt blendet `/api/tryouts` verwaiste Einträge aus,
     `/api/tryouts/[id]` liefert 404 (→ saubere Leer-/„nicht gefunden"-Zustände).
-  - **Offen/bewusst nicht gemacht:** vollständiges Cascade-Cleanup beim Team-Löschen (Matches/Posts/
-    `player.teamId`) – `deleteteam` löscht weiterhin nur das Team; Auto-Scroll zum aktiven Tab im
-    Team-Admin-Tab-Balken (kosmetisch).
+- **UX-Feinschliff Profil + Cascade + Tab-Scroll** (Folge-Runde):
+  - **Stats-Leiste: Text-Überlauf behoben** (`PlayerProfileView`/`StatCell`): Lange Werte wie
+    „Deutschland"/„Nordrhein-Westfalen" liefen bei schmaler Breite aus der Zelle. Meta-Zellen jetzt
+    `small` (text-sm) + `break-words`; die drei Kern-Stats (PPG/APG/RPG) bleiben groß.
+  - **Scroll-Hinweis** für die horizontale Stats-Leiste: neue `components/ScrollHintRow.js` (Rand-Fade
+    + pulsierender Pfeil rechts, erscheint nur wenn scrollbar) → Nutzer erkennen die Wisch-Geste.
+  - **Cascade-Cleanup beim Team-Löschen** (`api/admin/deleteteam`): löscht jetzt auch die Spiele des
+    Teams (und entfernt sie aus `League.matches`), die Tryouts, entfernt das Team aus `League.teams`
+    und löst Spieler-Referenzen (`teamId`, `teamAdminOf`/`isTeamAdmin`, `teamJoinRequest`,
+    `followingTeams`). Spieler/Posts bleiben erhalten (Posts referenzieren kein Team). **End-to-end
+    getestet** (Munich Hoops gelöscht → 6 Spiele weg, Liga bereinigt, Mitglied teamlos) + Dev-DB neu geseedet.
+  - **Auto-Scroll zum aktiven Tab** im Team-Admin-Panel (`team/admin`): aktiver Tab wird im scrollbaren
+    Balken zentriert (Ref-Map + `scrollTo`), Dep `[active, status]` – wichtig, da die Leiste erst nach
+    dem Team-Load gerendert wird (sonst feuert der Deeplink-Scroll ins Leere). Klick + Deeplink verifiziert.
+  - **Weiterhin offen (bewusst):** TransferEvents bleiben beim Team-Löschen als historische Einträge
+    erhalten (verweisen ggf. auf gelöschtes Team).
 
 > **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
 > Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).

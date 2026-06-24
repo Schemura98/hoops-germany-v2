@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FaUsers,
   FaUserPlus,
@@ -32,12 +32,28 @@ const TABS = [
 export default function TeamAdminPage() {
   const { team, status, reload } = useCurrentTeam();
   const [active, setActive] = useState("kader");
+  const tabBarRef = useRef(null);
+  const tabRefs = useRef({});
 
   // Tab-Deeplink: ?tab=ergebnisse (z.B. aus Mail/Benachrichtigung).
   useEffect(() => {
     const t = new URLSearchParams(window.location.search).get("tab");
     if (t && TABS.some((x) => x.key === t)) setActive(t);
   }, []);
+
+  // Aktiven Tab im scrollbaren Balken zentrieren (nur horizontal). Leicht
+  // verzögert, damit auch der Deeplink-Fall (?tab=…) nach dem Mount greift.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const bar = tabBarRef.current;
+      const btn = tabRefs.current[active];
+      if (!bar || !btn) return;
+      const target = btn.offsetLeft - bar.clientWidth / 2 + btn.clientWidth / 2;
+      bar.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+    }, 80);
+    return () => clearTimeout(t);
+    // status: nach dem Laden ist die Tab-Leiste erst gerendert (Refs vorhanden).
+  }, [active, status]);
 
   if (status === "loading") {
     return (
@@ -77,13 +93,16 @@ export default function TeamAdminPage() {
         </div>
 
         {/* Tab-Navigation */}
-        <div className="flex gap-1 overflow-x-auto border-b border-gray-200 mb-6">
+        <div ref={tabBarRef} className="relative flex gap-1 overflow-x-auto border-b border-gray-200 mb-6">
           {TABS.map((t) => {
             const Icon = t.icon;
             const isActive = t.key === active;
             return (
               <button
                 key={t.key}
+                ref={(el) => {
+                  tabRefs.current[t.key] = el;
+                }}
                 onClick={() => setActive(t.key)}
                 className={`flex items-center gap-2 whitespace-nowrap px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
                   isActive

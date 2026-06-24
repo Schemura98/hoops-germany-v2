@@ -15,15 +15,22 @@ import {
 } from "react-icons/fa";
 import PlayerPosts from "@/components/posts/PlayerPosts";
 import Avatar from "@/components/Avatar";
+import ScrollHintRow from "@/components/ScrollHintRow";
 import { ageFromBirthdate, formatBirthdate } from "@/lib/age";
 
 const round1 = (n) => Math.round(n * 10) / 10;
 
-function StatCell({ label, value, sub }) {
+function StatCell({ label, value, sub, small }) {
   return (
     <div className="px-4 py-3 text-center min-w-[84px]">
       <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
-      <p className="text-lg font-bold text-white leading-tight mt-0.5">{value ?? "–"}</p>
+      <p
+        className={`${
+          small ? "text-sm" : "text-lg"
+        } font-bold text-white leading-tight mt-0.5 break-words hyphens-auto`}
+      >
+        {value ?? "–"}
+      </p>
       {sub && <p className="text-[10px] text-slate-400 mt-0.5">{sub}</p>}
     </div>
   );
@@ -177,8 +184,8 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
             )}
           </div>
 
-          {/* Stats-Leiste */}
-          <div className="mt-6 overflow-x-auto">
+          {/* Stats-Leiste (horizontal scrollbar mit Scroll-Hinweis) */}
+          <ScrollHintRow className="mt-6">
             <div className="inline-flex min-w-full rounded-t-2xl bg-white/5 divide-x divide-white/10 border border-white/10 border-b-0">
               <div className="px-4 py-3 flex flex-col items-center justify-center min-w-[110px]">
                 <Avatar name={team?.teamName} src={team?.logo} className="h-9 w-9" textClass="text-xs" square />
@@ -190,16 +197,16 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
               <StatCell label="APG" value={stats ? stats.apg.toFixed(1) : "–"} />
               <StatCell label="RPG" value={stats ? stats.rpg.toFixed(1) : "–"} />
               <div className="grid grid-cols-1 divide-y divide-white/10 min-w-[120px]">
-                <StatCell label="Größe" value={player?.height} />
-                <StatCell label="Alter" value={ageFromBirthdate(player?.birthdate) ?? player?.age} />
+                <StatCell label="Größe" value={player?.height} small />
+                <StatCell label="Alter" value={ageFromBirthdate(player?.birthdate) ?? player?.age} small />
               </div>
               <div className="grid grid-cols-1 divide-y divide-white/10 min-w-[120px]">
-                <StatCell label="Gewicht" value={player?.weight} />
-                <StatCell label="Heimatort" value={player?.hometown} />
+                <StatCell label="Gewicht" value={player?.weight} small />
+                <StatCell label="Heimatort" value={player?.hometown} small />
               </div>
               <div className="grid grid-cols-1 divide-y divide-white/10 min-w-[110px]">
-                <StatCell label="Land" value={player?.country || player?.nationality} />
-                <StatCell label="Bundesland" value={player?.bundesland} />
+                <StatCell label="Land" value={player?.country || player?.nationality} small />
+                <StatCell label="Bundesland" value={player?.bundesland} small />
               </div>
               {player?.fibaLink && (
                 <a
@@ -226,7 +233,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                 </a>
               )}
             </div>
-          </div>
+          </ScrollHintRow>
         </div>
 
         {/* Tabs */}
