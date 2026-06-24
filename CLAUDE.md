@@ -309,24 +309,25 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > - **Team-Selbsterstellung entfernt**: das „Liga erstellen"-Formular + die Region-Vorschläge in
 >   `SpielplanTab` sind raus (Match-Form behält das Liga-Dropdown aus dem Katalog), stattdessen der Melde-Link.
 >
-> **Schritt 5 (Datenschritt) – Punkt 1 erledigt: 31 NRW-Herren-Verbandsligen 2025/26** (`7c68f9b`, `90b9851`):
-> Idempotentes Seed `scripts/seed-nrw-leagues.mjs` legt den offiziellen WBV-Katalog oberhalb der Kreisliga
-> an: **1. Regionalliga · 2. Regionalliga 1/2 · Oberliga 1–4 · Landesliga 1–8 · Bezirksliga 1–16** (= 31).
-> Namen **wörtlich** aus der WBV-Ligeneinteilung-PDF (Stand 12.06.2025,
-> `basketball.nrw/images/Spielbetrieb/2025_2026/ligeneinteilung_herren_20250612-1.pdf`). Felder:
-> `official:true`, `bundesland:"Nordrhein-Westfalen"`, `gender:"Herren"`, `ageGroup:"Senioren"`,
+> **Schritt 5 (Datenschritt) – Senioren Herren + Damen erledigt: 47 NRW-Verbandsligen 2025/26**
+> (`7c68f9b`, `90b9851`, `6897ebc`): Idempotentes Seed `scripts/seed-nrw-leagues.mjs` legt den offiziellen
+> WBV-Katalog oberhalb der Kreisliga an – **Herren (31):** 1. Regionalliga · 2. Regionalliga 1/2 ·
+> Oberliga 1–4 · Landesliga 1–8 · Bezirksliga 1–16. **Damen (16):** Regionalliga · Oberliga 1–2 ·
+> Landesliga 1–5 · Bezirksliga 1–8 (Vorrundengruppen A/B je als 1 Liga modelliert). Namen **wörtlich** aus
+> den WBV-Ligeneinteilungs-PDFs (Stand 12.06.2025, `…/2025_2026/ligeneinteilung_herren_20250612-1.pdf` bzw.
+> `…_damen_…`). Felder: `official:true`, `bundesland:"Nordrhein-Westfalen"`, `gender`, `ageGroup:"Senioren"`,
 > `season:"2025/26"`, `level` je Stufe, **`region` = RP-Bezirk** (Köln/Düsseldorf/Arnsberg/Münster/Detmold),
-> abgeleitet aus den Vereins-IDs der Einteilung (3. Ziffer = Bezirk): Bezirksligen je 1 Bezirk (4/4/4/2/2),
-> Landesligen meist 1 Bezirk (LL1/LL3 mischen Köln+Düsseldorf → leer), Regionalliga + Oberliga 4
-> bezirksübergreifend → leer. **Upsert (Match name+season+gender), löscht nichts** + Selbstheilung (leere
-> Alt-Einträge früherer Seed-Varianten werden entfernt, Ligen mit Teams/Spielen geschützt) → sicher für
-> Dev **und** Prod; `--dry` für Vorschau. **Auf Dev geseedet + verifiziert** (31, keine Reste, Idempotenz ok).
-> **✅ Auf Prod (hoops_prod) geseedet + verifiziert** (Dry-Run → Lauf → 2. Lauf idempotent; 31 official
-> NRW-Herren-Ligen live, Katalog gesamt 33 inkl. 2 Demo „Regionalliga Süd"/Bayern). Re-Run jederzeit gefahrlos.
+> abgeleitet aus den Vereins-IDs der Einteilung (3. Ziffer = Bezirk); bezirksübergreifende/gemischte Ligen →
+> leer. **Upsert (Match name+season+gender+ageGroup), löscht nichts** + Selbstheilung pro Geschlecht/
+> Altersklasse (leere Alt-Einträge raus, Ligen mit Teams/Spielen geschützt) → sicher Dev **und** Prod;
+> `--dry` für Vorschau. **✅ Auf Dev + Prod (hoops_prod) geseedet + verifiziert** (47 official, Idempotenz ok;
+> Prod-Katalog gesamt 49 inkl. 2 Demo „Regionalliga Süd"/Bayern). Re-Run jederzeit gefahrlos.
 >
-> **➡️ NÄCHSTE SESSION HIER STARTEN:** NRW-**Kreisligen**, dann **Damen** + **Jugend** (NRW komplett) – jeweils
-> eigene WBV-Einteilungs-PDFs (gleiches Muster: PDF lesen → Namen/Bezirk extrahieren → Seed erweitern oder
-> Schwester-Skript). Realistisch partiell → Korrektur-Check. Im Liga-Picker (`/team/create`) live gegenprüfen.
+> **➡️ NÄCHSTE SESSION HIER STARTEN:** NRW-**Jugend** (U18–U10 m/w, WBV-Einteilungs-PDFs – Achtung: tlw. noch
+> „vorläufig", U10 offen; ggf. nur fertige Altersklassen seeden). **Danach** ggf. NRW-**Kreisligen** (werden
+> von den 22 Basketballkreisen separat verwaltet, KEINE zentrale WBV-PDF → fragmentiert/aufwändig, eigene
+> Quellen je Kreis). Gleiches Muster: PDF lesen → Namen/Bezirk extrahieren → Seed erweitern. Im Liga-Picker
+> (`/team/create`) live gegenprüfen.
 > **Weiter offen:** (6) Demo-Liga `Regionalliga Süd` (Bayern) durch echte NRW-Ligen ersetzen / entfernen;
 > (optional) Liga-Auswahl nachträglich im Team-Einstellungen-Tab änderbar machen.
 >
