@@ -16,6 +16,7 @@ import {
   positionLabel,
 } from "@/lib/constants";
 import { loadCities, cityCoords, haversineKm } from "@/lib/geo";
+import { getPlayerToken } from "@/lib/clientAuth";
 
 const TABS = [
   { key: "players", label: "Spieler suchen Verein" },
@@ -35,9 +36,37 @@ export default function TransfermarktPage() {
   const [geo, setGeo] = useState({ center: null, radiusKm: 50 });
   const [cityMap, setCityMap] = useState(null);
 
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [joinState, setJoinState] = useState({}); // { [teamId]: { busy, msg, type } }
+
+  useEffect(() => {
+    setLoggedIn(!!getPlayerToken());
+  }, []);
+
   useEffect(() => {
     if (geo.center && !cityMap) loadCities().then(({ map }) => setCityMap(map));
   }, [geo.center, cityMap]);
+
+  async function requestJoin(teamId) {
+    setJoinState((s) => ({ ...s, [teamId]: { busy: true } }));
+    try {
+      const token = getPlayerToken();
+      const { data } = await axios.post("/api/team/requestjoin", { token, teamId });
+      setJoinState((s) => ({
+        ...s,
+        [teamId]: { busy: false, type: "ok", msg: data.message || "Anfrage gesendet." },
+      }));
+    } catch (err) {
+      setJoinState((s) => ({
+        ...s,
+        [teamId]: {
+          busy: false,
+          type: "err",
+          msg: err.response?.data?.message || "Anfrage fehlgeschlagen.",
+        },
+      }));
+    }
+  }
 
   useEffect(() => {
     let active = true;
@@ -267,45 +296,76 @@ export default function TransfermarktPage() {
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
-            {filteredTeams.map((t) => (
-              <Link
-                key={t._id}
-                href={`/team/team-detail/${t.slug}`}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 transition-all"
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar name={t.teamName} src={t.logo} className="h-12 w-12" textClass="text-sm" square />
-                  <div className="min-w-0">
-                    <p className="font-semibold text-gray-900 truncate">{t.teamName}</p>
-                    <p className="text-xs text-gray-500 truncate">
-                      {t.league?.name ? t.league.name : "Verein"}
-                    </p>
-                    {(t.region || t.bundesland) && (
-                      <p className="text-xs text-gray-400 truncate flex items-center gap-1 mt-0.5">
-                        <FaMapMarkerAlt className="flex-shrink-0 text-gray-300" />
-                        {[t.region, t.bundesland].filter(Boolean).join(" · ")}
+            {filteredTeams.map((t) => {
+              const js = joinState[t._id] || {};
+              return (
+                <div
+                  key={t._id}
+                  className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:border-brand-200 transition-all"
+                >
+                  <Link
+                    href={`/team/team-detail/${t.slug}`}
+                    className="flex items-center gap-3 group"
+                  >
+                    <Avatar name={t.teamName} src={t.logo} className="h-12 w-12" textClass="text-sm" square />
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900 truncate group-hover:text-brand-600">
+                        {t.teamName}
                       </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {t.league?.name ? t.league.name : "Verein"}
+                      </p>
+                      {(t.region || t.bundesland) && (
+                        <p className="text-xs text-gray-400 truncate flex items-center gap-1 mt-0.5">
+                          <FaMapMarkerAlt className="flex-shrink-0 text-gray-300" />
+                          {[t.region, t.bundesland].filter(Boolean).join(" · ")}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+
+                  {t.positions?.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {t.positions.map((p) => (
+                        <span
+                          key={p}
+                          className="text-xs font-medium bg-brand-50 text-brand-700 rounded-full px-2 py-0.5"
+                        >
+                          {positionLabel(p)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {t.note && (
+                    <p className="mt-2 text-sm text-gray-600 border-t border-gray-100 pt-2">{t.note}</p>
+                  )}
+
+                  {/* Direktkontakt: Beitritt anfragen */}
+                  <div className="mt-3 border-t border-gray-100 pt-3">
+                    {js.msg ? (
+                      <p className={`text-xs ${js.type === "ok" ? "text-green-600" : "text-red-600"}`}>
+                        {js.msg}
+                      </p>
+                    ) : loggedIn ? (
+                      <button
+                        onClick={() => requestJoin(t._id)}
+                        disabled={js.busy}
+                        className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+                      >
+                        {js.busy ? "Senden…" : "Beitritt anfragen"}
+                      </button>
+                    ) : (
+                      <Link
+                        href="/login"
+                        className="block text-center w-full border border-gray-300 hover:border-brand-500 text-gray-700 rounded-lg px-4 py-2 text-sm font-medium"
+                      >
+                        Zum Anfragen anmelden
+                      </Link>
                     )}
                   </div>
                 </div>
-
-                {t.positions?.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-1">
-                    {t.positions.map((p) => (
-                      <span
-                        key={p}
-                        className="text-xs font-medium bg-brand-50 text-brand-700 rounded-full px-2 py-0.5"
-                      >
-                        {positionLabel(p)}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                {t.note && (
-                  <p className="mt-2 text-sm text-gray-600 border-t border-gray-100 pt-2">{t.note}</p>
-                )}
-              </Link>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>
