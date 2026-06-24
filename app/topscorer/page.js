@@ -14,17 +14,26 @@ const RANK_COLOR = {
   3: "text-orange-700",
 };
 
+const selectClass =
+  "rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+
 export default function TopscorerPage() {
   const [scorers, setScorers] = useState([]);
+  const [seasons, setSeasons] = useState([]);
+  const [season, setSeason] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
     let active = true;
+    setLoading(true);
     (async () => {
       try {
-        const { data } = await axios.post("/api/player/topscorer", {});
-        if (active) setScorers(data.scorers || []);
+        const { data } = await axios.post("/api/player/topscorer", season ? { season } : {});
+        if (active) {
+          setScorers(data.scorers || []);
+          if (data.seasons) setSeasons(data.seasons);
+        }
       } catch {
         if (active) setError(true);
       } finally {
@@ -34,7 +43,7 @@ export default function TopscorerPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [season]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -47,6 +56,24 @@ export default function TopscorerPage() {
       />
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+        {seasons.length > 0 && (
+          <div className="mb-5">
+            <select
+              value={season}
+              onChange={(e) => setSeason(e.target.value)}
+              className={selectClass}
+              aria-label="Saison"
+            >
+              <option value="">Alle Saisons</option>
+              {seasons.map((s) => (
+                <option key={s} value={s}>
+                  Saison {s}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {loading ? (
           <div className="flex justify-center py-16">
             <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />

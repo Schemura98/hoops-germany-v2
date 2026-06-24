@@ -1,13 +1,27 @@
 import { connectDB } from "@/lib/db";
 import Match from "@/models/Match";
+import League from "@/models/League";
 import { ok, withErrorHandling } from "@/lib/apiResponse";
 
-// POST /api/player/topscorer – Topscorer-Tabelle (Aggregation über alle playerStats).
-async function handler() {
+// POST /api/player/topscorer – Topscorer-Tabelle (Aggregation über playerStats).
+// Optional body.season → nur Spiele der Ligen dieser Saison. Liefert zusätzlich
+// `seasons` (alle vorhandenen Saisons, neueste zuerst) für den Filter.
+async function handler(req) {
+  const body = await req.json().catch(() => ({}));
+  const season = typeof body.season === "string" ? body.season.trim() : "";
+
   await connectDB();
 
+  const seasons = (await League.distinct("season")).filter(Boolean).sort().reverse();
+
+  const matchStage = { status: "completed" };
+  if (season) {
+    const ids = (await League.find({ season }).select("_id").lean()).map((l) => l._id);
+    matchStage.leagueId = { $in: ids };
+  }
+
   const scorers = await Match.aggregate([
-    { $match: { status: "completed" } },
+    { $match: matchStage },
     { $unwind: "$playerStats" },
     {
       $match: {
@@ -67,7 +81,7 @@ async function handler() {
     { $limit: 100 },
   ]);
 
-  return ok({ scorers });
+  return ok({ scorers, seasons });
 }
 
 export const POST = withErrorHandling(handler);

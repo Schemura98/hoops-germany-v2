@@ -25,7 +25,9 @@ function rankBadge(i) {
 export default function RanglistePage() {
   const [standings, setStandings] = useState([]);
   const [leagues, setLeagues] = useState([]);
+  const [seasons, setSeasons] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [season, setSeason] = useState("all");
   const [leagueId, setLeagueId] = useState("all");
   const [bundesland, setBundesland] = useState("all");
 
@@ -34,12 +36,14 @@ export default function RanglistePage() {
     setLoading(true);
     (async () => {
       try {
-        const { data } = await axios.get("/api/teams/standings", {
-          params: leagueId !== "all" ? { leagueId } : {},
-        });
+        const params = {};
+        if (leagueId !== "all") params.leagueId = leagueId;
+        else if (season !== "all") params.season = season;
+        const { data } = await axios.get("/api/teams/standings", { params });
         if (!active) return;
         setStandings(data.standings || []);
         setLeagues(data.leagues || []);
+        if (data.seasons) setSeasons(data.seasons);
       } catch {
         if (active) setStandings([]);
       } finally {
@@ -49,7 +53,13 @@ export default function RanglistePage() {
     return () => {
       active = false;
     };
-  }, [leagueId]);
+  }, [leagueId, season]);
+
+  // Liga-Optionen auf die gewählte Saison eingrenzen.
+  const leagueOptions = useMemo(
+    () => (season === "all" ? leagues : leagues.filter((l) => l.season === season)),
+    [leagues, season]
+  );
 
   const availableBL = useMemo(() => {
     const present = new Set(standings.map((s) => s.bundesland).filter(Boolean));
@@ -74,6 +84,24 @@ export default function RanglistePage() {
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
         {/* Filter */}
         <div className="flex flex-wrap gap-3 mb-5">
+          {seasons.length > 0 && (
+            <select
+              value={season}
+              onChange={(e) => {
+                setSeason(e.target.value);
+                setLeagueId("all");
+              }}
+              className={selectClass}
+              aria-label="Saison"
+            >
+              <option value="all">Alle Saisons</option>
+              {seasons.map((s) => (
+                <option key={s} value={s}>
+                  Saison {s}
+                </option>
+              ))}
+            </select>
+          )}
           <select
             value={leagueId}
             onChange={(e) => setLeagueId(e.target.value)}
@@ -81,7 +109,7 @@ export default function RanglistePage() {
             aria-label="Liga"
           >
             <option value="all">Alle Ligen</option>
-            {leagues.map((l) => (
+            {leagueOptions.map((l) => (
               <option key={l._id} value={l._id}>
                 {l.name}
                 {l.season ? ` ${l.season}` : ""}

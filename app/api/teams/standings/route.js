@@ -13,23 +13,29 @@ async function handler(req) {
 
   const { searchParams } = new URL(req.url);
   const leagueId = searchParams.get("leagueId");
+  const season = searchParams.get("season");
 
   const matchQuery = {
     status: "completed",
     winningTeam: { $ne: null },
     winningTeamPoints: { $ne: null },
   };
+  // Liga-Filter ist spezifischer als Saison; sonst Saison über die Ligen der Saison.
   if (leagueId && leagueId !== "all") {
     matchQuery.leagueId = leagueId;
+  } else if (season && season !== "all") {
+    const ids = (await League.find({ season }).select("_id").lean()).map((l) => l._id);
+    matchQuery.leagueId = { $in: ids };
   }
 
-  const [matches, leagues] = await Promise.all([
+  const [matches, leagues, seasons] = await Promise.all([
     Match.find(matchQuery)
       .select("teamA teamB winningTeam winningTeamPoints losingTeamPoints")
       .populate("teamA", "teamName slug logo bundesland")
       .populate("teamB", "teamName slug logo bundesland")
       .lean(),
     League.find({ active: true }).select("name season").sort({ createdAt: -1 }).lean(),
+    League.distinct("season"),
   ]);
 
   // Pro Team aggregieren.
@@ -80,7 +86,11 @@ async function handler(req) {
     .map((t) => ({ ...t, diff: t.pointsFor - t.pointsAgainst }))
     .sort((a, b) => b.wins - a.wins || b.diff - a.diff || b.pointsFor - a.pointsFor);
 
-  return ok({ standings, leagues });
+  return ok({
+    standings,
+    leagues,
+    seasons: (seasons || []).filter(Boolean).sort().reverse(),
+  });
 }
 
 export const GET = withErrorHandling(handler);
