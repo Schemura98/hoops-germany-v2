@@ -1,6 +1,8 @@
 import { connectDB } from "@/lib/db";
 import Feedback from "@/models/Feedback";
 import { sendMail } from "@/lib/mailer";
+import { feedbackEmail } from "@/lib/emailTemplates";
+import { getBaseUrl } from "@/lib/baseUrl";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/feedback – strukturiertes Feedback speichern + Admin per E-Mail benachrichtigen.
@@ -46,18 +48,21 @@ async function handler(req) {
 
   // Benachrichtigung an Admin – Fehler hier nicht nach außen geben.
   try {
+    const mail = feedbackEmail({
+      type,
+      rating,
+      areas,
+      likes,
+      dislikes,
+      suggestions,
+      freeMessage,
+      baseUrl: getBaseUrl(req),
+    });
     await sendMail({
       to: process.env.SMTP_USER || "info@hoopsgermany.de",
-      subject: `Neues Feedback (${type}${rating ? ` · ${rating}/5` : ""})`,
-      html:
-        `<p><strong>Typ:</strong> ${type}</p>` +
-        (rating ? `<p><strong>Gesamteindruck:</strong> ${rating}/5</p>` : "") +
-        (areas.length ? `<p><strong>Themen:</strong> ${areas.join(", ")}</p>` : "") +
-        (likes ? `<p><strong>Gefällt:</strong> ${likes}</p>` : "") +
-        (dislikes ? `<p><strong>Gefällt nicht:</strong> ${dislikes}</p>` : "") +
-        (suggestions ? `<p><strong>Vorschlag:</strong> ${suggestions}</p>` : "") +
-        (freeMessage ? `<p>${freeMessage.replace(/\n/g, "<br>")}</p>` : ""),
-      text: message,
+      subject: mail.subject,
+      html: mail.html,
+      text: mail.text,
     });
   } catch (err) {
     console.error("[FEEDBACK MAIL ERROR]", err);

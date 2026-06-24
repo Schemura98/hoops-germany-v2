@@ -1,4 +1,6 @@
 import { sendMail } from "@/lib/mailer";
+import { contactEmail } from "@/lib/emailTemplates";
+import { getBaseUrl } from "@/lib/baseUrl";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -18,12 +20,13 @@ async function handler(req) {
   }
 
   try {
+    const mail = contactEmail({ name, email, message, baseUrl: getBaseUrl(req) });
     await sendMail({
       to: process.env.SMTP_USER || "info@hoopsgermany.de",
       replyTo: email,
-      subject: `Kontaktanfrage von ${name}`,
-      html: `<p><strong>Von:</strong> ${name} (${email})</p><p>${message.replace(/\n/g, "<br>")}</p>`,
-      text: `Von: ${name} (${email})\n\n${message}`,
+      subject: mail.subject,
+      html: mail.html,
+      text: mail.text,
     });
   } catch (err) {
     console.error("[KONTAKT MAIL ERROR]", err);

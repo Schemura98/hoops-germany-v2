@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { connectDB } from "@/lib/db";
 import Player from "@/models/Player";
 import { sendMail } from "@/lib/mailer";
+import { passwordResetEmail } from "@/lib/emailTemplates";
 import { getBaseUrl } from "@/lib/baseUrl";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
@@ -27,32 +28,16 @@ async function handler(req) {
     player.resetPasswordExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 Stunde
     await player.save();
 
-    const link = `${getBaseUrl(req)}/reset-password?token=${token}`;
-    const html = `
-      <div style="font-family:Inter,Arial,sans-serif;max-width:480px;margin:auto">
-        <h2 style="color:#111827">Passwort zurücksetzen</h2>
-        <p style="color:#4b5563">Hallo ${player.firstName || ""},</p>
-        <p style="color:#4b5563">
-          du hast angefordert, dein Passwort zurückzusetzen. Klicke auf den Button
-          (gültig für 1 Stunde):
-        </p>
-        <p style="margin:24px 0">
-          <a href="${link}" style="background:#f97316;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">
-            Neues Passwort setzen
-          </a>
-        </p>
-        <p style="color:#9ca3af;font-size:12px">
-          Falls du das nicht warst, kannst du diese E-Mail ignorieren.
-        </p>
-      </div>`;
+    const baseUrl = getBaseUrl(req);
+    const link = `${baseUrl}/reset-password?token=${token}`;
+    const { subject, html, text } = passwordResetEmail({
+      firstName: player.firstName,
+      link,
+      baseUrl,
+    });
 
     try {
-      await sendMail({
-        to: player.email,
-        subject: "Hoops Germany – Passwort zurücksetzen",
-        html,
-        text: `Passwort zurücksetzen: ${link}`,
-      });
+      await sendMail({ to: player.email, subject, html, text });
     } catch (err) {
       // Versand-Fehler nicht nach außen leaken; nur protokollieren.
       console.error("[FORGOT PASSWORD MAIL ERROR]", err);
