@@ -26,6 +26,8 @@ const teamSchema = new mongoose.Schema(
     about: String,
     region: String,
     bundesland: String,
+    // Liga, an der das Team teilnimmt (offizieller Katalog).
+    leagueId: { type: mongoose.Schema.Types.ObjectId, ref: "leagues" },
     logo: String,
     banner: String,
     slug: { type: String, unique: true },

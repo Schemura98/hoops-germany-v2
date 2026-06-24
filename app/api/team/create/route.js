@@ -1,7 +1,9 @@
+import mongoose from "mongoose";
 import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Team from "@/models/Team";
 import Player from "@/models/Player";
+import League from "@/models/League";
 import { getPlayerFromToken } from "@/lib/serverAuth";
 import { uniqueSlug } from "@/lib/slug";
 import { recordTransfer } from "@/lib/recordTransfer";
@@ -37,6 +39,13 @@ async function handler(req) {
     return fail("Dieser Teamname ist bereits vergeben", 409);
   }
 
+  // Optional gewählte Liga aus dem offiziellen Katalog prüfen.
+  let leagueId = null;
+  if (body.leagueId && mongoose.isValidObjectId(body.leagueId)) {
+    const league = await League.findById(body.leagueId).select("_id");
+    if (league) leagueId = league._id;
+  }
+
   const slug = await uniqueSlug(Team, teamName);
   const team = await Team.create({
     teamName,
@@ -44,8 +53,14 @@ async function handler(req) {
     bundesland,
     about,
     slug,
+    leagueId,
     adminPlayerId: player._id,
   });
+
+  // Team in die Liga aufnehmen.
+  if (leagueId) {
+    await League.findByIdAndUpdate(leagueId, { $addToSet: { teams: team._id } });
+  }
 
   // Spieler wird Admin + Mitglied des eigenen Teams
   await Player.findByIdAndUpdate(player._id, {

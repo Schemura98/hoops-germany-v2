@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { FaBasketballBall, FaUsers } from "react-icons/fa";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { getPlayerToken } from "@/lib/clientAuth";
-import { BUNDESLAENDER } from "@/lib/constants";
+import { BUNDESLAENDER, LEAGUE_LEVELS, LEAGUE_GENDERS, LEAGUE_AGE_GROUPS } from "@/lib/constants";
 import PlayerNav from "@/components/layout/PlayerNav";
 import Footer from "@/components/layout/Footer";
 import CityInput from "@/components/CityInput";
+import LeagueReportLink from "@/components/team/LeagueReportLink";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
@@ -22,12 +23,45 @@ export default function TeamCreatePage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Liga-Auswahl (offizieller Katalog)
+  const [leagues, setLeagues] = useState([]);
+  const [leagueFilter, setLeagueFilter] = useState({ level: "", gender: "Herren", ageGroup: "Senioren" });
+  const [leagueId, setLeagueId] = useState("");
+
   // Verwaltet der Spieler schon ein Team? → direkt ins Admin-Panel
   useEffect(() => {
     if (player?.isTeamAdmin && player?.teamAdminOf) {
       router.replace("/team/admin");
     }
   }, [player, router]);
+
+  // Offiziellen Liga-Katalog laden
+  useEffect(() => {
+    let active = true;
+    axios
+      .get("/api/leagues")
+      .then(({ data }) => active && setLeagues(data.leagues || []))
+      .catch(() => active && setLeagues([]));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Ligen nach Bundesland (aus dem Formular) + Filtern eingrenzen
+  const matchingLeagues = useMemo(() => {
+    return leagues.filter((l) => {
+      if (form.bundesland && l.bundesland && l.bundesland !== form.bundesland) return false;
+      if (leagueFilter.level && l.level !== leagueFilter.level) return false;
+      if (leagueFilter.gender && l.gender && l.gender !== leagueFilter.gender) return false;
+      if (leagueFilter.ageGroup && l.ageGroup && l.ageGroup !== leagueFilter.ageGroup) return false;
+      return true;
+    });
+  }, [leagues, form.bundesland, leagueFilter]);
+
+  // Auswahl zurücksetzen, wenn sie nicht mehr in die Filter passt
+  useEffect(() => {
+    if (leagueId && !matchingLeagues.some((l) => l._id === leagueId)) setLeagueId("");
+  }, [matchingLeagues, leagueId]);
 
   const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
@@ -37,7 +71,7 @@ export default function TeamCreatePage() {
     setLoading(true);
     try {
       const token = getPlayerToken();
-      await axios.post("/api/team/create", { token, ...form });
+      await axios.post("/api/team/create", { token, ...form, leagueId: leagueId || undefined });
       // Spieler-Flags haben sich geändert → harter Reload ins Admin-Panel
       window.location.href = "/team/admin";
     } catch (err) {
@@ -124,6 +158,78 @@ export default function TeamCreatePage() {
               </select>
             </div>
           </div>
+          {/* Liga-Auswahl aus dem offiziellen Katalog */}
+          <div className="rounded-xl border border-gray-200 p-4 space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Liga <span className="text-gray-400">(optional)</span>
+              </label>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Wähle die Liga, in der dein Team spielt – grenze sie über Bundesland (oben) und
+                die Filter ein.
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <select
+                value={leagueFilter.level}
+                onChange={(e) => setLeagueFilter((f) => ({ ...f, level: e.target.value }))}
+                className={`${inputClass} px-3 py-2 text-sm`}
+              >
+                <option value="">Alle Stufen</option>
+                {LEAGUE_LEVELS.map((x) => (
+                  <option key={x} value={x}>
+                    {x}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={leagueFilter.gender}
+                onChange={(e) => setLeagueFilter((f) => ({ ...f, gender: e.target.value }))}
+                className={`${inputClass} px-3 py-2 text-sm`}
+              >
+                <option value="">Alle</option>
+                {LEAGUE_GENDERS.map((x) => (
+                  <option key={x} value={x}>
+                    {x}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={leagueFilter.ageGroup}
+                onChange={(e) => setLeagueFilter((f) => ({ ...f, ageGroup: e.target.value }))}
+                className={`${inputClass} px-3 py-2 text-sm`}
+              >
+                <option value="">Alle Klassen</option>
+                {LEAGUE_AGE_GROUPS.map((x) => (
+                  <option key={x} value={x}>
+                    {x}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <select
+              value={leagueId}
+              onChange={(e) => setLeagueId(e.target.value)}
+              className={inputClass}
+            >
+              <option value="">– Liga wählen (oder später) –</option>
+              {matchingLeagues.map((l) => (
+                <option key={l._id} value={l._id}>
+                  {l.name}
+                  {l.region ? ` · ${l.region}` : ""}
+                  {l.season ? ` (${l.season})` : ""}
+                </option>
+              ))}
+            </select>
+            {matchingLeagues.length === 0 && (
+              <p className="text-xs text-gray-500">
+                Keine passende Liga gefunden. Du kannst dein Team auch ohne Liga gründen und sie
+                später wählen.
+              </p>
+            )}
+            <LeagueReportLink bundesland={form.bundesland} />
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Über das Team <span className="text-gray-400">(optional)</span>

@@ -1,0 +1,93 @@
+"use client";
+
+import { useState } from "react";
+import axios from "axios";
+import { FaFlag } from "react-icons/fa";
+import { getPlayerToken } from "@/lib/clientAuth";
+
+// „Liga melden": meldet eine fehlende oder falsche Liga an die Super-Admins.
+// Bewusst niedrigschwellig (aufklappbar), aber nur für den Notfall gedacht –
+// Ligen werden nicht mehr frei von Teams erstellt.
+export default function LeagueReportLink({ bundesland = "", className = "" }) {
+  const [open, setOpen] = useState(false);
+  const [leagueName, setLeagueName] = useState("");
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const [done, setDone] = useState(false);
+  const [err, setErr] = useState("");
+
+  async function submit() {
+    if (!leagueName.trim() && !message.trim()) {
+      setErr("Bitte beschreibe kurz, was fehlt oder nicht stimmt.");
+      return;
+    }
+    setSending(true);
+    setErr("");
+    try {
+      const token = getPlayerToken();
+      await axios.post("/api/leagues/report", { token, leagueName, message, bundesland });
+      setDone(true);
+    } catch (e) {
+      setErr(e.response?.data?.message || "Senden fehlgeschlagen.");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  if (done) {
+    return (
+      <p className={`text-xs text-green-600 ${className}`}>
+        Danke! Deine Liga-Meldung ist bei den Admins eingegangen.
+      </p>
+    );
+  }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className={`text-xs text-brand-600 hover:underline inline-flex items-center gap-1 ${className}`}
+      >
+        <FaFlag className="text-[10px]" /> Liga fehlt oder stimmt nicht? Den Admins melden
+      </button>
+    );
+  }
+
+  return (
+    <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 space-y-2">
+      <p className="text-xs font-medium text-amber-800">Liga melden (geht an die Super-Admins)</p>
+      <input
+        value={leagueName}
+        onChange={(e) => setLeagueName(e.target.value)}
+        placeholder="Name der Liga (falls bekannt)"
+        className="w-full rounded-md border border-gray-300 px-2.5 py-1.5 text-sm outline-none focus:border-brand-500"
+      />
+      <textarea
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        rows={3}
+        placeholder="Was fehlt oder stimmt nicht?"
+        className="w-full rounded-md border border-gray-300 px-2.5 py-1.5 text-sm outline-none focus:border-brand-500 resize-none"
+      />
+      {err && <p className="text-xs text-red-600">{err}</p>}
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={submit}
+          disabled={sending}
+          className="text-xs bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-md px-3 py-1.5 font-medium"
+        >
+          {sending ? "Senden…" : "Melden"}
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="text-xs text-gray-500 hover:text-gray-800 px-2 py-1.5"
+        >
+          Abbrechen
+        </button>
+      </div>
+    </div>
+  );
+}

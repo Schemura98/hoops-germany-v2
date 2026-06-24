@@ -5,6 +5,7 @@ import axios from "axios";
 import { FaPlus, FaTrash, FaMapMarkerAlt, FaBasketballBall } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import { BUNDESLAENDER } from "@/lib/constants";
+import LeagueReportLink from "@/components/team/LeagueReportLink";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
@@ -48,9 +49,6 @@ export default function SpielplanTab({ team }) {
   const [filterLeagueId, setFilterLeagueId] = useState("");
 
   // Liga erstellen
-  const [newLeague, setNewLeague] = useState({ name: "", season: "", bundesland: "" });
-  const [showLeagueForm, setShowLeagueForm] = useState(false);
-  const [creatingLeague, setCreatingLeague] = useState(false);
 
   const loadMatches = useCallback(async () => {
     const token = getTeamAuthToken();
@@ -101,44 +99,6 @@ export default function SpielplanTab({ team }) {
     } finally {
       setSaving(false);
     }
-  }
-
-  async function createLeague(e) {
-    e.preventDefault();
-    if (!newLeague.name.trim()) return;
-    setCreatingLeague(true);
-    setMsg(null);
-    try {
-      const token = getTeamAuthToken();
-      const { data } = await axios.post("/api/leagues", { token, ...newLeague });
-      setNewLeague({ name: "", season: "", bundesland: "" });
-      setShowLeagueForm(false);
-      await loadLeagues();
-      // Neue Liga direkt im Spielformular vorauswählen
-      setForm((f) => ({ ...f, leagueId: data.league._id }));
-    } catch (err) {
-      setMsg({ type: "err", text: err.response?.data?.message || "Liga konnte nicht erstellt werden." });
-    } finally {
-      setCreatingLeague(false);
-    }
-  }
-
-  // Bereits vorhandene aktive Ligen im gewählten Bundesland – damit nicht aus
-  // Versehen eine Dublette mit leicht abweichendem Namen angelegt wird.
-  const regionLeagues = useMemo(
-    () =>
-      newLeague.bundesland
-        ? leagues.filter((l) => l.bundesland === newLeague.bundesland)
-        : [],
-    [leagues, newLeague.bundesland]
-  );
-
-  // Eine vorgeschlagene bestehende Liga übernehmen, statt eine neue anzulegen.
-  function pickExistingLeague(l) {
-    setForm((f) => ({ ...f, leagueId: l._id }));
-    setShowLeagueForm(false);
-    setNewLeague({ name: "", season: "", bundesland: "" });
-    setMsg({ type: "ok", text: `Liga „${l.name}" ausgewählt – du musst sie nicht neu anlegen.` });
   }
 
   async function removeMatch(matchId) {
@@ -339,97 +299,11 @@ export default function SpielplanTab({ team }) {
             </div>
           </div>
 
-          {/* Liga erstellen */}
-          {showLeagueForm ? (
-            <div className="rounded-lg bg-gray-50 border border-gray-100 p-3 space-y-3">
-              <p className="text-xs text-gray-500">
-                Wähle zuerst das Bundesland – falls es deine Liga dort schon gibt, übernimm sie,
-                statt sie neu anzulegen.
-              </p>
-              <div className="flex flex-wrap items-end gap-2">
-                <div className="w-40">
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Bundesland</label>
-                  <select
-                    value={newLeague.bundesland}
-                    onChange={(e) => setNewLeague((l) => ({ ...l, bundesland: e.target.value }))}
-                    className={inputClass}
-                  >
-                    <option value="">– wählen –</option>
-                    {BUNDESLAENDER.map((b) => (
-                      <option key={b} value={b}>
-                        {b}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex-1 min-w-[140px]">
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Liga-Name</label>
-                  <input
-                    value={newLeague.name}
-                    onChange={(e) => setNewLeague((l) => ({ ...l, name: e.target.value }))}
-                    className={inputClass}
-                    placeholder="z.B. Stadtliga"
-                  />
-                </div>
-                <div className="w-28">
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Saison</label>
-                  <input
-                    value={newLeague.season}
-                    onChange={(e) => setNewLeague((l) => ({ ...l, season: e.target.value }))}
-                    className={inputClass}
-                    placeholder="2025/26"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={createLeague}
-                  disabled={creatingLeague || !newLeague.name.trim()}
-                  className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2 text-sm font-medium h-[38px]"
-                >
-                  {creatingLeague ? "…" : "Erstellen"}
-                </button>
-              </div>
-
-              {newLeague.bundesland && (
-                <div className="rounded-lg bg-amber-50 border border-amber-200 p-3">
-                  {regionLeagues.length === 0 ? (
-                    <p className="text-xs text-amber-800">
-                      In {newLeague.bundesland} gibt es noch keine Liga – du kannst eine neue anlegen.
-                    </p>
-                  ) : (
-                    <>
-                      <p className="text-xs text-amber-800 mb-2">
-                        In {newLeague.bundesland} gibt es bereits{" "}
-                        {regionLeagues.length === 1 ? "diese Liga" : "diese Ligen"} – bitte übernimm
-                        eine davon, falls es dieselbe ist:
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {regionLeagues.map((l) => (
-                          <button
-                            key={l._id}
-                            type="button"
-                            onClick={() => pickExistingLeague(l)}
-                            className="inline-flex items-center gap-1.5 rounded-full bg-white border border-amber-300 hover:border-brand-400 hover:bg-brand-50 px-3 py-1.5 text-xs font-medium text-gray-800"
-                          >
-                            {l.name}
-                            {l.season ? ` · ${l.season}` : ""}
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setShowLeagueForm(true)}
-              className="text-xs text-brand-600 hover:underline"
-            >
-              + Neue Liga erstellen
-            </button>
-          )}
+          {/* Ligen werden nicht mehr selbst angelegt – nur aus dem Katalog gewählt. */}
+          <div className="text-xs text-gray-500">
+            Fehlt deine Liga in der Auswahl?{" "}
+            <LeagueReportLink bundesland={team?.bundesland || ""} className="align-middle" />
+          </div>
 
           <div className="flex justify-end">
             <button

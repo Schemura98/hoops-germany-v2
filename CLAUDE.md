@@ -298,10 +298,20 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 >   Admin-Anlage. **Admin-Katalog-UI** (`/admin/leagues`) erweitert (Erstell-Raster + Karten mit „Offiziell").
 >   `/api/leagues` GET liefert die Felder für die spätere Team-Auswahl. Funktional + UI verifiziert.
 >
-> **Noch offen (nächste Schritte):** (2) `Team.leagueId` + **Liga-Auswahl bei Team-Gründung** (`/team/create`,
-> Filter Bundesland→Stufe→Liga) + Team in `League.teams`; (3) **„Liga melden"-Flow** an Super-Admins;
-> (4) Team-Selbsterstellung von Ligen in `SpielplanTab` **entfernen**; (5) **NRW-Katalog extrahieren & seeden**;
-> (6) Demo-Ligen (`Regionalliga Süd`) durch echte ersetzen.
+> **Schritt 2 erledigt – Team-Liga-Auswahl + Melde-Flow + Selbsterstellung entfernt** (deployt):
+> - `models/Team.js` um `leagueId` erweitert; `/api/team/create` nimmt `leagueId`, setzt sie und nimmt das
+>   Team per `$addToSet` in `League.teams` auf. **Liga-Picker bei der Gründung** (`/team/create`): Filter
+>   Bundesland (oben) + Stufe/Geschlecht/Altersklasse → Liga-Dropdown aus dem Katalog. Verifiziert (Team↔Liga
+>   verknüpft, teamCount steigt).
+> - **„Liga melden"-Flow**: `components/team/LeagueReportLink.js` (aufklappbares Formular) →
+>   `POST /api/leagues/report` legt einen `Feedback`-Eintrag (`type:"Liga-Meldung"`) an **und** mailt die
+>   Super-Admins (gleiches Muster wie Feedback-Fix). Eingebunden bei Team-Gründung **und** im SpielplanTab.
+> - **Team-Selbsterstellung entfernt**: das „Liga erstellen"-Formular + die Region-Vorschläge in
+>   `SpielplanTab` sind raus (Match-Form behält das Liga-Dropdown aus dem Katalog), stattdessen der Melde-Link.
+>
+> **Noch offen:** (5) **NRW-Katalog extrahieren & seeden** (der Datenschritt – Herren/Damen/Jugend aus
+> WBV-Ausschreibung/TeamSL); (6) Demo-Ligen (`Regionalliga Süd`) durch echte ersetzen; (optional) Liga-Auswahl
+> auch im Team-Einstellungen-Tab nachträglich änderbar machen.
 
 > **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
 > Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).
