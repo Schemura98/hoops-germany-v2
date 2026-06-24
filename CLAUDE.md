@@ -357,6 +357,11 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 3. **Monetarisierung (#6)** – BLOCKIERT bis **Gewerbeanmeldung** des Users (Amazon-Affiliate +
    Sponsorfläche; AdSense erst bei genug Traffic + Consent-Banner).
 4. Weitere UX-Feinschliffe nach Tester-Feedback.
+5. **Liga-Katalog: weibliche Jugend (U18w/U16w/U14w/U12w) + U10 ergänzen** (Datenschritt-Rest).
+   Aufgeschoben: WBV-Einteilungs-PDF der weibl. Jugend nicht auffindbar/abrufbar (Artikelseiten 404,
+   Einteilung noch „4. vorläufig"). **Wenn der PDF-Link/die Datei vorliegt:** im selben Muster wie Jugend m/o
+   in `scripts/seed-nrw-leagues.mjs` ergänzen (`gender:"Damen"` bzw. Mixed für U10, reale Stufen je
+   Altersklasse – nicht raten) → Dev + Prod seeden. (optional) NRW-**Kreisligen** (pro Basketballkreis, niedrige Prio).
 
 ### Bekannte Einschränkungen / offen
 - **Lokale Dev-Umgebung:** SMTP/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS
