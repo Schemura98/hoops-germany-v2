@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { FaCheck, FaTimes, FaBasketballBall } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
+import { positionLabel } from "@/lib/constants";
 
 export default function AnfragenTab() {
   const [requests, setRequests] = useState([]);
@@ -112,7 +113,7 @@ export default function AnfragenTab() {
                       {p.firstName} {p.lastName}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {p.position || "Position offen"}
+                      {positionLabel(p.position) || "Position offen"}
                       {p.nationality ? ` · ${p.nationality}` : ""}
                     </p>
                   </div>

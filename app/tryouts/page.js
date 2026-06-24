@@ -7,6 +7,7 @@ import { FaBasketballBall, FaBullhorn, FaMapMarkerAlt, FaUsers } from "react-ico
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
+import { positionLabel } from "@/lib/constants";
 
 function formatDate(d) {
   try {
@@ -109,7 +110,7 @@ export default function TryoutsPage() {
                         key={p}
                         className="text-xs font-medium bg-brand-50 text-brand-700 rounded-full px-2 py-0.5"
                       >
-                        {p}
+                        {positionLabel(p)}
                       </span>
                     ))}
                   </div>

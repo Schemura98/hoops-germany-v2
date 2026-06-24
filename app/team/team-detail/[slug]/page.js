@@ -18,6 +18,7 @@ import Footer from "@/components/layout/Footer";
 import FollowButton from "@/components/FollowButton";
 import { teamScores } from "@/lib/matchScore";
 import { timeAgo } from "@/lib/timeAgo";
+import { positionLabel } from "@/lib/constants";
 import { getPlayerToken } from "@/lib/clientAuth";
 import Avatar from "@/components/Avatar";
 
@@ -277,11 +278,11 @@ export default function TeamTeamDetailSlugPage({ params }) {
                         <p className="text-sm font-medium text-gray-900 truncate">
                           {m.firstName} {m.lastName}
                         </p>
-                        <p className="text-xs text-gray-500">{m.position || "—"}</p>
+                        <p className="text-xs text-gray-500">{positionLabel(m.position) || "—"}</p>
                       </div>
                       {m.position && (
                         <span className="text-xs font-semibold text-brand-500 bg-brand-50 px-2 py-0.5 rounded-md">
-                          {m.position}
+                          {positionLabel(m.position)}
                         </span>
                       )}
                     </Link>
@@ -299,7 +300,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
                         <p className="text-sm font-medium text-gray-700 truncate">
                           {slot.name || "Offener Platz"}
                         </p>
-                        <p className="text-xs text-gray-400">{slot.position || "—"}</p>
+                        <p className="text-xs text-gray-400">{positionLabel(slot.position) || "—"}</p>
                       </div>
                       <span className="text-xs font-medium rounded-full px-3 py-1 bg-amber-100 text-amber-700">
                         {slot.status === "pending" ? "Ausstehend" : "Frei"}

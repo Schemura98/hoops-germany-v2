@@ -11,7 +11,7 @@ import {
   FaBasketballBall,
 } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
-import { POSITIONS } from "@/lib/constants";
+import { POSITIONS, positionLabel } from "@/lib/constants";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
@@ -268,7 +268,7 @@ export default function TryoutsTab() {
                             key={p}
                             className="text-xs font-medium bg-brand-50 text-brand-700 rounded-full px-2 py-0.5"
                           >
-                            {p}
+                            {positionLabel(p)}
                           </span>
                         ))}
                       </div>
@@ -343,7 +343,7 @@ export default function TryoutsTab() {
                             {a.playerId.firstName} {a.playerId.lastName}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {a.playerId.position || "Position offen"}
+                            {positionLabel(a.playerId.position) || "Position offen"}
                           </p>
                         </div>
                       </li>

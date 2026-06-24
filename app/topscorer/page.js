@@ -7,6 +7,7 @@ import { FaBasketballBall, FaTrophy } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
+import { positionLabel } from "@/lib/constants";
 
 const RANK_COLOR = {
   1: "text-amber-500",
@@ -116,7 +117,7 @@ export default function TopscorerPage() {
                           {s.firstName} {s.lastName}
                         </Link>
                         <div className="text-xs text-gray-400">
-                          {s.position || "—"}
+                          {positionLabel(s.position) || "—"}
                           {s.teamName ? ` · ${s.teamName}` : ""}
                         </div>
                       </td>

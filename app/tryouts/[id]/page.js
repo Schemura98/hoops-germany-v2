@@ -7,6 +7,7 @@ import { FaBasketballBall, FaUsers, FaMapMarkerAlt, FaCalendarAlt } from "react-
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { getPlayerToken } from "@/lib/clientAuth";
+import { positionLabel } from "@/lib/constants";
 
 function formatDate(d) {
   try {
@@ -140,7 +141,7 @@ export default function TryoutDetailPage({ params }) {
                     key={p}
                     className="text-xs font-medium bg-brand-50 text-brand-700 rounded-full px-2 py-0.5"
                   >
-                    {p}
+                    {positionLabel(p)}
                   </span>
                 ))}
               </div>

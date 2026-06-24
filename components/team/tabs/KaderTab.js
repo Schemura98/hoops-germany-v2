@@ -14,7 +14,7 @@ import {
   FaWhatsapp,
 } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
-import { POSITIONS } from "@/lib/constants";
+import { POSITIONS, positionLabel } from "@/lib/constants";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
@@ -148,7 +148,7 @@ export default function KaderTab({ team, reload }) {
   function shareWhatsApp(slot) {
     const link = `${origin}/team/claim/${slot.claimToken}`;
     const text = `Du bist eingeladen, dem Kader von ${team?.teamName || "unserem Team"} beizutreten${
-      slot.position ? ` (Position: ${slot.position})` : ""
+      slot.position ? ` (Position: ${positionLabel(slot.position)})` : ""
     }: ${link}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener");
   }
@@ -211,7 +211,7 @@ export default function KaderTab({ team, reload }) {
                 </span>
                 <div className="min-w-0">
                   <p className="font-medium text-gray-900 truncate">{m.name}</p>
-                  <p className="text-xs text-gray-500">{m.position || "Position offen"}</p>
+                  <p className="text-xs text-gray-500">{positionLabel(m.position) || "Position offen"}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
@@ -310,7 +310,7 @@ export default function KaderTab({ team, reload }) {
                         {slot.name || "Unbenannter Slot"}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {slot.position || "Position offen"}
+                        {positionLabel(slot.position) || "Position offen"}
                       </p>
                     </div>
                   </div>

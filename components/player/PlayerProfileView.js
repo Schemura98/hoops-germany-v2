@@ -18,6 +18,7 @@ import PlayerPosts from "@/components/posts/PlayerPosts";
 import Avatar from "@/components/Avatar";
 import ScrollHintRow from "@/components/ScrollHintRow";
 import { ageFromBirthdate, formatBirthdate } from "@/lib/age";
+import { positionLabel } from "@/lib/constants";
 
 const round1 = (n) => Math.round(n * 10) / 10;
 
@@ -202,7 +203,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
             <div className="min-w-0 flex-1">
               <p className="text-orange-400 text-sm font-semibold flex items-center justify-center sm:justify-start gap-2">
                 {team?.teamName || "Vereinslos"}
-                {player?.position && <span className="text-slate-400">| {player.position}</span>}
+                {player?.position && <span className="text-slate-400">| {positionLabel(player.position)}</span>}
               </p>
               <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight">{fullName}</h1>
               <div className="mt-1.5 flex items-center justify-center sm:justify-start gap-4 text-sm text-slate-300">
@@ -517,7 +518,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
               <InfoRow label="Gewicht" value={player?.weight} />
               <InfoRow label="Alter" value={ageFromBirthdate(player?.birthdate) ?? player?.age} />
               <InfoRow label="Geburtsdatum" value={formatBirthdate(player?.birthdate)} />
-              <InfoRow label="Position" value={player?.position} />
+              <InfoRow label="Position / Rolle" value={positionLabel(player?.position)} />
               <InfoRow label="Nationalität" value={player?.nationality} />
               <InfoRow label="Land" value={player?.country} />
               <InfoRow label="Heimatort" value={player?.hometown} />

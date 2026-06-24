@@ -7,7 +7,7 @@ import axios from "axios";
 import { FaBasketballBall } from "react-icons/fa";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { getPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
-import { POSITIONS, BUNDESLAENDER } from "@/lib/constants";
+import { POSITIONS, PLAYER_ROLES, BUNDESLAENDER, positionLabel } from "@/lib/constants";
 import { ageFromBirthdate, toDateInputValue } from "@/lib/age";
 import PlayerNav from "@/components/layout/PlayerNav";
 import Footer from "@/components/layout/Footer";
@@ -57,6 +57,9 @@ export default function PlayerEditProfilePage() {
     if (player && !form) {
       const initial = {};
       for (const f of FIELDS) initial[f] = player[f] ?? "";
+      // Alte Positions-Kürzel (PG…) → ausgeschrieben, damit das Dropdown vorausgewählt
+      // ist und beim Speichern der kanonische Wert landet.
+      initial.position = positionLabel(player.position);
       // Geburtsdatum für <input type="date"> normalisieren (akzeptiert auch Altdaten)
       initial.birthdate = toDateInputValue(player.birthdate);
       // Mail-Einstellung (Standard an, wenn nicht explizit abgeschaltet)
@@ -148,14 +151,23 @@ export default function PlayerEditProfilePage() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Position">
+            <Field label="Position / Rolle">
               <select name="position" value={form.position} onChange={onChange} className={inputClass}>
                 <option value="">– wählen –</option>
-                {POSITIONS.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
+                <optgroup label="Spielposition">
+                  {POSITIONS.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Funktion">
+                  {PLAYER_ROLES.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </optgroup>
               </select>
             </Field>
             <Field label="Geburtsdatum">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import axios from "axios";
 import { FaBasketballBall, FaUsers } from "react-icons/fa";
 import { getPlayerToken, setPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
+import { positionLabel } from "@/lib/constants";
 
 function Shell({ children }) {
   return (
@@ -197,7 +198,7 @@ export default function TeamClaimTokenPage({ params }) {
         <p className="text-sm text-gray-500">Du wurdest eingeladen für:</p>
         <p className="mt-1 font-semibold text-gray-900">
           {slot?.name || "Kaderplatz"}
-          {slot?.position ? ` · ${slot.position}` : ""}
+          {slot?.position ? ` · ${positionLabel(slot.position)}` : ""}
           {slot?.number ? ` · #${slot.number}` : ""}
         </p>
       </div>

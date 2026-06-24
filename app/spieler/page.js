@@ -8,18 +8,21 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import CityRadiusFilter from "@/components/CityRadiusFilter";
-import { BUNDESLAENDER } from "@/lib/constants";
+import {
+  BUNDESLAENDER,
+  POSITIONS,
+  PLAYER_ROLES,
+  positionLabel,
+} from "@/lib/constants";
 import { loadCities, cityCoords, haversineKm } from "@/lib/geo";
 import { colorFor, initialsFor } from "@/components/Avatar";
-
-const POSITIONS = ["Alle", "PG", "SG", "SF", "PF", "C"];
 
 export default function SpielerPage() {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [query, setQuery] = useState("");
-  const [position, setPosition] = useState("Alle");
+  const [position, setPosition] = useState(""); // "" = Alle
   const [land, setLand] = useState("");
   const [geo, setGeo] = useState({ center: null, radiusKm: 50 });
   const [cityMap, setCityMap] = useState(null);
@@ -55,7 +58,7 @@ export default function SpielerPage() {
         p.position?.toLowerCase().includes(q) ||
         p.hometown?.toLowerCase().includes(q) ||
         p.teamId?.teamName?.toLowerCase().includes(q);
-      const matchesPosition = position === "Alle" || p.position === position;
+      const matchesPosition = !position || positionLabel(p.position) === position;
       const matchesLand = !land || p.bundesland === land;
       let matchesGeo = true;
       if (geo.center) {
@@ -107,21 +110,28 @@ export default function SpielerPage() {
             ))}
           </select>
           <CityRadiusFilter value={geo} onChange={setGeo} />
-          <div className="flex gap-2 flex-wrap">
-            {POSITIONS.map((pos) => (
-              <button
-                key={pos}
-                onClick={() => setPosition(pos)}
-                className={`px-3 py-2 rounded-xl text-xs font-bold transition-colors border ${
-                  position === pos
-                    ? "bg-brand-500 text-white border-brand-500"
-                    : "bg-white text-gray-500 border-gray-200 hover:border-brand-300 hover:text-brand-500"
-                }`}
-              >
-                {pos}
-              </button>
-            ))}
-          </div>
+          <select
+            value={position}
+            onChange={(e) => setPosition(e.target.value)}
+            className="rounded-xl border border-gray-200 px-3 py-3 text-sm text-gray-700 bg-white shadow-sm outline-none focus:border-brand-400"
+            aria-label="Position oder Rolle"
+          >
+            <option value="">Alle Positionen &amp; Rollen</option>
+            <optgroup label="Spielposition">
+              {POSITIONS.map((pos) => (
+                <option key={pos} value={pos}>
+                  {pos}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Funktion">
+              {PLAYER_ROLES.map((pos) => (
+                <option key={pos} value={pos}>
+                  {pos}
+                </option>
+              ))}
+            </optgroup>
+          </select>
         </div>
 
         {!loading && !error && (
@@ -143,7 +153,7 @@ export default function SpielerPage() {
             <FaBasketballBall className="text-5xl text-gray-200 mx-auto mb-4" />
             <p className="text-gray-500 font-semibold">Keine Spieler gefunden</p>
             <p className="text-gray-400 text-sm mt-1">
-              {query || position !== "Alle"
+              {query || position
                 ? "Versuche einen anderen Filter."
                 : "Noch keine Spieler registriert."}
             </p>
@@ -180,7 +190,7 @@ export default function SpielerPage() {
                   </p>
                   {p.position && (
                     <span className="inline-block text-xs font-semibold text-brand-500 bg-brand-50 px-1.5 py-0.5 rounded-md mt-1">
-                      {p.position}
+                      {positionLabel(p.position)}
                     </span>
                   )}
                   {p.teamId?.teamName && (
