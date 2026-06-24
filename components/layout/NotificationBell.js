@@ -9,8 +9,11 @@ import {
   FaUsers,
   FaCheckCircle,
   FaBasketballBall,
+  FaExclamationTriangle,
+  FaExchangeAlt,
 } from "react-icons/fa";
-import { getPlayerToken } from "@/lib/clientAuth";
+import { getPlayerToken, getStoredPlayer } from "@/lib/clientAuth";
+import { notificationHref } from "@/lib/notifications";
 import { timeAgo } from "@/lib/timeAgo";
 
 const ICON = {
@@ -19,15 +22,9 @@ const ICON = {
   join_approved: FaCheckCircle,
   match_result: FaBasketballBall,
   pending_result: FaBasketballBall,
+  result_mismatch: FaExclamationTriangle,
+  transfer: FaExchangeAlt,
 };
-
-function targetHref(n) {
-  if (n.teamSlug) return `/team/team-detail/${n.teamSlug}`;
-  if (n.type === "follow" && n.fromPlayerId) {
-    return `/player/view-player/${n.fromPlayerId}`;
-  }
-  return null;
-}
 
 export default function NotificationBell() {
   const [items, setItems] = useState([]);
@@ -66,6 +63,8 @@ export default function NotificationBell() {
     }
   }
 
+  const me = getStoredPlayer();
+
   return (
     <div className="relative">
       <button
@@ -98,7 +97,7 @@ export default function NotificationBell() {
               <ul className="divide-y divide-gray-50">
                 {items.map((n) => {
                   const Icon = ICON[n.type] || FaBell;
-                  const href = targetHref(n);
+                  const href = notificationHref(n, me);
                   const inner = (
                     <div
                       className={`flex gap-3 px-4 py-3 ${

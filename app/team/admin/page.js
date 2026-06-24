@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FaUsers,
   FaUserPlus,
@@ -31,6 +31,12 @@ const TABS = [
 export default function TeamAdminPage() {
   const { team, status, reload } = useCurrentTeam();
   const [active, setActive] = useState("kader");
+
+  // Tab-Deeplink: ?tab=ergebnisse (z.B. aus Mail/Benachrichtigung).
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get("tab");
+    if (t && TABS.some((x) => x.key === t)) setActive(t);
+  }, []);
 
   if (status === "loading") {
     return (

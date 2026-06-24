@@ -24,6 +24,7 @@ import {
   clearAdminToken,
 } from "@/lib/clientAuth";
 import { timeAgo } from "@/lib/timeAgo";
+import { notificationHref } from "@/lib/notifications";
 import Avatar from "@/components/Avatar";
 
 // Öffentliche, login-bewusste Navigation im Navy-Look mit Wortmarken-Logo.
@@ -231,20 +232,31 @@ export default function Navbar() {
                           Keine Benachrichtigungen
                         </p>
                       ) : (
-                        notifs.map((n, i) => (
-                          <div
-                            key={n._id || i}
-                            className={`flex gap-3 px-4 py-3 ${n.read ? "" : "bg-orange-50"}`}
-                          >
-                            <span className="h-8 w-8 flex-shrink-0 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
-                              <FaBasketballBall className="text-sm" />
-                            </span>
-                            <div className="min-w-0">
-                              <p className="text-sm text-gray-800 leading-snug">{n.message}</p>
-                              <p className="text-xs text-gray-400 mt-0.5">{timeAgo(n.createdAt)}</p>
+                        notifs.map((n, i) => {
+                          const href = notificationHref(n, me);
+                          const inner = (
+                            <div
+                              className={`flex gap-3 px-4 py-3 ${n.read ? "" : "bg-orange-50"} ${
+                                href ? "hover:bg-gray-50 transition-colors" : ""
+                              }`}
+                            >
+                              <span className="h-8 w-8 flex-shrink-0 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
+                                <FaBasketballBall className="text-sm" />
+                              </span>
+                              <div className="min-w-0">
+                                <p className="text-sm text-gray-800 leading-snug">{n.message}</p>
+                                <p className="text-xs text-gray-400 mt-0.5">{timeAgo(n.createdAt)}</p>
+                              </div>
                             </div>
-                          </div>
-                        ))
+                          );
+                          return href ? (
+                            <Link key={n._id || i} href={href} onClick={() => setNotifOpen(false)}>
+                              {inner}
+                            </Link>
+                          ) : (
+                            <div key={n._id || i}>{inner}</div>
+                          );
+                        })
                       )}
                     </div>
                   </div>
