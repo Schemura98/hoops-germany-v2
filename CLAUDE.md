@@ -309,9 +309,20 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > - **Team-Selbsterstellung entfernt**: das „Liga erstellen"-Formular + die Region-Vorschläge in
 >   `SpielplanTab` sind raus (Match-Form behält das Liga-Dropdown aus dem Katalog), stattdessen der Melde-Link.
 >
-> **Noch offen:** (5) **NRW-Katalog extrahieren & seeden** (der Datenschritt – Herren/Damen/Jugend aus
-> WBV-Ausschreibung/TeamSL); (6) Demo-Ligen (`Regionalliga Süd`) durch echte ersetzen; (optional) Liga-Auswahl
-> auch im Team-Einstellungen-Tab nachträglich änderbar machen.
+> **➡️ NÄCHSTE SESSION HIER STARTEN (Schritt 5 – Datenschritt):** Mit **Punkt 1** beginnen (vom User so
+> entschieden): zuerst die **~31 NRW-Herren-Verbandsligen oberhalb Kreisliga** extrahieren
+> (1. Regionalliga West, 2× 2. Regionalliga, 4 Oberligen, 8 Landesligen, 16 Bezirksligen) für **Saison
+> 2025/26** und über `/api/admin/createleague` bzw. einen Seed einseeden (`official:true`, `bundesland:
+> "Nordrhein-Westfalen"`, passende `level`/`region`). Quellen: WBV-Ausschreibung 2025/26 (PDF) +
+> basketball-bund.net/TeamSL. **Danach** Kreisligen, dann Damen + Jugend (NRW komplett). Realistisch
+> partiell → ggf. Korrektur-Check mit dem User.
+> **Weiter offen:** (6) Demo-Liga `Regionalliga Süd` (Bayern) durch echte NRW-Ligen ersetzen / entfernen;
+> (optional) Liga-Auswahl nachträglich im Team-Einstellungen-Tab änderbar machen.
+>
+> **Framework-Stand (alles deployt, getestet):** Modell (`level/gender/ageGroup/region/official`,
+> `Team.leagueId`), Admin-Katalog (`/admin/leagues`), Liga-Picker bei Team-Gründung (`/team/create`),
+> Melde-Flow (`LeagueReportLink` → `/api/leagues/report`), Team-Selbsterstellung entfernt. Test-Logins
+> wie gehabt (`max@test.de`/test123 = Team-Admin; `admin`/`geheim1234` = Admin-Panel).
 
 > **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
 > Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).
