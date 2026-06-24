@@ -392,6 +392,14 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > **noch NICHT auf Prod ausgeführt** (Tool für die nächste Saison; Skript ist nur deployt/verfügbar).
 > ⚠️ Voraussetzung fürs echte Rollover: Roadmap-Punkt 7 (Teams müssen Liga in neuer Saison neu wählen).
 
+> **🟢 BEREIT FÜR TESTER-PHASE (Stand 25.06.2026):** Liga-System (Filter/Saison/Archiv/Playoffs/Meister),
+> Scouting/Transfermarkt (A+B+C: Filter, „Vereine suchen", Direktanfrage, Matching, Spielklasse), Positionen
+> ausgeschrieben + Rollen (Coach/Manager/Sportl. Leitung/Fan) – alle live. **Pre-Test-Abschluss** (deployt):
+> Navbar um **Spieler + Transfermarkt** ergänzt (Scouting war nicht erreichbar; volle Navi ab `lg`, sonst
+> Hamburger); **Feedback** um Themen „Transfermarkt & Scouting"/„Tryouts" erweitert; **Analytics** mit
+> **Plattform-Überblick** (Spieler/Teams/offizielle Ligen/transferbereit/suchende Vereine) für Sponsoren-
+> Präsentation + Bereichs-Traffic (deckt alle neuen Bereiche ab). Desktop+Mobil + Prod-Smoke-Test grün.
+>
 > **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
 > Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).
 > ✅ `c813d56` (Akkordeon) **und** `fbbe06a` (Footer/Geburtstag/Karriere-Verlauf/aktive Nav) sind gepusht **und live deployt** (Prod-Build grün getestet).
