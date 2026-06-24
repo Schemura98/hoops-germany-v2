@@ -25,6 +25,7 @@ export default function AdminAnalyticsPage() {
   }, []);
 
   const maxDaily = summary?.daily?.reduce((m, d) => Math.max(m, d.count), 0) || 1;
+  const maxSection = summary?.sections?.reduce((m, s) => Math.max(m, s.count), 0) || 1;
 
   return (
     <AdminShell title="Analytics">
@@ -46,6 +47,35 @@ export default function AdminAnalyticsPage() {
               <p className="mt-3 text-2xl font-bold text-gray-900">{summary.uniqueSessions}</p>
               <p className="text-sm text-gray-500">Eindeutige Besucher (Sessions)</p>
             </div>
+          </div>
+
+          {/* Traffic nach Bereich – bündelt dynamische Pfade (Spielerprofile,
+              Teams, Spiele …) für eine sponsoren-taugliche Bereichs-Übersicht. */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <h2 className="text-sm font-semibold text-gray-900 mb-1">Traffic nach Bereich</h2>
+            <p className="text-xs text-gray-400 mb-4">
+              Aufrufe je Inhaltsbereich (Spielerprofile, Teams, Spiele … gebündelt)
+            </p>
+            {!summary.sections || summary.sections.length === 0 ? (
+              <p className="text-sm text-gray-400">Noch keine Aufrufe.</p>
+            ) : (
+              <div className="space-y-2.5">
+                {summary.sections.map((s) => (
+                  <div key={s.section} className="flex items-center gap-3">
+                    <span className="w-40 sm:w-48 text-xs text-gray-600 truncate">{s.section}</span>
+                    <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+                      <div
+                        className="bg-brand-500 h-full rounded-full"
+                        style={{ width: `${(s.count / maxSection) * 100}%` }}
+                      />
+                    </div>
+                    <span className="w-12 text-right text-xs font-semibold text-gray-900">
+                      {s.count}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Letzte 7 Tage */}

@@ -53,7 +53,7 @@ export default function PlayerNav({ player }) {
   return (
     <nav className="bg-gradient-to-r from-slate-950 to-slate-800 sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
-        <Link href="/player/newsfeed" className="flex items-center hover:opacity-80 transition-opacity">
+        <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
           <img src="/images/logo.svg" alt="Hoops Germany" className="h-9 w-auto object-contain" />
         </Link>
 

@@ -1,6 +1,7 @@
 import "./globals.css";
 import { inter } from "@/lib/fonts";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
+import FeedbackButton from "@/components/FeedbackButton";
 
 export const metadata = {
   title: "Hoops Germany – Amateur-Basketball Community",
@@ -17,6 +18,7 @@ export default function RootLayout({ children }) {
       >
         <AnalyticsTracker />
         {children}
+        <FeedbackButton />
       </body>
     </html>
   );

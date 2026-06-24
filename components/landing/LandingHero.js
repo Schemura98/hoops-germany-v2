@@ -70,7 +70,7 @@ export default function LandingHero() {
                 <FaNewspaper /> Zum Feed
               </Link>
               <Link
-                href="/player/newsfeed"
+                href="/player/player-detail"
                 className="border-2 border-white hover:bg-white hover:text-gray-900 text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center gap-2"
               >
                 <FaUsers /> Mein Profil

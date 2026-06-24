@@ -204,7 +204,7 @@ export default function Navbar() {
         <div className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 h-16">
           {/* Logo */}
           <Link
-            href={isLoggedIn ? "/home" : "/"}
+            href="/"
             className="flex items-center hover:opacity-80 transition-opacity"
           >
             <img

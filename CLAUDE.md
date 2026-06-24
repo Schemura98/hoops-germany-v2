@@ -239,6 +239,17 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
     `stations` liefert zusätzlich `teamId`/`leagueId` für die Detail-Abfrage. **DNP-Partien werden in
     der Detailliste ausgeblendet** (Query-`$elemMatch` mit `didNotPlay: {$ne:true}`) → deckt sich
     exakt mit der „Sp."-Zahl der Station (funktional verifiziert: DNP → Detail 3→2 = Sp. 2).
+- **Testphase-UX: Startseiten-Zugang, Feedback-Button, Analytics-Bereiche**:
+  - **Logo führt zur Startseite** (Navbar + PlayerNav `href="/"` statt `/home`/`/player/newsfeed`):
+    eingeloggte User erreichen die Begrüßungs-Startseite (Gruß via `LandingHero`). Nebenbei den
+    „Mein Profil"-Button in `LandingHero` gefixt (zeigte auf den Feed → jetzt `/player/player-detail`).
+  - **Schwebender Feedback-Button** (`components/FeedbackButton.js`, im Root-Layout): fixiert unten
+    rechts auf allen Seiten (Text ab `sm`, mobil nur Icon), ausgeblendet auf `/feedback` und `/admin`.
+  - **Analytics geprüft + „Traffic nach Bereich"**: `AnalyticsTracker` (Root-Layout) trackt jeden
+    Seitenaufruf außer `/admin`; `summary` liefert Aufrufe/Sessions/Top-Pfade/7-Tage – funktioniert.
+    **Neu:** `summary` bündelt Pfade serverseitig per `$switch` in Bereiche (Spielerprofile, Teams,
+    Spiele, Newsfeed …) → `/admin/analytics` zeigt „Traffic nach Bereich" (Balken). Dynamische Routen
+    (z. B. einzelne Spielerprofile) werden so sponsoren-tauglich gebündelt statt zersplittert.
 
 > **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
 > Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).
