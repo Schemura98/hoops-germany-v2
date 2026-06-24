@@ -69,15 +69,17 @@ export default function NotificationBell() {
     <div className="relative">
       <button
         onClick={toggle}
-        className="relative text-white/80 hover:text-orange-400 transition-colors"
+        className="p-2 -m-1 text-white/80 hover:text-orange-400 transition-colors"
         aria-label="Benachrichtigungen"
       >
-        <FaBell className="text-lg" />
-        {unread > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-brand-500 text-white text-[10px] font-bold flex items-center justify-center">
-            {unread > 9 ? "9+" : unread}
-          </span>
-        )}
+        <span className="relative block">
+          <FaBell className="text-lg" />
+          {unread > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-brand-500 text-white text-[10px] font-bold flex items-center justify-center">
+              {unread > 9 ? "9+" : unread}
+            </span>
+          )}
+        </span>
       </button>
 
       {open && (

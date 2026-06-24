@@ -88,9 +88,9 @@ export default function PlayerNav({ player }) {
           )}
         </div>
 
-        <div className="flex items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-1.5 sm:gap-3 -mr-1">
           <NotificationBell />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 px-1">
             {player?.profileImage ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -105,9 +105,10 @@ export default function PlayerNav({ player }) {
             )}
             <span className="hidden sm:block text-sm text-gray-200">{player?.firstName}</span>
           </div>
+          {/* Abmelden: auf Mobil im Hamburger-Menü, hier nur ab Desktop */}
           <button
             onClick={logout}
-            className="text-white/80 hover:text-orange-400 transition-colors"
+            className="hidden lg:block p-2 -m-1 text-white/80 hover:text-orange-400 transition-colors"
             aria-label="Abmelden"
             title="Abmelden"
           >
@@ -116,7 +117,7 @@ export default function PlayerNav({ player }) {
           {/* Mobile-Hamburger */}
           <button
             onClick={() => setMobileOpen((v) => !v)}
-            className="lg:hidden text-white/80 hover:text-orange-400 transition-colors"
+            className="lg:hidden p-2 -m-1 text-white/80 hover:text-orange-400 transition-colors"
             aria-label="Menü"
           >
             {mobileOpen ? <FaTimes className="w-5 h-5" /> : <FaBars className="w-5 h-5" />}
@@ -157,6 +158,16 @@ export default function PlayerNav({ player }) {
               <span className="text-sm font-medium">{adminLink.label}</span>
             </Link>
           )}
+          <button
+            onClick={() => {
+              setMobileOpen(false);
+              logout();
+            }}
+            className="flex w-full items-center gap-3 px-5 py-3.5 border-l-4 border-transparent text-gray-300 hover:bg-slate-800 hover:text-white transition-colors"
+          >
+            <FaSignOutAlt className="w-4 h-4 flex-shrink-0" />
+            <span className="text-sm font-medium">Abmelden</span>
+          </button>
         </div>
       )}
     </nav>
