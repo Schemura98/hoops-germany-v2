@@ -36,8 +36,8 @@ export default function ErgebnisseTab({ team }) {
   const [busyId, setBusyId] = useState(null);
   const [msg, setMsg] = useState(null);
 
-  // Stats-Editor
-  const [statsOpenId, setStatsOpenId] = useState(null);
+  // Stats-Editor: standardmäßig aufgeklappt; collapsedStats = vom User eingeklappte Spiele.
+  const [collapsedStats, setCollapsedStats] = useState(() => new Set());
   const [statsForms, setStatsForms] = useState({}); // { [matchId]: { [key]: {points,assists,rebounds,didNotPlay} } }
   const [savingStatsId, setSavingStatsId] = useState(null);
 
@@ -72,6 +72,42 @@ export default function ErgebnisseTab({ team }) {
     }));
     return [...fromPlayers, ...fromSlots];
   }, [roster]);
+
+  // Stats-Formular eines Spiels aus vorhandenen playerStats aufbauen.
+  const buildStatsForm = useCallback(
+    (match) => {
+      const own = (match.playerStats || []).filter(
+        (s) => String(s.team) === String(teamId)
+      );
+      const map = {};
+      for (const s of own) {
+        const k = s.player ? String(s.player) : `slot:${s.rosterSlotId}`;
+        map[k] = s;
+      }
+      const f = {};
+      for (const r of rosterList) {
+        const e = map[r.key];
+        f[r.key] = {
+          points: e?.points ?? "",
+          assists: e?.assists ?? "",
+          rebounds: e?.rebounds ?? "",
+          didNotPlay: !!e?.didNotPlay,
+        };
+      }
+      return f;
+    },
+    [teamId, rosterList]
+  );
+
+  // Formulare für alle Spiele vorbereiten, damit der aufgeklappte Editor direkt da ist.
+  useEffect(() => {
+    if (!teamId || rosterList.length === 0) return;
+    setStatsForms((prev) => {
+      const next = { ...prev };
+      for (const m of matches) if (!next[m._id]) next[m._id] = buildStatsForm(m);
+      return next;
+    });
+  }, [matches, rosterList, teamId, buildStatsForm]);
 
   const loadMatches = useCallback(async () => {
     const token = getTeamAuthToken();
@@ -141,31 +177,14 @@ export default function ErgebnisseTab({ team }) {
   }
 
   function toggleStats(match) {
-    if (statsOpenId === match._id) {
-      setStatsOpenId(null);
-      return;
-    }
-    setStatsOpenId(match._id);
+    setCollapsedStats((prev) => {
+      const next = new Set(prev);
+      if (next.has(match._id)) next.delete(match._id);
+      else next.add(match._id);
+      return next;
+    });
     if (!statsForms[match._id]) {
-      const own = (match.playerStats || []).filter(
-        (s) => String(s.team) === String(teamId)
-      );
-      const map = {};
-      for (const s of own) {
-        const k = s.player ? String(s.player) : `slot:${s.rosterSlotId}`;
-        map[k] = s;
-      }
-      const f = {};
-      for (const r of rosterList) {
-        const e = map[r.key];
-        f[r.key] = {
-          points: e?.points ?? "",
-          assists: e?.assists ?? "",
-          rebounds: e?.rebounds ?? "",
-          didNotPlay: !!e?.didNotPlay,
-        };
-      }
-      setStatsForms((prev) => ({ ...prev, [match._id]: f }));
+      setStatsForms((prev) => ({ ...prev, [match._id]: buildStatsForm(match) }));
     }
   }
 
@@ -256,8 +275,12 @@ export default function ErgebnisseTab({ team }) {
             const form = forms[match._id] || { ownPoints: "", opponentPoints: "" };
             const confirmed = match.resultStatus === "confirmed";
             const mismatch = match.resultStatus === "mismatch";
-            const statsOpen = statsOpenId === match._id;
+            const statsOpen = !collapsedStats.has(match._id);
             const sForm = statsForms[match._id] || {};
+            // Ergebnis/Statistiken erst ab Spielbeginn – außer es liegt schon etwas vor.
+            const isOver = new Date(match.date).getTime() <= Date.now();
+            const canEnter =
+              isOver || ownSubmitted || otherSubmitted || match.status === "completed";
 
             return (
               <div
@@ -281,6 +304,13 @@ export default function ErgebnisseTab({ team }) {
                   )}
                 </div>
 
+                {!canEnter ? (
+                  <div className="mt-3 rounded-lg bg-gray-50 border border-gray-100 px-4 py-3 text-sm text-gray-500">
+                    ⏳ Dieses Spiel findet erst am <strong>{formatDate(match.date)}</strong> statt –
+                    Ergebnis &amp; Statistiken kannst du danach eintragen.
+                  </div>
+                ) : (
+                  <>
                 {/* Score */}
                 {confirmed ? (
                   <div className="mt-3 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-center">
@@ -455,6 +485,8 @@ export default function ErgebnisseTab({ team }) {
                     </div>
                   )}
                 </div>
+                  </>
+                )}
               </div>
             );
           })}

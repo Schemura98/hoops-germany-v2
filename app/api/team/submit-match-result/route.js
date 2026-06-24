@@ -160,6 +160,17 @@ async function handler(req) {
     return fail("Das Ergebnis ist bereits bestätigt", 409);
   }
 
+  // Ergebnis erst ab Spielbeginn zulassen – außer es liegt bereits eine Meldung vor
+  // (z.B. Gegner ergänzt seine Sicht oder eine Korrektur).
+  const alreadyHasResult =
+    match.teamAResult?.ownPoints != null || match.teamBResult?.ownPoints != null;
+  if (!alreadyHasResult && match.date && new Date(match.date) > new Date()) {
+    return fail(
+      "Das Spiel hat noch nicht stattgefunden – ein Ergebnis kannst du erst danach eintragen.",
+      400
+    );
+  }
+
   const wasCompleted = match.status === "completed";
   const prevResultStatus = match.resultStatus;
 
