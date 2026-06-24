@@ -255,6 +255,14 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
     **Feedback** (`/feedback`); kompakter + `flex-wrap`. Der untere CTA „Bereit loszulegen" wird für
     eingeloggte User ausgeblendet (neue Client-Komponente `components/landing/LandingCTA.js`, in
     `app/page.js` statt des inline-CTA – nur für ausgeloggte Besucher).
+  - **Landing-Politur**: Hero-Buttons farblich vereinheitlicht (1 oranger Primär + gleichartige
+    „Ghost"-Buttons statt wechselnder Orange/Weiß-Outlines), eingeloggt in **3+2-Reihen** angeordnet
+    (`HERO_PRIMARY`/`HERO_GHOST`/`HERO_W` in `LandingHero`). „Alles, was du brauchst" von 3 auf
+    **6 Feature-Karten** erweitert (Spielerprofile & Statistiken, Teams & Kaderverwaltung, Spielplan &
+    Ergebnisse, Ligen & Tabellen, Tryouts & Transfermarkt, Community & News). „So funktionierts" ist
+    jetzt login-bewusst (`components/landing/LandingHowItWorks.js`): ausgeloggt Onboarding-Schritte,
+    eingeloggt **personalisierte „Deine nächsten Schritte"** (Profil / Team verwalten|ansehen|gründen
+    je nach Rolle / Ligen & Topscorer – als klickbare Links).
 
 > **STAND / WEITER (Pause):** v2 ist live, abgesichert, Hauptflow bestätigt. Offene Punkte siehe Roadmap.
 > Updates deployen: `cd /root/hoops-v2 && git pull && npm run build && pm2 restart hoops-v2` (Claude per `~/.ssh/hoops_vps`).

@@ -13,6 +13,14 @@ import {
 } from "react-icons/fa";
 import { getPlayerToken } from "@/lib/clientAuth";
 
+// Einheitliche Hero-Buttons: ein primärer (orange) + gleichartige „Ghost"-Buttons,
+// damit der Button-Block farblich ruhig und konsistent wirkt.
+const HERO_BTN =
+  "font-bold py-3.5 px-6 rounded-lg text-base flex items-center justify-center gap-2 transition-colors";
+const HERO_PRIMARY = `${HERO_BTN} bg-orange-500 hover:bg-orange-600 text-white`;
+const HERO_GHOST = `${HERO_BTN} border-2 border-white/70 bg-white/10 hover:bg-white hover:text-gray-900 text-white`;
+const HERO_W = "w-full sm:w-52";
+
 // Vollbild-Hero mit Hintergrundbild + dunklem Overlay.
 // Zeigt einen personalisierten Bereich für eingeloggte Spieler, sonst die
 // öffentliche Call-to-Action. Original-Design, v2-Architektur.
@@ -69,37 +77,31 @@ export default function LandingHero() {
             <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto leading-relaxed">
               Was möchtest du heute machen?
             </p>
-            <div className="flex flex-wrap gap-3 justify-center max-w-3xl mx-auto">
-              <Link
-                href="/home"
-                className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 px-6 rounded-lg text-base flex items-center justify-center gap-2"
-              >
-                <FaNewspaper /> Zum Feed
-              </Link>
-              <Link
-                href="/player/player-detail"
-                className="border-2 border-white hover:bg-white hover:text-gray-900 text-white font-bold py-3.5 px-6 rounded-lg text-base flex items-center justify-center gap-2"
-              >
-                <FaUser /> Mein Profil
-              </Link>
-              <Link
-                href={teamSlug ? `/team/team-detail/${teamSlug}` : "/teams"}
-                className="border-2 border-orange-400 hover:bg-orange-400 text-orange-300 hover:text-white font-bold py-3.5 px-6 rounded-lg text-base flex items-center justify-center gap-2"
-              >
-                <FaUsers /> {teamSlug ? "Mein Team" : "Teams"}
-              </Link>
-              <Link
-                href="/spiele"
-                className="border-2 border-white hover:bg-white hover:text-gray-900 text-white font-bold py-3.5 px-6 rounded-lg text-base flex items-center justify-center gap-2"
-              >
-                <FaCalendarAlt /> Spielplan
-              </Link>
-              <Link
-                href="/feedback"
-                className="border-2 border-white hover:bg-white hover:text-gray-900 text-white font-bold py-3.5 px-6 rounded-lg text-base flex items-center justify-center gap-2"
-              >
-                <FaCommentDots /> Feedback
-              </Link>
+            <div className="space-y-3 max-w-2xl mx-auto">
+              {/* Obere Reihe: 3 Buttons */}
+              <div className="flex flex-col sm:flex-row justify-center gap-3">
+                <Link href="/home" className={`${HERO_PRIMARY} ${HERO_W}`}>
+                  <FaNewspaper /> Zum Feed
+                </Link>
+                <Link href="/player/player-detail" className={`${HERO_GHOST} ${HERO_W}`}>
+                  <FaUser /> Mein Profil
+                </Link>
+                <Link
+                  href={teamSlug ? `/team/team-detail/${teamSlug}` : "/teams"}
+                  className={`${HERO_GHOST} ${HERO_W}`}
+                >
+                  <FaUsers /> {teamSlug ? "Mein Team" : "Teams"}
+                </Link>
+              </div>
+              {/* Untere Reihe: 2 Buttons */}
+              <div className="flex flex-col sm:flex-row justify-center gap-3">
+                <Link href="/spiele" className={`${HERO_GHOST} ${HERO_W}`}>
+                  <FaCalendarAlt /> Spielplan
+                </Link>
+                <Link href="/feedback" className={`${HERO_GHOST} ${HERO_W}`}>
+                  <FaCommentDots /> Feedback
+                </Link>
+              </div>
             </div>
           </>
         ) : (
@@ -128,13 +130,13 @@ export default function LandingHero() {
               </Link>
               <Link
                 href="/team/register"
-                className="border-2 border-white hover:bg-white hover:text-gray-900 text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center"
+                className="border-2 border-white/70 bg-white/10 hover:bg-white hover:text-gray-900 text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center"
               >
                 Team gründen
               </Link>
               <Link
                 href="/teams"
-                className="border-2 border-orange-400 hover:bg-orange-400 text-orange-300 hover:text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center gap-2"
+                className="border-2 border-white/70 bg-white/10 hover:bg-white hover:text-gray-900 text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center gap-2"
               >
                 <FaUsers /> Teams entdecken
               </Link>

@@ -1,32 +1,49 @@
-import { FaTrophy, FaUsers, FaChartBar } from "react-icons/fa";
+import {
+  FaTrophy,
+  FaUsers,
+  FaChartBar,
+  FaCalendarAlt,
+  FaExchangeAlt,
+  FaRegNewspaper,
+} from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LandingHero from "@/components/landing/LandingHero";
+import LandingHowItWorks from "@/components/landing/LandingHowItWorks";
 import LandingCTA from "@/components/landing/LandingCTA";
 import NewsWidget from "@/components/NewsWidget";
 
 const features = [
   {
+    icon: FaChartBar,
+    title: "Spielerprofile & Statistiken",
+    text: "Erstelle dein Profil, sammle Punkte, Assists & Rebounds und verfolge deine komplette Karrierehistorie – sichtbar für Vereine und Scouts.",
+  },
+  {
     icon: FaUsers,
-    title: "Spielerprofile",
-    text: "Erstelle dein persönliches Profil, teile deine Stats und Highlights und werde von Vereinen und Scouts entdeckt.",
+    title: "Teams & Kaderverwaltung",
+    text: "Gründe ein Team oder tritt einem bei, verwalte deinen Kader, lade Spieler ein und organisiere alles an einem Ort.",
+  },
+  {
+    icon: FaCalendarAlt,
+    title: "Spielplan & Ergebnisse",
+    text: "Trage Spiele und Ergebnisse ein, erfasse Box-Scores je Spieler und behalte kommende Partien immer im Blick.",
   },
   {
     icon: FaTrophy,
-    title: "Ligen und Tabellen",
-    text: "Verfolge Ergebnisse, Tabellenstände und Spielpläne deiner Liga – in Echtzeit, direkt auf deinem Handy.",
+    title: "Ligen & Tabellen",
+    text: "Verfolge Tabellenstände, Spielpläne und die Topscorer-Liste deiner Liga – in Echtzeit, direkt auf dem Handy.",
   },
   {
-    icon: FaChartBar,
-    title: "Transfers und News",
-    text: "Bleib auf dem Laufenden: Vereinswechsel, Tryouts, Turniere und News direkt aus der deutschen Basketball-Szene.",
+    icon: FaExchangeAlt,
+    title: "Tryouts & Transfermarkt",
+    text: "Schreibe Probetrainings aus oder bewirb dich, finde transferbereite Spieler und neue Vereine in deiner Region.",
   },
-];
-
-const steps = [
-  { n: 1, dark: true, title: "Kostenlos registrieren", text: "Erstelle deinen Account in unter 2 Minuten – komplett kostenlos." },
-  { n: 2, dark: false, title: "Profil vervollständigen", text: "Füge deine Position, Stats und ein Profilbild hinzu." },
-  { n: 3, dark: true, title: "Community beitreten", text: "Tritt deinem Verein bei, verfolge Ligen und vernetze dich mit anderen Spielern." },
+  {
+    icon: FaRegNewspaper,
+    title: "Community & News",
+    text: "Teile Beiträge, folge Spielern und Teams, bleib per Benachrichtigung am Ball und lies aktuelle Basketball-News.",
+  },
 ];
 
 export default function LandingPage() {
@@ -67,28 +84,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* So funktionierts */}
-      <section className="bg-white py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-black mb-4 text-gray-900">So funktionierts</h2>
-          <p className="text-gray-500 mb-16">In 3 einfachen Schritten dabei</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {steps.map((s) => (
-              <div key={s.n} className="text-center">
-                <div
-                  className={`w-16 h-16 ${
-                    s.dark ? "bg-gray-900" : "bg-orange-500"
-                  } text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-black`}
-                >
-                  {s.n}
-                </div>
-                <h3 className="font-bold text-lg mb-2 text-gray-900">{s.title}</h3>
-                <p className="text-gray-500 text-sm">{s.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* So funktionierts / Nächste Schritte – je nach Login-Status */}
+      <LandingHowItWorks />
 
       {/* Basketball-News */}
       <section className="bg-gray-50 py-16 px-4">
