@@ -1,19 +1,22 @@
 // Seed-Skript: offizieller NRW-Herren-Liga-Katalog (WBV) oberhalb der Kreisliga,
 // Saison 2025/26. IDEMPOTENT – legt fehlende Ligen an, aktualisiert die Katalog-
-// Felder bestehender und LÖSCHT NICHTS. Teams/Matches/active bleiben unberührt
-// (nur beim Neuanlegen gesetzt). Damit sicher auf Dev (hoopsgermany) UND Prod
-// (hoops_prod) ausführbar.
+// Felder bestehender und LÖSCHT NICHTS (außer leere Alt-Einträge, s. u.).
+// Teams/Matches/active bleiben unberührt (nur beim Neuanlegen gesetzt). Damit
+// sicher auf Dev (hoopsgermany) UND Prod (hoops_prod) ausführbar.
 //
 // Aufruf:  node scripts/seed-nrw-leagues.mjs
 //          node scripts/seed-nrw-leagues.mjs --dry   (nur anzeigen, nichts schreiben)
 //
-// Quelle der Struktur: WBV "Ligenstruktur Senioren" (basketball.nrw) +
-// vorläufige Ligeneinteilung 2025/26. Herren oberhalb Kreisliga:
+// Quelle: WBV "Ligeneinteilung für den MWB 2025/2026" (Stand 12.06.2025),
+//   basketball.nrw/images/Spielbetrieb/2025_2026/ligeneinteilung_herren_20250612-1.pdf
+// Namen wörtlich aus der PDF. Herren oberhalb Kreisliga:
 //   1× 1. Regionalliga · 2× 2. Regionalliga · 4× Oberliga · 8× Landesliga · 16× Bezirksliga = 31 Ligen.
-// Die 5 Regierungsbezirke des WBV (RP Köln/Düsseldorf/Arnsberg/Münster/Detmold)
-// tragen die regionale Gliederung; die exakte Gruppen↔Bezirk-Zuordnung der
-// Landes-/Bezirksligen ist über TeamSL nicht zuverlässig extrahierbar und wird
-// im Korrektur-Check mit dem User ergänzt (region bleibt vorerst leer).
+//
+// Bezirk je Liga aus der Einteilung abgeleitet (Vereins-ID, 3. Ziffer = Regierungsbezirk:
+//   111=Köln, 112=Düsseldorf, 113=Arnsberg, 114=Münster, 115=Detmold).
+//   - Bezirksligen liegen je vollständig in einem RP-Bezirk → region gesetzt.
+//   - Landesligen meist in einem Bezirk; LL1/LL3 mischen Köln+Düsseldorf → region leer.
+//   - 1./2. Regionalliga und Oberliga 4 sind bezirksübergreifend → region leer.
 import { readFileSync } from "fs";
 import mongoose from "mongoose";
 
@@ -41,21 +44,50 @@ const DRY = process.argv.includes("--dry");
 const SEASON = "2025/26";
 const BUNDESLAND = "Nordrhein-Westfalen";
 
-// ----- Katalog der NRW-Herren-Ligen (Senioren) oberhalb der Kreisliga -----
-const catalog = [];
-const add = (name, level) =>
-  catalog.push({ name, level, region: "" });
+const KOELN = "Bezirk Köln";
+const DDORF = "Bezirk Düsseldorf";
+const ARNS = "Bezirk Arnsberg";
+const MS = "Bezirk Münster";
+const DT = "Bezirk Detmold";
 
-// 1. Regionalliga (NRW-weit)
-add("1. Regionalliga", "Regionalliga");
-// 2. Regionalliga – 2 Gruppen
-for (let i = 1; i <= 2; i++) add(`2. Regionalliga Gruppe ${i}`, "Regionalliga");
-// Oberliga – 4 Gruppen
-for (let i = 1; i <= 4; i++) add(`Oberliga Gruppe ${i}`, "Oberliga");
-// Landesliga – 8 Gruppen
-for (let i = 1; i <= 8; i++) add(`Landesliga Gruppe ${i}`, "Landesliga");
-// Bezirksliga – 16 Gruppen
-for (let i = 1; i <= 16; i++) add(`Bezirksliga Gruppe ${i}`, "Bezirksliga");
+// ----- Katalog der NRW-Herren-Ligen (Senioren) oberhalb der Kreisliga -----
+const catalog = [
+  // Höchste NRW-Klassen – bezirksübergreifend → region leer
+  { name: "1. Regionalliga", level: "Regionalliga", region: "" },
+  { name: "2. Regionalliga 1", level: "Regionalliga", region: "" },
+  { name: "2. Regionalliga 2", level: "Regionalliga", region: "" },
+  // Oberligen
+  { name: "Oberliga 1", level: "Oberliga", region: KOELN },
+  { name: "Oberliga 2", level: "Oberliga", region: DDORF },
+  { name: "Oberliga 3", level: "Oberliga", region: ARNS },
+  { name: "Oberliga 4", level: "Oberliga", region: "" }, // Münster/Detmold/Arnsberg gemischt
+  // Landesligen
+  { name: "Landesliga 1", level: "Landesliga", region: "" }, // Köln + Düsseldorf gemischt
+  { name: "Landesliga 2", level: "Landesliga", region: KOELN },
+  { name: "Landesliga 3", level: "Landesliga", region: "" }, // Köln + Düsseldorf gemischt
+  { name: "Landesliga 4", level: "Landesliga", region: DDORF },
+  { name: "Landesliga 5", level: "Landesliga", region: ARNS },
+  { name: "Landesliga 6", level: "Landesliga", region: ARNS },
+  { name: "Landesliga 7", level: "Landesliga", region: MS },
+  { name: "Landesliga 8", level: "Landesliga", region: DT },
+  // Bezirksligen (je 1 RP-Bezirk)
+  { name: "Bezirksliga 1", level: "Bezirksliga", region: KOELN },
+  { name: "Bezirksliga 2", level: "Bezirksliga", region: KOELN },
+  { name: "Bezirksliga 3", level: "Bezirksliga", region: KOELN },
+  { name: "Bezirksliga 4", level: "Bezirksliga", region: KOELN },
+  { name: "Bezirksliga 5", level: "Bezirksliga", region: DDORF },
+  { name: "Bezirksliga 6", level: "Bezirksliga", region: DDORF },
+  { name: "Bezirksliga 7", level: "Bezirksliga", region: DDORF },
+  { name: "Bezirksliga 8", level: "Bezirksliga", region: DDORF },
+  { name: "Bezirksliga 9", level: "Bezirksliga", region: ARNS },
+  { name: "Bezirksliga 10", level: "Bezirksliga", region: ARNS },
+  { name: "Bezirksliga 11", level: "Bezirksliga", region: ARNS },
+  { name: "Bezirksliga 12", level: "Bezirksliga", region: ARNS },
+  { name: "Bezirksliga 13", level: "Bezirksliga", region: MS },
+  { name: "Bezirksliga 14", level: "Bezirksliga", region: MS },
+  { name: "Bezirksliga 15", level: "Bezirksliga", region: DT },
+  { name: "Bezirksliga 16", level: "Bezirksliga", region: DT },
+];
 
 await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 });
 console.log("⏳ Verbunden mit", mongoose.connection.name, DRY ? "(DRY-RUN)" : "");
@@ -78,7 +110,7 @@ for (const c of catalog) {
   };
   if (DRY) {
     const exists = await Leagues.findOne(filter);
-    console.log(`${exists ? "↻ update" : "+ neu  "}  ${c.name}  [${c.level}]`);
+    console.log(`${exists ? "↻ update" : "+ neu  "}  ${c.name.padEnd(20)} [${c.level}] ${c.region || "—"}`);
     exists ? updated++ : created++;
     continue;
   }
@@ -101,8 +133,31 @@ for (const c of catalog) {
   else updated++;
 }
 
+// ----- Selbstheilung: leere Alt-Einträge früherer Seed-Varianten entfernen -----
+// Nur offizielle NRW-Herren-Ligen 2025/26, die NICHT im Katalog stehen UND
+// keine Teams/Matches haben (also nie benutzt wurden). Schützt echte Daten.
+const canonical = new Set(catalog.map((c) => c.name));
+const strays = await Leagues.find({
+  official: true,
+  bundesland: BUNDESLAND,
+  season: SEASON,
+  gender: "Herren",
+  name: { $nin: [...canonical] },
+}).toArray();
+let removed = 0;
+for (const s of strays) {
+  const empty = (s.teams?.length || 0) === 0 && (s.matches?.length || 0) === 0;
+  if (!empty) {
+    console.warn(`⚠️  Übersprungen (hat Teams/Spiele, nicht im Katalog): "${s.name}"`);
+    continue;
+  }
+  if (DRY) console.log(`− stray  ${s.name} (leer, würde entfernt)`);
+  else await Leagues.deleteOne({ _id: s._id });
+  removed++;
+}
+
 console.log(
-  `✅ Fertig: ${created} angelegt, ${updated} aktualisiert (${catalog.length} Katalog-Ligen, Saison ${SEASON}).`
+  `✅ Fertig: ${created} angelegt, ${updated} aktualisiert, ${removed} leere Alt-Einträge entfernt (${catalog.length} Katalog-Ligen, Saison ${SEASON}).`
 );
 await mongoose.disconnect();
 process.exit(0);
