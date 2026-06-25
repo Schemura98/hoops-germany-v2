@@ -404,6 +404,11 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > gefülltes NRW-Set an (Tag `seedTag:"nrw-demo"`, fasst echte Tester-Daten NICHT an): 6 fiktive NRW-Teams an
 > echte NRW-Ligen gekoppelt, 30 Spieler (inkl. Coach/Manager-Rollen), 12 transferbereit, 3 suchende Vereine,
 > 3 Beitrittsanfragen + 1 Tryout mit 4 Bewerbern, 8 Spiele (Oberliga 1 → Tabelle/Topscorer), Posts, Follower.
+> **Liga-System-Showcase:** zusätzlich eine getaggte **Vorsaison-Liga „Oberliga 1" 2024/25 (abgeschlossen)**
+> mit Round-Robin-Tabelle **+ Playoffs (Halbfinale/Finale)** und **Meister = Playoff-Sieger Köln Comets**
+> (in der Tabelle nicht Erster → zeigt Playoff-Logik); demonstriert Saisonende/Meister-Badge/Playoff-Bracket/
+> Saison-Archiv + saison-fähige Stats. `/ligen` sortiert **befüllte Ligen zuerst** (sonst gehen sie in den
+> 67 leeren Katalog-Hüllen unter).
 > **Demo-Team-Admin-Login** (für die Anfragen/Bewerber-Sicht): `demo.coach@nrw-demo.de` / `test123` (Köln Comets).
 > **Entfernen nach der Testphase:** `node scripts/seed-nrw-demo.mjs --purge` (löscht NUR die getaggten Demo-Daten).
 > `components/TestPhaseBanner.js` im Root-Layout: schlanker, immer sichtbarer „Testbetrieb/Beispieldaten"-Hinweis
