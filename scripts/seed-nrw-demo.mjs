@@ -49,6 +49,8 @@ if (demoTeamIds.length)
   await Leagues.updateMany({}, { $pull: { teams: { $in: demoTeamIds } } });
 if (demoMatchIds.length)
   await Leagues.updateMany({}, { $pull: { matches: { $in: demoMatchIds } } });
+// Demo-eigene Ligen (Vorsaison-Showcase) löschen – echte Katalog-Ligen haben kein seedTag.
+await Leagues.deleteMany({ seedTag: TAG });
 for (const c of [Teams, Players, Matches, Posts, Tryouts, TransferEvents])
   await c.deleteMany({ seedTag: TAG });
 console.log(`🧹 Alte Demo-Daten entfernt (${demoTeamIds.length} Teams, ${demoMatchIds.length} Spiele …)`);
@@ -228,6 +230,50 @@ for (let i = 0; i < 2; i++)
 await Matches.insertMany(matchDocs);
 await Leagues.updateOne({ _id: oberliga._id }, { $addToSet: { matches: { $each: matchDocs.map((m) => m._id) } } });
 
+// ---------- Vorsaison-Demo-Liga (abgeschlossen) mit Meister + Playoffs ----------
+// Eigene, getaggte Liga (kein Eingriff in echte Katalog-Ligen) → zeigt Saisonende,
+// Meister-Badge, Playoff-Bracket, Saison-Archiv und saison-fähige Stats.
+const prevLeague = {
+  _id: oid(), seedTag: TAG, name: "Oberliga 1", season: "2024/25",
+  bundesland: "Nordrhein-Westfalen", level: "Oberliga", gender: "Herren",
+  ageGroup: "Senioren", region: "Bezirk Köln", official: false,
+  active: true, finished: true, teams: obTeams.map((t) => t._id), matches: [], champion: null,
+  createdAt: now, updatedAt: now,
+};
+const prevMatches = [];
+const completed = (tA, tB, date, opts = {}) => {
+  const mk = (team) => playersByTeam(team._id).map((p) => ({ _id: oid(), player: p._id, team: team._id, points: rnd(2, 24), assists: rnd(0, 7), rebounds: rnd(1, 10), didNotPlay: false }));
+  const sA = mk(tA), sB = mk(tB);
+  let pA = sA.reduce((s, x) => s + x.points, 0), pB = sB.reduce((s, x) => s + x.points, 0);
+  if (opts.winner === "A" && pA <= pB) pA = pB + rnd(3, 9);
+  if (opts.winner === "B" && pB <= pA) pB = pA + rnd(3, 9);
+  if (pA === pB) pA += 3;
+  const m = {
+    _id: oid(), seedTag: TAG, teamA: tA._id, teamB: tB._id, date, location: `${tA.region} Arena`,
+    leagueId: prevLeague._id, status: "completed", resultStatus: "confirmed",
+    stage: opts.stage || "Hauptrunde", ...(opts.round ? { playoffRound: opts.round } : {}),
+    winningTeam: pA > pB ? tA._id : tB._id, winningTeamPoints: Math.max(pA, pB), losingTeamPoints: Math.min(pA, pB),
+    playerStats: [...sA, ...sB],
+    teamAResult: { ownPoints: pA, opponentPoints: pB, submittedBy: null, submittedAt: date },
+    teamBResult: { ownPoints: pB, opponentPoints: pA, submittedBy: null, submittedAt: date },
+    notifiedPendingResult: false, createdAt: date, updatedAt: date,
+  };
+  prevMatches.push(m);
+  return m;
+};
+// Hauptrunde (Round-Robin) → Tabelle
+let pd = 300;
+for (let a = 0; a < obTeams.length; a++)
+  for (let b = a + 1; b < obTeams.length; b++) { completed(obTeams[a], obTeams[b], daysAgo(pd)); pd -= 10; }
+// Playoffs: 2 Halbfinale + Finale (Köln Comets = obTeams[0] wird Meister)
+completed(obTeams[0], obTeams[3], daysAgo(250), { stage: "Playoffs", round: "Halbfinale", winner: "A" });
+completed(obTeams[1], obTeams[2], daysAgo(249), { stage: "Playoffs", round: "Halbfinale", winner: "A" });
+const finale = completed(obTeams[0], obTeams[1], daysAgo(240), { stage: "Playoffs", round: "Finale", winner: "A" });
+prevLeague.champion = finale.winningTeam;
+await Matches.insertMany(prevMatches);
+prevLeague.matches = prevMatches.map((m) => m._id);
+await Leagues.insertOne(prevLeague);
+
 // ---------- Follower-Beziehungen ----------
 for (const p of players) {
   const others = players.filter((x) => !x._id.equals(p._id));
@@ -278,7 +324,8 @@ await Posts.insertMany(postDocs);
 const transferCount = players.filter((p) => p.transferStatus === "verfuegbar").length;
 console.log(`\n✅ NRW-Demo angelegt:`);
 console.log(`   ${teams.length} Teams (3 suchend), ${players.length} Spieler (${transferCount} transferbereit, inkl. Coach/Manager)`);
-console.log(`   ${matchDocs.length} Spiele (Oberliga 1), 1 Tryout + ${tryoutApplicants.length} Bewerber, ${requesters.length} Beitrittsanfragen, ${postDocs.length} Posts`);
+console.log(`   ${matchDocs.length} Spiele (Oberliga 1, laufend) + Vorsaison 2024/25 (abgeschlossen, Meister Köln Comets, Playoffs)`);
+console.log(`   1 Tryout + ${tryoutApplicants.length} Bewerber, ${requesters.length} Beitrittsanfragen, ${postDocs.length} Posts`);
 console.log(`   👉 Team-Admin-Sicht (Anfragen/Bewerber): demo.coach@nrw-demo.de / test123 (Köln Comets)`);
 console.log(`   Entfernen: node scripts/seed-nrw-demo.mjs --purge`);
 await mongoose.disconnect();

@@ -58,13 +58,17 @@ export default function LigenPage() {
 
   const filtered = useMemo(
     () =>
-      leagues.filter((l) => {
-        if (land && l.bundesland !== land) return false;
-        if (gender && l.gender !== gender) return false;
-        if (ageGroup && l.ageGroup !== ageGroup) return false;
-        if (level && l.level !== level) return false;
-        return true;
-      }),
+      leagues
+        .filter((l) => {
+          if (land && l.bundesland !== land) return false;
+          if (gender && l.gender !== gender) return false;
+          if (ageGroup && l.ageGroup !== ageGroup) return false;
+          if (level && l.level !== level) return false;
+          return true;
+        })
+        // Befüllte Ligen (mit Teams) zuerst – sonst gehen aktive Ligen in den
+        // vielen (noch) leeren Katalog-Hüllen unter.
+        .sort((a, b) => (b.teamCount || 0) - (a.teamCount || 0)),
     [leagues, land, gender, ageGroup, level]
   );
 
