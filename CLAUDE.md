@@ -502,9 +502,18 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
      Namen aufgelöst). **Sitzungsmetriken:** Sitzungen, Seiten/Sitzung, Ø Sitzungsdauer via Sessionisierung
      (`$setWindowFields`, 30-Min-Inaktivitätslücke; läuft auf Atlas). UI: `EngagementCards`/`RegionCard`/
      `ContentCard` in beiden Tabs + im Sponsoring-Report; CSV erweitert. Im Preview verifiziert.
-     **🔜 Offen: Phase 3** (Banner-Tracking je Werbefläche: Impressionen/Klicks/CTR; Sponsor-spezifische
-     Auswertungen; Leads/Kontaktanfragen; automatischer PDF-Export; **passwortgeschützte/teilbare
-     Sponsor-Report-Seite** zum Versenden an Sponsoren).
+   - ✅ **Analytics-Ausbau – Phase 3 (Teil 1: teilbarer Sponsor-Report)** (`7074bfe`, live): Für die
+     Akquise per Link, auch ohne laufende Werbung. **Refactor:** Summary-Logik → `lib/analyticsSummary.js`
+     (`computeAnalyticsSummary`), Report-Ansicht → `components/admin/SponsorReportView.js` (von Admin- UND
+     öffentlicher Seite genutzt). **Modell `ReportShare`** (token + **bcrypt-Passwort** + label + active).
+     Admin-Verwaltung `/api/analytics/shares` (list/create/revoke) + UI `SharesManager` im Sponsor-Tab.
+     **Öffentliche Seite `/sponsor-report/[token]`** mit Passwort-Gate → `/api/analytics/public-report`
+     (token+Passwort, bcrypt, konstantzeit-Vergleich) liefert **nur aggregierte Zahlen**; Zeitraum-
+     Umschaltung + Druck/PDF. `AnalyticsTracker` ignoriert `/sponsor-report`. Verifiziert (Refactor ok,
+     Gate falsch→401/richtig→Report mit Label, Admin-Liste). **⚠️ Passwort separat vom Link weitergeben.**
+     **🔜 Offen: Phase 3 (Teil 2)** – Banner-Tracking je Werbefläche (Impressionen/Klicks/CTR), Sponsor-
+     Entität + per-Sponsor-Auswertung, Leads/Kontaktanfragen, automatischer PDF-Export. **Sinnvoll erst mit
+     echten Werbeflächen** → an Monetarisierung (#3) gekoppelt, bis **Gewerbeanmeldung** zurückgestellt.
    - ✅ **„Land"/country aus dem Profil entfernt, „Nationalität" beibehalten** (`b22b731`+`2632972`, live):
      Entscheidung 26.06. – DE-only-Seite, Land überflüssig. Entfernt aus edit-profile/Anzeige/Selects;
      **Nationalität bleibt** (auf Wunsch wieder aktiviert). `Player.country` bleibt dormant (@deprecated, keine Migration).
