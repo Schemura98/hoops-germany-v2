@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
-import { FaBasketballBall } from "react-icons/fa";
+import Button from "@/components/ui/Button";
+import Loading from "@/components/ui/Loading";
+import { inputClass } from "@/lib/ui";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { getPlayerToken, setStoredPlayer, clearPlayerToken, clearTeamToken } from "@/lib/clientAuth";
 import { POSITIONS, PLAYER_ROLES, BUNDESLAENDER, LEAGUE_LEVELS, positionLabel } from "@/lib/constants";
@@ -13,9 +15,6 @@ import PlayerNav from "@/components/layout/PlayerNav";
 import Footer from "@/components/layout/Footer";
 import ImageUpload from "@/components/ImageUpload";
 import CityInput from "@/components/CityInput";
-
-const inputClass =
-  "w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
 
 // Felder, die das Formular bearbeitet (müssen mit der API-Whitelist übereinstimmen)
 const FIELDS = [
@@ -114,7 +113,7 @@ export default function PlayerEditProfilePage() {
   if (status === "loading" || !form) {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
+        <Loading />
       </main>
     );
   }
@@ -123,12 +122,9 @@ export default function PlayerEditProfilePage() {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
         <p className="text-gray-700">Profil konnte nicht geladen werden.</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-4 bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2 font-medium"
-        >
+        <Button onClick={() => window.location.reload()} className="mt-4">
           Erneut versuchen
-        </button>
+        </Button>
       </main>
     );
   }
@@ -315,19 +311,12 @@ export default function PlayerEditProfilePage() {
           )}
 
           <div className="flex justify-end gap-3 pt-2">
-            <Link
-              href="/player/player-detail"
-              className="border border-gray-300 hover:border-brand-500 text-gray-700 rounded-lg px-4 py-2.5 font-medium"
-            >
+            <Button href="/player/player-detail" variant="secondary">
               Abbrechen
-            </Link>
-            <button
-              type="submit"
-              disabled={saving}
-              className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-6 py-2.5 font-medium transition-colors"
-            >
+            </Button>
+            <Button type="submit" disabled={saving} size="lg">
               {saving ? "Speichern…" : "Speichern"}
-            </button>
+            </Button>
           </div>
         </form>
 
@@ -339,15 +328,16 @@ export default function PlayerEditProfilePage() {
             rückgängig gemacht werden.
           </p>
           {!showDelete ? (
-            <button
+            <Button
+              variant="dangerGhost"
+              className="mt-4"
               onClick={() => {
                 setShowDelete(true);
                 setDeleteError("");
               }}
-              className="mt-4 border border-red-300 text-red-700 hover:bg-red-50 rounded-lg px-4 py-2.5 font-medium"
             >
               Konto löschen…
-            </button>
+            </Button>
           ) : (
             <div className="mt-4 rounded-xl bg-red-50 border border-red-200 p-4">
               <p className="text-sm font-medium text-gray-800">
@@ -355,20 +345,12 @@ export default function PlayerEditProfilePage() {
               </p>
               {deleteError && <p className="mt-2 text-sm text-red-600">{deleteError}</p>}
               <div className="mt-3 flex flex-wrap gap-3">
-                <button
-                  onClick={deleteAccount}
-                  disabled={deleting}
-                  className="bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-lg px-5 py-2.5 font-medium"
-                >
+                <Button variant="danger" size="lg" onClick={deleteAccount} disabled={deleting}>
                   {deleting ? "Wird gelöscht…" : "Ja, Konto endgültig löschen"}
-                </button>
-                <button
-                  onClick={() => setShowDelete(false)}
-                  disabled={deleting}
-                  className="border border-gray-300 hover:border-gray-400 text-gray-700 rounded-lg px-4 py-2.5 font-medium"
-                >
+                </Button>
+                <Button variant="secondary" onClick={() => setShowDelete(false)} disabled={deleting}>
                   Abbrechen
-                </button>
+                </Button>
               </div>
             </div>
           )}

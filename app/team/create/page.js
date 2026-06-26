@@ -12,9 +12,9 @@ import PlayerNav from "@/components/layout/PlayerNav";
 import Footer from "@/components/layout/Footer";
 import CityInput from "@/components/CityInput";
 import LeagueReportLink from "@/components/team/LeagueReportLink";
-
-const inputClass =
-  "w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+import Button from "@/components/ui/Button";
+import Loading from "@/components/ui/Loading";
+import { inputClass } from "@/lib/ui";
 
 export default function TeamCreatePage() {
   const router = useRouter();
@@ -83,7 +83,7 @@ export default function TeamCreatePage() {
   if (status === "loading") {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
+        <Loading />
       </main>
     );
   }
@@ -244,13 +244,9 @@ export default function TeamCreatePage() {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
-          >
+          <Button type="submit" disabled={loading} className="w-full">
             {loading ? "Team wird erstellt…" : "Team erstellen"}
-          </button>
+          </Button>
         </form>
 
         <p className="mt-4 text-center text-sm text-gray-500">

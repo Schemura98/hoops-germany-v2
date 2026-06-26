@@ -3,14 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaBasketballBall } from "react-icons/fa";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { getPlayerToken } from "@/lib/clientAuth";
 import PlayerNav from "@/components/layout/PlayerNav";
 import Footer from "@/components/layout/Footer";
-
-const inputClass =
-  "w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+import Button from "@/components/ui/Button";
+import Loading from "@/components/ui/Loading";
+import { inputClass } from "@/lib/ui";
 
 export default function PlayerUpdatePasswordPage() {
   const { player, status } = useCurrentPlayer();
@@ -63,7 +62,7 @@ export default function PlayerUpdatePasswordPage() {
   if (status === "loading") {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
+        <Loading />
       </main>
     );
   }
@@ -72,12 +71,9 @@ export default function PlayerUpdatePasswordPage() {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
         <p className="text-gray-700">Seite konnte nicht geladen werden.</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-4 bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2 font-medium"
-        >
+        <Button onClick={() => window.location.reload()} className="mt-4">
           Erneut versuchen
-        </button>
+        </Button>
       </main>
     );
   }
@@ -158,13 +154,9 @@ export default function PlayerUpdatePasswordPage() {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
-          >
+          <Button type="submit" disabled={saving} className="w-full">
             {saving ? "Speichern…" : "Passwort ändern"}
-          </button>
+          </Button>
 
           <p className="text-center text-xs text-gray-400">
             Google-Konto ohne Passwort?{" "}

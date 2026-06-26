@@ -7,9 +7,8 @@ import axios from "axios";
 import { FaGoogle } from "react-icons/fa";
 import { setPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
 import AuthShell from "@/components/layout/AuthShell";
-
-const inputClass =
-  "w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+import Button from "@/components/ui/Button";
+import { inputClass } from "@/lib/ui";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -157,13 +156,9 @@ export default function SignupPage() {
           />
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
-        >
+        <Button type="submit" disabled={loading} className="w-full">
           {loading ? "Konto wird erstellt…" : "Konto erstellen"}
-        </button>
+        </Button>
       </form>
 
       <div className="my-6 flex items-center gap-3">
