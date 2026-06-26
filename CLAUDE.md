@@ -449,10 +449,11 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
    `/api/admin/approve-team` (freigeben → `approved` + Liga-Aufnahme + Gründer-Notif `team_approved`/Mail
    `teamApprovedEmail`; ablehnen → Team entfernen + Mitglieder/Flags lösen). Admin-UI `/admin/teams`:
    „Wartet auf Freigabe"-Sektion + Freigeben/Ablehnen + „in Prüfung"-Badge. Im Preview verifiziert.
-3e. **🔜 Agenda – Super-Admin wählt Team-Admin-Nachfolger bei Auswahl** (statt Auto-Transfer/admin-loses Team):
-   eigene Admin-UI, um einem Team gezielt einen neuen Admin aus den Mitgliedern zuzuweisen (Wunsch des Users,
-   als Nächstes dran). Aktuell: `deleteplayer` transferiert automatisch an einen Co-Admin (sonst Block);
-   `setteamadmin remove` lässt das Team ohne Admin.
+3e. ✅ **Super-Admin überträgt Team-Admin per Auswahl** (`9a69a20`, live): im Admin-Panel `/admin/teams`
+   pro Team „Team-Admin verwalten" → Modal mit aktuellem Admin + Mitglieder-Dropdown → Rolle gezielt an ein
+   Mitglied übertragen (bisheriger Admin wird normales Mitglied, neuer wird benachrichtigt). Endpoints
+   `/api/admin/team-members` + `/api/admin/transfer-team-admin`. **Konto-Löschung unverändert** (Auto-Transfer
+   an Co-Admin, sonst Block). Verifiziert (alt→Mitglied, neu→Admin+Notif, `adminPlayerId` aktualisiert).
 4. Weitere UX-Feinschliffe nach Tester-Feedback.
    - 📥 **Tester-Feedback ausgewertet (26.06.2026)** – 1 substanzielle Rückmeldung (25.06., „überwiegend top
      notch") aus `hoops_prod` (Lese-Tool `scripts/read-prod-feedback.mjs`, read-only). 3 Punkte:
