@@ -114,7 +114,6 @@ export default function AnfragenTab() {
                     </p>
                     <p className="text-xs text-gray-500">
                       {positionLabel(p.position) || "Position offen"}
-                      {p.nationality ? ` · ${p.nationality}` : ""}
                     </p>
                   </div>
                 </div>

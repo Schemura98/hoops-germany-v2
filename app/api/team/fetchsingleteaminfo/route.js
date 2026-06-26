@@ -59,7 +59,7 @@ async function handler(req) {
 
   // Spieler mit Account, die dem Team angehören
   const members = await Player.find({ teamId: team._id }).select(
-    "firstName lastName slug position profileImage nationality"
+    "firstName lastName slug position profileImage"
   );
   const memberIds = members.map((m) => m._id);
 

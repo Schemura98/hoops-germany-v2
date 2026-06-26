@@ -46,12 +46,12 @@ const playerSchema = new mongoose.Schema(
     age: Number,
     weight: String,
     birthdate: String,
-    country: String,
+    country: String, // @deprecated 26.06.2026 – nicht mehr erfasst/angezeigt (DE-only); Feld bleibt für Altdaten
     hometown: String,
     bundesland: String,
     fibaLink: String,
     position: String,
-    nationality: String,
+    nationality: String, // @deprecated 26.06.2026 – nicht mehr erfasst/angezeigt (DE-only); Feld bleibt für Altdaten
     aboutPlayer: String,
 
     resetPasswordToken: String,

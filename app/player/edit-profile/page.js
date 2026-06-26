@@ -25,8 +25,6 @@ const FIELDS = [
   "height",
   "weight",
   "birthdate",
-  "nationality",
-  "country",
   "hometown",
   "bundesland",
   "preferredLeague",
@@ -193,15 +191,6 @@ export default function PlayerEditProfilePage() {
             </Field>
             <Field label="Gewicht">
               <input name="weight" value={form.weight} onChange={onChange} className={inputClass} placeholder="z.B. 85 kg" />
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Nationalität">
-              <input name="nationality" value={form.nationality} onChange={onChange} className={inputClass} />
-            </Field>
-            <Field label="Land">
-              <input name="country" value={form.country} onChange={onChange} className={inputClass} />
             </Field>
           </div>
 

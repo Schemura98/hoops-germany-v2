@@ -248,7 +248,6 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                 <StatCell label="Heimatort" value={player?.hometown} small />
               </div>
               <div className="grid grid-cols-1 divide-y divide-white/10 min-w-[110px]">
-                <StatCell label="Land" value={player?.country || player?.nationality} small />
                 <StatCell label="Bundesland" value={player?.bundesland} small />
               </div>
               {player?.fibaLink && (
@@ -519,8 +518,6 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
               <InfoRow label="Alter" value={ageFromBirthdate(player?.birthdate) ?? player?.age} />
               <InfoRow label="Geburtsdatum" value={formatBirthdate(player?.birthdate)} />
               <InfoRow label="Position / Rolle" value={positionLabel(player?.position)} />
-              <InfoRow label="Nationalität" value={player?.nationality} />
-              <InfoRow label="Land" value={player?.country} />
               <InfoRow label="Heimatort" value={player?.hometown} />
               <InfoRow label="Bundesland" value={player?.bundesland} />
               <InfoRow label="Bevorzugte Liga" value={player?.preferredLeague} />

@@ -16,7 +16,7 @@ async function handler(req) {
 
   await connectDB();
   const requests = await Player.find({ teamJoinRequest: team._id }).select(
-    "firstName lastName position nationality profileImage"
+    "firstName lastName position profileImage"
   );
 
   return ok({ requests });

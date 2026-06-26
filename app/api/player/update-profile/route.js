@@ -13,8 +13,6 @@ const STRING_FIELDS = [
   "height",
   "weight",
   "birthdate",
-  "nationality",
-  "country",
   "hometown",
   "bundesland",
   "aboutPlayer",

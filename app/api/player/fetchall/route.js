@@ -6,7 +6,7 @@ import { ok, withErrorHandling } from "@/lib/apiResponse";
 async function handler() {
   await connectDB();
   const players = await Player.find({})
-    .select("firstName lastName slug position profileImage nationality hometown bundesland teamId")
+    .select("firstName lastName slug position profileImage hometown bundesland teamId")
     .populate("teamId", "teamName slug logo")
     .sort({ lastName: 1, firstName: 1 });
 
