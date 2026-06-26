@@ -440,6 +440,19 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
    (vorher nur Posts → verwaiste Referenzen). Verifiziert: Self-Delete+Cascade, Gründer-Block, Gründer-Transfer.
 3c. **🔜 Agenda – Analytics Phase 3 Teil 2** (Banner-Tracking/CTR/Leads/per-Sponsor-Auswertung) – an
    Monetarisierung (#3) gekoppelt, bis Gewerbe zurückgestellt (Details im Analytics-Block weiter unten).
+3d. ✅ **Team-Freigabe durch Super-Admins** (`a871244`, live): neue spieler-gegründete Teams starten
+   **„in Prüfung"** (`Team.approved=false`, Default true → Bestand/Seeds bleiben sichtbar, keine Migration)
+   und sind **öffentlich versteckt** (Filter `approved:{$ne:false}` in `fetchteams`/Navbar-Suche +
+   `recruiting-list`; `fetchsingleteaminfo` → 404; Liga-Aufnahme erst bei Freigabe → kein Pending-Team in
+   Liga/Tabellen). **Gründer kann sein Team schon verwalten** (Banner „wird geprüft" in `/team/admin`).
+   `create` benachrichtigt Super-Admins (In-App `team_pending` + Mail `teamPendingEmail`).
+   `/api/admin/approve-team` (freigeben → `approved` + Liga-Aufnahme + Gründer-Notif `team_approved`/Mail
+   `teamApprovedEmail`; ablehnen → Team entfernen + Mitglieder/Flags lösen). Admin-UI `/admin/teams`:
+   „Wartet auf Freigabe"-Sektion + Freigeben/Ablehnen + „in Prüfung"-Badge. Im Preview verifiziert.
+3e. **🔜 Agenda – Super-Admin wählt Team-Admin-Nachfolger bei Auswahl** (statt Auto-Transfer/admin-loses Team):
+   eigene Admin-UI, um einem Team gezielt einen neuen Admin aus den Mitgliedern zuzuweisen (Wunsch des Users,
+   als Nächstes dran). Aktuell: `deleteplayer` transferiert automatisch an einen Co-Admin (sonst Block);
+   `setteamadmin remove` lässt das Team ohne Admin.
 4. Weitere UX-Feinschliffe nach Tester-Feedback.
    - 📥 **Tester-Feedback ausgewertet (26.06.2026)** – 1 substanzielle Rückmeldung (25.06., „überwiegend top
      notch") aus `hoops_prod` (Lese-Tool `scripts/read-prod-feedback.mjs`, read-only). 3 Punkte:
