@@ -478,12 +478,16 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
      („Eigenes Team gründen") mit Hinweis, dass man **automatisch Team-Admin** wird (Kader/Spiele verwalten),
      plus „Team gründen"-Button im Leerzustand. Deckt den Onboarding-Schritt (verlinkt auf /teams) ab.
      (Team-Admin-Logik bei Gründung existiert bereits: `isTeamAdmin`/`teamAdminOf`/`adminPlayerId`.)
-   - 🔜 **Agenda (offen, mit Tester besprochen 26.06.):**
-     1. **Team-Admin kann Admin-Rechte an andere Spieler vergeben** (im Team-Admin-Panel, KaderTab) – aktuell
-        ist nur der Gründer Admin. Braucht: Modell (mehrere Admins? z. B. `adminPlayerIds[]` oder Flag je
-        Mitglied) + API + UI-Button „zum Admin machen"/„Adminrechte entziehen".
-     2. **Info-Sheet direkt nach der Registrierung** („Was kannst du hier alles tun?" als Anreiz) – z. B.
-        einmaliges Willkommens-Overlay/Seite nach dem Signup (ergänzt die Newsfeed-Onboarding-Checklist).
+   - ✅ **Team-Admin kann Co-Admins ernennen/entziehen** (`64c8a2f`, live): im KaderTab Rollen-Badge
+     (Gründer/Admin/Mitglied) + Buttons „Zum Admin machen"/„Adminrechte entziehen". Nutzt die bestehende
+     Dual-Auth (`Player.isTeamAdmin` + `teamAdminOf` == Team) → **kein Auth-/Team-Modell-Umbau**. Endpoint
+     `POST /api/team/set-member-admin` (jeder Team-Admin darf; **Gründer = `Team.adminPlayerId` geschützt**,
+     nicht degradierbar). Promote benachrichtigt den Spieler (neuer Notif-Typ `team_admin_granted` →
+     `/team/admin`). `roster-players` liefert `isAdmin`/`isFounder`. Entfernen nur für einfache Mitglieder
+     (Admins erst degradieren). Im Preview verifiziert (Promote/Demote/Founder-Schutz 400/Notification).
+   - 🔜 **Agenda (offen):** **Info-Sheet direkt nach der Registrierung** („Was kannst du hier alles tun?"
+     als Anreiz) – z. B. einmaliges Willkommens-Overlay/Seite nach dem Signup (ergänzt die Newsfeed-
+     Onboarding-Checklist). *(Als Nächstes dran.)*
    - ✅ **UX-Durchgang über die neuen Liga-Features** (`b39a35d`, mobil 375px): /ligen-Filter+Saison-Switcher,
      Liga-Detail (Tabelle+Playoffs), Topscorer, EinstellungenTab-Liga-Picker, Admin-Liga-Steuerung,
      SpielplanTab-Playoff-Formular, Team-Liga-Karte – alle sauber. **Fix:** Rangliste- + Topscorer-Tabelle
