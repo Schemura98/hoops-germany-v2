@@ -7,6 +7,8 @@ import { FaBasketballBall, FaTrophy } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
+import Loading from "@/components/ui/Loading";
+import EmptyState from "@/components/ui/EmptyState";
 import { positionLabel } from "@/lib/constants";
 
 const RANK_COLOR = {
@@ -76,18 +78,15 @@ export default function TopscorerPage() {
         )}
 
         {loading ? (
-          <div className="flex justify-center py-16">
-            <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
-          </div>
+          <Loading />
         ) : error ? (
-          <p className="text-center text-gray-500 py-16">
-            Tabelle konnte nicht geladen werden.
-          </p>
+          <EmptyState title="Tabelle konnte nicht geladen werden." />
         ) : scorers.length === 0 ? (
-          <p className="text-center text-gray-500 py-16">
-            Noch keine Statistiken erfasst. Sobald Teams Spieler-Stats eintragen,
-            erscheint hier die Rangliste.
-          </p>
+          <EmptyState
+            icon={FaBasketballBall}
+            title="Noch keine Statistiken erfasst"
+            text="Sobald Teams Spieler-Stats eintragen, erscheint hier die Rangliste."
+          />
         ) : (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="overflow-x-auto">

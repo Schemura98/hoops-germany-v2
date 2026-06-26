@@ -8,6 +8,9 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import Avatar from "@/components/Avatar";
+import Tabs from "@/components/ui/Tabs";
+import Loading from "@/components/ui/Loading";
+import EmptyState from "@/components/ui/EmptyState";
 import { teamScores, matchVerification } from "@/lib/matchScore";
 
 function TeamSide({ team, align = "left" }) {
@@ -122,40 +125,27 @@ export default function SpielePage() {
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
         {loading ? (
-          <div className="flex justify-center py-16">
-            <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
-          </div>
+          <Loading />
         ) : error ? (
-          <p className="text-center text-gray-500 py-16">
-            Spiele konnten nicht geladen werden.
-          </p>
+          <EmptyState title="Spiele konnten nicht geladen werden." />
         ) : matches.length === 0 ? (
-          <p className="text-center text-gray-500 py-16">Noch keine Spiele angesetzt.</p>
+          <EmptyState icon={FaBasketballBall} title="Noch keine Spiele angesetzt." />
         ) : (
           <div>
-            {/* Tabs: Anstehend / Ergebnisse */}
-            <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6 max-w-sm mx-auto sm:mx-0">
-              <button
-                onClick={() => setTab("upcoming")}
-                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  tab === "upcoming" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-800"
-                }`}
-              >
-                Anstehend{upcoming.length ? ` (${upcoming.length})` : ""}
-              </button>
-              <button
-                onClick={() => setTab("results")}
-                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  tab === "results" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-800"
-                }`}
-              >
-                Ergebnisse{results.length ? ` (${results.length})` : ""}
-              </button>
-            </div>
+            <Tabs
+              className="mb-6 max-w-sm"
+              fluid
+              value={tab}
+              onChange={setTab}
+              tabs={[
+                { key: "upcoming", label: "Anstehend", count: upcoming.length },
+                { key: "results", label: "Ergebnisse", count: results.length },
+              ]}
+            />
 
             {tab === "upcoming" ? (
               upcoming.length === 0 ? (
-                <p className="text-center text-sm text-gray-400 py-10">Keine anstehenden Spiele.</p>
+                <EmptyState title="Keine anstehenden Spiele." />
               ) : (
                 <div className="space-y-3">
                   {upcoming.map((m) => (
@@ -164,7 +154,7 @@ export default function SpielePage() {
                 </div>
               )
             ) : results.length === 0 ? (
-              <p className="text-center text-sm text-gray-400 py-10">Noch keine Ergebnisse.</p>
+              <EmptyState title="Noch keine Ergebnisse." />
             ) : (
               <div className="space-y-3">
                 {results.map((m) => (

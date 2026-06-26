@@ -7,6 +7,8 @@ import { FaBasketballBall, FaBullhorn, FaMapMarkerAlt, FaUsers } from "react-ico
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
+import Loading from "@/components/ui/Loading";
+import EmptyState from "@/components/ui/EmptyState";
 import { positionLabel } from "@/lib/constants";
 
 function formatDate(d) {
@@ -58,17 +60,11 @@ export default function TryoutsPage() {
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
 
         {loading ? (
-          <div className="flex justify-center py-16">
-            <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
-          </div>
+          <Loading />
         ) : error ? (
-          <p className="text-center text-gray-500 py-16">
-            Tryouts konnten nicht geladen werden.
-          </p>
+          <EmptyState title="Tryouts konnten nicht geladen werden." />
         ) : tryouts.length === 0 ? (
-          <p className="text-center text-gray-500 py-16">
-            Aktuell sind keine Tryouts ausgeschrieben.
-          </p>
+          <EmptyState icon={FaBullhorn} title="Aktuell sind keine Tryouts ausgeschrieben." />
         ) : (
           <div className="space-y-3">
             {tryouts.map((t) => (

@@ -7,6 +7,8 @@ import { FaBasketballBall, FaUsers, FaTrophy } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
+import Loading from "@/components/ui/Loading";
+import EmptyState from "@/components/ui/EmptyState";
 import {
   BUNDESLAENDER,
   LEAGUE_LEVELS,
@@ -160,21 +162,13 @@ export default function LigenPage() {
         )}
 
         {loading ? (
-          <div className="flex justify-center py-16">
-            <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
-          </div>
+          <Loading />
         ) : error ? (
-          <p className="text-center text-gray-500 py-16">
-            Ligen konnten nicht geladen werden.
-          </p>
+          <EmptyState title="Ligen konnten nicht geladen werden." />
         ) : leagues.length === 0 ? (
-          <p className="text-center text-gray-500 py-16">
-            Noch keine Ligen vorhanden.
-          </p>
+          <EmptyState icon={FaTrophy} title="Noch keine Ligen vorhanden." />
         ) : filtered.length === 0 ? (
-          <p className="text-center text-gray-500 py-16">
-            Keine Ligen für diese Auswahl. Probier andere Filter.
-          </p>
+          <EmptyState title="Keine Ligen für diese Auswahl." text="Probier andere Filter." />
         ) : (
           <>
             <p className="mb-3 text-xs text-gray-400">

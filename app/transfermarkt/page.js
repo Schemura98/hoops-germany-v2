@@ -3,11 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaSearch, FaBasketballBall, FaMapMarkerAlt, FaUsers } from "react-icons/fa";
+import { FaSearch, FaBasketballBall, FaMapMarkerAlt, FaUsers, FaExchangeAlt } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import CityRadiusFilter from "@/components/CityRadiusFilter";
+import Tabs from "@/components/ui/Tabs";
+import Button from "@/components/ui/Button";
+import Loading from "@/components/ui/Loading";
+import EmptyState from "@/components/ui/EmptyState";
 import Avatar from "@/components/Avatar";
 import {
   BUNDESLAENDER,
@@ -250,21 +254,7 @@ export default function TransfermarktPage() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-5 border-b border-gray-200">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setView(t.key)}
-              className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                view === t.key
-                  ? "border-brand-500 text-brand-600"
-                  : "border-transparent text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <Tabs className="mb-5" tabs={TABS} value={view} onChange={setView} />
 
         {/* Filter */}
         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mb-6">
@@ -322,21 +312,20 @@ export default function TransfermarktPage() {
         )}
 
         {loading ? (
-          <div className="flex justify-center py-16">
-            <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
-          </div>
+          <Loading />
         ) : error ? (
-          <p className="text-center text-gray-500 py-16">
-            Transferliste konnte nicht geladen werden.
-          </p>
+          <EmptyState title="Transferliste konnte nicht geladen werden." />
         ) : list.length === 0 ? (
-          <p className="text-center text-gray-500 py-16">
-            {query || position || land || geo.center
-              ? "Keine passenden Einträge gefunden."
-              : view === "players"
-              ? "Aktuell ist niemand als transferbereit gelistet."
-              : "Aktuell sucht kein Verein öffentlich Verstärkung."}
-          </p>
+          <EmptyState
+            icon={FaExchangeAlt}
+            title={
+              query || position || land || geo.center
+                ? "Keine passenden Einträge gefunden."
+                : view === "players"
+                ? "Aktuell ist niemand als transferbereit gelistet."
+                : "Aktuell sucht kein Verein öffentlich Verstärkung."
+            }
+          />
         ) : view === "players" ? (
           <div className="grid gap-4 sm:grid-cols-2">
             {filteredPlayers.map((p) => {
@@ -448,20 +437,17 @@ export default function TransfermarktPage() {
                         {js.msg}
                       </p>
                     ) : loggedIn ? (
-                      <button
+                      <Button
                         onClick={() => requestJoin(t._id)}
                         disabled={js.busy}
-                        className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+                        className="w-full"
                       >
                         {js.busy ? "Senden…" : "Beitritt anfragen"}
-                      </button>
+                      </Button>
                     ) : (
-                      <Link
-                        href="/login"
-                        className="block text-center w-full border border-gray-300 hover:border-brand-500 text-gray-700 rounded-lg px-4 py-2 text-sm font-medium"
-                      >
+                      <Button href="/login" variant="secondary" className="w-full">
                         Zum Anfragen anmelden
-                      </Link>
+                      </Button>
                     )}
                   </div>
                 </div>

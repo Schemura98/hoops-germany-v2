@@ -8,6 +8,8 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import CityRadiusFilter from "@/components/CityRadiusFilter";
+import Loading from "@/components/ui/Loading";
+import EmptyState from "@/components/ui/EmptyState";
 import {
   BUNDESLAENDER,
   POSITIONS,
@@ -141,23 +143,17 @@ export default function SpielerPage() {
         )}
 
         {loading ? (
-          <div className="flex justify-center py-24">
-            <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
-          </div>
+          <Loading className="py-24" />
         ) : error ? (
-          <p className="text-center text-gray-500 py-16">
-            Spieler konnten nicht geladen werden.
-          </p>
+          <EmptyState title="Spieler konnten nicht geladen werden." />
         ) : filtered.length === 0 ? (
-          <div className="text-center py-20">
-            <FaBasketballBall className="text-5xl text-gray-200 mx-auto mb-4" />
-            <p className="text-gray-500 font-semibold">Keine Spieler gefunden</p>
-            <p className="text-gray-400 text-sm mt-1">
-              {query || position
-                ? "Versuche einen anderen Filter."
-                : "Noch keine Spieler registriert."}
-            </p>
-          </div>
+          <EmptyState
+            icon={FaBasketballBall}
+            title="Keine Spieler gefunden"
+            text={
+              query || position ? "Versuche einen anderen Filter." : "Noch keine Spieler registriert."
+            }
+          />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {filtered.map((p) => (
