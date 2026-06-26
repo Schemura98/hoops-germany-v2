@@ -441,9 +441,13 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
    `gender:"Damen"`). Stufen aus der WBV-„Ligenstruktur Jugend" (gilt lt. Doku für weibl./männl./offen),
    gespiegelt zur männlichen 2025/26-Struktur (exakte weibliche 2025/26-Einteilung war nicht auffindbar).
    **⚠️ struktur-basiert** → bei realer Abweichung per Admin (`/admin/leagues`) / „Liga melden" korrigieren.
-   Katalog gesamt **67** (31 Herren + 16 Damen + 20 Jugend m/o/w). **Noch offen:** **U10** (beide; WBV noch
-   „offen"); (optional) NRW-**Kreisligen** (pro Basketballkreis, niedrige Prio); weibliche Jugend gegen die
-   finale WBV-Einteilung gegenprüfen, falls sie später auftaucht.
+   **🔻 CUTOFF bei U16 (26.06.2026, `377818e`, Dev+Prod live):** Entscheidung mit Partner – Jugend nur bis
+   einschließlich **U16**; **U14/U12/U10 entfernt**. `LEAGUE_AGE_GROUPS` auf `[Senioren,U18,U16]` reduziert
+   (raus aus allen Dropdowns/Filtern); `seed-nrw-leagues.mjs` ohne U14/U12-Einträge + expliziter Safe-Delete
+   für `<U16`-Ligen (löscht nur leere, schützt Daten). Auf Dev **und** Prod ausgeführt → je **10 leere
+   <U16-Ligen entfernt**, **Katalog gesamt jetzt 57** (31 Herren + 16 Damen + **10 Jugend U18/U16 m/w**).
+   **Noch offen:** (optional) NRW-**Kreisligen** (pro Basketballkreis, niedrige Prio). U10/U12/U14 bewusst
+   gestrichen (nicht mehr „offen").
 6. **Saisonende + Meister** ✅ **erledigt** (`b33c65f`, live): `League.finished` + `champion`; Admin
    (`/admin/leagues`) setzt „Saison abgeschlossen" + Meister (Auto-Tabellenführer oder explizit =
    Playoff-Sieger); `/ligen/[id]` zeigt Meister-Banner + Krone, `/ligen`-Liste „Abgeschlossen"-Badge.
