@@ -427,13 +427,25 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 4. Weitere UX-Feinschliffe nach Tester-Feedback.
    - 📥 **Tester-Feedback ausgewertet (26.06.2026)** – 1 substanzielle Rückmeldung (25.06., „überwiegend top
      notch") aus `hoops_prod` (Lese-Tool `scripts/read-prod-feedback.mjs`, read-only). 3 Punkte:
-   - ✅ **Logo/Banner-Upload-Bug behoben** (`2c6d104` Doku; **Server-Config, nicht im Repo**): Ursache =
-     **Nginx `client_max_body_size` war ungesetzt → Default 1 MB**; Uploads >1 MB (Handy-Fotos/Banner) wurden
-     mit 413 abgewiesen, bevor sie die App erreichten (nur winzige Bilder gingen durch). Fix: in beiden
-     server-Blöcken von `/etc/nginx/sites-available/default` `client_max_body_size 8M;` gesetzt + `nginx -t` +
-     `systemctl reload nginx` (Backup `…default.bak-bodysize-20260626`). App-Limit bleibt 4 MB (`lib/uploadFile.js`).
-     Verifiziert: 1,5-MB-Upload erreicht die App (401 statt 413). ⚠️ Auth war NICHT die Ursache –
-     `getTeamAuthToken()` fällt korrekt auf den Spieler-Token zurück (Dual-Auth ok).
+   - ✅ **Upload-Bug komplett behoben** (Profilfoto + Team-Logo/Banner; `a83dc0f`) – **ZWEI Ursachen,
+     beide server-seitig (Nginx/VPS), kanonische Config jetzt im Repo `deploy/nginx-hoopsgermany.conf`):**
+     - **(a) Nginx `client_max_body_size` ungesetzt → Default 1 MB:** Uploads >1 MB (Handy-Fotos/Banner)
+       wurden mit 413 abgewiesen, bevor sie die App erreichten (nur winzige Bilder gingen durch).
+       Fix: `client_max_body_size 8M;` in beiden server-Blöcken. App-Limit bleibt 4 MB (`lib/uploadFile.js`).
+     - **(b) HAUPTURSACHE „Foto wird nicht übernommen": `next start` liefert nur public/-Dateien aus, die
+       ZUR BUILD-ZEIT existierten.** Zur Laufzeit hochgeladene Bilder (`/players/…`, `/team/…`) wurden zwar
+       gespeichert + in der DB gesetzt, aber per HTTP **404** ausgeliefert (bis zum nächsten Rebuild).
+       Fix: Uploads liegen jetzt unter **`/var/www/hoops-uploads/{players,team}`** (NICHT unter `/root` –
+       das ist `700` → `www-data` „Permission denied"); `public/{players,team}` sind **Symlinks** dorthin
+       (App schreibt unverändert nach `public/…`). Nginx-**Location** liefert nur **Bilddateien** direkt von
+       `/var/www` aus (Extension-Regex `^/(players|team)/.+\.(jpg|jpeg|png|webp|gif)$` → kollidiert NICHT mit
+       Next-Seiten wie `/team/admin`, `/team/create`, die durch `location /` zur App proxen).
+     - **Verifiziert live:** bestehende + neu hochgeladene Bilder → HTTP 200; Write-Through-Symlink ok
+       (neue Datei sofort abrufbar, kein Rebuild); `/team/*`-Seiten weiter 200. ⚠️ Auth war NICHT die
+       Ursache – `getTeamAuthToken()` fällt korrekt auf den Spieler-Token zurück (Dual-Auth ok).
+     - **⚠️ Bei Neu-Deploy/Server-Umzug:** `deploy/nginx-hoopsgermany.conf` nach
+       `/etc/nginx/sites-available/default`, Symlinks + `/var/www/hoops-uploads` (chown root:www-data,
+       chmod a+rX) neu anlegen, sonst sind Uploads wieder kaputt.
    - ✅ **Stadt-Typeahead bereinigt** (`2c6d104`, live): `public/data/de-cities.json` enthielt Behörden/POIs
      (Agentur für Arbeit, Amtsgericht, Sparkassen, Kliniken, Versicherungen …). `scripts/clean-cities.mjs`
      entfernt klare Institutionen per **Phrasen-Muster** (echte Orte wie Bad Elster/Schulenberg/Elsterwerda
