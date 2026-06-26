@@ -42,6 +42,13 @@ Cluster `hoops.tbhsg.mongodb.net` hat ZWEI getrennte DBs:
 > Commit-Hash, Roadmap pflegen). CLAUDE.md ist die **kanonische, session-übergreifende Quelle** –
 > das private Session-Gedächtnis ersetzt sie nicht. Dafür gibt es die Skill **`log-progress`**
 > (`.claude/skills/log-progress/`). So fehlt auch bei einem späteren Umbau der Live-Seite nichts.
+>
+> 📌 **KONVENTION (verbindlich): Bei neuen Funktionen Feedback & Analytics mitpflegen.** Wird ein
+> **neuer nutzersichtbarer Bereich/eine neue Funktion** gebaut, das **Feedback-Formular** (Themen-Chip
+> in `app/feedback/page.js` `AREAS`) und das **Analytics-Tool** (Bereichs-Bündelung im `$switch` von
+> `app/api/analytics/summary/route.js`; bei zählbarer Kennzahl zusätzlich Plattform-Überblick +
+> `app/admin/analytics/page.js`) aktualisieren. Dafür gibt es die Skill **`update-feedback-analytics`**
+> (`.claude/skills/update-feedback-analytics/`).
 
 ### Architektur-Konventionen (etabliert, bitte beibehalten)
 - **lib/**: `db.js`, `auth.js`, `serverAuth.js` (`getPlayerFromToken`, `getTeamFromToken`=Dual-Auth, `getAdminFromToken`), `clientAuth.js`, `apiResponse.js` (`ok`/`fail`/`withErrorHandling`), `slug.js`, `matchScore.js`, `timeAgo.js`, `constants.js`, `useCurrentPlayer/Team/Admin.js`.
