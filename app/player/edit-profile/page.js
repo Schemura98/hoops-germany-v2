@@ -6,7 +6,7 @@ import Link from "next/link";
 import axios from "axios";
 import { FaBasketballBall } from "react-icons/fa";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
-import { getPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
+import { getPlayerToken, setStoredPlayer, clearPlayerToken, clearTeamToken } from "@/lib/clientAuth";
 import { POSITIONS, PLAYER_ROLES, BUNDESLAENDER, LEAGUE_LEVELS, positionLabel } from "@/lib/constants";
 import { ageFromBirthdate, toDateInputValue } from "@/lib/age";
 import PlayerNav from "@/components/layout/PlayerNav";
@@ -50,6 +50,26 @@ export default function PlayerEditProfilePage() {
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  // Konto löschen (Self-Service)
+  const [showDelete, setShowDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  async function deleteAccount() {
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      await axios.post("/api/player/delete-account", { token: getPlayerToken() });
+      clearPlayerToken();
+      clearTeamToken();
+      if (typeof window !== "undefined") window.localStorage.removeItem("player");
+      router.replace("/?deleted=1");
+    } catch (err) {
+      setDeleteError(err.response?.data?.message || "Löschen fehlgeschlagen.");
+      setDeleting(false);
+    }
+  }
 
   // Formular aus geladenem Profil vorbefüllen
   useEffect(() => {
@@ -310,6 +330,49 @@ export default function PlayerEditProfilePage() {
             </button>
           </div>
         </form>
+
+        {/* Gefahrenzone: Konto löschen */}
+        <div className="mt-8 bg-white rounded-2xl border border-red-200 p-6">
+          <h2 className="text-base font-bold text-red-700">Konto löschen</h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Dein Profil, deine Beiträge und Verknüpfungen werden dauerhaft entfernt. Das kann nicht
+            rückgängig gemacht werden.
+          </p>
+          {!showDelete ? (
+            <button
+              onClick={() => {
+                setShowDelete(true);
+                setDeleteError("");
+              }}
+              className="mt-4 border border-red-300 text-red-700 hover:bg-red-50 rounded-lg px-4 py-2.5 font-medium"
+            >
+              Konto löschen…
+            </button>
+          ) : (
+            <div className="mt-4 rounded-xl bg-red-50 border border-red-200 p-4">
+              <p className="text-sm font-medium text-gray-800">
+                Bist du sicher? Diese Aktion ist endgültig.
+              </p>
+              {deleteError && <p className="mt-2 text-sm text-red-600">{deleteError}</p>}
+              <div className="mt-3 flex flex-wrap gap-3">
+                <button
+                  onClick={deleteAccount}
+                  disabled={deleting}
+                  className="bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-lg px-5 py-2.5 font-medium"
+                >
+                  {deleting ? "Wird gelöscht…" : "Ja, Konto endgültig löschen"}
+                </button>
+                <button
+                  onClick={() => setShowDelete(false)}
+                  disabled={deleting}
+                  className="border border-gray-300 hover:border-gray-400 text-gray-700 rounded-lg px-4 py-2.5 font-medium"
+                >
+                  Abbrechen
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </main>
 
       <Footer />
