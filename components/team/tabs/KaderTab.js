@@ -239,7 +239,7 @@ export default function KaderTab({ team, reload }) {
               <div className="flex items-center gap-2 flex-shrink-0">
                 {m.isFounder ? (
                   <span className="text-xs font-medium rounded-full px-3 py-1 bg-brand-100 text-brand-700">
-                    Gründer
+                    Haupt-Admin
                   </span>
                 ) : m.isAdmin ? (
                   <span className="text-xs font-medium rounded-full px-3 py-1 bg-brand-100 text-brand-700">
@@ -251,7 +251,7 @@ export default function KaderTab({ team, reload }) {
                   </span>
                 )}
 
-                {/* Admin-Rechte vergeben/entziehen (nicht beim Gründer) */}
+                {/* Admin-Rechte vergeben/entziehen (nicht beim Haupt-Admin) */}
                 {!m.isFounder &&
                   (m.isAdmin ? (
                     <button

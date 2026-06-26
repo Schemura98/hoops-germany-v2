@@ -31,7 +31,7 @@ async function handler(req) {
 
   const isFounder = team.adminPlayerId && String(team.adminPlayerId) === String(player._id);
   if (isFounder) {
-    return fail("Der Team-Gründer ist dauerhaft Admin und kann nicht geändert werden", 400);
+    return fail("Der Haupt-Admin kann hier nicht geändert werden (nur über das Super-Admin-Panel übertragbar)", 400);
   }
 
   if (makeAdmin) {

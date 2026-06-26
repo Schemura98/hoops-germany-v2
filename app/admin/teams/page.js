@@ -128,7 +128,7 @@ export default function AdminTeamsPage() {
                 <div className="min-w-0">
                   <p className="font-medium text-gray-900 truncate">{t.teamName}</p>
                   <p className="text-xs text-gray-500 truncate">
-                    {adminName(t) ? `Gründer: ${adminName(t)}` : "—"}
+                    {adminName(t) ? `Haupt-Admin: ${adminName(t)}` : "—"}
                     {t.region ? ` · ${t.region}` : ""}
                   </p>
                 </div>
