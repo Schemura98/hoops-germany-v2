@@ -47,6 +47,7 @@ async function handler(req) {
 
   player.isTeamAdmin = true;
   player.teamAdminOf = team._id;
+  player.teamId = team._id; // Team-Admin ist auch Mitglied (sonst fehlen Kader/Spiele/Ergebnisse)
   await player.save();
   await Team.findByIdAndUpdate(team._id, { adminPlayerId: player._id });
 

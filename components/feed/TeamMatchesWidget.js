@@ -179,11 +179,12 @@ export default function TeamMatchesWidget() {
 
       <div className="mt-3">
         <Tabs
+          fluid
           value={tab}
           onChange={setTab}
           tabs={[
-            { key: "upcoming", label: "Anstehend", count: upcoming.length },
-            { key: "results", label: "Ergebnisse", count: results.length },
+            { key: "upcoming", label: "Anstehend" },
+            { key: "results", label: "Ergebnisse" },
           ]}
         />
       </div>
