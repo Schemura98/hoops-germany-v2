@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaUsers, FaSearch, FaBasketballBall, FaMapMarkerAlt } from "react-icons/fa";
+import { FaUsers, FaSearch, FaBasketballBall, FaMapMarkerAlt, FaPlus } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
@@ -73,7 +73,21 @@ export default function TeamsPage() {
         eyebrow="Vereine"
         title="Teams entdecken"
         subtitle="Finde Vereine und Mannschaften, folge ihnen und bleib am Ball."
-      />
+      >
+        <div className="mt-5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+          <Link
+            href="/team/create"
+            className="inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl px-5 py-3 shadow-sm whitespace-nowrap"
+          >
+            <FaPlus /> Eigenes Team gründen
+          </Link>
+          <p className="text-slate-400 text-sm">
+            Dein Team ist nicht dabei? Gründe es selbst – du wirst automatisch{" "}
+            <span className="text-slate-200 font-medium">Team-Admin</span> und verwaltest Kader,
+            Spiele &amp; mehr.
+          </p>
+        </div>
+      </PageHeader>
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -120,6 +134,13 @@ export default function TeamsPage() {
             <p className="text-gray-400 text-sm mt-1">
               {query ? "Versuche einen anderen Suchbegriff." : "Noch keine Teams registriert."}
             </p>
+            <p className="text-gray-500 text-sm mt-5">Dein Team ist nicht dabei?</p>
+            <Link
+              href="/team/create"
+              className="mt-2 inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl px-5 py-3 shadow-sm"
+            >
+              <FaPlus /> Eigenes Team gründen
+            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
