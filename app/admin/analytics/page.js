@@ -21,6 +21,7 @@ import {
 import AdminShell from "@/components/layout/AdminShell";
 import StatCard from "@/components/admin/StatCard";
 import LineChart from "@/components/admin/LineChart";
+import SharesManager from "@/components/admin/SharesManager";
 import { getAdminToken } from "@/lib/clientAuth";
 
 const PERIODS = [
@@ -342,6 +343,10 @@ export default function AdminAnalyticsPage() {
               <FaFileCsv /> CSV exportieren
             </button>
           </div>
+
+          <Card title="Teilbare Sponsor-Reports" hint="Passwortgeschützte Links zum Versenden an (potenzielle) Sponsoren – zeigen nur aggregierte Zahlen">
+            <SharesManager />
+          </Card>
 
           <Card title="Reichweite" hint={`Im Zeitraum: ${periodLabel} · Wachstum ggü. vorherigem Zeitraum`}>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">

@@ -21,7 +21,7 @@ export default function AnalyticsTracker() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!pathname || pathname.startsWith("/admin")) return;
+    if (!pathname || pathname.startsWith("/admin") || pathname.startsWith("/sponsor-report")) return;
     // Player-Token mitsenden (falls eingeloggt) → Server leitet daraus „aktive Nutzer" ab.
     const token =
       (typeof window !== "undefined" &&
