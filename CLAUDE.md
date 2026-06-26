@@ -537,6 +537,11 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
      aufrufbar** über den Footer-Link „Plattform-Tour" (`TourLink` → Custom-Event `hg:open-tour`).
      Im Preview verifiziert (Auto-Start, Slider, „Los geht's" setzt Flag, Footer-Reopen, keine Fehler).
      **Beide Tester-Agenda-Punkte (26.06.) damit erledigt** (Co-Admins + Willkommens-Tour).
+     **🐞 Fix** (`0cd4237`, live): Tour erschien nach Registrierung NICHT – Ursache: `WelcomeTour` im
+     Root-Layout remountet bei Client-Navigation (`router.push` nach Signup) nicht, der `[]`-Auto-Check lief
+     nur beim ersten (ausgeloggten) App-Mount. Fix: `usePathname`-Dependency → Check läuft bei jedem
+     Routenwechsel neu (erkennt Login/Registrierung nach Mount); sessionStorage-Wächter hält es bei 1×/Session.
+     Verifiziert mit echter Registrierung → Tour öffnet direkt auf `/player/newsfeed`.
    - ✅ **UX-Durchgang über die neuen Liga-Features** (`b39a35d`, mobil 375px): /ligen-Filter+Saison-Switcher,
      Liga-Detail (Tabelle+Playoffs), Topscorer, EinstellungenTab-Liga-Picker, Admin-Liga-Steuerung,
      SpielplanTab-Playoff-Formular, Team-Liga-Karte – alle sauber. **Fix:** Rangliste- + Topscorer-Tabelle
