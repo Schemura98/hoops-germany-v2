@@ -75,8 +75,10 @@ Cluster `hoops.tbhsg.mongodb.net` hat ZWEI getrennte DBs:
   spieler/ligen/tryouts/topscorer/transfermarkt) ✅ erledigt (`9712a92`); Welle 2 Detailseiten
   (team-detail + PlayerProfileView Tabs→Pill, Loading auf team/player/match/liga) ✅ erledigt (`b8e3a30`);
   Welle 3 Formulare/Auth (login/signup/reset/update-password/team-create/edit-profile: zentrale
-  `inputClass`, `<Button>`, `<Loading>`) ✅ erledigt (`58fd740`); offen: Welle 4 Newsfeed (+Widgets),
-  Welle 5 Admin + Team-Panel. (Rest-Cleanup: lokale `inputClass` noch in feedback/kontakt/claim/admin-Seiten.)
+  `inputClass`, `<Button>`, `<Loading>`) ✅ erledigt (`58fd740`); Welle 4 Newsfeed (Feed-Tabs→Pill,
+  Loading/EmptyState/Button; TeamMatchesWidget-Tabs→Pill) ✅ erledigt (`207247f`); offen:
+  **Welle 5 Admin + Team-Panel** (Tabs/Tabellen/Buttons/inputClass) + Rest-Cleanup
+  (lokale `inputClass` in feedback/kontakt/claim).
 - **Geo-Suche:** Feld `bundesland` an Player/Team/League; `lib/geo.js` + `public/data/de-cities.json`
   (16.172 Orte mit lat/lng, lazy geladen) für Stadt+Umkreis (Haversine). Stadt-Eingabe per Typeahead
   setzt das Bundesland automatisch.
