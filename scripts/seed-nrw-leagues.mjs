@@ -122,6 +122,9 @@ const damen = [
 //   bestätigt u. a. Regionalliga bei U16w/U14w. ⚠️ Exakte weibliche 2025/26-Einteilung war
 //   nicht auffindbar → Stufen sind struktur-basiert; bei Abweichung per Admin/„Liga melden"
 //   korrigieren. U10 (beide) noch offen.
+// Entscheidung 26.06.2026: nur Jugend bis einschließlich U16; U14/U12/U10 werden
+// vorerst NICHT abgebildet (siehe Selbstheilung weiter unten – sie entfernt leere
+// Alt-Einträge dieser jüngeren Klassen aus der DB).
 const jugend = [
   // männlich
   { name: "U18 Regionalliga", level: "Regionalliga", gender: "Herren", ageGroup: "U18" },
@@ -129,23 +132,12 @@ const jugend = [
   { name: "U16 Regionalliga", level: "Regionalliga", gender: "Herren", ageGroup: "U16" },
   { name: "U16 Oberliga", level: "Oberliga", gender: "Herren", ageGroup: "U16" },
   { name: "U16 Landesliga", level: "Landesliga", gender: "Herren", ageGroup: "U16" },
-  // offen
-  { name: "U14 Regionalliga", level: "Regionalliga", gender: "Mixed", ageGroup: "U14" },
-  { name: "U14 Oberliga", level: "Oberliga", gender: "Mixed", ageGroup: "U14" },
-  { name: "U14 Landesliga", level: "Landesliga", gender: "Mixed", ageGroup: "U14" },
-  { name: "U12 Oberliga", level: "Oberliga", gender: "Mixed", ageGroup: "U12" },
-  { name: "U12 Landesliga", level: "Landesliga", gender: "Mixed", ageGroup: "U12" },
   // weiblich
   { name: "U18 Regionalliga", level: "Regionalliga", gender: "Damen", ageGroup: "U18" },
   { name: "U18 Oberliga", level: "Oberliga", gender: "Damen", ageGroup: "U18" },
   { name: "U16 Regionalliga", level: "Regionalliga", gender: "Damen", ageGroup: "U16" },
   { name: "U16 Oberliga", level: "Oberliga", gender: "Damen", ageGroup: "U16" },
   { name: "U16 Landesliga", level: "Landesliga", gender: "Damen", ageGroup: "U16" },
-  { name: "U14 Regionalliga", level: "Regionalliga", gender: "Damen", ageGroup: "U14" },
-  { name: "U14 Oberliga", level: "Oberliga", gender: "Damen", ageGroup: "U14" },
-  { name: "U14 Landesliga", level: "Landesliga", gender: "Damen", ageGroup: "U14" },
-  { name: "U12 Oberliga", level: "Oberliga", gender: "Damen", ageGroup: "U12" },
-  { name: "U12 Landesliga", level: "Landesliga", gender: "Damen", ageGroup: "U12" },
 ].map((c) => ({ ...c, region: "" }));
 
 const catalog = [
@@ -200,6 +192,29 @@ for (const c of catalog) {
   else updated++;
 }
 
+// ----- Cutoff: jüngere Jugendklassen (unter U16) entfernen -----
+// Entscheidung 26.06.2026: keine U14/U12/U10. Leere offizielle NRW-Ligen dieser Klassen
+// werden gelöscht; solche mit Teams/Spielen bleiben (Schutz echter Daten) + Warnung.
+const REMOVED_AGE_GROUPS = ["U14", "U12", "U10"];
+let removedYouth = 0;
+{
+  const young = await Leagues.find({
+    official: true,
+    bundesland: BUNDESLAND,
+    ageGroup: { $in: REMOVED_AGE_GROUPS },
+  }).toArray();
+  for (const s of young) {
+    const empty = (s.teams?.length || 0) === 0 && (s.matches?.length || 0) === 0;
+    if (!empty) {
+      console.warn(`⚠️  Übersprungen (hat Teams/Spiele, <U16): "${s.name}" [${s.gender} ${s.ageGroup}]`);
+      continue;
+    }
+    if (DRY) console.log(`− <U16   ${s.gender} ${s.ageGroup} ${s.name} (leer, würde entfernt)`);
+    else await Leagues.deleteOne({ _id: s._id });
+    removedYouth++;
+  }
+}
+
 // ----- Selbstheilung: leere Alt-Einträge früherer Seed-Varianten entfernen -----
 // Pro (gender, ageGroup): offizielle NRW-Ligen 2025/26, die NICHT im Katalog stehen UND
 // keine Teams/Matches haben (also nie benutzt wurden). Schützt echte Daten.
@@ -233,7 +248,7 @@ for (const [key, names] of groups) {
 }
 
 console.log(
-  `✅ Fertig: ${created} angelegt, ${updated} aktualisiert, ${removed} leere Alt-Einträge entfernt (${catalog.length} Katalog-Ligen: ${herren.length} Herren-Senioren + ${damen.length} Damen-Senioren + ${jugend.length} Jugend (m/o/w), Saison ${SEASON}).`
+  `✅ Fertig: ${created} angelegt, ${updated} aktualisiert, ${removedYouth} <U16 entfernt, ${removed} leere Alt-Einträge entfernt (${catalog.length} Katalog-Ligen: ${herren.length} Herren-Senioren + ${damen.length} Damen-Senioren + ${jugend.length} Jugend (U18/U16 m/w), Saison ${SEASON}).`
 );
 await mongoose.disconnect();
 process.exit(0);
