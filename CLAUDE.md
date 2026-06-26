@@ -454,6 +454,11 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
    Mitglied übertragen (bisheriger Admin wird normales Mitglied, neuer wird benachrichtigt). Endpoints
    `/api/admin/team-members` + `/api/admin/transfer-team-admin`. **Konto-Löschung unverändert** (Auto-Transfer
    an Co-Admin, sonst Block). Verifiziert (alt→Mitglied, neu→Admin+Notif, `adminPlayerId` aktualisiert).
+3f. ✅ **Rolle „Gründer" → „Haupt-Admin" umbenannt** (`7abd9a1`, live): „Gründer" war irreführend (keine reale
+   Vereinsgründung, sondern Ersteller/Verwalter). Alle nutzersichtbaren Stellen (KaderTab-Badge, `/admin/teams`,
+   Pending-Mail, Lösch-/Schutz-Hinweise) → „Haupt-Admin"; Hierarchie **Haupt-Admin · Admin · Mitglied**.
+   ⚠️ Rolle ist **nicht öffentlich** (Team-Profilseite zeigt keine Rollen-Labels) – nur Team-Panel +
+   Super-Admin-Backoffice. Code-Kommentare zu `adminPlayerId` unverändert.
 4. Weitere UX-Feinschliffe nach Tester-Feedback.
    - 📥 **Tester-Feedback ausgewertet (26.06.2026)** – 1 substanzielle Rückmeldung (25.06., „überwiegend top
      notch") aus `hoops_prod` (Lese-Tool `scripts/read-prod-feedback.mjs`, read-only). 3 Punkte:
