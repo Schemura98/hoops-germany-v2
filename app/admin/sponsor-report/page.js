@@ -9,6 +9,11 @@ import LineChart from "@/components/admin/LineChart";
 import { getAdminToken } from "@/lib/clientAuth";
 
 const nf = (n) => (n ?? 0).toLocaleString("de-DE");
+const fmtDur = (sec) => {
+  const m = Math.floor((sec || 0) / 60);
+  const s = (sec || 0) % 60;
+  return m > 0 ? `${m} min ${s} s` : `${s} s`;
+};
 const PERIOD_LABEL = { 7: "letzte 7 Tage", 30: "letzte 30 Tage", 90: "letzte 90 Tage", 365: "letztes Jahr" };
 
 // Verfügbare Werbeflächen (Teaser für Sponsoren; echtes Tracking folgt in Phase 3).
@@ -157,8 +162,9 @@ function ReportInner() {
             <Kpi label="Neue Besucher" value={summary.reach.newVisitors} />
             <Kpi label="Wiederkehrende" value={summary.reach.returningVisitors} />
             <Kpi label="Aktive Nutzer (30T)" value={summary.activeUsers.d30} />
-            <Kpi label="Aufrufe gesamt" value={summary.reach.viewsAllTime} />
-            <Kpi label="Besucher gesamt" value={summary.reach.visitorsAllTime} />
+            <Kpi label="Sitzungen" value={summary.engagement.sessions} />
+            <Kpi label="Seiten / Sitzung" value={summary.engagement.pagesPerSession} />
+            <Kpi label="Ø Sitzungsdauer" value={fmtDur(summary.engagement.avgDurationSec)} />
           </div>
         </Section>
 
@@ -180,6 +186,34 @@ function ReportInner() {
             <Bars items={summary.sections.slice(0, 6).map((s) => ({ label: s.section, value: s.count }))} />
           </Section>
         </div>
+
+        <Section title="Regionale Stärke">
+          <div className="grid sm:grid-cols-2 gap-x-6 gap-y-4">
+            <div>
+              <p className="text-xs font-semibold text-gray-700 mb-2">Nutzer nach Bundesland</p>
+              <Bars items={summary.region.usersByState.slice(0, 8)} />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-gray-700 mb-2">Teams / Vereine nach Stadt</p>
+              <Bars items={summary.region.teamsByCity.slice(0, 8)} />
+            </div>
+          </div>
+        </Section>
+
+        <Section title="Beliebteste Inhalte">
+          <div className="grid sm:grid-cols-3 gap-x-6 gap-y-4">
+            {[
+              { t: "Spielerprofile", items: summary.content.topPlayers },
+              { t: "Teams", items: summary.content.topTeams },
+              { t: "Ligen", items: summary.content.topLeagues },
+            ].map((c) => (
+              <div key={c.t}>
+                <p className="text-xs font-semibold text-gray-700 mb-2">{c.t}</p>
+                <Bars items={c.items.slice(0, 5).map((i) => ({ label: i.label, value: i.count }))} />
+              </div>
+            ))}
+          </div>
+        </Section>
 
         <Section title="Plattform-Stärke">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

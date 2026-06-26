@@ -174,6 +174,116 @@ async function handler(req) {
     timeseries.push({ date: key, views: viewsMap[key] || 0, visitors: visMap[key] || 0 });
   }
 
+  // ========================= Phase 2 =========================
+  // Regionen aus Profildaten (aggregiert), Content-Performance (nach Aufrufen),
+  // Sitzungsmetriken (Sessionisierung mit 30-Min-Inaktivitätslücke).
+  const SESSION_GAP = 30 * 60 * 1000;
+  const [
+    usersByStateAgg,
+    usersByCityAgg,
+    teamsByCityAgg,
+    visitorsByStateAgg,
+    topPlayerPaths,
+    topTeamPaths,
+    topLeaguePaths,
+    sessionAgg,
+  ] = await Promise.all([
+    Player.aggregate([
+      { $match: { bundesland: { $nin: [null, ""] } } },
+      { $group: { _id: "$bundesland", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]),
+    Player.aggregate([
+      { $match: { hometown: { $nin: [null, ""] } } },
+      { $group: { _id: "$hometown", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 10 },
+    ]),
+    Team.aggregate([
+      { $match: { region: { $nin: [null, ""] } } },
+      { $group: { _id: "$region", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 10 },
+    ]),
+    // Besucher nach Bundesland = eingeloggte Nutzer (playerId) im Zeitraum → Profil-Bundesland
+    AE.aggregate([
+      { $match: { createdAt: { $gte: winStart }, playerId: { $ne: null } } },
+      { $group: { _id: "$playerId" } },
+      { $lookup: { from: "players", localField: "_id", foreignField: "_id", as: "p" } },
+      { $unwind: "$p" },
+      { $match: { "p.bundesland": { $nin: [null, ""] } } },
+      { $group: { _id: "$p.bundesland", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]),
+    AE.aggregate([
+      { $match: { ...pv, createdAt: { $gte: winStart }, path: { $regex: "^/player/view-player/" } } },
+      { $group: { _id: "$path", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 8 },
+    ]),
+    AE.aggregate([
+      { $match: { ...pv, createdAt: { $gte: winStart }, path: { $regex: "^/team/team-detail/" } } },
+      { $group: { _id: "$path", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 8 },
+    ]),
+    AE.aggregate([
+      { $match: { ...pv, createdAt: { $gte: winStart }, path: { $regex: "^/ligen/[a-fA-F0-9]{24}" } } },
+      { $group: { _id: "$path", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 8 },
+    ]),
+    // Sessionisierung: Events je sessionId zeitlich sortieren, neue Session bei Lücke > 30 Min.
+    AE.aggregate([
+      { $match: { ...pv, createdAt: { $gte: winStart }, sessionId: { $nin: ["", null] } } },
+      { $setWindowFields: { partitionBy: "$sessionId", sortBy: { createdAt: 1 }, output: { prevTime: { $shift: { output: "$createdAt", by: -1 } } } } },
+      { $set: { isNew: { $or: [{ $eq: ["$prevTime", null] }, { $gt: [{ $subtract: ["$createdAt", "$prevTime"] }, SESSION_GAP] }] } } },
+      { $setWindowFields: { partitionBy: "$sessionId", sortBy: { createdAt: 1 }, output: { sIdx: { $sum: { $cond: ["$isNew", 1, 0] }, window: { documents: ["unbounded", "current"] } } } } },
+      { $group: { _id: { sid: "$sessionId", s: "$sIdx" }, first: { $min: "$createdAt" }, last: { $max: "$createdAt" }, pages: { $sum: 1 } } },
+      { $group: { _id: null, sessions: { $sum: 1 }, totalPages: { $sum: "$pages" }, totalDurSec: { $sum: { $divide: [{ $subtract: ["$last", "$first"] }, 1000] } } } },
+    ]),
+  ]);
+
+  // Content-Performance: Slugs/IDs aus den Pfaden lösen → Namen.
+  const slugFrom = (prefix, p) => p.slice(prefix.length).split("/")[0];
+  const playerSlugs = topPlayerPaths.map((x) => slugFrom("/player/view-player/", x._id));
+  const teamSlugs = topTeamPaths.map((x) => slugFrom("/team/team-detail/", x._id));
+  const leagueIds = topLeaguePaths.map((x) => slugFrom("/ligen/", x._id));
+
+  const [playerDocs, teamDocs, leagueDocs] = await Promise.all([
+    Player.find({ slug: { $in: playerSlugs } }).select("slug firstName lastName"),
+    Team.find({ slug: { $in: teamSlugs } }).select("slug teamName"),
+    League.find({ _id: { $in: leagueIds.filter((id) => /^[a-fA-F0-9]{24}$/.test(id)) } }).select("name"),
+  ]);
+  const playerName = Object.fromEntries(playerDocs.map((d) => [d.slug, `${d.firstName} ${d.lastName}`.trim()]));
+  const teamName = Object.fromEntries(teamDocs.map((d) => [d.slug, d.teamName]));
+  const leagueName = Object.fromEntries(leagueDocs.map((d) => [String(d._id), d.name]));
+
+  const topPlayers = topPlayerPaths
+    .map((x) => ({ label: playerName[slugFrom("/player/view-player/", x._id)], count: x.count }))
+    .filter((x) => x.label);
+  const topTeamsContent = topTeamPaths
+    .map((x) => ({ label: teamName[slugFrom("/team/team-detail/", x._id)], count: x.count }))
+    .filter((x) => x.label);
+  const topLeagues = topLeaguePaths
+    .map((x) => ({ label: leagueName[slugFrom("/ligen/", x._id)], count: x.count }))
+    .filter((x) => x.label);
+
+  const sess = sessionAgg[0] || { sessions: 0, totalPages: 0, totalDurSec: 0 };
+  const engagement = {
+    sessions: sess.sessions,
+    pagesPerSession: sess.sessions ? Math.round((sess.totalPages / sess.sessions) * 10) / 10 : 0,
+    avgDurationSec: sess.sessions ? Math.round(sess.totalDurSec / sess.sessions) : 0,
+  };
+
+  const region = {
+    usersByState: usersByStateAgg.map((x) => ({ label: x._id, value: x.count })),
+    usersByCity: usersByCityAgg.map((x) => ({ label: x._id, value: x.count })),
+    teamsByCity: teamsByCityAgg.map((x) => ({ label: x._id, value: x.count })),
+    visitorsByState: visitorsByStateAgg.map((x) => ({ label: x._id, value: x.count })),
+  };
+  const content = { topPlayers, topTeams: topTeamsContent, topLeagues };
+
   return ok({
     summary: {
       period: periodDays,
@@ -186,6 +296,9 @@ async function handler(req) {
         returningVisitors,
       },
       activeUsers: { d7: active7Arr.length, d30: active30Arr.length },
+      engagement,
+      region,
+      content,
       devices,
       timeseries,
       topPaths: topPaths.map((p) => ({ path: p._id, count: p.count })),

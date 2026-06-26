@@ -68,6 +68,74 @@ function Card({ title, hint, children, right }) {
   );
 }
 
+const fmtDur = (sec) => {
+  const m = Math.floor((sec || 0) / 60);
+  const s = (sec || 0) % 60;
+  return m > 0 ? `${m} min ${s} s` : `${s} s`;
+};
+
+// Phase 2: Nutzung/Engagement
+function EngagementCards({ eng, period }) {
+  return (
+    <Card title="Nutzung & Engagement" hint={`Sitzungen (30-Min-Inaktivität) · ${period}`}>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <StatCard icon={FaUserClock} label="Sitzungen" value={eng.sessions} />
+        <StatCard icon={FaEye} label="Seiten / Sitzung" value={eng.pagesPerSession} />
+        <StatCard icon={FaUserClock} label="Ø Sitzungsdauer" value={fmtDur(eng.avgDurationSec)} />
+      </div>
+    </Card>
+  );
+}
+
+// Phase 2: Regionale Stärke (aus Profildaten – aggregiert)
+function RegionCard({ region }) {
+  return (
+    <Card title="Regionale Stärke" hint="Aus Profilangaben (aggregiert, keine personenbezogenen Daten)">
+      <div className="grid sm:grid-cols-2 gap-x-6 gap-y-4">
+        <div>
+          <p className="text-xs font-semibold text-gray-700 mb-2">Nutzer nach Bundesland</p>
+          <Bars items={region.usersByState} empty="Keine Regionsangaben." />
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-gray-700 mb-2">Nutzer nach Stadt</p>
+          <Bars items={region.usersByCity} empty="Keine Stadtangaben." />
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-gray-700 mb-2">Teams / Vereine nach Stadt</p>
+          <Bars items={region.teamsByCity} empty="Keine Teamstandorte." />
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-gray-700 mb-2">
+            Besucher nach Bundesland <span className="font-normal text-gray-400">(eingeloggt)</span>
+          </p>
+          <Bars items={region.visitorsByState} empty="Noch keine eingeloggten Besucher mit Region." />
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// Phase 2: Content-Performance (beliebteste Inhalte nach Aufrufen)
+function ContentCard({ content, period }) {
+  const cols = [
+    { title: "Beliebteste Spielerprofile", items: content.topPlayers },
+    { title: "Beliebteste Teams", items: content.topTeams },
+    { title: "Beliebteste Ligen", items: content.topLeagues },
+  ];
+  return (
+    <Card title="Beliebteste Inhalte" hint={`Nach Aufrufen · ${period}`}>
+      <div className="grid sm:grid-cols-3 gap-x-6 gap-y-4">
+        {cols.map((c) => (
+          <div key={c.title}>
+            <p className="text-xs font-semibold text-gray-700 mb-2">{c.title}</p>
+            <Bars items={c.items.map((i) => ({ label: i.label, value: i.count }))} empty="Noch keine Aufrufe." />
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
 export default function AdminAnalyticsPage() {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -126,6 +194,23 @@ export default function AdminAnalyticsPage() {
       [],
       ["Top-Seiten", "Aufrufe"],
       ...s.topPaths.map((x) => [x.path, x.count]),
+      [],
+      ["Nutzung", "Wert"],
+      ["Sitzungen", s.engagement.sessions],
+      ["Seiten / Sitzung", s.engagement.pagesPerSession],
+      ["Ø Sitzungsdauer (Sek.)", s.engagement.avgDurationSec],
+      [],
+      ["Nutzer nach Bundesland", "Anzahl"],
+      ...s.region.usersByState.map((x) => [x.label, x.value]),
+      [],
+      ["Beliebteste Spielerprofile", "Aufrufe"],
+      ...s.content.topPlayers.map((x) => [x.label, x.count]),
+      [],
+      ["Beliebteste Teams", "Aufrufe"],
+      ...s.content.topTeams.map((x) => [x.label, x.count]),
+      [],
+      ["Beliebteste Ligen", "Aufrufe"],
+      ...s.content.topLeagues.map((x) => [x.label, x.count]),
     ];
     const csv =
       "﻿" +
@@ -221,6 +306,10 @@ export default function AdminAnalyticsPage() {
             </Card>
           </div>
 
+          <EngagementCards eng={summary.engagement} period={periodLabel} />
+          <RegionCard region={summary.region} />
+          <ContentCard content={summary.content} period={periodLabel} />
+
           <Card title="Beliebteste Seiten" hint={`Im Zeitraum: ${periodLabel}`}>
             {summary.topPaths.length === 0 ? (
               <p className="text-sm text-gray-400">Noch keine Aufrufe.</p>
@@ -270,6 +359,10 @@ export default function AdminAnalyticsPage() {
           <Card title="Verlauf" hint={`Seitenaufrufe & Besucher · ${periodLabel}`}>
             <LineChart data={summary.timeseries} />
           </Card>
+
+          <EngagementCards eng={summary.engagement} period={periodLabel} />
+          <RegionCard region={summary.region} />
+          <ContentCard content={summary.content} period={periodLabel} />
 
           <div className="grid lg:grid-cols-2 gap-6">
             <Card title="Geräte" hint={`Aufrufe nach Gerätetyp · ${periodLabel}`}>
