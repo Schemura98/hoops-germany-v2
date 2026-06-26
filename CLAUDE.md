@@ -66,6 +66,14 @@ Cluster `hoops.tbhsg.mongodb.net` hat ZWEI getrennte DBs:
   Karriere-Bilanz, Karriere-Verlauf/Transfers, Spielerstationen, Saison-Filter),
   `components/CityInput.js` (Stadt-Typeahead), `components/CityRadiusFilter.js` (Umkreis-Filter),
   `components/layout/Navbar.js` (öffentlich, login-bewusst). (`ProfileHero`/`CareerStats`/`FollowList` entfernt.)
+- **Designsystem-Primitive (NEU, `components/ui/`):** `Button` (Varianten primary/secondary/ghost/danger/
+  dangerGhost + Größen sm/md/lg, `href`→Link), `Tabs` (einheitlicher Pill-Umschalter – plattformweit statt
+  Eigenbau), `Card` (rounded-2xl/border/shadow), `EmptyState` (Icon+Titel+Text+Aktion), `Loading`
+  (Basketball-Spinner), `Skeleton`/`SkeletonCard`/`SkeletonList`. Tokens in `lib/ui.js` (`inputClass`,
+  `inputClassSm`, `cardClass`). **Konvention:** neue/überarbeitete Seiten IMMER diese Primitive nutzen
+  (keine Ad-hoc-Buttons/Tabs/Spinner mehr). ⏳ **Rollout-Status:** Welle 1 (öffentliche Listen: spiele/teams/
+  spieler/ligen/tryouts/topscorer/transfermarkt) ✅ erledigt (`9712a92`); offen: Welle 2 Detailseiten
+  (team/player/match/liga), Welle 3 Formulare/Auth, Welle 4 Newsfeed, Welle 5 Admin + Team-Panel.
 - **Geo-Suche:** Feld `bundesland` an Player/Team/League; `lib/geo.js` + `public/data/de-cities.json`
   (16.172 Orte mit lat/lng, lazy geladen) für Stadt+Umkreis (Haversine). Stadt-Eingabe per Typeahead
   setzt das Bundesland automatisch.
