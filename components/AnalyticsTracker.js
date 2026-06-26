@@ -22,11 +22,17 @@ export default function AnalyticsTracker() {
 
   useEffect(() => {
     if (!pathname || pathname.startsWith("/admin")) return;
+    // Player-Token mitsenden (falls eingeloggt) → Server leitet daraus „aktive Nutzer" ab.
+    const token =
+      (typeof window !== "undefined" &&
+        window.localStorage.getItem("playerAuthToken")) ||
+      undefined;
     axios
       .post("/api/analytics/track", {
         eventType: "pageview",
         path: pathname,
         sessionId: getSessionId(),
+        token,
       })
       .catch(() => {});
   }, [pathname]);

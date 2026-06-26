@@ -5,7 +5,7 @@ import Link from "next/link";
 // schließbar, damit der Disclaimer auf jeder Seite präsent ist.
 export default function TestPhaseBanner() {
   return (
-    <div className="bg-amber-400 text-slate-900 text-center text-xs sm:text-sm px-3 py-1.5 leading-snug">
+    <div className="bg-amber-400 text-slate-900 text-center text-xs sm:text-sm px-3 py-1.5 leading-snug print:hidden">
       <span className="font-semibold">🚧 Testphase:</span>{" "}
       Hoops Germany ist im Testbetrieb – einige Inhalte sind Beispieldaten.{" "}
       <Link href="/feedback" className="font-semibold underline underline-offset-2 hover:text-slate-700">
