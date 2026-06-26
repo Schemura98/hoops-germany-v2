@@ -12,6 +12,8 @@ import {
   FaUserMinus,
   FaUser,
   FaWhatsapp,
+  FaUserShield,
+  FaUserSlash,
 } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import { POSITIONS, positionLabel } from "@/lib/constants";
@@ -34,6 +36,7 @@ export default function KaderTab({ team, reload }) {
   // Tatsächliche Mitglieder (Account-Spieler mit teamId)
   const [members, setMembers] = useState([]);
   const [removingId, setRemovingId] = useState(null);
+  const [adminBusyId, setAdminBusyId] = useState(null);
 
   async function loadMembers() {
     try {
@@ -62,6 +65,25 @@ export default function KaderTab({ team, reload }) {
       flash("err", err.response?.data?.message || "Entfernen fehlgeschlagen.");
     } finally {
       setRemovingId(null);
+    }
+  }
+
+  async function setMemberAdmin(playerId, makeAdmin, name) {
+    const q = makeAdmin
+      ? `${name} zum Team-Admin machen? Die Person kann dann Kader, Spiele & Ergebnisse verwalten.`
+      : `${name} die Adminrechte entziehen?`;
+    if (!window.confirm(q)) return;
+    setAdminBusyId(playerId);
+    setMsg(null);
+    try {
+      const token = getTeamAuthToken();
+      await axios.post("/api/team/set-member-admin", { token, playerId, makeAdmin });
+      flash("ok", makeAdmin ? "Spieler ist jetzt Team-Admin." : "Adminrechte entzogen.");
+      loadMembers();
+    } catch (err) {
+      flash("err", err.response?.data?.message || "Aktion fehlgeschlagen.");
+    } finally {
+      setAdminBusyId(null);
     }
   }
 
@@ -215,17 +237,53 @@ export default function KaderTab({ team, reload }) {
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
-                <span className="text-xs font-medium rounded-full px-3 py-1 bg-green-100 text-green-700">
-                  Mitglied
-                </span>
-                <button
-                  onClick={() => removeMember(m.playerId)}
-                  disabled={removingId === m.playerId}
-                  className="text-gray-400 hover:text-red-600 disabled:opacity-60 p-1.5"
-                  title="Aus Team entfernen"
-                >
-                  <FaUserMinus className="text-sm" />
-                </button>
+                {m.isFounder ? (
+                  <span className="text-xs font-medium rounded-full px-3 py-1 bg-brand-100 text-brand-700">
+                    Gründer
+                  </span>
+                ) : m.isAdmin ? (
+                  <span className="text-xs font-medium rounded-full px-3 py-1 bg-brand-100 text-brand-700">
+                    Admin
+                  </span>
+                ) : (
+                  <span className="text-xs font-medium rounded-full px-3 py-1 bg-green-100 text-green-700">
+                    Mitglied
+                  </span>
+                )}
+
+                {/* Admin-Rechte vergeben/entziehen (nicht beim Gründer) */}
+                {!m.isFounder &&
+                  (m.isAdmin ? (
+                    <button
+                      onClick={() => setMemberAdmin(m.playerId, false, m.name)}
+                      disabled={adminBusyId === m.playerId}
+                      className="text-brand-600 hover:text-gray-500 disabled:opacity-60 p-1.5"
+                      title="Adminrechte entziehen"
+                    >
+                      <FaUserSlash className="text-sm" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setMemberAdmin(m.playerId, true, m.name)}
+                      disabled={adminBusyId === m.playerId}
+                      className="text-gray-400 hover:text-brand-600 disabled:opacity-60 p-1.5"
+                      title="Zum Admin machen"
+                    >
+                      <FaUserShield className="text-sm" />
+                    </button>
+                  ))}
+
+                {/* Entfernen nur für einfache Mitglieder (Admins vorher degradieren) */}
+                {!m.isFounder && !m.isAdmin && (
+                  <button
+                    onClick={() => removeMember(m.playerId)}
+                    disabled={removingId === m.playerId}
+                    className="text-gray-400 hover:text-red-600 disabled:opacity-60 p-1.5"
+                    title="Aus Team entfernen"
+                  >
+                    <FaUserMinus className="text-sm" />
+                  </button>
+                )}
               </div>
             </div>
           ))}
