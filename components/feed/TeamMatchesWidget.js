@@ -6,6 +6,8 @@ import axios from "axios";
 import { FaBasketballBall, FaMapMarkerAlt } from "react-icons/fa";
 import { getPlayerToken } from "@/lib/clientAuth";
 import Avatar from "@/components/Avatar";
+import Tabs from "@/components/ui/Tabs";
+import Loading from "@/components/ui/Loading";
 import { teamScores, matchVerification } from "@/lib/matchScore";
 
 function dateLabel(d) {
@@ -175,30 +177,20 @@ export default function TeamMatchesWidget() {
         </div>
       )}
 
-      <div className="mt-3 flex gap-4 border-b border-gray-100 text-xs font-semibold">
-        {[
-          { key: "upcoming", label: "Anstehend", n: upcoming.length },
-          { key: "results", label: "Ergebnisse", n: results.length },
-        ].map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            className={`pb-2 -mb-px border-b-2 transition-colors ${
-              tab === t.key
-                ? "border-brand-500 text-brand-600"
-                : "border-transparent text-gray-400 hover:text-gray-700"
-            }`}
-          >
-            {t.label} {t.n > 0 && <span className="text-gray-400">· {t.n}</span>}
-          </button>
-        ))}
+      <div className="mt-3">
+        <Tabs
+          value={tab}
+          onChange={setTab}
+          tabs={[
+            { key: "upcoming", label: "Anstehend", count: upcoming.length },
+            { key: "results", label: "Ergebnisse", count: results.length },
+          ]}
+        />
       </div>
 
       <div className="mt-3 space-y-2 max-h-80 overflow-y-auto -mr-1 pr-1">
         {loading ? (
-          <div className="flex justify-center py-6">
-            <FaBasketballBall className="text-brand-500 text-xl animate-bounce" />
-          </div>
+          <Loading className="py-6" size="text-xl" />
         ) : !hasMine && !hasFollowed ? (
           <p className="text-xs text-gray-400 py-4">
             Tritt einem Team bei oder folge Teams, um ihre Spiele hier zu sehen.{" "}

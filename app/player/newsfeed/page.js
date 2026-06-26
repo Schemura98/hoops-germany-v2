@@ -15,6 +15,10 @@ import TransferFeedWidget from "@/components/feed/TransferFeedWidget";
 import CollapsibleWidget from "@/components/feed/CollapsibleWidget";
 import NewsWidget from "@/components/NewsWidget";
 import OnboardingChecklist from "@/components/onboarding/OnboardingChecklist";
+import Tabs from "@/components/ui/Tabs";
+import Button from "@/components/ui/Button";
+import Loading from "@/components/ui/Loading";
+import EmptyState from "@/components/ui/EmptyState";
 
 const TABS = [
   { key: "discover", label: "Entdecken" },
@@ -100,7 +104,7 @@ export default function PlayerNewsfeedPage() {
   if (status === "loading") {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
+        <Loading />
       </main>
     );
   }
@@ -109,12 +113,9 @@ export default function PlayerNewsfeedPage() {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
         <p className="text-gray-700">Profil konnte nicht geladen werden.</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-4 bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2 font-medium"
-        >
+        <Button onClick={() => window.location.reload()} className="mt-4">
           Erneut versuchen
-        </button>
+        </Button>
       </main>
     );
   }
@@ -130,34 +131,20 @@ export default function PlayerNewsfeedPage() {
           const feed = (
             <>
               {/* Feed-Umschaltung */}
-              <div className="flex gap-1 border-b border-gray-200">
-              {TABS.map((t) => (
-                <button
-                  key={t.key}
-                  onClick={() => setMode(t.key)}
-                  className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                    mode === t.key
-                      ? "border-brand-500 text-brand-600"
-                      : "border-transparent text-gray-500 hover:text-gray-800"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
+              <Tabs value={mode} onChange={setMode} tabs={TABS} />
 
             {feedLoading ? (
-              <div className="flex justify-center py-10">
-                <FaBasketballBall className="text-brand-500 text-2xl animate-bounce" />
-              </div>
+              <Loading className="py-10" size="text-2xl" />
             ) : posts.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-gray-200 p-10 text-center">
-                <p className="text-gray-400 text-sm">
-                  {mode === "following"
+              <EmptyState
+                icon={FaNewspaper}
+                title={mode === "following" ? "Noch nichts in deinem Feed" : "Noch keine Beiträge"}
+                text={
+                  mode === "following"
                     ? "Du folgst noch niemandem – oder es gibt noch keine Beiträge. Entdecke Spieler und folge ihnen!"
-                    : "Noch keine Beiträge. Sei der Erste und teile etwas mit der Community!"}
-                </p>
-              </div>
+                    : "Sei der Erste und teile etwas mit der Community!"
+                }
+              />
             ) : (
               <>
                 {posts.map((post) => (
@@ -166,11 +153,7 @@ export default function PlayerNewsfeedPage() {
 
                 {hasMore ? (
                   <div ref={sentinelRef} className="flex justify-center py-2">
-                    <button
-                      onClick={loadMore}
-                      disabled={loadingMore}
-                      className="inline-flex items-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-700 disabled:opacity-60"
-                    >
+                    <Button variant="ghost" size="sm" onClick={loadMore} disabled={loadingMore}>
                       {loadingMore ? (
                         <>
                           <FaBasketballBall className="animate-bounce" /> Lädt…
@@ -178,7 +161,7 @@ export default function PlayerNewsfeedPage() {
                       ) : (
                         "Mehr laden"
                       )}
-                    </button>
+                    </Button>
                   </div>
                 ) : (
                   <p className="text-center text-xs text-gray-400 py-2">
