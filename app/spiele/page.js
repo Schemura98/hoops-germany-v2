@@ -83,6 +83,7 @@ export default function SpielePage() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [tab, setTab] = useState("upcoming"); // "upcoming" | "results"
 
   useEffect(() => {
     let active = true;
@@ -131,36 +132,46 @@ export default function SpielePage() {
         ) : matches.length === 0 ? (
           <p className="text-center text-gray-500 py-16">Noch keine Spiele angesetzt.</p>
         ) : (
-          <div className="space-y-8">
-            <section>
-              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                Anstehend
-              </h2>
-              {upcoming.length === 0 ? (
-                <p className="text-sm text-gray-400">Keine anstehenden Spiele.</p>
+          <div>
+            {/* Tabs: Anstehend / Ergebnisse */}
+            <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6 max-w-sm mx-auto sm:mx-0">
+              <button
+                onClick={() => setTab("upcoming")}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition ${
+                  tab === "upcoming" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-800"
+                }`}
+              >
+                Anstehend{upcoming.length ? ` (${upcoming.length})` : ""}
+              </button>
+              <button
+                onClick={() => setTab("results")}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition ${
+                  tab === "results" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-800"
+                }`}
+              >
+                Ergebnisse{results.length ? ` (${results.length})` : ""}
+              </button>
+            </div>
+
+            {tab === "upcoming" ? (
+              upcoming.length === 0 ? (
+                <p className="text-center text-sm text-gray-400 py-10">Keine anstehenden Spiele.</p>
               ) : (
                 <div className="space-y-3">
                   {upcoming.map((m) => (
                     <MatchCard key={m._id} match={m} />
                   ))}
                 </div>
-              )}
-            </section>
-
-            <section>
-              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                Ergebnisse
-              </h2>
-              {results.length === 0 ? (
-                <p className="text-sm text-gray-400">Noch keine Ergebnisse.</p>
-              ) : (
-                <div className="space-y-3">
-                  {results.map((m) => (
-                    <MatchCard key={m._id} match={m} />
-                  ))}
-                </div>
-              )}
-            </section>
+              )
+            ) : results.length === 0 ? (
+              <p className="text-center text-sm text-gray-400 py-10">Noch keine Ergebnisse.</p>
+            ) : (
+              <div className="space-y-3">
+                {results.map((m) => (
+                  <MatchCard key={m._id} match={m} />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </main>
