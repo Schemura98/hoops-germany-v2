@@ -7,13 +7,24 @@ import { FaUpload, FaSpinner } from "react-icons/fa";
 // Muss zu lib/uploadFile.js (Server) passen.
 const MAX_MB = 4;
 const MAX_BYTES = MAX_MB * 1024 * 1024;
-const ALLOWED_TYPES = {
-  "image/jpeg": "JPG",
-  "image/png": "PNG",
-  "image/webp": "WEBP",
-  "image/gif": "GIF",
-};
-const ALLOWED_LABEL = "JPG, PNG, WEBP oder GIF";
+// Im Browser darstellbare Formate (für den Hinweistext).
+const DISPLAY_FORMATS = "JPG, PNG, WEBP, GIF";
+const ALLOWED_LABEL = "JPG, PNG, WEBP, GIF oder HEIC";
+// Akzeptierte MIME-Typen inkl. iPhone-HEIC (wird serverseitig nach JPG konvertiert).
+const ALLOWED_MIME = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/heic",
+  "image/heif",
+]);
+// Manche Browser senden HEIC ohne MIME-Typ → über die Endung erkennen.
+const ALLOWED_EXT = /\.(jpe?g|png|webp|gif|heic|heif)$/i;
+
+function isAllowedFile(file) {
+  return ALLOWED_MIME.has((file.type || "").toLowerCase()) || ALLOWED_EXT.test(file.name || "");
+}
 
 // MB-Anzeige mit einer Nachkommastelle.
 const mb = (bytes) => (bytes / 1024 / 1024).toFixed(1).replace(".", ",");
@@ -49,7 +60,7 @@ export default function ImageUpload({
     setError("");
 
     // Vorprüfung vor dem Upload → sofortige, klare Rückmeldung (kein vergeblicher Upload).
-    if (!ALLOWED_TYPES[file.type]) {
+    if (!isAllowedFile(file)) {
       setError(`Dieses Format wird nicht unterstützt. Erlaubt: ${ALLOWED_LABEL}.`);
       resetInput();
       return;
@@ -105,7 +116,7 @@ export default function ImageUpload({
         <input
           ref={inputRef}
           type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
+          accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif"
           onChange={onChange}
           className="hidden"
         />
@@ -120,7 +131,7 @@ export default function ImageUpload({
         </button>
         {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
         <p className="mt-1 text-xs text-gray-400">
-          {Object.values(ALLOWED_TYPES).join(", ")} · max. {MAX_MB} MB
+          {DISPLAY_FORMATS} · max. {MAX_MB} MB · iPhone-Fotos (HEIC) werden automatisch umgewandelt
         </p>
       </div>
     </div>
