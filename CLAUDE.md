@@ -485,9 +485,14 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
      nicht degradierbar). Promote benachrichtigt den Spieler (neuer Notif-Typ `team_admin_granted` →
      `/team/admin`). `roster-players` liefert `isAdmin`/`isFounder`. Entfernen nur für einfache Mitglieder
      (Admins erst degradieren). Im Preview verifiziert (Promote/Demote/Founder-Schutz 400/Notification).
-   - 🔜 **Agenda (offen):** **Info-Sheet direkt nach der Registrierung** („Was kannst du hier alles tun?"
-     als Anreiz) – z. B. einmaliges Willkommens-Overlay/Seite nach dem Signup (ergänzt die Newsfeed-
-     Onboarding-Checklist). *(Als Nächstes dran.)*
+   - ✅ **Willkommens-Tour nach der Registrierung** (`14670aa`, live): mehrstufiges Overlay (5 Slides:
+     Intro, Profil & Stats, Teams & Kader, Spiele/Ligen, Transfermarkt/Tryouts/Community) als Anreiz.
+     App-weit im Root-Layout (`components/onboarding/WelcomeTour.js`); **startet einmalig nach Signup**
+     (E-Mail + Google einheitlich über **Server-Flag `Player.welcomeSeen`**, gesetzt via
+     `POST /api/player/mark-welcome-seen`; Auto-Check 1×/Session via sessionStorage). **Jederzeit erneut
+     aufrufbar** über den Footer-Link „Plattform-Tour" (`TourLink` → Custom-Event `hg:open-tour`).
+     Im Preview verifiziert (Auto-Start, Slider, „Los geht's" setzt Flag, Footer-Reopen, keine Fehler).
+     **Beide Tester-Agenda-Punkte (26.06.) damit erledigt** (Co-Admins + Willkommens-Tour).
    - ✅ **UX-Durchgang über die neuen Liga-Features** (`b39a35d`, mobil 375px): /ligen-Filter+Saison-Switcher,
      Liga-Detail (Tabelle+Playoffs), Topscorer, EinstellungenTab-Liga-Picker, Admin-Liga-Steuerung,
      SpielplanTab-Playoff-Formular, Team-Liga-Karte – alle sauber. **Fix:** Rangliste- + Topscorer-Tabelle
