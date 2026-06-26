@@ -425,6 +425,22 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 3. **Monetarisierung (#6)** – BLOCKIERT bis **Gewerbeanmeldung** des Users (Amazon-Affiliate +
    Sponsorfläche; AdSense erst bei genug Traffic + Consent-Banner).
 4. Weitere UX-Feinschliffe nach Tester-Feedback.
+   - 📥 **Tester-Feedback ausgewertet (26.06.2026)** – 1 substanzielle Rückmeldung (25.06., „überwiegend top
+     notch") aus `hoops_prod` (Lese-Tool `scripts/read-prod-feedback.mjs`, read-only). 3 Punkte:
+   - ✅ **Logo/Banner-Upload-Bug behoben** (`2c6d104` Doku; **Server-Config, nicht im Repo**): Ursache =
+     **Nginx `client_max_body_size` war ungesetzt → Default 1 MB**; Uploads >1 MB (Handy-Fotos/Banner) wurden
+     mit 413 abgewiesen, bevor sie die App erreichten (nur winzige Bilder gingen durch). Fix: in beiden
+     server-Blöcken von `/etc/nginx/sites-available/default` `client_max_body_size 8M;` gesetzt + `nginx -t` +
+     `systemctl reload nginx` (Backup `…default.bak-bodysize-20260626`). App-Limit bleibt 4 MB (`lib/uploadFile.js`).
+     Verifiziert: 1,5-MB-Upload erreicht die App (401 statt 413). ⚠️ Auth war NICHT die Ursache –
+     `getTeamAuthToken()` fällt korrekt auf den Spieler-Token zurück (Dual-Auth ok).
+   - ✅ **Stadt-Typeahead bereinigt** (`2c6d104`, live): `public/data/de-cities.json` enthielt Behörden/POIs
+     (Agentur für Arbeit, Amtsgericht, Sparkassen, Kliniken, Versicherungen …). `scripts/clean-cities.mjs`
+     entfernt klare Institutionen per **Phrasen-Muster** (echte Orte wie Bad Elster/Schulenberg/Elsterwerda
+     bleiben): **16172 → 14910** (1262 entfernt). Live verifiziert (Agentur/Amtsgericht/Sparkasse = 0 Treffer).
+   - 🔜 **Onboarding (offen, geplant):** neue User landen direkt im Newsfeed („lost"). Entschieden:
+     **dismissbare Checklist** oben im Newsfeed („Profil vervollständigen · Teams/Spielern folgen · erstes
+     Posting"), kein Zwang. Noch zu bauen.
    - ✅ **UX-Durchgang über die neuen Liga-Features** (`b39a35d`, mobil 375px): /ligen-Filter+Saison-Switcher,
      Liga-Detail (Tabelle+Playoffs), Topscorer, EinstellungenTab-Liga-Picker, Admin-Liga-Steuerung,
      SpielplanTab-Playoff-Formular, Team-Liga-Karte – alle sauber. **Fix:** Rangliste- + Topscorer-Tabelle
