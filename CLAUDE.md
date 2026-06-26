@@ -462,9 +462,17 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
      (Agentur für Arbeit, Amtsgericht, Sparkassen, Kliniken, Versicherungen …). `scripts/clean-cities.mjs`
      entfernt klare Institutionen per **Phrasen-Muster** (echte Orte wie Bad Elster/Schulenberg/Elsterwerda
      bleiben): **16172 → 14910** (1262 entfernt). Live verifiziert (Agentur/Amtsgericht/Sparkasse = 0 Treffer).
-   - 🔜 **Onboarding (offen, geplant):** neue User landen direkt im Newsfeed („lost"). Entschieden:
-     **dismissbare Checklist** oben im Newsfeed („Profil vervollständigen · Teams/Spielern folgen · erstes
-     Posting"), kein Zwang. Noch zu bauen.
+   - ✅ **Onboarding-Checklist** (`2632972`, live): Tester-Feedback „neue User sind lost" → dismissbare
+     **Navy/Orange-Karte oben im Newsfeed** mit Fortschrittsbalken + **4 Schritten**: Profilfoto,
+     Profil vervollständigen (Position + Bundesland), Team beitreten/gründen, jemandem folgen. Erledigt-Status
+     **live aus `getmyinfo`** abgeleitet (`components/onboarding/OnboardingChecklist.js`); blendet sich aus,
+     sobald **alle Schritte erledigt** sind ODER der Nutzer ausblendet (**Server-Flag**
+     `Player.onboardingDismissed` via `POST /api/player/dismiss-onboarding`, geräteübergreifend).
+     Im Preview verifiziert (Render 2/4 = 50 %, Dismiss persistiert, danach ausgeblendet). ⚠️ Schema-Feld →
+     Dev-Server-Neustart nötig (mongoose-Cache), Prod ok durch frischen Build.
+   - ✅ **„Land"/country aus dem Profil entfernt, „Nationalität" beibehalten** (`b22b731`+`2632972`, live):
+     Entscheidung 26.06. – DE-only-Seite, Land überflüssig. Entfernt aus edit-profile/Anzeige/Selects;
+     **Nationalität bleibt** (auf Wunsch wieder aktiviert). `Player.country` bleibt dormant (@deprecated, keine Migration).
    - ✅ **UX-Durchgang über die neuen Liga-Features** (`b39a35d`, mobil 375px): /ligen-Filter+Saison-Switcher,
      Liga-Detail (Tabelle+Playoffs), Topscorer, EinstellungenTab-Liga-Picker, Admin-Liga-Steuerung,
      SpielplanTab-Playoff-Formular, Team-Liga-Karte – alle sauber. **Fix:** Rangliste- + Topscorer-Tabelle
