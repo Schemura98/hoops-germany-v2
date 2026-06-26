@@ -473,6 +473,17 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
    - ✅ **„Land"/country aus dem Profil entfernt, „Nationalität" beibehalten** (`b22b731`+`2632972`, live):
      Entscheidung 26.06. – DE-only-Seite, Land überflüssig. Entfernt aus edit-profile/Anzeige/Selects;
      **Nationalität bleibt** (auf Wunsch wieder aktiviert). `Player.country` bleibt dormant (@deprecated, keine Migration).
+   - ✅ **Teams-Übersicht: prominenter „Team gründen"-CTA** (`cafedfe`, live): Tester-Feedback „Team gründen
+     war nur versteckt in der Navbar". `/teams` hat jetzt einen deutlichen Orange-CTA im Navy-Header
+     („Eigenes Team gründen") mit Hinweis, dass man **automatisch Team-Admin** wird (Kader/Spiele verwalten),
+     plus „Team gründen"-Button im Leerzustand. Deckt den Onboarding-Schritt (verlinkt auf /teams) ab.
+     (Team-Admin-Logik bei Gründung existiert bereits: `isTeamAdmin`/`teamAdminOf`/`adminPlayerId`.)
+   - 🔜 **Agenda (offen, mit Tester besprochen 26.06.):**
+     1. **Team-Admin kann Admin-Rechte an andere Spieler vergeben** (im Team-Admin-Panel, KaderTab) – aktuell
+        ist nur der Gründer Admin. Braucht: Modell (mehrere Admins? z. B. `adminPlayerIds[]` oder Flag je
+        Mitglied) + API + UI-Button „zum Admin machen"/„Adminrechte entziehen".
+     2. **Info-Sheet direkt nach der Registrierung** („Was kannst du hier alles tun?" als Anreiz) – z. B.
+        einmaliges Willkommens-Overlay/Seite nach dem Signup (ergänzt die Newsfeed-Onboarding-Checklist).
    - ✅ **UX-Durchgang über die neuen Liga-Features** (`b39a35d`, mobil 375px): /ligen-Filter+Saison-Switcher,
      Liga-Detail (Tabelle+Playoffs), Topscorer, EinstellungenTab-Liga-Picker, Admin-Liga-Steuerung,
      SpielplanTab-Playoff-Formular, Team-Liga-Karte – alle sauber. **Fix:** Rangliste- + Topscorer-Tabelle
