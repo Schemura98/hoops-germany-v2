@@ -446,6 +446,18 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
      - **⚠️ Bei Neu-Deploy/Server-Umzug:** `deploy/nginx-hoopsgermany.conf` nach
        `/etc/nginx/sites-available/default`, Symlinks + `/var/www/hoops-uploads` (chown root:www-data,
        chmod a+rX) neu anlegen, sonst sind Uploads wieder kaputt.
+   - ✅ **Upload-UX: Client-Vorprüfung + klare Fehlermeldungen** (`3def2c3`, live): `components/ImageUpload.js`
+     prüft Format + Größe (4 MB) **vor** dem Upload → sofortige konkrete Meldung statt vergeblichem Upload;
+     413 (Proxy) wird gesondert als „zu groß" gemeldet. Limits/Formate zentral aus Konstanten (passend zu
+     `lib/uploadFile.js`). Gilt für Spielerfoto, Team-Logo, Banner (gemeinsame Komponente).
+   - ✅ **HEIC/iPhone-Support** (`97b98a3`, live): iPhone-Fotos (HEIC/HEIF) werden **serverseitig nach JPEG
+     konvertiert** (`lib/uploadFile.js` via **`heic-convert`**, neue Dependency, pure JS/WASM – keine
+     System-Libs), da HEIC außerhalb von Safari nicht angezeigt wird. Erkennung über MIME **oder** Endung
+     (manche Browser senden HEIC ohne MIME-Typ). `ImageUpload` akzeptiert HEIC (accept + Vorprüfung), Hinweis
+     „iPhone-Fotos (HEIC) werden automatisch umgewandelt". Verifiziert mit echtem 3-MB-HEIC lokal (Node 24)
+     **und auf Prod (Node 20)** → valides JPG. ⚠️ **Neue Dependency** → Deploy braucht `npm install` (nicht
+     nur `git pull && build`). **Optionaler Follow-up:** stored JPEGs nicht verkleinert (Avatare können groß
+     sein) – ggf. später sharp-Resize (entspricht aber dem Status quo der Nicht-HEIC-Uploads).
    - ✅ **Stadt-Typeahead bereinigt** (`2c6d104`, live): `public/data/de-cities.json` enthielt Behörden/POIs
      (Agentur für Arbeit, Amtsgericht, Sparkassen, Kliniken, Versicherungen …). `scripts/clean-cities.mjs`
      entfernt klare Institutionen per **Phrasen-Muster** (echte Orte wie Bad Elster/Schulenberg/Elsterwerda
