@@ -51,7 +51,7 @@ const playerSchema = new mongoose.Schema(
     bundesland: String,
     fibaLink: String,
     position: String,
-    nationality: String, // @deprecated 26.06.2026 – nicht mehr erfasst/angezeigt (DE-only); Feld bleibt für Altdaten
+    nationality: String,
     aboutPlayer: String,
 
     resetPasswordToken: String,
@@ -73,6 +73,8 @@ const playerSchema = new mongoose.Schema(
     teamJoinRequest: { type: mongoose.Schema.Types.ObjectId, ref: "teams" },
     followingTeams: [{ type: mongoose.Schema.Types.ObjectId, ref: "teams" }],
     instagram: String,
+    // Onboarding-Checklist im Newsfeed dauerhaft ausgeblendet (Server-Flag, geräteübergreifend).
+    onboardingDismissed: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

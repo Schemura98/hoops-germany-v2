@@ -14,6 +14,7 @@ import TopTeamsWidget from "@/components/feed/TopTeamsWidget";
 import TransferFeedWidget from "@/components/feed/TransferFeedWidget";
 import CollapsibleWidget from "@/components/feed/CollapsibleWidget";
 import NewsWidget from "@/components/NewsWidget";
+import OnboardingChecklist from "@/components/onboarding/OnboardingChecklist";
 
 const TABS = [
   { key: "discover", label: "Entdecken" },
@@ -123,6 +124,7 @@ export default function PlayerNewsfeedPage() {
       <PlayerNav player={player} />
 
       <div className="max-w-6xl mx-auto px-4 py-8">
+        <OnboardingChecklist player={player} />
         {(() => {
           const composer = <PostComposer player={player} onCreated={handleCreated} />;
           const feed = (
