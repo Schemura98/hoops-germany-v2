@@ -477,6 +477,10 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
      `Player.onboardingDismissed` via `POST /api/player/dismiss-onboarding`, geräteübergreifend).
      Im Preview verifiziert (Render 2/4 = 50 %, Dismiss persistiert, danach ausgeblendet). ⚠️ Schema-Feld →
      Dev-Server-Neustart nötig (mongoose-Cache), Prod ok durch frischen Build.
+     **Erweiterung** (`3fea157`, live): Checklist erscheint jetzt **auch auf der Startseite `/`** (eingeloggt,
+     `components/landing/LandingOnboarding.js`, nach dem Hero). Neuer **Feedback-Chip „Onboarding / Einstieg"**
+     (`app/feedback` AREAS) – via Skill `update-feedback-analytics`; Analytics unverändert (Onboarding ohne
+     eigenen Pfad, `/` = „Startseite").
    - ✅ **„Land"/country aus dem Profil entfernt, „Nationalität" beibehalten** (`b22b731`+`2632972`, live):
      Entscheidung 26.06. – DE-only-Seite, Land überflüssig. Entfernt aus edit-profile/Anzeige/Selects;
      **Nationalität bleibt** (auf Wunsch wieder aktiviert). `Player.country` bleibt dormant (@deprecated, keine Migration).
