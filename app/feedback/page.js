@@ -27,6 +27,7 @@ const TYPES = [
 
 const AREAS = [
   "Design & Optik",
+  "Onboarding / Einstieg",
   "Spielerprofile",
   "Teams & Kader",
   "Spiele & Ergebnisse",

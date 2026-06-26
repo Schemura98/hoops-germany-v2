@@ -9,6 +9,7 @@ import {
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LandingHero from "@/components/landing/LandingHero";
+import LandingOnboarding from "@/components/landing/LandingOnboarding";
 import LandingHowItWorks from "@/components/landing/LandingHowItWorks";
 import LandingCTA from "@/components/landing/LandingCTA";
 import NewsWidget from "@/components/NewsWidget";
@@ -53,6 +54,9 @@ export default function LandingPage() {
 
       {/* Hero */}
       <LandingHero />
+
+      {/* Onboarding-Checklist (nur eingeloggt, blendet sich selbst aus) */}
+      <LandingOnboarding />
 
       {/* Features */}
       <section className="bg-gray-50 py-20 px-4">
