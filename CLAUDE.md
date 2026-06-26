@@ -495,10 +495,16 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
      `TestPhaseBanner` `print:hidden`). **Datenschutz:** nur aggregierte Zahlen. ⚠️ Entscheidung: **Team =
      Verein** (eine Kennzahl). ⚠️ Schema-Feld → Dev-Neustart nötig (mongoose-Cache); Geräte alter Events =
      „unbekannt" (heilt sich vorwärts). Im Preview verifiziert (beide Tabs/Zeitraum/Chart/Report/CSV).
-     **🔜 Offen:** **Phase 2** (Regionen/Städte: Besucher-Geo via IP o. Profilregion; Sitzungsdauer/
-     Seiten-pro-Sitzung/Bounce via Sessionisierung; Top-Teams/-Spieler/-Ligen nach Aufrufen). **Phase 3**
-     (Banner-Tracking je Werbefläche: Impressionen/Klicks/CTR; Sponsor-spezifische Auswertungen; Leads;
-     PDF-Export-Automatik; **passwortgeschützte/teilbare Sponsor-Report-Seite**).
+   - ✅ **Analytics-Ausbau – Phase 2** (`3dfce29`, live): **Regionale Stärke** (aus Profildaten, aggregiert):
+     Nutzer nach Bundesland/Stadt, Teams/Vereine nach Stadt, **Besucher nach Bundesland** = eingeloggte
+     Nutzer (Event-`playerId` → Profil-Bundesland; **bewusst keine IP-Geolokalisierung**, DSGVO-konform).
+     **Content-Performance:** beliebteste Spielerprofile/Teams/Ligen nach Aufrufen (Slugs/IDs aus Pfaden →
+     Namen aufgelöst). **Sitzungsmetriken:** Sitzungen, Seiten/Sitzung, Ø Sitzungsdauer via Sessionisierung
+     (`$setWindowFields`, 30-Min-Inaktivitätslücke; läuft auf Atlas). UI: `EngagementCards`/`RegionCard`/
+     `ContentCard` in beiden Tabs + im Sponsoring-Report; CSV erweitert. Im Preview verifiziert.
+     **🔜 Offen: Phase 3** (Banner-Tracking je Werbefläche: Impressionen/Klicks/CTR; Sponsor-spezifische
+     Auswertungen; Leads/Kontaktanfragen; automatischer PDF-Export; **passwortgeschützte/teilbare
+     Sponsor-Report-Seite** zum Versenden an Sponsoren).
    - ✅ **„Land"/country aus dem Profil entfernt, „Nationalität" beibehalten** (`b22b731`+`2632972`, live):
      Entscheidung 26.06. – DE-only-Seite, Land überflüssig. Entfernt aus edit-profile/Anzeige/Selects;
      **Nationalität bleibt** (auf Wunsch wieder aktiviert). `Player.country` bleibt dormant (@deprecated, keine Migration).
