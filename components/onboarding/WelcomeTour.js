@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import axios from "axios";
 import {
   FaBasketballBall,
@@ -46,8 +47,12 @@ const STEPS = [
 export default function WelcomeTour() {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
+  const pathname = usePathname();
 
-  // Auto-Start einmalig nach der Registrierung (nur eingeloggt, 1× pro Session geprüft).
+  // Auto-Start einmalig nach der Registrierung. Läuft bei jedem Routenwechsel neu,
+  // damit ein Login/Registrierung NACH dem ersten Mount erkannt wird (Tour liegt im
+  // Root-Layout und remountet bei Client-Navigation nicht). sessionStorage-Wächter
+  // sorgt dafür, dass die Prüfung nur 1× pro Session (nach erstem eingeloggten Aufruf) feuert.
   useEffect(() => {
     const token = getPlayerToken();
     if (!token) return;
@@ -64,7 +69,7 @@ export default function WelcomeTour() {
         /* ignorieren */
       }
     })();
-  }, []);
+  }, [pathname]);
 
   // Erneut öffnen (z.B. aus dem Footer) via Custom-Event.
   useEffect(() => {
