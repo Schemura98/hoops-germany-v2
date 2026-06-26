@@ -481,6 +481,24 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
      `components/landing/LandingOnboarding.js`, nach dem Hero). Neuer **Feedback-Chip „Onboarding / Einstieg"**
      (`app/feedback` AREAS) – via Skill `update-feedback-analytics`; Analytics unverändert (Onboarding ohne
      eigenen Pfad, `/` = „Startseite").
+   - ✅ **Analytics-Ausbau – Phase 1** (`f3c6714`, live): Dashboard `/admin/analytics` in **zwei Tabs**
+     (Plattform intern | Sponsor-Report) + **Zeitraum-Filter** (7/30/90/365). **Datenfundament:**
+     `AnalyticsEvent` um `device/browser/os` (serverseitig aus User-Agent via `lib/userAgent.js`, nicht
+     personenbezogen) + optionale `playerId` erweitert (Tracker sendet Player-Token → „aktive Nutzer");
+     Indizes auf `createdAt`. **Summary-API** (`/api/analytics/summary`, POST `period`): Reichweite
+     (Aufrufe/Besucher) **mit Wachstum ggü. Vorperiode**, neue/wiederkehrende Besucher, aktive Nutzer 7/30,
+     Geräte-Breakdown, Tages-Zeitreihe, Top-Seiten/Bereiche je Zeitraum, abgeleitete Bereichs-KPIs,
+     Plattform-Kennzahlen (Nutzer/Teams=Vereine/Spiele/Ligen) mit Neuzugängen + Monatswachstum.
+     **UI:** `components/admin/StatCard.js` (Wachstum grün/rot), `components/admin/LineChart.js`
+     (Eigenbau-SVG, kein Extra-Paket), Balken, **CSV-Export**; druckfreundliche **`/admin/sponsor-report`**
+     (Reichweite/Verlauf/Geräte/Bereiche/Plattform-Stärke/Werbeflächen → Browser-Druck als PDF,
+     `TestPhaseBanner` `print:hidden`). **Datenschutz:** nur aggregierte Zahlen. ⚠️ Entscheidung: **Team =
+     Verein** (eine Kennzahl). ⚠️ Schema-Feld → Dev-Neustart nötig (mongoose-Cache); Geräte alter Events =
+     „unbekannt" (heilt sich vorwärts). Im Preview verifiziert (beide Tabs/Zeitraum/Chart/Report/CSV).
+     **🔜 Offen:** **Phase 2** (Regionen/Städte: Besucher-Geo via IP o. Profilregion; Sitzungsdauer/
+     Seiten-pro-Sitzung/Bounce via Sessionisierung; Top-Teams/-Spieler/-Ligen nach Aufrufen). **Phase 3**
+     (Banner-Tracking je Werbefläche: Impressionen/Klicks/CTR; Sponsor-spezifische Auswertungen; Leads;
+     PDF-Export-Automatik; **passwortgeschützte/teilbare Sponsor-Report-Seite**).
    - ✅ **„Land"/country aus dem Profil entfernt, „Nationalität" beibehalten** (`b22b731`+`2632972`, live):
      Entscheidung 26.06. – DE-only-Seite, Land überflüssig. Entfernt aus edit-profile/Anzeige/Selects;
      **Nationalität bleibt** (auf Wunsch wieder aktiviert). `Player.country` bleibt dormant (@deprecated, keine Migration).
