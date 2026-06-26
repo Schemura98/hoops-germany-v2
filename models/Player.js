@@ -76,6 +76,8 @@ const playerSchema = new mongoose.Schema(
     instagram: String,
     // Onboarding-Checklist im Newsfeed dauerhaft ausgeblendet (Server-Flag, geräteübergreifend).
     onboardingDismissed: { type: Boolean, default: false },
+    // Willkommens-Tour nach der Registrierung gesehen (Auto-Start nur einmal).
+    welcomeSeen: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

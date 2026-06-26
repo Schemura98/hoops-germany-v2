@@ -3,6 +3,7 @@ import { inter } from "@/lib/fonts";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import FeedbackButton from "@/components/FeedbackButton";
 import TestPhaseBanner from "@/components/TestPhaseBanner";
+import WelcomeTour from "@/components/onboarding/WelcomeTour";
 
 export const metadata = {
   title: "Hoops Germany – Amateur-Basketball Community",
@@ -21,6 +22,7 @@ export default function RootLayout({ children }) {
         <TestPhaseBanner />
         {children}
         <FeedbackButton />
+        <WelcomeTour />
       </body>
     </html>
   );

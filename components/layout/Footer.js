@@ -1,4 +1,5 @@
 import Link from "next/link";
+import TourLink from "@/components/onboarding/TourLink";
 
 const legal = [
   { href: "/about", label: "Über uns" },
@@ -25,6 +26,7 @@ export default function Footer() {
               {l.label}
             </Link>
           ))}
+          <TourLink />
         </div>
       </div>
     </footer>
