@@ -15,6 +15,8 @@ import {
 } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import Tabs from "@/components/ui/Tabs";
+import Loading from "@/components/ui/Loading";
 import FollowButton from "@/components/FollowButton";
 import { teamScores } from "@/lib/matchScore";
 import { timeAgo } from "@/lib/timeAgo";
@@ -95,7 +97,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
   if (state === "loading") {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
+        <Loading />
       </main>
     );
   }
@@ -237,21 +239,19 @@ export default function TeamTeamDetailSlugPage({ params }) {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-5 border-b border-gray-200">
-          {TABS.map(({ key, label, icon: Icon }) => (
-            <button
-              key={key}
-              onClick={() => setTab(key)}
-              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                tab === key
-                  ? "border-brand-500 text-brand-600"
-                  : "border-transparent text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              <Icon className="text-xs" /> {label}
-            </button>
-          ))}
-        </div>
+        <Tabs
+          className="mb-5"
+          value={tab}
+          onChange={setTab}
+          tabs={TABS.map(({ key, label, icon: Icon }) => ({
+            key,
+            label: (
+              <span className="inline-flex items-center gap-1.5">
+                <Icon className="text-xs" /> {label}
+              </span>
+            ),
+          }))}
+        />
 
         {/* Kader */}
         {tab === "kader" && (

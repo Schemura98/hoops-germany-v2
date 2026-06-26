@@ -5,6 +5,7 @@ import Link from "next/link";
 import axios from "axios";
 import { FaBasketballBall, FaMapMarkerAlt } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
+import Loading from "@/components/ui/Loading";
 import Footer from "@/components/layout/Footer";
 import Avatar from "@/components/Avatar";
 import { teamScores, matchVerification } from "@/lib/matchScore";
@@ -128,7 +129,7 @@ export default function MatchIdPage({ params }) {
   if (state === "loading") {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
+        <Loading />
       </main>
     );
   }

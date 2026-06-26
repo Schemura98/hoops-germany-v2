@@ -17,6 +17,7 @@ import {
 import PlayerPosts from "@/components/posts/PlayerPosts";
 import Avatar from "@/components/Avatar";
 import ScrollHintRow from "@/components/ScrollHintRow";
+import Tabs from "@/components/ui/Tabs";
 import { ageFromBirthdate, formatBirthdate } from "@/lib/age";
 import { positionLabel } from "@/lib/constants";
 
@@ -280,21 +281,20 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
         </div>
 
         {/* Tabs */}
-        <div className="bg-white border-b border-gray-200">
-          <div className="max-w-4xl mx-auto px-4 flex gap-1">
-            {TABS.map(({ key, label, icon: Icon }) => (
-              <button
-                key={key}
-                onClick={() => setTab(key)}
-                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                  tab === key
-                    ? "border-brand-500 text-brand-600"
-                    : "border-transparent text-gray-500 hover:text-gray-800"
-                }`}
-              >
-                <Icon className="text-xs" /> {label}
-              </button>
-            ))}
+        <div className="bg-white border-b border-gray-100">
+          <div className="max-w-4xl mx-auto px-4 py-3 overflow-x-auto">
+            <Tabs
+              value={tab}
+              onChange={setTab}
+              tabs={TABS.map(({ key, label, icon: Icon }) => ({
+                key,
+                label: (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Icon className="text-xs" /> {label}
+                  </span>
+                ),
+              }))}
+            />
           </div>
         </div>
       </div>

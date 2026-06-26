@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { FaBasketballBall, FaPen } from "react-icons/fa";
+import { FaPen } from "react-icons/fa";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import PlayerNav from "@/components/layout/PlayerNav";
 import Footer from "@/components/layout/Footer";
 import PlayerProfileView from "@/components/player/PlayerProfileView";
 import TransferControl from "@/components/player/TransferControl";
+import Loading from "@/components/ui/Loading";
+import Button from "@/components/ui/Button";
 
 export default function PlayerPlayerDetailPage() {
   const { player, status } = useCurrentPlayer();
@@ -14,7 +16,7 @@ export default function PlayerPlayerDetailPage() {
   if (status === "loading") {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
+        <Loading />
       </main>
     );
   }
@@ -23,12 +25,9 @@ export default function PlayerPlayerDetailPage() {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
         <p className="text-gray-700">Profil konnte nicht geladen werden.</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-4 bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2 font-medium"
-        >
+        <Button onClick={() => window.location.reload()} className="mt-4">
           Erneut versuchen
-        </button>
+        </Button>
       </main>
     );
   }

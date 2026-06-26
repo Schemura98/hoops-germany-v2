@@ -5,6 +5,7 @@ import Link from "next/link";
 import axios from "axios";
 import { FaUsers, FaBasketballBall, FaTrophy, FaCrown } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
+import Loading from "@/components/ui/Loading";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 
@@ -34,7 +35,7 @@ export default function LigaDetailPage({ params }) {
   if (state === "loading") {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
+        <Loading />
       </main>
     );
   }

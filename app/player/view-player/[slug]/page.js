@@ -7,6 +7,7 @@ import { FaBasketballBall } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PlayerProfileView from "@/components/player/PlayerProfileView";
+import Loading from "@/components/ui/Loading";
 import FollowButton from "@/components/FollowButton";
 import { getStoredPlayer } from "@/lib/clientAuth";
 
@@ -40,7 +41,7 @@ export default function PlayerViewPlayerSlugPage({ params }) {
   if (state === "loading") {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
+        <Loading />
       </main>
     );
   }
