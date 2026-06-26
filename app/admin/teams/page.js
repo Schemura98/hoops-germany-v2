@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaTrash, FaCheck, FaTimes } from "react-icons/fa";
+import { FaTrash, FaCheck, FaTimes, FaUserShield } from "react-icons/fa";
 import AdminShell from "@/components/layout/AdminShell";
 import { getAdminToken } from "@/lib/clientAuth";
 
@@ -54,6 +54,44 @@ export default function AdminTeamsPage() {
       /* ignorieren */
     } finally {
       setBusyId(null);
+    }
+  }
+
+  // Team-Admin verwalten (Übertragung)
+  const [manage, setManage] = useState(null); // { teamId, teamName, members, currentAdminId }
+  const [selPlayer, setSelPlayer] = useState("");
+  const [mMsg, setMMsg] = useState(null);
+  const [mBusy, setMBusy] = useState(false);
+
+  async function openManage(teamId) {
+    setMMsg(null);
+    setSelPlayer("");
+    try {
+      const token = getAdminToken();
+      const { data } = await axios.post("/api/admin/team-members", { token, teamId });
+      setManage({ teamId, teamName: data.teamName, members: data.members || [], currentAdminId: data.currentAdminId });
+    } catch {
+      setManage({ teamId, members: [], error: true });
+    }
+  }
+
+  async function transferAdmin() {
+    if (!selPlayer) return;
+    setMBusy(true);
+    setMMsg(null);
+    try {
+      const token = getAdminToken();
+      const { data } = await axios.post("/api/admin/transfer-team-admin", {
+        token,
+        teamId: manage.teamId,
+        playerId: selPlayer,
+      });
+      setMMsg({ type: "ok", text: data.message || "Übertragen." });
+      await openManage(manage.teamId); // Liste aktualisieren
+    } catch (err) {
+      setMMsg({ type: "err", text: err.response?.data?.message || "Übertragung fehlgeschlagen." });
+    } finally {
+      setMBusy(false);
     }
   }
 
@@ -147,7 +185,14 @@ export default function AdminTeamsPage() {
                   </td>
                   <td className="py-3 text-gray-600">{t.email}</td>
                   <td className="py-3 text-gray-600">{t.region || "—"}</td>
-                  <td className="py-3 pr-4 text-right">
+                  <td className="py-3 pr-4 text-right whitespace-nowrap">
+                    <button
+                      onClick={() => openManage(t._id)}
+                      className="text-gray-400 hover:text-brand-600 p-1.5"
+                      title="Team-Admin verwalten"
+                    >
+                      <FaUserShield />
+                    </button>
                     <button
                       onClick={() => remove(t._id, t.teamName)}
                       disabled={busyId === t._id}
@@ -164,6 +209,76 @@ export default function AdminTeamsPage() {
           {filtered.length === 0 && (
             <p className="px-4 py-8 text-center text-sm text-gray-400">Keine Teams gefunden.</p>
           )}
+        </div>
+      )}
+
+      {/* Team-Admin verwalten (Übertragung) */}
+      {manage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setManage(null)}>
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between gap-3">
+              <h2 className="text-base font-bold text-gray-900">
+                Team-Admin verwalten{manage.teamName ? ` · ${manage.teamName}` : ""}
+              </h2>
+              <button onClick={() => setManage(null)} className="text-gray-400 hover:text-gray-700 p-1">
+                <FaTimes />
+              </button>
+            </div>
+
+            {manage.error ? (
+              <p className="mt-4 text-sm text-red-600">Mitglieder konnten nicht geladen werden.</p>
+            ) : manage.members.length === 0 ? (
+              <p className="mt-4 text-sm text-gray-500">Dieses Team hat keine Mitglieder mit Konto.</p>
+            ) : (
+              <>
+                <p className="mt-3 text-sm text-gray-600">
+                  Aktueller Admin:{" "}
+                  <span className="font-medium text-gray-900">
+                    {manage.members.find((m) => m.id === manage.currentAdminId)?.name || "—"}
+                  </span>
+                </p>
+                <label className="block text-sm font-medium text-gray-700 mt-4 mb-1">
+                  Neuen Team-Admin wählen
+                </label>
+                <select
+                  value={selPlayer}
+                  onChange={(e) => setSelPlayer(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-brand-500"
+                >
+                  <option value="">– Mitglied auswählen –</option>
+                  {manage.members.map((m) => (
+                    <option key={m.id} value={m.id} disabled={m.id === manage.currentAdminId}>
+                      {m.name}
+                      {m.id === manage.currentAdminId ? " (aktueller Admin)" : ""}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-2 text-xs text-gray-400">
+                  Der bisherige Admin wird zu einem normalen Mitglied. Der neue Admin wird benachrichtigt.
+                </p>
+                {mMsg && (
+                  <p className={`mt-2 text-sm ${mMsg.type === "ok" ? "text-green-600" : "text-red-600"}`}>
+                    {mMsg.text}
+                  </p>
+                )}
+                <div className="mt-4 flex justify-end gap-2">
+                  <button
+                    onClick={() => setManage(null)}
+                    className="border border-gray-300 hover:border-gray-400 text-gray-700 rounded-lg px-4 py-2 text-sm font-medium"
+                  >
+                    Schließen
+                  </button>
+                  <button
+                    onClick={transferAdmin}
+                    disabled={!selPlayer || mBusy}
+                    className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2 text-sm font-medium"
+                  >
+                    <FaUserShield className="text-xs" /> Als Admin übertragen
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
     </AdminShell>
