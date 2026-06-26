@@ -4,6 +4,20 @@ import { useRef, useState } from "react";
 import axios from "axios";
 import { FaUpload, FaSpinner } from "react-icons/fa";
 
+// Muss zu lib/uploadFile.js (Server) passen.
+const MAX_MB = 4;
+const MAX_BYTES = MAX_MB * 1024 * 1024;
+const ALLOWED_TYPES = {
+  "image/jpeg": "JPG",
+  "image/png": "PNG",
+  "image/webp": "WEBP",
+  "image/gif": "GIF",
+};
+const ALLOWED_LABEL = "JPG, PNG, WEBP oder GIF";
+
+// MB-Anzeige mit einer Nachkommastelle.
+const mb = (bytes) => (bytes / 1024 / 1024).toFixed(1).replace(".", ",");
+
 // Wiederverwendbarer Bild-Upload.
 // props:
 //   endpoint   – API-Route (multipart)
@@ -25,10 +39,27 @@ export default function ImageUpload({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
+  function resetInput() {
+    if (inputRef.current) inputRef.current.value = "";
+  }
+
   async function onChange(e) {
     const file = e.target.files?.[0];
     if (!file) return;
     setError("");
+
+    // Vorprüfung vor dem Upload → sofortige, klare Rückmeldung (kein vergeblicher Upload).
+    if (!ALLOWED_TYPES[file.type]) {
+      setError(`Dieses Format wird nicht unterstützt. Erlaubt: ${ALLOWED_LABEL}.`);
+      resetInput();
+      return;
+    }
+    if (file.size > MAX_BYTES) {
+      setError(`Die Datei ist zu groß (${mb(file.size)} MB). Maximal ${MAX_MB} MB erlaubt.`);
+      resetInput();
+      return;
+    }
+
     setUploading(true);
     try {
       const fd = new FormData();
@@ -40,10 +71,15 @@ export default function ImageUpload({
       setPreview(data.url);
       onUploaded?.(data.url);
     } catch (err) {
-      setError(err.response?.data?.message || "Upload fehlgeschlagen.");
+      // 413 (z.B. Proxy-Limit) liefert oft kein JSON → eigene verständliche Meldung.
+      const msg =
+        err.response?.status === 413
+          ? `Die Datei ist zu groß. Maximal ${MAX_MB} MB erlaubt.`
+          : err.response?.data?.message || "Upload fehlgeschlagen. Bitte erneut versuchen.";
+      setError(msg);
     } finally {
       setUploading(false);
-      if (inputRef.current) inputRef.current.value = "";
+      resetInput();
     }
   }
 
@@ -83,7 +119,9 @@ export default function ImageUpload({
           {uploading ? "Lädt…" : label}
         </button>
         {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
-        <p className="mt-1 text-xs text-gray-400">JPG, PNG, WEBP, GIF · max. 4 MB</p>
+        <p className="mt-1 text-xs text-gray-400">
+          {Object.values(ALLOWED_TYPES).join(", ")} · max. {MAX_MB} MB
+        </p>
       </div>
     </div>
   );
