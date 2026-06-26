@@ -49,15 +49,17 @@ export default function WelcomeTour() {
   const [step, setStep] = useState(0);
   const pathname = usePathname();
 
-  // Auto-Start einmalig nach der Registrierung. Läuft bei jedem Routenwechsel neu,
+  // Auto-Start einmalig pro Login/Registrierung. Läuft bei jedem Routenwechsel neu,
   // damit ein Login/Registrierung NACH dem ersten Mount erkannt wird (Tour liegt im
-  // Root-Layout und remountet bei Client-Navigation nicht). sessionStorage-Wächter
-  // sorgt dafür, dass die Prüfung nur 1× pro Session (nach erstem eingeloggten Aufruf) feuert.
+  // Root-Layout und remountet bei Client-Navigation nicht). Wächter ist an den TOKEN
+  // gebunden: pro Token wird nur 1× geprüft (kein wiederholtes getmyinfo bei Navigation),
+  // aber ein NEUER Token (neuer Login / neue Registrierung, auch mit gleicher Mail nach
+  // Account-Löschung) löst eine erneute Prüfung aus.
   useEffect(() => {
     const token = getPlayerToken();
     if (!token) return;
-    if (sessionStorage.getItem("hg_welcome_checked")) return;
-    sessionStorage.setItem("hg_welcome_checked", "1");
+    if (sessionStorage.getItem("hg_welcome_token") === token) return;
+    sessionStorage.setItem("hg_welcome_token", token);
     (async () => {
       try {
         const { data } = await axios.post("/api/player/getmyinfo", { token });
