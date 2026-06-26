@@ -5,9 +5,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { FaShieldAlt } from "react-icons/fa";
 import { setAdminToken } from "@/lib/clientAuth";
-
-const inputClass =
-  "w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+import { inputClass } from "@/lib/ui";
 
 export default function AdminLoginPage() {
   const router = useRouter();

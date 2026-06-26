@@ -5,9 +5,7 @@ import axios from "axios";
 import { FaEnvelope } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-
-const inputClass =
-  "w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+import { inputClass } from "@/lib/ui";
 
 export default function KontaktPage() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });

@@ -14,9 +14,7 @@ import {
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
-
-const inputClass =
-  "w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+import { inputClass } from "@/lib/ui";
 
 const TYPES = [
   { key: "Lob", label: "Lob", icon: FaThumbsUp },

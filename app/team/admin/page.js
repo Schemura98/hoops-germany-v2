@@ -13,6 +13,8 @@ import {
 import { useCurrentTeam } from "@/lib/useCurrentTeam";
 import TeamNav from "@/components/layout/TeamNav";
 import Footer from "@/components/layout/Footer";
+import Loading from "@/components/ui/Loading";
+import Button from "@/components/ui/Button";
 import KaderTab from "@/components/team/tabs/KaderTab";
 import AnfragenTab from "@/components/team/tabs/AnfragenTab";
 import SpielplanTab from "@/components/team/tabs/SpielplanTab";
@@ -58,7 +60,7 @@ export default function TeamAdminPage() {
   if (status === "loading") {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
+        <Loading />
       </main>
     );
   }
@@ -67,12 +69,9 @@ export default function TeamAdminPage() {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
         <p className="text-gray-700">Team-Daten konnten nicht geladen werden.</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-4 bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2 font-medium"
-        >
+        <Button onClick={() => window.location.reload()} className="mt-4">
           Erneut versuchen
-        </button>
+        </Button>
       </main>
     );
   }
@@ -103,8 +102,8 @@ export default function TeamAdminPage() {
           </div>
         )}
 
-        {/* Tab-Navigation */}
-        <div ref={tabBarRef} className="relative flex gap-1 overflow-x-auto border-b border-gray-200 mb-6">
+        {/* Tab-Navigation (einheitlicher Pill-Stil; Refs für Auto-Scroll/Deeplink bleiben) */}
+        <div ref={tabBarRef} className="relative flex gap-1 overflow-x-auto bg-gray-100 rounded-xl p-1 mb-6">
           {TABS.map((t) => {
             const Icon = t.icon;
             const isActive = t.key === active;
@@ -115,10 +114,10 @@ export default function TeamAdminPage() {
                   tabRefs.current[t.key] = el;
                 }}
                 onClick={() => setActive(t.key)}
-                className={`flex items-center gap-2 whitespace-nowrap px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                className={`flex items-center gap-1.5 whitespace-nowrap px-3 sm:px-4 py-1.5 rounded-lg text-sm font-medium transition ${
                   isActive
-                    ? "border-brand-500 text-brand-600"
-                    : "border-transparent text-gray-500 hover:text-gray-800"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-500 hover:text-gray-800"
                 }`}
               >
                 <Icon className="text-xs" />
