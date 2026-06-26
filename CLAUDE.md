@@ -431,11 +431,13 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 2. **Demo-Daten** nach der Testphase durch echte ersetzen (frischer Seed / Bereinigung); dann alte DB `test` löschen.
 3. **Monetarisierung (#6)** – BLOCKIERT bis **Gewerbeanmeldung** des Users (Amazon-Affiliate +
    Sponsorfläche; AdSense erst bei genug Traffic + Consent-Banner).
-3b. **🔜 Agenda – Spieler kann eigenes Profil selbst löschen** (aktuell nur Admin via `/api/admin/deleteplayer`).
-   Braucht: Self-Service-Endpoint (Spieler-Auth, eigene ID) mit denselben Cascade-Aufräumarbeiten wie der
-   Admin-Delete (Team-Referenzen, Posts, Follower, Anfragen, ggf. Team-Admin-Übergabe falls Gründer) +
-   Bestätigungs-Dialog in `edit-profile`/Einstellungen. ⚠️ Sonderfall: Ist der Spieler **Team-Gründer**
-   (`adminPlayerId`), vorher klären (Team auflösen oder Admin übertragen).
+3b. ✅ **Spieler kann eigenes Profil selbst löschen** (`2c2efbe`, live): gemeinsamer Cascade
+   `lib/deletePlayer.js` (`deletePlayerCascade`) – Posts, Follower/Following anderer, Notifications,
+   Team-Follower, Kader-Slots, Match-Stats (`player→null`, Verlauf bleibt), TransferEvents. **Gründer-Regel:**
+   Rolle an vorhandenen **Co-Admin übertragen**, sonst Löschen verweigert (`FOUNDER_BLOCK`, 409, Hinweis erst
+   Co-Admin zu ernennen). `/api/player/delete-account` (Spieler-Auth) + **Gefahrenzone** in `edit-profile`
+   (Bestätigungs-Flow → Logout + Redirect). `/api/admin/deleteplayer` nutzt jetzt **denselben Cascade**
+   (vorher nur Posts → verwaiste Referenzen). Verifiziert: Self-Delete+Cascade, Gründer-Block, Gründer-Transfer.
 3c. **🔜 Agenda – Analytics Phase 3 Teil 2** (Banner-Tracking/CTR/Leads/per-Sponsor-Auswertung) – an
    Monetarisierung (#3) gekoppelt, bis Gewerbe zurückgestellt (Details im Analytics-Block weiter unten).
 4. Weitere UX-Feinschliffe nach Tester-Feedback.
