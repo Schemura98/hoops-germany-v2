@@ -12,7 +12,8 @@ async function handler(req) {
 
   await connectDB();
   const teams = await Team.find({})
-    .select("teamName email slug region createdAt")
+    .select("teamName email slug region createdAt approved adminPlayerId")
+    .populate("adminPlayerId", "firstName lastName")
     .sort({ createdAt: -1 });
 
   return ok({ teams });

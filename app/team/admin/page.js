@@ -92,6 +92,17 @@ export default function TeamAdminPage() {
           </p>
         </div>
 
+        {team?.approved === false && (
+          <div className="mb-6 rounded-2xl bg-amber-50 border border-amber-200 p-4">
+            <p className="text-sm font-semibold text-amber-800">⏳ Dein Team wird gerade geprüft</p>
+            <p className="text-sm text-amber-700 mt-1">
+              Du kannst dein Team schon einrichten (Kader, Logo, Spiele vorbereiten). Öffentlich
+              sichtbar wird es, sobald ein Administrator es freigegeben hat – du bekommst dann eine
+              Benachrichtigung.
+            </p>
+          </div>
+        )}
+
         {/* Tab-Navigation */}
         <div ref={tabBarRef} className="relative flex gap-1 overflow-x-auto border-b border-gray-200 mb-6">
           {TABS.map((t) => {

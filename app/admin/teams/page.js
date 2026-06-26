@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaTrash } from "react-icons/fa";
+import { FaTrash, FaCheck, FaTimes } from "react-icons/fa";
 import AdminShell from "@/components/layout/AdminShell";
 import { getAdminToken } from "@/lib/clientAuth";
 
@@ -43,6 +43,24 @@ export default function AdminTeamsPage() {
     }
   }
 
+  async function decide(id, name, approve) {
+    if (!approve && !window.confirm(`Team „${name}" ablehnen? Es wird dabei entfernt.`)) return;
+    setBusyId(id);
+    try {
+      const token = getAdminToken();
+      await axios.post("/api/admin/approve-team", { token, teamId: id, approve });
+      await load();
+    } catch {
+      /* ignorieren */
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  const pending = teams.filter((t) => t.approved === false);
+  const adminName = (t) =>
+    t.adminPlayerId ? `${t.adminPlayerId.firstName || ""} ${t.adminPlayerId.lastName || ""}`.trim() : "";
+
   const filtered = teams.filter((t) => {
     const q = query.trim().toLowerCase();
     if (!q) return true;
@@ -57,6 +75,46 @@ export default function AdminTeamsPage() {
         placeholder="Suche nach Name oder E-Mail…"
         className="mb-4 w-full sm:w-80 rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
       />
+
+      {!loading && pending.length > 0 && (
+        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-4">
+          <h2 className="text-sm font-bold text-amber-800 mb-3">
+            Wartet auf Freigabe ({pending.length})
+          </h2>
+          <ul className="space-y-2">
+            {pending.map((t) => (
+              <li
+                key={t._id}
+                className="flex items-center justify-between gap-3 bg-white rounded-xl border border-amber-100 px-4 py-2.5"
+              >
+                <div className="min-w-0">
+                  <p className="font-medium text-gray-900 truncate">{t.teamName}</p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {adminName(t) ? `Gründer: ${adminName(t)}` : "—"}
+                    {t.region ? ` · ${t.region}` : ""}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => decide(t._id, t.teamName, true)}
+                    disabled={busyId === t._id}
+                    className="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white rounded-lg px-3 py-1.5 text-sm font-medium"
+                  >
+                    <FaCheck className="text-xs" /> Freigeben
+                  </button>
+                  <button
+                    onClick={() => decide(t._id, t.teamName, false)}
+                    disabled={busyId === t._id}
+                    className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-red-400 hover:text-red-600 text-gray-600 rounded-lg px-3 py-1.5 text-sm font-medium"
+                  >
+                    <FaTimes className="text-xs" /> Ablehnen
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {loading ? (
         <p className="text-gray-500">Lädt…</p>
@@ -81,6 +139,11 @@ export default function AdminTeamsPage() {
                     >
                       {t.teamName}
                     </Link>
+                    {t.approved === false && (
+                      <span className="ml-2 text-[11px] font-medium rounded-full px-2 py-0.5 bg-amber-100 text-amber-700">
+                        in Prüfung
+                      </span>
+                    )}
                   </td>
                   <td className="py-3 text-gray-600">{t.email}</td>
                   <td className="py-3 text-gray-600">{t.region || "—"}</td>

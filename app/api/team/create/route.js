@@ -7,6 +7,9 @@ import League from "@/models/League";
 import { getPlayerFromToken } from "@/lib/serverAuth";
 import { uniqueSlug } from "@/lib/slug";
 import { recordTransfer } from "@/lib/recordTransfer";
+import { sendMail } from "@/lib/mailer";
+import { teamPendingEmail } from "@/lib/emailTemplates";
+import { getBaseUrl } from "@/lib/baseUrl";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/team/create – ein eingeloggter Spieler gründet ein Team und wird
@@ -55,14 +58,13 @@ async function handler(req) {
     slug,
     leagueId,
     adminPlayerId: player._id,
+    approved: false, // wartet auf Super-Admin-Freigabe
   });
 
-  // Team in die Liga aufnehmen.
-  if (leagueId) {
-    await League.findByIdAndUpdate(leagueId, { $addToSet: { teams: team._id } });
-  }
+  // Hinweis: Aufnahme in die Liga (League.teams) erfolgt erst bei der Freigabe,
+  // damit ein noch nicht freigegebenes Team nicht in Liga-/Tabellen-Ansichten auftaucht.
 
-  // Spieler wird Admin + Mitglied des eigenen Teams
+  // Spieler wird Admin + Mitglied des eigenen Teams (kann es schon verwalten)
   await Player.findByIdAndUpdate(player._id, {
     isTeamAdmin: true,
     teamAdminOf: team._id,
@@ -76,9 +78,43 @@ async function handler(req) {
     type: "found",
   });
 
+  // Super-Admins zur Freigabe benachrichtigen (In-App + Mail). Fehler nicht nach außen geben.
+  try {
+    const admins = await Player.find({ isSuperAdmin: true }).select("email firstName");
+    const founderName = `${player.firstName || ""} ${player.lastName || ""}`.trim();
+    if (admins.length) {
+      await Player.updateMany(
+        { _id: { $in: admins.map((a) => a._id) } },
+        {
+          $push: {
+            notifications: {
+              type: "team_pending",
+              teamId: team._id,
+              teamName: team.teamName,
+              teamSlug: team.slug,
+              message: `Neues Team „${team.teamName}" wartet auf Freigabe.`,
+            },
+          },
+        }
+      );
+    }
+    const recipients = admins.map((a) => a.email).filter(Boolean);
+    const to = recipients.length ? recipients.join(", ") : process.env.SMTP_USER || "info@hoopsgermany.de";
+    const mail = teamPendingEmail({
+      teamName: team.teamName,
+      founderName,
+      region: region || bundesland,
+      baseUrl: getBaseUrl(req),
+    });
+    await sendMail({ to, subject: mail.subject, html: mail.html, text: mail.text });
+  } catch {
+    /* Mail/Notif-Fehler ignorieren – Team ist trotzdem angelegt */
+  }
+
   return ok(
     {
       team: { _id: team._id, teamName: team.teamName, slug: team.slug, region: team.region },
+      pending: true,
     },
     201
   );

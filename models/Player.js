@@ -13,6 +13,8 @@ const notificationSchema = new mongoose.Schema(
         "transfer",
         "result_mismatch",
         "team_admin_granted",
+        "team_pending",
+        "team_approved",
       ],
     },
     fromPlayerId: { type: mongoose.Schema.Types.ObjectId, ref: "players" },

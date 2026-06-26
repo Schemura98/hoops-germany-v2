@@ -33,6 +33,10 @@ const teamSchema = new mongoose.Schema(
     slug: { type: String, unique: true },
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "players" }],
     adminPlayerId: { type: mongoose.Schema.Types.ObjectId, ref: "players" },
+    // Moderation: neue (spieler-gegründete) Teams müssen von Super-Admins
+    // freigegeben werden, bevor sie öffentlich erscheinen. Default true, damit
+    // Bestand/Seeds sichtbar bleiben; /api/team/create setzt explizit false.
+    approved: { type: Boolean, default: true },
     inviteToken: String,
     rosterSlots: [rosterSlotSchema],
     // Scouting / Transfermarkt (Team-Seite): Verein sucht Verstärkung.
