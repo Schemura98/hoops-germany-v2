@@ -203,7 +203,13 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
             />
             <div className="min-w-0 flex-1">
               <p className="text-orange-400 text-sm font-semibold flex items-center justify-center sm:justify-start gap-2">
-                {team?.teamName || "Vereinslos"}
+                {team?.slug ? (
+                  <Link href={`/team/team-detail/${team.slug}`} className="hover:underline">
+                    {team.teamName}
+                  </Link>
+                ) : (
+                  team?.teamName || "Vereinslos"
+                )}
                 {player?.position && <span className="text-slate-400">| {positionLabel(player.position)}</span>}
               </p>
               <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight">{fullName}</h1>
@@ -232,10 +238,21 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
           <ScrollHintRow className="mt-6">
             <div className="inline-flex min-w-full rounded-t-2xl bg-white/5 divide-x divide-white/10 border border-white/10 border-b-0">
               <div className="px-4 py-3 flex flex-col items-center justify-center min-w-[110px]">
-                <Avatar name={team?.teamName} src={team?.logo} className="h-9 w-9" textClass="text-xs" square />
-                <span className="text-[10px] text-slate-300 mt-1 truncate max-w-[96px]">
-                  {team?.teamName || "—"}
-                </span>
+                {team?.slug ? (
+                  <Link href={`/team/team-detail/${team.slug}`} className="flex flex-col items-center group">
+                    <Avatar name={team?.teamName} src={team?.logo} className="h-9 w-9" textClass="text-xs" square />
+                    <span className="text-[10px] text-slate-300 mt-1 truncate max-w-[96px] group-hover:text-white">
+                      {team?.teamName || "—"}
+                    </span>
+                  </Link>
+                ) : (
+                  <>
+                    <Avatar name={team?.teamName} src={team?.logo} className="h-9 w-9" textClass="text-xs" square />
+                    <span className="text-[10px] text-slate-300 mt-1 truncate max-w-[96px]">
+                      {team?.teamName || "—"}
+                    </span>
+                  </>
+                )}
               </div>
               <StatCell label="PPG" value={stats ? stats.ppg.toFixed(1) : "–"} />
               <StatCell label="APG" value={stats ? stats.apg.toFixed(1) : "–"} />

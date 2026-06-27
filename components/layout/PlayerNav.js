@@ -90,7 +90,11 @@ export default function PlayerNav({ player }) {
 
         <div className="flex items-center gap-1.5 sm:gap-3 -mr-1">
           <NotificationBell />
-          <div className="flex items-center gap-2 px-1">
+          <Link
+            href="/player/player-detail"
+            className="flex items-center gap-2 px-1 rounded-full hover:bg-white/5 transition-colors"
+            title="Mein Profil"
+          >
             {player?.profileImage ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -103,8 +107,8 @@ export default function PlayerNav({ player }) {
                 {initials}
               </span>
             )}
-            <span className="hidden sm:block text-sm text-gray-200">{player?.firstName}</span>
-          </div>
+            <span className="hidden sm:block text-sm text-gray-200 hover:text-white">{player?.firstName}</span>
+          </Link>
           {/* Abmelden: auf Mobil im Hamburger-Menü, hier nur ab Desktop */}
           <button
             onClick={logout}
