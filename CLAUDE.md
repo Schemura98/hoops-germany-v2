@@ -692,23 +692,31 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > | 3 | Echter Bild-Upload im Composer (HEIC) | ✅ live (`a0c6321`) |
 > | 4 | Teamkollegen/eigenes Team in „Folge ich" + Auto-Follow | ✅ live (`a0c6321`) |
 > | 2 | Auto-Posts (Ergebnis/Transfer/Tryout) | ✅ live (`b7445b2`) |
-> | **7** | **Transfermarkt→Feed** (suchende Spieler/Vereine regional, als Auto-Posts) | 🔜 **als Nächstes** |
-> | 5 | „Für dich"-Ranking (Hot-Score + Region/Liga-Boost statt roh-chronologisch) | 🔜 offen |
+> | 7 | Transfermarkt→Feed (suchende Spieler/Vereine, als Auto-Posts) | ✅ live (`c9bb958`) |
+> | **5** | **„Für dich"-Ranking** (Hot-Score + Region/Liga-Boost statt roh-chronologisch) | 🔜 **als Nächstes** |
 > | 6 | Team-Posts (Vereine als Autoren: Probetraining/Heimspiel/News) | 🔜 offen |
 > | 8 | Folge-Vorschläge im Feed (Region/Liga) für neue User | 🔜 offen |
 > | 9 | Hashtags + @Mentions (klickbar + Mention-Notif) | 🔜 offen |
 > | 10 | YouTube-/Link-Embeds (Highlight-Clips) | 🔜 offen |
 >
-> **➡️ NÄCHSTE SESSION HIER STARTEN – #7 Transfermarkt→Feed** (billig dank `lib/autoPost.js`):
-> Neue Auto-Post-Typen über denselben Helper – `autoPostRecruiting` (Verein aktiviert „Verstärkung suchen" in
-> `set-recruiting` → teams=[teamId]), `autoPostTransferAvailable` (Spieler setzt `transferStatus:"verfuegbar"`
-> in `update-transfer` → subjectPlayer). **Wichtig gegen Spam:** nur bei **Statuswechsel** posten (nicht bei
-> jeder Bearbeitung) + Throttle (max. 1 Auto-Post pro Person/Tag, z.B. via `eventKey` mit Tagesstempel) +
-> idealerweise **regional dosiert** (nur Region/Liga). Neue `autoType` „recruiting"/„transfer_available" in
-> `PostCard.AUTO` ergänzen (Icon+Badge). Tryout-Auto-Post (#2) existiert bereits.
-> **Danach:** #5 Ranking (eigene Aggregation/JS-Sort über ~200 Kandidaten: `score = engagement / (alter+2)^1.5`
-> × Boosts eigenes Team ×2 / gefolgt ×1.8 / gleiche Liga ×1.5 / Bundesland ×1.3 – Bausteine `bundesland`/
-> `leagueId`/`lib/geo.js` vorhanden), dann #6 Team-Posts (`Post.authorTeam` + Team-Composer, Dual-Auth), #8/#9/#10.
+> **#7 Transfermarkt→Feed ✅ erledigt** (`c9bb958`): Über `lib/autoPost.js` – `autoPostTransferAvailable`
+> (Spieler setzt `transferStatus:"verfuegbar"` in `update-transfer` → subjectPlayer, Text mit
+> preferredLeague·bundesland) und `autoPostRecruiting` (Verein aktiviert „Verstärkung suchen" in
+> `set-recruiting` → teams=[teamId], gesuchte Rollen + Notiz). **Anti-Spam:** beide Routen lesen den
+> **vorherigen Status** und posten NUR beim Übergang (`≠verfuegbar→verfuegbar` bzw. `recruiting false→true`);
+> zusätzlich **Tages-Throttle** über `eventKey` mit `dayStamp()` (max. 1 Post/Person/Tag). Neue `autoType`
+> „recruiting"/„transfer_available" in `PostCard.AUTO` (Badges „Spieler gesucht"/„Auf Vereinssuche").
+> Sichtbarkeit via bestehendes `getfollowingposts`-`$or` (teams/subjectPlayer). **Verifiziert (Dev/Preview):**
+> doppeltes Umschalten → je 1 Post, Texte/Links/Notiz korrekt, im Feed + gerendert, keine Konsolenfehler.
+> **Regionale Dosierung** bewusst auf #5 (Ranking) verschoben – vorerst Reichweite > Filter, Region/Liga steht im Text.
+>
+> **➡️ NÄCHSTE SESSION HIER STARTEN – #5 „Für dich"-Ranking** (ersetzt die roh-chronologische „Entdecken"-Liste):
+> Eigene Aggregation/JS-Sort über ~200 frische Kandidaten (letzte ~14 Tage), `score = (1 + likes + 2·kommentare +
+> medienBonus) / (stundenSeitPost + 2)^1.5` × Boosts: eigenes Team ×2 / gefolgt ×1.8 / gleiche Liga ×1.5 /
+> Bundesland ×1.3. Bausteine vorhanden: `bundesland`/`leagueId` an Player/Team, `lib/geo.js`. Umsetzung am besten
+> in `/api/posts/feed` (Kontext = eingeloggter Spieler via Token; aktuell ist die Route auth-frter → Token
+> optional annehmen). „Entdecken"-Tab ggf. in „Für dich" umbenennen. **Danach:** #6 Team-Posts (`Post.authorTeam`
+> + Team-Composer, Dual-Auth), #8 Folge-Vorschläge, #9 Hashtags/@Mentions, #10 YouTube/Link-Embeds.
 >
 > ⚠️ **Dev-DB-Aufräumen vor dem Weitermachen:** In `hoopsgermany` (Dev) liegen Test-Artefakte aus der
 > Verifikation (3 Auto-Posts, Sven Adler in „Test Baskets", Demo-Spielstand „Düsseldorf 90:70 Dortmund",
