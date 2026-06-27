@@ -21,7 +21,7 @@ import Loading from "@/components/ui/Loading";
 import EmptyState from "@/components/ui/EmptyState";
 
 const TABS = [
-  { key: "discover", label: "Entdecken" },
+  { key: "discover", label: "Für dich" },
   { key: "following", label: "Folge ich" },
 ];
 
@@ -42,7 +42,9 @@ export default function PlayerNewsfeedPage() {
     setHasMore(false);
     try {
       const token = getPlayerToken();
-      const { data } = await axios.post(feedUrl(which), { token });
+      // „Für dich" (discover) ist gerankt → Offset-Paginierung; „Folge ich" chronologisch.
+      const body = which === "discover" ? { token, offset: 0 } : { token };
+      const { data } = await axios.post(feedUrl(which), body);
       setPosts(data.posts || []);
       setHasMore(!!data.hasMore);
     } catch {
@@ -65,8 +67,12 @@ export default function PlayerNewsfeedPage() {
     setLoadingMore(true);
     try {
       const token = getPlayerToken();
-      const before = posts[posts.length - 1]?.createdAt;
-      const { data } = await axios.post(feedUrl(mode), { token, before });
+      // discover: weiter im Ranking via Offset; following: chronologischer Cursor.
+      const body =
+        mode === "discover"
+          ? { token, offset: posts.length }
+          : { token, before: posts[posts.length - 1]?.createdAt };
+      const { data } = await axios.post(feedUrl(mode), body);
       setPosts((prev) => {
         const seen = new Set(prev.map((p) => p._id));
         const fresh = (data.posts || []).filter((p) => !seen.has(p._id));
