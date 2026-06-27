@@ -708,6 +708,7 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > „recruiting"/„transfer_available" in `PostCard.AUTO` (Badges „Spieler gesucht"/„Auf Vereinssuche").
 > Sichtbarkeit via bestehendes `getfollowingposts`-`$or` (teams/subjectPlayer). **Verifiziert (Dev/Preview):**
 > doppeltes Umschalten → je 1 Post, Texte/Links/Notiz korrekt, im Feed + gerendert, keine Konsolenfehler.
+> **Live deployt** (27.06.2026; Prod-Build grün, Smoke Homepage/Feed-API/Transfermarkt 200; keine neue Infra/Migration).
 > **Regionale Dosierung** bewusst auf #5 (Ranking) verschoben – vorerst Reichweite > Filter, Region/Liga steht im Text.
 >
 > **➡️ NÄCHSTE SESSION HIER STARTEN – #5 „Für dich"-Ranking** (ersetzt die roh-chronologische „Entdecken"-Liste):
