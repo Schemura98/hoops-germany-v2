@@ -18,6 +18,7 @@ import { getPlayerToken } from "@/lib/clientAuth";
 import { timeAgo } from "@/lib/timeAgo";
 import Avatar from "./Avatar";
 import BaseAvatar from "@/components/Avatar";
+import RichText from "./RichText";
 
 // Darstellung der automatischen Ereignis-Beiträge (Icon + Badge je Typ).
 const AUTO = {
@@ -381,7 +382,9 @@ export default function PostCard({ post, currentPlayerId }) {
 
           {/* Inhalt */}
           {post.content && (
-            <p className="mt-3 text-gray-800 whitespace-pre-line">{post.content}</p>
+            <p className="mt-3 text-gray-800 whitespace-pre-line">
+              <RichText text={post.content} mentions={post.mentions} />
+            </p>
           )}
           {post.image && (
             // eslint-disable-next-line @next/next/no-img-element

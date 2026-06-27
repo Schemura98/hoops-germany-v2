@@ -41,6 +41,16 @@ const postSchema = new mongoose.Schema(
     // Feed-/Ranking-Logik (Folge-ich-$or, Boosts) greift ohne Zusatzcode.
     authorTeam: { type: mongoose.Schema.Types.ObjectId, ref: "teams" },
     teams: [{ type: mongoose.Schema.Types.ObjectId, ref: "teams" }],
+
+    // Hashtags (klein, indizierbar) + aufgelöste @Mentions (Render + Benachrichtigung).
+    hashtags: { type: [String], index: true },
+    mentions: [
+      {
+        playerId: { type: mongoose.Schema.Types.ObjectId, ref: "players" },
+        slug: String,
+        token: String,
+      },
+    ],
     subjectPlayer: { type: mongoose.Schema.Types.ObjectId, ref: "players" },
     eventKey: { type: String, index: true, sparse: true },
     meta: { type: mongoose.Schema.Types.Mixed },

@@ -18,6 +18,7 @@ const notificationSchema = new mongoose.Schema(
         "post_like",
         "post_comment",
         "comment_reply",
+        "mention",
       ],
     },
     fromPlayerId: { type: mongoose.Schema.Types.ObjectId, ref: "players" },

@@ -2,6 +2,8 @@ import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Post from "@/models/Post";
 import { getTeamFromToken } from "@/lib/serverAuth";
+import { extractHashtags, resolveMentions } from "@/lib/postParse";
+import { notifyMentions } from "@/lib/notifyEngagement";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/posts/team-post – Beitrag im Namen des Vereins erstellen (Dual-Auth:
@@ -24,6 +26,8 @@ async function handler(req) {
   }
 
   await connectDB();
+  const hashtags = extractHashtags(content);
+  const mentions = await resolveMentions(content);
   const post = await Post.create({
     player: null,
     authorTeam: team._id,
@@ -31,10 +35,20 @@ async function handler(req) {
     kind: "user",
     content,
     image,
+    hashtags,
+    mentions,
     likes: [],
     comments: [],
   });
   await post.populate("authorTeam", "teamName slug logo");
+
+  // Erwähnte Spieler benachrichtigen.
+  await notifyMentions({
+    recipientIds: mentions.map((m) => m.playerId),
+    actorId: null,
+    authorName: team.teamName,
+    postId: post._id,
+  });
 
   return ok({ post }, 201);
 }

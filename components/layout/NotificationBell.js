@@ -14,6 +14,7 @@ import {
   FaHeart,
   FaRegComment,
   FaReply,
+  FaAt,
 } from "react-icons/fa";
 import { getPlayerToken, getStoredPlayer } from "@/lib/clientAuth";
 import { notificationHref } from "@/lib/notifications";
@@ -30,6 +31,7 @@ const ICON = {
   post_like: FaHeart,
   post_comment: FaRegComment,
   comment_reply: FaReply,
+  mention: FaAt,
 };
 
 export default function NotificationBell() {

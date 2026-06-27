@@ -2,6 +2,8 @@ import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Post from "@/models/Post";
 import { getPlayerFromToken } from "@/lib/serverAuth";
+import { extractHashtags, resolveMentions } from "@/lib/postParse";
+import { notifyMentions } from "@/lib/notifyEngagement";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/posts/uploadpost – Beitrag erstellen (Spieler-Auth).
@@ -21,14 +23,26 @@ async function handler(req) {
   }
 
   await connectDB();
+  const hashtags = extractHashtags(content);
+  const mentions = await resolveMentions(content);
   const post = await Post.create({
     player: player._id,
     content,
     image,
+    hashtags,
+    mentions,
     likes: [],
     comments: [],
   });
   await post.populate("player", "firstName lastName slug profileImage");
+
+  // Erwähnte Spieler benachrichtigen.
+  await notifyMentions({
+    recipientIds: mentions.map((m) => m.playerId),
+    actorId: player._id,
+    authorName: `${player.firstName || ""} ${player.lastName || ""}`.trim(),
+    postId: post._id,
+  });
 
   return ok({ post }, 201);
 }
