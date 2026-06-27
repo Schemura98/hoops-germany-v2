@@ -695,8 +695,8 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > | 7 | Transfermarkt→Feed (suchende Spieler/Vereine, als Auto-Posts) | ✅ live (`c9bb958`) |
 > | 5 | „Für dich"-Ranking (Hot-Score + Region/Liga/Team-Boosts statt roh-chronologisch) | ✅ live (`8755c08`) |
 > | 6 | Team-Posts (Vereine als Autoren: Probetraining/Heimspiel/News) | ✅ live (`33316d0`) |
-> | **8** | **Folge-Vorschläge** im Feed (Region/Liga) für neue User | 🔜 **als Nächstes** |
-> | 9 | Hashtags + @Mentions (klickbar + Mention-Notif) | 🔜 offen |
+> | 8 | Folge-Vorschläge im Feed (Region/Liga) für neue User | ✅ live (`8755553`) |
+> | **9** | **Hashtags + @Mentions** (klickbar + Mention-Notif) | 🔜 **als Nächstes** |
 > | 10 | YouTube-/Link-Embeds (Highlight-Clips) | 🔜 offen |
 >
 > **#7 Transfermarkt→Feed ✅ erledigt** (`c9bb958`): Über `lib/autoPost.js` – `autoPostTransferAvailable`
@@ -734,13 +734,25 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > KEINE Beiträge (existierte noch nie) – optionaler Follow-up: Beiträge-Tab auf `/team/team-detail` (Quelle:
 > `{$or:[{authorTeam:teamId},{player:{$in:members}}]}`).
 >
-> **➡️ NÄCHSTE SESSION HIER STARTEN – #8 Folge-Vorschläge** (für neue User, gegen den „leeren Feed"):
-> Neuer Endpoint `POST /api/player/suggestions` (Spieler-Auth) → Spieler/Teams aus **gleichem Bundesland/gleicher
-> Liga**, denen man noch NICHT folgt (exkl. eigenes Team/sich selbst), sortiert nach Nähe (Bundesland-Match,
-> Follower-Zahl). Im Newsfeed eine **„Vorschläge für dich"-Karte** (Avatar + Name + Folgen-Button, nutzt
-> bestehende `followplayer`/`followteam`), eingeblendet v.a. wenn `following`/`followingTeams` klein sind
-> (neue User) – ideal interleaved alle ~5 Beiträge ODER als eigene Karte oben im „Für dich"-Tab. Bausteine
-> vorhanden: `bundesland`/`leagueId`, `FollowButton`, Avatare. **Danach:** #9 Hashtags/@Mentions, #10 YouTube/Link-Embeds.
+> **#8 Folge-Vorschläge ✅ erledigt** (`8755553`, live 27.06.2026): Endpoint `POST /api/player/suggestions`
+> (Spieler-Auth) liefert **Spieler** (gleiches Bundesland, Fallback beliebige) + **Vereine** (Bundesland ODER
+> gleiche Liga), exkl. selbst/gefolgte/eigenes Team, sortiert nach Follower-Zahl; Position via `positionLabel`
+> ausgeschrieben. `components/feed/FollowSuggestions.js` (Karte „Vorschläge für dich", Spieler/Teams abwechselnd,
+> kompakter Folgen-Button OHNE `checkfollowing` – Vorschläge sind per Definition ungefolgt; entfernt Eintrag
+> optimistisch nach dem Folgen, blendet sich leer aus). Eingebunden im Newsfeed **nach dem Composer**
+> (Desktop + Mobil), auf beiden Tabs. **Verifiziert (Dev/Preview):** 5 Spieler + 3 Teams, keine Selbst-/gefolgten
+> Einträge; nach Folgen ausgeschlossen + nachgefüllt; Liga-Teams greifen; UI rendert + „Folgen" entfernt Eintrag;
+> keine Konsolenfehler. ⚠️ Karte ist aktuell **immer** sichtbar (blendet sich nur leer aus) – optional könnte man
+> sie für Nutzer mit vielen Follows ausblenden; bewusst belassen (Discovery hilft auch aktiven Nutzern).
+>
+> **➡️ NÄCHSTE SESSION HIER STARTEN – #9 Hashtags + @Mentions** (Vernetzung/Discovery):
+> **Render:** Helper `lib/richText.js` (oder in `PostCard`) der `content` parst und `#tag`/`@name` als Links
+> rendert (`#tag` → neue Suchseite `/feed/tag/[tag]` oder `/suche?tag=`, `@slug` → Profil). **Hashtag-Suche:**
+> entweder bei Bedarf per Regex auf `content` (`Post.find({content:/#tag\b/i})`) ODER beim Anlegen Tags in ein
+> Feld `Post.hashtags:[String]` extrahieren (sauberer/indizierbar – empfohlen; in `uploadpost`/`team-post`/
+> `autoPost` füllen). **@Mentions:** beim Erstellen `@`-Tokens gegen `Player.slug` auflösen → Mention-Notif
+> (neuer `Player.notifications`-Typ `mention` + `notificationHref` → `/post/[id]`; `NotificationBell`-Icon).
+> Mention-Eingabe-Autocomplete im Composer ist optional (erst Parsing/Notif liefern). **Danach:** #10 YouTube/Link-Embeds.
 >
 > ⚠️ **Dev-DB-Aufräumen vor dem Weitermachen:** Die Verifikation legt in `hoopsgermany` (Dev) Test-Artefakte an
 > (z.B. ein „Probetraining"-Team-Post von Test Baskets). Rein lokal → `node scripts/seed-demo.mjs` setzt sauber
