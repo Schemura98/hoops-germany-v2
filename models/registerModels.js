@@ -14,3 +14,4 @@ import "./Feedback";
 import "./AnalyticsEvent";
 import "./TransferEvent";
 import "./AuditLog";
+import "./TeamSeason";

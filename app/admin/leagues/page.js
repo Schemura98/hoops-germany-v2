@@ -12,6 +12,7 @@ import {
   LEAGUE_GENDERS,
   LEAGUE_AGE_GROUPS,
   LEAGUE_PLAYOFF_MODES,
+  TEAM_SEASON_STATUS,
 } from "@/lib/constants";
 
 const inputClass =
@@ -36,6 +37,40 @@ export default function AdminLeaguesPage() {
   const [msg, setMsg] = useState(null);
   const [newLeague, setNewLeague] = useState(EMPTY_NEW);
   const [creating, setCreating] = useState(false);
+  const [seasonsByLeague, setSeasonsByLeague] = useState({}); // { [leagueId]: rows }
+  const [openSeasons, setOpenSeasons] = useState(null); // leagueId
+
+  async function toggleSeasons(leagueId) {
+    if (openSeasons === leagueId) {
+      setOpenSeasons(null);
+      return;
+    }
+    setOpenSeasons(leagueId);
+    if (!seasonsByLeague[leagueId]) {
+      try {
+        const token = getAdminToken();
+        const { data } = await axios.post("/api/admin/league-seasons", { token, leagueId });
+        setSeasonsByLeague((s) => ({ ...s, [leagueId]: data.seasons || [] }));
+      } catch {
+        setSeasonsByLeague((s) => ({ ...s, [leagueId]: [] }));
+      }
+    }
+  }
+
+  async function setSeasonStatus(leagueId, teamSeasonId, status) {
+    setSeasonsByLeague((s) => ({
+      ...s,
+      [leagueId]: (s[leagueId] || []).map((r) =>
+        r._id === teamSeasonId ? { ...r, status } : r
+      ),
+    }));
+    try {
+      const token = getAdminToken();
+      await axios.post("/api/admin/season-status", { token, teamSeasonId, status });
+    } catch {
+      /* still */
+    }
+  }
 
   const load = useCallback(async () => {
     const token = getAdminToken();
@@ -405,6 +440,53 @@ export default function AdminLeaguesPage() {
                   </div>
                 )}
               </div>
+
+              {/* Saison-Status (eingefrorene TeamSeason-Einträge) */}
+              {l.finished && (
+                <div className="pt-2 border-t border-gray-50">
+                  <button
+                    type="button"
+                    onClick={() => toggleSeasons(l._id)}
+                    className="text-xs font-medium text-brand-600 hover:underline"
+                  >
+                    {openSeasons === l._id ? "Saison-Status ausblenden" : "Saison-Status verwalten"}
+                  </button>
+                  {openSeasons === l._id && (
+                    <div className="mt-2 space-y-1.5">
+                      {!seasonsByLeague[l._id] ? (
+                        <p className="text-xs text-gray-400">Lädt…</p>
+                      ) : seasonsByLeague[l._id].length === 0 ? (
+                        <p className="text-xs text-gray-400">
+                          Noch keine eingefrorenen Einträge – Saison (erneut) abschließen, um den
+                          Endstand einzufrieren.
+                        </p>
+                      ) : (
+                        seasonsByLeague[l._id].map((r) => (
+                          <div key={r._id} className="flex items-center justify-between gap-2">
+                            <span className="text-sm text-gray-700">
+                              {r.placement ? `${r.placement}. ` : ""}
+                              {r.teamName}
+                              {r.champion ? " 🏆" : ""}
+                              <span className="text-gray-400"> ({r.wins}–{r.losses})</span>
+                            </span>
+                            <select
+                              value={r.status}
+                              onChange={(e) => setSeasonStatus(l._id, r._id, e.target.value)}
+                              className={inputClass}
+                            >
+                              {TEAM_SEASON_STATUS.map((s) => (
+                                <option key={s.value} value={s.value}>
+                                  {s.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="flex items-center justify-between gap-2 pt-1 border-t border-gray-50">
                 <div className="flex items-center gap-3">

@@ -12,6 +12,8 @@ import {
   FaHeart,
   FaRegComment,
   FaTrophy,
+  FaHistory,
+  FaCrown,
 } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -20,13 +22,14 @@ import Loading from "@/components/ui/Loading";
 import FollowButton from "@/components/FollowButton";
 import { teamScores } from "@/lib/matchScore";
 import { timeAgo } from "@/lib/timeAgo";
-import { positionLabel } from "@/lib/constants";
+import { positionLabel, teamSeasonStatusLabel } from "@/lib/constants";
 import { getPlayerToken } from "@/lib/clientAuth";
 import Avatar from "@/components/Avatar";
 
 const TABS = [
   { key: "kader", label: "Kader", icon: FaUsers },
   { key: "spielplan", label: "Spielplan", icon: FaCalendarAlt },
+  { key: "saisons", label: "Saisons", icon: FaHistory },
   { key: "news", label: "News", icon: FaNewspaper },
 ];
 
@@ -54,6 +57,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
   const [joining, setJoining] = useState(false);
   const [joinMsg, setJoinMsg] = useState(null);
   const [followerCount, setFollowerCount] = useState(0);
+  const [history, setHistory] = useState([]);
 
   useEffect(() => {
     setLoggedIn(!!getPlayerToken());
@@ -65,6 +69,11 @@ export default function TeamTeamDetailSlugPage({ params }) {
           setData(res.data);
           setFollowerCount(res.data.team.followersCount || 0);
           setState("ready");
+          // Saison-Historie (eingefrorene TeamSeason-Snapshots) nachladen.
+          axios
+            .post("/api/team/season-history", { teamId: res.data.team._id })
+            .then((h) => active && setHistory(h.data.history || []))
+            .catch(() => {});
         }
       } catch {
         if (active) setState("notfound");
@@ -396,6 +405,79 @@ export default function TeamTeamDetailSlugPage({ params }) {
               </div>
             );
           })()}
+
+        {/* Saison-Historie */}
+        {tab === "saisons" && (
+          <div>
+            {history.length === 0 ? (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center text-sm text-gray-500">
+                Noch keine abgeschlossene Saison. Die Historie (Liga, Platz, Bilanz,
+                Status) wird beim Saisonabschluss eingefroren.
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-xs text-gray-400 text-left border-b border-gray-100">
+                        <th className="font-medium py-3 pl-4">Saison</th>
+                        <th className="font-medium py-3">Liga</th>
+                        <th className="font-medium py-3 text-center">Platz</th>
+                        <th className="font-medium py-3 text-center">S–N</th>
+                        <th className="font-medium py-3 text-center">Diff</th>
+                        <th className="font-medium py-3 pr-4">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {history.map((h) => (
+                        <tr key={h._id} className="border-b border-gray-50 last:border-0">
+                          <td className="py-3 pl-4 font-medium text-gray-900">{h.season || "—"}</td>
+                          <td className="py-3 text-gray-700">
+                            {h.leagueId ? (
+                              <Link href={`/ligen/${h.leagueId}`} className="hover:text-brand-600">
+                                {h.leagueName}
+                              </Link>
+                            ) : (
+                              h.leagueName || "—"
+                            )}
+                          </td>
+                          <td className="py-3 text-center text-gray-700">
+                            {h.champion ? (
+                              <span className="inline-flex items-center gap-1 text-amber-600 font-semibold">
+                                <FaCrown className="text-xs" /> Meister
+                              </span>
+                            ) : (
+                              h.placement ?? "—"
+                            )}
+                          </td>
+                          <td className="py-3 text-center text-gray-600">
+                            {h.wins}–{h.losses}
+                          </td>
+                          <td
+                            className={`py-3 text-center font-medium ${
+                              h.diff > 0 ? "text-green-600" : h.diff < 0 ? "text-red-600" : "text-gray-500"
+                            }`}
+                          >
+                            {h.diff > 0 ? `+${h.diff}` : h.diff}
+                          </td>
+                          <td className="py-3 pr-4">
+                            {h.status && h.status !== "aktiv" ? (
+                              <span className="text-xs rounded-full bg-gray-100 text-gray-600 px-2 py-0.5">
+                                {teamSeasonStatusLabel(h.status)}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-400">Aktiv</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* News */}
         {tab === "news" && (

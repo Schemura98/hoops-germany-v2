@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import League from "@/models/League";
 import Match from "@/models/Match";
 import { computeStandings } from "@/lib/standings";
+import { freezeSeason } from "@/lib/teamSeason";
 import { getAdminFromToken } from "@/lib/serverAuth";
 import { findDuplicateLeague } from "@/lib/leagues";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
@@ -83,6 +84,11 @@ async function handler(req) {
     { $set: updates },
     { new: true }
   ).select("name season bundesland active finished champion playoffMode");
+
+  // Beim Abschließen den Endstand je Team als TeamSeason-Snapshot einfrieren.
+  if (updates.finished === true) {
+    await freezeSeason(current, league.champion);
+  }
 
   return ok({ league });
 }
