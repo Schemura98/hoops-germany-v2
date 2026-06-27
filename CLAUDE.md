@@ -697,7 +697,9 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > | 6 | Team-Posts (Vereine als Autoren: Probetraining/Heimspiel/News) | ✅ live (`33316d0`) |
 > | 8 | Folge-Vorschläge im Feed (Region/Liga) für neue User | ✅ live (`8755553`) |
 > | 9 | Hashtags + @Mentions (klickbar + Mention-Notif) | ✅ live (`bfc97e8`) |
-> | **10** | **YouTube-/Link-Embeds** (Highlight-Clips) | 🔜 **als Nächstes (letztes)** |
+> | 10 | YouTube-/Link-Embeds (Highlight-Clips) | ✅ live (`fe4bbee`) |
+>
+> **🎉 NEWSFEED-ROADMAP 10/10 KOMPLETT (27.06.2026) – alle live auf hoopsgermany.de.**
 >
 > **#7 Transfermarkt→Feed ✅ erledigt** (`c9bb958`): Über `lib/autoPost.js` – `autoPostTransferAvailable`
 > (Spieler setzt `transferStatus:"verfuegbar"` in `update-transfer` → subjectPlayer, Text mit
@@ -758,13 +760,21 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > Composer-Autocomplete (bewusst – Nutzer tippen `@Vorname`/`@VornameNachname`); Mentions in **Kommentaren**
 > sind noch nicht geparst (nur Beitragstext) – möglicher Follow-up.
 >
-> **➡️ NÄCHSTE SESSION HIER STARTEN – #10 YouTube-/Link-Embeds** (LETZTES Roadmap-Item, dann Newsfeed komplett):
-> In `RichText` (oder eigener Schritt nach dem Beitrags-Body) **erste erkannte URL** als Embed rendern:
-> YouTube (`youtube.com/watch?v=`/`youtu.be/`) → `<iframe>` (16:9, lazy), sonst generische **Link-Vorschau-Karte**
-> (Domain + Link; optional OG-Title/Image serverseitig holen – v1 reicht Domain + klickbare URL). Sinnvoll:
-> beim Erstellen erste URL in `Post.linkUrl`/`Post.embed` denormalisieren (kein populate/Fetch im Render).
-> URLs im Text ansonsten als normale Links klickbar machen (in `RichText` Regex um `https?://…` ergänzen).
-> **Danach: Newsfeed-Roadmap (10/10) vollständig abgeschlossen.**
+> **#10 YouTube-/Link-Embeds ✅ erledigt** (`fe4bbee`, live 27.06.2026): `models/Post.js` um `embed` (Mixed,
+> denormalisiert beim Erstellen → kein Fetch im Render). `lib/linkEmbed.js` (`detectEmbed` → erste URL →
+> `{type:"youtube",videoId,url}` für watch/`youtu.be`/embed/shorts, sonst `{type:"link",url,domain}` via `URL()`).
+> `components/posts/PostEmbed.js` rendert YouTube-iframe (16:9, **lazy**) bzw. kompakte Link-Vorschau-Karte
+> (Domain + URL). `RichText` macht zusätzlich rohe `https?://…`-URLs klickbar (target=_blank; URL-Alternative
+> steht in der Regex zuerst, damit sie nicht an `#/@` zerschnitten wird). `uploadpost`/`team-post` speichern das
+> Embed; `PostCard` rendert `PostEmbed` nach Text/Bild. **Verifiziert (Dev/Preview):** `youtu.be/…` → videoId +
+> lazy iframe; generischer Link → Karte (`basketball-bund.net` + URL); URLs inline klickbar; keine Konsolenfehler.
+>
+> **🎉 DAMIT IST DIE KOMPLETTE NEWSFEED-ROADMAP (Analyse vom 27.06.2026, alle 10 Punkte) ABGESCHLOSSEN UND LIVE.**
+> Der Feed kann jetzt: personalisiertes „Für dich"-Ranking, „Folge ich" (inkl. eigenes Team), Auto-Posts
+> (Ergebnis/Transfer/Tryout/Recruiting/Verfügbarkeit), Team-Posts, Like/Kommentar/Mention-Benachrichtigungen,
+> Bild-Upload, Hashtags + @Mentions (klickbar, mit Tag-Feed), YouTube-/Link-Embeds, Folge-Vorschläge, Permalinks.
+> **Optionale Follow-ups (nicht eingeplant):** Mentions/Embeds auch in Kommentaren; Composer-@-Autocomplete;
+> OG-Title/Image für Link-Karten; „Beiträge"-Tab auf der Team-Profilseite; Suggestions nur für neue User.
 >
 > ⚠️ **Dev-DB-Aufräumen vor dem Weitermachen:** Die Verifikation legt in `hoopsgermany` (Dev) Test-Artefakte an
 > (z.B. ein „Probetraining"-Team-Post von Test Baskets). Rein lokal → `node scripts/seed-demo.mjs` setzt sauber
