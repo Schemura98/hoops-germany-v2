@@ -29,13 +29,27 @@ async function handler(req) {
         "playerStats.didNotPlay": { $ne: true },
       },
     },
+    // Pro Spieler UND Team (= Team zum Zeitpunkt des Spiels) summieren.
     {
       $group: {
-        _id: "$playerStats.player",
+        _id: { player: "$playerStats.player", team: "$playerStats.team" },
         games: { $sum: 1 },
         points: { $sum: { $ifNull: ["$playerStats.points", 0] } },
         assists: { $sum: { $ifNull: ["$playerStats.assists", 0] } },
         rebounds: { $sum: { $ifNull: ["$playerStats.rebounds", 0] } },
+      },
+    },
+    // Nach Punkten sortieren, damit $first unten das punktreichste Team trifft.
+    { $sort: { points: -1 } },
+    // Pro Spieler gesamt aufsummieren; Label-Team = wo die meisten Punkte erzielt wurden.
+    {
+      $group: {
+        _id: "$_id.player",
+        games: { $sum: "$games" },
+        points: { $sum: "$points" },
+        assists: { $sum: "$assists" },
+        rebounds: { $sum: "$rebounds" },
+        primaryTeam: { $first: "$_id.team" },
       },
     },
     // Spielerinfos
@@ -48,11 +62,11 @@ async function handler(req) {
       },
     },
     { $unwind: "$player" },
-    // Team des Spielers
+    // Team, für das die Punkte erzielt wurden (nicht das aktuelle Team).
     {
       $lookup: {
         from: "teams",
-        localField: "player.teamId",
+        localField: "primaryTeam",
         foreignField: "_id",
         as: "team",
       },
