@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaBasketballBall, FaMapMarkerAlt } from "react-icons/fa";
+import { FaBasketballBall, FaMapMarkerAlt, FaTrophy } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
@@ -11,6 +11,7 @@ import Avatar from "@/components/Avatar";
 import Tabs from "@/components/ui/Tabs";
 import Loading from "@/components/ui/Loading";
 import EmptyState from "@/components/ui/EmptyState";
+import { inputClassSm } from "@/lib/ui";
 import { teamScores, matchVerification } from "@/lib/matchScore";
 
 function TeamSide({ team, align = "left" }) {
@@ -41,11 +42,28 @@ function formatDate(d) {
 function MatchCard({ match }) {
   const score = teamScores(match);
   const verify = matchVerification(match);
+  const isPlayoff = match.stage === "Playoffs";
   return (
     <Link
       href={`/match/${match._id}`}
       className="block bg-white rounded-2xl shadow-sm border border-gray-100 p-4 hover:shadow-md hover:border-brand-200 transition-all"
     >
+      {(match.leagueId?.name || isPlayoff) && (
+        <div className="mb-2 flex items-center justify-center gap-2">
+          {match.leagueId?.name && (
+            <span className="text-[11px] font-medium text-gray-400">
+              {match.leagueId.name}
+              {match.leagueId.season ? ` · ${match.leagueId.season}` : ""}
+            </span>
+          )}
+          {isPlayoff && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 text-[10px] font-semibold px-2 py-0.5">
+              <FaTrophy className="text-[9px]" /> Playoffs
+              {match.playoffRound ? ` · ${match.playoffRound}` : ""}
+            </span>
+          )}
+        </div>
+      )}
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
         <TeamSide team={match.teamA} />
         <div className="text-center">
@@ -86,7 +104,12 @@ export default function SpielePage() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [tab, setTab] = useState("upcoming"); // "upcoming" | "results"
+  const [tab, setTab] = useState("upcoming"); // upcoming | results | all
+  const [stage, setStage] = useState("all"); // all | Hauptrunde | Playoffs
+  const [league, setLeague] = useState(""); // leagueId
+  const [season, setSeason] = useState("");
+  const [ort, setOrt] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -105,13 +128,52 @@ export default function SpielePage() {
     };
   }, []);
 
-  const { upcoming, results } = useMemo(() => {
-    const up = matches
-      .filter((m) => m.status === "scheduled")
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
-    const res = matches.filter((m) => m.status === "completed");
-    return { upcoming: up, results: res };
+  // Filter-Optionen aus den geladenen Spielen ableiten.
+  const { leagueOptions, seasonOptions } = useMemo(() => {
+    const lg = new Map();
+    const se = new Set();
+    for (const m of matches) {
+      if (m.leagueId?._id) {
+        lg.set(String(m.leagueId._id), {
+          id: String(m.leagueId._id),
+          label: `${m.leagueId.name}${m.leagueId.season ? ` · ${m.leagueId.season}` : ""}`,
+        });
+      }
+      if (m.leagueId?.season) se.add(m.leagueId.season);
+    }
+    return {
+      leagueOptions: [...lg.values()].sort((a, b) => a.label.localeCompare(b.label)),
+      seasonOptions: [...se].sort().reverse(),
+    };
   }, [matches]);
+
+  const filtered = useMemo(() => {
+    const list = matches.filter((m) => {
+      if (tab === "upcoming" && m.status !== "scheduled") return false;
+      if (tab === "results" && m.status !== "completed") return false;
+      if (stage !== "all" && (m.stage || "Hauptrunde") !== stage) return false;
+      if (league && String(m.leagueId?._id || "") !== league) return false;
+      if (season && (m.leagueId?.season || "") !== season) return false;
+      if (ort && !(m.location || "").toLowerCase().includes(ort.toLowerCase())) return false;
+      if (dateFrom && new Date(m.date) < new Date(dateFrom)) return false;
+      return true;
+    });
+    // Anstehend aufsteigend, sonst neueste zuerst.
+    return list.sort((a, b) =>
+      tab === "upcoming"
+        ? new Date(a.date) - new Date(b.date)
+        : new Date(b.date) - new Date(a.date)
+    );
+  }, [matches, tab, stage, league, season, ort, dateFrom]);
+
+  const counts = useMemo(
+    () => ({
+      upcoming: matches.filter((m) => m.status === "scheduled").length,
+      results: matches.filter((m) => m.status === "completed").length,
+      all: matches.length,
+    }),
+    [matches]
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -133,31 +195,75 @@ export default function SpielePage() {
         ) : (
           <div>
             <Tabs
-              className="mb-6 max-w-sm"
+              className="mb-4 max-w-md"
               fluid
               value={tab}
               onChange={setTab}
               tabs={[
-                { key: "upcoming", label: "Anstehend", count: upcoming.length },
-                { key: "results", label: "Ergebnisse", count: results.length },
+                { key: "upcoming", label: "Anstehend", count: counts.upcoming },
+                { key: "results", label: "Ergebnisse", count: counts.results },
+                { key: "all", label: "Alle", count: counts.all },
               ]}
             />
 
-            {tab === "upcoming" ? (
-              upcoming.length === 0 ? (
-                <EmptyState title="Keine anstehenden Spiele." />
-              ) : (
-                <div className="space-y-3">
-                  {upcoming.map((m) => (
-                    <MatchCard key={m._id} match={m} />
-                  ))}
-                </div>
-              )
-            ) : results.length === 0 ? (
-              <EmptyState title="Noch keine Ergebnisse." />
+            {/* Filterleiste */}
+            <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <select value={stage} onChange={(e) => setStage(e.target.value)} className={inputClassSm}>
+                <option value="all">Alle Abschnitte</option>
+                <option value="Hauptrunde">Hauptrunde</option>
+                <option value="Playoffs">Playoffs</option>
+              </select>
+              <select value={league} onChange={(e) => setLeague(e.target.value)} className={inputClassSm}>
+                <option value="">Alle Ligen</option>
+                {leagueOptions.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.label}
+                  </option>
+                ))}
+              </select>
+              <select value={season} onChange={(e) => setSeason(e.target.value)} className={inputClassSm}>
+                <option value="">Alle Saisons</option>
+                {seasonOptions.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+              <input
+                value={ort}
+                onChange={(e) => setOrt(e.target.value)}
+                placeholder="Ort suchen…"
+                className={inputClassSm}
+              />
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className={inputClassSm}
+                title="Spiele ab diesem Datum"
+              />
+              {(stage !== "all" || league || season || ort || dateFrom) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStage("all");
+                    setLeague("");
+                    setSeason("");
+                    setOrt("");
+                    setDateFrom("");
+                  }}
+                  className="rounded-lg border border-gray-200 text-sm text-gray-500 hover:text-brand-600 hover:border-brand-300"
+                >
+                  Filter zurücksetzen
+                </button>
+              )}
+            </div>
+
+            {filtered.length === 0 ? (
+              <EmptyState title="Keine Spiele für diese Filter." />
             ) : (
               <div className="space-y-3">
-                {results.map((m) => (
+                {filtered.map((m) => (
                   <MatchCard key={m._id} match={m} />
                 ))}
               </div>

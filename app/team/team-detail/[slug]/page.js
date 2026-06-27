@@ -49,6 +49,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
   const [state, setState] = useState("loading"); // loading | ready | notfound
   const [loggedIn, setLoggedIn] = useState(false);
   const [tab, setTab] = useState("kader");
+  const [scheduleFilter, setScheduleFilter] = useState("upcoming"); // upcoming | past | all | playoffs
 
   const [joining, setJoining] = useState(false);
   const [joinMsg, setJoinMsg] = useState(null);
@@ -313,53 +314,88 @@ export default function TeamTeamDetailSlugPage({ params }) {
         )}
 
         {/* Spielplan */}
-        {tab === "spielplan" && (
-          <div className="space-y-3">
-            {matches.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center text-sm text-gray-500">
-                Noch keine Spiele angesetzt.
-              </div>
-            ) : (
-              matches.map((m) => {
-                const isHome = String(m.teamA?._id) === String(team._id);
-                const opponent = isHome ? m.teamB : m.teamA;
-                const score = teamScores(m);
-                const own = score ? (isHome ? score.a : score.b) : null;
-                const opp = score ? (isHome ? score.b : score.a) : null;
-                const won = score && own > opp;
-                return (
-                  <div
-                    key={m._id}
-                    className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center justify-between gap-4"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {isHome ? "vs." : "@"} {opponent?.teamName || "Unbekannt"}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {formatDate(m.date)}
-                        {m.location ? ` · ${m.location}` : ""}
-                      </p>
-                    </div>
-                    {score ? (
-                      <span
-                        className={`text-lg font-bold flex-shrink-0 ${
-                          won ? "text-green-600" : "text-gray-900"
-                        }`}
-                      >
-                        {own} : {opp}
-                      </span>
-                    ) : (
-                      <span className="text-xs font-medium text-amber-600 bg-amber-50 rounded-full px-3 py-1 flex-shrink-0">
-                        Anstehend
-                      </span>
-                    )}
-                  </div>
-                );
+        {tab === "spielplan" &&
+          (() => {
+            const list = matches
+              .filter((m) => {
+                if (scheduleFilter === "upcoming") return m.status === "scheduled";
+                if (scheduleFilter === "past") return m.status === "completed";
+                if (scheduleFilter === "playoffs") return m.stage === "Playoffs";
+                return true;
               })
-            )}
-          </div>
-        )}
+              .sort((a, b) =>
+                scheduleFilter === "upcoming"
+                  ? new Date(a.date) - new Date(b.date)
+                  : new Date(b.date) - new Date(a.date)
+              );
+            return (
+              <div className="space-y-3">
+                <Tabs
+                  className="max-w-md"
+                  fluid
+                  value={scheduleFilter}
+                  onChange={setScheduleFilter}
+                  tabs={[
+                    { key: "upcoming", label: "Anstehend" },
+                    { key: "past", label: "Vergangen" },
+                    { key: "all", label: "Alle" },
+                    { key: "playoffs", label: "Playoffs" },
+                  ]}
+                />
+                {list.length === 0 ? (
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center text-sm text-gray-500">
+                    Keine Spiele in dieser Ansicht.
+                  </div>
+                ) : (
+                  list.map((m) => {
+                    const isHome = String(m.teamA?._id) === String(team._id);
+                    const opponent = isHome ? m.teamB : m.teamA;
+                    const score = teamScores(m);
+                    const own = score ? (isHome ? score.a : score.b) : null;
+                    const opp = score ? (isHome ? score.b : score.a) : null;
+                    const won = score && own > opp;
+                    const isPlayoff = m.stage === "Playoffs";
+                    return (
+                      <div
+                        key={m._id}
+                        className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center justify-between gap-4"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {isHome ? "vs." : "@"} {opponent?.teamName || "Unbekannt"}
+                            {isPlayoff && (
+                              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 text-[10px] font-semibold px-2 py-0.5 align-middle">
+                                <FaTrophy className="text-[9px]" />
+                                {m.playoffRound || "Playoffs"}
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {formatDate(m.date)}
+                            {m.location ? ` · ${m.location}` : ""}
+                            {m.leagueId?.name ? ` · ${m.leagueId.name}` : ""}
+                          </p>
+                        </div>
+                        {score ? (
+                          <span
+                            className={`text-lg font-bold flex-shrink-0 ${
+                              won ? "text-green-600" : "text-gray-900"
+                            }`}
+                          >
+                            {own} : {opp}
+                          </span>
+                        ) : (
+                          <span className="text-xs font-medium text-amber-600 bg-amber-50 rounded-full px-3 py-1 flex-shrink-0">
+                            Anstehend
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            );
+          })()}
 
         {/* News */}
         {tab === "news" && (

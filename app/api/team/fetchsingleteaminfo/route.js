@@ -70,12 +70,13 @@ async function handler(req) {
     status: { $ne: "cancelled" },
   })
     .select(
-      "teamA teamB date location status winningTeam winningTeamPoints losingTeamPoints"
+      "teamA teamB date location status winningTeam winningTeamPoints losingTeamPoints stage playoffRound leagueId"
     )
     .populate("teamA", "teamName slug logo")
     .populate("teamB", "teamName slug logo")
+    .populate("leagueId", "name season")
     .sort({ date: -1 })
-    .limit(30);
+    .limit(50);
 
   // Team-News: aktuelle Beiträge der Mitglieder
   const posts = memberIds.length

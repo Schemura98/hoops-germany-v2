@@ -10,10 +10,11 @@ async function handler() {
   await connectDB();
   const matches = await Match.find({ status: { $ne: "cancelled" } })
     .select(
-      "teamA teamB date location status winningTeam winningTeamPoints losingTeamPoints resultStatus teamAResult teamBResult"
+      "teamA teamB date location status winningTeam winningTeamPoints losingTeamPoints resultStatus teamAResult teamBResult leagueId stage playoffRound"
     )
     .populate("teamA", "teamName slug logo")
     .populate("teamB", "teamName slug logo")
+    .populate("leagueId", "name season")
     .sort({ date: -1 });
 
   return ok({ matches });
