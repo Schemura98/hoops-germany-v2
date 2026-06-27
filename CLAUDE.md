@@ -693,8 +693,8 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > | 4 | Teamkollegen/eigenes Team in „Folge ich" + Auto-Follow | ✅ live (`a0c6321`) |
 > | 2 | Auto-Posts (Ergebnis/Transfer/Tryout) | ✅ live (`b7445b2`) |
 > | 7 | Transfermarkt→Feed (suchende Spieler/Vereine, als Auto-Posts) | ✅ live (`c9bb958`) |
-> | **5** | **„Für dich"-Ranking** (Hot-Score + Region/Liga-Boost statt roh-chronologisch) | 🔜 **als Nächstes** |
-> | 6 | Team-Posts (Vereine als Autoren: Probetraining/Heimspiel/News) | 🔜 offen |
+> | 5 | „Für dich"-Ranking (Hot-Score + Region/Liga/Team-Boosts statt roh-chronologisch) | ✅ live (`8755c08`) |
+> | **6** | **Team-Posts** (Vereine als Autoren: Probetraining/Heimspiel/News) | 🔜 **als Nächstes** |
 > | 8 | Folge-Vorschläge im Feed (Region/Liga) für neue User | 🔜 offen |
 > | 9 | Hashtags + @Mentions (klickbar + Mention-Notif) | 🔜 offen |
 > | 10 | YouTube-/Link-Embeds (Highlight-Clips) | 🔜 offen |
@@ -711,13 +711,26 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > **Live deployt** (27.06.2026; Prod-Build grün, Smoke Homepage/Feed-API/Transfermarkt 200; keine neue Infra/Migration).
 > **Regionale Dosierung** bewusst auf #5 (Ranking) verschoben – vorerst Reichweite > Filter, Region/Liga steht im Text.
 >
-> **➡️ NÄCHSTE SESSION HIER STARTEN – #5 „Für dich"-Ranking** (ersetzt die roh-chronologische „Entdecken"-Liste):
-> Eigene Aggregation/JS-Sort über ~200 frische Kandidaten (letzte ~14 Tage), `score = (1 + likes + 2·kommentare +
-> medienBonus) / (stundenSeitPost + 2)^1.5` × Boosts: eigenes Team ×2 / gefolgt ×1.8 / gleiche Liga ×1.5 /
-> Bundesland ×1.3. Bausteine vorhanden: `bundesland`/`leagueId` an Player/Team, `lib/geo.js`. Umsetzung am besten
-> in `/api/posts/feed` (Kontext = eingeloggter Spieler via Token; aktuell ist die Route auth-frter → Token
-> optional annehmen). „Entdecken"-Tab ggf. in „Für dich" umbenennen. **Danach:** #6 Team-Posts (`Post.authorTeam`
-> + Team-Composer, Dual-Auth), #8 Folge-Vorschläge, #9 Hashtags/@Mentions, #10 YouTube/Link-Embeds.
+> **#5 „Für dich"-Ranking ✅ erledigt** (`8755c08`, live 27.06.2026): `lib/feedRanking.js`
+> (`computeScore`/`rankPosts`, deterministisch, im Speicher) – `score = (1 + likes + 2·kommentare +
+> Medien-/Auto-Bonus) / (alterStunden + 2)^1.5` × Boosts: eigenes Team ×2 · gefolgt ×1.8 · gleiche Liga ×1.5 ·
+> gleiches Bundesland ×1.3. `/api/posts/feed` nimmt jetzt **optionalen Token** (Personalisierung; funktioniert
+> auch ausgeloggt), rankt ein Kandidatenfenster der **500 neuesten** Beiträge, lädt Team→Liga/Bundesland einmalig,
+> **Offset-Paginierung** (Ranking ist nicht chronologisch). Newsfeed-Tab „Entdecken" → **„Für dich"**; discover
+> paginiert per `offset`, „Folge ich" bleibt chronologisch (`before`). **Verifiziert (Dev/Preview):** Ranking nach
+> Engagement; eigenes Team steigt messbar ggü. ausgeloggt (`orderDiffers`); Offset-Seiten ohne Überlappung;
+> ausgeloggt ok; keine Konsolenfehler. ⚠️ Beiträge älter als die 500 neuesten erscheinen nicht in „Für dich"
+> (für Amateur-Scale unkritisch). Auto-Posts bekommen einen kleinen Sockel, damit sie frisch nicht versinken.
+>
+> **➡️ NÄCHSTE SESSION HIER STARTEN – #6 Team-Posts** (Vereine als Autoren):
+> `models/Post.js` um `authorTeam` (ObjectId→teams) erweitern; neuer Endpoint `POST /api/posts/team-post`
+> (Dual-Auth via `getTeamFromToken` – nur Team-Admins posten im Vereinsnamen). `PostComposer` braucht einen
+> Team-Modus (Umschalter „als Spieler / als <Team>", nur für Team-Admins sichtbar – `player.isTeamAdmin`).
+> `PostCard`-Kopf: bei `authorTeam` Team-Avatar (`<Avatar name=teamName src=logo>`) + Link `/team/team-detail/slug`
+> statt Spieler. Feed-Sichtbarkeit: `getfollowingposts`-`$or` um `{ authorTeam: { $in: feedTeamIds } }` ergänzen;
+> Ranking (`feedRanking`) Team-Posts wie Auto-Posts behandeln (relTeamIds um `authorTeam`). Eignet sich für die
+> in der Analyse genannten Use-Cases (Probetraining/Heimspiel/Turnier/Jugendtraining/Vereinsnews).
+> **Danach:** #8 Folge-Vorschläge, #9 Hashtags/@Mentions, #10 YouTube/Link-Embeds.
 >
 > ⚠️ **Dev-DB-Aufräumen vor dem Weitermachen:** In `hoopsgermany` (Dev) liegen Test-Artefakte aus der
 > Verifikation (3 Auto-Posts, Sven Adler in „Test Baskets", Demo-Spielstand „Düsseldorf 90:70 Dortmund",
