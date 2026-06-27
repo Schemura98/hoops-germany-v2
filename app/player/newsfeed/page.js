@@ -12,6 +12,7 @@ import PostCard from "@/components/posts/PostCard";
 import TeamMatchesWidget from "@/components/feed/TeamMatchesWidget";
 import TopTeamsWidget from "@/components/feed/TopTeamsWidget";
 import TransferFeedWidget from "@/components/feed/TransferFeedWidget";
+import FollowSuggestions from "@/components/feed/FollowSuggestions";
 import CollapsibleWidget from "@/components/feed/CollapsibleWidget";
 import NewsWidget from "@/components/NewsWidget";
 import OnboardingChecklist from "@/components/onboarding/OnboardingChecklist";
@@ -191,6 +192,7 @@ export default function PlayerNewsfeedPage() {
                 {/* Mitte: Composer + Feed */}
                 <main className="space-y-6 min-w-0">
                   {composer}
+                  <FollowSuggestions />
                   {feed}
                 </main>
 
@@ -208,6 +210,7 @@ export default function PlayerNewsfeedPage() {
           return (
             <div className="space-y-6">
               {composer}
+              <FollowSuggestions />
               <div className="space-y-3">
                 <CollapsibleWidget
                   icon={<FaBasketballBall className="text-brand-500" />}
