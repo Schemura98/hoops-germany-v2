@@ -10,6 +10,16 @@ export const metadata = {
   description:
     "Hoops Germany ist die Community-Plattform für Amateur-Basketball in Deutschland. Spieler, Teams, Ligen, Spiele, Tryouts und Transfers an einem Ort.",
   metadataBase: new URL("https://hoopsgermany.de"),
+  applicationName: "Hoops Germany",
+  appleWebApp: {
+    capable: true,
+    title: "Hoops Germany",
+    statusBarStyle: "black-translucent",
+  },
+};
+
+export const viewport = {
+  themeColor: "#0f172a",
 };
 
 export default function RootLayout({ children }) {

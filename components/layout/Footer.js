@@ -2,6 +2,7 @@ import Link from "next/link";
 import TourLink from "@/components/onboarding/TourLink";
 
 const legal = [
+  { href: "/installieren", label: "App installieren" },
   { href: "/about", label: "Über uns" },
   { href: "/kontakt", label: "Kontakt" },
   { href: "/impressum", label: "Impressum" },
