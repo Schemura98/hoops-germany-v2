@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaImage, FaTimes } from "react-icons/fa";
 import { getPlayerToken } from "@/lib/clientAuth";
 import ImageUpload from "@/components/ImageUpload";
 import Avatar from "./Avatar";
+import BaseAvatar from "@/components/Avatar";
 
-// Eingabe-Karte für neue Beiträge.
+// Eingabe-Karte für neue Beiträge. Team-Admins können zusätzlich „als Verein" posten.
 export default function PostComposer({ player, onCreated }) {
   const [content, setContent] = useState("");
   const [image, setImage] = useState("");
@@ -16,8 +17,28 @@ export default function PostComposer({ player, onCreated }) {
   const [error, setError] = useState("");
   // Erzwingt ein Remount des Uploaders (setzt dessen interne Vorschau zurück).
   const [uploadKey, setUploadKey] = useState(0);
+  // Vereins-Modus: geladenes Team (nur bei Team-Admins) + aktive Autorenwahl.
+  const [team, setTeam] = useState(null);
+  const [asTeam, setAsTeam] = useState(false);
 
   const token = getPlayerToken();
+
+  // Verwaltetes Team laden (für den „als Verein"-Umschalter).
+  useEffect(() => {
+    if (!player?.isTeamAdmin) return;
+    let active = true;
+    (async () => {
+      try {
+        const { data } = await axios.post("/api/team/fetchinfo", { token });
+        if (active && data?.team) setTeam(data.team);
+      } catch {
+        /* kein Team-Modus */
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [player?.isTeamAdmin, token]);
 
   function clearImage() {
     setImage("");
@@ -29,11 +50,8 @@ export default function PostComposer({ player, onCreated }) {
     setPosting(true);
     setError("");
     try {
-      const { data } = await axios.post("/api/posts/uploadpost", {
-        token,
-        content,
-        image,
-      });
+      const endpoint = asTeam ? "/api/posts/team-post" : "/api/posts/uploadpost";
+      const { data } = await axios.post(endpoint, { token, content, image });
       setContent("");
       setImage("");
       setShowImage(false);
@@ -49,12 +67,42 @@ export default function PostComposer({ player, onCreated }) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
       <div className="flex gap-3">
-        <Avatar player={player} />
+        {asTeam && team ? (
+          <BaseAvatar name={team.teamName} src={team.logo} square />
+        ) : (
+          <Avatar player={player} />
+        )}
         <div className="flex-1">
+          {/* Autorenwahl (nur Team-Admins) */}
+          {team && (
+            <div className="mb-2 inline-flex rounded-lg bg-gray-100 p-0.5 text-sm">
+              <button
+                type="button"
+                onClick={() => setAsTeam(false)}
+                className={`px-3 py-1 rounded-md font-medium transition-colors ${
+                  !asTeam ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
+                }`}
+              >
+                Als Spieler
+              </button>
+              <button
+                type="button"
+                onClick={() => setAsTeam(true)}
+                className={`px-3 py-1 rounded-md font-medium transition-colors ${
+                  asTeam ? "bg-white text-brand-600 shadow-sm" : "text-gray-500"
+                }`}
+              >
+                Als {team.teamName}
+              </button>
+            </div>
+          )}
+
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Was gibt's Neues?"
+            placeholder={
+              asTeam ? "Neuigkeit vom Verein teilen…" : "Was gibt's Neues?"
+            }
             rows={2}
             className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
           />

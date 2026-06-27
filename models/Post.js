@@ -36,6 +36,10 @@ const postSchema = new mongoose.Schema(
     // Feed-Filter ("Folge ich"). eventKey macht Auto-Posts idempotent.
     kind: { type: String, enum: ["user", "auto"], default: "user" },
     autoType: String, // match_result | transfer | team_founded | tryout
+    // Vereins-Beitrag: Team als Autor (kind bleibt "user"). Render-Header zeigt dann
+    // den Verein statt eines Spielers. teams[] wird ebenfalls gesetzt → bestehende
+    // Feed-/Ranking-Logik (Folge-ich-$or, Boosts) greift ohne Zusatzcode.
+    authorTeam: { type: mongoose.Schema.Types.ObjectId, ref: "teams" },
     teams: [{ type: mongoose.Schema.Types.ObjectId, ref: "teams" }],
     subjectPlayer: { type: mongoose.Schema.Types.ObjectId, ref: "players" },
     eventKey: { type: String, index: true, sparse: true },

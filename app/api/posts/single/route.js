@@ -14,6 +14,7 @@ async function handler(req) {
   await connectDB();
   const post = await Post.findById(postId)
     .populate("player", "firstName lastName slug profileImage")
+    .populate("authorTeam", "teamName slug logo")
     .populate("comments.player", "firstName lastName slug profileImage")
     .populate("comments.replies.player", "firstName lastName slug profileImage");
 

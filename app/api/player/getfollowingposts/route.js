@@ -59,6 +59,7 @@ async function handler(req) {
     .sort({ createdAt: -1 })
     .limit(limit + 1)
     .populate("player", "firstName lastName slug profileImage")
+    .populate("authorTeam", "teamName slug logo")
     .populate("comments.player", "firstName lastName slug profileImage")
     .populate("comments.replies.player", "firstName lastName slug profileImage");
 

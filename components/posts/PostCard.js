@@ -17,6 +17,7 @@ import {
 import { getPlayerToken } from "@/lib/clientAuth";
 import { timeAgo } from "@/lib/timeAgo";
 import Avatar from "./Avatar";
+import BaseAvatar from "@/components/Avatar";
 
 // Darstellung der automatischen Ereignis-Beiträge (Icon + Badge je Typ).
 const AUTO = {
@@ -292,6 +293,11 @@ export default function PostCard({ post, currentPlayerId }) {
   const author = post.player;
   const isAuto = post.kind === "auto";
   const auto = isAuto ? AUTO[post.autoType] || AUTO_FALLBACK : null;
+  // Vereins-Beitrag (Team als Autor) – nur wenn es kein Auto-Post ist.
+  const teamAuthor = !isAuto && post.authorTeam ? post.authorTeam : null;
+  const teamLink = teamAuthor?.slug
+    ? `/team/team-detail/${teamAuthor.slug}`
+    : "#";
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
@@ -334,20 +340,44 @@ export default function PostCard({ post, currentPlayerId }) {
       ) : (
         <>
           {/* Kopf */}
-          <div className="flex items-center gap-3">
-            <Link href={authorLink(author)}>
-              <Avatar player={author} />
-            </Link>
-            <div>
-              <Link
-                href={authorLink(author)}
-                className="font-medium text-gray-900 hover:text-brand-600"
-              >
-                {author?.firstName} {author?.lastName}
+          {teamAuthor ? (
+            <div className="flex items-center gap-3">
+              <Link href={teamLink}>
+                <BaseAvatar
+                  name={teamAuthor.teamName}
+                  src={teamAuthor.logo}
+                  square
+                />
               </Link>
-              <p className="text-xs text-gray-400">{timeAgo(post.createdAt)}</p>
+              <div>
+                <Link
+                  href={teamLink}
+                  className="font-medium text-gray-900 hover:text-brand-600"
+                >
+                  {teamAuthor.teamName}
+                </Link>
+                <p className="text-xs text-gray-400">
+                  <span className="text-brand-600 font-medium">Verein</span> ·{" "}
+                  {timeAgo(post.createdAt)}
+                </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Link href={authorLink(author)}>
+                <Avatar player={author} />
+              </Link>
+              <div>
+                <Link
+                  href={authorLink(author)}
+                  className="font-medium text-gray-900 hover:text-brand-600"
+                >
+                  {author?.firstName} {author?.lastName}
+                </Link>
+                <p className="text-xs text-gray-400">{timeAgo(post.createdAt)}</p>
+              </div>
+            </div>
+          )}
 
           {/* Inhalt */}
           {post.content && (

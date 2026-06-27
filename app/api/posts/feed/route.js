@@ -35,6 +35,7 @@ async function handler(req) {
     .sort({ createdAt: -1 })
     .limit(CANDIDATE_CAP)
     .populate("player", "firstName lastName slug profileImage teamId bundesland")
+    .populate("authorTeam", "teamName slug logo")
     .populate("comments.player", "firstName lastName slug profileImage")
     .populate("comments.replies.player", "firstName lastName slug profileImage");
 
