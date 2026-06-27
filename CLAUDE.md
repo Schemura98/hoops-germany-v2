@@ -781,6 +781,24 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > zurück (Standard-Start jeder Newsfeed-Session). **Prod (`hoops_prod`) ist unberührt** (nur Code deployt,
 > keine Test-Trigger gegen Prod gefahren).
 
+#### 📱 PWA – Seite als App aufs Handy installierbar (27.06.2026, `de86a7c`, live)
+> Nutzerwunsch: „App, die mit der Website synchron ist, oder ein Shortcut/Anleitung zum Pinnen auf den
+> Home-Bildschirm." Gelöst als **PWA** (die App **IST** die Website → immer automatisch synchron, kein Store):
+> - **`app/manifest.js`** (→ `/manifest.webmanifest`): `display:standalone`, Navy-Theme (`#0f172a`),
+>   `start_url:/`, Icons `purpose:any` (`/icon.png`) + `maskable` (`/apple-icon.png`, 512px – wiederverwendet
+>   die bestehenden Logo-Assets aus `3100f7e`, keine extra 192/512-Dateien nötig).
+> - **`app/layout.js`**: `appleWebApp` ({capable, title, statusBarStyle:black-translucent}) +
+>   `export const viewport = { themeColor:"#0f172a" }` → Next generiert manifest-/theme-color-/apple-Tags.
+> - **`app/installieren/page.js`** (`/installieren`): Anleitungsseite mit **Plattform-Erkennung** –
+>   Android/Chrome zeigt bei `beforeinstallprompt` einen **„App installieren"-Button** (sonst Menü-Anleitung),
+>   iOS/Safari die **„Teilen → Zum Home-Bildschirm"-Schritte**; erkennt bereits installierten Standalone-Modus.
+>   Navy-`PageHeader` + 3 Vorteils-Cards (Vollbild/Immer aktuell/Schneller Start) + Navbar/Footer.
+> - **Footer**: Link „App installieren" (erste Position) → erreichbar von überall.
+> - **Verifiziert:** Build grün; Dev-Preview (Manifest 200 + alle Head-Tags + Seite gerendert); **live**
+>   (`/manifest.webmanifest`, `/installieren`, `/icon.png`, `/apple-icon.png` je 200; Head-Tags auf `/` da).
+>   ⚠️ Lehre: `npm run build` NICHT laufen lassen, während `next dev` läuft (überschreibt dessen `.next`-CSS
+>   → Dev-Server liefert dann ungestylte Seiten/CSS-404; Dev-Server danach neu starten).
+
 #### 🏗️ Liga-/Saison-/Playoff-/Admin-Audit umgesetzt (27.06.2026) – 5 Stufen, alle live
 > Auf Basis eines vollständigen Architektur-Audits (Liga/Saison-Trennung, Team-Saison-Teilnahme,
 > Spielerhistorie, Playoffs, Spiele-Filter, Admin-Rechte). Alle Stufen lokal verifiziert + deployt.
