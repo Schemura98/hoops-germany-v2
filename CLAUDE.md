@@ -644,8 +644,10 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 
 #### 🗞️ Newsfeed-Weiterentwicklung – Quick-Win-Paket (27.06.2026)
 > Auf Basis einer tiefen Ist-Analyse des Feeds (roh-chronologisch, keine Personalisierung, keine Auto-Posts,
-> keine Like-/Kommentar-Notifs). Umgesetzt + lokal verifiziert (Build grün, Preview-Flows getestet), **noch
-> NICHT deployt** (Prod-Infra für Bild-Uploads nötig, s. u.):
+> keine Like-/Kommentar-Notifs). Umgesetzt, lokal verifiziert (Build grün, Preview-Flows) **und live deployt**
+> (`a0c6321`, 27.06.2026; Prod-Build grün, Smoke-Test grün). **Prod-Infra für Bild-Uploads eingerichtet:**
+> `/var/www/hoops-uploads/posts` (root:www-data) + Symlink `public/posts` + Nginx-Location um `posts` erweitert
+> (Backup `default.bak-pre-posts-*`) → posts-Bildauslieferung live mit HTTP 200 verifiziert.
 > - **#1 Engagement-Benachrichtigungen + Post-Permalink:** Neue Notif-Typen `post_like`/`post_comment`/
 >   `comment_reply` (`models/Player.js` Enum + Felder `postId`/`count`). Helper `lib/notifyEngagement.js`
 >   (kein Self-Notify; **Likes gebündelt** = eine Notif mit Zähler statt Flut; fehlertolerant). Verdrahtet in
