@@ -19,6 +19,7 @@ import { timeAgo } from "@/lib/timeAgo";
 import Avatar from "./Avatar";
 import BaseAvatar from "@/components/Avatar";
 import RichText from "./RichText";
+import PostEmbed from "./PostEmbed";
 
 // Darstellung der automatischen Ereignis-Beiträge (Icon + Badge je Typ).
 const AUTO = {
@@ -394,6 +395,7 @@ export default function PostCard({ post, currentPlayerId }) {
               className="mt-3 rounded-xl max-h-96 w-full object-cover"
             />
           )}
+          <PostEmbed embed={post.embed} />
         </>
       )}
 

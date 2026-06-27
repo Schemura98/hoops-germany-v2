@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Post from "@/models/Post";
 import { getPlayerFromToken } from "@/lib/serverAuth";
 import { extractHashtags, resolveMentions } from "@/lib/postParse";
+import { detectEmbed } from "@/lib/linkEmbed";
 import { notifyMentions } from "@/lib/notifyEngagement";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
@@ -25,12 +26,14 @@ async function handler(req) {
   await connectDB();
   const hashtags = extractHashtags(content);
   const mentions = await resolveMentions(content);
+  const embed = detectEmbed(content);
   const post = await Post.create({
     player: player._id,
     content,
     image,
     hashtags,
     mentions,
+    embed,
     likes: [],
     comments: [],
   });

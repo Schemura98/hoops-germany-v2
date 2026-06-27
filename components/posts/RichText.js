@@ -1,8 +1,9 @@
 import Link from "next/link";
 
-// Rendert Beitragstext mit klickbaren #Hashtags und @Mentions.
+// Rendert Beitragstext mit klickbaren URLs, #Hashtags und @Mentions.
 // mentions: [{ token, slug }] – nur aufgelöste @-Tokens werden verlinkt.
-const TOKEN_RE = /([#@][A-Za-z0-9_äöüÄÖÜß]+)/g;
+// URL-Alternative steht zuerst, damit URLs nicht an #/@ zerschnitten werden.
+const TOKEN_RE = /(https?:\/\/[^\s<]+|[#@][A-Za-z0-9_äöüÄÖÜß]+)/g;
 
 export default function RichText({ text, mentions = [] }) {
   if (!text) return null;
@@ -17,6 +18,19 @@ export default function RichText({ text, mentions = [] }) {
   return (
     <>
       {parts.map((part, i) => {
+        if (/^https?:\/\//i.test(part)) {
+          return (
+            <a
+              key={i}
+              href={part}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand-600 hover:underline break-all"
+            >
+              {part}
+            </a>
+          );
+        }
         if (part.length > 1 && part[0] === "#") {
           const tag = part.slice(1).toLowerCase();
           return (

@@ -54,6 +54,9 @@ const postSchema = new mongoose.Schema(
     subjectPlayer: { type: mongoose.Schema.Types.ObjectId, ref: "players" },
     eventKey: { type: String, index: true, sparse: true },
     meta: { type: mongoose.Schema.Types.Mixed },
+    // Erste erkannte URL als Embed (denormalisiert beim Erstellen → kein Fetch im Render):
+    // { type:"youtube", videoId, url } | { type:"link", url, domain }
+    embed: { type: mongoose.Schema.Types.Mixed },
   },
   { timestamps: true }
 );
