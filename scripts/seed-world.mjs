@@ -460,6 +460,31 @@ posts.push({ _id:oid(), seedTag:TAG, player:null, kind:"auto", autoType:"tryout"
   content:`${eagles.teamName} sucht Verstärkung – Tryout (offenes Probetraining) in Essen.`, teams:[eagles._id],
   meta:{href:`/tryouts/${tryouts[0]._id}`}, likes:[], comments:[], createdAt:daysAgo(7), updatedAt:now });
 
+// Selbst-enthaltene Test-Bilder: on-brand SVG-Poster als Data-URI (kein externer Dienst,
+// rendern überall zuverlässig im <img> der PostCard).
+const POSTERS = [
+  { sub:"Heimspiel", head:"Samstag 19 Uhr", accent:"#f97316" },
+  { sub:"Sieg!", head:"Hart erkaempft", accent:"#22c55e" },
+  { sub:"Training", head:"Dienstag & Donnerstag", accent:"#38bdf8" },
+  { sub:"Probetraining", head:"Komm vorbei", accent:"#f97316" },
+  { sub:"Aufstieg", head:"Wir feiern", accent:"#eab308" },
+  { sub:"Throwback", head:"Saison-Highlights", accent:"#a78bfa" },
+];
+function posterImage(p){
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">`+
+    `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f172a"/><stop offset="1" stop-color="#1e293b"/></linearGradient></defs>`+
+    `<rect width="800" height="450" fill="url(#g)"/>`+
+    `<circle cx="680" cy="110" r="170" fill="${p.accent}" opacity="0.14"/>`+
+    `<circle cx="120" cy="350" r="72" fill="#f97316"/>`+
+    `<path d="M48 350 H192 M120 278 V422 M66 296 Q120 350 66 404 M174 296 Q120 350 174 404" stroke="#0f172a" stroke-width="4" fill="none"/>`+
+    `<text x="60" y="180" fill="${p.accent}" font-family="Arial, sans-serif" font-size="28" font-weight="bold">${p.sub.toUpperCase()}</text>`+
+    `<text x="60" y="240" fill="#ffffff" font-family="Arial, sans-serif" font-size="50" font-weight="bold">${p.head}</text>`+
+    `<text x="740" y="420" fill="#64748b" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="end">HOOPS GERMANY</text>`+
+    `</svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
 // d) Nutzer-Posts (Spieler) – viele Stile/Themen
 const POST_TEMPLATES = [
   ()=>`Heimspiel am Wochenende – kommt vorbei und supportet uns! 🏀`,
@@ -487,8 +512,40 @@ const POST_TEMPLATES = [
 ];
 for (let i=0;i<150;i++){
   const author=pick(players.filter(p=>p.status==="active"));
-  posts.push({ _id:oid(), seedTag:TAG, player:author._id, content:pick(POST_TEMPLATES)(), image:null,
+  posts.push({ _id:oid(), seedTag:TAG, player:author._id, content:pick(POST_TEMPLATES)(),
+    image: chance(0.35) ? posterImage(pick(POSTERS)) : null,
     likes:[], comments:[], createdAt:dateBetween(0,360), updatedAt:now });
+}
+
+// d2) @Mention-Demonstration: echte Spieler erwähnen (klickbar + Mention-Benachrichtigung)
+const MENTION_TEMPLATES = [
+  (t)=>`Was für eine Leistung von @${t} heute! 🔥`,
+  (t)=>`Glückwunsch @${t} zum Double-Double 👏`,
+  (t)=>`Willkommen im Team, @${t}! 🙌`,
+  (t)=>`Großer Dank an @${t} für die Vorlagen.`,
+  (t)=>`@${t} dreht gerade richtig auf. Stark!`,
+  (t)=>`Schön, @${t} wieder fit auf dem Court zu sehen.`,
+];
+const mentionTargets = players.filter(p=>p.firstName && p.lastName && p.slug);
+const mentionToken = (p)=>`${p.firstName}${p.lastName}`.replace(/[^A-Za-z0-9äöüÄÖÜß]/g,"");
+function addMentionPost(author, target, tmpl){
+  const token = mentionToken(target);
+  const post = { _id:oid(), seedTag:TAG, player:author._id, content:tmpl(token), image:null,
+    mentions:[{ playerId:target._id, slug:target.slug, token }],
+    likes:[], comments:[], createdAt:dateBetween(0,60), updatedAt:now };
+  posts.push(post);
+  if (String(target._id)!==String(author._id))
+    target.notifications.push({ _id:oid(), type:"mention", fromPlayerId:author._id, postId:post._id,
+      message:`${playerName(author)} hat dich in einem Beitrag erwähnt`, read:false, createdAt:daysAgo(rnd(0,30)) });
+}
+// Prominentes Beispiel: jemand erwähnt Finn Brandt
+addMentionPost(pick(players.filter(a=>String(a._id)!==String(finn._id)&&a.status==="active")), finn,
+  (t)=>`Was für ein Wurf von @${t} in der Schlusssekunde! 🔥`);
+// 16 weitere
+for (let i=0;i<16;i++){
+  const target=pick(mentionTargets);
+  const author=pick(players.filter(a=>String(a._id)!==String(target._id)&&a.status==="active"));
+  if (author) addMentionPost(author, target, pick(MENTION_TEMPLATES));
 }
 // e) Vereins-News (Team-Posts)
 const NEWS=[
@@ -500,7 +557,7 @@ const NEWS=[
 ];
 for (const t of pickN(teams, 22)) {
   for (let k=0;k<rnd(1,3);k++) posts.push({ _id:oid(), seedTag:TAG, player:null, authorTeam:t._id, teams:[t._id], kind:"user",
-    content:pick(NEWS), image:null, likes:[], comments:[], createdAt:dateBetween(0,300), updatedAt:now });
+    content:pick(NEWS), image: chance(0.4) ? posterImage(pick(POSTERS)) : null, likes:[], comments:[], createdAt:dateBetween(0,300), updatedAt:now });
 }
 
 // f) Likes + Kommentare auf einen Teil der Posts
