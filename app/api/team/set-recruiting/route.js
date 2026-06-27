@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Team from "@/models/Team";
 import { getTeamFromToken } from "@/lib/serverAuth";
 import { ALL_ROLES } from "@/lib/constants";
+import { autoPostRecruiting } from "@/lib/autoPost";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/team/set-recruiting – Team als „sucht Verstärkung" listen/aktualisieren
@@ -24,9 +25,23 @@ async function handler(req) {
     : [];
   const note = typeof body.recruitingNote === "string" ? body.recruitingNote.trim() : "";
 
+  // Vorherigen Status lesen, um nur beim echten Einschalten einen Auto-Post zu erzeugen.
+  const prev = await Team.findById(team._id).select("recruiting teamName slug");
+
   await Team.findByIdAndUpdate(team._id, {
     $set: { recruiting, recruitingPositions: positions, recruitingNote: note },
   });
+
+  // Nur beim Übergang false → true → Auto-Post in den Feed (Tages-Throttle im Helper).
+  if (recruiting && !prev?.recruiting) {
+    await autoPostRecruiting({
+      teamId: team._id,
+      teamName: prev?.teamName || team.teamName,
+      teamSlug: prev?.slug || team.slug,
+      positions,
+      note,
+    });
+  }
 
   return ok({ recruiting, recruitingPositions: positions, recruitingNote: note });
 }

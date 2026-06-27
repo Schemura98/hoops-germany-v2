@@ -11,6 +11,8 @@ import {
   FaExchangeAlt,
   FaUsers,
   FaBullhorn,
+  FaSearch,
+  FaUserPlus,
 } from "react-icons/fa";
 import { getPlayerToken } from "@/lib/clientAuth";
 import { timeAgo } from "@/lib/timeAgo";
@@ -22,6 +24,8 @@ const AUTO = {
   transfer: { Icon: FaExchangeAlt, label: "Transfer", color: "bg-blue-100 text-blue-600" },
   team_founded: { Icon: FaUsers, label: "Neues Team", color: "bg-green-100 text-green-600" },
   tryout: { Icon: FaBullhorn, label: "Tryout", color: "bg-purple-100 text-purple-600" },
+  recruiting: { Icon: FaSearch, label: "Spieler gesucht", color: "bg-indigo-100 text-indigo-600" },
+  transfer_available: { Icon: FaUserPlus, label: "Auf Vereinssuche", color: "bg-teal-100 text-teal-600" },
 };
 const AUTO_FALLBACK = { Icon: FaBasketballBall, label: "Update", color: "bg-gray-100 text-gray-600" };
 
