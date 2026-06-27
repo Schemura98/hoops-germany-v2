@@ -344,7 +344,8 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > leer. **Upsert (Match name+season+gender+ageGroup), löscht nichts** + Selbstheilung pro Geschlecht/
 > Altersklasse (leere Alt-Einträge raus, Ligen mit Teams/Spielen geschützt) → sicher Dev **und** Prod;
 > `--dry` für Vorschau. **✅ Senioren (47) + Jugend männlich/offen (10) auf Dev + Prod geseedet + verifiziert**
-> (`942cc69`; 57 official, Idempotenz ok; Prod-Katalog gesamt 59 inkl. 2 Demo „Regionalliga Süd"/Bayern).
+> (`942cc69`; 57 official, Idempotenz ok; die 2 Demo „Regionalliga Süd"/Bayern wurden am 27.06.2026 entfernt
+> → Prod-Katalog jetzt 58, s. Roadmap-Punkt 6).
 > **Jugend m/o (10):** U18 männl. (Regio, Oberliga) · U16 männl. (Regio, Oberliga, Landesliga) · U14 offen
 > (Regio, Oberliga, Landesliga) · U12 offen (Oberliga, Landesliga) – gender Herren (männl.) bzw. Mixed
 > (offen), `ageGroup` U18/U16/U14/U12, Name mit Altersklassen-Präfix, transiente „…Qualifikation"-Pools
@@ -361,8 +362,18 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > 2. (optional) NRW-**Kreisligen** – von den 22 Basketballkreisen separat verwaltet, KEINE zentrale WBV-PDF →
 >    fragmentiert/aufwändig, eigene Quellen je Kreis. Niedrige Prio.
 > Im Liga-Picker (`/team/create`) live gegenprüfen.
-> **Weiter offen:** (6) Demo-Liga `Regionalliga Süd` (Bayern) durch echte NRW-Ligen ersetzen / entfernen;
-> (optional) Liga-Auswahl nachträglich im Team-Einstellungen-Tab änderbar machen.
+> **(6) ✅ erledigt (27.06.2026): Demo-Liga `Regionalliga Süd` (Bayern) aus dem Prod-Katalog entfernt.**
+> `scripts/purge-demo-bayern-leagues.mjs` (Dry-Run als Default, `--apply` zum Löschen, schreibt vorher ein
+> JSON-Backup in den Scratchpad; strenge Zielmenge `name=/Regionalliga Süd/i + bundesland=Bayern +
+> official≠true + kein seedTag` → schont alle offiziellen Ligen und `nrw-demo`). Auf Prod ausgeführt:
+> **2 Fake-Bayern-Ligen (2024/25 + 2025/26) + 11 zugehörige Spiele gelöscht** → Prod-Katalog **60 → 58**
+> (57 official + 1 `nrw-demo`-Showcase „Oberliga 1" 2024/25); `/ligen` enthält keine Bayern-Fremdkörper mehr.
+> **Teams blieben erhalten.** Das echte Test-Team **Viersen Hoops II** war nur über das Mismatch-Testspiel
+> (20:17) in der Südliga gelandet (`bundesland` war schon immer NRW) → steht nach dem Löschen korrekt als
+> **NRW-Team ohne Liga** da (`leagueId` leer). ⚠️ `seed-demo.mjs` (reine **Dev**-Fixture) erzeugt lokal
+> weiter eine „Regionalliga Süd"/Bayern – betrifft nur die Dev-DB, nie Prod (Prod wird nie mit seed-demo geseedet).
+> **Weiter offen:** (optional) Liga-Auswahl nachträglich im Team-Einstellungen-Tab änderbar machen
+> (Hinweis: `/api/team/set-league` + Picker existiert bereits, s. Roadmap-Punkt 7).
 >
 > **Framework-Stand (alles deployt, getestet):** Modell (`level/gender/ageGroup/region/official`,
 > `Team.leagueId`), Admin-Katalog (`/admin/leagues`), Liga-Picker bei Team-Gründung (`/team/create`),
