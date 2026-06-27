@@ -485,6 +485,26 @@ function posterImage(p){
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
+// Echte, frei hotlinkbare Basketball-Fotos (Unsplash/Pexels, Inhalt geprüft).
+const PHOTOS = [
+  "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=70&auto=format&fit=crop", // Ball im Korb
+  "https://images.unsplash.com/photo-1574623452334-1e0ac2b3ccb4?w=800&q=70&auto=format&fit=crop", // Bälle-Wand
+  "https://images.unsplash.com/photo-1608245449230-4ac19066d2d0?w=800&q=70&auto=format&fit=crop", // Dunk in der Halle
+  "https://images.unsplash.com/photo-1519861531473-9200262188bf?w=800&q=70&auto=format&fit=crop", // Streetball-Court
+  "https://images.unsplash.com/photo-1504450758481-7338eba7524a?w=800&q=70&auto=format&fit=crop", // volle Arena
+  "https://images.pexels.com/photos/1080884/pexels-photo-1080884.jpeg?auto=compress&cs=tinysrgb&w=800", // Outdoor-Dunk
+  "https://images.pexels.com/photos/2834917/pexels-photo-2834917.jpeg?auto=compress&cs=tinysrgb&w=800", // Dunk #21 Sunset
+];
+// Spiel-/Sieg-Motive (Action/Arena) für MVP-/Siegposts
+const GAME_PHOTOS = [
+  "https://images.unsplash.com/photo-1608245449230-4ac19066d2d0?w=800&q=70&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1504450758481-7338eba7524a?w=800&q=70&auto=format&fit=crop",
+  "https://images.pexels.com/photos/1080884/pexels-photo-1080884.jpeg?auto=compress&cs=tinysrgb&w=800",
+  "https://images.pexels.com/photos/2834917/pexels-photo-2834917.jpeg?auto=compress&cs=tinysrgb&w=800",
+];
+// Bild für einen Post: meist echtes Foto, manchmal ein on-brand SVG-Poster.
+const postImage = () => (chance(0.68) ? pick(PHOTOS) : posterImage(pick(POSTERS)));
+
 // d) Nutzer-Posts (Spieler) – viele Stile/Themen
 const POST_TEMPLATES = [
   ()=>`Heimspiel am Wochenende – kommt vorbei und supportet uns! 🏀`,
@@ -513,7 +533,7 @@ const POST_TEMPLATES = [
 for (let i=0;i<150;i++){
   const author=pick(players.filter(p=>p.status==="active"));
   posts.push({ _id:oid(), seedTag:TAG, player:author._id, content:pick(POST_TEMPLATES)(),
-    image: chance(0.35) ? posterImage(pick(POSTERS)) : null,
+    image: chance(0.4) ? postImage() : null,
     likes:[], comments:[], createdAt:dateBetween(0,360), updatedAt:now });
 }
 
@@ -528,9 +548,9 @@ const MENTION_TEMPLATES = [
 ];
 const mentionTargets = players.filter(p=>p.firstName && p.lastName && p.slug);
 const mentionToken = (p)=>`${p.firstName}${p.lastName}`.replace(/[^A-Za-z0-9äöüÄÖÜß]/g,"");
-function addMentionPost(author, target, tmpl){
+function addMentionPost(author, target, tmpl, image=null){
   const token = mentionToken(target);
-  const post = { _id:oid(), seedTag:TAG, player:author._id, content:tmpl(token), image:null,
+  const post = { _id:oid(), seedTag:TAG, player:author._id, content:tmpl(token), image,
     mentions:[{ playerId:target._id, slug:target.slug, token }],
     likes:[], comments:[], createdAt:dateBetween(0,60), updatedAt:now };
   posts.push(post);
@@ -547,6 +567,25 @@ for (let i=0;i<16;i++){
   const author=pick(players.filter(a=>String(a._id)!==String(target._id)&&a.status==="active"));
   if (author) addMentionPost(author, target, pick(MENTION_TEMPLATES));
 }
+
+// d3) Sieg-/MVP-Posts: echtes Spielfoto + Spieler als MVP (@Mention, klickbar + Notif)
+const MVP_TEMPLATES = [
+  (t)=>`🏆 Was für ein Sieg! MVP des Spiels: @${t} 🔥`,
+  (t)=>`🏆 Titel geholt! Unser MVP: @${t} 🙌`,
+  (t)=>`Spieler des Spiels: @${t} – Wahnsinns-Leistung am Court! 🏀`,
+  (t)=>`Sieg im Derby! @${t} mit dem Game-Winner. Gänsehaut.`,
+  (t)=>`Pokal gesichert – @${t} zum MVP gewählt. Unvergesslich! 🏆`,
+];
+// Finn Brandt als prominenter MVP
+addMentionPost(pick(players.filter(a=>String(a._id)!==String(finn._id)&&a.status==="active")), finn,
+  (t)=>`🏆 Großer Heimsieg! MVP des Spiels: @${t} mit 31 Punkten 🔥`, pick(GAME_PHOTOS));
+// 8 weitere MVP-/Siegposts
+for (let i=0;i<8;i++){
+  const target=pick(mentionTargets);
+  const author=pick(players.filter(a=>String(a._id)!==String(target._id)&&a.status==="active"));
+  if (author) addMentionPost(author, target, pick(MVP_TEMPLATES), pick(GAME_PHOTOS));
+}
+
 // e) Vereins-News (Team-Posts)
 const NEWS=[
   "Unser Trainer verlängert – Kontinuität auf der Bank! ✍️","Saisonstart steht: erste Heimpartie in zwei Wochen.",
@@ -557,7 +596,7 @@ const NEWS=[
 ];
 for (const t of pickN(teams, 22)) {
   for (let k=0;k<rnd(1,3);k++) posts.push({ _id:oid(), seedTag:TAG, player:null, authorTeam:t._id, teams:[t._id], kind:"user",
-    content:pick(NEWS), image: chance(0.4) ? posterImage(pick(POSTERS)) : null, likes:[], comments:[], createdAt:dateBetween(0,300), updatedAt:now });
+    content:pick(NEWS), image: chance(0.45) ? postImage() : null, likes:[], comments:[], createdAt:dateBetween(0,300), updatedAt:now });
 }
 
 // f) Likes + Kommentare auf einen Teil der Posts
