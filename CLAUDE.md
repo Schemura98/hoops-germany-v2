@@ -675,6 +675,8 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 >   (Spielergebnis/Transfer/Neues Team/Tryout) + verlinktem Ereignis. Auto-Posts sind like-/kommentierbar.
 >   **Verifiziert (Dev/Preview):** Match-Ergebnis (88:72→90:70 **idempotent**, 1 Post), Tryout, Beitritt (Sven→
 >   Test Baskets) je 1 Auto-Post mit korrekten Teams/Links; alle 3 im Feed + korrekt gerendert; keine Konsolenfehler.
+>   **Live deployt** (`b7445b2`, 27.06.2026; Prod-Build grün, Smoke-Test Homepage/Feed-API/Newsfeed 200). Keine
+>   neue Infra nötig (Auto-Posts ohne Uploads); Bestand-Posts ohne `kind` = „user" (rückwärtskompatibel, keine Migration).
 > **➡️ Noch offen (aus der Analyse, priorisiert):** #5 „Für dich"-Ranking, #6 Team-Posts (Vereine als Autoren),
 > #7 Transfermarkt→Feed (suchende Spieler/Vereine regional), #8 Folge-Vorschläge, #9 Hashtags/@Mentions,
 > #10 YouTube/Link-Embeds. (Auto-Post-Fundament `lib/autoPost.js` macht #7 jetzt billig.)
