@@ -13,3 +13,4 @@ import "./Admin";
 import "./Feedback";
 import "./AnalyticsEvent";
 import "./TransferEvent";
+import "./AuditLog";

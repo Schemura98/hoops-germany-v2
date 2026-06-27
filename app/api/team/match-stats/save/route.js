@@ -1,7 +1,8 @@
-import { getTokenFromRequest } from "@/lib/auth";
+import { getTokenFromRequest, verifyToken } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Match from "@/models/Match";
 import { getTeamFromToken } from "@/lib/serverAuth";
+import { recordAudit } from "@/lib/audit";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 function toCount(v) {
@@ -53,6 +54,22 @@ async function handler(req) {
   );
   match.playerStats.push(...entries);
   await match.save();
+
+  // Audit: Bearbeitung der Statistiken eines bereits gespielten Spiels protokollieren
+  // (Score/Ergebnis bleibt unberührt; nur die eigenen Spieler-Stats werden ersetzt).
+  if (match.status === "completed") {
+    const decoded = verifyToken(token);
+    await recordAudit({
+      entityType: "match",
+      entityId: match._id,
+      action: "stats_edited",
+      actorPlayerId: decoded?.id || decoded?.playerId || undefined,
+      actorName: team.teamName,
+      actorRole: "team_admin",
+      teamId: team._id,
+      summary: `${team.teamName} bearbeitete die Spieler-Statistiken (${entries.length} Einträge)`,
+    });
+  }
 
   return ok({ message: "Statistiken gespeichert." });
 }

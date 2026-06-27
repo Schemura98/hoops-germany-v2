@@ -3,7 +3,17 @@ import { connectDB } from "@/lib/db";
 import Match from "@/models/Match";
 import { getAdminFromToken } from "@/lib/serverAuth";
 import { syncMatchResultPost } from "@/lib/autoPost";
+import { recordAudit } from "@/lib/audit";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
+
+function snapshot(m) {
+  return {
+    status: m.status,
+    resultStatus: m.resultStatus,
+    winningTeamPoints: m.winningTeamPoints,
+    losingTeamPoints: m.losingTeamPoints,
+  };
+}
 
 // POST /api/admin/updatematch – Spielstatus/Ergebnis als Admin setzen.
 async function handler(req) {
@@ -15,6 +25,7 @@ async function handler(req) {
   const match = await Match.findById(body.matchId);
   if (!match) return fail("Spiel nicht gefunden", 404);
 
+  const before = snapshot(match);
   const status = body.status;
 
   if (status === "cancelled") {
@@ -57,6 +68,36 @@ async function handler(req) {
 
   // Ergebnis-Auto-Post in den Feed legen/aktualisieren (bzw. bei Reset/Absage entfernen).
   await syncMatchResultPost(match);
+
+  // Audit: Super-Admin-Eingriff mit Vorher/Nachher protokollieren.
+  const after = snapshot(match);
+  const action =
+    status === "cancelled"
+      ? "admin_cancelled"
+      : status === "scheduled"
+      ? "admin_result_reset"
+      : "admin_result_set";
+  const actorName =
+    `${admin.firstName || ""} ${admin.lastName || ""}`.trim() ||
+    admin.username ||
+    "Super-Admin";
+  const summary =
+    action === "admin_result_set"
+      ? `Super-Admin setzte das Ergebnis auf ${after.winningTeamPoints ?? "?"}:${after.losingTeamPoints ?? "?"} (vorher ${before.winningTeamPoints ?? "–"}:${before.losingTeamPoints ?? "–"}, ${before.resultStatus})`
+      : action === "admin_result_reset"
+      ? "Super-Admin setzte das Spiel zurück auf geplant (Ergebnis verworfen)"
+      : "Super-Admin hat das Spiel abgesagt";
+  await recordAudit({
+    entityType: "match",
+    entityId: match._id,
+    action,
+    actorPlayerId: admin._id || undefined,
+    actorName,
+    actorRole: "super_admin",
+    summary,
+    before,
+    after,
+  });
 
   return ok({ message: "Spiel aktualisiert" });
 }

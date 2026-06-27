@@ -21,6 +21,17 @@ export default function AdminUpdateMatchPage({ params }) {
   const [bPts, setBPts] = useState("");
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState(null);
+  const [audit, setAudit] = useState([]);
+
+  async function loadAudit() {
+    try {
+      const token = getAdminToken();
+      const { data } = await axios.post("/api/admin/match-audit", { token, matchId: id });
+      setAudit(data.audit || []);
+    } catch {
+      /* still */
+    }
+  }
 
   useEffect(() => {
     let active = true;
@@ -34,6 +45,7 @@ export default function AdminUpdateMatchPage({ params }) {
         if (m.teamAResult?.ownPoints != null) setAPts(String(m.teamAResult.ownPoints));
         if (m.teamBResult?.ownPoints != null) setBPts(String(m.teamBResult.ownPoints));
         setState("ready");
+        loadAudit();
       } catch {
         if (active) setState("notfound");
       }
@@ -41,6 +53,7 @@ export default function AdminUpdateMatchPage({ params }) {
     return () => {
       active = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   async function save() {
@@ -56,7 +69,8 @@ export default function AdminUpdateMatchPage({ params }) {
         teamBPoints: bPts,
       });
       setMsg({ type: "ok", text: "Gespeichert." });
-      setTimeout(() => router.push("/admin/matches"), 800);
+      loadAudit();
+      setTimeout(() => router.push("/admin/matches"), 1200);
     } catch (err) {
       setMsg({ type: "err", text: err.response?.data?.message || "Speichern fehlgeschlagen." });
     } finally {
@@ -199,6 +213,34 @@ export default function AdminUpdateMatchPage({ params }) {
             Abbrechen
           </Link>
         </div>
+      </div>
+
+      {/* Änderungsverlauf (Audit-Log) */}
+      <div className="max-w-lg mt-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h2 className="text-sm font-semibold text-gray-900 mb-3">Änderungsverlauf</h2>
+        {audit.length === 0 ? (
+          <p className="text-sm text-gray-400">Noch keine protokollierten Änderungen.</p>
+        ) : (
+          <ul className="space-y-3">
+            {audit.map((a) => (
+              <li key={a._id} className="flex gap-3 text-sm">
+                <span
+                  className={`mt-1 h-2 w-2 flex-shrink-0 rounded-full ${
+                    a.actorRole === "super_admin" ? "bg-amber-500" : "bg-brand-500"
+                  }`}
+                />
+                <div>
+                  <p className="text-gray-800">{a.summary}</p>
+                  <p className="text-xs text-gray-400">
+                    {a.actorName}
+                    {a.actorRole === "super_admin" ? " (Super-Admin)" : ""} ·{" "}
+                    {new Date(a.createdAt).toLocaleString("de-DE")}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </AdminShell>
   );

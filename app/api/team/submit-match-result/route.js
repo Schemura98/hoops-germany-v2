@@ -8,6 +8,7 @@ import { sendMail } from "@/lib/mailer";
 import { resultMismatchEmail } from "@/lib/emailTemplates";
 import { getBaseUrl } from "@/lib/baseUrl";
 import { syncMatchResultPost } from "@/lib/autoPost";
+import { recordAudit } from "@/lib/audit";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // Benachrichtigt beide Team-Admins + alle Super-Admins über ein strittiges Ergebnis
@@ -241,6 +242,35 @@ async function handler(req) {
 
   // Ergebnis-Auto-Post in den Feed legen/aktualisieren (bzw. bei mismatch entfernen).
   await syncMatchResultPost(match);
+
+  // Audit-Eintrag: wer hat was gemeldet und wie ist der Status danach.
+  const auditAction =
+    match.resultStatus === "confirmed"
+      ? "result_confirmed"
+      : match.resultStatus === "mismatch"
+      ? "result_mismatch"
+      : "result_submitted";
+  const statusLabel =
+    match.resultStatus === "confirmed"
+      ? "bestätigt"
+      : match.resultStatus === "mismatch"
+      ? "strittig"
+      : "vorläufig";
+  await recordAudit({
+    entityType: "match",
+    entityId: match._id,
+    action: auditAction,
+    actorPlayerId: submitterId || undefined,
+    actorName: team.teamName,
+    actorRole: "team_admin",
+    teamId: team._id,
+    summary: `${team.teamName} meldete ${ownPoints}:${opponentPoints} → ${statusLabel}`,
+    after: {
+      resultStatus: match.resultStatus,
+      winningTeamPoints: match.winningTeamPoints,
+      losingTeamPoints: match.losingTeamPoints,
+    },
+  });
 
   return ok({
     resultStatus: match.resultStatus,
