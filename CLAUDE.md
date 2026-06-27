@@ -677,9 +677,43 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 >   Test Baskets) je 1 Auto-Post mit korrekten Teams/Links; alle 3 im Feed + korrekt gerendert; keine Konsolenfehler.
 >   **Live deployt** (`b7445b2`, 27.06.2026; Prod-Build grün, Smoke-Test Homepage/Feed-API/Newsfeed 200). Keine
 >   neue Infra nötig (Auto-Posts ohne Uploads); Bestand-Posts ohne `kind` = „user" (rückwärtskompatibel, keine Migration).
-> **➡️ Noch offen (aus der Analyse, priorisiert):** #5 „Für dich"-Ranking, #6 Team-Posts (Vereine als Autoren),
-> #7 Transfermarkt→Feed (suchende Spieler/Vereine regional), #8 Folge-Vorschläge, #9 Hashtags/@Mentions,
-> #10 YouTube/Link-Embeds. (Auto-Post-Fundament `lib/autoPost.js` macht #7 jetzt billig.)
+>
+> #### 📋 Newsfeed-Roadmap (vollständige Analyse vom 27.06.2026 – verbindliche Grundlage fürs Weitermachen)
+> **Ist-Zustand-Befunde (Ausgangslage der Analyse):** Der Feed hat **2 Tabs** „Entdecken" (`/api/posts/feed`,
+> `Post.find({})` rein chronologisch, KEIN Ranking) + „Folge ich" (`getfollowingposts`). Vor diesem Paket gab es
+> **keine Personalisierung, keine Auto-Posts, keine Like-/Kommentar-Notifs, keine Team-Posts**; Composer nahm nur
+> eine Bild-**URL** (kein Upload). Beitragstypen: Text + 1 Bild + Emojis; **fehlen** weiterhin: mehrere Bilder,
+> Videos, Link-/YouTube-/IG-Embeds, Hashtags, @Mentions. Diese Befunde sind die Basis der Punkte unten.
+>
+> **Status der 10 Verbesserungen (priorisiert nach Impact × Langfristnutzen ÷ Aufwand):**
+> | # | Verbesserung | Status |
+> |---|---|---|
+> | 1 | Like/Kommentar/Antwort-Benachrichtigungen (gebündelt) + Post-Permalink | ✅ live (`a0c6321`) |
+> | 3 | Echter Bild-Upload im Composer (HEIC) | ✅ live (`a0c6321`) |
+> | 4 | Teamkollegen/eigenes Team in „Folge ich" + Auto-Follow | ✅ live (`a0c6321`) |
+> | 2 | Auto-Posts (Ergebnis/Transfer/Tryout) | ✅ live (`b7445b2`) |
+> | **7** | **Transfermarkt→Feed** (suchende Spieler/Vereine regional, als Auto-Posts) | 🔜 **als Nächstes** |
+> | 5 | „Für dich"-Ranking (Hot-Score + Region/Liga-Boost statt roh-chronologisch) | 🔜 offen |
+> | 6 | Team-Posts (Vereine als Autoren: Probetraining/Heimspiel/News) | 🔜 offen |
+> | 8 | Folge-Vorschläge im Feed (Region/Liga) für neue User | 🔜 offen |
+> | 9 | Hashtags + @Mentions (klickbar + Mention-Notif) | 🔜 offen |
+> | 10 | YouTube-/Link-Embeds (Highlight-Clips) | 🔜 offen |
+>
+> **➡️ NÄCHSTE SESSION HIER STARTEN – #7 Transfermarkt→Feed** (billig dank `lib/autoPost.js`):
+> Neue Auto-Post-Typen über denselben Helper – `autoPostRecruiting` (Verein aktiviert „Verstärkung suchen" in
+> `set-recruiting` → teams=[teamId]), `autoPostTransferAvailable` (Spieler setzt `transferStatus:"verfuegbar"`
+> in `update-transfer` → subjectPlayer). **Wichtig gegen Spam:** nur bei **Statuswechsel** posten (nicht bei
+> jeder Bearbeitung) + Throttle (max. 1 Auto-Post pro Person/Tag, z.B. via `eventKey` mit Tagesstempel) +
+> idealerweise **regional dosiert** (nur Region/Liga). Neue `autoType` „recruiting"/„transfer_available" in
+> `PostCard.AUTO` ergänzen (Icon+Badge). Tryout-Auto-Post (#2) existiert bereits.
+> **Danach:** #5 Ranking (eigene Aggregation/JS-Sort über ~200 Kandidaten: `score = engagement / (alter+2)^1.5`
+> × Boosts eigenes Team ×2 / gefolgt ×1.8 / gleiche Liga ×1.5 / Bundesland ×1.3 – Bausteine `bundesland`/
+> `leagueId`/`lib/geo.js` vorhanden), dann #6 Team-Posts (`Post.authorTeam` + Team-Composer, Dual-Auth), #8/#9/#10.
+>
+> ⚠️ **Dev-DB-Aufräumen vor dem Weitermachen:** In `hoopsgermany` (Dev) liegen Test-Artefakte aus der
+> Verifikation (3 Auto-Posts, Sven Adler in „Test Baskets", Demo-Spielstand „Düsseldorf 90:70 Dortmund",
+> Test-Like/-Kommentar auf Aaron Becks Beitrag). Rein lokal → `node scripts/seed-demo.mjs` setzt sauber zurück.
+> **Prod (`hoops_prod`) ist unberührt** (nur Code deployt, keine Test-Trigger gegen Prod gefahren).
 
 ### Bekannte Einschränkungen / offen
 - **Lokale Dev-Umgebung:** SMTP/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS
