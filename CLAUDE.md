@@ -694,8 +694,8 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > | 2 | Auto-Posts (Ergebnis/Transfer/Tryout) | ✅ live (`b7445b2`) |
 > | 7 | Transfermarkt→Feed (suchende Spieler/Vereine, als Auto-Posts) | ✅ live (`c9bb958`) |
 > | 5 | „Für dich"-Ranking (Hot-Score + Region/Liga/Team-Boosts statt roh-chronologisch) | ✅ live (`8755c08`) |
-> | **6** | **Team-Posts** (Vereine als Autoren: Probetraining/Heimspiel/News) | 🔜 **als Nächstes** |
-> | 8 | Folge-Vorschläge im Feed (Region/Liga) für neue User | 🔜 offen |
+> | 6 | Team-Posts (Vereine als Autoren: Probetraining/Heimspiel/News) | ✅ live (`33316d0`) |
+> | **8** | **Folge-Vorschläge** im Feed (Region/Liga) für neue User | 🔜 **als Nächstes** |
 > | 9 | Hashtags + @Mentions (klickbar + Mention-Notif) | 🔜 offen |
 > | 10 | YouTube-/Link-Embeds (Highlight-Clips) | 🔜 offen |
 >
@@ -722,20 +722,30 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > ausgeloggt ok; keine Konsolenfehler. ⚠️ Beiträge älter als die 500 neuesten erscheinen nicht in „Für dich"
 > (für Amateur-Scale unkritisch). Auto-Posts bekommen einen kleinen Sockel, damit sie frisch nicht versinken.
 >
-> **➡️ NÄCHSTE SESSION HIER STARTEN – #6 Team-Posts** (Vereine als Autoren):
-> `models/Post.js` um `authorTeam` (ObjectId→teams) erweitern; neuer Endpoint `POST /api/posts/team-post`
-> (Dual-Auth via `getTeamFromToken` – nur Team-Admins posten im Vereinsnamen). `PostComposer` braucht einen
-> Team-Modus (Umschalter „als Spieler / als <Team>", nur für Team-Admins sichtbar – `player.isTeamAdmin`).
-> `PostCard`-Kopf: bei `authorTeam` Team-Avatar (`<Avatar name=teamName src=logo>`) + Link `/team/team-detail/slug`
-> statt Spieler. Feed-Sichtbarkeit: `getfollowingposts`-`$or` um `{ authorTeam: { $in: feedTeamIds } }` ergänzen;
-> Ranking (`feedRanking`) Team-Posts wie Auto-Posts behandeln (relTeamIds um `authorTeam`). Eignet sich für die
-> in der Analyse genannten Use-Cases (Probetraining/Heimspiel/Turnier/Jugendtraining/Vereinsnews).
-> **Danach:** #8 Folge-Vorschläge, #9 Hashtags/@Mentions, #10 YouTube/Link-Embeds.
+> **#6 Team-Posts ✅ erledigt** (`33316d0`, live 27.06.2026): `models/Post.js` um `authorTeam` (→teams)
+> erweitert (`kind` bleibt „user"). Neuer Endpoint `POST /api/posts/team-post` (Dual-Auth via
+> `getTeamFromToken` – nur Team-Admins; setzt `player:null`, `authorTeam`, **`teams:[team._id]`** → bestehende
+> Feed-/Ranking-Logik greift ohne Zusatzcode). `feed`/`getfollowingposts`/`single` populaten `authorTeam`
+> (teamName/slug/logo). `PostCard` zeigt bei `authorTeam` einen **Vereins-Header** (Logo/Initialen-Avatar +
+> Name + „Verein"-Badge + Link `/team/team-detail/slug`). `PostComposer` hat für Team-Admins einen Umschalter
+> **„Als Spieler / Als <Team>"** (lädt Team via `fetchinfo`, Endpoint-Wechsel je Modus). **Verifiziert
+> (Dev/Preview):** Team-Post 201 mit populiertem `authorTeam`; erscheint in „Für dich" UND „Folge ich";
+> Composer-Umschalter + Vereins-Header + Badge rendern; keine Konsolenfehler. ⚠️ Team-Profilseite zeigt aktuell
+> KEINE Beiträge (existierte noch nie) – optionaler Follow-up: Beiträge-Tab auf `/team/team-detail` (Quelle:
+> `{$or:[{authorTeam:teamId},{player:{$in:members}}]}`).
 >
-> ⚠️ **Dev-DB-Aufräumen vor dem Weitermachen:** In `hoopsgermany` (Dev) liegen Test-Artefakte aus der
-> Verifikation (3 Auto-Posts, Sven Adler in „Test Baskets", Demo-Spielstand „Düsseldorf 90:70 Dortmund",
-> Test-Like/-Kommentar auf Aaron Becks Beitrag). Rein lokal → `node scripts/seed-demo.mjs` setzt sauber zurück.
-> **Prod (`hoops_prod`) ist unberührt** (nur Code deployt, keine Test-Trigger gegen Prod gefahren).
+> **➡️ NÄCHSTE SESSION HIER STARTEN – #8 Folge-Vorschläge** (für neue User, gegen den „leeren Feed"):
+> Neuer Endpoint `POST /api/player/suggestions` (Spieler-Auth) → Spieler/Teams aus **gleichem Bundesland/gleicher
+> Liga**, denen man noch NICHT folgt (exkl. eigenes Team/sich selbst), sortiert nach Nähe (Bundesland-Match,
+> Follower-Zahl). Im Newsfeed eine **„Vorschläge für dich"-Karte** (Avatar + Name + Folgen-Button, nutzt
+> bestehende `followplayer`/`followteam`), eingeblendet v.a. wenn `following`/`followingTeams` klein sind
+> (neue User) – ideal interleaved alle ~5 Beiträge ODER als eigene Karte oben im „Für dich"-Tab. Bausteine
+> vorhanden: `bundesland`/`leagueId`, `FollowButton`, Avatare. **Danach:** #9 Hashtags/@Mentions, #10 YouTube/Link-Embeds.
+>
+> ⚠️ **Dev-DB-Aufräumen vor dem Weitermachen:** Die Verifikation legt in `hoopsgermany` (Dev) Test-Artefakte an
+> (z.B. ein „Probetraining"-Team-Post von Test Baskets). Rein lokal → `node scripts/seed-demo.mjs` setzt sauber
+> zurück (Standard-Start jeder Newsfeed-Session). **Prod (`hoops_prod`) ist unberührt** (nur Code deployt,
+> keine Test-Trigger gegen Prod gefahren).
 
 ### Bekannte Einschränkungen / offen
 - **Lokale Dev-Umgebung:** SMTP/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS
