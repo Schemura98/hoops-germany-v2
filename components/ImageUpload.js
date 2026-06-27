@@ -94,15 +94,21 @@ export default function ImageUpload({
     }
   }
 
-  const previewBox =
-    variant === "banner"
-      ? "h-24 w-full rounded-lg"
-      : "h-16 w-16 rounded-full";
+  // Banner: vertikal gestapelt (Vorschau oben über volle Breite, Steuerung darunter)
+  // → läuft nicht aus schmalen Spalten heraus. Avatar: kompakte Zeile.
+  const isBanner = variant === "banner";
+  const previewBox = isBanner
+    ? "h-28 w-full rounded-lg"
+    : "h-16 w-16 rounded-full flex-shrink-0";
 
   return (
-    <div className="flex items-center gap-3">
+    <div
+      className={`w-full min-w-0 ${
+        isBanner ? "flex flex-col gap-2" : "flex items-center gap-3"
+      }`}
+    >
       <div
-        className={`${previewBox} bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center flex-shrink-0`}
+        className={`${previewBox} bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center`}
       >
         {preview ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -112,7 +118,7 @@ export default function ImageUpload({
         )}
       </div>
 
-      <div>
+      <div className="min-w-0">
         <input
           ref={inputRef}
           type="file"
@@ -129,8 +135,8 @@ export default function ImageUpload({
           {uploading ? <FaSpinner className="animate-spin" /> : <FaUpload />}
           {uploading ? "Lädt…" : label}
         </button>
-        {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
-        <p className="mt-1 text-xs text-gray-400">
+        {error && <p className="mt-1 text-xs text-red-600 break-words">{error}</p>}
+        <p className="mt-1 text-xs text-gray-400 break-words">
           {DISPLAY_FORMATS} · max. {MAX_MB} MB · iPhone-Fotos (HEIC) werden automatisch umgewandelt
         </p>
       </div>
