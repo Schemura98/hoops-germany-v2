@@ -781,6 +781,41 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > zurück (Standard-Start jeder Newsfeed-Session). **Prod (`hoops_prod`) ist unberührt** (nur Code deployt,
 > keine Test-Trigger gegen Prod gefahren).
 
+#### 🏗️ Liga-/Saison-/Playoff-/Admin-Audit umgesetzt (27.06.2026) – 5 Stufen, alle live
+> Auf Basis eines vollständigen Architektur-Audits (Liga/Saison-Trennung, Team-Saison-Teilnahme,
+> Spielerhistorie, Playoffs, Spiele-Filter, Admin-Rechte). Alle Stufen lokal verifiziert + deployt.
+> - **Stufe 1 – Integrität/Audit-Log** (`8eeb1bd`): `models/AuditLog.js` (append-only) + `lib/audit.js`.
+>   Audit bei `submit-match-result` (Meldung/bestätigt/strittig), `match-stats/save` (Bearbeitung gespielter
+>   Partien, mit Spieler-ID), `admin/updatematch` (Super-Admin-Override mit Vorher/Nachher). Endpoint
+>   `/api/admin/match-audit` + **Änderungsverlauf-Sektion** auf der Admin-Match-Seite. (Confirmed-Schutz für
+>   Ergebnisse existierte schon in submit-match-result; Stats-Edits werden jetzt protokolliert statt blockiert.)
+> - **Stufe 2 – Topscorer-Teamlabel** (`cca5e5a`): zeigt das Team **zum Zeitpunkt der Punkte** (gruppiert
+>   nach `playerStats.team`, Label = punktstärkstes Team; saisongenau bei Saison-Filter) statt `player.teamId`.
+> - **Stufe 3 – Playoffs explizit** (`f842d05`): `League.playoffMode` (`keine`|`best_of_1`, Default keine) +
+>   `LEAGUE_PLAYOFF_MODES`. Admin-Liga-Verwaltung (Erstellen+Bearbeiten) setzt den Modus; `/api/leagues/[id]`
+>   liefert `playoffMode`+`championBasis`; Liga-Detailseite zeigt klar „Meister über Playoffs" vs.
+>   „über Abschlusstabelle". Macht „Playoffs optional pro Liga" explizit (funktionierte implizit schon über
+>   `resolveChampionId`: Finalsieger sonst Tabellenführer).
+> - **Stufe 4 – Spiele-/Team-Spielplan-Filter** (`1007e2b`): `matches/public` + `fetchsingleteaminfo` liefern
+>   `leagueId`(populate name/season)/`stage`/`playoffRound`. `/spiele`: Tabs Anstehend/Ergebnisse/Alle + Filter
+>   Abschnitt(Hauptrunde/Playoffs)/Liga/Saison/Ort/ab-Datum, je Karte Liga-Zeile + Playoff-Badge. Team-Detail-
+>   Spielplan: Sub-Tabs Anstehend/Vergangen/Alle/Playoffs + Playoff-Badge.
+> - **Stufe 5 – TeamSeason-Fundament** (`4edd9b4`): `models/TeamSeason.js` (teamId/leagueId/season/**status**/
+>   placement/wins/losses/pointsFor/Against/diff/champion/finalized, unique je Team+Liga+Saison). `lib/teamSeason.js`
+>   `freezeSeason` friert den Endstand **beim Saisonabschluss** als Snapshot ein (Upsert, Status bleibt) →
+>   **alte Saisons werden nie überschrieben** (neue Saison = anderes Liga-Dokument). `TEAM_SEASON_STATUS`
+>   (aktiv/zurückgezogen/außer Konkurrenz/disqualifiziert). APIs `/api/team/season-history`,
+>   `/api/admin/league-seasons`, `/api/admin/season-status`. **Team-Detail: neuer „Saisons"-Tab** (Saison/Liga/
+>   Platz/Bilanz/Diff/Status/Meister); Admin-Liga: Saison-Status je Team verwaltbar (bei abgeschlossener Liga).
+>   Verifiziert: Liga abschließen → 4 Snapshots (Platz 1–4, Meister Munich Hoops 3-0); Status „disqualifiziert"
+>   gesetzt; Saisons-Tab rendert Saison/Liga/Meister/Status.
+> **Bewusst offen (optionale Follow-ups):** Best-of-3/5 + echter Playoff-Bracket/Auto-Seeding (aktuell Best-of-1,
+> Paarungen manuell); Status-basierte Tabellen-Exklusion (Status ist Snapshot-Metadatum, ändert die Live-Tabelle
+> nicht); Stat-Filter Hauptrunde/Playoffs/Gesamt; stabiler `leagueKey` zur Saison-Verknüpfung einer Liga.
+> ⚠️ **Dev-DB enthält Audit-Test-Artefakte** (abgeschlossene Regionalliga Süd + TeamSeason-Snapshots, Playoff-
+> Finale, Audit-Logs, geändertes Ergebnis). Rein lokal → `node scripts/seed-demo.mjs` setzt zurück; **Prod unberührt**
+> (nur Code deployt). Neue Schemas (AuditLog/TeamSeason/League.playoffMode) sind additiv, **keine Migration**.
+
 ### Bekannte Einschränkungen / offen
 - **Lokale Dev-Umgebung:** SMTP/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS
   (hoops_prod) live testbar; lokal über In-App-Notifs + Trigger-Logs verifizieren.
