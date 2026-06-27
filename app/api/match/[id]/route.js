@@ -20,6 +20,7 @@ async function handler(req, ctx) {
     .populate("teamA", "teamName slug logo")
     .populate("teamB", "teamName slug logo")
     .populate("leagueId", "name season")
+    .populate("mvp", "firstName lastName slug")
     .populate("playerStats.player", "firstName lastName slug");
 
   if (!match) {

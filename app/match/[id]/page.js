@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaBasketballBall, FaMapMarkerAlt } from "react-icons/fa";
+import { FaBasketballBall, FaMapMarkerAlt, FaStar, FaUsers } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Loading from "@/components/ui/Loading";
 import Footer from "@/components/layout/Footer";
@@ -235,6 +235,36 @@ export default function MatchIdPage({ params }) {
       </div>
 
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
+        {/* MVP / Zuschauer / Spielbericht (optional) */}
+        {completed && (match.mvp || match.attendance || match.report) && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+              {match.mvp && (
+                <span className="inline-flex items-center gap-1.5">
+                  <FaStar className="text-amber-500" />
+                  <span className="text-gray-500">MVP:</span>
+                  <Link
+                    href={`/player/view-player/${match.mvp.slug || match.mvp._id}`}
+                    className="font-medium text-gray-900 hover:text-brand-600"
+                  >
+                    {match.mvp.firstName} {match.mvp.lastName}
+                  </Link>
+                </span>
+              )}
+              {match.attendance ? (
+                <span className="inline-flex items-center gap-1.5 text-gray-600">
+                  <FaUsers className="text-gray-400" /> {match.attendance} Zuschauer
+                </span>
+              ) : null}
+            </div>
+            {match.report && (
+              <p className="mt-3 border-t border-gray-100 pt-3 text-sm text-gray-700 whitespace-pre-line">
+                {match.report}
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Spieler-Stats */}
         {completed && (
           <div className="mt-6 grid gap-4 sm:grid-cols-2">

@@ -44,6 +44,10 @@ const matchSchema = new mongoose.Schema(
     winningTeamPoints: Number,
     losingTeamPoints: Number,
     notifiedPendingResult: { type: Boolean, default: false },
+    // Optionale Zusatzinfos (z. B. aus Demo-Daten): MVP, Zuschauerzahl, Spielbericht.
+    mvp: { type: mongoose.Schema.Types.ObjectId, ref: "players" },
+    attendance: Number,
+    report: String,
     teamAResult: teamResultSchema,
     teamBResult: teamResultSchema,
     resultStatus: {
