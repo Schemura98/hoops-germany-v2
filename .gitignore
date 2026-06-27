@@ -32,6 +32,7 @@ yarn-error.log*
 # user uploads (auf VPS persistent, nicht in git)
 /public/team/
 /public/players/
+/public/posts/
 
 # vercel
 .vercel

@@ -642,6 +642,30 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
    Picker in `EinstellungenTab` (pflegt `League.teams` beidseitig). Teams können sich nach dem Season-Rollover
    der neuen Saison zuordnen.
 
+#### 🗞️ Newsfeed-Weiterentwicklung – Quick-Win-Paket (27.06.2026)
+> Auf Basis einer tiefen Ist-Analyse des Feeds (roh-chronologisch, keine Personalisierung, keine Auto-Posts,
+> keine Like-/Kommentar-Notifs). Umgesetzt + lokal verifiziert (Build grün, Preview-Flows getestet), **noch
+> NICHT deployt** (Prod-Infra für Bild-Uploads nötig, s. u.):
+> - **#1 Engagement-Benachrichtigungen + Post-Permalink:** Neue Notif-Typen `post_like`/`post_comment`/
+>   `comment_reply` (`models/Player.js` Enum + Felder `postId`/`count`). Helper `lib/notifyEngagement.js`
+>   (kein Self-Notify; **Likes gebündelt** = eine Notif mit Zähler statt Flut; fehlertolerant). Verdrahtet in
+>   `likepost`/`addcomment`/`addreply`. `getnotifications` gibt jetzt `postId`/`matchId`/`count`/`teamName`
+>   mit zurück (vorher gedroppt → **nebenbei match_result-Links repariert**). `notificationHref` → `/post/[id]`;
+>   `NotificationBell` Icons ergänzt. Neue **Permalink-Seite** `app/post/[id]/page.js` + API `/api/posts/single`.
+> - **#3 Echter Bild-Upload im Composer:** statt URL-Paste jetzt `components/ImageUpload` (HEIC/Validierung)
+>   in `PostComposer`; neuer Endpoint `/api/posts/upload-image` (`saveImage(file,"posts")`). `.gitignore` +
+>   `deploy/nginx-hoopsgermany.conf` um `posts` erweitert. ⚠️ **Prod-Deploy braucht** wie bei players/team:
+>   `/var/www/hoops-uploads/posts` + Symlink `public/posts` + Nginx-Location (sonst 404 nach Rebuild).
+> - **#4 Teamkollegen im Feed + Auto-Follow:** `getfollowingposts` bezieht jetzt **eigene Team-Mitglieder**
+>   immer ein (auch ohne Follow). Helper `lib/teamFollow.js` (`followOwnTeam`, beidseitig/idempotent) in
+>   `team/create` (Gründer), `handlejoinrequest` (approve), `roster/approve-claim` verdrahtet.
+> - **Verifiziert (Dev/Preview):** Like+Kommentar von Max auf fremden Beitrag → Notifs in DB angelegt;
+>   2. Liker → Bündelung `count=2`; Bild-Upload → `/posts/…png` ausgeliefert (200); Composer-„Bild" blendet
+>   Uploader ein; Permalink lädt Beitrag.
+> **➡️ Noch offen (aus der Analyse, priorisiert):** #2 Auto-Posts (Ergebnis/Transfer/Tryout/Beitritt –
+> `lib/autoPost.js` + `Post.type/meta`), #5 „Für dich"-Ranking, #6 Team-Posts, #7 Transfermarkt→Feed,
+> #8 Folge-Vorschläge, #9 Hashtags/@Mentions, #10 YouTube/Link-Embeds.
+
 ### Bekannte Einschränkungen / offen
 - **Lokale Dev-Umgebung:** SMTP/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS
   (hoops_prod) live testbar; lokal über In-App-Notifs + Trigger-Logs verifizieren.

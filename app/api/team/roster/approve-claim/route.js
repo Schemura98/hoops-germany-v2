@@ -4,6 +4,7 @@ import Team from "@/models/Team";
 import Player from "@/models/Player";
 import { getTeamFromToken, TEAM_PUBLIC_FIELDS } from "@/lib/serverAuth";
 import { recordTransfer } from "@/lib/recordTransfer";
+import { followOwnTeam } from "@/lib/teamFollow";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/team/roster/approve-claim – Slot-Anspruch genehmigen (Dual-Auth).
@@ -67,6 +68,7 @@ async function handler(req) {
       fromTeam: prevTeam,
       toTeam: team._id,
     });
+    await followOwnTeam(slot.claimedBy, team._id);
   }
 
   const updated = await Team.findById(team._id).select(TEAM_PUBLIC_FIELDS);

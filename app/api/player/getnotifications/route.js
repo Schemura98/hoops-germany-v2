@@ -22,7 +22,11 @@ async function handler(req) {
       read: n.read,
       createdAt: n.createdAt,
       teamSlug: n.teamSlug,
+      teamName: n.teamName,
       fromPlayerId: n.fromPlayerId,
+      matchId: n.matchId,
+      postId: n.postId,
+      count: n.count,
     }));
 
   const unreadCount = notifications.filter((n) => !n.read).length;

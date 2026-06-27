@@ -11,6 +11,9 @@ import {
   FaBasketballBall,
   FaExclamationTriangle,
   FaExchangeAlt,
+  FaHeart,
+  FaRegComment,
+  FaReply,
 } from "react-icons/fa";
 import { getPlayerToken, getStoredPlayer } from "@/lib/clientAuth";
 import { notificationHref } from "@/lib/notifications";
@@ -24,6 +27,9 @@ const ICON = {
   pending_result: FaBasketballBall,
   result_mismatch: FaExclamationTriangle,
   transfer: FaExchangeAlt,
+  post_like: FaHeart,
+  post_comment: FaRegComment,
+  comment_reply: FaReply,
 };
 
 export default function NotificationBell() {

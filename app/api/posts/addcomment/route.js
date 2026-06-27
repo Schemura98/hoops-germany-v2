@@ -2,6 +2,7 @@ import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Post from "@/models/Post";
 import { getPlayerFromToken } from "@/lib/serverAuth";
+import { notifyPostComment } from "@/lib/notifyEngagement";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/posts/addcomment – Kommentar hinzufügen (Spieler-Auth).
@@ -27,6 +28,9 @@ async function handler(req) {
 
   post.comments.push({ player: player._id, text, createdAt: new Date() });
   await post.save();
+
+  // Beitrags-Autor über den neuen Kommentar benachrichtigen.
+  await notifyPostComment({ recipientId: post.player, actor: player, postId: post._id });
 
   const c = post.comments[post.comments.length - 1];
   return ok({

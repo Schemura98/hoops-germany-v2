@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Player from "@/models/Player";
 import { getTeamFromToken } from "@/lib/serverAuth";
 import { recordTransfer } from "@/lib/recordTransfer";
+import { followOwnTeam } from "@/lib/teamFollow";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/team/handlejoinrequest – Beitrittsanfrage genehmigen/ablehnen (Dual-Auth).
@@ -54,6 +55,7 @@ async function handler(req) {
       fromTeam: prevTeam,
       toTeam: team._id,
     });
+    await followOwnTeam(player._id, team._id);
   }
 
   return ok({

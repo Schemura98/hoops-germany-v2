@@ -22,10 +22,16 @@ async function handler(req) {
 
   await connectDB();
 
-  // Mitglieder der Teams, denen ich folge → ihre Beiträge erscheinen im Feed
+  // Mitglieder gefolgter Teams UND des eigenen Teams → ihre Beiträge erscheinen
+  // im Feed (eigene Mannschaft ist immer dabei, auch ohne sie explizit zu folgen).
   let teamMemberIds = [];
-  if ((me.followingTeams || []).length) {
-    const members = await Player.find({ teamId: { $in: me.followingTeams } }).select("_id");
+  const feedTeamIds = [
+    ...new Set(
+      [...(me.followingTeams || []), me.teamId].filter(Boolean).map(String)
+    ),
+  ];
+  if (feedTeamIds.length) {
+    const members = await Player.find({ teamId: { $in: feedTeamIds } }).select("_id");
     teamMemberIds = members.map((m) => m._id);
   }
 

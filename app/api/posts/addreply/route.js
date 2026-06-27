@@ -2,6 +2,7 @@ import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Post from "@/models/Post";
 import { getPlayerFromToken } from "@/lib/serverAuth";
+import { notifyCommentReply } from "@/lib/notifyEngagement";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/posts/addreply – Antwort auf einen Kommentar hinzufügen (Spieler-Auth).
@@ -33,6 +34,9 @@ async function handler(req) {
 
   comment.replies.push({ player: player._id, text, likes: [], createdAt: new Date() });
   await post.save();
+
+  // Kommentar-Autor über die Antwort benachrichtigen.
+  await notifyCommentReply({ recipientId: comment.player, actor: player, postId: post._id });
 
   const r = comment.replies[comment.replies.length - 1];
   return ok({

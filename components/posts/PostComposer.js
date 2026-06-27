@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import axios from "axios";
-import { FaImage } from "react-icons/fa";
+import { FaImage, FaTimes } from "react-icons/fa";
 import { getPlayerToken } from "@/lib/clientAuth";
+import ImageUpload from "@/components/ImageUpload";
 import Avatar from "./Avatar";
 
 // Eingabe-Karte für neue Beiträge.
@@ -13,13 +14,21 @@ export default function PostComposer({ player, onCreated }) {
   const [showImage, setShowImage] = useState(false);
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState("");
+  // Erzwingt ein Remount des Uploaders (setzt dessen interne Vorschau zurück).
+  const [uploadKey, setUploadKey] = useState(0);
+
+  const token = getPlayerToken();
+
+  function clearImage() {
+    setImage("");
+    setUploadKey((k) => k + 1);
+  }
 
   async function submit() {
     if (!content.trim() && !image.trim()) return;
     setPosting(true);
     setError("");
     try {
-      const token = getPlayerToken();
       const { data } = await axios.post("/api/posts/uploadpost", {
         token,
         content,
@@ -28,6 +37,7 @@ export default function PostComposer({ player, onCreated }) {
       setContent("");
       setImage("");
       setShowImage(false);
+      setUploadKey((k) => k + 1);
       onCreated?.(data.post);
     } catch (err) {
       setError(err.response?.data?.message || "Beitrag konnte nicht erstellt werden.");
@@ -48,14 +58,30 @@ export default function PostComposer({ player, onCreated }) {
             rows={2}
             className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
           />
+
           {showImage && (
-            <input
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              placeholder="Bild-URL (https://…)"
-              className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-            />
+            <div className="mt-3">
+              <ImageUpload
+                key={uploadKey}
+                endpoint="/api/posts/upload-image"
+                fields={{ token }}
+                onUploaded={(url) => setImage(url)}
+                currentUrl={image}
+                variant="banner"
+                label={image ? "Bild ersetzen" : "Bild hochladen"}
+              />
+              {image && (
+                <button
+                  type="button"
+                  onClick={clearImage}
+                  className="mt-2 inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-red-600"
+                >
+                  <FaTimes /> Bild entfernen
+                </button>
+              )}
+            </div>
           )}
+
           {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
 
           <div className="mt-2 flex items-center justify-between">

@@ -7,6 +7,7 @@ import League from "@/models/League";
 import { getPlayerFromToken } from "@/lib/serverAuth";
 import { uniqueSlug } from "@/lib/slug";
 import { recordTransfer } from "@/lib/recordTransfer";
+import { followOwnTeam } from "@/lib/teamFollow";
 import { sendMail } from "@/lib/mailer";
 import { teamPendingEmail } from "@/lib/emailTemplates";
 import { getBaseUrl } from "@/lib/baseUrl";
@@ -77,6 +78,9 @@ async function handler(req) {
     toTeam: team._id,
     type: "found",
   });
+
+  // Gründer folgt automatisch dem eigenen Team (Team-Inhalte im „Folge ich"-Feed).
+  await followOwnTeam(player._id, team._id);
 
   // Super-Admins zur Freigabe benachrichtigen (In-App + Mail). Fehler nicht nach außen geben.
   try {

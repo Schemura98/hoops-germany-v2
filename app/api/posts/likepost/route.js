@@ -2,6 +2,7 @@ import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Post from "@/models/Post";
 import { getPlayerFromToken } from "@/lib/serverAuth";
+import { notifyPostLike } from "@/lib/notifyEngagement";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/posts/likepost – Like togglen (Spieler-Auth).
@@ -31,6 +32,11 @@ async function handler(req) {
     liked = true;
   }
   await post.save();
+
+  // Beim Liken (nicht beim Entfernen) den Beitrags-Autor benachrichtigen.
+  if (liked) {
+    await notifyPostLike({ recipientId: post.player, actor: player, postId: post._id });
+  }
 
   return ok({ liked, likeCount: post.likes.length });
 }
