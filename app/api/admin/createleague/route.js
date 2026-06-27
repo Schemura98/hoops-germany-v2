@@ -32,6 +32,7 @@ async function handler(req) {
     gender: String(body.gender || "Herren").trim(),
     ageGroup: String(body.ageGroup || "Senioren").trim(),
     region: String(body.region || "").trim(),
+    playoffMode: body.playoffMode === "best_of_1" ? "best_of_1" : "keine",
     official: true,
     teams: [],
     matches: [],

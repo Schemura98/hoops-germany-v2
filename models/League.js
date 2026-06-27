@@ -19,6 +19,10 @@ const leagueSchema = new mongoose.Schema(
     // den Tabellen-Ersten; sonst ist der Meister automatisch Platz 1 der Endtabelle.
     finished: { type: Boolean, default: false },
     champion: { type: mongoose.Schema.Types.ObjectId, ref: "teams" },
+    // Playoff-Modus (optional pro Liga/Saison): "keine" = Meister über Abschlusstabelle,
+    // "best_of_1" = Playoff-Endrunde (Finalsieger = Meister). Nicht jede Amateurklasse
+    // trägt Playoffs aus → Default "keine".
+    playoffMode: { type: String, default: "keine" },
   },
   { timestamps: true }
 );

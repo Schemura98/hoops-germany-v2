@@ -44,6 +44,8 @@ async function handler(req) {
   if (body.gender !== undefined) updates.gender = String(body.gender).trim();
   if (body.ageGroup !== undefined) updates.ageGroup = String(body.ageGroup).trim();
   if (body.region !== undefined) updates.region = String(body.region).trim();
+  if (body.playoffMode !== undefined)
+    updates.playoffMode = body.playoffMode === "best_of_1" ? "best_of_1" : "keine";
   if (body.active !== undefined) updates.active = !!body.active;
   if (body.finished !== undefined) updates.finished = !!body.finished;
   if (body.champion !== undefined)
@@ -80,7 +82,7 @@ async function handler(req) {
     body.leagueId,
     { $set: updates },
     { new: true }
-  ).select("name season bundesland active finished champion");
+  ).select("name season bundesland active finished champion playoffMode");
 
   return ok({ league });
 }

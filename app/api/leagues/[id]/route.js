@@ -89,6 +89,9 @@ async function handler(req, ctx) {
       name: league.name,
       season: league.season,
       finished: !!league.finished,
+      playoffMode: league.playoffMode || "keine",
+      // Wie der Meister (zu) ermitteln ist – nur Anzeige.
+      championBasis: league.playoffMode === "best_of_1" ? "playoffs" : "table",
     },
     standings,
     champion,

@@ -11,6 +11,7 @@ import {
   LEAGUE_LEVELS,
   LEAGUE_GENDERS,
   LEAGUE_AGE_GROUPS,
+  LEAGUE_PLAYOFF_MODES,
 } from "@/lib/constants";
 
 const inputClass =
@@ -24,6 +25,7 @@ const EMPTY_NEW = {
   gender: "Herren",
   ageGroup: "Senioren",
   region: "",
+  playoffMode: "keine",
 };
 
 export default function AdminLeaguesPage() {
@@ -52,6 +54,7 @@ export default function AdminLeaguesPage() {
         region: l.region || "",
         finished: !!l.finished,
         champion: l.champion || "",
+        playoffMode: l.playoffMode || "keine",
       };
     setEdits(e);
   }, []);
@@ -234,6 +237,20 @@ export default function AdminLeaguesPage() {
               placeholder="z.B. Bezirk Köln/Aachen"
             />
           </div>
+          <div className="col-span-2">
+            <label className="block text-xs font-medium text-gray-600 mb-1">Meister-Modus</label>
+            <select
+              value={newLeague.playoffMode}
+              onChange={(e) => setNewLeague((l) => ({ ...l, playoffMode: e.target.value }))}
+              className={`${inputClass} w-full`}
+            >
+              {LEAGUE_PLAYOFF_MODES.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         <div className="mt-3">
           <button
@@ -341,6 +358,22 @@ export default function AdminLeaguesPage() {
                     placeholder="Bezirk/Kreis"
                   />
                 </div>
+              </div>
+
+              {/* Playoff-Modus */}
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-50">
+                <label className="text-xs font-medium text-gray-600">Meister-Modus</label>
+                <select
+                  value={edits[l._id]?.playoffMode || "keine"}
+                  onChange={(e) => setField(l._id, "playoffMode", e.target.value)}
+                  className={`${inputClass}`}
+                >
+                  {LEAGUE_PLAYOFF_MODES.map((m) => (
+                    <option key={m.value} value={m.value}>
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Saison-Abschluss + Meister */}

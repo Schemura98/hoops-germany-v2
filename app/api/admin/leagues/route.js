@@ -12,7 +12,7 @@ async function handler(req) {
 
   await connectDB();
   const leagues = await League.find({})
-    .select("name season bundesland level gender ageGroup region official teams active finished champion")
+    .select("name season bundesland level gender ageGroup region official teams active finished champion playoffMode")
     .populate("teams", "teamName")
     .sort({ createdAt: -1 });
 
@@ -30,6 +30,7 @@ async function handler(req) {
       active: l.active,
       finished: !!l.finished,
       champion: l.champion ? String(l.champion) : "",
+      playoffMode: l.playoffMode || "keine",
       teams: (l.teams || []).map((t) => ({ _id: String(t._id), teamName: t.teamName })),
       teamCount: l.teams?.length || 0,
     })),

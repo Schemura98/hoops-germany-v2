@@ -166,6 +166,12 @@ export default function LigaDetailPage({ params }) {
           Sp = Spiele · S = Siege · N = Niederlagen · Diff = Korbdifferenz. Tabelle aus
           bestätigten Ergebnissen der Hauptrunde.
         </p>
+        <p className="mt-1 text-xs text-gray-500">
+          🏆{" "}
+          {league.championBasis === "playoffs"
+            ? "Meister über die Playoffs (Finalsieger)."
+            : "Meister über die Abschlusstabelle der Hauptrunde (keine Playoffs)."}
+        </p>
 
         {/* Playoffs */}
         {playoffRounds.length > 0 && (
