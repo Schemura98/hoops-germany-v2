@@ -794,8 +794,15 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 >   iOS/Safari die **„Teilen → Zum Home-Bildschirm"-Schritte**; erkennt bereits installierten Standalone-Modus.
 >   Navy-`PageHeader` + 3 Vorteils-Cards (Vollbild/Immer aktuell/Schneller Start) + Navbar/Footer.
 > - **Footer**: Link „App installieren" (erste Position) → erreichbar von überall.
-> - **Verifiziert:** Build grün; Dev-Preview (Manifest 200 + alle Head-Tags + Seite gerendert); **live**
->   (`/manifest.webmanifest`, `/installieren`, `/icon.png`, `/apple-icon.png` je 200; Head-Tags auf `/` da).
+> - **Onboarding-Baustein** (`43dd746`, live): Die Willkommens-Checklist (`components/onboarding/
+>   OnboardingChecklist.js`, „Richte dein Profil ein …" – im Newsfeed **und** auf der eingeloggten
+>   Startseite) zeigt unter den 4 Kern-Schritten einen **5. Bonus-Baustein „Als App installieren"** →
+>   `/installieren`. **Zählt bewusst NICHT in Fortschritt/`allDone`** (sonst sähen bestehend-fertige Nutzer
+>   die Karte wieder) – `done` via Standalone-Erkennung (`display-mode:standalone`/`navigator.standalone`)
+>   + `appinstalled`-Merker (`localStorage hg_pwa_installed`), „Bonus"-Badge solange nicht installiert.
+> - **Verifiziert:** Build grün; Dev-Preview (Manifest 200 + alle Head-Tags + Seite gerendert; Onboarding-
+>   Karte mit Bonus-Zeile bei frischem Account, „0 von 4" bleibt); **live** (`/manifest.webmanifest`,
+>   `/installieren`, `/icon.png`, `/apple-icon.png` je 200; Head-Tags auf `/` da).
 >   ⚠️ Lehre: `npm run build` NICHT laufen lassen, während `next dev` läuft (überschreibt dessen `.next`-CSS
 >   → Dev-Server liefert dann ungestylte Seiten/CSS-404; Dev-Server danach neu starten).
 
