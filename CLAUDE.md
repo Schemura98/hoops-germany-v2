@@ -816,6 +816,28 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > Finale, Audit-Logs, geändertes Ergebnis). Rein lokal → `node scripts/seed-demo.mjs` setzt zurück; **Prod unberührt**
 > (nur Code deployt). Neue Schemas (AuditLog/TeamSeason/League.playoffMode) sind additiv, **keine Migration**.
 
+#### 🌍 Demo-Welt-Generator `seed-world.mjs` (27.06.2026) – „fühlt sich an wie 1 Jahr live"
+> Großer, **zusammenhängender** Demo-Datensatz mit Narrativen. **Getaggt `seedTag:"world"`, additiv,
+> `--purge`-fähig** (fasst echte/andere Daten nicht an), eigene Ligen (self-contained), **eindeutige Team-/
+> Spielernamen** (keine Kollision mit `teamName`-Unique). Aufruf: `node scripts/seed-world.mjs` (Dev) bzw.
+> `node scripts/seed-world.mjs --prod` (Prod), Entfernen: `… --purge`.
+> - **Umfang:** 10 Ligen (8 aktuell 2025/26 + 2 Vorsaison 2024/25 abgeschlossen mit Playoffs/Meister/TeamSeason-
+>   Freeze), 40 NRW-Teams (~38 Vereinsgesuche), 359 Spieler (87 transferbereit inkl. Coach/Manager/Sportl. Ltg.,
+>   ~18 % „pending"/inaktiv), 136 Spiele (gespielt+anstehend, Box-Scores **positions- & tier-realistisch** →
+>   PG viele Assists, C viele Rebounds, Shooter viele Punkte, Bench wenig/DNP), ~45 % Spiele mit **MVP/Zuschauer/
+>   Spielbericht** (neue `Match.mvp/attendance/report`-Felder + Anzeige auf der Match-Seite), 10 TeamSeason-
+>   Snapshots, Transfermarkt (Angebote + Gesuche, teils ältere Einträge), 7 Tryouts, **265 Posts** (User/Vereins-
+>   News/**Auto-Posts** Ergebnis/Transfer/Recruiting/Verfügbar/Meister/Tryout), Likes+Kommentare, Follower **nach
+>   Tier** (Jugend 2–8, Amateur 15–90, Stars 120–260, Vereine 30–400), Karriere-Stationen (Mehr-Saison/Mehr-Team),
+>   12-Monats-Zeitverteilung.
+> - **Narrative (Geschichten):** Finn Brandt (`finn.brandt@demo.de`, seit Jahren Düsseldorf Diamonds, sucht
+>   höherklassig), Köln Sharks suchen seit 2 Wochen einen PG, Dortmund Drivers Siegesserie, Rhein Rockets
+>   Aufstieg/Meister 2024/25, Essen Eagles offenes Probetraining. **Login** `world.coach@demo.de` / `test123`.
+> - **Verifiziert (Dev):** Feed lebendig (Auto-Posts/Vereins-News/Vorschläge); Topscorer realistisch (Star >20 PPG);
+>   Finn 2 Stationen (Düsseldorf 24/25+25/26); abgeschlossene Liga **Tabellenführer ≠ Meister** (Playoff-Sieger);
+>   MVP-Spiel mit Zuschauer/Bericht; keine Konsolenfehler; Build grün. Code (`0f33be0`) gepusht. ⚠️ Auf **Prod
+>   noch NICHT geseedet** (großer additiver Write → erst nach ausdrücklicher Freigabe; `--prod` + `--purge` bereit).
+
 ### Bekannte Einschränkungen / offen
 - **Lokale Dev-Umgebung:** SMTP/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS
   (hoops_prod) live testbar; lokal über In-App-Notifs + Trigger-Logs verifizieren.
