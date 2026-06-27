@@ -26,29 +26,42 @@ async function handler(req) {
     ),
   ];
 
-  // Ohne gefolgte Personen/Teams gibt es nichts anzuzeigen.
-  if (!followingPlayers.length && !teamIds.length) {
-    return ok({ transfers: [] });
-  }
+  await connectDB();
 
+  const pop = (q) =>
+    q
+      .populate("player", "firstName lastName slug profileImage")
+      .populate("fromTeam", "teamName slug logo")
+      .populate("toTeam", "teamName slug logo")
+      .lean();
+
+  // 1) Persönlich relevante Transfers (gefolgte Personen / eigenes & gefolgte Teams).
   const or = [];
   if (followingPlayers.length) or.push({ player: { $in: followingPlayers } });
   if (teamIds.length) {
     or.push({ toTeam: { $in: teamIds } });
     or.push({ fromTeam: { $in: teamIds } });
   }
+  let transfers = or.length
+    ? (await pop(TransferEvent.find({ $or: or }).sort({ createdAt: -1 }).limit(LIMIT))).filter((t) => t.player)
+    : [];
 
-  await connectDB();
-  const transfers = await TransferEvent.find({ $or: or })
-    .sort({ createdAt: -1 })
-    .limit(LIMIT)
-    .populate("player", "firstName lastName slug profileImage")
-    .populate("fromTeam", "teamName slug logo")
-    .populate("toTeam", "teamName slug logo")
-    .lean();
+  // 2) Mit aktuellen Community-Transfers auffüllen, damit das Widget nie leer ist.
+  if (transfers.length < LIMIT) {
+    const seen = new Set(transfers.map((t) => String(t._id)));
+    const recent = await pop(
+      TransferEvent.find({}).sort({ createdAt: -1 }).limit(LIMIT + 10)
+    );
+    for (const t of recent) {
+      if (transfers.length >= LIMIT) break;
+      if (t.player && !seen.has(String(t._id))) {
+        transfers.push(t);
+        seen.add(String(t._id));
+      }
+    }
+  }
 
-  // Verwaiste Einträge (gelöschter Spieler) herausfiltern.
-  return ok({ transfers: transfers.filter((t) => t.player) });
+  return ok({ transfers });
 }
 
 export const POST = withErrorHandling(handler);
