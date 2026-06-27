@@ -2,6 +2,7 @@ import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Match from "@/models/Match";
 import { getAdminFromToken } from "@/lib/serverAuth";
+import { syncMatchResultPost } from "@/lib/autoPost";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/admin/updatematch – Spielstatus/Ergebnis als Admin setzen.
@@ -53,6 +54,10 @@ async function handler(req) {
   }
 
   await match.save();
+
+  // Ergebnis-Auto-Post in den Feed legen/aktualisieren (bzw. bei Reset/Absage entfernen).
+  await syncMatchResultPost(match);
+
   return ok({ message: "Spiel aktualisiert" });
 }
 

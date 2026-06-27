@@ -42,7 +42,14 @@ async function handler(req) {
     ),
   ];
 
-  const query = { player: { $in: ids } };
+  // Beiträge gefolgter Autoren PLUS Auto-Posts (Ergebnis/Transfer/Tryout), die mein
+  // eigenes/gefolgtes Team betreffen oder einen gefolgten Spieler als Subjekt haben.
+  const followingPlayers = (me.following || []).map(String);
+  const or = [{ player: { $in: ids } }];
+  if (feedTeamIds.length) or.push({ teams: { $in: feedTeamIds } });
+  if (followingPlayers.length) or.push({ subjectPlayer: { $in: followingPlayers } });
+
+  const query = { $or: or };
   if (body.before) {
     const d = new Date(body.before);
     if (!Number.isNaN(d.getTime())) query.createdAt = { $lt: d };

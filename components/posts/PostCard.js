@@ -3,10 +3,27 @@
 import { useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaRegHeart, FaHeart, FaRegComment } from "react-icons/fa";
+import {
+  FaRegHeart,
+  FaHeart,
+  FaRegComment,
+  FaBasketballBall,
+  FaExchangeAlt,
+  FaUsers,
+  FaBullhorn,
+} from "react-icons/fa";
 import { getPlayerToken } from "@/lib/clientAuth";
 import { timeAgo } from "@/lib/timeAgo";
 import Avatar from "./Avatar";
+
+// Darstellung der automatischen Ereignis-Beiträge (Icon + Badge je Typ).
+const AUTO = {
+  match_result: { Icon: FaBasketballBall, label: "Spielergebnis", color: "bg-brand-100 text-brand-600" },
+  transfer: { Icon: FaExchangeAlt, label: "Transfer", color: "bg-blue-100 text-blue-600" },
+  team_founded: { Icon: FaUsers, label: "Neues Team", color: "bg-green-100 text-green-600" },
+  tryout: { Icon: FaBullhorn, label: "Tryout", color: "bg-purple-100 text-purple-600" },
+};
+const AUTO_FALLBACK = { Icon: FaBasketballBall, label: "Update", color: "bg-gray-100 text-gray-600" };
 
 function authorLink(player) {
   return player?.slug || player?._id
@@ -269,36 +286,78 @@ export default function PostCard({ post, currentPlayerId }) {
   }
 
   const author = post.player;
+  const isAuto = post.kind === "auto";
+  const auto = isAuto ? AUTO[post.autoType] || AUTO_FALLBACK : null;
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-      {/* Kopf */}
-      <div className="flex items-center gap-3">
-        <Link href={authorLink(author)}>
-          <Avatar player={author} />
-        </Link>
-        <div>
-          <Link
-            href={authorLink(author)}
-            className="font-medium text-gray-900 hover:text-brand-600"
-          >
-            {author?.firstName} {author?.lastName}
-          </Link>
-          <p className="text-xs text-gray-400">{timeAgo(post.createdAt)}</p>
-        </div>
-      </div>
+      {isAuto ? (
+        <>
+          {/* Kopf (Ereignis) */}
+          <div className="flex items-center gap-3">
+            <span
+              className={`h-10 w-10 flex-shrink-0 rounded-full flex items-center justify-center ${auto.color}`}
+            >
+              <auto.Icon />
+            </span>
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                {auto.label}
+              </span>
+              <p className="text-xs text-gray-400">{timeAgo(post.createdAt)}</p>
+            </div>
+          </div>
 
-      {/* Inhalt */}
-      {post.content && (
-        <p className="mt-3 text-gray-800 whitespace-pre-line">{post.content}</p>
-      )}
-      {post.image && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={post.image}
-          alt=""
-          className="mt-3 rounded-xl max-h-96 w-full object-cover"
-        />
+          {/* Inhalt (verlinkt aufs Ereignis) */}
+          {post.meta?.href ? (
+            <Link href={post.meta.href} className="block mt-3 group">
+              <p className="font-semibold text-gray-900 group-hover:text-brand-600">
+                {post.content}
+              </p>
+              {post.meta?.note && (
+                <p className="text-xs text-gray-500 mt-0.5">{post.meta.note}</p>
+              )}
+            </Link>
+          ) : (
+            <div className="mt-3">
+              <p className="font-semibold text-gray-900">{post.content}</p>
+              {post.meta?.note && (
+                <p className="text-xs text-gray-500 mt-0.5">{post.meta.note}</p>
+              )}
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          {/* Kopf */}
+          <div className="flex items-center gap-3">
+            <Link href={authorLink(author)}>
+              <Avatar player={author} />
+            </Link>
+            <div>
+              <Link
+                href={authorLink(author)}
+                className="font-medium text-gray-900 hover:text-brand-600"
+              >
+                {author?.firstName} {author?.lastName}
+              </Link>
+              <p className="text-xs text-gray-400">{timeAgo(post.createdAt)}</p>
+            </div>
+          </div>
+
+          {/* Inhalt */}
+          {post.content && (
+            <p className="mt-3 text-gray-800 whitespace-pre-line">{post.content}</p>
+          )}
+          {post.image && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={post.image}
+              alt=""
+              className="mt-3 rounded-xl max-h-96 w-full object-cover"
+            />
+          )}
+        </>
       )}
 
       {/* Aktionen */}

@@ -7,6 +7,7 @@ import { getTeamFromToken } from "@/lib/serverAuth";
 import { sendMail } from "@/lib/mailer";
 import { resultMismatchEmail } from "@/lib/emailTemplates";
 import { getBaseUrl } from "@/lib/baseUrl";
+import { syncMatchResultPost } from "@/lib/autoPost";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // Benachrichtigt beide Team-Admins + alle Super-Admins über ein strittiges Ergebnis
@@ -237,6 +238,9 @@ async function handler(req) {
       console.error("[MISMATCH NOTIFY ERROR]", err);
     }
   }
+
+  // Ergebnis-Auto-Post in den Feed legen/aktualisieren (bzw. bei mismatch entfernen).
+  await syncMatchResultPost(match);
 
   return ok({
     resultStatus: match.resultStatus,

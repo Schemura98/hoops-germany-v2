@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Tryout from "@/models/Tryout";
 import { getTeamFromToken } from "@/lib/serverAuth";
 import { POSITIONS } from "@/lib/constants";
+import { autoPostTryout } from "@/lib/autoPost";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/tryouts/create – Tryout ausschreiben (Dual-Auth).
@@ -42,6 +43,9 @@ async function handler(req) {
     status: "active",
     applicants: [],
   });
+
+  // Auto-Post in den Feed (Followern des Teams + Entdecken).
+  await autoPostTryout({ tryout, teamName: team.teamName });
 
   return ok({ tryout }, 201);
 }
