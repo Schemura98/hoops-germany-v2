@@ -696,8 +696,8 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > | 5 | „Für dich"-Ranking (Hot-Score + Region/Liga/Team-Boosts statt roh-chronologisch) | ✅ live (`8755c08`) |
 > | 6 | Team-Posts (Vereine als Autoren: Probetraining/Heimspiel/News) | ✅ live (`33316d0`) |
 > | 8 | Folge-Vorschläge im Feed (Region/Liga) für neue User | ✅ live (`8755553`) |
-> | **9** | **Hashtags + @Mentions** (klickbar + Mention-Notif) | 🔜 **als Nächstes** |
-> | 10 | YouTube-/Link-Embeds (Highlight-Clips) | 🔜 offen |
+> | 9 | Hashtags + @Mentions (klickbar + Mention-Notif) | ✅ live (`bfc97e8`) |
+> | **10** | **YouTube-/Link-Embeds** (Highlight-Clips) | 🔜 **als Nächstes (letztes)** |
 >
 > **#7 Transfermarkt→Feed ✅ erledigt** (`c9bb958`): Über `lib/autoPost.js` – `autoPostTransferAvailable`
 > (Spieler setzt `transferStatus:"verfuegbar"` in `update-transfer` → subjectPlayer, Text mit
@@ -745,14 +745,26 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > keine Konsolenfehler. ⚠️ Karte ist aktuell **immer** sichtbar (blendet sich nur leer aus) – optional könnte man
 > sie für Nutzer mit vielen Follows ausblenden; bewusst belassen (Discovery hilft auch aktiven Nutzern).
 >
-> **➡️ NÄCHSTE SESSION HIER STARTEN – #9 Hashtags + @Mentions** (Vernetzung/Discovery):
-> **Render:** Helper `lib/richText.js` (oder in `PostCard`) der `content` parst und `#tag`/`@name` als Links
-> rendert (`#tag` → neue Suchseite `/feed/tag/[tag]` oder `/suche?tag=`, `@slug` → Profil). **Hashtag-Suche:**
-> entweder bei Bedarf per Regex auf `content` (`Post.find({content:/#tag\b/i})`) ODER beim Anlegen Tags in ein
-> Feld `Post.hashtags:[String]` extrahieren (sauberer/indizierbar – empfohlen; in `uploadpost`/`team-post`/
-> `autoPost` füllen). **@Mentions:** beim Erstellen `@`-Tokens gegen `Player.slug` auflösen → Mention-Notif
-> (neuer `Player.notifications`-Typ `mention` + `notificationHref` → `/post/[id]`; `NotificationBell`-Icon).
-> Mention-Eingabe-Autocomplete im Composer ist optional (erst Parsing/Notif liefern). **Danach:** #10 YouTube/Link-Embeds.
+> **#9 Hashtags + @Mentions ✅ erledigt** (`bfc97e8`, live 27.06.2026): `models/Post.js` um `hashtags:[String]`
+> (indiziert) + `mentions:[{playerId,slug,token}]` erweitert. `lib/postParse.js` (`extractHashtags` +
+> `resolveMentions` – Handle = firstName+lastName ODER **eindeutiger** Vorname ODER normalisierter Slug;
+> mehrdeutige Vornamen werden übersprungen). `uploadpost`/`team-post` extrahieren + speichern + benachrichtigen
+> erwähnte Spieler (neuer Player-Notif-Typ **`mention`**, `notifyMentions` in `lib/notifyEngagement.js`, kein
+> Self-Notify; `notificationHref`→`/post/[id]`, `NotificationBell`-Icon `FaAt`). `components/posts/RichText.js`
+> rendert `#tag`→`/feed/tag/[tag]` und `@token`→Profil (nur aufgelöste Mentions verlinkt); `PostCard` nutzt es
+> für den Inhalt. Neuer Hashtag-Feed: `POST /api/posts/by-tag` + Seite `app/feed/tag/[tag]`. **Verifiziert
+> (Dev/Preview):** Tags extrahiert; `@NoahBecker`(Vollname)/`@Tim`(eindeutiger Vorname) aufgelöst; Mention-Notifs
+> bei beiden; Feed rendert klickbare #/@-Links; Tag-Seite zeigt Posts; keine Konsolenfehler. ⚠️ Kein
+> Composer-Autocomplete (bewusst – Nutzer tippen `@Vorname`/`@VornameNachname`); Mentions in **Kommentaren**
+> sind noch nicht geparst (nur Beitragstext) – möglicher Follow-up.
+>
+> **➡️ NÄCHSTE SESSION HIER STARTEN – #10 YouTube-/Link-Embeds** (LETZTES Roadmap-Item, dann Newsfeed komplett):
+> In `RichText` (oder eigener Schritt nach dem Beitrags-Body) **erste erkannte URL** als Embed rendern:
+> YouTube (`youtube.com/watch?v=`/`youtu.be/`) → `<iframe>` (16:9, lazy), sonst generische **Link-Vorschau-Karte**
+> (Domain + Link; optional OG-Title/Image serverseitig holen – v1 reicht Domain + klickbare URL). Sinnvoll:
+> beim Erstellen erste URL in `Post.linkUrl`/`Post.embed` denormalisieren (kein populate/Fetch im Render).
+> URLs im Text ansonsten als normale Links klickbar machen (in `RichText` Regex um `https?://…` ergänzen).
+> **Danach: Newsfeed-Roadmap (10/10) vollständig abgeschlossen.**
 >
 > ⚠️ **Dev-DB-Aufräumen vor dem Weitermachen:** Die Verifikation legt in `hoopsgermany` (Dev) Test-Artefakte an
 > (z.B. ein „Probetraining"-Team-Post von Test Baskets). Rein lokal → `node scripts/seed-demo.mjs` setzt sauber
