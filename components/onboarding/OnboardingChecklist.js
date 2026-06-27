@@ -1,12 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaCheckCircle, FaRegCircle, FaTimes, FaArrowRight } from "react-icons/fa";
+import {
+  FaCheckCircle,
+  FaRegCircle,
+  FaTimes,
+  FaArrowRight,
+  FaMobileAlt,
+} from "react-icons/fa";
 import { getPlayerToken } from "@/lib/clientAuth";
 
-// Leitet den Erledigt-Status der 4 Schritte aus dem Spieler-Objekt ab (aus getmyinfo).
+// Leitet den Erledigt-Status der 4 Kern-Schritte aus dem Spieler-Objekt ab (aus getmyinfo).
 function computeSteps(player) {
   return [
     {
@@ -44,12 +50,51 @@ function computeSteps(player) {
 // erledigt sind ODER der Nutzer „Nicht mehr anzeigen" wählt (Server-Flag).
 export default function OnboardingChecklist({ player, onDismiss }) {
   const [hidden, setHidden] = useState(false);
+  const [appInstalled, setAppInstalled] = useState(false);
 
+  // App-Installation erkennen: läuft die Seite im Standalone-Modus (= installiert),
+  // oder wurde sie auf diesem Gerät schon einmal installiert (gemerkt via appinstalled).
+  useEffect(() => {
+    const detect = () =>
+      window.matchMedia?.("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true ||
+      (() => {
+        try {
+          return localStorage.getItem("hg_pwa_installed") === "1";
+        } catch {
+          return false;
+        }
+      })();
+    setAppInstalled(!!detect());
+    const onInstalled = () => {
+      try {
+        localStorage.setItem("hg_pwa_installed", "1");
+      } catch {
+        /* localStorage evtl. blockiert – Standalone-Erkennung greift trotzdem */
+      }
+      setAppInstalled(true);
+    };
+    window.addEventListener("appinstalled", onInstalled);
+    return () => window.removeEventListener("appinstalled", onInstalled);
+  }, []);
+
+  // Nur die 4 Kern-Schritte bestimmen Fortschritt + „alles erledigt" (auto-ausblenden).
   const steps = useMemo(() => computeSteps(player), [player]);
   const doneCount = steps.filter((s) => s.done).length;
   const allDone = doneCount === steps.length;
 
   if (!player || hidden || player.onboardingDismissed || allDone) return null;
+
+  // Bonus-Baustein (zählt NICHT in den Fortschritt) – Hoops Germany als App aufs Handy.
+  const appStep = {
+    key: "app",
+    label: "Als App installieren",
+    desc: "Hol dir Hoops Germany aufs Handy – Vollbild, ein Tap zum Start.",
+    href: "/installieren",
+    done: appInstalled,
+    bonus: true,
+    Icon: FaMobileAlt,
+  };
 
   async function dismiss() {
     setHidden(true); // sofort ausblenden (optimistisch)
@@ -98,9 +143,9 @@ export default function OnboardingChecklist({ player, onDismiss }) {
         </div>
       </div>
 
-      {/* Schritte */}
+      {/* Schritte (4 Kern + 1 Bonus: App-Installation) */}
       <ul className="mt-4 space-y-2">
-        {steps.map((s) => (
+        {[...steps, appStep].map((s) => (
           <li key={s.key}>
             <Link
               href={s.href}
@@ -110,6 +155,8 @@ export default function OnboardingChecklist({ player, onDismiss }) {
             >
               {s.done ? (
                 <FaCheckCircle className="text-brand-500 flex-shrink-0" />
+              ) : s.Icon ? (
+                <s.Icon className="text-white/60 flex-shrink-0" />
               ) : (
                 <FaRegCircle className="text-white/40 flex-shrink-0" />
               )}
@@ -120,6 +167,11 @@ export default function OnboardingChecklist({ player, onDismiss }) {
                   }`}
                 >
                   {s.label}
+                  {s.bonus && !s.done && (
+                    <span className="ml-2 align-middle text-[10px] font-bold uppercase tracking-wide text-brand-400">
+                      Bonus
+                    </span>
+                  )}
                 </span>
                 {!s.done && <span className="block text-xs text-white/60">{s.desc}</span>}
               </span>
