@@ -9,6 +9,7 @@ const notificationSchema = new mongoose.Schema(
         "join_request",
         "join_approved",
         "member_joined",
+        "team_invite",
         "pending_result",
         "match_result",
         "transfer",

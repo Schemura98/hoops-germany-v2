@@ -45,6 +45,8 @@ const teamSchema = new mongoose.Schema(
     recruitingNote: String,
     // Bei Beitritten/Anfragen: alle Team-Admins benachrichtigen (statt nur Haupt-Admin).
     notifyAllAdmins: { type: Boolean, default: false },
+    // Direkt eingeladene bestehende Accounts (warten auf Annahme/Ablehnung).
+    invitedPlayers: [{ type: mongoose.Schema.Types.ObjectId, ref: "players" }],
     // Teilrechte je Co-Admin (Capability-Keys aus lib/teamPermissions). KEIN Eintrag
     // = Vollzugriff (Rückwärtskompatibilität für Bestands-Co-Admins). Haupt-Admin
     // (adminPlayerId) hat IMMER alle Rechte und steht hier nicht.

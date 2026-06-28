@@ -21,6 +21,7 @@ async function handler(req) {
       message: n.message,
       read: n.read,
       createdAt: n.createdAt,
+      teamId: n.teamId,
       teamSlug: n.teamSlug,
       teamName: n.teamName,
       fromPlayerId: n.fromPlayerId,

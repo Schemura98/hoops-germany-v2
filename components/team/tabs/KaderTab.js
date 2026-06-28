@@ -17,6 +17,8 @@ import {
   FaLink,
   FaHashtag,
   FaSlidersH,
+  FaSearch,
+  FaUserPlus,
 } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import { POSITIONS, positionLabel } from "@/lib/constants";
@@ -56,6 +58,13 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
   const [inviteToken, setInviteToken] = useState(team?.inviteToken || "");
   const [generatingInvite, setGeneratingInvite] = useState(false);
   const [inviteCopied, setInviteCopied] = useState(false);
+
+  // Bestehenden Account direkt einladen (Suche)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [invitingId, setInvitingId] = useState(null);
+  const [invitedIds, setInvitedIds] = useState([]);
 
   async function loadMembers() {
     try {
@@ -188,6 +197,46 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
     if (!inviteLink) return;
     const text = `Tritt dem Team ${team?.teamName || "unserem Team"} bei Hoops Germany bei: ${inviteLink}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener");
+  }
+
+  // Bestehende Accounts suchen (debounced) und einladen.
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    let active = true;
+    setSearching(true);
+    const t = setTimeout(async () => {
+      try {
+        const { data } = await axios.post("/api/player/search", { q });
+        if (active) setSearchResults(data.players || []);
+      } catch {
+        /* ignorieren */
+      } finally {
+        if (active) setSearching(false);
+      }
+    }, 300);
+    return () => {
+      active = false;
+      clearTimeout(t);
+    };
+  }, [searchQuery]);
+
+  async function invitePlayer(p) {
+    setInvitingId(p.playerId);
+    setMsg(null);
+    try {
+      const token = getTeamAuthToken();
+      await axios.post("/api/team/invite-player", { token, playerId: p.playerId });
+      setInvitedIds((ids) => [...ids, p.playerId]);
+      flash("ok", `Einladung an ${p.name} gesendet – sie wird per Glocke & Mail gefragt.`);
+    } catch (err) {
+      flash("err", err.response?.data?.message || "Einladung fehlgeschlagen.");
+    } finally {
+      setInvitingId(null);
+    }
   }
 
   // Slot hinzufügen
@@ -377,6 +426,71 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
             <FaLink className="text-xs" />
             {generatingInvite ? "Wird erstellt…" : "Einladungslink erstellen"}
           </button>
+        )}
+      </div>
+
+      {/* Bestehenden Account direkt einladen */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+        <div className="flex items-center gap-2 mb-1">
+          <FaUserPlus className="text-brand-500 text-sm" />
+          <h3 className="text-sm font-semibold text-gray-900">Bestehenden Spieler einladen</h3>
+        </div>
+        <p className="text-xs text-gray-500 mb-3">
+          Suche einen registrierten Spieler – er wird per Glocke &amp; E-Mail gefragt und landet erst nach
+          seiner Zustimmung in deinem Kader.
+        </p>
+        <div className="relative">
+          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Name suchen…"
+            className={`${inputClass} pl-8`}
+          />
+        </div>
+        {searchQuery.trim().length >= 2 && (
+          <div className="mt-2 divide-y divide-gray-50 rounded-lg border border-gray-100">
+            {searching ? (
+              <p className="px-3 py-3 text-xs text-gray-400">Suche…</p>
+            ) : (
+              (() => {
+                const list = searchResults.filter(
+                  (p) => !members.some((m) => m.playerId === p.playerId)
+                );
+                if (list.length === 0) {
+                  return (
+                    <p className="px-3 py-3 text-xs text-gray-400">
+                      Keine passenden Spieler gefunden.
+                    </p>
+                  );
+                }
+                return list.map((p) => {
+                  const already = invitedIds.includes(p.playerId);
+                  return (
+                    <div
+                      key={p.playerId}
+                      className="flex items-center justify-between gap-2 px-3 py-2"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{p.name}</p>
+                        <p className="text-xs text-gray-400 truncate">
+                          {[p.position, p.teamName].filter(Boolean).join(" · ") || "Vereinslos"}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => invitePlayer(p)}
+                        disabled={invitingId === p.playerId || already}
+                        className="flex-shrink-0 inline-flex items-center gap-1.5 bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-3 py-1.5 text-xs font-medium"
+                      >
+                        {already ? <FaCheck /> : <FaUserPlus />}
+                        {already ? "Eingeladen" : invitingId === p.playerId ? "…" : "Einladen"}
+                      </button>
+                    </div>
+                  );
+                });
+              })()
+            )}
+          </div>
         )}
       </div>
 

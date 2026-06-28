@@ -15,6 +15,9 @@ import {
   FaRegComment,
   FaReply,
   FaAt,
+  FaEnvelopeOpenText,
+  FaCheck,
+  FaTimes,
 } from "react-icons/fa";
 import { getPlayerToken, getStoredPlayer } from "@/lib/clientAuth";
 import { notificationHref } from "@/lib/notifications";
@@ -25,6 +28,7 @@ const ICON = {
   join_request: FaUsers,
   join_approved: FaCheckCircle,
   member_joined: FaUserPlus,
+  team_invite: FaEnvelopeOpenText,
   match_result: FaBasketballBall,
   pending_result: FaBasketballBall,
   result_mismatch: FaExclamationTriangle,
@@ -39,6 +43,24 @@ export default function NotificationBell() {
   const [items, setItems] = useState([]);
   const [unread, setUnread] = useState(0);
   const [open, setOpen] = useState(false);
+  const [respondingTeam, setRespondingTeam] = useState(null);
+  const [responded, setResponded] = useState({}); // teamId -> "accepted" | "declined"
+
+  async function respondInvite(n, accept) {
+    if (!n.teamId) return;
+    setRespondingTeam(String(n.teamId));
+    try {
+      const token = getPlayerToken();
+      await axios.post("/api/team/respond-invite", { token, teamId: n.teamId, accept });
+      setResponded((r) => ({ ...r, [String(n.teamId)]: accept ? "accepted" : "declined" }));
+      load();
+    } catch {
+      /* Fehler ignorieren – Einladung evtl. nicht mehr gültig */
+      load();
+    } finally {
+      setRespondingTeam(null);
+    }
+  }
 
   async function load() {
     try {
@@ -108,7 +130,10 @@ export default function NotificationBell() {
               <ul className="divide-y divide-gray-50">
                 {items.map((n) => {
                   const Icon = ICON[n.type] || FaBell;
-                  const href = notificationHref(n, me);
+                  const isInvite = n.type === "team_invite";
+                  const href = isInvite ? null : notificationHref(n, me);
+                  const status = isInvite ? responded[String(n.teamId)] : null;
+                  const busy = isInvite && respondingTeam === String(n.teamId);
                   const inner = (
                     <div
                       className={`flex gap-3 px-4 py-3 ${
@@ -118,11 +143,39 @@ export default function NotificationBell() {
                       <span className="h-8 w-8 flex-shrink-0 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
                         <Icon className="text-sm" />
                       </span>
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <p className="text-sm text-gray-800">{n.message}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          {timeAgo(n.createdAt)}
-                        </p>
+                        <p className="text-xs text-gray-400 mt-0.5">{timeAgo(n.createdAt)}</p>
+
+                        {/* Kader-Einladung: annehmen / ablehnen */}
+                        {isInvite && (
+                          status ? (
+                            <p
+                              className={`mt-2 text-xs font-semibold ${
+                                status === "accepted" ? "text-green-600" : "text-gray-400"
+                              }`}
+                            >
+                              {status === "accepted" ? "✓ Angenommen" : "Abgelehnt"}
+                            </p>
+                          ) : (
+                            <div className="mt-2 flex items-center gap-2">
+                              <button
+                                onClick={() => respondInvite(n, true)}
+                                disabled={busy}
+                                className="inline-flex items-center gap-1.5 bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-3 py-1.5 text-xs font-semibold"
+                              >
+                                <FaCheck className="text-[10px]" /> Annehmen
+                              </button>
+                              <button
+                                onClick={() => respondInvite(n, false)}
+                                disabled={busy}
+                                className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-gray-400 text-gray-600 rounded-lg px-3 py-1.5 text-xs font-medium"
+                              >
+                                <FaTimes className="text-[10px]" /> Ablehnen
+                              </button>
+                            </div>
+                          )
+                        )}
                       </div>
                     </div>
                   );
