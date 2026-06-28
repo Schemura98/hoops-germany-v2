@@ -3,6 +3,10 @@ import { connectDB } from "@/lib/db";
 import Team from "@/models/Team";
 import Player from "@/models/Player";
 import { getPlayerFromToken } from "@/lib/serverAuth";
+import { sendMail } from "@/lib/mailer";
+import { joinRequestEmail } from "@/lib/emailTemplates";
+import { getBaseUrl } from "@/lib/baseUrl";
+import { positionLabel } from "@/lib/constants";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/team/roster/request-claim – eingeloggter Spieler beansprucht einen Slot.
@@ -40,22 +44,38 @@ async function handler(req) {
   slot.claimedBy = player._id;
   await team.save();
 
-  // Team-Admin benachrichtigen (falls spielergeführtes Team)
+  // Team-Admin benachrichtigen (falls spielergeführtes Team): In-App + Mail
   if (team.adminPlayerId) {
-    await Player.findByIdAndUpdate(team.adminPlayerId, {
-      $push: {
-        notifications: {
-          type: "join_request",
-          fromPlayerId: player._id,
-          teamId: team._id,
-          teamName: team.teamName,
-          teamSlug: team.slug,
-          message: `${player.firstName} ${player.lastName} möchte einen Kaderplatz beanspruchen.`,
-          read: false,
-          createdAt: new Date(),
+    const admin = await Player.findByIdAndUpdate(
+      team.adminPlayerId,
+      {
+        $push: {
+          notifications: {
+            type: "join_request",
+            fromPlayerId: player._id,
+            teamId: team._id,
+            teamName: team.teamName,
+            teamSlug: team.slug,
+            message: `${player.firstName} ${player.lastName} möchte einen Kaderplatz beanspruchen.`,
+            read: false,
+            createdAt: new Date(),
+          },
         },
       },
-    });
+      { new: true, projection: "email" }
+    );
+    if (admin?.email) {
+      const mail = joinRequestEmail({
+        teamName: team.teamName,
+        playerName: `${player.firstName} ${player.lastName}`.trim(),
+        position: positionLabel(slot.position),
+        kind: "slot",
+        baseUrl: getBaseUrl(req),
+      });
+      sendMail({ to: admin.email, subject: mail.subject, html: mail.html, text: mail.text }).catch(
+        (err) => console.error("[JOIN REQUEST MAIL ERROR]", err?.message || err)
+      );
+    }
   }
 
   return ok({ message: "Anspruch gesendet – warte auf Bestätigung durch das Team." });
