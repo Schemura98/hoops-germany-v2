@@ -43,6 +43,8 @@ const teamSchema = new mongoose.Schema(
     recruiting: { type: Boolean, default: false },
     recruitingPositions: [String], // gesuchte Positionen/Rollen (ALL_ROLES)
     recruitingNote: String,
+    // Bei Beitritten/Anfragen: alle Team-Admins benachrichtigen (statt nur Haupt-Admin).
+    notifyAllAdmins: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

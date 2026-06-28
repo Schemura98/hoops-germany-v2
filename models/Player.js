@@ -8,6 +8,7 @@ const notificationSchema = new mongoose.Schema(
         "follow",
         "join_request",
         "join_approved",
+        "member_joined",
         "pending_result",
         "match_result",
         "transfer",

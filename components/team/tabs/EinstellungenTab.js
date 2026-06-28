@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { FaCopy, FaCheck, FaLink, FaTrophy } from "react-icons/fa";
+import { FaCopy, FaCheck, FaLink, FaTrophy, FaBell } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import {
   BUNDESLAENDER,
@@ -55,6 +55,10 @@ export default function EinstellungenTab({ team, reload }) {
   const [recruitSaving, setRecruitSaving] = useState(false);
   const [recruitMsg, setRecruitMsg] = useState(null);
 
+  // Benachrichtigungen: bei Beitritten/Anfragen alle Admins benachrichtigen
+  const [notifyAllAdmins, setNotifyAllAdmins] = useState(!!team?.notifyAllAdmins);
+  const [notifySaving, setNotifySaving] = useState(false);
+
   const toggleRecruitPos = (p) =>
     setRecruitPositions((list) =>
       list.includes(p) ? list.filter((x) => x !== p) : [...list, p]
@@ -80,6 +84,18 @@ export default function EinstellungenTab({ team, reload }) {
       });
     } finally {
       setRecruitSaving(false);
+    }
+  }
+
+  async function saveNotifyAdmins(next) {
+    setNotifySaving(true);
+    try {
+      const token = getTeamAuthToken();
+      await axios.post("/api/team/set-notify-admins", { token, notifyAllAdmins: next });
+    } catch {
+      setNotifyAllAdmins(!next); // bei Fehler zurückrollen
+    } finally {
+      setNotifySaving(false);
     }
   }
 
@@ -496,6 +512,40 @@ export default function EinstellungenTab({ team, reload }) {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Benachrichtigungen */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <FaBell className="text-brand-500" /> Benachrichtigungen
+          </h2>
+          <button
+            type="button"
+            onClick={() => {
+              const next = !notifyAllAdmins;
+              setNotifyAllAdmins(next);
+              saveNotifyAdmins(next);
+            }}
+            disabled={notifySaving}
+            role="switch"
+            aria-checked={notifyAllAdmins}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${
+              notifyAllAdmins ? "bg-brand-500" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                notifyAllAdmins ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+        <p className="text-sm text-gray-500">
+          {notifyAllAdmins
+            ? "Bei Beitritten und Anfragen werden alle Team-Admins (Haupt-Admin + Co-Admins) benachrichtigt."
+            : "Bei Beitritten und Anfragen wird nur der Haupt-Admin benachrichtigt. Aktiviere den Schalter, um alle Team-Admins zu benachrichtigen."}
+        </p>
       </div>
 
       {/* Einladungslink */}

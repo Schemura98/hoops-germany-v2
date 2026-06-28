@@ -7,6 +7,7 @@ import { sendMail } from "@/lib/mailer";
 import { joinRequestEmail } from "@/lib/emailTemplates";
 import { getBaseUrl } from "@/lib/baseUrl";
 import { positionLabel } from "@/lib/constants";
+import { getTeamAdminRecipients } from "@/lib/teamAdmins";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/team/requestjoin – Spieler stellt Beitrittsanfrage an ein Team.
@@ -41,10 +42,13 @@ async function handler(req) {
   player.teamJoinRequest = team._id;
   await player.save();
 
-  // Team-Admin benachrichtigen (spielergeführtes Team): In-App + Mail
-  if (team.adminPlayerId) {
-    const admin = await Player.findByIdAndUpdate(
-      team.adminPlayerId,
+  // Team-Admin(s) benachrichtigen (spielergeführtes Team): In-App + Mail.
+  // Empfänger je nach Team-Einstellung (nur Haupt-Admin oder alle Admins).
+  const playerName = `${player.firstName} ${player.lastName}`.trim();
+  const admins = await getTeamAdminRecipients(team);
+  if (admins.length) {
+    await Player.updateMany(
+      { _id: { $in: admins.map((a) => a._id) } },
       {
         $push: {
           notifications: {
@@ -53,25 +57,26 @@ async function handler(req) {
             teamId: team._id,
             teamName: team.teamName,
             teamSlug: team.slug,
-            message: `${player.firstName} ${player.lastName} möchte deinem Team beitreten.`,
+            message: `${playerName} möchte deinem Team beitreten.`,
             read: false,
             createdAt: new Date(),
           },
         },
-      },
-      { new: true, projection: "email" }
+      }
     );
-    if (admin?.email) {
-      const mail = joinRequestEmail({
-        teamName: team.teamName,
-        playerName: `${player.firstName} ${player.lastName}`.trim(),
-        position: positionLabel(player.position),
-        kind: "join",
-        baseUrl: getBaseUrl(req),
-      });
-      sendMail({ to: admin.email, subject: mail.subject, html: mail.html, text: mail.text }).catch(
-        (err) => console.error("[JOIN REQUEST MAIL ERROR]", err?.message || err)
-      );
+    const mail = joinRequestEmail({
+      teamName: team.teamName,
+      playerName,
+      position: positionLabel(player.position),
+      kind: "join",
+      baseUrl: getBaseUrl(req),
+    });
+    for (const a of admins) {
+      if (a.email) {
+        sendMail({ to: a.email, subject: mail.subject, html: mail.html, text: mail.text }).catch(
+          (err) => console.error("[JOIN REQUEST MAIL ERROR]", err?.message || err)
+        );
+      }
     }
   }
 

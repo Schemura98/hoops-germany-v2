@@ -4,13 +4,18 @@ import Team from "@/models/Team";
 import Player from "@/models/Player";
 import { getPlayerFromToken } from "@/lib/serverAuth";
 import { sendMail } from "@/lib/mailer";
-import { joinRequestEmail } from "@/lib/emailTemplates";
+import { memberJoinedEmail } from "@/lib/emailTemplates";
 import { getBaseUrl } from "@/lib/baseUrl";
 import { positionLabel } from "@/lib/constants";
+import { recordTransfer } from "@/lib/recordTransfer";
+import { followOwnTeam } from "@/lib/teamFollow";
+import { getTeamAdminRecipients } from "@/lib/teamAdmins";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
-// POST /api/team/roster/request-claim – eingeloggter Spieler beansprucht einen Slot.
-// Setzt den Slot auf "pending" und vermerkt den Spieler (claimedBy).
+// POST /api/team/roster/request-claim – eingeloggter (oder gerade registrierter)
+// Spieler übernimmt einen Slot über den Einladungslink. Der Link = Autorisierung
+// durch den Team-Admin → der Spieler wird DIREKT bestätigt (kein manuelles
+// Genehmigen mehr); die Team-Admins erhalten eine Bestätigung (In-App + Mail).
 async function handler(req) {
   const body = await req.json().catch(() => ({}));
   const token = getTokenFromRequest(req, body.token);
@@ -36,49 +41,77 @@ async function handler(req) {
     return fail("Slot nicht gefunden", 404);
   }
   if (slot.status !== "empty") {
-    return fail("Dieser Platz wurde bereits beansprucht", 409);
+    return fail("Dieser Platz wurde bereits vergeben", 409);
   }
 
-  // Slot beanspruchen
-  slot.status = "pending";
+  // Slot direkt bestätigen (Einladungslink = Autorisierung)
+  slot.status = "confirmed";
   slot.claimedBy = player._id;
   await team.save();
 
-  // Team-Admin benachrichtigen (falls spielergeführtes Team): In-App + Mail
-  if (team.adminPlayerId) {
-    const admin = await Player.findByIdAndUpdate(
-      team.adminPlayerId,
+  // Spieler mit Team verknüpfen (+ Slot-Nummer übernehmen, falls keine eigene)
+  const prevTeam = player.teamId || null;
+  const setFields = { teamId: team._id };
+  if (slot.number && !player.number) {
+    setFields.number = String(slot.number);
+  }
+  await Player.findByIdAndUpdate(player._id, {
+    $set: setFields,
+    $push: {
+      notifications: {
+        type: "join_approved",
+        teamId: team._id,
+        teamName: team.teamName,
+        teamSlug: team.slug,
+        message: `Du bist jetzt im Kader von ${team.teamName}.`,
+        read: false,
+        createdAt: new Date(),
+      },
+    },
+  });
+
+  if (String(prevTeam || "") !== String(team._id)) {
+    await recordTransfer({ player: player._id, fromTeam: prevTeam, toTeam: team._id });
+  }
+  await followOwnTeam(player._id, team._id);
+
+  // Team-Admins benachrichtigen: erfolgreicher Beitritt (In-App + Mail).
+  const playerName = `${player.firstName} ${player.lastName}`.trim();
+  const admins = await getTeamAdminRecipients(team);
+  if (admins.length) {
+    await Player.updateMany(
+      { _id: { $in: admins.map((a) => a._id) } },
       {
         $push: {
           notifications: {
-            type: "join_request",
+            type: "member_joined",
             fromPlayerId: player._id,
             teamId: team._id,
             teamName: team.teamName,
             teamSlug: team.slug,
-            message: `${player.firstName} ${player.lastName} möchte einen Kaderplatz beanspruchen.`,
+            message: `${playerName} hat sich registriert und ist jetzt in deinem Kader.`,
             read: false,
             createdAt: new Date(),
           },
         },
-      },
-      { new: true, projection: "email" }
+      }
     );
-    if (admin?.email) {
-      const mail = joinRequestEmail({
-        teamName: team.teamName,
-        playerName: `${player.firstName} ${player.lastName}`.trim(),
-        position: positionLabel(slot.position),
-        kind: "slot",
-        baseUrl: getBaseUrl(req),
-      });
-      sendMail({ to: admin.email, subject: mail.subject, html: mail.html, text: mail.text }).catch(
-        (err) => console.error("[JOIN REQUEST MAIL ERROR]", err?.message || err)
-      );
+    const mail = memberJoinedEmail({
+      teamName: team.teamName,
+      playerName,
+      position: positionLabel(slot.position),
+      baseUrl: getBaseUrl(req),
+    });
+    for (const a of admins) {
+      if (a.email) {
+        sendMail({ to: a.email, subject: mail.subject, html: mail.html, text: mail.text }).catch(
+          (err) => console.error("[MEMBER JOINED MAIL ERROR]", err?.message || err)
+        );
+      }
     }
   }
 
-  return ok({ message: "Anspruch gesendet – warte auf Bestätigung durch das Team." });
+  return ok({ message: "Willkommen im Kader!" });
 }
 
 export const POST = withErrorHandling(handler);

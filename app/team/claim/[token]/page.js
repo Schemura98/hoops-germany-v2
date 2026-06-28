@@ -152,11 +152,10 @@ export default function TeamClaimTokenPage({ params }) {
   if (state === "done") {
     return (
       <Shell>
-        <h1 className="text-xl font-bold text-gray-900">Anspruch gesendet 🎉</h1>
+        <h1 className="text-xl font-bold text-gray-900">Willkommen im Kader! 🎉</h1>
         <p className="mt-2 text-sm text-gray-500">
-          Deine Anfrage wurde an <strong>{info?.team?.teamName}</strong> gesendet. Sobald
-          das Team dich bestätigt, erscheinst du im Kader. Vervollständige in der
-          Zwischenzeit gern dein Profil.
+          Du bist jetzt im Kader von <strong>{info?.team?.teamName}</strong>. Vervollständige
+          jetzt dein Profil – Foto, Position und Co. – damit dich alle finden.
         </p>
         <Link
           href="/player/edit-profile"
@@ -219,7 +218,7 @@ export default function TeamClaimTokenPage({ params }) {
           disabled={claiming}
           className="mt-6 w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
         >
-          {claiming ? "Senden…" : "Platz beanspruchen"}
+          {claiming ? "Trete bei…" : "Dem Kader beitreten"}
         </button>
       ) : (
         <form onSubmit={registerAndClaim} className="mt-6 space-y-3">

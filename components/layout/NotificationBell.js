@@ -24,6 +24,7 @@ const ICON = {
   follow: FaUserPlus,
   join_request: FaUsers,
   join_approved: FaCheckCircle,
+  member_joined: FaUserPlus,
   match_result: FaBasketballBall,
   pending_result: FaBasketballBall,
   result_mismatch: FaExclamationTriangle,
