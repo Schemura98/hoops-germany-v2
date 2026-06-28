@@ -19,13 +19,14 @@ async function handler(req) {
 
   // Account-Spieler des Teams
   const members = await Player.find({ teamId: team._id }).select(
-    "firstName lastName position isTeamAdmin teamAdminOf"
+    "firstName lastName position number isTeamAdmin teamAdminOf"
   );
   const founderId = team.adminPlayerId ? String(team.adminPlayerId) : null;
   const players = members.map((m) => ({
     playerId: String(m._id),
     name: `${m.firstName} ${m.lastName}`.trim(),
     position: m.position || "",
+    number: m.number || "",
     isAdmin: !!(m.isTeamAdmin && String(m.teamAdminOf || "") === String(team._id)),
     isFounder: founderId === String(m._id),
   }));

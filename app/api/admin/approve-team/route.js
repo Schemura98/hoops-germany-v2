@@ -83,9 +83,12 @@ async function handler(req) {
       try {
         const mail = teamApprovedEmail({ teamName: team.teamName, slug: team.slug, baseUrl: getBaseUrl(req) });
         await sendMail({ to: founder.email, subject: mail.subject, html: mail.html, text: mail.text });
-      } catch {
-        /* Mail-Fehler ignorieren */
+      } catch (err) {
+        // Mail-Fehler nicht nach außen geben, aber protokollieren (Diagnose).
+        console.error("[TEAM APPROVED MAIL ERROR]", founder.email, err?.message || err);
       }
+    } else {
+      console.warn("[TEAM APPROVED] Kein Gründer/Mail für Team", String(team._id), team.teamName);
     }
   }
   return ok({ message: "Team freigegeben" });

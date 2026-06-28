@@ -211,6 +211,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                   team?.teamName || "Vereinslos"
                 )}
                 {player?.position && <span className="text-slate-400">| {positionLabel(player.position)}</span>}
+                {player?.number && <span className="text-slate-400">· #{player.number}</span>}
               </p>
               <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight">{fullName}</h1>
               <div className="mt-1.5 flex items-center justify-center sm:justify-start gap-4 text-sm text-slate-300">
@@ -536,6 +537,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
               <InfoRow label="Alter" value={ageFromBirthdate(player?.birthdate) ?? player?.age} />
               <InfoRow label="Geburtsdatum" value={formatBirthdate(player?.birthdate)} />
               <InfoRow label="Position / Rolle" value={positionLabel(player?.position)} />
+              <InfoRow label="Rückennummer" value={player?.number ? `#${player.number}` : ""} />
               <InfoRow label="Nationalität" value={player?.nationality} />
               <InfoRow label="Heimatort" value={player?.hometown} />
               <InfoRow label="Bundesland" value={player?.bundesland} />

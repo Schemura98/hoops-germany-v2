@@ -21,6 +21,7 @@ const FIELDS = [
   "firstName",
   "lastName",
   "position",
+  "number",
   "height",
   "weight",
   "birthdate",
@@ -202,12 +203,15 @@ export default function PlayerEditProfilePage() {
             </Field>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <Field label="Größe">
               <input name="height" value={form.height} onChange={onChange} className={inputClass} placeholder="z.B. 1,92 m" />
             </Field>
             <Field label="Gewicht">
               <input name="weight" value={form.weight} onChange={onChange} className={inputClass} placeholder="z.B. 85 kg" />
+            </Field>
+            <Field label="Rückennummer">
+              <input name="number" value={form.number} onChange={onChange} className={inputClass} placeholder="z.B. 7" maxLength={3} />
             </Field>
           </div>
 

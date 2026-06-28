@@ -9,6 +9,7 @@ import { uniqueSlug } from "@/lib/slug";
 import { recordTransfer } from "@/lib/recordTransfer";
 import { followOwnTeam } from "@/lib/teamFollow";
 import { sendMail } from "@/lib/mailer";
+import { getAdminNotifyTo } from "@/lib/adminRecipients";
 import { teamPendingEmail } from "@/lib/emailTemplates";
 import { getBaseUrl } from "@/lib/baseUrl";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
@@ -102,8 +103,7 @@ async function handler(req) {
         }
       );
     }
-    const recipients = admins.map((a) => a.email).filter(Boolean);
-    const to = recipients.length ? recipients.join(", ") : process.env.SMTP_USER || "info@hoopsgermany.de";
+    const to = await getAdminNotifyTo();
     const mail = teamPendingEmail({
       teamName: team.teamName,
       founderName,

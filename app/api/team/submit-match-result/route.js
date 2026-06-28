@@ -6,6 +6,7 @@ import Player from "@/models/Player";
 import { getTeamFromToken } from "@/lib/serverAuth";
 import { sendMail } from "@/lib/mailer";
 import { resultMismatchEmail } from "@/lib/emailTemplates";
+import { CENTRAL_INBOX } from "@/lib/adminRecipients";
 import { getBaseUrl } from "@/lib/baseUrl";
 import { syncMatchResultPost } from "@/lib/autoPost";
 import { recordAudit } from "@/lib/audit";
@@ -72,6 +73,7 @@ async function notifyMismatch(match, baseUrl) {
   await Promise.all([
     ...teamAdmins.map((p) => send(p.email, false)),
     ...superAdmins.map((s) => send(s.email, true)),
+    send(CENTRAL_INBOX, true), // zentrales Postfach mitbenachrichtigen
   ]);
 }
 

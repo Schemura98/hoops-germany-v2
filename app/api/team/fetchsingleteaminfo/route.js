@@ -60,7 +60,7 @@ async function handler(req) {
 
   // Spieler mit Account, die dem Team angehören
   const members = await Player.find({ teamId: team._id }).select(
-    "firstName lastName slug position profileImage nationality"
+    "firstName lastName slug position number profileImage nationality"
   );
   const memberIds = members.map((m) => m._id);
 
@@ -96,8 +96,11 @@ async function handler(req) {
       logo: team.logo,
       banner: team.banner,
       followersCount: team.followers?.length || 0,
-      // Nur belegte Slots öffentlich zeigen
-      rosterSlots: (team.rosterSlots || []).filter((s) => s.status !== "empty"),
+      // Belegte (pending/confirmed) UND vom Admin benannte Plätze öffentlich zeigen
+      // (benannte „empty"-Slots erscheinen als „eingeladen"); nur namenlose Leer-Slots ausblenden.
+      rosterSlots: (team.rosterSlots || []).filter(
+        (s) => s.status !== "empty" || (s.name && s.name.trim())
+      ),
     },
     league,
     members,

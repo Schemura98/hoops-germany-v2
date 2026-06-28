@@ -14,6 +14,8 @@ import {
   FaWhatsapp,
   FaUserShield,
   FaUserSlash,
+  FaLink,
+  FaHashtag,
 } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import { POSITIONS, positionLabel } from "@/lib/constants";
@@ -37,6 +39,16 @@ export default function KaderTab({ team, reload }) {
   const [members, setMembers] = useState([]);
   const [removingId, setRemovingId] = useState(null);
   const [adminBusyId, setAdminBusyId] = useState(null);
+
+  // Rückennummer eines Mitglieds bearbeiten (Inline)
+  const [numberEditId, setNumberEditId] = useState(null);
+  const [numberValue, setNumberValue] = useState("");
+  const [numberBusyId, setNumberBusyId] = useState(null);
+
+  // Allgemeiner Team-Einladungslink (auch im Kader, nicht nur in Einstellungen)
+  const [inviteToken, setInviteToken] = useState(team?.inviteToken || "");
+  const [generatingInvite, setGeneratingInvite] = useState(false);
+  const [inviteCopied, setInviteCopied] = useState(false);
 
   async function loadMembers() {
     try {
@@ -85,6 +97,61 @@ export default function KaderTab({ team, reload }) {
     } finally {
       setAdminBusyId(null);
     }
+  }
+
+  async function saveMemberNumber(playerId) {
+    setNumberBusyId(playerId);
+    setMsg(null);
+    try {
+      const token = getTeamAuthToken();
+      await axios.post("/api/team/set-member-number", {
+        token,
+        playerId,
+        number: numberValue,
+      });
+      setNumberEditId(null);
+      setNumberValue("");
+      loadMembers();
+    } catch (err) {
+      flash("err", err.response?.data?.message || "Nummer konnte nicht gespeichert werden.");
+    } finally {
+      setNumberBusyId(null);
+    }
+  }
+
+  // Allgemeiner Team-Einladungslink (Beitritt ohne festen Slot)
+  const inviteLink = inviteToken ? `${origin}/team/join/${inviteToken}` : "";
+
+  async function generateInvite() {
+    setGeneratingInvite(true);
+    setMsg(null);
+    try {
+      const token = getTeamAuthToken();
+      const { data } = await axios.post("/api/team/generate-invite", { token });
+      setInviteToken(data.inviteToken);
+      setInviteCopied(false);
+    } catch (err) {
+      flash("err", err.response?.data?.message || "Link konnte nicht erstellt werden.");
+    } finally {
+      setGeneratingInvite(false);
+    }
+  }
+
+  async function copyInvite() {
+    if (!inviteLink) return;
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      setInviteCopied(true);
+      setTimeout(() => setInviteCopied(false), 2000);
+    } catch {
+      /* Clipboard nicht verfügbar */
+    }
+  }
+
+  function shareInviteWhatsApp() {
+    if (!inviteLink) return;
+    const text = `Tritt dem Team ${team?.teamName || "unserem Team"} bei Hoops Germany bei: ${inviteLink}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener");
   }
 
   // Slot hinzufügen
@@ -198,15 +265,20 @@ export default function KaderTab({ team, reload }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">
-          Kader <span className="text-sm font-normal text-gray-500">· {members.length} Spieler</span>
-        </h2>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Kader <span className="text-sm font-normal text-gray-500">· {members.length} Spieler</span>
+          </h2>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Lege Spieler an und lade sie per Link, WhatsApp oder E-Mail ein.
+          </p>
+        </div>
         <button
           onClick={() => setShowAdd((v) => !v)}
-          className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+          className="inline-flex flex-shrink-0 items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors"
         >
-          <FaPlus className="text-xs" /> Slot hinzufügen
+          <FaPlus className="text-xs" /> Spieler hinzufügen
         </button>
       </div>
 
@@ -222,14 +294,64 @@ export default function KaderTab({ team, reload }) {
         </div>
       )}
 
+      {/* Allgemeiner Team-Einladungslink (Beitritt ohne festen Slot) */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+        <div className="flex items-center gap-2 mb-1">
+          <FaLink className="text-brand-500 text-sm" />
+          <h3 className="text-sm font-semibold text-gray-900">Team-Einladungslink</h3>
+        </div>
+        <p className="text-xs text-gray-500 mb-3">
+          Teile diesen Link – wer ihn öffnet, kann deinem Team direkt beitreten (kein fester Slot nötig).
+        </p>
+        {inviteLink ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              readOnly
+              value={inviteLink}
+              onFocus={(e) => e.target.select()}
+              className={`${inputClass} flex-1 min-w-0 bg-gray-50`}
+            />
+            <button
+              onClick={copyInvite}
+              className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-brand-500 text-gray-600 rounded-lg px-3 py-2 text-xs font-medium"
+            >
+              {inviteCopied ? <FaCheck className="text-green-600" /> : <FaCopy />}
+              {inviteCopied ? "Kopiert" : "Kopieren"}
+            </button>
+            <button
+              onClick={shareInviteWhatsApp}
+              className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-green-500 hover:text-green-700 text-gray-600 rounded-lg px-3 py-2 text-xs font-medium"
+            >
+              <FaWhatsapp className="text-green-600" /> WhatsApp
+            </button>
+            <button
+              onClick={generateInvite}
+              disabled={generatingInvite}
+              className="text-xs text-gray-400 hover:text-gray-600 underline px-1"
+            >
+              Neuer Link
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={generateInvite}
+            disabled={generatingInvite}
+            className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2 text-sm font-medium"
+          >
+            <FaLink className="text-xs" />
+            {generatingInvite ? "Wird erstellt…" : "Einladungslink erstellen"}
+          </button>
+        )}
+      </div>
+
       {/* Mitglieder (Account-Spieler) */}
       {members.length > 0 && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-100">
           {members.map((m) => (
             <div key={m.playerId} className="px-5 py-3 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <span className="h-9 w-9 flex-shrink-0 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center">
-                  <FaUser className="text-sm" />
+                <span className="h-9 w-9 flex-shrink-0 rounded-full bg-brand-100 text-brand-700 text-sm font-semibold flex items-center justify-center">
+                  {m.number ? `#${m.number}` : <FaUser className="text-sm" />}
                 </span>
                 <div className="min-w-0">
                   <p className="font-medium text-gray-900 truncate">{m.name}</p>
@@ -237,6 +359,40 @@ export default function KaderTab({ team, reload }) {
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
+                {/* Rückennummer vergeben/ändern */}
+                {numberEditId === m.playerId ? (
+                  <div className="flex items-center gap-1">
+                    <input
+                      autoFocus
+                      value={numberValue}
+                      onChange={(e) => setNumberValue(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && saveMemberNumber(m.playerId)}
+                      maxLength={3}
+                      placeholder="Nr."
+                      className="w-14 rounded-lg border border-gray-300 px-2 py-1 text-sm text-gray-900 outline-none focus:border-brand-500"
+                    />
+                    <button
+                      onClick={() => saveMemberNumber(m.playerId)}
+                      disabled={numberBusyId === m.playerId}
+                      className="text-green-600 hover:text-green-700 disabled:opacity-60 p-1.5"
+                      title="Nummer speichern"
+                    >
+                      <FaCheck className="text-sm" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setNumberEditId(m.playerId);
+                      setNumberValue(m.number || "");
+                    }}
+                    className="text-gray-400 hover:text-brand-600 p-1.5"
+                    title="Rückennummer vergeben"
+                  >
+                    <FaHashtag className="text-sm" />
+                  </button>
+                )}
+
                 {m.isFounder ? (
                   <span className="text-xs font-medium rounded-full px-3 py-1 bg-brand-100 text-brand-700">
                     Haupt-Admin

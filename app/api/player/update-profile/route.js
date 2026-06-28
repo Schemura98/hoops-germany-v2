@@ -10,6 +10,7 @@ const STRING_FIELDS = [
   "firstName",
   "lastName",
   "position",
+  "number",
   "height",
   "weight",
   "birthdate",

@@ -287,6 +287,11 @@ export default function TeamTeamDetailSlugPage({ params }) {
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-gray-900 truncate">
                           {m.firstName} {m.lastName}
+                          {m.number && (
+                            <span className="ml-1.5 text-xs font-semibold text-gray-400">
+                              #{m.number}
+                            </span>
+                          )}
                         </p>
                         <p className="text-xs text-gray-500">{positionLabel(m.position) || "—"}</p>
                       </div>
@@ -313,7 +318,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
                         <p className="text-xs text-gray-400">{positionLabel(slot.position) || "—"}</p>
                       </div>
                       <span className="text-xs font-medium rounded-full px-3 py-1 bg-amber-100 text-amber-700">
-                        {slot.status === "pending" ? "Ausstehend" : "Frei"}
+                        {slot.status === "pending" ? "Ausstehend" : "eingeladen"}
                       </span>
                     </div>
                   ))}

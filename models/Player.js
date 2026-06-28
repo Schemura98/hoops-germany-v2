@@ -61,6 +61,7 @@ const playerSchema = new mongoose.Schema(
     bundesland: String,
     fibaLink: String,
     position: String,
+    number: String, // optionale Rückennummer (z.B. "7", "00")
     nationality: String,
     aboutPlayer: String,
 

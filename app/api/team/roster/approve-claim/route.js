@@ -45,11 +45,17 @@ async function handler(req) {
 
   // Spieler mit Team verknüpfen + Benachrichtigung
   if (slot.claimedBy) {
-    const claimer = await Player.findById(slot.claimedBy).select("teamId");
+    const claimer = await Player.findById(slot.claimedBy).select("teamId number");
     const prevTeam = claimer?.teamId || null;
 
+    // Slot-Rückennummer übernehmen, falls der Spieler noch keine eigene hat.
+    const setFields = { teamId: team._id };
+    if (slot.number && !claimer?.number) {
+      setFields.number = String(slot.number);
+    }
+
     await Player.findByIdAndUpdate(slot.claimedBy, {
-      $set: { teamId: team._id },
+      $set: setFields,
       $push: {
         notifications: {
           type: "join_approved",

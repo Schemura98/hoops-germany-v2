@@ -3,6 +3,7 @@ import Feedback from "@/models/Feedback";
 import Player from "@/models/Player";
 import { sendMail } from "@/lib/mailer";
 import { feedbackEmail } from "@/lib/emailTemplates";
+import { getAdminNotifyTo } from "@/lib/adminRecipients";
 import { getBaseUrl } from "@/lib/baseUrl";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
@@ -47,15 +48,9 @@ async function handler(req) {
     status: "new",
   });
 
-  // Benachrichtigung an die Super-Admins (Fallback: info@). Fehler nicht nach außen geben.
+  // Benachrichtigung an die Super-Admins + zentrales Postfach. Fehler nicht nach außen geben.
   try {
-    const admins = await Player.find({ isSuperAdmin: true })
-      .select("email")
-      .lean();
-    const recipients = admins.map((a) => a.email).filter(Boolean);
-    const to = recipients.length
-      ? recipients.join(", ")
-      : process.env.SMTP_USER || "info@hoopsgermany.de";
+    const to = await getAdminNotifyTo();
 
     const mail = feedbackEmail({
       type,

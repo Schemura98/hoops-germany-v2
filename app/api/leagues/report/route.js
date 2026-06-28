@@ -4,6 +4,7 @@ import Player from "@/models/Player";
 import Feedback from "@/models/Feedback";
 import { getPlayerFromToken } from "@/lib/serverAuth";
 import { sendMail } from "@/lib/mailer";
+import { getAdminNotifyTo } from "@/lib/adminRecipients";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/leagues/report – Liga-Meldung an die Super-Admins (Notfall/Korrektur,
@@ -38,13 +39,9 @@ async function handler(req) {
   // In der Admin-Inbox sichtbar machen.
   await Feedback.create({ type: "Liga-Meldung", message: text, status: "new" });
 
-  // Super-Admins per Mail benachrichtigen.
+  // Super-Admins + zentrales Postfach per Mail benachrichtigen.
   try {
-    const admins = await Player.find({ isSuperAdmin: true }).select("email").lean();
-    const to =
-      admins.map((a) => a.email).filter(Boolean).join(", ") ||
-      process.env.SMTP_USER ||
-      "info@hoopsgermany.de";
+    const to = await getAdminNotifyTo();
     await sendMail({
       to,
       subject: "Hoops Germany – Liga-Meldung",
