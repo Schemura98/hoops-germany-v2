@@ -1002,6 +1002,20 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > (für alle)** (ein Link für die Gruppe → Selbst-Beitritt, Auto-Join). Beschreibungen schärfen den Unterschied
 > „persönlicher Link" vs. „allgemeiner Gruppen-Link". Toggle-Button + `showAdd` entfernt. Verifiziert im Preview.
 
+#### 🔗 Allgemeiner Team-Einladungslink fertig (war Platzhalter!) (`73805b1`, live)
+> Tester-Fund: `/team/join/[token]` war nur ein **Stub** („wird in der Umsetzungsphase implementiert") und es
+> fehlte die Beitritts-Logik → der **allgemeine** Team-Einladungslink (Karte „Team-Einladungslink für alle")
+> war **funktionslos**. (`inviteToken` wurde nur erzeugt/gespeichert, nie eingelöst; kein `join-team`-Endpoint.)
+> Jetzt komplett implementiert, analog zum Claim-Flow:
+> - **`/api/team/invite-info`** (POST `inviteToken`): öffentliche Team-Info (Name/Slug/Logo/Region) für die Landeseite.
+> - **`/api/team/join-via-link`** (Spieler-Auth, `{inviteToken}`): **direkter Beitritt** über den Link –
+>   `teamId` gesetzt, `recordTransfer` (join/move → **Karriere-Verlauf**), `followOwnTeam`, `join_approved` an den
+>   Spieler + **`member_joined`** an die Admins (je `notifyAllAdmins`); Schutz „bereits im Kader".
+> - **`app/team/join/[token]/page.js`**: echte Seite (statt Stub) – Team-Header + Hinweis „landest direkt im
+>   Kader"; ausgeloggt → Registrier-Formular („Konto erstellen & beitreten"), eingeloggt → „Dem Team beitreten";
+>   danach „Willkommen im Kader!". ✅ Verifiziert (Preview: Register+Join + eingeloggter Join + Doppel-Join-Schutz;
+>   Prod-Smoke: Tester-Token löst „Düsseldorf Dribblers", keine „Platzhalter"-Meldung mehr).
+
 ### Bekannte Einschränkungen / offen
 - **Lokale Dev-Umgebung:** SMTP/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS
   (hoops_prod) live testbar; lokal über In-App-Notifs + Trigger-Logs verifizieren.
