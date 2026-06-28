@@ -93,18 +93,20 @@ async function handler(req) {
 
   const missingIds = [...affiliation.keys()].filter((tid) => !coveredTeamIds.has(tid));
   if (missingIds.length) {
+    // Liga des Teams mitladen, damit Saison/Liga auch ohne Spiele angezeigt werden.
     const teams = await Team.find({ _id: { $in: missingIds } })
-      .select("teamName slug logo")
+      .select("teamName slug logo leagueId")
+      .populate("leagueId", "name season")
       .lean();
     for (const t of teams) {
       stations.push({
         teamId: String(t._id),
-        leagueId: null,
+        leagueId: null, // keine gespielten Liga-Partien (nur Zugehörigkeit)
         teamName: t.teamName || "Unbekanntes Team",
         teamSlug: t.slug || null,
         teamLogo: t.logo || null,
-        leagueName: "", // reine Zugehörigkeit, (noch) keine Liga/Spiele
-        season: "",
+        leagueName: t.leagueId?.name || "", // aktuelle Liga des Teams (Anzeige)
+        season: t.leagueId?.season || "",
         games: 0,
         points: 0,
         assists: 0,

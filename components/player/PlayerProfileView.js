@@ -11,7 +11,6 @@ import {
   FaChartBar,
   FaIdCard,
   FaRegNewspaper,
-  FaExchangeAlt,
   FaChevronDown,
 } from "react-icons/fa";
 import PlayerPosts from "@/components/posts/PlayerPosts";
@@ -147,7 +146,9 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
     };
   }, [filteredStations]);
 
-  // Karriere-Verlauf: Team-Wechsel in chronologischer Reihenfolge
+  // Karriere-Verlauf: Vereins-Stationen in chronologischer Reihenfolge (alt → neu).
+  // Aufeinanderfolgende Stationen desselben Vereins werden zu einer „Stint" gebündelt;
+  // die Saisons werden gesammelt und als Einzelsaison oder Bereich angezeigt.
   const teamHistory = useMemo(() => {
     const asc = [...stations].sort(
       (a, b) => new Date(a.lastDate || 0) - new Date(b.lastDate || 0)
@@ -156,8 +157,24 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
     for (const s of asc) {
       const last = hist[hist.length - 1];
       if (!last || last.teamName !== s.teamName) {
-        hist.push({ teamName: s.teamName, teamLogo: s.teamLogo, teamSlug: s.teamSlug, season: s.season });
+        hist.push({
+          teamName: s.teamName,
+          teamLogo: s.teamLogo,
+          teamSlug: s.teamSlug,
+          seasons: s.season ? [s.season] : [],
+        });
+      } else if (s.season && !last.seasons.includes(s.season)) {
+        last.seasons.push(s.season);
       }
+    }
+    for (const h of hist) {
+      h.seasons.sort();
+      h.season =
+        h.seasons.length === 0
+          ? ""
+          : h.seasons.length === 1
+          ? h.seasons[0]
+          : `${h.seasons[0]} – ${h.seasons[h.seasons.length - 1]}`;
     }
     return hist;
   }, [stations]);
@@ -544,36 +561,47 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
               <InfoRow label="Bevorzugte Liga" value={player?.preferredLeague} />
             </SectionCard>
 
-            {/* Karriere-Verlauf / Transfers */}
+            {/* Karriere-Verlauf / Transfers – vertikale Timeline (neuester Verein oben) */}
             {teamHistory.length > 0 && (
               <SectionCard title="Karriere-Verlauf">
-                <div className="flex items-center gap-1 overflow-x-auto pb-1">
-                  {teamHistory.map((h, i) => (
-                    <div key={i} className="flex items-center gap-1 flex-shrink-0">
-                      {i > 0 && (
-                        <div className="flex flex-col items-center px-1 text-brand-500">
-                          <FaExchangeAlt className="text-xs" />
-                          <span className="text-[9px] font-semibold uppercase tracking-wide">Wechsel</span>
-                        </div>
-                      )}
-                      <div className="flex flex-col items-center gap-1 px-2 py-1 min-w-[88px]">
-                        {h.teamSlug ? (
-                          <Link href={`/team/team-detail/${h.teamSlug}`}>
-                            <Avatar name={h.teamName} src={h.teamLogo} className="h-11 w-11" textClass="text-sm" square />
-                          </Link>
-                        ) : (
-                          <Avatar name={h.teamName} src={h.teamLogo} className="h-11 w-11" textClass="text-sm" square />
-                        )}
-                        <span className="text-xs font-medium text-gray-900 text-center leading-tight truncate max-w-[88px]">
+                <div className="space-y-2">
+                  {[...teamHistory].reverse().map((h, i) => {
+                    const isCurrent = i === 0 && teamHistory.length > 1;
+                    const inner = (
+                      <div className="flex items-center gap-3 rounded-xl border border-gray-100 p-3 hover:bg-gray-50 transition-colors">
+                        <Avatar
+                          name={h.teamName}
+                          src={h.teamLogo}
+                          className="h-11 w-11 flex-shrink-0"
+                          textClass="text-sm"
+                          square
+                        />
+                        <p className="flex-1 min-w-0 font-semibold text-gray-900 truncate">
                           {h.teamName}
-                        </span>
-                        {h.season && <span className="text-[10px] text-gray-400">{h.season}</span>}
+                        </p>
+                        {isCurrent && (
+                          <span className="flex-shrink-0 text-[10px] font-semibold uppercase tracking-wide text-brand-600 bg-brand-50 rounded-full px-2 py-0.5">
+                            Aktuell
+                          </span>
+                        )}
+                        {h.season && (
+                          <span className="flex-shrink-0 text-sm text-gray-500 whitespace-nowrap">
+                            {h.season}
+                          </span>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                    return h.teamSlug ? (
+                      <Link key={i} href={`/team/team-detail/${h.teamSlug}`} className="block">
+                        {inner}
+                      </Link>
+                    ) : (
+                      <div key={i}>{inner}</div>
+                    );
+                  })}
                 </div>
                 {teamHistory.length === 1 && (
-                  <p className="mt-2 text-xs text-gray-400">Noch kein Vereinswechsel.</p>
+                  <p className="mt-3 text-xs text-gray-400">Noch kein Vereinswechsel.</p>
                 )}
               </SectionCard>
             )}
