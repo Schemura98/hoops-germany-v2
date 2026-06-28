@@ -994,6 +994,13 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 >   Kader aufnehmen" mit Annehmen/Ablehnen → Annahme → Spieler im Kader (teamName gesetzt) + Team in
 >   `stations`/Karriere-Verlauf; Admin erhält `member_joined`; Mail rendert. Live-Smoke (403 ohne Token, Suche).
 >   ⚠️ Schemafelder additiv (Dev-Neustart nötig); SMTP lokal nicht testbar (Mail-Logik über Build/Render verifiziert).
+>
+> **KaderTab als 3 klare Karten (`1cd93cd`, live):** Die Wege „jemanden ins Team holen" sind jetzt drei gleich
+> gestylte Karten (statt Toggle-Button + verstecktem Formular): **1) Bestehenden Spieler einladen** (schon
+> registriert → Suche → Glocke/Mail-Anfrage), **2) Neuen Spieler anlegen** (kein Account → Formular Name/Pos/Nr.
+> immer sichtbar → **persönlicher** Claim-Link unten unter „Eingeladene & offene Plätze"), **3) Team-Einladungslink
+> (für alle)** (ein Link für die Gruppe → Selbst-Beitritt, Auto-Join). Beschreibungen schärfen den Unterschied
+> „persönlicher Link" vs. „allgemeiner Gruppen-Link". Toggle-Button + `showAdd` entfernt. Verifiziert im Preview.
 
 ### Bekannte Einschränkungen / offen
 - **Lokale Dev-Umgebung:** SMTP/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS
