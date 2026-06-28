@@ -32,6 +32,7 @@ export default function TeamJoinTokenPage({ params }) {
   const [state, setState] = useState("loading"); // loading | invalid | ready | done
   const [team, setTeam] = useState(null);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [myTeam, setMyTeam] = useState(null); // aktuelles Team des eingeloggten Spielers
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState("");
 
@@ -40,7 +41,8 @@ export default function TeamJoinTokenPage({ params }) {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    setLoggedIn(!!getPlayerToken());
+    const token = getPlayerToken();
+    setLoggedIn(!!token);
     let active = true;
     (async () => {
       try {
@@ -51,6 +53,16 @@ export default function TeamJoinTokenPage({ params }) {
       } catch {
         if (!active) return;
         setState("invalid");
+        return;
+      }
+      // Aktuelles Team des eingeloggten Spielers (für den Wechsel-Hinweis).
+      if (token) {
+        try {
+          const { data } = await axios.post("/api/player/getmyinfo", { token });
+          if (active) setMyTeam(data?.player?.team || null);
+        } catch {
+          /* ignorieren */
+        }
       }
     })();
     return () => {
@@ -183,13 +195,50 @@ export default function TeamJoinTokenPage({ params }) {
       )}
 
       {loggedIn ? (
-        <button
-          onClick={joinTeam}
-          disabled={joining}
-          className="mt-6 w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
-        >
-          {joining ? "Trete bei…" : "Dem Team beitreten"}
-        </button>
+        myTeam && team && myTeam.slug === team.slug ? (
+          // Schon in genau diesem Team
+          <div className="mt-6">
+            <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
+              Du bist bereits im Kader von <strong>{team.teamName}</strong>.
+            </div>
+            <Link
+              href={`/team/team-detail/${team.slug}`}
+              className="mt-4 block text-center bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2.5 font-medium"
+            >
+              Zur Teamseite
+            </Link>
+          </div>
+        ) : myTeam ? (
+          // In einem ANDEREN Team → Wechsel-Hinweis (Sicherheitsabfrage)
+          <div className="mt-6 space-y-3">
+            <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+              Du bist aktuell bei <strong>{myTeam.teamName}</strong>. Wenn du beitrittst, verlässt du
+              dieses Team und wechselst zu <strong>{team?.teamName}</strong>.
+            </div>
+            <button
+              onClick={joinTeam}
+              disabled={joining}
+              className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
+            >
+              {joining ? "Wechsle…" : `Zu ${team?.teamName} wechseln`}
+            </button>
+            <Link
+              href="/"
+              className="block text-center text-sm text-gray-500 hover:text-brand-600"
+            >
+              Abbrechen
+            </Link>
+          </div>
+        ) : (
+          // Kein Team → normaler Beitritt
+          <button
+            onClick={joinTeam}
+            disabled={joining}
+            className="mt-6 w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
+          >
+            {joining ? "Trete bei…" : "Dem Team beitreten"}
+          </button>
+        )
       ) : (
         <form onSubmit={registerAndJoin} className="mt-6 space-y-3">
           <p className="text-sm text-gray-600">
