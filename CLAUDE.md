@@ -974,6 +974,27 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > in Dev (frischer Gründer → 0-Spiele-Station + „Noch kein Vereinswechsel.") **und auf Prod** (Jonatans Profil →
 > „Mönchengladbach Scorpions e.V." erscheint, games 0).
 
+#### ✉️ Bestehende Accounts direkt in den Kader einladen (28.06.2026, `93c5ae5`, live)
+> Bisher konnte ein Team-Admin nur Slot-Links verschicken; einen **registrierten Account gezielt** einladen
+> (mit Glocke + Annehmen/Ablehnen) ging nicht. Neuer Flow:
+> - `Team.invitedPlayers[]` (offene Direkt-Einladungen) + Notif-Typ **`team_invite`**.
+> - **`/api/player/search`** (POST `q`): leichte Namens-Suche (bis 10 Treffer, Name/Position/aktuelles Team).
+> - **`/api/team/invite-player`** (Capability **`kader`**): lädt einen bestehenden Account ein → `team_invite`-
+>   Glocke + **`teamInvitePlayerEmail`** (optimierte Mail, CTA → Glocke/Newsfeed). Blockt „schon im Kader" /
+>   „bereits eingeladen".
+> - **`/api/team/respond-invite`** (Spieler-Auth, `{teamId, accept}`): validiert gegen `invitedPlayers`;
+>   **annehmen** → `teamId` gesetzt, `recordTransfer` (join/move → **Karriere-Verlauf**), `followOwnTeam`,
+>   `join_approved` an den Spieler + **`member_joined`** an die Admins (je `notifyAllAdmins`); **ablehnen** →
+>   Einladung entfernt. Einladung wird in jedem Fall aus `invitedPlayers` gelöscht + Notif als gelesen markiert.
+> - **NotificationBell:** `team_invite` rendert **inline „Annehmen/Ablehnen"** (+ Status „✓ Angenommen/
+>   Abgelehnt"); kein Link. ⚠️ `getnotifications` liefert jetzt zusätzlich **`teamId`** (Bell braucht es für die
+>   Antwort). **KaderTab:** Sektion „Bestehenden Spieler einladen" (debounced Suche → „Einladen", schließt
+>   eigene Mitglieder aus).
+> - ✅ End-to-end im Preview: Admin sucht „Sven"/„Jay" → Einladung → Glocke „Test Baskets möchte dich in den
+>   Kader aufnehmen" mit Annehmen/Ablehnen → Annahme → Spieler im Kader (teamName gesetzt) + Team in
+>   `stations`/Karriere-Verlauf; Admin erhält `member_joined`; Mail rendert. Live-Smoke (403 ohne Token, Suche).
+>   ⚠️ Schemafelder additiv (Dev-Neustart nötig); SMTP lokal nicht testbar (Mail-Logik über Build/Render verifiziert).
+
 ### Bekannte Einschränkungen / offen
 - **Lokale Dev-Umgebung:** SMTP/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS
   (hoops_prod) live testbar; lokal über In-App-Notifs + Trigger-Logs verifizieren.
