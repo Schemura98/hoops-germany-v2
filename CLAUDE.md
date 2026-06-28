@@ -863,6 +863,34 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 >   MVP-Spiel mit Zuschauer/Bericht; keine Konsolenfehler; Build grün. Code (`0f33be0`) gepusht. ⚠️ Auf **Prod
 >   noch NICHT geseedet** (großer additiver Write → erst nach ausdrücklicher Freigabe; `--prod` + `--purge` bereit).
 
+#### 📲 Tester-Feedback-Runde (28.06.2026, `97d65b8`, live) – Kader-UX, Rückennummer, Mails
+> Aus Jonatans WhatsApp-Feedback (5 Punkte), alle live deployt + im Preview verifiziert (`max@test.de`):
+> 1. **Freigabe-Mail robust + nächste Schritte + Bündelung:** `approve-team` loggt Mail-Fehler statt sie stumm
+>    zu verschlucken; `teamApprovedEmail` enthält jetzt konkrete nächste Schritte (Kader füllen → Spiele
+>    eintragen → Vereinsseite, als `linkCard`s mit `?tab=…`-Deeplinks). **Admin-Benachrichtigungen** (neues Team
+>    `team/create`, Feedback, Liga-Meldung `leagues/report`, Mismatch `submit-match-result`) gehen zusätzlich
+>    **gebündelt an `info@hoopsgermany`** (neuer Helper `lib/adminRecipients.js`: `getAdminNotifyTo()` =
+>    Super-Admin-Mails + `CENTRAL_INBOX`, dedupliziert; via `ADMIN_INBOX` überschreibbar) → nichts geht in
+>    persönlichen Postfächern unter.
+> 2. **Kader-Slots öffentlich sichtbar:** `fetchsingleteaminfo` lieferte nur `status!=="empty"` → vom Admin
+>    angelegte, noch nicht beanspruchte Plätze waren unsichtbar. Jetzt werden **benannte** „empty"-Slots
+>    mitgeliefert und auf der Vereinsseite (`team-detail`) als **„eingeladen"** (statt „Frei") gezeigt; namenlose
+>    Leer-Slots bleiben verborgen.
+> 3. **Button „Slot hinzufügen" → „Spieler hinzufügen"** (`KaderTab`) + Hilfetext „Lege Spieler an und lade sie
+>    per Link/WhatsApp/E-Mail ein".
+> 4. **Allgemeiner Team-Einladungslink jetzt auch im Kader-Reiter** (`KaderTab`): eigener Block oben
+>    (Kopieren/WhatsApp/„Neuer Link", via `generate-invite`), nicht mehr nur unter Einstellungen.
+> 5. **Optionale Rückennummer** (`Player.number`, additiv, keine Migration): im **Spielerprofil pflegbar**
+>    (edit-profile-Feld + `update-profile`/whitelist) **UND vom Team-Admin im Kader vergebbar** (neuer Endpoint
+>    `/api/team/set-member-number`, Inline-`#`-Editor je Mitglied in `KaderTab`). **Slot-Nummer wird beim
+>    Bestätigen übernommen** (`approve-claim`, falls Spieler noch keine hat). Anzeige **neben der Position**
+>    überall: Kader (Avatar-Kreis), Spielerprofil (Hero „· #23" + Steckbrief-Zeile), öffentliche Vereinsseite.
+>    ⚠️ `fetchsingleplayerinfo` musste `number` explizit in die `PUBLIC_FIELDS`-Whitelist (sonst fehlte sie im
+>    fremden Profil); `getmyinfo`/`fetchsingleteaminfo`/`roster-players` ergänzt. Schema → Dev-Neustart nötig.
+> ⚠️ Dev-DB enthält jetzt Test-Artefakte (Noah Becker #23, Slot „Ahmed Osman" bei Test Baskets) → `seed-demo.mjs`
+> setzt zurück. **Prod unberührt** (nur Code deployt). SMTP lokal nicht testbar → Mail-Logik über Build + In-App
+> verifiziert; Live-Smoke (Homepage/Team-Admin/Teams) 200.
+
 ### Bekannte Einschränkungen / offen
 - **Lokale Dev-Umgebung:** SMTP/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS
   (hoops_prod) live testbar; lokal über In-App-Notifs + Trigger-Logs verifizieren.
