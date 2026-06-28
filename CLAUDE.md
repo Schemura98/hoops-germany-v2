@@ -962,6 +962,18 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 >   `set-member-number` 200 aber `set-notify-admins`/`submit-match-result`/`set-recruiting` 401, Rollen-Verwalten
 >   403; Haupt-Admin sieht alle 6 Tabs + Rechte-Editor. ⚠️ Schemafelder additiv (Dev-Neustart nötig).
 
+#### 🧭 Karriere-Verlauf zeigt Team-Zugehörigkeit ohne Spiele (28.06.2026, `78e9948`, live)
+> Tester-Fund: ein gegründetes/beigetretenes Team tauchte im **Karriere-Verlauf** des Spielers nicht auf, solange
+> noch **kein Spiel** gespielt war (Karriere-Verlauf + Spielerhistorie kamen NUR aus `Match.playerStats`).
+> Fix: `/api/player/stations` ergänzt jetzt **Team-Zugehörigkeiten aus `TransferEvent` (toTeam: join/found/move)
+> + dem aktuellen `Player.teamId`** als **0-Spiele-Station** (`affiliationOnly:true`, `leagueName:""`,
+> `lastDate`=Event-Datum), sofern das Team nicht ohnehin über Spiele auftaucht. Dadurch erscheint das
+> gegründete/aktuelle Team sofort im **Karriere-Verlauf** (`teamHistory` aus `stations`) und in der
+> **Spielerhistorie** (Liga-Zeile fällt auf „Noch kein Spiel" zurück). **Career-Stats (PPG/APG/RPG, Spiele-**
+> **Zähler) bleiben unberührt** (eigener `careerstats`-Endpoint; 0-Spiele ändert keine Schnitte). ✅ Verifiziert
+> in Dev (frischer Gründer → 0-Spiele-Station + „Noch kein Vereinswechsel.") **und auf Prod** (Jonatans Profil →
+> „Mönchengladbach Scorpions e.V." erscheint, games 0).
+
 ### Bekannte Einschränkungen / offen
 - **Lokale Dev-Umgebung:** SMTP/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS
   (hoops_prod) live testbar; lokal über In-App-Notifs + Trigger-Logs verifizieren.
