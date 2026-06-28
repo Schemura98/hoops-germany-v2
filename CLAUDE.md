@@ -789,10 +789,13 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 >   die bestehenden Logo-Assets aus `3100f7e`, keine extra 192/512-Dateien nötig).
 > - **`app/layout.js`**: `appleWebApp` ({capable, title, statusBarStyle:black-translucent}) +
 >   `export const viewport = { themeColor:"#0f172a" }` → Next generiert manifest-/theme-color-/apple-Tags.
-> - **`app/installieren/page.js`** (`/installieren`): Anleitungsseite mit **Plattform-Erkennung** –
->   Android/Chrome zeigt bei `beforeinstallprompt` einen **„App installieren"-Button** (sonst Menü-Anleitung),
->   iOS/Safari die **„Teilen → Zum Home-Bildschirm"-Schritte**; erkennt bereits installierten Standalone-Modus.
->   Navy-`PageHeader` + 3 Vorteils-Cards (Vollbild/Immer aktuell/Schneller Start) + Navbar/Footer.
+> - **`app/installieren/page.js`** (`/installieren`): Anleitungsseite. ⚠️ **Redesign (`2b8b932`):** alle
+>   Plattformen als **aufklappbare Abschnitte** (iPhone/iPad·Safari, Android·Chrome, Desktop·Chrome/Edge/Opera) –
+>   die erkannte Plattform wird vorausgewählt geöffnet + „Dein Gerät"-Badge, alle anderen bleiben sichtbar/
+>   aufklappbar. (Vorher zeigte Nicht-iOS **inkl. Desktop fälschlich nur die Android-Anleitung** → ein iPhone-
+>   Nutzer am Desktop dachte, es ginge nur mit Android.) Direkter **„App installieren"-Button** erscheint
+>   geräteunabhängig, sobald der Browser `beforeinstallprompt` anbietet (auch Desktop-Chromium); erkennt bereits
+>   installierten Standalone-Modus. Navy-`PageHeader` + 3 Vorteils-Cards + Navbar/Footer.
 > - **Footer**: Link „App installieren" (erste Position) → erreichbar von überall.
 > - **Onboarding-Baustein** (`43dd746`, live): Die Willkommens-Checklist (`components/onboarding/
 >   OnboardingChecklist.js`, „Richte dein Profil ein …" – im Newsfeed **und** auf der eingeloggten
