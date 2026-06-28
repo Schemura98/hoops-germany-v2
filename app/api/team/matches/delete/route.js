@@ -1,7 +1,7 @@
 import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Match from "@/models/Match";
-import { getTeamFromToken } from "@/lib/serverAuth";
+import { getTeamForCapability } from "@/lib/serverAuth";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/team/matches/delete – geplantes Spiel entfernen (Dual-Auth).
@@ -9,7 +9,7 @@ async function handler(req) {
   const body = await req.json().catch(() => ({}));
   const token = getTokenFromRequest(req, body.token);
 
-  const team = await getTeamFromToken(token);
+  const team = await getTeamForCapability(token, "spiele");
   if (!team) {
     return fail("Kein Team-Zugriff für diese Sitzung", 401);
   }

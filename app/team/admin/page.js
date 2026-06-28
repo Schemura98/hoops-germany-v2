@@ -11,6 +11,8 @@ import {
   FaBasketballBall,
 } from "react-icons/fa";
 import { useCurrentTeam } from "@/lib/useCurrentTeam";
+import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
+import { hasTeamPermission, TAB_PERMISSION } from "@/lib/teamPermissions";
 import TeamNav from "@/components/layout/TeamNav";
 import Footer from "@/components/layout/Footer";
 import Loading from "@/components/ui/Loading";
@@ -33,15 +35,31 @@ const TABS = [
 
 export default function TeamAdminPage() {
   const { team, status, reload } = useCurrentTeam();
+  const { player } = useCurrentPlayer();
   const [active, setActive] = useState("kader");
   const tabBarRef = useRef(null);
   const tabRefs = useRef({});
+
+  // Eigene Rolle/Rechte: Haupt-Admin sieht alles, Co-Admin nur erlaubte Tabs.
+  const myId = player?._id || player?.id || null;
+  const isMainAdmin = !myId || String(team?.adminPlayerId || "") === String(myId);
+  const visibleTabs = TABS.filter((t) =>
+    hasTeamPermission(team || {}, myId, TAB_PERMISSION[t.key])
+  );
+  const visibleKeys = visibleTabs.map((t) => t.key).join(",");
 
   // Tab-Deeplink: ?tab=ergebnisse (z.B. aus Mail/Benachrichtigung).
   useEffect(() => {
     const t = new URLSearchParams(window.location.search).get("tab");
     if (t && TABS.some((x) => x.key === t)) setActive(t);
   }, []);
+
+  // Falls der aktive Tab nicht (mehr) erlaubt ist → ersten erlaubten wählen.
+  useEffect(() => {
+    if (visibleKeys && !visibleKeys.split(",").includes(active)) {
+      setActive(visibleKeys.split(",")[0]);
+    }
+  }, [visibleKeys, active]);
 
   // Aktiven Tab im scrollbaren Balken zentrieren (nur horizontal). Leicht
   // verzögert, damit auch der Deeplink-Fall (?tab=…) nach dem Mount greift.
@@ -104,7 +122,7 @@ export default function TeamAdminPage() {
 
         {/* Tab-Navigation (einheitlicher Pill-Stil; Refs für Auto-Scroll/Deeplink bleiben) */}
         <div ref={tabBarRef} className="relative flex gap-1 overflow-x-auto bg-gray-100 rounded-xl p-1 mb-6">
-          {TABS.map((t) => {
+          {visibleTabs.map((t) => {
             const Icon = t.icon;
             const isActive = t.key === active;
             return (
@@ -128,7 +146,7 @@ export default function TeamAdminPage() {
         </div>
 
         {/* Tab-Inhalt */}
-        <ActiveComp team={team} reload={reload} />
+        <ActiveComp team={team} reload={reload} isMainAdmin={isMainAdmin} />
       </main>
 
       <Footer />

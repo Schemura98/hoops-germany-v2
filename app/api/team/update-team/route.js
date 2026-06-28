@@ -1,7 +1,7 @@
 import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Team from "@/models/Team";
-import { getTeamFromToken, TEAM_PUBLIC_FIELDS } from "@/lib/serverAuth";
+import { getTeamForCapability, TEAM_PUBLIC_FIELDS } from "@/lib/serverAuth";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // Felder, die ein Team-Admin ändern darf.
@@ -12,7 +12,7 @@ async function handler(req) {
   const body = await req.json().catch(() => ({}));
   const token = getTokenFromRequest(req, body.token);
 
-  const team = await getTeamFromToken(token);
+  const team = await getTeamForCapability(token, "einstellungen");
   if (!team) {
     return fail("Kein Team-Zugriff für diese Sitzung", 401);
   }

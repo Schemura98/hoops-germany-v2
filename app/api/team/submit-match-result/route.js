@@ -3,10 +3,11 @@ import { connectDB } from "@/lib/db";
 import Match from "@/models/Match";
 import Team from "@/models/Team";
 import Player from "@/models/Player";
-import { getTeamFromToken } from "@/lib/serverAuth";
+import { getTeamForCapability } from "@/lib/serverAuth";
 import { sendMail } from "@/lib/mailer";
 import { resultMismatchEmail } from "@/lib/emailTemplates";
 import { CENTRAL_INBOX } from "@/lib/adminRecipients";
+import { getTeamAdminRecipients } from "@/lib/teamAdmins";
 import { getBaseUrl } from "@/lib/baseUrl";
 import { syncMatchResultPost } from "@/lib/autoPost";
 import { recordAudit } from "@/lib/audit";
@@ -17,8 +18,8 @@ import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 // "mismatch" aufgerufen, damit erneutes Einreichen nicht spammt.
 async function notifyMismatch(match, baseUrl) {
   const [tA, tB] = await Promise.all([
-    Team.findById(match.teamA).select("teamName slug adminPlayerId"),
-    Team.findById(match.teamB).select("teamName slug adminPlayerId"),
+    Team.findById(match.teamA).select("teamName slug adminPlayerId notifyAllAdmins"),
+    Team.findById(match.teamB).select("teamName slug adminPlayerId notifyAllAdmins"),
   ]);
   if (!tA || !tB) return;
 
@@ -30,11 +31,19 @@ async function notifyMismatch(match, baseUrl) {
   const message = `Strittiges Ergebnis ${tA.teamName} vs ${tB.teamName}: ${tA.teamName} meldet ${reportA}, ${tB.teamName} meldet ${reportB}.`;
 
   const superAdmins = await Player.find({ isSuperAdmin: true }).select("email firstName");
-  const teamAdminIds = [tA.adminPlayerId, tB.adminPlayerId].filter(Boolean);
+
+  // Team-Admin-Empfänger je Team-Einstellung (nur Haupt-Admin oder alle Admins), dedupliziert.
+  const [adminsA, adminsB] = await Promise.all([
+    getTeamAdminRecipients(tA),
+    getTeamAdminRecipients(tB),
+  ]);
+  const teamAdminMap = new Map();
+  for (const a of [...adminsA, ...adminsB]) teamAdminMap.set(String(a._id), a);
+  const teamAdmins = [...teamAdminMap.values()];
 
   // In-App-Benachrichtigung an alle Beteiligten (Team-Admins + Super-Admins), dedupliziert.
   const recipientIds = [
-    ...new Set([...teamAdminIds, ...superAdmins.map((s) => s._id)].map(String)),
+    ...new Set([...teamAdmins.map((a) => a._id), ...superAdmins.map((s) => s._id)].map(String)),
   ];
   await Player.updateMany(
     { _id: { $in: recipientIds } },
@@ -55,7 +64,6 @@ async function notifyMismatch(match, baseUrl) {
   );
 
   // Mails: Team-Admins (korrigieren) + Super-Admins (auflösen).
-  const teamAdmins = await Player.find({ _id: { $in: teamAdminIds } }).select("email");
   const send = (to, forSuperAdmin) => {
     if (!to) return Promise.resolve();
     const { subject, html, text } = resultMismatchEmail({
@@ -132,7 +140,7 @@ async function handler(req) {
   const body = await req.json().catch(() => ({}));
   const token = getTokenFromRequest(req, body.token);
 
-  const team = await getTeamFromToken(token);
+  const team = await getTeamForCapability(token, "spiele");
   if (!team) {
     return fail("Kein Team-Zugriff für diese Sitzung", 401);
   }

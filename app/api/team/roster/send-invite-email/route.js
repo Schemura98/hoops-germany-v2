@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Team from "@/models/Team";
-import { getTeamFromToken } from "@/lib/serverAuth";
+import { getTeamForCapability } from "@/lib/serverAuth";
 import { sendMail } from "@/lib/mailer";
 import { inviteEmail } from "@/lib/emailTemplates";
 import { getBaseUrl } from "@/lib/baseUrl";
@@ -15,7 +15,7 @@ async function handler(req) {
   const body = await req.json().catch(() => ({}));
   const token = getTokenFromRequest(req, body.token);
 
-  const team = await getTeamFromToken(token);
+  const team = await getTeamForCapability(token, "kader");
   if (!team) {
     return fail("Kein Team-Zugriff für diese Sitzung", 401);
   }

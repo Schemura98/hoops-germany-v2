@@ -1,7 +1,7 @@
 import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Tryout from "@/models/Tryout";
-import { getTeamFromToken } from "@/lib/serverAuth";
+import { getTeamForCapability } from "@/lib/serverAuth";
 import { POSITIONS } from "@/lib/constants";
 import { autoPostTryout } from "@/lib/autoPost";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
@@ -11,7 +11,7 @@ async function handler(req) {
   const body = await req.json().catch(() => ({}));
   const token = getTokenFromRequest(req, body.token);
 
-  const team = await getTeamFromToken(token);
+  const team = await getTeamForCapability(token, "tryouts");
   if (!team) {
     return fail("Kein Team-Zugriff für diese Sitzung", 401);
   }

@@ -16,9 +16,11 @@ import {
   FaUserSlash,
   FaLink,
   FaHashtag,
+  FaSlidersH,
 } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import { POSITIONS, positionLabel } from "@/lib/constants";
+import { TEAM_PERMISSIONS } from "@/lib/teamPermissions";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
@@ -29,7 +31,7 @@ const STATUS_BADGE = {
   confirmed: { label: "Bestätigt", cls: "bg-green-100 text-green-700" },
 };
 
-export default function KaderTab({ team, reload }) {
+export default function KaderTab({ team, reload, isMainAdmin = true }) {
   const slots = team?.rosterSlots || [];
 
   const [origin, setOrigin] = useState("");
@@ -44,6 +46,11 @@ export default function KaderTab({ team, reload }) {
   const [numberEditId, setNumberEditId] = useState(null);
   const [numberValue, setNumberValue] = useState("");
   const [numberBusyId, setNumberBusyId] = useState(null);
+
+  // Teilrechte eines Co-Admins bearbeiten (nur Haupt-Admin)
+  const [permEditId, setPermEditId] = useState(null);
+  const [permDraft, setPermDraft] = useState([]);
+  const [permBusyId, setPermBusyId] = useState(null);
 
   // Allgemeiner Team-Einladungslink (auch im Kader, nicht nur in Einstellungen)
   const [inviteToken, setInviteToken] = useState(team?.inviteToken || "");
@@ -96,6 +103,35 @@ export default function KaderTab({ team, reload }) {
       flash("err", err.response?.data?.message || "Aktion fehlgeschlagen.");
     } finally {
       setAdminBusyId(null);
+    }
+  }
+
+  function openPermEditor(m) {
+    setPermEditId(m.playerId);
+    setPermDraft(m.perms || []);
+  }
+
+  function togglePerm(key) {
+    setPermDraft((d) => (d.includes(key) ? d.filter((x) => x !== key) : [...d, key]));
+  }
+
+  async function savePerms(playerId) {
+    setPermBusyId(playerId);
+    setMsg(null);
+    try {
+      const token = getTeamAuthToken();
+      await axios.post("/api/team/set-member-permissions", {
+        token,
+        playerId,
+        perms: permDraft,
+      });
+      flash("ok", "Rechte gespeichert.");
+      setPermEditId(null);
+      loadMembers();
+    } catch (err) {
+      flash("err", err.response?.data?.message || "Speichern fehlgeschlagen.");
+    } finally {
+      setPermBusyId(null);
     }
   }
 
@@ -348,99 +384,162 @@ export default function KaderTab({ team, reload }) {
       {members.length > 0 && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-100">
           {members.map((m) => (
-            <div key={m.playerId} className="px-5 py-3 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <span className="h-9 w-9 flex-shrink-0 rounded-full bg-brand-100 text-brand-700 text-sm font-semibold flex items-center justify-center">
-                  {m.number ? `#${m.number}` : <FaUser className="text-sm" />}
-                </span>
-                <div className="min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{m.name}</p>
-                  <p className="text-xs text-gray-500">{positionLabel(m.position) || "Position offen"}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {/* Rückennummer vergeben/ändern */}
-                {numberEditId === m.playerId ? (
-                  <div className="flex items-center gap-1">
-                    <input
-                      autoFocus
-                      value={numberValue}
-                      onChange={(e) => setNumberValue(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && saveMemberNumber(m.playerId)}
-                      maxLength={3}
-                      placeholder="Nr."
-                      className="w-14 rounded-lg border border-gray-300 px-2 py-1 text-sm text-gray-900 outline-none focus:border-brand-500"
-                    />
-                    <button
-                      onClick={() => saveMemberNumber(m.playerId)}
-                      disabled={numberBusyId === m.playerId}
-                      className="text-green-600 hover:text-green-700 disabled:opacity-60 p-1.5"
-                      title="Nummer speichern"
-                    >
-                      <FaCheck className="text-sm" />
-                    </button>
+            <div key={m.playerId} className="px-5 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="h-9 w-9 flex-shrink-0 rounded-full bg-brand-100 text-brand-700 text-sm font-semibold flex items-center justify-center">
+                    {m.number ? `#${m.number}` : <FaUser className="text-sm" />}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-medium text-gray-900 truncate">{m.name}</p>
+                    <p className="text-xs text-gray-500">{positionLabel(m.position) || "Position offen"}</p>
                   </div>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setNumberEditId(m.playerId);
-                      setNumberValue(m.number || "");
-                    }}
-                    className="text-gray-400 hover:text-brand-600 p-1.5"
-                    title="Rückennummer vergeben"
-                  >
-                    <FaHashtag className="text-sm" />
-                  </button>
-                )}
-
-                {m.isFounder ? (
-                  <span className="text-xs font-medium rounded-full px-3 py-1 bg-brand-100 text-brand-700">
-                    Haupt-Admin
-                  </span>
-                ) : m.isAdmin ? (
-                  <span className="text-xs font-medium rounded-full px-3 py-1 bg-brand-100 text-brand-700">
-                    Admin
-                  </span>
-                ) : (
-                  <span className="text-xs font-medium rounded-full px-3 py-1 bg-green-100 text-green-700">
-                    Mitglied
-                  </span>
-                )}
-
-                {/* Admin-Rechte vergeben/entziehen (nicht beim Haupt-Admin) */}
-                {!m.isFounder &&
-                  (m.isAdmin ? (
-                    <button
-                      onClick={() => setMemberAdmin(m.playerId, false, m.name)}
-                      disabled={adminBusyId === m.playerId}
-                      className="text-brand-600 hover:text-gray-500 disabled:opacity-60 p-1.5"
-                      title="Adminrechte entziehen"
-                    >
-                      <FaUserSlash className="text-sm" />
-                    </button>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {/* Rückennummer vergeben/ändern */}
+                  {numberEditId === m.playerId ? (
+                    <div className="flex items-center gap-1">
+                      <input
+                        autoFocus
+                        value={numberValue}
+                        onChange={(e) => setNumberValue(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && saveMemberNumber(m.playerId)}
+                        maxLength={3}
+                        placeholder="Nr."
+                        className="w-14 rounded-lg border border-gray-300 px-2 py-1 text-sm text-gray-900 outline-none focus:border-brand-500"
+                      />
+                      <button
+                        onClick={() => saveMemberNumber(m.playerId)}
+                        disabled={numberBusyId === m.playerId}
+                        className="text-green-600 hover:text-green-700 disabled:opacity-60 p-1.5"
+                        title="Nummer speichern"
+                      >
+                        <FaCheck className="text-sm" />
+                      </button>
+                    </div>
                   ) : (
                     <button
-                      onClick={() => setMemberAdmin(m.playerId, true, m.name)}
-                      disabled={adminBusyId === m.playerId}
-                      className="text-gray-400 hover:text-brand-600 disabled:opacity-60 p-1.5"
-                      title="Zum Admin machen"
+                      onClick={() => {
+                        setNumberEditId(m.playerId);
+                        setNumberValue(m.number || "");
+                      }}
+                      className="text-gray-400 hover:text-brand-600 p-1.5"
+                      title="Rückennummer vergeben"
                     >
-                      <FaUserShield className="text-sm" />
+                      <FaHashtag className="text-sm" />
                     </button>
-                  ))}
+                  )}
 
-                {/* Entfernen nur für einfache Mitglieder (Admins vorher degradieren) */}
-                {!m.isFounder && !m.isAdmin && (
-                  <button
-                    onClick={() => removeMember(m.playerId)}
-                    disabled={removingId === m.playerId}
-                    className="text-gray-400 hover:text-red-600 disabled:opacity-60 p-1.5"
-                    title="Aus Team entfernen"
-                  >
-                    <FaUserMinus className="text-sm" />
-                  </button>
-                )}
+                  {m.isFounder ? (
+                    <span className="text-xs font-medium rounded-full px-3 py-1 bg-brand-100 text-brand-700">
+                      Haupt-Admin
+                    </span>
+                  ) : m.isAdmin ? (
+                    <span className="text-xs font-medium rounded-full px-3 py-1 bg-brand-100 text-brand-700">
+                      Admin
+                    </span>
+                  ) : (
+                    <span className="text-xs font-medium rounded-full px-3 py-1 bg-green-100 text-green-700">
+                      Mitglied
+                    </span>
+                  )}
+
+                  {/* Teilrechte festlegen (nur Haupt-Admin, nur für Co-Admins) */}
+                  {isMainAdmin && m.isAdmin && !m.isFounder && (
+                    <button
+                      onClick={() =>
+                        permEditId === m.playerId ? setPermEditId(null) : openPermEditor(m)
+                      }
+                      className={`p-1.5 ${
+                        permEditId === m.playerId
+                          ? "text-brand-600"
+                          : "text-gray-400 hover:text-brand-600"
+                      }`}
+                      title="Teilrechte festlegen"
+                    >
+                      <FaSlidersH className="text-sm" />
+                    </button>
+                  )}
+
+                  {/* Admin-Rechte vergeben/entziehen (nur Haupt-Admin) */}
+                  {isMainAdmin &&
+                    !m.isFounder &&
+                    (m.isAdmin ? (
+                      <button
+                        onClick={() => setMemberAdmin(m.playerId, false, m.name)}
+                        disabled={adminBusyId === m.playerId}
+                        className="text-brand-600 hover:text-gray-500 disabled:opacity-60 p-1.5"
+                        title="Adminrechte entziehen"
+                      >
+                        <FaUserSlash className="text-sm" />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setMemberAdmin(m.playerId, true, m.name)}
+                        disabled={adminBusyId === m.playerId}
+                        className="text-gray-400 hover:text-brand-600 disabled:opacity-60 p-1.5"
+                        title="Zum Admin machen"
+                      >
+                        <FaUserShield className="text-sm" />
+                      </button>
+                    ))}
+
+                  {/* Entfernen nur für einfache Mitglieder (Admins vorher degradieren) */}
+                  {!m.isFounder && !m.isAdmin && (
+                    <button
+                      onClick={() => removeMember(m.playerId)}
+                      disabled={removingId === m.playerId}
+                      className="text-gray-400 hover:text-red-600 disabled:opacity-60 p-1.5"
+                      title="Aus Team entfernen"
+                    >
+                      <FaUserMinus className="text-sm" />
+                    </button>
+                  )}
+                </div>
               </div>
+
+              {/* Teilrechte-Panel (nur Haupt-Admin) */}
+              {isMainAdmin && permEditId === m.playerId && (
+                <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 p-4">
+                  <p className="text-sm font-medium text-gray-700 mb-2">
+                    Welche Bereiche darf <strong>{m.name}</strong> verwalten?
+                  </p>
+                  <div className="space-y-2">
+                    {TEAM_PERMISSIONS.map((p) => (
+                      <label key={p.key} className="flex items-start gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={permDraft.includes(p.key)}
+                          onChange={() => togglePerm(p.key)}
+                          className="mt-0.5 h-4 w-4 accent-brand-500"
+                        />
+                        <span className="min-w-0">
+                          <span className="block text-sm font-medium text-gray-800">{p.label}</span>
+                          <span className="block text-xs text-gray-500">{p.desc}</span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                  <div className="mt-3 flex items-center gap-2">
+                    <button
+                      onClick={() => savePerms(m.playerId)}
+                      disabled={permBusyId === m.playerId}
+                      className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-1.5 text-sm font-medium"
+                    >
+                      {permBusyId === m.playerId ? "Speichern…" : "Rechte speichern"}
+                    </button>
+                    <button
+                      onClick={() => setPermEditId(null)}
+                      className="text-sm text-gray-500 hover:text-gray-700 px-2"
+                    >
+                      Abbrechen
+                    </button>
+                  </div>
+                  <p className="mt-2 text-xs text-gray-400">
+                    Alle Häkchen = voller Zugriff wie der Haupt-Admin. Keine = nur ansehen.
+                  </p>
+                </div>
+              )}
             </div>
           ))}
         </div>

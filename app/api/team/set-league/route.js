@@ -3,7 +3,7 @@ import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Team from "@/models/Team";
 import League from "@/models/League";
-import { getTeamFromToken } from "@/lib/serverAuth";
+import { getTeamForCapability } from "@/lib/serverAuth";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/team/set-league – Liga des Teams setzen/wechseln/entfernen (Dual-Auth).
@@ -13,7 +13,7 @@ async function handler(req) {
   const body = await req.json().catch(() => ({}));
   const token = getTokenFromRequest(req, body.token);
 
-  const team = await getTeamFromToken(token);
+  const team = await getTeamForCapability(token, "einstellungen");
   if (!team) {
     return fail("Kein Team-Zugriff für diese Sitzung", 401);
   }

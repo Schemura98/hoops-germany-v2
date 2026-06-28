@@ -1,22 +1,26 @@
 import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Player from "@/models/Player";
-import { getTeamFromToken } from "@/lib/serverAuth";
+import Team from "@/models/Team";
+import { getTeamWithRole } from "@/lib/serverAuth";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
-// POST /api/team/set-member-admin – Team-Admin macht ein Mitglied zum Co-Admin
-// oder entzieht die Rechte (Dual-Auth; jeder Team-Admin darf das).
+// POST /api/team/set-member-admin – Mitglied zum Co-Admin machen oder degradieren.
+// NUR der Haupt-Admin (team.adminPlayerId) darf Admin-Rollen verwalten.
 // Body: { token, playerId, makeAdmin: boolean }
-// Co-Admin = Player.isTeamAdmin + teamAdminOf == team (nutzt die bestehende Dual-Auth).
-// Der Gründer (team.adminPlayerId) ist geschützt und kann nicht degradiert werden.
+// Co-Admin = Player.isTeamAdmin + teamAdminOf == team.
 async function handler(req) {
   const body = await req.json().catch(() => ({}));
   const token = getTokenFromRequest(req, body.token);
 
-  const team = await getTeamFromToken(token);
-  if (!team) {
+  const role = await getTeamWithRole(token);
+  if (!role) {
     return fail("Kein Team-Zugriff für diese Sitzung", 401);
   }
+  if (!role.isMainAdmin) {
+    return fail("Nur der Haupt-Admin kann Admin-Rollen verwalten", 403);
+  }
+  const team = role.team;
 
   const { playerId, makeAdmin } = body;
   if (!playerId) {
@@ -48,6 +52,11 @@ async function handler(req) {
   } else {
     player.isTeamAdmin = false;
     player.teamAdminOf = null;
+    // Teilrechte-Eintrag aufräumen
+    await Team.updateOne(
+      { _id: team._id },
+      { $pull: { adminPermissions: { player: player._id } } }
+    );
   }
   await player.save();
 

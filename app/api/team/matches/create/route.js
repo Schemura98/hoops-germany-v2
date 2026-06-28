@@ -4,7 +4,7 @@ import { connectDB } from "@/lib/db";
 import Team from "@/models/Team";
 import Match from "@/models/Match";
 import League from "@/models/League";
-import { getTeamFromToken } from "@/lib/serverAuth";
+import { getTeamForCapability } from "@/lib/serverAuth";
 import { PLAYOFF_ROUNDS } from "@/lib/constants";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
@@ -13,7 +13,7 @@ async function handler(req) {
   const body = await req.json().catch(() => ({}));
   const token = getTokenFromRequest(req, body.token);
 
-  const team = await getTeamFromToken(token);
+  const team = await getTeamForCapability(token, "spiele");
   if (!team) {
     return fail("Kein Team-Zugriff für diese Sitzung", 401);
   }

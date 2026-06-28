@@ -3,6 +3,7 @@ import Match from "@/models/Match";
 import Player from "@/models/Player";
 import { sendMail } from "@/lib/mailer";
 import { pendingResultEmail } from "@/lib/emailTemplates";
+import { getTeamAdminRecipients } from "@/lib/teamAdmins";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 const BASE_URL = process.env.NEXTAUTH_URL || "https://hoopsgermany.de";
@@ -19,9 +20,14 @@ async function remindForMatch(match) {
     if (!team) continue;
     const opponent = team === match.teamA ? match.teamB : match.teamA;
 
-    // In-App-Benachrichtigung an den Team-Admin (immer, unabhängig von Mail-Opt-out).
-    if (team.adminPlayerId) {
-      await Player.findByIdAndUpdate(team.adminPlayerId, {
+    // Empfänger je Team-Einstellung (nur Haupt-Admin oder alle Admins).
+    const admins = await getTeamAdminRecipients(team);
+    if (!admins.length) continue;
+
+    // In-App-Benachrichtigung an alle (immer, unabhängig vom Mail-Opt-out).
+    await Player.updateMany(
+      { _id: { $in: admins.map((a) => a._id) } },
+      {
         $push: {
           notifications: {
             type: "pending_result",
@@ -33,21 +39,20 @@ async function remindForMatch(match) {
             createdAt: new Date(),
           },
         },
-      });
+      }
+    );
 
-      // Mail an die Admin-Spieler-Mail, sofern der Admin sie nicht abgeschaltet hat.
-      const admin = await Player.findById(team.adminPlayerId).select(
-        "email emailPendingResult"
-      );
-      if (admin?.email && admin.emailPendingResult !== false) {
-        const { subject, html, text } = pendingResultEmail({
-          teamName: team.teamName,
-          opponentName: opponent?.teamName,
-          matchDate: match.date,
-          baseUrl: BASE_URL,
-        });
+    // Mail nur an Admins, die die Erinnerung nicht abgeschaltet haben.
+    const { subject, html, text } = pendingResultEmail({
+      teamName: team.teamName,
+      opponentName: opponent?.teamName,
+      matchDate: match.date,
+      baseUrl: BASE_URL,
+    });
+    for (const a of admins) {
+      if (a.email && a.emailPendingResult !== false) {
         try {
-          await sendMail({ to: admin.email, subject, html, text });
+          await sendMail({ to: a.email, subject, html, text });
         } catch (err) {
           console.error("[PENDING RESULT MAIL ERROR]", err?.message || err);
         }
@@ -70,8 +75,8 @@ async function handler(req) {
     date: { $lt: now },
     notifiedPendingResult: { $ne: true },
   })
-    .populate("teamA", "teamName email adminPlayerId")
-    .populate("teamB", "teamName email adminPlayerId");
+    .populate("teamA", "teamName email adminPlayerId notifyAllAdmins")
+    .populate("teamB", "teamName email adminPlayerId notifyAllAdmins");
 
   for (const match of matches) {
     await remindForMatch(match);
