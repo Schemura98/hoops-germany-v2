@@ -1,13 +1,248 @@
-export const metadata = { title: "Team beitreten – Hoops Germany" };
+"use client";
 
-export default function TeamJoinTokenPage() {
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import axios from "axios";
+import { FaBasketballBall, FaUsers } from "react-icons/fa";
+import { getPlayerToken, setPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
+
+function Shell({ children }) {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
-      <h1 className="text-2xl font-bold text-gray-900">Team beitreten</h1>
-      <p className="mt-2 text-gray-500">
-        Platzhalter – Route <code className="text-brand-600">/team/join/[token]</code> wird in der
-        Umsetzungsphase implementiert.
-      </p>
+    <main className="min-h-screen flex items-center justify-center px-6 py-12">
+      <div className="w-full max-w-md">
+        <Link
+          href="/"
+          className="flex items-center justify-center gap-2 font-bold text-gray-900 mb-8"
+        >
+          <FaBasketballBall className="text-brand-500 text-xl" />
+          Hoops Germany
+        </Link>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">{children}</div>
+      </div>
     </main>
+  );
+}
+
+const inputClass =
+  "w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+
+export default function TeamJoinTokenPage({ params }) {
+  const inviteToken = params.token;
+
+  const [state, setState] = useState("loading"); // loading | invalid | ready | done
+  const [team, setTeam] = useState(null);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [joining, setJoining] = useState(false);
+  const [error, setError] = useState("");
+
+  // Register-on-Join (nicht eingeloggte Eingeladene)
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "" });
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    setLoggedIn(!!getPlayerToken());
+    let active = true;
+    (async () => {
+      try {
+        const { data } = await axios.post("/api/team/invite-info", { inviteToken });
+        if (!active) return;
+        setTeam(data.team);
+        setState("ready");
+      } catch {
+        if (!active) return;
+        setState("invalid");
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [inviteToken]);
+
+  // Eingeloggter Spieler tritt direkt bei.
+  async function joinTeam() {
+    setError("");
+    setJoining(true);
+    try {
+      const token = getPlayerToken();
+      await axios.post("/api/team/join-via-link", { token, inviteToken });
+      setState("done");
+    } catch (err) {
+      setError(err.response?.data?.message || "Beitritt fehlgeschlagen.");
+      setJoining(false);
+    }
+  }
+
+  // Konto anlegen + in einem Schritt beitreten.
+  async function registerAndJoin(e) {
+    e.preventDefault();
+    setError("");
+    if (form.password.length < 6) {
+      setError("Das Passwort muss mindestens 6 Zeichen lang sein.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { data } = await axios.post("/api/player/playerregister", {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        password: form.password,
+      });
+      setPlayerToken(data.token);
+      setStoredPlayer(data.player);
+      await axios.post("/api/team/join-via-link", { token: data.token, inviteToken });
+      setState("done");
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Konto konnte nicht erstellt werden. Bitte erneut versuchen."
+      );
+      setSubmitting(false);
+    }
+  }
+
+  if (state === "loading") {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
+      </main>
+    );
+  }
+
+  if (state === "invalid") {
+    return (
+      <Shell>
+        <h1 className="text-xl font-bold text-gray-900">Link ungültig</h1>
+        <p className="mt-2 text-sm text-gray-500">
+          Dieser Einladungslink ist ungültig oder abgelaufen. Bitte fordere beim Team einen neuen
+          Link an.
+        </p>
+        <Link
+          href="/"
+          className="mt-6 block text-center bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2.5 font-medium"
+        >
+          Zur Startseite
+        </Link>
+      </Shell>
+    );
+  }
+
+  if (state === "done") {
+    return (
+      <Shell>
+        <h1 className="text-xl font-bold text-gray-900">Willkommen im Kader! 🎉</h1>
+        <p className="mt-2 text-sm text-gray-500">
+          Du bist jetzt im Kader von <strong>{team?.teamName}</strong>. Vervollständige jetzt dein
+          Profil – Foto, Position und Co. – damit dich alle finden.
+        </p>
+        <Link
+          href="/player/edit-profile"
+          className="mt-6 block text-center bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2.5 font-medium"
+        >
+          Profil jetzt vervollständigen
+        </Link>
+        <Link
+          href="/player/newsfeed"
+          className="mt-3 block text-center text-sm text-gray-500 hover:text-brand-600"
+        >
+          Später – zum Newsfeed
+        </Link>
+      </Shell>
+    );
+  }
+
+  // state === "ready"
+  return (
+    <Shell>
+      <div className="flex items-center gap-3">
+        {team?.logo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={team.logo} alt={team.teamName} className="h-12 w-12 rounded-full object-cover" />
+        ) : (
+          <span className="h-12 w-12 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
+            <FaUsers />
+          </span>
+        )}
+        <div>
+          <h1 className="text-lg font-bold text-gray-900">{team?.teamName}</h1>
+          {team?.region && <p className="text-xs text-gray-500">{team.region}</p>}
+        </div>
+      </div>
+
+      <div className="mt-5 rounded-lg bg-gray-50 border border-gray-100 p-4">
+        <p className="text-sm text-gray-700">
+          Du wurdest eingeladen, <strong>{team?.teamName}</strong> beizutreten. Über diesen Link
+          landest du direkt im Kader.
+        </p>
+      </div>
+
+      {error && (
+        <div className="mt-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
+      {loggedIn ? (
+        <button
+          onClick={joinTeam}
+          disabled={joining}
+          className="mt-6 w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
+        >
+          {joining ? "Trete bei…" : "Dem Team beitreten"}
+        </button>
+      ) : (
+        <form onSubmit={registerAndJoin} className="mt-6 space-y-3">
+          <p className="text-sm text-gray-600">
+            Erstelle in wenigen Sekunden dein Konto und tritt dem Team bei:
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <input
+              value={form.firstName}
+              onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
+              className={inputClass}
+              placeholder="Vorname"
+              required
+            />
+            <input
+              value={form.lastName}
+              onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
+              className={inputClass}
+              placeholder="Nachname"
+              required
+            />
+          </div>
+          <input
+            type="email"
+            value={form.email}
+            onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+            className={inputClass}
+            placeholder="E-Mail"
+            required
+          />
+          <input
+            type="password"
+            value={form.password}
+            onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+            className={inputClass}
+            placeholder="Passwort (mind. 6 Zeichen)"
+            required
+          />
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
+          >
+            {submitting ? "Konto wird erstellt…" : "Konto erstellen & beitreten"}
+          </button>
+          <p className="text-center text-xs text-gray-400">
+            Du hast schon ein Konto?{" "}
+            <Link href="/login" className="text-brand-600 font-medium">
+              Anmelden
+            </Link>{" "}
+            und dann zu diesem Link zurückkehren.
+          </p>
+        </form>
+      )}
+    </Shell>
   );
 }
