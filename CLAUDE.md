@@ -891,6 +891,40 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > setzt zurück. **Prod unberührt** (nur Code deployt). SMTP lokal nicht testbar → Mail-Logik über Build + In-App
 > verifiziert; Live-Smoke (Homepage/Team-Admin/Teams) 200.
 
+#### 📬 Mail-Empfänger-Matrix + Bündelung an info@ (28.06.2026, `123edc1`, live)
+> Auf Wunsch: **jede administrative / Super-Admin-Mail geht zusätzlich an `info@hoopsgermany.de`** (zentrale
+> Übersicht, geht im privaten Postfach nicht unter). Helper `lib/adminRecipients.js` (`getAdminNotifyTo()` =
+> Super-Admin-Mails + `CENTRAL_INBOX`; `CENTRAL_INBOX` via `ADMIN_INBOX` überschreibbar). Verifiziert gegen
+> Dev-DB → `p.schemura@gmail.com, jonatanbaenavides@gmail.com, info@hoopsgermany.de`. **Vollständige Matrix
+> aller Mail-Versandstellen:**
+> | Mail | Trigger | Empfänger |
+> |---|---|---|
+> | `feedbackEmail` | Feedback abgeschickt | **Super-Admins + info@** |
+> | `teamPendingEmail` | neues Team angelegt (`team/create`) | **Super-Admins + info@** |
+> | Liga-Meldung (`leagues/report`) | „Liga melden" | **Super-Admins + info@** |
+> | `resultMismatchEmail` (SuperAdmin-Variante) | strittiges Ergebnis | **Super-Admins + info@** + beide Team-Admins |
+> | `contactEmail` (`kontakt`) | Kontaktformular | **Super-Admins + info@** (`replyTo`=Absender) |
+> | `resultMismatchEmail` (Team-Variante) | strittiges Ergebnis | **Team-Admins** beider Teams |
+> | `pendingResultEmail` (`notify-pending-results`, Cron) | Ergebnis offen | **Team-Admin** (Opt-out `emailPendingResult`) |
+> | `teamApprovedEmail` (`approve-team`) | Team freigegeben | **User** (Gründer) |
+> | `welcomeEmail` (`playerregister` + Google-Callback) | Registrierung | **User** |
+> | `inviteEmail` (`roster/send-invite-email`) | Slot-Einladung | **User** (eingeladene Adresse) |
+> | `passwordResetEmail` (`forgotpassword`) | Passwort vergessen | **User** |
+> Nicht in info@: rein nutzergerichtete Mails (Willkommen/Freigabe/Einladung/Reset) – bewusst, das ist kein
+> Admin-Posteingang. **Team-Admin-Mails** (Pending-Result, Mismatch-Team-Variante) gehen an die Team-Admins.
+>
+> **Einladungs-→Registrierungs-Flow (end-to-end verifiziert im Preview):** Admin legt im Kader einen Slot an
+> (Name/Position/Nr.) → lädt per **Claim-Link / WhatsApp / E-Mail** ein (`roster/send-invite-email`,
+> `inviteEmail` → Link `/team/claim/[token]`). Eingeladener (ausgeloggt) öffnet den Link → sieht Slot
+> (Name·Position·#Nr.) → **legt E-Mail + Passwort direkt an** (`registerAndClaim` → `playerregister`) →
+> `request-claim` (Slot „pending", Team-Admin erhält In-App `join_request`). `playerregister` sendet die
+> **Willkommensmail** und setzt **kein** `welcomeSeen`/`onboardingDismissed` → der neue User bekommt beim
+> Wechsel auf den Newsfeed die **Willkommens-Tour** (Token-gebundener Wächter greift auch nach Claim-Register)
+> **und die Onboarding-Checklist** – also den vollen Neu-User-Start. Admin bestätigt (`approve-claim`): `teamId`
+> gesetzt, `join_approved`-Notif, folgt eigenem Team, **Slot-Nr. wird übernommen** (falls Spieler keine hat).
+> ✅ Live im Preview durchgespielt (Slot „Invite Tester #15" → Claim-Seite mit E-Mail/PW → „Anspruch gesendet"
+> → Newsfeed mit Tour + Checklist).
+
 ### Bekannte Einschränkungen / offen
 - **Lokale Dev-Umgebung:** SMTP/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS
   (hoops_prod) live testbar; lokal über In-App-Notifs + Trigger-Logs verifizieren.
