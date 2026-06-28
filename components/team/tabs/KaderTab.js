@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import {
-  FaPlus,
+  FaIdBadge,
   FaTrash,
   FaCopy,
   FaCheck,
@@ -239,8 +239,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
     }
   }
 
-  // Slot hinzufügen
-  const [showAdd, setShowAdd] = useState(false);
+  // Neuen Spieler anlegen (Slot)
   const [newSlot, setNewSlot] = useState({ name: "", position: "", number: "" });
   const [adding, setAdding] = useState(false);
 
@@ -268,7 +267,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
       const token = getTeamAuthToken();
       await axios.post("/api/team/roster/add-slot", { token, ...newSlot });
       setNewSlot({ name: "", position: "", number: "" });
-      setShowAdd(false);
+      flash("ok", "Platz angelegt – schick den persönlichen Link unten an den Spieler.");
       reload?.();
     } catch (err) {
       flash("err", err.response?.data?.message || "Slot konnte nicht angelegt werden.");
@@ -350,21 +349,13 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">
-            Kader <span className="text-sm font-normal text-gray-500">· {members.length} Spieler</span>
-          </h2>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Lege Spieler an und lade sie per Link, WhatsApp oder E-Mail ein.
-          </p>
-        </div>
-        <button
-          onClick={() => setShowAdd((v) => !v)}
-          className="inline-flex flex-shrink-0 items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors"
-        >
-          <FaPlus className="text-xs" /> Spieler hinzufügen
-        </button>
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900">
+          Kader <span className="text-sm font-normal text-gray-500">· {members.length} Spieler</span>
+        </h2>
+        <p className="text-xs text-gray-500 mt-0.5">
+          Drei Wege, jemanden in dein Team zu holen:
+        </p>
       </div>
 
       {msg && (
@@ -379,65 +370,15 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
         </div>
       )}
 
-      {/* Allgemeiner Team-Einladungslink (Beitritt ohne festen Slot) */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-        <div className="flex items-center gap-2 mb-1">
-          <FaLink className="text-brand-500 text-sm" />
-          <h3 className="text-sm font-semibold text-gray-900">Team-Einladungslink</h3>
-        </div>
-        <p className="text-xs text-gray-500 mb-3">
-          Teile diesen Link – wer ihn öffnet, kann deinem Team direkt beitreten (kein fester Slot nötig).
-        </p>
-        {inviteLink ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <input
-              readOnly
-              value={inviteLink}
-              onFocus={(e) => e.target.select()}
-              className={`${inputClass} flex-1 min-w-0 bg-gray-50`}
-            />
-            <button
-              onClick={copyInvite}
-              className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-brand-500 text-gray-600 rounded-lg px-3 py-2 text-xs font-medium"
-            >
-              {inviteCopied ? <FaCheck className="text-green-600" /> : <FaCopy />}
-              {inviteCopied ? "Kopiert" : "Kopieren"}
-            </button>
-            <button
-              onClick={shareInviteWhatsApp}
-              className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-green-500 hover:text-green-700 text-gray-600 rounded-lg px-3 py-2 text-xs font-medium"
-            >
-              <FaWhatsapp className="text-green-600" /> WhatsApp
-            </button>
-            <button
-              onClick={generateInvite}
-              disabled={generatingInvite}
-              className="text-xs text-gray-400 hover:text-gray-600 underline px-1"
-            >
-              Neuer Link
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={generateInvite}
-            disabled={generatingInvite}
-            className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2 text-sm font-medium"
-          >
-            <FaLink className="text-xs" />
-            {generatingInvite ? "Wird erstellt…" : "Einladungslink erstellen"}
-          </button>
-        )}
-      </div>
-
-      {/* Bestehenden Account direkt einladen */}
+      {/* 1) Bestehenden Account direkt einladen (schon registriert) */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
         <div className="flex items-center gap-2 mb-1">
           <FaUserPlus className="text-brand-500 text-sm" />
           <h3 className="text-sm font-semibold text-gray-900">Bestehenden Spieler einladen</h3>
         </div>
         <p className="text-xs text-gray-500 mb-3">
-          Suche einen registrierten Spieler – er wird per Glocke &amp; E-Mail gefragt und landet erst nach
-          seiner Zustimmung in deinem Kader.
+          Er ist <strong>schon bei Hoops Germany registriert?</strong> Such ihn und lade ihn ein – er wird
+          per Glocke &amp; E-Mail gefragt und ist nach seiner Zustimmung im Kader (mit Karriere-Eintrag).
         </p>
         <div className="relative">
           <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
@@ -491,6 +432,115 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
               })()
             )}
           </div>
+        )}
+      </div>
+
+      {/* 2) Neuen Spieler anlegen (Account-Platz + persönlicher Einladungslink) */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+        <div className="flex items-center gap-2 mb-1">
+          <FaIdBadge className="text-brand-500 text-sm" />
+          <h3 className="text-sm font-semibold text-gray-900">Neuen Spieler anlegen</h3>
+        </div>
+        <p className="text-xs text-gray-500 mb-3">
+          Er hat <strong>noch keinen Account?</strong> Leg ihm hier einen Platz an – du erhältst seinen
+          <strong> persönlichen Einladungslink</strong>, den du ihm per Kopieren, WhatsApp oder E-Mail schickst.
+          Er registriert sich darüber und ist sofort im Kader. (Erscheint unten unter „Eingeladene &amp; offene Plätze“.)
+        </p>
+        <form
+          onSubmit={addSlot}
+          className="grid sm:grid-cols-[1fr_140px_90px_auto] gap-3 items-end"
+        >
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Name</label>
+            <input
+              value={newSlot.name}
+              onChange={(e) => setNewSlot((s) => ({ ...s, name: e.target.value }))}
+              className={inputClass}
+              placeholder="Spielername"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Position</label>
+            <select
+              value={newSlot.position}
+              onChange={(e) => setNewSlot((s) => ({ ...s, position: e.target.value }))}
+              className={inputClass}
+            >
+              <option value="">–</option>
+              {POSITIONS.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Nr.</label>
+            <input
+              value={newSlot.number}
+              onChange={(e) => setNewSlot((s) => ({ ...s, number: e.target.value }))}
+              className={inputClass}
+              placeholder="#"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={adding || !newSlot.name.trim()}
+            className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2 text-sm font-medium h-[38px]"
+          >
+            {adding ? "…" : "Anlegen"}
+          </button>
+        </form>
+      </div>
+
+      {/* 3) Allgemeiner Team-Einladungslink (für alle, Selbst-Beitritt) */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+        <div className="flex items-center gap-2 mb-1">
+          <FaLink className="text-brand-500 text-sm" />
+          <h3 className="text-sm font-semibold text-gray-900">Team-Einladungslink (für alle)</h3>
+        </div>
+        <p className="text-xs text-gray-500 mb-3">
+          <strong>Ein Link für alle:</strong> teile ihn z.&nbsp;B. in eurer WhatsApp-Gruppe. Jeder erstellt sich
+          selbst einen Account und ist über den Link <strong>automatisch im Team</strong>.
+        </p>
+        {inviteLink ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              readOnly
+              value={inviteLink}
+              onFocus={(e) => e.target.select()}
+              className={`${inputClass} flex-1 min-w-0 bg-gray-50`}
+            />
+            <button
+              onClick={copyInvite}
+              className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-brand-500 text-gray-600 rounded-lg px-3 py-2 text-xs font-medium"
+            >
+              {inviteCopied ? <FaCheck className="text-green-600" /> : <FaCopy />}
+              {inviteCopied ? "Kopiert" : "Kopieren"}
+            </button>
+            <button
+              onClick={shareInviteWhatsApp}
+              className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-green-500 hover:text-green-700 text-gray-600 rounded-lg px-3 py-2 text-xs font-medium"
+            >
+              <FaWhatsapp className="text-green-600" /> WhatsApp
+            </button>
+            <button
+              onClick={generateInvite}
+              disabled={generatingInvite}
+              className="text-xs text-gray-400 hover:text-gray-600 underline px-1"
+            >
+              Neuer Link
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={generateInvite}
+            disabled={generatingInvite}
+            className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2 text-sm font-medium"
+          >
+            <FaLink className="text-xs" />
+            {generatingInvite ? "Wird erstellt…" : "Einladungslink erstellen"}
+          </button>
         )}
       </div>
 
@@ -660,64 +710,15 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
       )}
 
       <h3 className="text-sm font-semibold text-gray-700 pt-2">
-        Einladungen &amp; offene Plätze
+        Eingeladene &amp; offene Plätze
       </h3>
 
-      {/* Formular: Slot hinzufügen */}
-      {showAdd && (
-        <form
-          onSubmit={addSlot}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 grid sm:grid-cols-[1fr_140px_90px_auto] gap-3 items-end"
-        >
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Name</label>
-            <input
-              autoFocus
-              value={newSlot.name}
-              onChange={(e) => setNewSlot((s) => ({ ...s, name: e.target.value }))}
-              className={inputClass}
-              placeholder="Spielername"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Position</label>
-            <select
-              value={newSlot.position}
-              onChange={(e) => setNewSlot((s) => ({ ...s, position: e.target.value }))}
-              className={inputClass}
-            >
-              <option value="">–</option>
-              {POSITIONS.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Nr.</label>
-            <input
-              value={newSlot.number}
-              onChange={(e) => setNewSlot((s) => ({ ...s, number: e.target.value }))}
-              className={inputClass}
-              placeholder="#"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={adding || !newSlot.name.trim()}
-            className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2 text-sm font-medium h-[38px]"
-          >
-            {adding ? "…" : "Anlegen"}
-          </button>
-        </form>
-      )}
-
-      {/* Slot-Liste */}
+      {/* Slot-Liste (über „Neuen Spieler anlegen" erstellt) */}
       {slots.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center">
+        <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center">
           <p className="text-sm text-gray-500">
-            Noch keine Kader-Slots. Lege Slots an, um Spieler einzuladen.
+            Noch keine offenen Plätze. Über <strong>„Neuen Spieler anlegen“</strong> legst du jemandem
+            ohne Account einen Platz an – sein persönlicher Einladungslink erscheint dann hier.
           </p>
         </div>
       ) : (
