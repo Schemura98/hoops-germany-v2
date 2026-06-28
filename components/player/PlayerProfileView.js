@@ -422,7 +422,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                                       <span className="font-semibold text-gray-900">{s.teamName}</span>
                                     )}
                                     <p className="text-xs text-gray-400">
-                                      {s.leagueName}
+                                      {s.leagueName || (s.games === 0 ? "Noch kein Spiel" : "")}
                                       {s.season ? ` · ${s.season}` : ""}
                                     </p>
                                   </div>
