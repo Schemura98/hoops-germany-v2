@@ -973,6 +973,13 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > **Zähler) bleiben unberührt** (eigener `careerstats`-Endpoint; 0-Spiele ändert keine Schnitte). ✅ Verifiziert
 > in Dev (frischer Gründer → 0-Spiele-Station + „Noch kein Vereinswechsel.") **und auf Prod** (Jonatans Profil →
 > „Mönchengladbach Scorpions e.V." erscheint, games 0).
+> **Redesign + Saison (`da5e22b`, live):** Karriere-Verlauf ist jetzt eine **vertikale, voll-breite Timeline**
+> (Desktop+mobil) statt horizontaler Avatar-Reihe: je Verein eine Zeile **Logo · ausgeschriebener Name · Saison
+> (rechts)**, **neuester Verein oben** (jeder Wechsel = neue Zeile darüber) mit **„Aktuell"-Badge**, Vereine
+> verlinkt; Saison je Stint als Einzelsaison oder Bereich (`seasons[]`). **Saison-Quelle gefixt:**
+> `/api/player/stations` leitet bei 0-Spiele-Zugehörigkeiten die **Saison + Liga aus der aktuellen Team-Liga**
+> ab (`populate leagueId`) → Saison erscheint nun auch ohne Spiele in **Karriere-Verlauf UND Spielerhistorie**
+> (Stats-Tab). ✅ Prod: Pat Test → „Düsseldorf Dribblers · 2025/26", Spielerhistorie „Oberliga 1 · 2025/26".
 
 #### ✉️ Bestehende Accounts direkt in den Kader einladen (28.06.2026, `93c5ae5`, live)
 > Bisher konnte ein Team-Admin nur Slot-Links verschicken; einen **registrierten Account gezielt** einladen
