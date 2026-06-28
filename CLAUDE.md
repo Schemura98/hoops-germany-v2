@@ -936,6 +936,31 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > `isTeamAdmin`+`teamAdminOf`==team). Toggle im **Einstellungen-Tab** (`/api/team/set-notify-admins`). Greift
 > bei `request-claim` (member_joined) und `requestjoin` (join_request). ✅ Verifiziert: mit Toggle an erhalten
 > Haupt-Admin **und** Co-Admin die `join_request`-Notif.
+>
+> **Benachrichtigungs-Einstellung gilt jetzt überall + Teilrechte für Co-Admins (`a6c7639`, live):**
+> - **notifyAllAdmins erweitert:** `pendingResultEmail` (`notify-pending-results`, Cron) und die Team-Variante
+>   des `resultMismatchEmail` (`submit-match-result`) nutzen jetzt ebenfalls `getTeamAdminRecipients` →
+>   je Team-Einstellung nur Haupt-Admin oder alle Admins; der Pending-Opt-out (`emailPendingResult`) wird
+>   **je Empfänger** respektiert. Damit greift die „alle Admins"-Einstellung bei ALLEN Team-Admin-Mails.
+> - **Teilrechte (Capabilities):** `lib/teamPermissions.js` mit 4 Bereichen **`kader` / `spiele` / `tryouts` /
+>   `einstellungen`** (`TEAM_PERMISSIONS`, `coAdminPerms`, `hasTeamPermission`, `TAB_PERMISSION`).
+>   `Team.adminPermissions: [{ player, perms[] }]`. **Haupt-Admin (`adminPlayerId`) hat immer alle Rechte;
+>   KEIN Eintrag = Vollzugriff** (Bestands-Co-Admins behalten ihr Verhalten → keine Migration).
+> - **Server-Durchsetzung:** `serverAuth.getTeamWithRole` (Team + handelnder Spieler + `isMainAdmin`) +
+>   `getTeamForCapability(token, cap)`. ALLE Schreib-Endpunkte gestaffelt: Kader (add/remove-slot,
+>   approve-claim, send-invite-email, set-member-number, remove-member, handlejoinrequest, generate-invite),
+>   Spiele (matches/create+delete, submit-match-result, match-stats/save), Tryouts (tryouts/create),
+>   Einstellungen (update-team, set-league, set-recruiting, set-notify-admins, upload/team-image). **Lese-**
+>   **Endpunkte bleiben offen** (fetchinfo, fetchjoinrequests, roster-players, matches/list).
+> - **Admin-Rollen verwalten nur noch Haupt-Admin:** `set-member-admin` prüft `isMainAdmin` (vorher durfte jeder
+>   Team-Admin befördern); neuer Endpoint **`set-member-permissions`** (Haupt-Admin) setzt die Teilrechte;
+>   Degradieren räumt den `adminPermissions`-Eintrag auf.
+> - **UI:** Team-Panel (`/team/admin`) blendet via `useCurrentPlayer` + `hasTeamPermission` die Tabs aus, die der
+>   Co-Admin nicht hat (fällt auf den ersten erlaubten Tab zurück); **KaderTab Rechte-Editor** (4 Checkboxen je
+>   Co-Admin, „alle = Vollzugriff / keine = nur ansehen") – nur für den Haupt-Admin sichtbar; `roster-players`
+>   liefert `perms` je Co-Admin. ✅ Verifiziert im Preview: Co-Admin „nur kader" sieht nur Kader/Anfragen,
+>   `set-member-number` 200 aber `set-notify-admins`/`submit-match-result`/`set-recruiting` 401, Rollen-Verwalten
+>   403; Haupt-Admin sieht alle 6 Tabs + Rechte-Editor. ⚠️ Schemafelder additiv (Dev-Neustart nötig).
 
 ### Bekannte Einschränkungen / offen
 - **Lokale Dev-Umgebung:** SMTP/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS
