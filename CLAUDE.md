@@ -905,7 +905,8 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > | `resultMismatchEmail` (SuperAdmin-Variante) | strittiges Ergebnis | **Super-Admins + info@** + beide Team-Admins |
 > | `contactEmail` (`kontakt`) | Kontaktformular | **Super-Admins + info@** (`replyTo`=Absender) |
 > | `resultMismatchEmail` (Team-Variante) | strittiges Ergebnis | **Team-Admins** beider Teams |
-> | `joinRequestEmail` (`request-claim` + `requestjoin`) | Beitritts-/Slot-Anfrage | **Team-Admin** (`adminPlayerId`), `kind` slot→`?tab=kader` / join→`?tab=anfragen` |
+> | `joinRequestEmail` (`requestjoin`) | allgemeine Beitrittsanfrage (ohne Link) | **Team-Admin(s)** – je `notifyAllAdmins` nur Haupt-Admin oder alle |
+> | `memberJoinedEmail` (`request-claim`) | eingeladener Spieler ist über den Link beigetreten | **Team-Admin(s)** – je `notifyAllAdmins` |
 > | `pendingResultEmail` (`notify-pending-results`, Cron) | Ergebnis offen | **Team-Admin** (Opt-out `emailPendingResult`) |
 > | `teamApprovedEmail` (`approve-team`) | Team freigegeben | **User** (Gründer) |
 > | `welcomeEmail` (`playerregister` + Google-Callback) | Registrierung | **User** |
@@ -914,17 +915,27 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > Nicht in info@: rein nutzergerichtete Mails (Willkommen/Freigabe/Einladung/Reset) – bewusst, das ist kein
 > Admin-Posteingang. **Team-Admin-Mails** (Pending-Result, Mismatch-Team-Variante) gehen an die Team-Admins.
 >
-> **Einladungs-→Registrierungs-Flow (end-to-end verifiziert im Preview):** Admin legt im Kader einen Slot an
-> (Name/Position/Nr.) → lädt per **Claim-Link / WhatsApp / E-Mail** ein (`roster/send-invite-email`,
-> `inviteEmail` → Link `/team/claim/[token]`). Eingeladener (ausgeloggt) öffnet den Link → sieht Slot
-> (Name·Position·#Nr.) → **legt E-Mail + Passwort direkt an** (`registerAndClaim` → `playerregister`) →
-> `request-claim` (Slot „pending", Team-Admin erhält In-App `join_request`). `playerregister` sendet die
-> **Willkommensmail** und setzt **kein** `welcomeSeen`/`onboardingDismissed` → der neue User bekommt beim
-> Wechsel auf den Newsfeed die **Willkommens-Tour** (Token-gebundener Wächter greift auch nach Claim-Register)
-> **und die Onboarding-Checklist** – also den vollen Neu-User-Start. Admin bestätigt (`approve-claim`): `teamId`
-> gesetzt, `join_approved`-Notif, folgt eigenem Team, **Slot-Nr. wird übernommen** (falls Spieler keine hat).
-> ✅ Live im Preview durchgespielt (Slot „Invite Tester #15" → Claim-Seite mit E-Mail/PW → „Anspruch gesendet"
-> → Newsfeed mit Tour + Checklist).
+> **Einladungs-→Registrierungs-Flow – AUTO-BEITRITT (`91d429e`, end-to-end verifiziert):** Admin legt im Kader
+> einen Slot an (Name/Position/Nr., **kein** PW/Mail nötig) → lädt per **Claim-Link / WhatsApp / E-Mail** ein
+> (`roster/send-invite-email`, `inviteEmail` → Link `/team/claim/[token]`). Eingeladener (ausgeloggt) öffnet den
+> Link → sieht Slot (Name·Position·#Nr.) → **legt E-Mail + Passwort direkt an** (`registerAndClaim` →
+> `playerregister`) → `request-claim`. **Der Link = Autorisierung → der Spieler wird SOFORT in den Kader
+> übernommen** (Slot `confirmed`, `teamId` gesetzt, `join_approved`-Notif an den Spieler, folgt eigenem Team,
+> **Slot-Nr. übernommen**) – **kein manuelles Genehmigen mehr**. Die **Team-Admins erhalten eine Bestätigung**
+> „X hat sich registriert und ist jetzt in deinem Kader" (neue Notif `member_joined` + `memberJoinedEmail`).
+> `playerregister` sendet die **Willkommensmail** und setzt **kein** `welcomeSeen`/`onboardingDismissed` → der
+> neue User bekommt beim Wechsel auf den Newsfeed die **Willkommens-Tour** (Token-gebundener Wächter greift auch
+> nach Claim-Register) **und die Onboarding-Checklist** – voller Neu-User-Start. Claim-Seite zeigt „Willkommen
+> im Kader!". ⚠️ **Allgemeine** Beitrittsanfrage (`requestjoin`, ohne Link) bleibt **bestätigungspflichtig**
+> (`join_request` → Admin genehmigt via Anfragen-Tab/`handlejoinrequest`).
+> ✅ Live im Preview: Slot „Auto Join #33" → Claim-Register → „Willkommen im Kader!", `teamId`+#33+`confirmed`,
+> Admin-Notif `member_joined`; Tour + Checklist erscheinen.
+>
+> **Co-Admin-Benachrichtigung selbst einstellbar (`91d429e`):** `Team.notifyAllAdmins` (Default false = nur
+> Haupt-Admin). Helper `lib/teamAdmins.getTeamAdminRecipients(team)` (Haupt-Admin + optional alle Co-Admins =
+> `isTeamAdmin`+`teamAdminOf`==team). Toggle im **Einstellungen-Tab** (`/api/team/set-notify-admins`). Greift
+> bei `request-claim` (member_joined) und `requestjoin` (join_request). ✅ Verifiziert: mit Toggle an erhalten
+> Haupt-Admin **und** Co-Admin die `join_request`-Notif.
 
 ### Bekannte Einschränkungen / offen
 - **Lokale Dev-Umgebung:** SMTP/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS
