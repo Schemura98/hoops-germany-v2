@@ -1015,6 +1015,11 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 >   Kader"; ausgeloggt → Registrier-Formular („Konto erstellen & beitreten"), eingeloggt → „Dem Team beitreten";
 >   danach „Willkommen im Kader!". ✅ Verifiziert (Preview: Register+Join + eingeloggter Join + Doppel-Join-Schutz;
 >   Prod-Smoke: Tester-Token löst „Düsseldorf Dribblers", keine „Platzhalter"-Meldung mehr).
+> - **Wechsel-Warnung (`f4f5bfe`, live):** Eingeloggt kennt die Seite via `getmyinfo` das aktuelle Team und zeigt
+>   3 Fälle: **kein Team** → „Dem Team beitreten"; **schon in DIESEM Team** → „Du bist bereits im Kader von X" +
+>   Link zur Teamseite (kein Re-Join); **anderes Team** → **Sicherheitsabfrage** „Du bist aktuell bei A. Wenn du
+>   beitrittst, verlässt du dieses Team und wechselst zu B." + „Zu B wechseln"/„Abbrechen" → kein versehentlicher
+>   Vereinswechsel. ✅ Alle 3 Fälle im Preview verifiziert.
 
 ### Bekannte Einschränkungen / offen
 - **Lokale Dev-Umgebung:** SMTP/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS
