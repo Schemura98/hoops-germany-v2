@@ -905,6 +905,7 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > | `resultMismatchEmail` (SuperAdmin-Variante) | strittiges Ergebnis | **Super-Admins + info@** + beide Team-Admins |
 > | `contactEmail` (`kontakt`) | Kontaktformular | **Super-Admins + info@** (`replyTo`=Absender) |
 > | `resultMismatchEmail` (Team-Variante) | strittiges Ergebnis | **Team-Admins** beider Teams |
+> | `joinRequestEmail` (`request-claim` + `requestjoin`) | Beitritts-/Slot-Anfrage | **Team-Admin** (`adminPlayerId`), `kind` slot→`?tab=kader` / join→`?tab=anfragen` |
 > | `pendingResultEmail` (`notify-pending-results`, Cron) | Ergebnis offen | **Team-Admin** (Opt-out `emailPendingResult`) |
 > | `teamApprovedEmail` (`approve-team`) | Team freigegeben | **User** (Gründer) |
 > | `welcomeEmail` (`playerregister` + Google-Callback) | Registrierung | **User** |
