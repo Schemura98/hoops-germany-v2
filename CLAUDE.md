@@ -10,6 +10,31 @@
 > Hauptflow live verifiziert. Details + offene Punkte siehe unten (Go-Live-Block + Roadmap).
 > Alte Seite läuft als Rollback-Fallback weiter (PM2 `sports`, Port 3000, DB `test`).
 
+#### 🔒 Klick-zum-Laden für YouTube/Link-Vorschau + Datenschutz-Passus (01.07.2026, `14ba439`, live)
+> Datenschutz-Härtung der Embed-Features (aus dem `update-onboarding-surfaces`-Durchgang hervorgegangen):
+> Dritt-Inhalte werden nicht mehr automatisch geladen (IP-/Cookie-Abfluss an Fremd-Server erst nach Consent).
+> - **`components/posts/PostEmbed.js`** (jetzt Client-Komponente): **Klick-zum-Laden**. YouTube zeigt einen
+>   lokalen Platzhalter („Video von YouTube laden" + Hinweis) → Klick lädt den Player, und zwar im
+>   **erweiterten Datenschutzmodus `youtube-nocookie.com`** (`?autoplay=1`). Externe Link-Vorschaubilder
+>   zeigen einen „Vorschaubild laden"-Platzhalter → Klick lädt das Fremd-Bild (`referrerPolicy=no-referrer`,
+>   lazy). **OG-Titel/Beschreibung/Domain bleiben sofort sichtbar** (das sind serverseitig gespeicherte
+>   Daten, kein Dritt-Abruf). Karte umgebaut von einem `<a>` zu `<div>` + separatem Bild-/Text-Link (kein
+>   verschachteltes interaktives Element). Domain-only-Karte (ohne OG) unverändert = kein Nachladen.
+> - **`app/datenschutz/page.js`**: neuer **Abschnitt 10 „Eingebettete Inhalte Dritter (YouTube,
+>   Link-Vorschauen)"** – beschreibt Klick-zum-Laden, No-Cookie, serverseitigen OG-Abruf (kein Nutzer-Abfluss),
+>   Google-Datenschutz-Link; **Rechtsgrundlage Einwilligung per Klick (Art. 6 Abs. 1 lit. a DSGVO)**;
+>   „Stand: → Juli 2026". ⚠️ Formulierung ist ein **Vorschlag, ersetzt keine Rechtsberatung** (Betreiber soll
+>   gegenchecken lassen).
+> ✅ Verifiziert (Preview): YouTube-Post → vor Klick 0 iframes/Platzhalter, nach Klick iframe mit
+>   `youtube-nocookie.com`; Link-Post → vor Klick kein Fremd-Bild (Titel/Domain trotzdem sichtbar), nach Klick
+>   Bild mit `no-referrer`; Datenschutz-Abschnitt 10 rendert. Build grün, keine Konsolenfehler, Test-Posts
+>   entfernt. **Deployt** (`14ba439`; Live-Smoke: `/`+`/datenschutz` 200, Abschnitt 10 + no-cookie im HTML).
+> **Offene rechtliche Entscheidung (Betreiber):** finale Datenschutz-Formulierung prüfen lassen; bei späterer
+>   Monetarisierung (Roadmap #3) kommen weitere Dritt-Dienste + Consent-Banner hinzu.
+> **Onboarding-/Marketing-Flächen** (Landing-Cards/Tour/Navbar/Checklist): beim `update-onboarding-surfaces`-
+>   Durchgang **bewusst NICHT geändert** – die 5 heutigen Newsfeed-Features vertiefen den bestehenden Bereich
+>   „Community & News" (bereits beworben + erreichbar); kein neuer Top-Level-Bereich.
+
 #### 🅰️ @-Mention-Autocomplete jetzt auch in Kommentaren + Antworten (01.07.2026, `ce1faa5`)
 > Ergänzung zum Composer-Autocomplete: die `MentionTextarea` wurde **generalisiert** und in den Kommentar-/
 > Antwort-Feldern eingebunden → @-Vorschläge überall im Feed.
