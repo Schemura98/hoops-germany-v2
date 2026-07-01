@@ -25,6 +25,45 @@ export default function PostEmbed({ embed }) {
   }
 
   if (embed.type === "link" && embed.url) {
+    // Reiche Vorschau (Open Graph): Titel + Beschreibung + Vorschaubild, falls
+    // beim Erstellen ermittelt. Ohne OG-Daten → kompakte Domain-Karte (Fallback).
+    if (embed.title || embed.image) {
+      return (
+        <a
+          href={embed.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 block overflow-hidden rounded-xl border border-gray-200 transition-colors hover:border-brand-300 hover:bg-gray-50"
+        >
+          {embed.image && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={embed.image}
+              alt=""
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              className="h-44 w-full bg-gray-100 object-cover"
+            />
+          )}
+          <div className="p-3">
+            <span className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-gray-400">
+              <FaGlobe className="text-[10px]" /> {embed.domain}
+            </span>
+            {embed.title && (
+              <span className="mt-1 block text-sm font-semibold text-gray-900 line-clamp-2">
+                {embed.title}
+              </span>
+            )}
+            {embed.description && (
+              <span className="mt-1 block text-xs text-gray-500 line-clamp-2">
+                {embed.description}
+              </span>
+            )}
+          </div>
+        </a>
+      );
+    }
+
     return (
       <a
         href={embed.url}
