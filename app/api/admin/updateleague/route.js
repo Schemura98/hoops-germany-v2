@@ -5,7 +5,7 @@ import Match from "@/models/Match";
 import { computeStandings } from "@/lib/standings";
 import { freezeSeason } from "@/lib/teamSeason";
 import { getAdminFromToken } from "@/lib/serverAuth";
-import { findDuplicateLeague } from "@/lib/leagues";
+import { findDuplicateLeague, normalizeAgeGroup } from "@/lib/leagues";
 import { LEAGUE_AGE_GROUPS } from "@/lib/constants";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
@@ -45,11 +45,11 @@ async function handler(req) {
   if (body.level !== undefined) updates.level = String(body.level).trim();
   if (body.gender !== undefined) updates.gender = String(body.gender).trim();
   if (body.ageGroup !== undefined) {
-    const ageGroup = String(body.ageGroup).trim();
-    // Produktregel: nur Senioren/U18/U16 – auch serverseitig erzwungen.
-    if (!LEAGUE_AGE_GROUPS.includes(ageGroup)) {
+    // Produktregel: nur Senioren/U18/U16 – zentral validiert/normalisiert.
+    const ageGroup = normalizeAgeGroup(body.ageGroup);
+    if (!ageGroup) {
       return fail(
-        `Altersklasse „${ageGroup}" wird nicht unterstützt. Erlaubt: ${LEAGUE_AGE_GROUPS.join(", ")}.`,
+        `Altersklasse „${String(body.ageGroup)}" wird nicht unterstützt. Erlaubt: ${LEAGUE_AGE_GROUPS.join(", ")}.`,
         400
       );
     }

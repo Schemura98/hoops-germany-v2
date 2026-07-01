@@ -77,7 +77,8 @@ for (const l of buildLeagues()) {
     ...key,
     bundesland: NRW,
     level: "Kreisliga",
-    official: false, // DEMO, nicht verifizierter Verbandskatalog
+    official: false, // DEMO, nicht als offizieller Verbandskatalog behandeln
+    isDemo: true, // maschinenlesbare Demo-Kennzeichnung
     active: true,
     finished: false,
     playoffMode: "keine",

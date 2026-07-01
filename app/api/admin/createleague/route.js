@@ -2,7 +2,7 @@ import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import League from "@/models/League";
 import { getAdminFromToken } from "@/lib/serverAuth";
-import { findDuplicateLeague } from "@/lib/leagues";
+import { findDuplicateLeague, normalizeAgeGroup } from "@/lib/leagues";
 import { LEAGUE_AGE_GROUPS } from "@/lib/constants";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
@@ -18,14 +18,18 @@ async function handler(req) {
   const season = String(body.season || "").trim();
   const bundesland = String(body.bundesland || "").trim();
 
-  // Produktregel: nur unterstützte Altersbereiche (Senioren/U18/U16) – auch serverseitig
-  // erzwungen (nicht nur im UI-Dropdown), damit z. B. U14 nicht über die API angelegt wird.
-  const ageGroup = String(body.ageGroup || "Senioren").trim();
-  if (!LEAGUE_AGE_GROUPS.includes(ageGroup)) {
-    return fail(
-      `Altersklasse „${ageGroup}" wird nicht unterstützt. Erlaubt: ${LEAGUE_AGE_GROUPS.join(", ")}.`,
-      400
-    );
+  // Produktregel: nur unterstützte Altersbereiche (Senioren/U18/U16) – zentral validiert
+  // (auch serverseitig, nicht nur UI). Fehlender Wert → Default "Senioren" (Pflichtfeldlogik);
+  // leerer/ungültiger String → 400. Case/Whitespace werden normalisiert ("u16"/" U16 " → "U16").
+  let ageGroup = "Senioren";
+  if (body.ageGroup !== undefined && body.ageGroup !== null) {
+    ageGroup = normalizeAgeGroup(body.ageGroup);
+    if (!ageGroup) {
+      return fail(
+        `Altersklasse „${String(body.ageGroup)}" wird nicht unterstützt. Erlaubt: ${LEAGUE_AGE_GROUPS.join(", ")}.`,
+        400
+      );
+    }
   }
 
   await connectDB();

@@ -33,7 +33,9 @@ Felder: `name`, `season`, `level`, `gender`, `ageGroup`, `region`, `official`, `
 ## Region / Basketballkreis
 - `region` ist ein **freier String** (z. B. „Bezirk Niederrhein", „Kreis Köln").
 - **Keine** eigene verwaltete Basketballkreis-Entität. Eine kanonische Kreis-Liste liegt in
-  `lib/constants.js` (`BASKETBALLKREISE_NRW`, **provisorisch** – s. wbv-nrw-catalog.md).
+  `lib/constants.js` (`BASKETBALLKREISE_NRW`, **verifiziert** gegen WBV, Stand 02.07.2026 – s. wbv-nrw-catalog.md).
+- **Demo-Kennzeichnung:** `League.isDemo` (Boolean, additiv) markiert Beispieldaten maschinenlesbar;
+  Demo-Kreisligen sind `official:false` + `isDemo:true` + `seedTag:"kreisliga-demo"`.
 
 ## Team ↔ Liga (`models/Team.js`, `models/TeamSeason.js`)
 - `Team.leagueId` = **eine** aktuelle Liga eines Teams.

@@ -24,7 +24,7 @@ async function list(req) {
 
   const query = season ? { season } : { active: true };
   const leagues = await League.find(query)
-    .select("name season bundesland level gender ageGroup region official teams finished champion active")
+    .select("name season bundesland level gender ageGroup region official isDemo teams finished champion active")
     .populate("champion", "teamName slug")
     .sort({ createdAt: -1 });
 
@@ -45,6 +45,7 @@ async function list(req) {
       ageGroup: l.ageGroup || "",
       region: l.region || "",
       official: !!l.official,
+      isDemo: !!l.isDemo,
       active: l.active,
       finished: !!l.finished,
       champion: l.champion ? { teamName: l.champion.teamName, slug: l.champion.slug } : null,

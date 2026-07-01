@@ -42,11 +42,13 @@ Anzeige kann zu männlich/weiblich/offen mappen.
 - „**Kreisklasse**" nur verwenden, wenn sie in einer gepflegten/importierten offiziellen Quelle
   tatsächlich vorkommt.
 
-## Basketballkreise in NRW — ⚠️ PROVISORISCHE LISTE (gegen echte WBV-Quelle prüfen!)
-> Diese Liste stammt aus einer ChatGPT-Recherche und ist **noch nicht** gegen die offizielle
-> WBV-Struktur (basketball.nrw) verifiziert. Namen/Zuschnitte können abweichen. **Vor produktiver
-> Nutzung prüfen und korrigieren.** Kanonische Quelle im Code: `lib/constants.js → BASKETBALLKREISE_NRW`
-> (dort NICHT mehrfach über Komponenten verteilen).
+## Basketballkreise in NRW — ✅ offizielle, zentral gepflegte Liste (22 WBV-Kreise)
+> **Verifiziert** anhand der offiziellen WBV-Seite „Basketballkreise" (basketball.nrw), **zuletzt geprüft
+> am 02.07.2026**. **Nur die Kreisnamen und ihre Gruppierung nach Regierungsbezirk gelten als verifiziert.**
+> Kanonische Quelle im Code: `lib/constants.js → BASKETBALLKREISE_NRW(_GRUPPIERT)` – dort zentral pflegen,
+> NICHT über Komponenten duplizieren.
+> ⚠️ Davon unberührt: die per `seed-kreisligen-demo.mjs` angelegten **Demo-Kreisligen** sind ausdrücklich
+> **nicht offizielle Beispieldaten** (`official:false`, `isDemo:true`, `seedTag:"kreisliga-demo"`).
 
 **Regierungsbezirk Köln:** Kreis Aachen · Kreis Erft · Kreis Bonn · Kreis Köln · Rheinisch Bergischer Kreis
 **Regierungsbezirk Düsseldorf:** Kreis Düsseldorf · Kreis Niers · Kreis Niederrhein · Kreis Essen ·

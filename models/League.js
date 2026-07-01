@@ -11,6 +11,10 @@ const leagueSchema = new mongoose.Schema(
     ageGroup: { type: String, default: "Senioren" }, // Senioren | U18 | U16 | …
     region: String, // Bezirk/Kreis (z. B. "Bezirk Niederrhein", "Kreis Köln")
     official: { type: Boolean, default: false }, // true = vom Verband, nicht selbst erstellt
+    // Maschinenlesbare Demo-Kennzeichnung (additiv). true = Beispieldaten (Testphase),
+    // NIE als reale/offizielle Liga behandeln (nicht in Sitemap/SEO/Reichweiten-KPI, Badge
+    // „Beispieldaten"). Gesetzt von seed-*-demo-Skripten; Bestand/echte Ligen = false.
+    isDemo: { type: Boolean, default: false },
     teams: [{ type: mongoose.Schema.Types.ObjectId, ref: "teams" }],
     matches: [{ type: mongoose.Schema.Types.ObjectId, ref: "matches" }],
     active: { type: Boolean, default: true },
