@@ -5,6 +5,31 @@
 
 ## 0. AKTUELLER STAND (Stand: 24.06.2026 – Redesign-Phase)
 
+#### 🏀 Kreisligen (Framework + Demo) + Skill `league-catalog` (02.07.2026, `e63f5c3`, live)
+> Kreisliga-Fundament gebaut (Testphase; echte WBV-Daten folgen separat). **Vorab ChatGPTs Ligen-Plan gegen
+> den echten Code geprüft** – zentrale Produktregel (nur Senioren/U18/U16) war längst umgesetzt, „Aktuelle
+> Saison" = `active`-Flag (kein Datum), Liga-Follow/competitionType/Basketballkreis-Entität existieren NICHT.
+> - **Skill `.claude/skills/league-catalog/`** (SKILL.md + `references/`: current-architecture / product-rules
+>   / wbv-nrw-catalog / change-checklist): verbindliche Liga-/Saison-/Playoff-/Kreisliga-Logik, trennt
+>   **Ist-Zustand / Produktregeln / Tech-Schulden / Zukunftsentscheidungen**. Aufruf `/league-catalog`,
+>   greift bei ligaabhängigen Aufgaben. **Kein** autonomer Agent (bewusst).
+> - **`lib/constants.js`**: `BASKETBALLKREISE_NRW` + `_GRUPPIERT` (22 Kreise nach Regierungsbezirk).
+>   ⚠️ **PROVISORISCH** (ChatGPT-Recherche, NICHT gegen offizielle WBV-Quelle verifiziert – vor „echt" prüfen).
+> - **`/ligen`**: bedingter **Basketballkreis-Filter** (nur NRW + Kreisliga), Optionen nach Bezirk gruppiert
+>   (optgroup), nicht vorhandene Kreise deaktiviert („– folgt"), setzt sich zurück wenn nicht mehr anwendbar.
+> - **Serverseitige `ageGroup`-Validierung** in `createleague`/`updateleague`: nur `LEAGUE_AGE_GROUPS`
+>   (Senioren/U18/U16), **U14 & jünger → 400** (härtet den Produkt-Cutoff über die API, nicht nur UI-Dropdown).
+> - **`scripts/seed-kreisligen-demo.mjs`** (additiv, `seedTag:"kreisliga-demo"`, idempotent, `--dry`/`--purge`):
+>   14 Demo-Kreisligen (5 Kreise über alle 5 Bezirke: Köln/Düsseldorf/Dortmund/Münster/Paderborn; je 1./2.
+>   Kreisliga Herren + für Köln/Düsseldorf zusätzlich U18/U16 männlich). `official:false` (Demo). Beispiel
+>   „1. Kreisliga Herren – Kreis Köln" mit 4 Demo-Teams befüllt. Namen enthalten den Kreis (eindeutig).
+> ✅ Verifiziert: Dev-Preview (Filter erscheint NRW+Kreisliga → 5 Bezirks-Optgroups, nur 5 Kreise aktiv;
+>   Kreis Köln → exakt die 4 Köln-Ligen; Beispiel 4 Teams), Server-Validierung (U14→400, U16→201), Seed
+>   idempotent (14 neu → 0/14). Dev danach ge-`--purge`t. **Prod**: Code deployt (`e63f5c3`), Seed auf
+>   `hoops_prod` (14 Kreisligen, Live-API bestätigt: 5 Kreise, ageGroups U16/U18/Senioren, Köln 4 Teams).
+> **Entfernen:** `node scripts/seed-kreisligen-demo.mjs --purge` (VPS). **Offen:** echte WBV-Kreisliga-Daten
+>   (Namen/Kreise/Staffeln aus der ChatGPT-PDF **prüfen** + Umlaute) statt Demo; Kreis-Liste gegen WBV verifizieren.
+
 > 🟢 **v2 IST LIVE auf https://hoopsgermany.de** (seit 24.06.2026, Hostinger-VPS, DB `hoops_prod`).
 > Das Redesign (Navy/Slate + Orange + Canva-Logo) ist abgeschlossen und im Produktivbetrieb;
 > Hauptflow live verifiziert. Details + offene Punkte siehe unten (Go-Live-Block + Roadmap).
