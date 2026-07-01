@@ -10,6 +10,25 @@
 > Hauptflow live verifiziert. Details + offene Punkte siehe unten (Go-Live-Block + Roadmap).
 > Alte Seite läuft als Rollback-Fallback weiter (PM2 `sports`, Port 3000, DB `test`).
 
+#### 🅰️ Composer: @-Mention-Autocomplete (01.07.2026, `b219e6d`)
+> Letzter offener Newsfeed-Follow-up erledigt: Der Beitrags-Composer schlägt beim Tippen von „@" jetzt Spieler
+> vor (vorher musste man `@Vorname`/`@VornameNachname` blind tippen).
+> - **Neue Komponente `components/posts/MentionTextarea.js`** (wiederverwendbar): erkennt das aktive `@`-Token
+>   direkt vor dem Cursor (`activeMention`), fragt ab 2 Zeichen **debounced** (200 ms) `/api/player/search`
+>   ab (kein Auth nötig) und zeigt eine Vorschlagsliste (Avatar + Name + „Position · Team", erster Treffer
+>   markiert). Bedienung per **Tastatur** (↑/↓, Enter/Tab wählt, Esc schließt) **und Maus** (`onMouseDown` vor
+>   Blur). Auswahl fügt den Handle **`@VornameNachname`** ein (`toHandle` = nur Buchstaben/Ziffern) – exakt die
+>   Form, die serverseitig `resolveMentions` wieder auflöst; Cursor landet hinter der Einfügung. Klick außerhalb
+>   schließt die Liste.
+> - **`components/posts/PostComposer.js`**: statt der einfachen `<textarea>` die `MentionTextarea` (gilt für
+>   Spieler- **und** Vereins-Modus; Platzhalter-Hinweis „Tippe @ für Erwähnungen").
+> ✅ Verifiziert (Preview, `max@test.de`): „@Bja" → Liste mit 13 Bjarne-Treffern; Auswahl „Bjarne Adler" fügt
+>   `@BjarneAdler ` ein (Cursor am Ende); Beitrag gepostet → `mentions` serverseitig aufgelöst (slug
+>   `bjarne-adler-w280`); Liste schließt nach Auswahl; keine Konsolenfehler; Build grün. Test-Post entfernt.
+> **➡️ Damit sind ALLE optionalen Newsfeed-Follow-ups abgeschlossen** (Team-News-Tab, Mentions/Links in
+> Kommentaren, Open-Graph-Link-Vorschau, Composer-@-Autocomplete). Bewusst offen bleibt nur ein
+> @-Autocomplete in **Kommentar-/Antwort-Feldern** (dort `<input>`, MentionTextarea ist auf `<textarea>` ausgelegt).
+
 #### 🔗 Link-Karten mit Open-Graph-Vorschau (Titel/Bild/Beschreibung) (01.07.2026, `3346117`)
 > Newsfeed-Follow-up „OG-Title/Image für Link-Karten" erledigt: Bisher zeigte die Link-Vorschaukarte nur
 > **Domain + rohe URL** (generisches Globus-Icon). Jetzt reiche Vorschau im WhatsApp-Stil (Thumbnail +
