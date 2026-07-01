@@ -40,7 +40,7 @@ const STEPS = [
   {
     icon: FaExchangeAlt,
     title: "Transfermarkt, Tryouts & Community",
-    text: "Finde Spieler oder Vereine im Transfermarkt, bewirb dich auf Tryouts und bleib im Newsfeed auf dem Laufenden – folge Spielern und Teams und teile deine Highlights.",
+    text: "Finde Spieler oder Vereine im Transfermarkt, bewirb dich auf Tryouts und bleib im Newsfeed auf dem Laufenden – folge Spielern und Teams und teile deine Highlights: mit Fotos, @Erwähnungen, #Hashtags und Video-Links (z. B. YouTube).",
   },
 ];
 

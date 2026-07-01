@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaImage, FaTimes } from "react-icons/fa";
+import { FaImage, FaTimes, FaYoutube } from "react-icons/fa";
 import { getPlayerToken } from "@/lib/clientAuth";
 import ImageUpload from "@/components/ImageUpload";
 import Avatar from "./Avatar";
@@ -107,6 +107,22 @@ export default function PostComposer({ player, onCreated }) {
             rows={2}
             className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
           />
+
+          {/* Kurzer Hinweis auf die Post-Funktionen (dezent, immer sichtbar). */}
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400">
+            <span>
+              <b className="font-semibold text-gray-500">@</b> erwähnt Spieler
+            </span>
+            <span>
+              <b className="font-semibold text-gray-500">#</b> Hashtag
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <FaYoutube className="text-[11px]" /> Links &amp; YouTube werden als Vorschau eingebettet
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <FaImage className="text-[10px]" /> Foto anhängen
+            </span>
+          </div>
 
           {showImage && (
             <div className="mt-3">
