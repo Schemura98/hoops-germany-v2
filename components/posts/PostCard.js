@@ -20,6 +20,7 @@ import Avatar from "./Avatar";
 import BaseAvatar from "@/components/Avatar";
 import RichText from "./RichText";
 import PostEmbed from "./PostEmbed";
+import MentionTextarea from "./MentionTextarea";
 
 // Darstellung der automatischen Ereignis-Beiträge (Icon + Badge je Typ).
 const AUTO = {
@@ -215,13 +216,15 @@ function CommentItem({ comment, postId, currentPlayerId }) {
         {/* Antwort-Eingabe */}
         {showReply && (
           <div className="mt-2 flex gap-2">
-            <input
+            <MentionTextarea
+              multiline={false}
               autoFocus
               value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addReply()}
+              onChange={setReplyText}
+              onEnter={addReply}
               placeholder="Antworten…"
-              className="flex-1 rounded-full border border-gray-200 px-4 py-1.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              wrapperClassName="relative flex-1"
+              className="w-full rounded-full border border-gray-200 px-4 py-1.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
             <button
               onClick={addReply}
@@ -434,12 +437,14 @@ export default function PostCard({ post, currentPlayerId }) {
           ))}
 
           <div className="flex gap-2">
-            <input
+            <MentionTextarea
+              multiline={false}
               value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addComment()}
+              onChange={setCommentText}
+              onEnter={addComment}
               placeholder="Kommentieren…"
-              className="flex-1 rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              wrapperClassName="relative flex-1"
+              className="w-full rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
             <button
               onClick={addComment}

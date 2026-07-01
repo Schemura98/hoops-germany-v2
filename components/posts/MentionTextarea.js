@@ -4,12 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import BaseAvatar from "@/components/Avatar";
 
-// Textarea mit @-Mention-Autocomplete. Tippt der Nutzer „@" + Namen, erscheint eine
+// Eingabefeld mit @-Mention-Autocomplete. Tippt der Nutzer „@" + Namen, erscheint eine
 // Vorschlagsliste (aus /api/player/search); die Auswahl fügt den Handle
 // „@VornameNachname" ein – genau die Form, die serverseitig `resolveMentions`
 // wieder auflöst (norm() entfernt Groß-/Kleinschreibung + Sonderzeichen).
 //
-// Props wie ein normales <textarea>: value, onChange(nextString), placeholder, rows, className.
+// Props:
+//  - value, onChange(nextString), placeholder, className   (wie ein Eingabefeld)
+//  - multiline (default true) → <textarea rows>, sonst <input> (z.B. Kommentare)
+//  - onEnter() → bei Enter OHNE offene Vorschlagsliste (nur sinnvoll für <input>-Absenden)
+//  - wrapperClassName (default "relative"), rows, autoFocus
 
 // Aktives @-Token direkt vor dem Cursor finden (nur wenn ohne Leerzeichen am Wortanfang).
 function activeMention(text, caret) {
@@ -30,8 +34,12 @@ export default function MentionTextarea({
   placeholder,
   rows = 2,
   className = "",
+  multiline = true,
+  onEnter,
+  wrapperClassName = "relative",
+  autoFocus = false,
 }) {
-  const taRef = useRef(null);
+  const fieldRef = useRef(null);
   const boxRef = useRef(null);
   const debounceRef = useRef(null);
   const caretToSet = useRef(null);
@@ -43,11 +51,11 @@ export default function MentionTextarea({
 
   // Cursor nach programmatischem Einfügen an die richtige Stelle setzen.
   useEffect(() => {
-    if (caretToSet.current != null && taRef.current) {
+    if (caretToSet.current != null && fieldRef.current) {
       const pos = caretToSet.current;
       caretToSet.current = null;
-      taRef.current.focus();
-      taRef.current.setSelectionRange(pos, pos);
+      fieldRef.current.focus();
+      fieldRef.current.setSelectionRange(pos, pos);
     }
   }, [value]);
 
@@ -106,34 +114,49 @@ export default function MentionTextarea({
   }
 
   function handleKeyDown(e) {
-    if (!open || results.length === 0) return;
-    if (e.key === "ArrowDown") {
+    if (open && results.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setIndex((i) => (i + 1) % results.length);
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setIndex((i) => (i - 1 + results.length) % results.length);
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        pick(results[index]);
+        return;
+      }
+      if (e.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+    }
+    // Enter zum Absenden (nur <input>) – nicht wenn die Vorschlagsliste offen ist.
+    if (e.key === "Enter" && onEnter && !e.shiftKey && !multiline) {
       e.preventDefault();
-      setIndex((i) => (i + 1) % results.length);
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setIndex((i) => (i - 1 + results.length) % results.length);
-    } else if (e.key === "Enter" || e.key === "Tab") {
-      e.preventDefault();
-      pick(results[index]);
-    } else if (e.key === "Escape") {
-      setOpen(false);
+      onEnter();
     }
   }
 
+  const shared = {
+    ref: fieldRef,
+    value,
+    onChange: handleChange,
+    onKeyUp: (e) => syncActive(e.currentTarget),
+    onClick: (e) => syncActive(e.currentTarget),
+    onKeyDown: handleKeyDown,
+    placeholder,
+    className,
+    autoFocus,
+  };
+
   return (
-    <div ref={boxRef} className="relative">
-      <textarea
-        ref={taRef}
-        value={value}
-        onChange={handleChange}
-        onKeyUp={(e) => syncActive(e.currentTarget)}
-        onClick={(e) => syncActive(e.currentTarget)}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        rows={rows}
-        className={className}
-      />
+    <div ref={boxRef} className={wrapperClassName}>
+      {multiline ? <textarea {...shared} rows={rows} /> : <input {...shared} />}
 
       {open && results.length > 0 && (
         <ul className="absolute z-20 left-0 right-0 mt-1 max-h-64 overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
@@ -141,7 +164,7 @@ export default function MentionTextarea({
             <li key={p.playerId}>
               <button
                 type="button"
-                // onMouseDown statt onClick: feuert vor dem Blur der Textarea.
+                // onMouseDown statt onClick: feuert vor dem Blur des Feldes.
                 onMouseDown={(e) => {
                   e.preventDefault();
                   pick(p);
