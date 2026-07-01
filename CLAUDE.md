@@ -10,6 +10,25 @@
 > Hauptflow live verifiziert. Details + offene Punkte siehe unten (Go-Live-Block + Roadmap).
 > Alte Seite läuft als Rollback-Fallback weiter (PM2 `sports`, Port 3000, DB `test`).
 
+#### 🔗 Link-Karten mit Open-Graph-Vorschau (Titel/Bild/Beschreibung) (01.07.2026, `3346117`)
+> Newsfeed-Follow-up „OG-Title/Image für Link-Karten" erledigt: Bisher zeigte die Link-Vorschaukarte nur
+> **Domain + rohe URL** (generisches Globus-Icon). Jetzt reiche Vorschau im WhatsApp-Stil (Thumbnail +
+> Überschrift + Beschreibung):
+> - **`lib/linkEmbed.js`**: neue async `enrichEmbed(embed)` → `fetchOgMeta(url)` ruft die Zielseite **einmal
+>   beim Erstellen** ab und liest `og:title`/`og:description`/`og:image` (Fallbacks: `twitter:*`, `<title>`)
+>   aus dem `<head>`; Ergebnis wird am `embed` **denormalisiert gespeichert** (kein Fetch/populate im Render).
+>   Vollständig **fehlertolerant** (Timeout 4 s, nur `text/html`, Head-only ~256 KB, relative Bild-URLs →
+>   absolut) + einfacher **SSRF-Schutz** (`isSafePublicUrl`: nur http(s), keine localhost/privaten IPs/`.local`;
+>   kein DNS-Rebinding-Schutz – für den Umfang ok). `detectEmbed` bleibt synchron; YouTube braucht keine OG-Daten.
+> - **`uploadpost` + `team-post`**: `const embed = await enrichEmbed(detectEmbed(content))`.
+> - **`components/posts/PostEmbed.js`**: bei `embed.title || embed.image` → volle Karte (Thumbnail 16:44,
+>   Domain-Label, Titel 2-zeilig, Beschreibung 2-zeilig; `<img loading=lazy referrerPolicy=no-referrer>`);
+>   sonst weiterhin die kompakte Domain-Karte (Fallback). `line-clamp` ist in Tailwind 3.4 eingebaut.
+> ✅ Verifiziert: `enrichEmbed` liefert für `de.wikipedia.org/wiki/Basketball` Titel „Basketball – Wikipedia"
+> + Wikimedia-`og:image`; localhost-URL → SSRF-Guard greift (keine Anreicherung); end-to-end Beitrag erstellt
+> → Embed mit Titel/Bild gespeichert → Permalink rendert Thumbnail + Titel + Domain; Build grün. Bestehende
+> Beiträge ohne OG-Felder rendern unverändert die Domain-Karte (additiv, keine Migration). Test-Post entfernt.
+
 #### 💬 Hashtags/@Mentions/Links auch in Kommentaren + Antworten (01.07.2026, `dd01446`)
 > Newsfeed-Follow-up „Mentions/Embeds auch in Kommentaren" erledigt: Bisher wurden `#Hashtags`, `@Mentions`
 > und URLs nur im **Beitragstext** geparst/verlinkt, nicht in Kommentaren/Antworten. Jetzt:
