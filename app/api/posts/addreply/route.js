@@ -2,7 +2,8 @@ import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Post from "@/models/Post";
 import { getPlayerFromToken } from "@/lib/serverAuth";
-import { notifyCommentReply } from "@/lib/notifyEngagement";
+import { notifyCommentReply, notifyMentions } from "@/lib/notifyEngagement";
+import { resolveMentions } from "@/lib/postParse";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/posts/addreply – Antwort auf einen Kommentar hinzufügen (Spieler-Auth).
@@ -32,11 +33,21 @@ async function handler(req) {
     return fail("Kommentar nicht gefunden", 404);
   }
 
-  comment.replies.push({ player: player._id, text, likes: [], createdAt: new Date() });
+  const mentions = await resolveMentions(text);
+  comment.replies.push({ player: player._id, text, likes: [], mentions, createdAt: new Date() });
   await post.save();
 
   // Kommentar-Autor über die Antwort benachrichtigen.
   await notifyCommentReply({ recipientId: comment.player, actor: player, postId: post._id });
+
+  // In der Antwort erwähnte Spieler benachrichtigen.
+  await notifyMentions({
+    recipientIds: mentions.map((m) => m.playerId),
+    actorId: player._id,
+    authorName: `${player.firstName || ""} ${player.lastName || ""}`.trim(),
+    postId: post._id,
+    context: "einer Antwort",
+  });
 
   const r = comment.replies[comment.replies.length - 1];
   return ok({
@@ -44,6 +55,7 @@ async function handler(req) {
       _id: r._id,
       text: r.text,
       likes: [],
+      mentions: r.mentions,
       createdAt: r.createdAt,
       player: {
         _id: player._id,

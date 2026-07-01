@@ -1,10 +1,18 @@
 import mongoose from "mongoose";
 
+// Aufgelöste @Mentions (Render + Benachrichtigung) – gleiche Form wie beim Post.
+const mentionSchema = {
+  playerId: { type: mongoose.Schema.Types.ObjectId, ref: "players" },
+  slug: String,
+  token: String,
+};
+
 const replySchema = new mongoose.Schema(
   {
     player: { type: mongoose.Schema.Types.ObjectId, ref: "players" },
     text: String,
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "players" }],
+    mentions: [mentionSchema],
     createdAt: { type: Date, default: Date.now },
   },
   { _id: true }
@@ -16,6 +24,7 @@ const commentSchema = new mongoose.Schema(
     text: String,
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "players" }],
     replies: [replySchema],
+    mentions: [mentionSchema],
     createdAt: { type: Date, default: Date.now },
   },
   { _id: true }

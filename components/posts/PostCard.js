@@ -99,7 +99,9 @@ function ReplyItem({ reply, postId, commentId, currentPlayerId }) {
           >
             {reply.player?.firstName} {reply.player?.lastName}
           </Link>
-          <p className="text-sm text-gray-700">{reply.text}</p>
+          <p className="text-sm text-gray-700 whitespace-pre-line break-words">
+            <RichText text={reply.text} mentions={reply.mentions} />
+          </p>
         </div>
         <div className="mt-1 pl-3">
           <LikeButton liked={liked} count={likeCount} busy={busy} onToggle={toggleLike} />
@@ -179,7 +181,9 @@ function CommentItem({ comment, postId, currentPlayerId }) {
           >
             {comment.player?.firstName} {comment.player?.lastName}
           </Link>
-          <p className="text-sm text-gray-700">{comment.text}</p>
+          <p className="text-sm text-gray-700 whitespace-pre-line break-words">
+            <RichText text={comment.text} mentions={comment.mentions} />
+          </p>
         </div>
 
         {/* Aktionen */}

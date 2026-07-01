@@ -2,7 +2,8 @@ import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Post from "@/models/Post";
 import { getPlayerFromToken } from "@/lib/serverAuth";
-import { notifyPostComment } from "@/lib/notifyEngagement";
+import { notifyPostComment, notifyMentions } from "@/lib/notifyEngagement";
+import { resolveMentions } from "@/lib/postParse";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/posts/addcomment – Kommentar hinzufügen (Spieler-Auth).
@@ -26,11 +27,21 @@ async function handler(req) {
     return fail("Beitrag nicht gefunden", 404);
   }
 
-  post.comments.push({ player: player._id, text, createdAt: new Date() });
+  const mentions = await resolveMentions(text);
+  post.comments.push({ player: player._id, text, mentions, createdAt: new Date() });
   await post.save();
 
   // Beitrags-Autor über den neuen Kommentar benachrichtigen.
   await notifyPostComment({ recipientId: post.player, actor: player, postId: post._id });
+
+  // Im Kommentar erwähnte Spieler benachrichtigen.
+  await notifyMentions({
+    recipientIds: mentions.map((m) => m.playerId),
+    actorId: player._id,
+    authorName: `${player.firstName || ""} ${player.lastName || ""}`.trim(),
+    postId: post._id,
+    context: "einem Kommentar",
+  });
 
   const c = post.comments[post.comments.length - 1];
   return ok({
@@ -39,6 +50,7 @@ async function handler(req) {
       text: c.text,
       likes: [],
       replies: [],
+      mentions: c.mentions,
       createdAt: c.createdAt,
       player: {
         _id: player._id,
