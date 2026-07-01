@@ -10,6 +10,29 @@
 > Hauptflow live verifiziert. Details + offene Punkte siehe unten (Go-Live-Block + Roadmap).
 > Alte Seite läuft als Rollback-Fallback weiter (PM2 `sports`, Port 3000, DB `test`).
 
+#### 📣 Post-Funktionen erklärt (Composer-Hinweis + Tour) + Showcase-Testposts (01.07.2026, `12a9152`, live)
+> Die neuen Post-Funktionen waren nur „entdeckbar", nicht erklärt. Jetzt:
+> - **Composer-Hinweis** (`components/posts/PostComposer.js`): dezente Zeile unter dem Eingabefeld –
+>   „**@** erwähnt Spieler · **#** Hashtag · ▶ Links & YouTube werden als Vorschau eingebettet · 🖼 Foto
+>   anhängen" (immer sichtbar, `text-gray-400`).
+> - **Plattform-Tour** (`components/onboarding/WelcomeTour.js`): Community-Slide nennt jetzt explizit
+>   „mit Fotos, @Erwähnungen, #Hashtags und Video-Links (z. B. YouTube)".
+> - **Showcase-Testposts** (`scripts/seed-showcase-posts.mjs`, **additiv/idempotent/purgebar**,
+>   Tag `meta.showcase:true`, Idempotenz über `meta.showcaseKey`): 3 Demo-Posts, die die Funktionen zeigen –
+>   (1) @Erwähnungen + #Hashtags, (2) YouTube-Einbettung, (3) externe Link-Vorschau (OG). Autor = Demo-Account
+>   (Priorität `demo.coach@nrw-demo.de` → `world.coach@demo.de` → `max@test.de`; bricht ab, wenn kein
+>   Demo-Autor da ist – **nie als echter Nutzer posten**). **@Erwähnungen bevorzugt Demo-Accounts**
+>   (`@nrw-demo.de`/`@demo.de`) → keine echten Tester-Namen in Demo-Posts. YouTube-ID per **oEmbed validiert**
+>   (echtes NBA-Video „The Top 100 Plays of the 2024-25 NBA Season"; **kein Rickroll-Fallback** – lieber den
+>   YouTube-Post weglassen). Baut Mentions/Hashtags/Embeds (inkl. serverseitigem OG-Abruf) originalgetreu nach
+>   (self-contained, keine `@/`-Alias-Importe); **keine** Mention-Notifs (kein Tester-Spam).
+>   Aufruf: `node scripts/seed-showcase-posts.mjs` · `--dry` · **`--purge`** (entfernt nur die getaggten Posts).
+> ✅ Verifiziert: Dev-Preview (Mentions/Hashtags klickbar, YouTube-Platzhalter click-to-load, OG-Karte),
+>   Idempotenz (Re-Run 0 neu/3 aktualisiert), Dev danach ge-`--purge`t. **Prod**: Code deployt (`12a9152`),
+>   Seed auf `hoops_prod` ausgeführt (Autor „Chris Trainer", Erwähnungen @AaronBeck/@AaronBrandt = Demo),
+>   Live-API bestätigt 3 Posts mit korrekten Embeds/Mentions. **Entfernen nach der Testphase:**
+>   `node scripts/seed-showcase-posts.mjs --purge` (auf dem VPS).
+
 #### 🔒 Klick-zum-Laden für YouTube/Link-Vorschau + Datenschutz-Passus (01.07.2026, `14ba439`, live)
 > Datenschutz-Härtung der Embed-Features (aus dem `update-onboarding-surfaces`-Durchgang hervorgegangen):
 > Dritt-Inhalte werden nicht mehr automatisch geladen (IP-/Cookie-Abfluss an Fremd-Server erst nach Consent).
