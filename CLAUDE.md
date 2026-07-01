@@ -501,9 +501,16 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 >    (Artikel 4841). **Lösung:** User holt den PDF-Link (oder die Datei) der weiblichen Jugend-Einteilung von
 >    basketball.nrw → dann gleiches Muster wie Jugend m/o ins Seed (`gender:"Damen"`, je Altersklasse die real
 >    existierenden Stufen – nicht raten!).
-> 2. (optional) NRW-**Kreisligen** – von den 22 Basketballkreisen separat verwaltet, KEINE zentrale WBV-PDF →
->    fragmentiert/aufwändig, eigene Quellen je Kreis. Niedrige Prio.
-> Im Liga-Picker (`/team/create`) live gegenprüfen.
+> 2. **➡️ GEPLANTER NÄCHSTER SCHRITT (Kreisligen, 01.07.2026 vom User angekündigt):** Der User hat mit
+>    ChatGPT eine **PDF zu den NRW-Kreisligen** erstellt (Quelle für den fehlenden Katalog-Teil unterhalb der
+>    Bezirksliga; die 22 Basketballkreise haben KEINE zentrale WBV-PDF → bisher offen).
+>    **AUFTRAG (verbindlich, VOR dem Programmieren):** (a) PDF vom User einlesen lassen/finden (Pfad wird in
+>    der Session genannt – vermutlich unter `C:\Users\schem\OneDrive\...`), (b) **Inhalt sorgfältig auf
+>    Korrektheit prüfen** (ChatGPT-generiert → nicht blind übernehmen! Liganamen/Kreise/Zuordnung
+>    plausibilisieren, nicht raten), (c) **Umlaute korrigieren** bei Bedarf (ä/ö/ü/ß – PDF-/KI-Exporte
+>    verstümmeln die oft). ERST danach ins Seed-Muster (analog `seed-nrw-leagues.mjs`: `official:true`,
+>    `bundesland:"Nordrhein-Westfalen"`, `level:"Kreisliga"`, `region`=Kreis, idempotenter Upsert, `--dry`,
+>    Safe-Delete nur leerer Alt-Einträge) → Dev testen, dann Prod. Im Liga-Picker (`/team/create`) live gegenprüfen.
 > **(6) ✅ erledigt (27.06.2026): Demo-Liga `Regionalliga Süd` (Bayern) aus dem Prod-Katalog entfernt.**
 > `scripts/purge-demo-bayern-leagues.mjs` (Dry-Run als Default, `--apply` zum Löschen, schreibt vorher ein
 > JSON-Backup in den Scratchpad; strenge Zielmenge `name=/Regionalliga Süd/i + bundesland=Bayern +
