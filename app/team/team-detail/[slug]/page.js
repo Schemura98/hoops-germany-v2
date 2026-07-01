@@ -9,8 +9,6 @@ import {
   FaBasketballBall,
   FaCalendarAlt,
   FaNewspaper,
-  FaHeart,
-  FaRegComment,
   FaTrophy,
   FaHistory,
   FaCrown,
@@ -20,8 +18,8 @@ import Footer from "@/components/layout/Footer";
 import Tabs from "@/components/ui/Tabs";
 import Loading from "@/components/ui/Loading";
 import FollowButton from "@/components/FollowButton";
+import PostCard from "@/components/posts/PostCard";
 import { teamScores } from "@/lib/matchScore";
-import { timeAgo } from "@/lib/timeAgo";
 import { positionLabel, teamSeasonStatusLabel } from "@/lib/constants";
 import { getPlayerToken } from "@/lib/clientAuth";
 import Avatar from "@/components/Avatar";
@@ -58,10 +56,19 @@ export default function TeamTeamDetailSlugPage({ params }) {
   const [joinMsg, setJoinMsg] = useState(null);
   const [followerCount, setFollowerCount] = useState(0);
   const [history, setHistory] = useState([]);
+  const [meId, setMeId] = useState(null);
 
   useEffect(() => {
-    setLoggedIn(!!getPlayerToken());
+    const token = getPlayerToken();
+    setLoggedIn(!!token);
     let active = true;
+    // Eigene Spieler-ID (nur zur Like-Hervorhebung) – ohne Login-Redirect.
+    if (token) {
+      axios
+        .post("/api/player/getmyinfo", { token })
+        .then((r) => active && setMeId(r.data?.player?._id || null))
+        .catch(() => {});
+    }
     (async () => {
       try {
         const res = await axios.post("/api/team/fetchsingleteaminfo", { slug });
@@ -492,42 +499,9 @@ export default function TeamTeamDetailSlugPage({ params }) {
                 Noch keine Beiträge.
               </div>
             ) : (
-              posts.map((p) => {
-                const author = p.player || {};
-                const initials = `${author.firstName?.[0] || ""}${author.lastName?.[0] || ""}`.toUpperCase();
-                return (
-                  <div key={p._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                    <div className="flex items-center gap-3 mb-3">
-                      {author.profileImage ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={author.profileImage} alt="" className="h-9 w-9 rounded-full object-cover" />
-                      ) : (
-                        <span className="h-9 w-9 rounded-full bg-brand-100 text-brand-700 text-xs font-semibold flex items-center justify-center">
-                          {initials || "?"}
-                        </span>
-                      )}
-                      <div>
-                        <Link
-                          href={`/player/view-player/${author.slug || author._id}`}
-                          className="text-sm font-semibold text-gray-900 hover:text-brand-600"
-                        >
-                          {author.firstName} {author.lastName}
-                        </Link>
-                        <p className="text-xs text-gray-400">{timeAgo(p.createdAt)}</p>
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-700 whitespace-pre-line">{p.content}</p>
-                    <div className="mt-3 flex items-center gap-4 text-xs text-gray-400">
-                      <span className="flex items-center gap-1">
-                        <FaHeart /> {p.likes?.length || 0}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <FaRegComment /> {p.comments?.length || 0}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
+              posts.map((p) => (
+                <PostCard key={p._id} post={p} currentPlayerId={meId} />
+              ))
             )}
           </div>
         )}

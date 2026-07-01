@@ -78,13 +78,17 @@ async function handler(req) {
     .sort({ date: -1 })
     .limit(50);
 
-  // Team-News: aktuelle Beiträge der Mitglieder
-  const posts = memberIds.length
-    ? await Post.find({ player: { $in: memberIds } })
-        .populate("player", "firstName lastName slug profileImage")
-        .sort({ createdAt: -1 })
-        .limit(10)
-    : [];
+  // Team-News: Beiträge des Vereins selbst (authorTeam), auf den Verein bezogene
+  // Auto-Posts (teams enthält das Team) sowie Beiträge der Mitglieder.
+  const postOr = [{ authorTeam: team._id }, { teams: team._id }];
+  if (memberIds.length) postOr.push({ player: { $in: memberIds } });
+  const posts = await Post.find({ $or: postOr })
+    .populate("player", "firstName lastName slug profileImage teamId bundesland")
+    .populate("authorTeam", "teamName slug logo")
+    .populate("comments.player", "firstName lastName slug profileImage")
+    .populate("comments.replies.player", "firstName lastName slug profileImage")
+    .sort({ createdAt: -1 })
+    .limit(15);
 
   return ok({
     team: {
