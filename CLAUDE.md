@@ -10,6 +10,20 @@
 > Hauptflow live verifiziert. Details + offene Punkte siehe unten (Go-Live-Block + Roadmap).
 > Alte Seite läuft als Rollback-Fallback weiter (PM2 `sports`, Port 3000, DB `test`).
 
+#### 📰 Team-Profilseite: News-Tab zeigt jetzt Team-Beiträge + Auto-Posts (01.07.2026, `916d9ce`)
+> Offener Newsfeed-Follow-up erledigt: `/team/team-detail/[slug]` (News-Tab) zeigte bislang **nur Beiträge
+> der Mitglieder** – **Vereins-eigene Beiträge** (`authorTeam`, Feature #6) und **team-bezogene Auto-Posts**
+> (Ergebnis/Transfer/Recruiting, `teams` enthält das Team) fehlten komplett. Fix in
+> `fetchsingleteaminfo`: Query jetzt `{$or:[{authorTeam:teamId},{teams:teamId},{player:{$in:memberIds}}]}`
+> (Limit 15, neueste zuerst) mit voller populate (`authorTeam`, `comments.player`,
+> `comments.replies.player`). **Rendering vereinheitlicht:** der News-Tab nutzt jetzt `PostCard` (Badges
+> „Verein"/„Transfer"/…, Bilder, YouTube/Link-Embeds, Hashtags/@Mentions, Like/Kommentar/Antwort) statt der
+> alten manuellen Minimal-Darstellung; eigene Spieler-ID wird ohne Login-Redirect geladen (nur Like-
+> Hervorhebung). ✅ Verifiziert (Preview): Aachen Aces → Team-Beitrag „neue Trainingshalle" (Verein-Badge)
+> + Auto-Post „Marko Otto wechselte zu Aachen Aces" (Transfer-Badge) + Mitglieder-Posts; Build grün, keine
+> Konsolenfehler. Rückwärtskompatibel (keine Migration; `teams`/`authorTeam` waren additiv aus der
+> Newsfeed-Roadmap). Damit ist der Follow-up „Beiträge-Tab auf `/team/team-detail`" abgeschlossen.
+
 ### Projektort & Umgebung
 - **Lokaler Pfad: `C:\dev\hoops-germany-v2`** (NICHT zurück nach OneDrive – OneDrive sperrt `.next`).
 - Next.js **14.2.35**, App Router, JavaScript (kein TS), Tailwind.
