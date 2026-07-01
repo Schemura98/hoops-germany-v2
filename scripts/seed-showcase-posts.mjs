@@ -145,14 +145,25 @@ if (!author) {
 }
 console.log("✍️  Autor:", author.firstName, author.lastName, `(${author._id})`);
 
-// Zwei echte Spieler (nicht der Autor) für die Erwähnungen
-const targets = await Players.find({ _id: { $ne: author._id }, firstName: { $exists: true }, lastName: { $exists: true }, slug: { $exists: true, $ne: null } })
+// Zwei Spieler (nicht der Autor) für die Erwähnungen – DEMO-Accounts bevorzugt,
+// damit keine echten Tester-Namen in Demo-Posts landen.
+const baseFilter = { _id: { $ne: author._id }, firstName: { $exists: true }, lastName: { $exists: true }, slug: { $exists: true, $ne: null } };
+let targets = await Players.find({ ...baseFilter, email: { $regex: "@(nrw-demo|demo)\\.de$", $options: "i" } })
   .project({ firstName: 1, lastName: 1 })
   .limit(2)
   .toArray();
+if (targets.length < 2) {
+  // Auffüllen mit beliebigen Spielern, falls zu wenige Demo-Accounts existieren.
+  const more = await Players.find({ ...baseFilter, _id: { $nin: [author._id, ...targets.map((t) => t._id)] } })
+    .project({ firstName: 1, lastName: 1 })
+    .limit(2 - targets.length)
+    .toArray();
+  targets = [...targets, ...more];
+}
 const handle = (p) => "@" + `${p.firstName}${p.lastName}`.replace(/[^\p{L}\p{N}]/gu, "");
 const mentionA = targets[0] ? handle(targets[0]) : "@Team";
 const mentionB = targets[1] ? handle(targets[1]) : "";
+console.log("🔖 Erwähnungen:", [mentionA, mentionB].filter(Boolean).join(", "));
 
 // YouTube-Video validieren
 let ytUrl = null, ytTitle = "";
