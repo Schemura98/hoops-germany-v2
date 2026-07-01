@@ -10,6 +10,22 @@
 > Hauptflow live verifiziert. Details + offene Punkte siehe unten (Go-Live-Block + Roadmap).
 > Alte Seite läuft als Rollback-Fallback weiter (PM2 `sports`, Port 3000, DB `test`).
 
+#### 🅰️ @-Mention-Autocomplete jetzt auch in Kommentaren + Antworten (01.07.2026, `ce1faa5`)
+> Ergänzung zum Composer-Autocomplete: die `MentionTextarea` wurde **generalisiert** und in den Kommentar-/
+> Antwort-Feldern eingebunden → @-Vorschläge überall im Feed.
+> - **`components/posts/MentionTextarea.js`**: neue Props `multiline` (default true → `<textarea>`, false →
+>   `<input>`), `onEnter` (Absenden per Enter, **nur wenn die Vorschlagsliste geschlossen ist** – ist sie offen,
+>   wählt Enter/Tab aus), `wrapperClassName` (z.B. `relative flex-1`), `autoFocus`. Gleiche Such-/Einfüge-Logik.
+> - **`components/posts/PostCard.js`**: Kommentar- **und** Antwort-Eingabe nutzen jetzt
+>   `<MentionTextarea multiline={false} onEnter={addComment|addReply} …>` statt `<input>` (Enter sendet
+>   weiterhin; Antwort-Feld behält `autoFocus`).
+> ✅ Verifiziert (Preview): im Kommentarfeld „@Bja" → 5 Bjarne-Treffer, Auswahl fügt `@BjarneAdler ` ein +
+>   schließt die Liste, **Enter sendet** → Kommentar mit aufgelöster `mentions` gespeichert (slug
+>   `bjarne-adler-w280`); Antwort-Feld nutzt dieselbe Komponente/Props; keine Konsolenfehler; Build grün.
+>   Test-Artefakte entfernt.
+> **➡️ Damit sind wirklich ALLE Newsfeed-Follow-ups erledigt** (inkl. des zuvor bewusst offen gelassenen
+>   Kommentar-Autocompletes).
+
 #### 🅰️ Composer: @-Mention-Autocomplete (01.07.2026, `b219e6d`)
 > Letzter offener Newsfeed-Follow-up erledigt: Der Beitrags-Composer schlägt beim Tippen von „@" jetzt Spieler
 > vor (vorher musste man `@Vorname`/`@VornameNachname` blind tippen).
