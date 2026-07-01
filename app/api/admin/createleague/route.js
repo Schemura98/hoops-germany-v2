@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import League from "@/models/League";
 import { getAdminFromToken } from "@/lib/serverAuth";
 import { findDuplicateLeague } from "@/lib/leagues";
+import { LEAGUE_AGE_GROUPS } from "@/lib/constants";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/admin/createleague – Liga zentral durch Super-Admin anlegen.
@@ -17,6 +18,16 @@ async function handler(req) {
   const season = String(body.season || "").trim();
   const bundesland = String(body.bundesland || "").trim();
 
+  // Produktregel: nur unterstützte Altersbereiche (Senioren/U18/U16) – auch serverseitig
+  // erzwungen (nicht nur im UI-Dropdown), damit z. B. U14 nicht über die API angelegt wird.
+  const ageGroup = String(body.ageGroup || "Senioren").trim();
+  if (!LEAGUE_AGE_GROUPS.includes(ageGroup)) {
+    return fail(
+      `Altersklasse „${ageGroup}" wird nicht unterstützt. Erlaubt: ${LEAGUE_AGE_GROUPS.join(", ")}.`,
+      400
+    );
+  }
+
   await connectDB();
 
   const dup = await findDuplicateLeague(name, season);
@@ -30,7 +41,7 @@ async function handler(req) {
     bundesland,
     level: String(body.level || "").trim(),
     gender: String(body.gender || "Herren").trim(),
-    ageGroup: String(body.ageGroup || "Senioren").trim(),
+    ageGroup,
     region: String(body.region || "").trim(),
     playoffMode: body.playoffMode === "best_of_1" ? "best_of_1" : "keine",
     official: true,

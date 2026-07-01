@@ -6,6 +6,7 @@ import { computeStandings } from "@/lib/standings";
 import { freezeSeason } from "@/lib/teamSeason";
 import { getAdminFromToken } from "@/lib/serverAuth";
 import { findDuplicateLeague } from "@/lib/leagues";
+import { LEAGUE_AGE_GROUPS } from "@/lib/constants";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // Meister beim Abschließen ermitteln: Sieger des (letzten) abgeschlossenen Finales,
@@ -43,7 +44,17 @@ async function handler(req) {
   if (body.bundesland !== undefined) updates.bundesland = String(body.bundesland).trim();
   if (body.level !== undefined) updates.level = String(body.level).trim();
   if (body.gender !== undefined) updates.gender = String(body.gender).trim();
-  if (body.ageGroup !== undefined) updates.ageGroup = String(body.ageGroup).trim();
+  if (body.ageGroup !== undefined) {
+    const ageGroup = String(body.ageGroup).trim();
+    // Produktregel: nur Senioren/U18/U16 – auch serverseitig erzwungen.
+    if (!LEAGUE_AGE_GROUPS.includes(ageGroup)) {
+      return fail(
+        `Altersklasse „${ageGroup}" wird nicht unterstützt. Erlaubt: ${LEAGUE_AGE_GROUPS.join(", ")}.`,
+        400
+      );
+    }
+    updates.ageGroup = ageGroup;
+  }
   if (body.region !== undefined) updates.region = String(body.region).trim();
   if (body.playoffMode !== undefined)
     updates.playoffMode = body.playoffMode === "best_of_1" ? "best_of_1" : "keine";

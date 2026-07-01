@@ -14,7 +14,10 @@ import {
   LEAGUE_LEVELS,
   LEAGUE_GENDERS,
   LEAGUE_AGE_GROUPS,
+  BASKETBALLKREISE_NRW_GRUPPIERT,
 } from "@/lib/constants";
+
+const NRW = "Nordrhein-Westfalen";
 
 export default function LigenPage() {
   const [leagues, setLeagues] = useState([]);
@@ -26,6 +29,21 @@ export default function LigenPage() {
   const [gender, setGender] = useState("");
   const [ageGroup, setAgeGroup] = useState("");
   const [level, setLevel] = useState("");
+  const [kreis, setKreis] = useState(""); // Basketballkreis (nur bei NRW + Kreisliga)
+
+  // Basketballkreis-Filter nur bei NRW + Kreisliga anbieten.
+  const showKreisFilter = land === NRW && level === "Kreisliga";
+  // Welche Kreise kommen in den (NRW-)Kreisligen tatsächlich vor? (für „vorhanden"-Markierung)
+  const kreiseMitLigen = useMemo(
+    () =>
+      new Set(
+        leagues
+          .filter((l) => l.level === "Kreisliga" && l.bundesland === NRW)
+          .map((l) => l.region)
+          .filter(Boolean)
+      ),
+    [leagues]
+  );
 
   useEffect(() => {
     let active = true;
@@ -66,13 +84,20 @@ export default function LigenPage() {
           if (gender && l.gender !== gender) return false;
           if (ageGroup && l.ageGroup !== ageGroup) return false;
           if (level && l.level !== level) return false;
+          if (showKreisFilter && kreis && l.region !== kreis) return false;
           return true;
         })
         // Befüllte Ligen (mit Teams) zuerst – sonst gehen aktive Ligen in den
         // vielen (noch) leeren Katalog-Hüllen unter.
         .sort((a, b) => (b.teamCount || 0) - (a.teamCount || 0)),
-    [leagues, land, gender, ageGroup, level]
+    [leagues, land, gender, ageGroup, level, kreis, showKreisFilter]
   );
+
+  // Kreis-Auswahl zurücksetzen, sobald der Kreisfilter nicht mehr angeboten wird
+  // (z. B. Spielklasse ≠ Kreisliga oder Bundesland ≠ NRW).
+  useEffect(() => {
+    if (!showKreisFilter && kreis) setKreis("");
+  }, [showKreisFilter, kreis]);
 
   const selectCls =
     "rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-gray-700 bg-white shadow-sm outline-none focus:border-brand-400";
@@ -158,6 +183,30 @@ export default function LigenPage() {
                 </option>
               ))}
             </select>
+
+            {/* Basketballkreis – nur bei NRW + Kreisliga (Kreisligen sind kreisbezogen). */}
+            {showKreisFilter && (
+              <select
+                value={kreis}
+                onChange={(e) => setKreis(e.target.value)}
+                className={selectCls}
+                aria-label="Basketballkreis"
+              >
+                <option value="">Alle Basketballkreise</option>
+                {BASKETBALLKREISE_NRW_GRUPPIERT.map((g) => (
+                  <optgroup key={g.bezirk} label={g.bezirk}>
+                    {g.kreise.map((k) => {
+                      const vorhanden = kreiseMitLigen.has(k);
+                      return (
+                        <option key={k} value={k} disabled={!vorhanden}>
+                          {vorhanden ? k : `${k} – folgt`}
+                        </option>
+                      );
+                    })}
+                  </optgroup>
+                ))}
+              </select>
+            )}
           </div>
         )}
 
