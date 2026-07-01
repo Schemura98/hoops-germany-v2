@@ -5,6 +5,30 @@
 
 ## 0. AKTUELLER STAND (Stand: 24.06.2026 – Redesign-Phase)
 
+#### 🧭 Ligen-Seite: geführte Startansicht + Nachbereitungs-/Sicherheitscheck (02.07.2026, `7e69f12`, live)
+> Nachbereitung nach dem Kreisliga-Framework (UI-only, keine Datenmodell-/Follow-/Season-Architektur).
+> - **Doku (Teil 1):** Basketballkreis-Liste von „provisorisch" auf **verifiziert** (offizielle WBV-Seite,
+>   Stand 02.07.2026) umgestellt – in `lib/constants.js`, `wbv-nrw-catalog.md`, `current-architecture.md`.
+> - **Demo-Kennzeichnung (Teil 2):** neues additives Feld **`League.isDemo`**; `seed-kreisligen-demo.mjs`
+>   setzt `isDemo:true`; `/api/leagues` liefert `isDemo`; Ligakarte zeigt Badge **„Beispieldaten"**. Demo bleibt
+>   `official:false` → **zählt NICHT** in die Analytics-Plattform-KPI (`countDocuments({official:true})`). **Keine
+>   Sitemap** im Projekt (nichts auszuschließen). `--purge` matcht **ausschließlich `seedTag:"kreisliga-demo"`**
+>   (nie echte Ligen mit ähnlichem Namen – verifiziert).
+> - **Zentrale ageGroup-Validierung (Teil 3):** `normalizeAgeGroup()` in `lib/leagues.js` (trim + case-insensitiv
+>   → kanonisch, sonst null). `createleague`/`updateleague` nutzen sie. **Getestet:** Senioren/U18/U16→ok,
+>   U14/U12/U15/leer→400, fehlend→Default Senioren, `u16`/` U16 `→normalisiert (create+update je 200/400 korrekt).
+> - **Ligen-Seite neu (Teil 6, `app/ligen/page.js`):** **geführte Startansicht** (Schnellzugriff-Chips
+>   Senioren Herren/Damen · U18 · U16 · Kreisligen · Alle durchsuchen; **„Deine Liga"** via Team-in-`League.teams`
+>   – KEIN Follow-System; **„Aktive Ligen entdecken"** max. 12, ohne leere/abgeschlossene; **„Alle N durchsuchen"**)
+>   ↔ **Durchsuchen-Modus** (Filter + Suche + aktive Filter-Chips + Zähler + „Filter zurücksetzen"; **fachliche
+>   Sortierung** eigene Liga → laufend → Teams → Level → Alter → Geschlecht → **Staffelnummer numerisch** → Name;
+>   Badges „Abgeschlossen"/„In Vorbereitung"/„Beispieldaten"; Empty States; **Mobile-Filter-Panel**). Filter/Suche
+>   aktivieren automatisch den Durchsuchen-Modus; Kreis-Filter nur NRW+Kreisliga, resettet bei Wechsel.
+> ✅ Verifiziert (Dev-Preview): geführt (ausgeloggt 9 Karten, keine finished/empty), „Deine Liga" (max→
+>   Regionalliga Süd), Kreisligen-Chip→Kreis-Filter→Köln 4 Ligen (Staffel 1 vor 2, Teams vor leer), U18-Chip nur
+>   U18, Reset→geführt, Mobile-Toggle; Validierung create+update alle Fälle; Build grün, keine Konsolenfehler.
+>   Dev ge-`--purge`t. **Prod** (`7e69f12`): `/ligen` 200, 14 `isDemo`-Kreisligen, 57 official (KPI unverändert).
+
 #### 🏀 Kreisligen (Framework + Demo) + Skill `league-catalog` (02.07.2026, `e63f5c3`, live)
 > Kreisliga-Fundament gebaut (Testphase; echte WBV-Daten folgen separat). **Vorab ChatGPTs Ligen-Plan gegen
 > den echten Code geprüft** – zentrale Produktregel (nur Senioren/U18/U16) war längst umgesetzt, „Aktuelle
