@@ -10,6 +10,23 @@
 > Hauptflow live verifiziert. Details + offene Punkte siehe unten (Go-Live-Block + Roadmap).
 > Alte Seite läuft als Rollback-Fallback weiter (PM2 `sports`, Port 3000, DB `test`).
 
+#### 💬 Hashtags/@Mentions/Links auch in Kommentaren + Antworten (01.07.2026, `dd01446`)
+> Newsfeed-Follow-up „Mentions/Embeds auch in Kommentaren" erledigt: Bisher wurden `#Hashtags`, `@Mentions`
+> und URLs nur im **Beitragstext** geparst/verlinkt, nicht in Kommentaren/Antworten. Jetzt:
+> - **Modell** (`models/Post.js`): `comment`- und `reply`-Subschema um `mentions[]` (playerId/slug/token,
+>   gleiche Form wie beim Post) erweitert – additiv, keine Migration.
+> - **APIs** (`addcomment`/`addreply`): `resolveMentions(text)` beim Speichern, Mentions am Sub-Dokument
+>   abgelegt und erwähnte Spieler via `notifyMentions` benachrichtigt (neuer optionaler `context`-Parameter →
+>   Meldung „… hat dich in **einem Kommentar** / **einer Antwort** erwähnt"; Notif-Typ bleibt `mention`,
+>   Href → `/post/[id]`). Kein Self-Notify (bestehende Logik).
+> - **Render** (`components/posts/PostCard.js`): Kommentar- und Antworttext laufen jetzt über `RichText`
+>   (klickbare `@Mentions` → Profil, `#Hashtags` → `/feed/tag/[tag]`, rohe URLs → extern) statt Plain-Text.
+> - **Bewusst NICHT** volle YouTube-/Link-**iframe-Embeds** in Kommentaren (nur klickbare Links) → hält
+>   Kommentar-Threads kompakt; Embeds bleiben Beiträgen vorbehalten.
+> ✅ Verifiziert (Preview + DB): Kommentar „…@BjarneAdler … #Testtag https://youtu.be/…" → Mentions am
+> Kommentar gespeichert (slug `bjarne-adler-w280`), Bjarne erhält `mention`-Notif („in einem Kommentar"),
+> alle drei Token im Kommentar klickbar gerendert; Build grün. Test-Artefakte (Dev-DB) wieder entfernt.
+
 #### 📰 Team-Profilseite: News-Tab zeigt jetzt Team-Beiträge + Auto-Posts (01.07.2026, `916d9ce`)
 > Offener Newsfeed-Follow-up erledigt: `/team/team-detail/[slug]` (News-Tab) zeigte bislang **nur Beiträge
 > der Mitglieder** – **Vereins-eigene Beiträge** (`authorTeam`, Feature #6) und **team-bezogene Auto-Posts**
