@@ -90,8 +90,39 @@ export default function DatenschutzPage() {
         automatisch anonymisiert bzw. gelöscht.
       </p>
 
+      <LegalHeading>10. Eingebettete Inhalte Dritter (YouTube, Link-Vorschauen)</LegalHeading>
+      <p>
+        Nutzer können in Beiträgen Links teilen. Enthält ein Beitrag einen YouTube-Link,
+        kann das Video als eingebetteter Player von YouTube (Google Ireland Limited, Gordon
+        House, Barrow Street, Dublin 4, Irland) angezeigt werden. Enthält ein Beitrag einen
+        sonstigen Link, kann eine Vorschaukarte mit einem Vorschaubild angezeigt werden, das
+        vom jeweiligen Zielserver stammt.
+      </p>
+      <p>
+        Diese Inhalte von Drittanbietern werden <strong>nicht automatisch geladen</strong>,
+        sondern erst, nachdem du sie durch einen Klick („Video von YouTube laden“ bzw.
+        „Vorschaubild laden“) aktiv freigibst. Bis dahin wird keine Verbindung zu den Servern
+        der Anbieter hergestellt. Klickst du auf „Laden“, stellt dein Browser eine Verbindung
+        zum jeweiligen Anbieter her und übermittelt technisch notwendige Daten – insbesondere
+        deine IP-Adresse. Auf die weitere Verarbeitung durch diese Anbieter haben wir keinen
+        Einfluss; YouTube/Google kann dabei Cookies setzen. Wir binden YouTube-Videos im
+        erweiterten Datenschutzmodus (youtube-nocookie.com) ein. Informationen zur
+        Datenverarbeitung durch Google findest du unter{" "}
+        <a href="https://policies.google.com/privacy" className="text-brand-600 hover:underline">
+          policies.google.com/privacy
+        </a>
+        .
+      </p>
+      <p>
+        Die Vorschau-Metadaten eines Links (Titel, Beschreibung, Adresse des Vorschaubilds)
+        rufen wir einmalig serverseitig ab, wenn ein Beitrag erstellt wird – dein Browser
+        übermittelt dabei keine Daten an den Ziel-Anbieter. Rechtsgrundlage für das Laden der
+        eingebetteten Inhalte ist deine Einwilligung durch den Klick (Art. 6 Abs. 1 lit. a
+        DSGVO).
+      </p>
+
       <p className="text-xs text-gray-400 pt-2">
-        Stand: Juni 2026. Diese Datenschutzerklärung ersetzt keine Rechtsberatung.
+        Stand: Juli 2026. Diese Datenschutzerklärung ersetzt keine Rechtsberatung.
       </p>
     </LegalShell>
   );
