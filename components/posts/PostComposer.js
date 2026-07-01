@@ -7,6 +7,7 @@ import { getPlayerToken } from "@/lib/clientAuth";
 import ImageUpload from "@/components/ImageUpload";
 import Avatar from "./Avatar";
 import BaseAvatar from "@/components/Avatar";
+import MentionTextarea from "./MentionTextarea";
 
 // Eingabe-Karte für neue Beiträge. Team-Admins können zusätzlich „als Verein" posten.
 export default function PostComposer({ player, onCreated }) {
@@ -97,11 +98,11 @@ export default function PostComposer({ player, onCreated }) {
             </div>
           )}
 
-          <textarea
+          <MentionTextarea
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={setContent}
             placeholder={
-              asTeam ? "Neuigkeit vom Verein teilen…" : "Was gibt's Neues?"
+              asTeam ? "Neuigkeit vom Verein teilen…" : "Was gibt's Neues? Tippe @ für Erwähnungen"
             }
             rows={2}
             className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
