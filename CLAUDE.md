@@ -5,6 +5,65 @@
 
 ## 0. AKTUELLER STAND (Stand: 24.06.2026 – Redesign-Phase)
 
+#### 🗺️ Regierungsbezirk-Navigation + Kreis Niers + Liga-Zuordnungs-Freigabe (02.07.2026, `eb3ab34`, live)
+> **1) Kreis Niers war nie „fehlend"** – er stand bereits korrekt in `BASKETBALLKREISE_NRW_GRUPPIERT`
+> (Regierungsbezirk Düsseldorf). Ursache war die UI: der Kreis-Filter zeigte nur Kreise mit **vorhandenen**
+> Ligen, alle anderen nur als pauschales „Weitere 17 folgen".
+> - **`/ligen`**: neuer **Regierungsbezirk**-Filter (nur UI-Gruppierung aus der zentralen Konstante, **keine**
+>   DB-Entität) – erscheint bei Spielklasse „Kreisliga". Basketballkreis-Dropdown zeigt jetzt **alle 22 Kreise**
+>   gruppiert nach Bezirk; verfügbare mit **Liga-Anzahl** `(4)` (aus den ohnehin geladenen Ligen berechnet,
+>   keine Zusatzabfrage), nicht verfügbare **sichtbar aber deaktiviert** „– noch keine Ligen" (kein
+>   pauschaler Sammel-Eintrag mehr). Kreisliga-Katalog gliedert sich jetzt **Regierungsbezirk → Basketballkreis
+>   → Bereich (Senioren Herren/Damen/U18/U16) → Staffel (numerisch)**.
+> - **Such-Aliase** (`lib/constants.js` → `KREIS_ORT_ALIASE`, `kreisFromText()`): Orte wie „Viersen",
+>   „Krefeld", „Mönchengladbach" … verweisen für die Suche auf `Kreis Niers`, **ändern aber nicht** den
+>   kanonischen `region`-Wert. Nur Kreis Niers gepflegt; weitere Kreise bei Bedarf ergänzbar.
+> - **Nutzerregion-Vorauswahl:** Heimatort/Bundesland des eingeloggten Spielers schlägt beim Kreisliga-
+>   Schnellzugriff den passenden Kreis vor (Filter vorbelegt, jederzeit per Chip entfernbar) – **keine feste
+>   Ligazuordnung**, nur Sortierung/Vorauswahl.
+> - **`scripts/seed-kreisligen-demo-niers.mjs`** (eigener `seedTag:"kreisliga-demo-niers"`, additiv,
+>   idempotent, `--dry`/`--purge`): 4 Kreisligen (1./2. Kreisliga Herren, 1. Kreisliga U18/U16 männlich) +
+>   **18 klar fiktive „Demo "-Teams** (z. B. „Demo Viersen Vipers"), `isDemo:true` auf Liga **und** Team
+>   (`Team.isDemo` additiv neu). Rührt nie echte Daten an (eigener Tag, getrennt vom Basis-Kreisliga-Seed).
+> ✅ Verifiziert (Dev-Preview, alle Testfälle): Regierungsbezirk+Kreis erscheinen bei Kreisliga; Bezirk
+>   Düsseldorf zeigt Niers+Düsseldorf(je vorhanden)+Niederrhein/Essen/Mettmann/Wuppertal (deaktiviert); Kreis
+>   Niers → exakt 4 Ligen + Teams; Suche „Viersen"/„Krefeld" findet die Niers-Ligen; Filter zurücksetzen →
+>   geführte Ansicht; kein Horizontal-Scroll (Desktop/Tablet/Mobile, scrollWidth=clientWidth). **Prod**: Code
+>   deployt, Seed ausgeführt (4 Ligen live, korrekte Team-Zahlen + `isDemo:true`), `/ligen` 200.
+>
+> **2) Liga-Zuordnung im Team-Panel abgesichert** (neuer Freigabeprozess, kein Season-/Follow-Umbau):
+> - **`/api/team/set-league`**: Team-Admins dürfen **offizielle** (`official:true`) Ligen nicht mehr direkt
+>   speichern (→ 403, Hinweis auf die Anfrage). Direkt erlaubt bleibt: **Entfernen** (Liga rausnehmen) und
+>   **Demo-/Test-Ligen** (`official:false`) – z. B. für die Kreisliga-Showcases. Ein zusätzlicher
+>   Super-Admin-Bypass ist verdrahtet (`getAdminFromToken`), aber nur relevant, wenn dieselbe Person Team-
+>   **und** Super-Admin ist (Randfall, code-geprüft statt live mit Testdaten durchgespielt).
+> - **Neues Modell `LeagueChangeRequest`** (`team`, `currentLeagueId`-Snapshot, `requestedLeagueId`,
+>   `season`, `requestedBy`, `note`, `status` ausstehend/genehmigt/abgelehnt/storniert, `reviewedBy`,
+>   `reviewNote`, `reviewedAt`) + Endpunkte: `POST /api/team/request-league-change` (Validierung: Zielliga
+>   nicht abgeschlossen, nicht bereits aktuell, **passt zu Altersklasse+Kategorie der aktuellen Liga** falls
+>   vorhanden, **keine zweite offene Anfrage**), `league-change-requests` (eigene Historie),
+>   `cancel-league-change-request`; `POST /api/admin/league-change-requests` (Liste + **Warnhinweis**, wenn
+>   alte/neue Liga bereits Spiele hat, aus den ohnehin geladenen Daten berechnet) + `review-league-change-
+>   request` (genehmigen/ablehnen; bei Genehmigung **konsistent**: `League.teams` alt `$pull`/neu
+>   `$addToSet`, `Team.leagueId` gesetzt – **`TeamSeason` bleibt unangetastet**, nur Endstand-Snapshots).
+> - **`EinstellungenTab`**: „**Aktuelle Liga**" jetzt schreibgeschützt (Name/Saison/Bereich/Kategorie/
+>   Spielklasse/Region/Status); der alte „Liga speichern"-Button ist ersetzt durch ein **Anfrage-Formular**
+>   (Bereich→Kategorie→Spielklasse→Regierungsbezirk/Kreis bei Kreisliga→Suche, dieselbe zentrale
+>   Kreis-Konstante wie `/ligen`), **Ziel-Liga startet leer** („Bitte gewünschte Liga auswählen") und
+>   **resettet bei Filterwechsel**, wenn die Auswahl nicht mehr passt. Bei offener Anfrage wird **kein**
+>   neues Formular gezeigt, sondern Status + „Anfrage stornieren"; letzte 3 bearbeitete Anfragen als
+>   Mini-Historie. Neue Notification-Typen `league_change_request/_approved/_rejected`.
+> - **Neue Admin-Seite `/admin/league-requests`** (+ AdminNav-Link „Liga-Anfragen"): ausstehende Anfragen
+>   mit Team/aktueller/gewünschter Liga/Notiz/**Spiele-Warnung**, Genehmigen/Ablehnen (+ Rückfrage-Notiz),
+>   bearbeitete Anfragen als Verlauf mit Status-Badge.
+> ✅ Verifiziert (Dev, end-to-end über echte API-Calls): Duplikat-Anfrage → 409; Alters-/Kategorie-Mismatch
+>   (Senioren-Team fragt U16-Liga an) → 400 mit Klartext-Meldung; Anfrage auf bereits-aktuelle Liga → 400;
+>   Genehmigen → `Team.leagueId` + `League.teams` konsistent aktualisiert + Notif an Team-Admin; Ablehnen →
+>   `Team.leagueId` **unverändert** + Notif mit Ablehnungsgrund; direkter Versuch auf offizielle Liga → 403,
+>   auf Demo-Liga/Entfernen → 200; Admin-Seite zeigt Ausstehend/Genehmigt/Abgelehnt/Storniert korrekt. Dev-
+>   Testdaten (Anfragen + Kreisliga-Demo) entfernt, `seed-demo.mjs` zum Zurücksetzen gefahren. **Prod**: Code
+>   deployt (`eb3ab34`), noch keine echten Anfragen (Feature ist einsatzbereit für den Test).
+
 #### 🧭 Ligen-Seite: Filterführung, responsives Grid, Sortierung + Demo-noindex (02.07.2026, `3600f3e`, live)
 > Feinschliff vor dem Nutzertest (UI-only, keine Follow-/Season-/Datenmodell-Architektur).
 > - **Demo-noindex:** `app/ligen/[id]/layout.js` (Server) `generateMetadata` → `robots noindex/nofollow` bei
