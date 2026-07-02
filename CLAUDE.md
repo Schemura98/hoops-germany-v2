@@ -5,6 +5,33 @@
 
 ## 0. AKTUELLER STAND (Stand: 24.06.2026 – Redesign-Phase)
 
+#### 🧭 Ligen-Seite: Filterführung, responsives Grid, Sortierung + Demo-noindex (02.07.2026, `3600f3e`, live)
+> Feinschliff vor dem Nutzertest (UI-only, keine Follow-/Season-/Datenmodell-Architektur).
+> - **Demo-noindex:** `app/ligen/[id]/layout.js` (Server) `generateMetadata` → `robots noindex/nofollow` bei
+>   `isDemo` (echte Ligen indexierbar). Fehlende Sitemap verhindert Indexierung nicht → expliziter Meta-Robots.
+>   Live bestätigt: Demo-Detailseite `noindex,nofollow`, echte Liga kein robots-Meta.
+> - **Saisonfilter → Status:** „Aktuelle Saison" (nutzte nur `active`) ersetzt durch ehrlichen **Status**-Filter
+>   (Aktive/Alle/Abgeschlossene/In Vorbereitung). Keine Season-Modell-Migration.
+> - **„Deine Liga"-Quelle dokumentiert** (Skill `current-architecture.md`): führend ist die
+>   **`League.teams`-Mitgliedschaft** (Client hat via `getmyinfo` nur `teamId`); **`Team.leagueId`** ist
+>   kanonisch; Risiko Mehrfach-Saison-Mitgliedschaft → Auswahl bevorzugt die aktive Liga. Kein Umbau.
+> - **`/api/leagues?scope=all`** (nur `/ligen`; Default „aktiv" bleibt für die Team-Picker).
+> - **Redundanz entfernt:** Schnellzugriffe nur in der geführten Ansicht; im Durchsuchen-Modus ist die Auswahl
+>   nur in Filterfeldern + aktiven Chips sichtbar (keine dritte Darstellung).
+> - **Filter vereinfacht:** kombinierter **Bereich** (Alle/Senioren/U18/U16) statt separatem Altersklassenfilter;
+>   dynamische **Kategorie** (Herren/Damen bzw. männlich/weiblich/offen bei Jugend – Datenwerte unverändert,
+>   nur Anzeige-Mapping); **Spielklasse** bereichsabhängig (aus vorhandenen Daten); **Basketballkreis** nur bei
+>   Kreisliga, zeigt **verfügbare Kreise + „Weitere N folgen"** (keine 17 disabled-Einträge). Bundesland-Dropdown
+>   erst ab **≥2 Ländern**, sonst Region-Hinweis (technischer Filter bleibt erhalten).
+> - **Responsive, KEIN Horizontal-Scroll:** Suche eigene volle Breite; Filter-**Grid** (1 / sm:2 / lg:3 Spalten)
+>   statt nicht-umbrechender Flex-Reihe; `overflow-x-hidden` am Container, `w-full`/`min-w-0`. Mobil hinter
+>   „Filter (N)" + „Ergebnisse anzeigen". Verifiziert Desktop/Tablet(768)/Mobile(375): scrollWidth = clientWidth.
+> - **Gruppierte Sortierung:** Startansicht + ungefilterter Katalog nach **Bereichsgruppen** (Senioren Herren/
+>   Damen · U18 · U16 · Kreisligen), je Gruppe fachlich (laufend→Teams→Level→Region→**Staffelnummer numerisch**→
+>   Name); gefilterter Bereich → flache Liste **ohne** Fremdgruppen. Gleichnamige Ligen via **Region-Zeile**
+>   unterscheidbar (Karte: Name · Kategorie·Alter·Region · Saison·Teams · Badges).
+> ✅ Verifiziert (Preview, alle 12 Abnahmekriterien) + Prod-Smoke. Dev ge-`--purge`t.
+
 #### 🧭 Ligen-Seite: geführte Startansicht + Nachbereitungs-/Sicherheitscheck (02.07.2026, `7e69f12`, live)
 > Nachbereitung nach dem Kreisliga-Framework (UI-only, keine Datenmodell-/Follow-/Season-Architektur).
 > - **Doku (Teil 1):** Basketballkreis-Liste von „provisorisch" auf **verifiziert** (offizielle WBV-Seite,
