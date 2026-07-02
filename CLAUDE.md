@@ -5,6 +5,28 @@
 
 ## 0. AKTUELLER STAND (Stand: 24.06.2026 – Redesign-Phase)
 
+#### 📧 Liga-Zuordnungsanfrage: fehlende Mails ergänzt (02.07.2026, `5430ce5`, live)
+> Nachfrage-Check: Glocke funktionierte bereits, **Mails fehlten komplett** (bei der Erstimplementierung
+> bewusst auf In-App beschränkt, war aber nicht der Wunsch). Jetzt ergänzt:
+> - **`leagueChangeRequestEmail`** (`lib/emailTemplates.js`): geht bei jeder neuen Anfrage an
+>   **Super-Admins + info@hoopsgermany.de** (`getAdminNotifyTo()`, gleiches Muster wie `teamPendingEmail`) –
+>   Team/aktuelle Liga/gewünschte Liga/Notiz + direkter CTA-Link **„Anfrage jetzt prüfen" → `/admin/league-
+>   requests`**.
+> - **`leagueChangeApprovedEmail`/`leagueChangeRejectedEmail`**: gehen bei Genehmigung/Ablehnung an den
+>   **anfragenden Team-Admin** (`request.requestedBy`), inkl. optionaler Rückfrage-Notiz des Super-Admins,
+>   CTA zurück ins Team-Panel (`?tab=einstellungen`).
+> - Beide Stellen `try/catch`-**best-effort** (wie alle bestehenden Mail-Flows) – ein Mail-Fehler blockiert
+>   nie die eigentliche Anfrage/Freigabe.
+> ✅ **Live auf Prod real getestet** (lokal fehlen SMTP-Zugangsdaten): Demo-Team-Admin (`demo.coach@nrw-demo.de`,
+>   Köln Comets) stellte eine echte Anfrage → **Glocke bei Patrick UND Jonatan bestätigt** (DB-Check: je 1
+>   `league_change_request`-Notif mit korrektem Text), keine SMTP-Fehler in den PM2-Logs. Ablehnung über einen
+>   temporären Test-Admin-Account (echte Admin-Zugangsdaten wurden seither geändert, s. Roadmap #1) →
+>   `league_change_rejected`-Notif beim Demo-Team-Admin korrekt inkl. Rückfrage-Text. **Alle Testartefakte
+>   danach entfernt** (temp Admin-Account, die Test-Anfrage, beide Test-Notifications) – Köln Comets'
+>   `leagueId` war nie betroffen (Ablehnung ändert nichts). ⚠️ **Ob die zwei Test-Mails tatsächlich in den
+>   Postfächern ankamen, muss der User selbst bestätigen** (Claude kann keine externen Postfächer lesen) –
+>   zu prüfen: `p.schemura@gmail.com`, `jonatanbaenavides@gmail.com`, `info@hoopsgermany.de`.
+
 #### 🗺️ Regierungsbezirk-Navigation + Kreis Niers + Liga-Zuordnungs-Freigabe (02.07.2026, `eb3ab34`, live)
 > **1) Kreis Niers war nie „fehlend"** – er stand bereits korrekt in `BASKETBALLKREISE_NRW_GRUPPIERT`
 > (Regierungsbezirk Düsseldorf). Ursache war die UI: der Kreis-Filter zeigte nur Kreise mit **vorhandenen**
