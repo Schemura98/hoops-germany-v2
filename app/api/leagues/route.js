@@ -14,15 +14,18 @@ export const dynamic = "force-dynamic";
 // Antwort enthält zusätzlich `seasons` (alle vorhandenen Saisons, neueste zuerst).
 async function list(req) {
   await connectDB();
-  const season = (() => {
+  const { season, scope } = (() => {
     try {
-      return new URL(req.url).searchParams.get("season");
+      const p = new URL(req.url).searchParams;
+      return { season: p.get("season"), scope: p.get("scope") };
     } catch {
-      return null;
+      return { season: null, scope: null };
     }
   })();
 
-  const query = season ? { season } : { active: true };
+  // scope=all → ALLE Ligen (aktiv + inaktiv + abgeschlossen), für die geführte
+  // /ligen-Seite (Status-Filter clientseitig). Sonst: Saison-Archiv oder Default aktiv.
+  const query = scope === "all" ? {} : season ? { season } : { active: true };
   const leagues = await League.find(query)
     .select("name season bundesland level gender ageGroup region official isDemo teams finished champion active")
     .populate("champion", "teamName slug")

@@ -38,10 +38,19 @@ Felder: `name`, `season`, `level`, `gender`, `ageGroup`, `region`, `official`, `
   Demo-Kreisligen sind `official:false` + `isDemo:true` + `seedTag:"kreisliga-demo"`.
 
 ## Team ↔ Liga (`models/Team.js`, `models/TeamSeason.js`)
-- `Team.leagueId` = **eine** aktuelle Liga eines Teams.
+- `Team.leagueId` = **eine** aktuelle Liga eines Teams (**kanonischer Zeiger**).
+- `League.teams[]` = Team-Mitglieder EINER Liga-Saison (kann ein Team über mehrere, auch archivierte,
+  Saisons enthalten).
+- `set-league` pflegt **beide** synchron (`Team.leagueId` + `League.teams` $pull alt/$addToSet neu). Andere
+  Flows (create/join) setzen `leagueId` bzw. `teams` je nach Fall.
 - `TeamSeason` = **historischer Snapshot** nach Saisonabschluss (`freezeSeason` in `lib/teamSeason.js`),
   **kein** vollständiges Live-Teilnahmemodell.
 - Auf-/Abstieg bzw. Ligawechsel = **manuelle Neuzuordnung** (`/api/team/set-league`).
+- ⚠️ **„Deine Liga" (/ligen):** führende Quelle ist aktuell die **Mitgliedschaft in `League.teams`** (der
+  Client hat via `getmyinfo` nur `teamId`, nicht `team.leagueId`). **Risiko:** ein Team kann in mehreren
+  Saison-Ligen als `teams`-Mitglied stehen → die Auswahl bevorzugt daher die **aktive, laufende** Liga.
+  **Kanonisch korrekter** wäre `Team.leagueId` (eindeutig) – dafür müsste `getmyinfo` `leagueId` mitliefern
+  (kleiner Follow-up, bewusst noch NICHT umgesetzt; keine Architekturänderung).
 
 ## Saison-Rollover (`scripts/rollover-season.mjs`)
 - **Kein Cron.** Manuelles, idempotentes Skript.
