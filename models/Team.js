@@ -37,6 +37,9 @@ const teamSchema = new mongoose.Schema(
     // freigegeben werden, bevor sie öffentlich erscheinen. Default true, damit
     // Bestand/Seeds sichtbar bleiben; /api/team/create setzt explizit false.
     approved: { type: Boolean, default: true },
+    // Maschinenlesbare Demo-Kennzeichnung (additiv, analog League.isDemo). true = fiktives
+    // Test-Team einer Demo-Fixture (z. B. Kreisliga-Showcase) – NIE als echter Verein behandeln.
+    isDemo: { type: Boolean, default: false },
     inviteToken: String,
     rosterSlots: [rosterSlotSchema],
     // Scouting / Transfermarkt (Team-Seite): Verein sucht Verstärkung.

@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { FaCopy, FaCheck, FaLink, FaTrophy, FaBell } from "react-icons/fa";
+import { FaCopy, FaCheck, FaLink, FaTrophy, FaBell, FaTimes } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import {
   BUNDESLAENDER,
   LEAGUE_LEVELS,
-  LEAGUE_GENDERS,
-  LEAGUE_AGE_GROUPS,
+  BASKETBALLKREISE_NRW_GRUPPIERT,
   ALL_ROLES,
+  bezirkOfKreis,
 } from "@/lib/constants";
 import { FaUserPlus } from "react-icons/fa";
 import ImageUpload from "@/components/ImageUpload";
@@ -41,12 +41,23 @@ export default function EinstellungenTab({ team, reload }) {
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState(null); // { type: "ok"|"err", text }
 
-  // Liga-Auswahl/-Wechsel
+  // Liga-Zuordnung: NUR Anfrage (Freigabe durch Super-Admin) – s. request-league-change.
   const [leagues, setLeagues] = useState([]);
-  const [leagueId, setLeagueId] = useState(team?.leagueId ? String(team.leagueId) : "");
-  const [leagueFilter, setLeagueFilter] = useState({ level: "", gender: "", ageGroup: "" });
+  const [leagueId, setLeagueId] = useState(""); // Ziel-Liga der ANFRAGE – startet immer leer
+  const [leagueFilter, setLeagueFilter] = useState({
+    bereich: "",
+    kategorie: "",
+    level: "",
+    bezirk: "",
+    kreis: "",
+    search: "",
+  });
+  const [leagueRequests, setLeagueRequests] = useState([]);
+  const [requestsLoading, setRequestsLoading] = useState(true);
+  const [requestNote, setRequestNote] = useState("");
   const [leagueSaving, setLeagueSaving] = useState(false);
   const [leagueMsg, setLeagueMsg] = useState(null);
+  const [cancelingId, setCancelingId] = useState(null);
 
   // Scouting: Verstärkung suchen
   const [recruiting, setRecruiting] = useState(!!team?.recruiting);
@@ -99,55 +110,138 @@ export default function EinstellungenTab({ team, reload }) {
     }
   }
 
+  const loadLeagueRequests = useCallback(async () => {
+    setRequestsLoading(true);
+    try {
+      const token = getTeamAuthToken();
+      const { data } = await axios.post("/api/team/league-change-requests", { token });
+      setLeagueRequests(data.requests || []);
+    } catch {
+      /* optional */
+    } finally {
+      setRequestsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     let active = true;
     (async () => {
       try {
-        const { data } = await axios.get("/api/leagues");
+        const { data } = await axios.get("/api/leagues", { params: { scope: "all" } });
         if (active) setLeagues(data.leagues || []);
       } catch {
         /* Ligen optional */
       }
     })();
+    loadLeagueRequests();
     return () => {
       active = false;
     };
-  }, []);
+  }, [loadLeagueRequests]);
 
-  // Optionen: nach Bundesland des Teams + Filtern; aktuelle Liga immer enthalten.
+  const currentLeague = useMemo(
+    () => leagues.find((l) => String(l._id) === String(team?.leagueId || "")) || null,
+    [leagues, team?.leagueId]
+  );
+  const pendingRequest = useMemo(
+    () => leagueRequests.find((r) => r.status === "ausstehend") || null,
+    [leagueRequests]
+  );
+  const historyRequests = useMemo(
+    () => leagueRequests.filter((r) => r.status !== "ausstehend").slice(0, 3),
+    [leagueRequests]
+  );
+
+  const isYouth = leagueFilter.bereich === "U18" || leagueFilter.bereich === "U16";
+  const kategorieOptions = isYouth
+    ? [
+        { v: "", l: "Alle" },
+        { v: "Herren", l: "männlich" },
+        { v: "Damen", l: "weiblich" },
+        { v: "Mixed", l: "offen" },
+      ]
+    : [
+        { v: "", l: "Alle" },
+        { v: "Herren", l: "Herren" },
+        { v: "Damen", l: "Damen" },
+      ];
+  const showKreisFilter = leagueFilter.level === "Kreisliga";
+  const kreisGroupsForSelect = leagueFilter.bezirk
+    ? BASKETBALLKREISE_NRW_GRUPPIERT.filter((g) => g.bezirk === leagueFilter.bezirk)
+    : BASKETBALLKREISE_NRW_GRUPPIERT;
+
+  function setFilter(patch) {
+    setLeagueFilter((f) => ({ ...f, ...patch }));
+  }
+
+  // Optionen: nach den gewählten Filtern; eigene aktuelle Liga wird NICHT als Ziel angeboten
+  // (Anfrage auf die bereits aktuelle Liga ist unzulässig).
   const leagueOptions = useMemo(() => {
-    const cur = leagues.find((l) => String(l._id) === leagueId);
-    const list = leagues.filter((l) => {
-      if (form.bundesland && l.bundesland && l.bundesland !== form.bundesland) return false;
-      if (leagueFilter.level && l.level !== leagueFilter.level) return false;
-      if (leagueFilter.gender && l.gender !== leagueFilter.gender) return false;
-      if (leagueFilter.ageGroup && l.ageGroup !== leagueFilter.ageGroup) return false;
-      return true;
-    });
-    if (cur && !list.some((l) => String(l._id) === leagueId)) list.unshift(cur);
-    return list;
-  }, [leagues, leagueId, form.bundesland, leagueFilter]);
+    const q = leagueFilter.search.trim().toLowerCase();
+    return leagues
+      .filter((l) => {
+        if (team?.leagueId && String(l._id) === String(team.leagueId)) return false;
+        if (l.finished) return false;
+        if (leagueFilter.bereich && l.ageGroup !== leagueFilter.bereich) return false;
+        if (leagueFilter.kategorie && l.gender !== leagueFilter.kategorie) return false;
+        if (leagueFilter.level && l.level !== leagueFilter.level) return false;
+        if (showKreisFilter && leagueFilter.bezirk && bezirkOfKreis(l.region) !== leagueFilter.bezirk)
+          return false;
+        if (showKreisFilter && leagueFilter.kreis && l.region !== leagueFilter.kreis) return false;
+        if (q && !`${l.name} ${l.region} ${l.bundesland}`.toLowerCase().includes(q)) return false;
+        return true;
+      })
+      .sort((a, b) => String(a.name).localeCompare(String(b.name), "de"));
+  }, [leagues, leagueFilter, showKreisFilter, team?.leagueId]);
+
+  // Ziel-Liga zurücksetzen, sobald sie durch einen Filterwechsel nicht mehr in den
+  // Optionen vorkommt (Auswahl darf nie „unsichtbar" gewählt bleiben).
+  useEffect(() => {
+    if (leagueId && !leagueOptions.some((l) => String(l._id) === leagueId)) setLeagueId("");
+  }, [leagueOptions, leagueId]);
+  // Regierungsbezirk/Kreis nur relevant bei Kreisliga.
+  useEffect(() => {
+    if (!showKreisFilter && (leagueFilter.bezirk || leagueFilter.kreis)) {
+      setFilter({ bezirk: "", kreis: "" });
+    }
+  }, [showKreisFilter, leagueFilter.bezirk, leagueFilter.kreis]);
 
   const leagueLabel = (l) =>
     [l.name, l.gender, l.ageGroup !== "Senioren" ? l.ageGroup : null, l.season]
       .filter(Boolean)
       .join(" · ");
 
-  async function onSaveLeague() {
+  async function onRequestLeague() {
+    if (!leagueId) return;
     setLeagueMsg(null);
     setLeagueSaving(true);
     try {
       const token = getTeamAuthToken();
-      await axios.post("/api/team/set-league", { token, leagueId });
-      setLeagueMsg({ type: "ok", text: "Liga gespeichert." });
-      reload?.();
+      await axios.post("/api/team/request-league-change", { token, requestedLeagueId: leagueId, note: requestNote });
+      setLeagueMsg({ type: "ok", text: "Anfrage gesendet – ein Super-Admin prüft sie." });
+      setLeagueId("");
+      setRequestNote("");
+      await loadLeagueRequests();
     } catch (err) {
       setLeagueMsg({
         type: "err",
-        text: err.response?.data?.message || "Liga konnte nicht gespeichert werden.",
+        text: err.response?.data?.message || "Anfrage konnte nicht gesendet werden.",
       });
     } finally {
       setLeagueSaving(false);
+    }
+  }
+
+  async function onCancelRequest(requestId) {
+    setCancelingId(requestId);
+    try {
+      const token = getTeamAuthToken();
+      await axios.post("/api/team/cancel-league-change-request", { token, requestId });
+      await loadLeagueRequests();
+    } catch {
+      /* ignorieren */
+    } finally {
+      setCancelingId(null);
     }
   }
 
@@ -329,10 +423,34 @@ export default function EinstellungenTab({ team, reload }) {
           <FaTrophy className="text-brand-500" />
           <h2 className="text-lg font-semibold text-gray-900">Liga</h2>
         </div>
-        <p className="text-sm text-gray-500">
-          Wähle die Liga deines Teams aus dem offiziellen Katalog. Nach Saisonwechsel
-          (Auf-/Abstieg) hier die neue Liga einstellen.
-        </p>
+
+        {/* Aktuelle Liga – SCHREIBGESCHÜTZT. Ändert sich nur nach Super-Admin-Freigabe. */}
+        <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+            Aktuelle Liga
+          </p>
+          {currentLeague ? (
+            <div className="space-y-0.5 text-sm">
+              <p className="font-semibold text-gray-900">{currentLeague.name}</p>
+              <p className="text-gray-500">
+                {[
+                  currentLeague.season ? `Saison ${currentLeague.season}` : null,
+                  currentLeague.ageGroup,
+                  currentLeague.gender,
+                  currentLeague.level,
+                  currentLeague.region,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+              <p className="text-xs text-gray-400">
+                Status: {currentLeague.finished ? "Abgeschlossen" : currentLeague.active ? "Aktiv" : "Inaktiv"}
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">Noch keine Liga zugeordnet.</p>
+          )}
+        </div>
 
         {leagueMsg && (
           <div
@@ -346,78 +464,174 @@ export default function EinstellungenTab({ team, reload }) {
           </div>
         )}
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <select
-            value={leagueFilter.level}
-            onChange={(e) => setLeagueFilter((f) => ({ ...f, level: e.target.value }))}
-            className={inputClass}
-          >
-            <option value="">Alle Spielklassen</option>
-            {LEAGUE_LEVELS.map((x) => (
-              <option key={x} value={x}>
-                {x}
-              </option>
-            ))}
-          </select>
-          <select
-            value={leagueFilter.gender}
-            onChange={(e) => setLeagueFilter((f) => ({ ...f, gender: e.target.value }))}
-            className={inputClass}
-          >
-            <option value="">Alle Geschlechter</option>
-            {LEAGUE_GENDERS.map((x) => (
-              <option key={x} value={x}>
-                {x}
-              </option>
-            ))}
-          </select>
-          <select
-            value={leagueFilter.ageGroup}
-            onChange={(e) => setLeagueFilter((f) => ({ ...f, ageGroup: e.target.value }))}
-            className={inputClass}
-          >
-            <option value="">Alle Altersklassen</option>
-            {LEAGUE_AGE_GROUPS.map((x) => (
-              <option key={x} value={x}>
-                {x}
-              </option>
-            ))}
-          </select>
-        </div>
+        {requestsLoading ? null : pendingRequest ? (
+          /* Offene Anfrage – kein neues Formular, solange diese läuft. */
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
+              Ligazuordnung ausstehend
+            </p>
+            <p className="text-sm text-gray-800">
+              Angefragt: <strong>{pendingRequest.requestedLeagueId?.name}</strong>
+              {pendingRequest.requestedLeagueId?.season ? ` · Saison ${pendingRequest.requestedLeagueId.season}` : ""}
+            </p>
+            <p className="text-xs text-gray-500">Ein Super-Admin prüft die Anfrage.</p>
+            <button
+              type="button"
+              onClick={() => onCancelRequest(pendingRequest._id)}
+              disabled={cancelingId === pendingRequest._id}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-60"
+            >
+              <FaTimes className="text-[10px]" />
+              {cancelingId === pendingRequest._id ? "Storniere…" : "Anfrage stornieren"}
+            </button>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-gray-500">
+              Ligazuordnung ändern? Wähle die gewünschte Liga aus dem offiziellen Katalog –
+              ein Super-Admin prüft die Anfrage, bevor sie wirksam wird.
+            </p>
 
-        <Field
-          label="Liga"
-          hint={
-            form.bundesland
-              ? `Gefiltert nach ${form.bundesland}.`
-              : "Tipp: Bundesland oben setzen, um die Auswahl einzugrenzen."
-          }
-        >
-          <select
-            value={leagueId}
-            onChange={(e) => setLeagueId(e.target.value)}
-            className={inputClass}
-          >
-            <option value="">– keine Liga –</option>
-            {leagueOptions.map((l) => (
-              <option key={l._id} value={l._id}>
-                {leagueLabel(l)}
-              </option>
-            ))}
-          </select>
-        </Field>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <select
+                value={leagueFilter.bereich}
+                onChange={(e) =>
+                  setFilter({ bereich: e.target.value, kategorie: "", level: "", bezirk: "", kreis: "" })
+                }
+                className={inputClass}
+              >
+                <option value="">Alle Bereiche</option>
+                <option value="Senioren">Senioren</option>
+                <option value="U18">U18</option>
+                <option value="U16">U16</option>
+              </select>
+              <select
+                value={leagueFilter.kategorie}
+                onChange={(e) => setFilter({ kategorie: e.target.value })}
+                className={inputClass}
+              >
+                {kategorieOptions.map((o) => (
+                  <option key={o.v || "all"} value={o.v}>
+                    {o.v ? o.l : "Alle Kategorien"}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={leagueFilter.level}
+                onChange={(e) => setFilter({ level: e.target.value, bezirk: "", kreis: "" })}
+                className={inputClass}
+              >
+                <option value="">Alle Spielklassen</option>
+                {LEAGUE_LEVELS.map((x) => (
+                  <option key={x} value={x}>
+                    {x}
+                  </option>
+                ))}
+              </select>
+              {showKreisFilter && (
+                <select
+                  value={leagueFilter.bezirk}
+                  onChange={(e) => setFilter({ bezirk: e.target.value, kreis: "" })}
+                  className={inputClass}
+                >
+                  <option value="">Alle Regierungsbezirke</option>
+                  {BASKETBALLKREISE_NRW_GRUPPIERT.map((g) => (
+                    <option key={g.bezirk} value={g.bezirk}>
+                      {g.bezirk}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {showKreisFilter && (
+                <select
+                  value={leagueFilter.kreis}
+                  onChange={(e) => setFilter({ kreis: e.target.value })}
+                  className={inputClass}
+                >
+                  <option value="">Alle Basketballkreise</option>
+                  {kreisGroupsForSelect.map((g) => (
+                    <optgroup key={g.bezirk} label={g.bezirk}>
+                      {g.kreise.map((k) => (
+                        <option key={k} value={k}>
+                          {k}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              )}
+              <input
+                value={leagueFilter.search}
+                onChange={(e) => setFilter({ search: e.target.value })}
+                placeholder="Liga, Region oder Basketballkreis suchen"
+                className={inputClass}
+              />
+            </div>
 
-        <div className="flex items-center justify-between gap-3">
-          <LeagueReportLink bundesland={form.bundesland} />
-          <button
-            type="button"
-            onClick={onSaveLeague}
-            disabled={leagueSaving}
-            className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-6 py-2.5 font-medium transition-colors"
-          >
-            {leagueSaving ? "Speichern…" : "Liga speichern"}
-          </button>
-        </div>
+            <Field label="Ziel-Liga">
+              <select
+                value={leagueId}
+                onChange={(e) => setLeagueId(e.target.value)}
+                className={inputClass}
+              >
+                <option value="">Bitte gewünschte Liga auswählen</option>
+                {leagueOptions.map((l) => (
+                  <option key={l._id} value={l._id}>
+                    {leagueLabel(l)}
+                  </option>
+                ))}
+              </select>
+            </Field>
+
+            <Field label="Hinweis (optional)">
+              <textarea
+                value={requestNote}
+                onChange={(e) => setRequestNote(e.target.value)}
+                rows={2}
+                placeholder="z. B. Grund für den Wechsel"
+                className={inputClass}
+              />
+            </Field>
+
+            <div className="flex items-center justify-between gap-3">
+              <LeagueReportLink bundesland={form.bundesland} />
+              <button
+                type="button"
+                onClick={onRequestLeague}
+                disabled={leagueSaving || !leagueId}
+                className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-6 py-2.5 font-medium transition-colors"
+              >
+                {leagueSaving ? "Sende…" : "Ligazuordnung anfragen"}
+              </button>
+            </div>
+          </>
+        )}
+
+        {historyRequests.length > 0 && (
+          <div className="pt-2 border-t border-gray-100">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Letzte Anfragen
+            </p>
+            <ul className="space-y-1.5">
+              {historyRequests.map((r) => (
+                <li key={r._id} className="flex items-center justify-between gap-3 text-xs text-gray-500">
+                  <span className="truncate">{r.requestedLeagueId?.name || "Liga"}</span>
+                  <span
+                    className={`shrink-0 rounded-full px-2 py-0.5 font-medium ${
+                      r.status === "genehmigt"
+                        ? "bg-green-50 text-green-700"
+                        : r.status === "abgelehnt"
+                        ? "bg-red-50 text-red-700"
+                        : "bg-gray-100 text-gray-600"
+                    }`}
+                  >
+                    {r.status}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       {/* Verstärkung suchen (Scouting) */}

@@ -11,6 +11,7 @@ const links = [
   { href: "/admin/teams", label: "Teams" },
   { href: "/admin/matches", label: "Spiele" },
   { href: "/admin/leagues", label: "Ligen" },
+  { href: "/admin/league-requests", label: "Liga-Anfragen" },
   { href: "/admin/moderation", label: "Moderation" },
   { href: "/admin/analytics", label: "Analytics" },
   { href: "/admin/feedback", label: "Feedback" },

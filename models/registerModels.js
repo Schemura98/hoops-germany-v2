@@ -15,3 +15,4 @@ import "./AnalyticsEvent";
 import "./TransferEvent";
 import "./AuditLog";
 import "./TeamSeason";
+import "./LeagueChangeRequest";

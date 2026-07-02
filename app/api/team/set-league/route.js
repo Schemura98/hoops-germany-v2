@@ -3,12 +3,16 @@ import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Team from "@/models/Team";
 import League from "@/models/League";
-import { getTeamForCapability } from "@/lib/serverAuth";
+import { getTeamForCapability, getAdminFromToken } from "@/lib/serverAuth";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
-// POST /api/team/set-league – Liga des Teams setzen/wechseln/entfernen (Dual-Auth).
+// POST /api/team/set-league – Liga des Teams DIREKT setzen/wechseln/entfernen (Dual-Auth).
 // Pflegt League.teams auf beiden Seiten (alte Liga $pull, neue Liga $addToSet).
-// Nützlich u. a. nach dem Season-Rollover (Teams ordnen sich der neuen Saison zu).
+// ⚠️ Direktänderung ist nur erlaubt beim ENTFERNEN, bei DEMO-/Test-Ligen (official:false)
+// oder wenn der Aufrufende zusätzlich Super-Admin ist. Für offizielle Ligen müssen
+// Team-Admins stattdessen eine Anfrage stellen (/api/team/request-league-change) –
+// die Zuordnung wirkt sich auf Tabelle/Spielplan/Statistiken/Saisonhistorie aus.
+// Weiterhin nützlich für Super-Admin-Korrekturen u. a. nach dem Season-Rollover.
 async function handler(req) {
   const body = await req.json().catch(() => ({}));
   const token = getTokenFromRequest(req, body.token);
@@ -22,13 +26,24 @@ async function handler(req) {
 
   // Zielliga bestimmen ("" / null = Liga entfernen).
   let newId = null;
+  let targetLeague = null;
   if (body.leagueId) {
     if (!mongoose.isValidObjectId(body.leagueId)) {
       return fail("Ungültige Liga-ID", 400);
     }
-    const league = await League.findById(body.leagueId).select("_id");
-    if (!league) return fail("Liga nicht gefunden", 404);
-    newId = league._id;
+    targetLeague = await League.findById(body.leagueId).select("_id official");
+    if (!targetLeague) return fail("Liga nicht gefunden", 404);
+    newId = targetLeague._id;
+  }
+
+  if (newId && targetLeague.official) {
+    const admin = await getAdminFromToken(token);
+    if (!admin) {
+      return fail(
+        "Offizielle Liga-Zuordnungen können nicht mehr direkt gespeichert werden – bitte über „Ligazuordnung anfragen\" beantragen.",
+        403
+      );
+    }
   }
 
   const current = await Team.findById(team._id).select("leagueId");
