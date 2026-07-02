@@ -6,6 +6,10 @@ import LeagueChangeRequest from "@/models/LeagueChangeRequest";
 import Player from "@/models/Player";
 import { getTeamWithRole } from "@/lib/serverAuth";
 import { hasTeamPermission } from "@/lib/teamPermissions";
+import { sendMail } from "@/lib/mailer";
+import { getAdminNotifyTo } from "@/lib/adminRecipients";
+import { leagueChangeRequestEmail } from "@/lib/emailTemplates";
+import { getBaseUrl } from "@/lib/baseUrl";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/team/request-league-change – Team-Admin fragt eine NEUE offizielle
@@ -40,9 +44,11 @@ async function handler(req) {
 
   // Passt die Zielliga fachlich zur aktuellen (Altersklasse + Kategorie)? Nur relevant,
   // wenn das Team bereits einer Liga zugeordnet ist.
+  let currentLeagueName = "";
   if (team.leagueId) {
-    const current = await League.findById(team.leagueId).select("ageGroup gender");
+    const current = await League.findById(team.leagueId).select("name ageGroup gender");
     if (current) {
+      currentLeagueName = current.name;
       if (current.ageGroup !== requested.ageGroup) {
         return fail(
           `Die Zielliga passt nicht zur aktuellen Altersklasse (${current.ageGroup}).`,
@@ -77,7 +83,8 @@ async function handler(req) {
     status: "ausstehend",
   });
 
-  // Super-Admins in-app benachrichtigen (analog team_pending).
+  // Super-Admins benachrichtigen: in-app (Glocke) + Mail an Super-Admins + info@
+  // (analog team_pending) mit direktem Link zur Freigabeseite.
   try {
     const admins = await Player.find({ isSuperAdmin: true }).select("_id");
     if (admins.length) {
@@ -98,8 +105,20 @@ async function handler(req) {
         }
       );
     }
+
+    const requester = await Player.findById(requestingPlayerId).select("firstName lastName");
+    const to = await getAdminNotifyTo();
+    const mail = leagueChangeRequestEmail({
+      teamName: team.teamName,
+      currentLeagueName,
+      requestedLeagueName: requested.name,
+      requesterName: requester ? `${requester.firstName || ""} ${requester.lastName || ""}`.trim() : "",
+      note: request.note,
+      baseUrl: getBaseUrl(req),
+    });
+    await sendMail({ to, subject: mail.subject, html: mail.html, text: mail.text });
   } catch {
-    /* Benachrichtigung ist best-effort */
+    /* Benachrichtigung/Mail ist best-effort */
   }
 
   return ok({ request }, 201);

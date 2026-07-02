@@ -5,6 +5,9 @@ import League from "@/models/League";
 import Team from "@/models/Team";
 import Player from "@/models/Player";
 import { getAdminFromToken } from "@/lib/serverAuth";
+import { sendMail } from "@/lib/mailer";
+import { leagueChangeApprovedEmail, leagueChangeRejectedEmail } from "@/lib/emailTemplates";
+import { getBaseUrl } from "@/lib/baseUrl";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/admin/review-league-change-request – Super-Admin genehmigt/lehnt eine
@@ -53,7 +56,7 @@ async function handler(req) {
 
   await request.save();
 
-  // Anfragenden Team-Admin benachrichtigen.
+  // Anfragenden Team-Admin benachrichtigen: in-app (Glocke) + Bestätigungsmail.
   try {
     if (request.requestedBy) {
       const requestedLeague = await League.findById(request.requestedLeagueId).select("name");
@@ -74,9 +77,29 @@ async function handler(req) {
           },
         }
       );
+
+      const requester = await Player.findById(request.requestedBy).select("email");
+      const team = await Team.findById(request.team).select("teamName");
+      if (requester?.email && team) {
+        const baseUrl = getBaseUrl(req);
+        const mail = approve
+          ? leagueChangeApprovedEmail({
+              teamName: team.teamName,
+              leagueName: requestedLeague?.name || "der Liga",
+              reviewNote: request.reviewNote,
+              baseUrl,
+            })
+          : leagueChangeRejectedEmail({
+              teamName: team.teamName,
+              leagueName: requestedLeague?.name || "der Liga",
+              reviewNote: request.reviewNote,
+              baseUrl,
+            });
+        await sendMail({ to: requester.email, subject: mail.subject, html: mail.html, text: mail.text });
+      }
     }
   } catch {
-    /* Benachrichtigung ist best-effort */
+    /* Benachrichtigung/Mail ist best-effort */
   }
 
   return ok({ request });
