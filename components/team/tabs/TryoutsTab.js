@@ -216,7 +216,7 @@ export default function TryoutsTab() {
 
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">
-              Beschreibung <span className="text-gray-400">(optional)</span>
+              Beschreibung <span className="text-gray-500">(optional)</span>
             </label>
             <textarea
               rows={2}
@@ -299,7 +299,7 @@ export default function TryoutsTab() {
                       <button
                         onClick={() => remove(t._id)}
                         disabled={busyId === t._id}
-                        className="text-gray-400 hover:text-red-600 disabled:opacity-60 p-1.5"
+                        className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
                         title="Tryout entfernen"
                       >
                         <FaTrash className="text-sm" />

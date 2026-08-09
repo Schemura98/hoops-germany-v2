@@ -123,7 +123,7 @@ export default function NotificationBell() {
             </div>
 
             {items.length === 0 ? (
-              <p className="px-4 py-8 text-center text-sm text-gray-400">
+              <p className="px-4 py-8 text-center text-sm text-gray-500">
                 Keine Benachrichtigungen.
               </p>
             ) : (
@@ -145,14 +145,14 @@ export default function NotificationBell() {
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm text-gray-800">{n.message}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">{timeAgo(n.createdAt)}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{timeAgo(n.createdAt)}</p>
 
                         {/* Kader-Einladung: annehmen / ablehnen */}
                         {isInvite && (
                           status ? (
                             <p
                               className={`mt-2 text-xs font-semibold ${
-                                status === "accepted" ? "text-green-600" : "text-gray-400"
+                                status === "accepted" ? "text-green-600" : "text-gray-500"
                               }`}
                             >
                               {status === "accepted" ? "✓ Angenommen" : "Abgelehnt"}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import axios from "axios";
 import { FaSearch, FaBasketballBall, FaMapMarkerAlt, FaUsers, FaExchangeAlt } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
+import DemoBadge from "@/components/DemoBadge";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import CityRadiusFilter from "@/components/CityRadiusFilter";
@@ -215,8 +216,11 @@ export default function TransfermarktPage() {
                     >
                       <Avatar name={t.teamName} src={t.logo} className="h-8 w-8" textClass="text-[10px]" square />
                       <span className="min-w-0">
-                        <span className="block text-sm font-medium text-gray-900 truncate">{t.teamName}</span>
-                        <span className="block text-xs text-gray-400 truncate">
+                        <span className="block text-sm font-medium text-gray-900 truncate">
+                          {t.teamName}
+                          {t.isDemo && <DemoBadge className="ml-1.5 align-middle" />}
+                        </span>
+                        <span className="block text-xs text-gray-500 truncate">
                           {(t.positions || []).map(positionLabel).join(", ") || t.bundesland}
                         </span>
                       </span>
@@ -240,8 +244,9 @@ export default function TransfermarktPage() {
                       <span className="min-w-0">
                         <span className="block text-sm font-medium text-gray-900 truncate">
                           {p.firstName} {p.lastName}
+                          {p.isDemo && <DemoBadge className="ml-1.5 align-middle" />}
                         </span>
-                        <span className="block text-xs text-gray-400 truncate">
+                        <span className="block text-xs text-gray-500 truncate">
                           {[positionLabel(p.position), p.bundesland].filter(Boolean).join(" · ")}
                         </span>
                       </span>
@@ -259,7 +264,7 @@ export default function TransfermarktPage() {
         {/* Filter */}
         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mb-6">
           <div className="relative flex-1 min-w-[200px]">
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -306,7 +311,7 @@ export default function TransfermarktPage() {
         </div>
 
         {!loading && !error && (
-          <p className="text-xs text-gray-400 font-medium mb-4 uppercase tracking-wide">
+          <p className="text-xs text-gray-500 font-medium mb-4 uppercase tracking-wide">
             {list.length} {list.length === 1 ? "Eintrag" : "Einträge"}
           </p>
         )}
@@ -353,13 +358,14 @@ export default function TransfermarktPage() {
                     <div className="min-w-0">
                       <p className="font-semibold text-gray-900 truncate">
                         {p.firstName} {p.lastName}
+                        {p.isDemo && <DemoBadge className="ml-2 align-middle" />}
                       </p>
                       <p className="text-xs text-gray-500 truncate">
                         {positionLabel(p.position) || "Position offen"}
                         {p.teamId?.teamName ? ` · aktuell: ${p.teamId.teamName}` : ""}
                       </p>
                       {(p.hometown || p.bundesland) && (
-                        <p className="text-xs text-gray-400 truncate flex items-center gap-1 mt-0.5">
+                        <p className="text-xs text-gray-500 truncate flex items-center gap-1 mt-0.5">
                           <FaMapMarkerAlt className="flex-shrink-0 text-gray-300" />
                           {[p.hometown, p.bundesland].filter(Boolean).join(" · ")}
                         </p>
@@ -401,12 +407,13 @@ export default function TransfermarktPage() {
                     <div className="min-w-0">
                       <p className="font-semibold text-gray-900 truncate group-hover:text-brand-600">
                         {t.teamName}
+                        {t.isDemo && <DemoBadge className="ml-2 align-middle" />}
                       </p>
                       <p className="text-xs text-gray-500 truncate">
                         {t.league?.name ? t.league.name : "Verein"}
                       </p>
                       {(t.region || t.bundesland) && (
-                        <p className="text-xs text-gray-400 truncate flex items-center gap-1 mt-0.5">
+                        <p className="text-xs text-gray-500 truncate flex items-center gap-1 mt-0.5">
                           <FaMapMarkerAlt className="flex-shrink-0 text-gray-300" />
                           {[t.region, t.bundesland].filter(Boolean).join(" · ")}
                         </p>

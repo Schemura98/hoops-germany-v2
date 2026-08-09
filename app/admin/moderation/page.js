@@ -68,13 +68,13 @@ export default function AdminModerationPage() {
                       >
                         {a?.firstName} {a?.lastName}
                       </Link>
-                      <p className="text-xs text-gray-400">{timeAgo(post.createdAt)}</p>
+                      <p className="text-xs text-gray-500">{timeAgo(post.createdAt)}</p>
                     </div>
                   </div>
                   <button
                     onClick={() => remove(post._id)}
                     disabled={busyId === post._id}
-                    className="text-gray-400 hover:text-red-600 disabled:opacity-60 p-1.5 flex-shrink-0"
+                    className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5 flex-shrink-0"
                     title="Beitrag löschen"
                   >
                     <FaTrash />
@@ -93,7 +93,7 @@ export default function AdminModerationPage() {
                   />
                 )}
 
-                <div className="mt-3 flex items-center gap-5 text-xs text-gray-400">
+                <div className="mt-3 flex items-center gap-5 text-xs text-gray-500">
                   <span className="inline-flex items-center gap-1">
                     <FaRegHeart /> {(post.likes || []).length}
                   </span>

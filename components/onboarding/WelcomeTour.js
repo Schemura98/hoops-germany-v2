@@ -153,7 +153,7 @@ export default function WelcomeTour() {
             ) : (
               <button
                 onClick={close}
-                className="text-sm font-medium text-gray-400 hover:text-gray-600"
+                className="text-sm font-medium text-gray-500 hover:text-gray-600"
               >
                 Überspringen
               </button>

@@ -6,7 +6,7 @@ import { ok, withErrorHandling } from "@/lib/apiResponse";
 async function handler() {
   await connectDB();
   const teams = await Team.find({ recruiting: true, approved: { $ne: false } })
-    .select("teamName slug logo region bundesland recruitingPositions recruitingNote leagueId")
+    .select("teamName slug logo region bundesland recruitingPositions recruitingNote leagueId isDemo")
     .populate("leagueId", "name season level")
     .sort({ teamName: 1 });
 

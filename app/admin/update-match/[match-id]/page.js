@@ -96,7 +96,7 @@ export default function AdminUpdateMatchPage({ params }) {
     <AdminShell title="Spiel bearbeiten">
       <div className="max-w-lg bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <p className="text-lg font-semibold text-gray-900">
-          {match.teamA?.teamName} <span className="text-gray-400">vs</span> {match.teamB?.teamName}
+          {match.teamA?.teamName} <span className="text-gray-500">vs</span> {match.teamB?.teamName}
         </p>
 
         {msg && (
@@ -182,7 +182,7 @@ export default function AdminUpdateMatchPage({ params }) {
                 className={inputClass}
               />
             </div>
-            <span className="pb-2 text-gray-400 font-semibold">:</span>
+            <span className="pb-2 text-gray-500 font-semibold">:</span>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">
                 {match.teamB?.teamName}
@@ -219,7 +219,7 @@ export default function AdminUpdateMatchPage({ params }) {
       <div className="max-w-lg mt-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h2 className="text-sm font-semibold text-gray-900 mb-3">Änderungsverlauf</h2>
         {audit.length === 0 ? (
-          <p className="text-sm text-gray-400">Noch keine protokollierten Änderungen.</p>
+          <p className="text-sm text-gray-500">Noch keine protokollierten Änderungen.</p>
         ) : (
           <ul className="space-y-3">
             {audit.map((a) => (
@@ -231,7 +231,7 @@ export default function AdminUpdateMatchPage({ params }) {
                 />
                 <div>
                   <p className="text-gray-800">{a.summary}</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-500">
                     {a.actorName}
                     {a.actorRole === "super_admin" ? " (Super-Admin)" : ""} ·{" "}
                     {new Date(a.createdAt).toLocaleString("de-DE")}

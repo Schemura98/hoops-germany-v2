@@ -121,7 +121,7 @@ function LeagueCard({ l }) {
         </div>
       </div>
       {line2 && <p className="mt-1 text-xs text-gray-500 break-words">{line2}</p>}
-      <p className="mt-1 text-xs text-gray-400">
+      <p className="mt-1 text-xs text-gray-500">
         {l.season ? `Saison ${l.season} · ` : ""}
         {l.teamCount} {l.teamCount === 1 ? "Team" : "Teams"}
       </p>
@@ -449,7 +449,7 @@ export default function LigenPage() {
           /* ══ Geführte Startansicht ══ */
           <div className="space-y-8">
             {!showBundesland && (
-              <p className="text-xs text-gray-400">Region: {NRW} · weitere Bundesländer folgen</p>
+              <p className="text-xs text-gray-500">Region: {NRW} · weitere Bundesländer folgen</p>
             )}
 
             {/* Schnellzugriffe (nur Voreinstellungen) */}
@@ -482,7 +482,7 @@ export default function LigenPage() {
               ) : (
                 guidedGroups.map((g) => (
                   <div key={g.key}>
-                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">{g.label}</h3>
+                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">{g.label}</h3>
                     <div className="grid gap-4 sm:grid-cols-2">
                       {g.items.map((l) => (
                         <LeagueCard key={l._id} l={l} />
@@ -519,7 +519,7 @@ export default function LigenPage() {
                 </button>
               </div>
               <div className="relative">
-                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400" />
+                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -685,7 +685,7 @@ export default function LigenPage() {
                     <div className="space-y-5 pl-3 border-l-2 border-gray-100">
                       {be.kreise.map((kg) => (
                         <div key={kg.kreisName}>
-                          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
                             {kg.kreisName}
                             {preferredKreis === kg.kreisName && (
                               <span className="ml-1.5 normal-case text-brand-600">· dein Kreis</span>
@@ -694,7 +694,7 @@ export default function LigenPage() {
                           <div className="space-y-3">
                             {kg.brackets.map((br) => (
                               <div key={br.key}>
-                                <p className="mb-1.5 text-[11px] font-medium text-gray-400">{br.label}</p>
+                                <p className="mb-1.5 text-[11px] font-medium text-gray-500">{br.label}</p>
                                 <div className="grid gap-3 sm:grid-cols-2">
                                   {br.items.map((l) => (
                                     <LeagueCard key={l._id} l={l} />
@@ -719,7 +719,7 @@ export default function LigenPage() {
               <div className="space-y-6">
                 {catalogGroups.map((g) => (
                   <div key={g.key}>
-                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">{g.label}</h3>
+                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">{g.label}</h3>
                     <div className="grid gap-4 sm:grid-cols-2">
                       {g.items.map((l) => (
                         <LeagueCard key={l._id} l={l} />

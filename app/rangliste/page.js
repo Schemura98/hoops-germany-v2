@@ -19,7 +19,7 @@ function rankBadge(i) {
   if (i === 0) return `${base} bg-amber-100 text-amber-700`;
   if (i === 1) return `${base} bg-gray-200 text-gray-600`;
   if (i === 2) return `${base} bg-orange-100 text-orange-700`;
-  return `${base} text-gray-400`;
+  return `${base} text-gray-500`;
 }
 
 export default function RanglistePage() {
@@ -146,7 +146,7 @@ export default function RanglistePage() {
             <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs uppercase tracking-wide text-gray-400 border-b border-gray-100">
+                <tr className="text-xs uppercase tracking-wide text-gray-500 border-b border-gray-100">
                   <th className="text-left font-medium px-4 py-3 w-12">#</th>
                   <th className="text-left font-medium px-2 py-3">Team</th>
                   <th className="text-center font-medium px-2 py-3 w-12">Sp</th>
@@ -178,7 +178,7 @@ export default function RanglistePage() {
                             {t.teamName}
                           </span>
                           {t.bundesland && (
-                            <span className="block text-xs text-gray-400">
+                            <span className="block text-xs text-gray-500">
                               {t.bundesland}
                             </span>
                           )}

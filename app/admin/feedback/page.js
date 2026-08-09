@@ -66,7 +66,7 @@ export default function AdminFeedbackPage() {
                       neu
                     </span>
                   )}
-                  <span className="text-xs text-gray-400">{timeAgo(f.createdAt)}</span>
+                  <span className="text-xs text-gray-500">{timeAgo(f.createdAt)}</span>
                 </div>
                 {f.status === "new" && (
                   <button

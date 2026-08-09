@@ -54,7 +54,7 @@ export default function AdminMatchesPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-xs text-gray-400 text-left border-b border-gray-100">
+              <tr className="text-xs text-gray-500 text-left border-b border-gray-100">
                 <th className="font-medium py-3 pl-4">Datum</th>
                 <th className="font-medium py-3">Partie</th>
                 <th className="font-medium py-3 text-center">Ergebnis</th>
@@ -70,7 +70,7 @@ export default function AdminMatchesPage() {
                   <tr key={m._id} className="border-b border-gray-50 last:border-0">
                     <td className="py-3 pl-4 text-gray-600">{formatDate(m.date)}</td>
                     <td className="py-3 text-gray-900">
-                      {m.teamA?.teamName || "?"} <span className="text-gray-400">vs</span>{" "}
+                      {m.teamA?.teamName || "?"} <span className="text-gray-500">vs</span>{" "}
                       {m.teamB?.teamName || "?"}
                     </td>
                     <td className="py-3 text-center font-semibold text-gray-900">

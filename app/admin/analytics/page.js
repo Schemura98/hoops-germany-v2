@@ -40,7 +40,7 @@ const nf = (n) => (n ?? 0).toLocaleString("de-DE");
 // Horizontale Balkenliste
 function Bars({ items, empty = "Noch keine Daten." }) {
   const max = items.reduce((m, i) => Math.max(m, i.value), 0) || 1;
-  if (!items.length) return <p className="text-sm text-gray-400">{empty}</p>;
+  if (!items.length) return <p className="text-sm text-gray-500">{empty}</p>;
   return (
     <div className="space-y-2.5">
       {items.map((it) => (
@@ -63,7 +63,7 @@ function Card({ title, hint, children, right }) {
         <h2 className="text-sm font-semibold text-gray-900">{title}</h2>
         {right}
       </div>
-      {hint && <p className="text-xs text-gray-400 mb-4">{hint}</p>}
+      {hint && <p className="text-xs text-gray-500 mb-4">{hint}</p>}
       {children}
     </div>
   );
@@ -107,7 +107,7 @@ function RegionCard({ region }) {
         </div>
         <div>
           <p className="text-xs font-semibold text-gray-700 mb-2">
-            Besucher nach Bundesland <span className="font-normal text-gray-400">(eingeloggt)</span>
+            Besucher nach Bundesland <span className="font-normal text-gray-500">(eingeloggt)</span>
           </p>
           <Bars items={region.visitorsByState} empty="Noch keine eingeloggten Besucher mit Region." />
         </div>
@@ -313,7 +313,7 @@ export default function AdminAnalyticsPage() {
 
           <Card title="Beliebteste Seiten" hint={`Im Zeitraum: ${periodLabel}`}>
             {summary.topPaths.length === 0 ? (
-              <p className="text-sm text-gray-400">Noch keine Aufrufe.</p>
+              <p className="text-sm text-gray-500">Noch keine Aufrufe.</p>
             ) : (
               <ul className="divide-y divide-gray-50">
                 {summary.topPaths.map((p) => (
@@ -387,7 +387,7 @@ export default function AdminAnalyticsPage() {
 
           <Card title="Beliebteste Seiten" hint={`Im Zeitraum: ${periodLabel}`}>
             {summary.topPaths.length === 0 ? (
-              <p className="text-sm text-gray-400">Noch keine Aufrufe.</p>
+              <p className="text-sm text-gray-500">Noch keine Aufrufe.</p>
             ) : (
               <ul className="divide-y divide-gray-50">
                 {summary.topPaths.map((p) => (

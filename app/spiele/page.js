@@ -43,6 +43,8 @@ function MatchCard({ match }) {
   const score = teamScores(match);
   const verify = matchVerification(match);
   const isPlayoff = match.stage === "Playoffs";
+  const resultPending =
+    match.status === "scheduled" && new Date(match.date) < new Date();
   return (
     <Link
       href={`/match/${match._id}`}
@@ -51,7 +53,7 @@ function MatchCard({ match }) {
       {(match.leagueId?.name || isPlayoff) && (
         <div className="mb-2 flex items-center justify-center gap-2">
           {match.leagueId?.name && (
-            <span className="text-[11px] font-medium text-gray-400">
+            <span className="text-[11px] font-medium text-gray-500">
               {match.leagueId.name}
               {match.leagueId.season ? ` · ${match.leagueId.season}` : ""}
             </span>
@@ -72,12 +74,12 @@ function MatchCard({ match }) {
               {score.a} : {score.b}
             </span>
           ) : (
-            <span className="text-xs text-gray-400 font-medium">vs</span>
+            <span className="text-xs text-gray-500 font-medium">vs</span>
           )}
         </div>
         <TeamSide team={match.teamB} align="right" />
       </div>
-      <div className="mt-3 flex items-center justify-center gap-3 text-xs text-gray-400">
+      <div className="mt-3 flex items-center justify-center gap-3 text-xs text-gray-500">
         <span>{formatDate(match.date)}</span>
         {match.location && (
           <span className="flex items-center gap-1">
@@ -85,6 +87,11 @@ function MatchCard({ match }) {
           </span>
         )}
       </div>
+      {resultPending && (
+        <div className="mt-2 text-center text-[11px] font-medium rounded-full px-3 py-1 bg-gray-100 text-gray-600">
+          Ergebnis ausstehend
+        </div>
+      )}
       {verify && (verify.state === "unverified" || verify.state === "mismatch") && (
         <div
           className={`mt-2 text-center text-[11px] font-medium rounded-full px-3 py-1 ${
@@ -147,9 +154,18 @@ export default function SpielePage() {
     };
   }, [matches]);
 
+  // "Anstehend" heißt: geplant UND heute oder später – vergangene Spiele ohne
+  // Ergebnis würden die Liste sonst als veraltet erscheinen lassen.
+  const startOfToday = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+
   const filtered = useMemo(() => {
     const list = matches.filter((m) => {
-      if (tab === "upcoming" && m.status !== "scheduled") return false;
+      if (tab === "upcoming" && (m.status !== "scheduled" || new Date(m.date) < startOfToday))
+        return false;
       if (tab === "results" && m.status !== "completed") return false;
       if (stage !== "all" && (m.stage || "Hauptrunde") !== stage) return false;
       if (league && String(m.leagueId?._id || "") !== league) return false;
@@ -164,15 +180,17 @@ export default function SpielePage() {
         ? new Date(a.date) - new Date(b.date)
         : new Date(b.date) - new Date(a.date)
     );
-  }, [matches, tab, stage, league, season, ort, dateFrom]);
+  }, [matches, tab, stage, league, season, ort, dateFrom, startOfToday]);
 
   const counts = useMemo(
     () => ({
-      upcoming: matches.filter((m) => m.status === "scheduled").length,
+      upcoming: matches.filter(
+        (m) => m.status === "scheduled" && new Date(m.date) >= startOfToday
+      ).length,
       results: matches.filter((m) => m.status === "completed").length,
       all: matches.length,
     }),
-    [matches]
+    [matches, startOfToday]
   );
 
   return (

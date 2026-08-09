@@ -80,6 +80,7 @@ async function handler(req) {
         lastName: "$player.lastName",
         slug: "$player.slug",
         position: "$player.position",
+        isDemo: { $ifNull: ["$player.isDemo", false] },
         teamName: "$team.teamName",
         teamSlug: "$team.slug",
         games: 1,

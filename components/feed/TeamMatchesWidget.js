@@ -70,7 +70,7 @@ function MatchMini({ match }) {
         <TeamRow team={match.teamA} points={score?.a} isWinner={!!winId && winId === aId} />
         <TeamRow team={match.teamB} points={score?.b} isWinner={!!winId && winId === bId} />
       </div>
-      <div className="mt-2 flex items-center gap-2 text-[11px] text-gray-400">
+      <div className="mt-2 flex items-center gap-2 text-[11px] text-gray-500">
         <span className="whitespace-nowrap">{dateLabel(match.date)}</span>
         {match.location && (
           <span className="flex items-center gap-1 min-w-0 truncate">
@@ -193,14 +193,14 @@ export default function TeamMatchesWidget() {
         {loading ? (
           <Loading className="py-6" size="text-xl" />
         ) : !hasMine && !hasFollowed ? (
-          <p className="text-xs text-gray-400 py-4">
+          <p className="text-xs text-gray-500 py-4">
             Tritt einem Team bei oder folge Teams, um ihre Spiele hier zu sehen.{" "}
             <Link href="/teams" className="text-brand-600 font-medium">
               Teams entdecken
             </Link>
           </p>
         ) : list.length === 0 ? (
-          <p className="text-xs text-gray-400 py-4">
+          <p className="text-xs text-gray-500 py-4">
             {tab === "upcoming"
               ? "Keine anstehenden Spiele."
               : "Noch keine Ergebnisse."}

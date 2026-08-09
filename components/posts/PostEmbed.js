@@ -82,7 +82,7 @@ export default function PostEmbed({ embed }) {
             rel="noopener noreferrer"
             className="block p-3 transition-colors hover:bg-gray-50"
           >
-            <span className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-gray-400">
+            <span className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-gray-500">
               <FaGlobe className="text-[10px]" /> {embed.domain}
             </span>
             {embed.title && (
@@ -113,9 +113,9 @@ export default function PostEmbed({ embed }) {
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-medium text-gray-900">{embed.domain}</span>
-          <span className="block truncate text-xs text-gray-400">{embed.url}</span>
+          <span className="block truncate text-xs text-gray-500">{embed.url}</span>
         </span>
-        <FaExternalLinkAlt className="flex-shrink-0 text-xs text-gray-400" />
+        <FaExternalLinkAlt className="flex-shrink-0 text-xs text-gray-500" />
       </a>
     );
   }

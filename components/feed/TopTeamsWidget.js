@@ -12,7 +12,7 @@ const selectClass =
 
 function rankColor(i) {
   if (i === 0) return "text-amber-500";
-  if (i === 1) return "text-gray-400";
+  if (i === 1) return "text-gray-500";
   if (i === 2) return "text-orange-400";
   return "text-gray-300";
 }
@@ -99,9 +99,9 @@ export default function TopTeamsWidget() {
       {/* Rangliste (gedeckelte Höhe + interner Scroll) */}
       <div className="mt-3 max-h-80 overflow-y-auto -mr-1 pr-1">
         {loading ? (
-          <p className="text-xs text-gray-400 py-4">Lädt…</p>
+          <p className="text-xs text-gray-500 py-4">Lädt…</p>
         ) : rows.length === 0 ? (
-          <p className="text-xs text-gray-400 py-4">
+          <p className="text-xs text-gray-500 py-4">
             Noch keine Ergebnisse für diese Auswahl.
           </p>
         ) : (

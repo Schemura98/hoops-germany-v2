@@ -5,6 +5,7 @@ import Link from "next/link";
 import axios from "axios";
 import { FaUsers, FaSearch, FaBasketballBall, FaMapMarkerAlt, FaPlus } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
+import DemoBadge from "@/components/DemoBadge";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import CityRadiusFilter from "@/components/CityRadiusFilter";
@@ -92,7 +93,7 @@ export default function TeamsPage() {
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1 max-w-md">
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -116,7 +117,7 @@ export default function TeamsPage() {
         </div>
 
         {!loading && !error && (
-          <p className="text-xs text-gray-400 font-medium mb-4 uppercase tracking-wide">
+          <p className="text-xs text-gray-500 font-medium mb-4 uppercase tracking-wide">
             {filtered.length} Teams
           </p>
         )}
@@ -166,6 +167,7 @@ export default function TeamsPage() {
                   <h2 className="font-bold text-gray-900 text-base leading-tight group-hover:text-brand-600 transition-colors truncate">
                     {t.teamName}
                   </h2>
+                  {t.isDemo && <DemoBadge className="mt-1.5 self-start" />}
                   {t.region && (
                     <div className="flex items-center gap-1.5 mt-1.5 text-gray-500 text-xs">
                       <FaMapMarkerAlt className="flex-shrink-0 text-brand-400" />

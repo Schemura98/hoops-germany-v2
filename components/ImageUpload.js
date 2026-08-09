@@ -114,7 +114,7 @@ export default function ImageUpload({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={preview} alt="Vorschau" className="h-full w-full object-cover" />
         ) : (
-          <span className="text-xs text-gray-400">kein Bild</span>
+          <span className="text-xs text-gray-500">kein Bild</span>
         )}
       </div>
 
@@ -136,7 +136,7 @@ export default function ImageUpload({
           {uploading ? "Lädt…" : label}
         </button>
         {error && <p className="mt-1 text-xs text-red-600 break-words">{error}</p>}
-        <p className="mt-1 text-xs text-gray-400 break-words">
+        <p className="mt-1 text-xs text-gray-500 break-words">
           {DISPLAY_FORMATS} · max. {MAX_MB} MB · iPhone-Fotos (HEIC) werden automatisch umgewandelt
         </p>
       </div>

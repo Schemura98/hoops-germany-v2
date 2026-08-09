@@ -359,7 +359,7 @@ export default function ErgebnisseTab({ team }) {
                           className={numInput}
                         />
                       </div>
-                      <span className="pb-2 text-gray-400 font-semibold">:</span>
+                      <span className="pb-2 text-gray-500 font-semibold">:</span>
                       <div>
                         <label className="block text-xs font-medium text-gray-600 mb-1">
                           Gegner-Punkte
@@ -399,7 +399,7 @@ export default function ErgebnisseTab({ team }) {
                   {statsOpen && (
                     <div className="mt-3">
                       {rosterList.length === 0 ? (
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-gray-500">
                           Kein Kader erfasst. Lege Slots im Kader-Tab an oder nimm Spieler auf.
                         </p>
                       ) : (
@@ -407,7 +407,7 @@ export default function ErgebnisseTab({ team }) {
                           <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                               <thead>
-                                <tr className="text-xs text-gray-400 text-left">
+                                <tr className="text-xs text-gray-500 text-left">
                                   <th className="font-medium py-1 pr-2">Spieler</th>
                                   <th className="font-medium py-1 text-center">PKT</th>
                                   <th className="font-medium py-1 text-center">AST</th>
@@ -424,7 +424,7 @@ export default function ErgebnisseTab({ team }) {
                                       <td className="py-1.5 pr-2">
                                         <span className="text-gray-900">{r.name}</span>
                                         {r.position && (
-                                          <span className="text-xs text-gray-400"> · {r.position}</span>
+                                          <span className="text-xs text-gray-500"> · {r.position}</span>
                                         )}
                                       </td>
                                       <td className="py-1.5 text-center">

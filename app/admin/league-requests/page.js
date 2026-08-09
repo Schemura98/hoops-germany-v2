@@ -79,7 +79,7 @@ export default function AdminLeagueRequestsPage() {
             Ausstehend ({pending.length})
           </h2>
           {pending.length === 0 ? (
-            <p className="mb-8 text-sm text-gray-400">Keine offenen Anfragen.</p>
+            <p className="mb-8 text-sm text-gray-500">Keine offenen Anfragen.</p>
           ) : (
             <div className="mb-8 space-y-4">
               {pending.map((r) => {
@@ -93,14 +93,14 @@ export default function AdminLeagueRequestsPage() {
                       >
                         {r.team?.teamName || "Team"}
                       </Link>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-gray-500">
                         {new Date(r.createdAt).toLocaleDateString("de-DE")}
                       </span>
                     </div>
 
                     <div className="grid gap-3 sm:grid-cols-2 text-sm">
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                           Aktuelle Liga
                         </p>
                         <p className="text-gray-700">{leagueLabel(r.currentLeagueId)}</p>
@@ -109,7 +109,7 @@ export default function AdminLeagueRequestsPage() {
                         )}
                       </div>
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                           Gewünschte Liga
                         </p>
                         <p className="text-gray-700">{leagueLabel(r.requestedLeagueId)}</p>
@@ -166,7 +166,7 @@ export default function AdminLeagueRequestsPage() {
 
           <h2 className="mb-3 text-sm font-bold text-gray-900">Bearbeitet</h2>
           {decided.length === 0 ? (
-            <p className="text-sm text-gray-400">Noch keine bearbeiteten Anfragen.</p>
+            <p className="text-sm text-gray-500">Noch keine bearbeiteten Anfragen.</p>
           ) : (
             <div className="space-y-2">
               {decided.map((r) => (

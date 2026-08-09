@@ -49,14 +49,14 @@ function TeamBadge({ team }) {
 function StatTable({ stats }) {
   const playing = stats.filter((s) => !s.didNotPlay);
   if (playing.length === 0) {
-    return <p className="text-sm text-gray-400 py-2">Keine Statistiken erfasst.</p>;
+    return <p className="text-sm text-gray-500 py-2">Keine Statistiken erfasst.</p>;
   }
   const sorted = [...playing].sort((a, b) => (b.points ?? 0) - (a.points ?? 0));
   const topPoints = sorted[0]?.points ?? 0;
   return (
     <table className="w-full text-sm">
       <thead>
-        <tr className="text-xs text-gray-400 text-left">
+        <tr className="text-xs text-gray-500 text-left">
           <th className="font-medium py-1">Spieler</th>
           <th className="font-medium py-1 text-center w-12">PKT</th>
           <th className="font-medium py-1 text-center w-12">AST</th>
@@ -253,7 +253,7 @@ export default function MatchIdPage({ params }) {
               )}
               {match.attendance ? (
                 <span className="inline-flex items-center gap-1.5 text-gray-600">
-                  <FaUsers className="text-gray-400" /> {match.attendance} Zuschauer
+                  <FaUsers className="text-gray-500" /> {match.attendance} Zuschauer
                 </span>
               ) : null}
             </div>

@@ -69,7 +69,7 @@ export default function PublicSponsorReportPage() {
             Dieser Report ist passwortgeschützt. Bitte gib das Passwort ein, das du erhalten hast.
           </p>
           <div className="relative">
-            <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+            <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
             <input
               type="password"
               value={password}

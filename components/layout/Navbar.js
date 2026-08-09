@@ -263,7 +263,7 @@ export default function Navbar() {
                     </div>
                     <div className="max-h-80 overflow-y-auto divide-y divide-gray-50">
                       {notifs.length === 0 ? (
-                        <p className="px-4 py-8 text-center text-gray-400 text-sm">
+                        <p className="px-4 py-8 text-center text-gray-500 text-sm">
                           Keine Benachrichtigungen
                         </p>
                       ) : (
@@ -280,7 +280,7 @@ export default function Navbar() {
                               </span>
                               <div className="min-w-0">
                                 <p className="text-sm text-gray-800 leading-snug">{n.message}</p>
-                                <p className="text-xs text-gray-400 mt-0.5">{timeAgo(n.createdAt)}</p>
+                                <p className="text-xs text-gray-500 mt-0.5">{timeAgo(n.createdAt)}</p>
                               </div>
                             </div>
                           );
@@ -527,7 +527,7 @@ export default function Navbar() {
               />
               <button
                 onClick={closeSearch}
-                className="text-gray-400 hover:text-gray-700 transition-colors"
+                className="text-gray-500 hover:text-gray-700 transition-colors"
                 aria-label="Suche schließen"
               >
                 <FaTimes className="w-4 h-4" />
@@ -535,7 +535,7 @@ export default function Navbar() {
             </div>
             <div className="max-h-80 overflow-y-auto divide-y divide-gray-50">
               {searchTerm && results.length === 0 && (
-                <div className="px-4 py-6 text-center text-gray-400 text-sm">
+                <div className="px-4 py-6 text-center text-gray-500 text-sm">
                   {searchData ? "Keine Ergebnisse" : "Lädt…"}
                 </div>
               )}

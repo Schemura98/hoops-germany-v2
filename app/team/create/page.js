@@ -128,7 +128,7 @@ export default function TeamCreatePage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Stadt/Region <span className="text-gray-400">(optional)</span>
+                Stadt/Region <span className="text-gray-500">(optional)</span>
               </label>
               <CityInput
                 value={form.region}
@@ -141,7 +141,7 @@ export default function TeamCreatePage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Bundesland <span className="text-gray-400">(optional)</span>
+                Bundesland <span className="text-gray-500">(optional)</span>
               </label>
               <select
                 name="bundesland"
@@ -162,7 +162,7 @@ export default function TeamCreatePage() {
           <div className="rounded-xl border border-gray-200 p-4 space-y-3">
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Liga <span className="text-gray-400">(optional)</span>
+                Liga <span className="text-gray-500">(optional)</span>
               </label>
               <p className="text-xs text-gray-500 mt-0.5">
                 Wähle die Liga, in der dein Team spielt – grenze sie über Bundesland (oben) und
@@ -232,7 +232,7 @@ export default function TeamCreatePage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Über das Team <span className="text-gray-400">(optional)</span>
+              Über das Team <span className="text-gray-500">(optional)</span>
             </label>
             <textarea
               name="about"

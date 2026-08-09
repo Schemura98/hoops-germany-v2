@@ -105,7 +105,7 @@ export default function FollowSuggestions() {
               >
                 {item.name}
               </Link>
-              <p className="truncate text-xs text-gray-400">
+              <p className="truncate text-xs text-gray-500">
                 {item.type === "team" ? "Verein" : "Spieler"}
                 {item.subtitle ? ` · ${item.subtitle}` : ""}
               </p>

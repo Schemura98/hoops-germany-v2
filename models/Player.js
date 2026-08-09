@@ -73,6 +73,10 @@ const playerSchema = new mongoose.Schema(
     resetPasswordToken: String,
     resetPasswordExpiry: Date,
 
+    // Maschinenlesbare Demo-Kennzeichnung (additiv, analog Team.isDemo/League.isDemo).
+    // true = fiktives Seed-Profil der Testphase – NIE als echter Spieler behandeln.
+    isDemo: { type: Boolean, default: false },
+
     transferStatus: {
       type: String,
       enum: ["verfuegbar", "nicht_verfuegbar"],

@@ -101,7 +101,7 @@ export default function AdminPlayersPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-xs text-gray-400 text-left border-b border-gray-100">
+              <tr className="text-xs text-gray-500 text-left border-b border-gray-100">
                 <th className="font-medium py-3 pl-4">Name</th>
                 <th className="font-medium py-3">E-Mail</th>
                 <th className="font-medium py-3">Team-Admin</th>
@@ -134,7 +134,7 @@ export default function AdminPlayersPage() {
                         <button
                           onClick={() => removeAdmin(p._id)}
                           disabled={busyId === p._id}
-                          className="text-gray-400 hover:text-red-600 disabled:opacity-60"
+                          className="text-gray-500 hover:text-red-600 disabled:opacity-60"
                           title="Rechte entfernen"
                         >
                           <FaTimes className="text-xs" />
@@ -170,7 +170,7 @@ export default function AdminPlayersPage() {
                     <button
                       onClick={() => remove(p._id, `${p.firstName} ${p.lastName}`)}
                       disabled={busyId === p._id}
-                      className="text-gray-400 hover:text-red-600 disabled:opacity-60 p-1.5"
+                      className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
                       title="Löschen"
                     >
                       <FaTrash />
@@ -181,7 +181,7 @@ export default function AdminPlayersPage() {
             </tbody>
           </table>
           {filtered.length === 0 && (
-            <p className="px-4 py-8 text-center text-sm text-gray-400">Keine Spieler gefunden.</p>
+            <p className="px-4 py-8 text-center text-sm text-gray-500">Keine Spieler gefunden.</p>
           )}
         </div>
       )}

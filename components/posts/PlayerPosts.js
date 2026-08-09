@@ -41,7 +41,7 @@ export default function PlayerPosts({ playerId, currentPlayerId }) {
         </div>
       ) : posts.length === 0 ? (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-center">
-          <p className="text-sm text-gray-400">Noch keine Beiträge.</p>
+          <p className="text-sm text-gray-500">Noch keine Beiträge.</p>
         </div>
       ) : (
         posts.map((post) => (

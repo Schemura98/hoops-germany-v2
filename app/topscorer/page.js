@@ -10,10 +10,11 @@ import PageHeader from "@/components/layout/PageHeader";
 import Loading from "@/components/ui/Loading";
 import EmptyState from "@/components/ui/EmptyState";
 import { positionLabel } from "@/lib/constants";
+import DemoBadge from "@/components/DemoBadge";
 
 const RANK_COLOR = {
   1: "text-amber-500",
-  2: "text-gray-400",
+  2: "text-gray-500",
   3: "text-orange-700",
 };
 
@@ -92,7 +93,7 @@ export default function TopscorerPage() {
             <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-gray-400 text-left border-b border-gray-100">
+                <tr className="text-xs text-gray-500 text-left border-b border-gray-100">
                   <th className="font-medium py-3 pl-4 w-10">#</th>
                   <th className="font-medium py-3">Spieler</th>
                   <th className="font-medium py-3 text-center w-12">Sp.</th>
@@ -115,7 +116,8 @@ export default function TopscorerPage() {
                         >
                           {s.firstName} {s.lastName}
                         </Link>
-                        <div className="text-xs text-gray-400">
+                        {s.isDemo && <DemoBadge className="ml-2 align-middle" />}
+                        <div className="text-xs text-gray-500">
                           {positionLabel(s.position) || "—"}
                           {s.teamName ? ` · ${s.teamName}` : ""}
                         </div>

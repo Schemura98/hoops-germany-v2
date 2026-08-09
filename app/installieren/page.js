@@ -48,7 +48,7 @@ function Section({ icon: Icon, title, badge, open, onToggle, children }) {
           </span>
         )}
         <FaChevronDown
-          className={`text-gray-400 flex-shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`text-gray-500 flex-shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && <div className="px-6 pb-6 -mt-1">{children}</div>}
@@ -154,7 +154,7 @@ export default function InstallierenPage() {
 
             <p className="text-sm text-gray-500">
               Oder wähle dein Gerät{" "}
-              <span className="text-gray-400">
+              <span className="text-gray-500">
                 (wir haben <strong>{detectedLabel}</strong> erkannt und passend geöffnet):
               </span>
             </p>
@@ -227,7 +227,7 @@ export default function InstallierenPage() {
                 </Step>
                 <Step n="3">Bestätigen – Hoops Germany öffnet sich künftig als eigenes Fenster.</Step>
               </ol>
-              <p className="mt-3 text-xs text-gray-400">
+              <p className="mt-3 text-xs text-gray-500">
                 Mac-Safari: Menü <strong>„Ablage“ → „Zum Dock hinzufügen“</strong>. Firefox unterstützt
                 die Installation aktuell nicht – dort die Seite einfach als Lesezeichen speichern.
               </p>
@@ -235,7 +235,7 @@ export default function InstallierenPage() {
           </>
         )}
 
-        <p className="flex items-center justify-center gap-2 text-xs text-gray-400 pt-2">
+        <p className="flex items-center justify-center gap-2 text-xs text-gray-500 pt-2">
           <FaWifi /> Die App ist die Website selbst – sie ist immer automatisch synchron, ohne Update
           aus einem Store.
         </p>

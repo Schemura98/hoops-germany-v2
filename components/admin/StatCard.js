@@ -30,7 +30,7 @@ export default function StatCard({ label, value, growth = null, hint, icon: Icon
         )}
         {sub && <span className="text-xs text-gray-500">{sub}</span>}
       </div>
-      {hint && <p className="mt-1 text-[11px] text-gray-400 leading-tight">{hint}</p>}
+      {hint && <p className="mt-1 text-[11px] text-gray-500 leading-tight">{hint}</p>}
     </div>
   );
 }

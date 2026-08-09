@@ -14,6 +14,7 @@ import {
   FaCrown,
 } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
+import DemoBadge from "@/components/DemoBadge";
 import Footer from "@/components/layout/Footer";
 import Tabs from "@/components/ui/Tabs";
 import Loading from "@/components/ui/Loading";
@@ -162,6 +163,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
           />
           <div className="min-w-0 flex-1">
             <h1 className="text-3xl sm:text-4xl font-black text-white">{team.teamName}</h1>
+            {team.isDemo && <DemoBadge className="mt-2" />}
             <div className="mt-1 flex flex-wrap items-center justify-center sm:justify-start gap-3 text-sm text-slate-300">
               {team.region && (
                 <span className="flex items-center gap-1">
@@ -215,7 +217,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
           >
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                   Liga{league.season ? ` · ${league.season}` : ""}
                 </p>
                 <p className="font-semibold text-gray-900 truncate">{league.name}</p>
@@ -230,14 +232,14 @@ export default function TeamTeamDetailSlugPage({ params }) {
                   <p className="text-xl font-black text-gray-900 leading-none">
                     {league.rank}.
                   </p>
-                  <p className="text-[11px] text-gray-400">von {league.totalTeams}</p>
+                  <p className="text-[11px] text-gray-500">von {league.totalTeams}</p>
                 </div>
               ) : null}
             </div>
             {league.record && league.record.games > 0 && (
               <p className="mt-2 text-xs text-gray-500">
                 {league.record.wins}S · {league.record.losses}N
-                <span className="text-gray-400">
+                <span className="text-gray-500">
                   {" "}
                   · Korbdiff {league.record.diff > 0 ? `+${league.record.diff}` : league.record.diff}
                 </span>
@@ -295,7 +297,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
                         <p className="text-sm font-medium text-gray-900 truncate">
                           {m.firstName} {m.lastName}
                           {m.number && (
-                            <span className="ml-1.5 text-xs font-semibold text-gray-400">
+                            <span className="ml-1.5 text-xs font-semibold text-gray-500">
                               #{m.number}
                             </span>
                           )}
@@ -315,14 +317,14 @@ export default function TeamTeamDetailSlugPage({ params }) {
                   .filter((s) => !s.claimedBy)
                   .map((slot) => (
                     <div key={slot._id} className="flex items-center gap-3 py-3 opacity-70">
-                      <span className="h-10 w-10 rounded-full bg-gray-100 text-gray-400 text-xs font-semibold flex items-center justify-center">
+                      <span className="h-10 w-10 rounded-full bg-gray-100 text-gray-500 text-xs font-semibold flex items-center justify-center">
                         {slot.number || "–"}
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-gray-700 truncate">
                           {slot.name || "Offener Platz"}
                         </p>
-                        <p className="text-xs text-gray-400">{positionLabel(slot.position) || "—"}</p>
+                        <p className="text-xs text-gray-500">{positionLabel(slot.position) || "—"}</p>
                       </div>
                       <span className="text-xs font-medium rounded-full px-3 py-1 bg-amber-100 text-amber-700">
                         {slot.status === "pending" ? "Ausstehend" : "eingeladen"}
@@ -431,7 +433,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-xs text-gray-400 text-left border-b border-gray-100">
+                      <tr className="text-xs text-gray-500 text-left border-b border-gray-100">
                         <th className="font-medium py-3 pl-4">Saison</th>
                         <th className="font-medium py-3">Liga</th>
                         <th className="font-medium py-3 text-center">Platz</th>
@@ -478,7 +480,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
                                 {teamSeasonStatusLabel(h.status)}
                               </span>
                             ) : (
-                              <span className="text-xs text-gray-400">Aktiv</span>
+                              <span className="text-xs text-gray-500">Aktiv</span>
                             )}
                           </td>
                         </tr>

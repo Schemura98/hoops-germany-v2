@@ -51,7 +51,7 @@ export default function CityInput({ value = "", onChange, onPick, placeholder = 
 
   return (
     <div className="relative" ref={boxRef}>
-      <FaMapMarkerAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none" />
+      <FaMapMarkerAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none" />
       <input
         value={value}
         onChange={(e) => {
@@ -73,7 +73,7 @@ export default function CityInput({ value = "", onChange, onPick, placeholder = 
               className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between"
             >
               <span className="text-gray-900">{c.n}</span>
-              <span className="text-xs text-gray-400">{c.s}</span>
+              <span className="text-xs text-gray-500">{c.s}</span>
             </button>
           ))}
         </div>

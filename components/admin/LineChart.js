@@ -12,7 +12,7 @@ export default function LineChart({ data = [], height = 200 }) {
   const padB = 22;
 
   if (!data.length) {
-    return <p className="text-sm text-gray-400">Noch keine Daten im Zeitraum.</p>;
+    return <p className="text-sm text-gray-500">Noch keine Daten im Zeitraum.</p>;
   }
 
   const max = Math.max(1, ...data.map((d) => Math.max(d.views || 0, d.visitors || 0)));
@@ -64,7 +64,7 @@ export default function LineChart({ data = [], height = 200 }) {
         <span className="inline-flex items-center gap-1.5">
           <span className="inline-block w-3 h-0.5 bg-slate-600" style={{ borderTop: "2px dashed #475569" }} /> Besucher
         </span>
-        <span className="ml-auto text-gray-400">max {max}</span>
+        <span className="ml-auto text-gray-500">max {max}</span>
       </div>
     </div>
   );

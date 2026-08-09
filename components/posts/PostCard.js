@@ -46,7 +46,7 @@ function LikeButton({ liked, count, busy, onToggle }) {
       onClick={onToggle}
       disabled={busy}
       className={`inline-flex items-center gap-1 text-xs ${
-        liked ? "text-brand-600" : "text-gray-400 hover:text-brand-600"
+        liked ? "text-brand-600" : "text-gray-500 hover:text-brand-600"
       }`}
     >
       {liked ? <FaHeart /> : <FaRegHeart />}
@@ -192,7 +192,7 @@ function CommentItem({ comment, postId, currentPlayerId }) {
           <LikeButton liked={liked} count={likeCount} busy={likeBusy} onToggle={toggleLike} />
           <button
             onClick={() => setShowReply((v) => !v)}
-            className="text-xs font-medium text-gray-400 hover:text-brand-600"
+            className="text-xs font-medium text-gray-500 hover:text-brand-600"
           >
             Antworten
           </button>
@@ -323,7 +323,7 @@ export default function PostCard({ post, currentPlayerId }) {
               <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                 {auto.label}
               </span>
-              <p className="text-xs text-gray-400">{timeAgo(post.createdAt)}</p>
+              <p className="text-xs text-gray-500">{timeAgo(post.createdAt)}</p>
             </div>
           </div>
 
@@ -365,7 +365,7 @@ export default function PostCard({ post, currentPlayerId }) {
                 >
                   {teamAuthor.teamName}
                 </Link>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-gray-500">
                   <span className="text-brand-600 font-medium">Verein</span> ·{" "}
                   {timeAgo(post.createdAt)}
                 </p>
@@ -383,7 +383,7 @@ export default function PostCard({ post, currentPlayerId }) {
                 >
                   {author?.firstName} {author?.lastName}
                 </Link>
-                <p className="text-xs text-gray-400">{timeAgo(post.createdAt)}</p>
+                <p className="text-xs text-gray-500">{timeAgo(post.createdAt)}</p>
               </div>
             </div>
           )}

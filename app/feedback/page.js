@@ -176,7 +176,7 @@ export default function FeedbackPage() {
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-2">
                 Worum geht es?{" "}
-                <span className="font-normal text-gray-400">(Mehrfachauswahl)</span>
+                <span className="font-normal text-gray-500">(Mehrfachauswahl)</span>
               </label>
               <div className="flex flex-wrap gap-2">
                 {AREAS.map((a) => (
@@ -236,7 +236,7 @@ export default function FeedbackPage() {
               {loading ? "Senden…" : "Feedback senden"}
             </button>
             {!hasContent && (
-              <p className="text-center text-xs text-gray-400 -mt-3">
+              <p className="text-center text-xs text-gray-500 -mt-3">
                 Wähle eine Bewertung/ein Thema oder schreib uns kurz etwas.
               </p>
             )}

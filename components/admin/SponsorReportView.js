@@ -41,7 +41,7 @@ function Kpi({ label, value, growth }) {
 
 function Bars({ items }) {
   const max = items.reduce((m, i) => Math.max(m, i.value), 0) || 1;
-  if (!items.length) return <p className="text-sm text-gray-400">Keine Daten.</p>;
+  if (!items.length) return <p className="text-sm text-gray-500">Keine Daten.</p>;
   return (
     <div className="space-y-2">
       {items.map((it) => (
@@ -187,7 +187,7 @@ export default function SponsorReportView({ summary, period, generatedAt, label 
         </div>
       </Section>
 
-      <footer className="border-t border-gray-200 pt-3 text-[11px] text-gray-400">
+      <footer className="border-t border-gray-200 pt-3 text-[11px] text-gray-500">
         Hoops Germany · hoopsgermany.de · Aggregierte Statistiken{generatedAt ? `, Stand ${generatedAt}` : ""}
       </footer>
     </div>

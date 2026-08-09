@@ -120,15 +120,15 @@ export default function TryoutDetailPage({ params }) {
 
           <div className="mt-3 space-y-2 text-sm text-gray-600">
             <p className="flex items-center gap-2">
-              <FaCalendarAlt className="text-gray-400" /> {formatDate(tryout.date)}
+              <FaCalendarAlt className="text-gray-500" /> {formatDate(tryout.date)}
             </p>
             {tryout.location && (
               <p className="flex items-center gap-2">
-                <FaMapMarkerAlt className="text-gray-400" /> {tryout.location}
+                <FaMapMarkerAlt className="text-gray-500" /> {tryout.location}
               </p>
             )}
             <p className="flex items-center gap-2">
-              <FaUsers className="text-gray-400" /> {tryout.applicantCount} Bewerber
+              <FaUsers className="text-gray-500" /> {tryout.applicantCount} Bewerber
             </p>
           </div>
 
@@ -170,7 +170,7 @@ export default function TryoutDetailPage({ params }) {
                 {applyMsg.text}
               </div>
             ) : closed ? (
-              <p className="text-sm text-gray-400">Dieses Tryout ist geschlossen.</p>
+              <p className="text-sm text-gray-500">Dieses Tryout ist geschlossen.</p>
             ) : loggedIn ? (
               <button
                 onClick={apply}

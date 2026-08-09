@@ -24,7 +24,7 @@ function Field({ label, hint, children }) {
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
       {children}
-      {hint && <p className="mt-1 text-xs text-gray-400">{hint}</p>}
+      {hint && <p className="mt-1 text-xs text-gray-500">{hint}</p>}
     </div>
   );
 }
@@ -426,7 +426,7 @@ export default function EinstellungenTab({ team, reload }) {
 
         {/* Aktuelle Liga – SCHREIBGESCHÜTZT. Ändert sich nur nach Super-Admin-Freigabe. */}
         <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
             Aktuelle Liga
           </p>
           {currentLeague ? (
@@ -443,7 +443,7 @@ export default function EinstellungenTab({ team, reload }) {
                   .filter(Boolean)
                   .join(" · ")}
               </p>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-500">
                 Status: {currentLeague.finished ? "Abgeschlossen" : currentLeague.active ? "Aktiv" : "Inaktiv"}
               </p>
             </div>
@@ -609,7 +609,7 @@ export default function EinstellungenTab({ team, reload }) {
 
         {historyRequests.length > 0 && (
           <div className="pt-2 border-t border-gray-100">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
               Letzte Anfragen
             </p>
             <ul className="space-y-1.5">
@@ -791,7 +791,7 @@ export default function EinstellungenTab({ team, reload }) {
             </button>
           </div>
         ) : (
-          <p className="text-sm text-gray-400">Noch kein Link erstellt.</p>
+          <p className="text-sm text-gray-500">Noch kein Link erstellt.</p>
         )}
 
         <button

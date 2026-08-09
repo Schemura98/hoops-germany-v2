@@ -171,7 +171,7 @@ export default function PlayerNewsfeedPage() {
                     </Button>
                   </div>
                 ) : (
-                  <p className="text-center text-xs text-gray-400 py-2">
+                  <p className="text-center text-xs text-gray-500 py-2">
                     Das war alles.
                   </p>
                 )}

@@ -91,7 +91,7 @@ export default function SpielerPage() {
         {/* Filter */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -137,7 +137,7 @@ export default function SpielerPage() {
         </div>
 
         {!loading && !error && (
-          <p className="text-xs text-gray-400 font-medium mb-4 uppercase tracking-wide">
+          <p className="text-xs text-gray-500 font-medium mb-4 uppercase tracking-wide">
             {filtered.length} Spieler
           </p>
         )}
@@ -190,7 +190,7 @@ export default function SpielerPage() {
                     </span>
                   )}
                   {p.teamId?.teamName && (
-                    <p className="text-xs text-gray-400 mt-1.5 truncate flex items-center gap-1">
+                    <p className="text-xs text-gray-500 mt-1.5 truncate flex items-center gap-1">
                       {p.teamId.logo && (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -203,7 +203,7 @@ export default function SpielerPage() {
                     </p>
                   )}
                   {p.hometown && (
-                    <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1 truncate">
+                    <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1 truncate">
                       <FaMapMarkerAlt className="flex-shrink-0 text-gray-300" />
                       {p.hometown}
                     </p>

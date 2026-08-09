@@ -88,7 +88,7 @@ export default function TransferFeedWidget() {
 
       <div className="mt-3 max-h-80 overflow-y-auto -mr-1 pr-1">
         {loading ? (
-          <p className="text-xs text-gray-400 py-2">Lädt…</p>
+          <p className="text-xs text-gray-500 py-2">Lädt…</p>
         ) : (
           <ul className="space-y-3">
             {transfers.map((t) => (
@@ -106,7 +106,7 @@ export default function TransferFeedWidget() {
                     </Link>{" "}
                     <TransferText t={t} />
                   </p>
-                  <p className="text-[11px] text-gray-400">{timeAgo(t.createdAt)}</p>
+                  <p className="text-[11px] text-gray-500">{timeAgo(t.createdAt)}</p>
                 </div>
               </li>
             ))}

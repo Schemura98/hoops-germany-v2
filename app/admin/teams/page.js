@@ -160,7 +160,7 @@ export default function AdminTeamsPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-xs text-gray-400 text-left border-b border-gray-100">
+              <tr className="text-xs text-gray-500 text-left border-b border-gray-100">
                 <th className="font-medium py-3 pl-4">Team</th>
                 <th className="font-medium py-3">E-Mail</th>
                 <th className="font-medium py-3">Region</th>
@@ -188,7 +188,7 @@ export default function AdminTeamsPage() {
                   <td className="py-3 pr-4 text-right whitespace-nowrap">
                     <button
                       onClick={() => openManage(t._id)}
-                      className="text-gray-400 hover:text-brand-600 p-1.5"
+                      className="text-gray-500 hover:text-brand-600 p-1.5"
                       title="Team-Admin verwalten"
                     >
                       <FaUserShield />
@@ -196,7 +196,7 @@ export default function AdminTeamsPage() {
                     <button
                       onClick={() => remove(t._id, t.teamName)}
                       disabled={busyId === t._id}
-                      className="text-gray-400 hover:text-red-600 disabled:opacity-60 p-1.5"
+                      className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
                       title="Löschen"
                     >
                       <FaTrash />
@@ -207,7 +207,7 @@ export default function AdminTeamsPage() {
             </tbody>
           </table>
           {filtered.length === 0 && (
-            <p className="px-4 py-8 text-center text-sm text-gray-400">Keine Teams gefunden.</p>
+            <p className="px-4 py-8 text-center text-sm text-gray-500">Keine Teams gefunden.</p>
           )}
         </div>
       )}
@@ -220,7 +220,7 @@ export default function AdminTeamsPage() {
               <h2 className="text-base font-bold text-gray-900">
                 Team-Admin verwalten{manage.teamName ? ` · ${manage.teamName}` : ""}
               </h2>
-              <button onClick={() => setManage(null)} className="text-gray-400 hover:text-gray-700 p-1">
+              <button onClick={() => setManage(null)} className="text-gray-500 hover:text-gray-700 p-1">
                 <FaTimes />
               </button>
             </div>
@@ -253,7 +253,7 @@ export default function AdminTeamsPage() {
                     </option>
                   ))}
                 </select>
-                <p className="mt-2 text-xs text-gray-400">
+                <p className="mt-2 text-xs text-gray-500">
                   Der bisherige Admin wird zu einem normalen Mitglied. Der neue Admin wird benachrichtigt.
                 </p>
                 {mMsg && (

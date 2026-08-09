@@ -185,7 +185,7 @@ export default function MentionTextarea({
                     {p.name}
                   </span>
                   {(p.position || p.teamName) && (
-                    <span className="block truncate text-xs text-gray-400">
+                    <span className="block truncate text-xs text-gray-500">
                       {[p.position, p.teamName].filter(Boolean).join(" · ")}
                     </span>
                   )}

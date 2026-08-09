@@ -237,7 +237,7 @@ export default function SpielplanTab({ team }) {
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">
                 Gegner{" "}
-                <span className="text-gray-400 font-normal">· {filteredOpponents.length}</span>
+                <span className="text-gray-500 font-normal">· {filteredOpponents.length}</span>
               </label>
               <select
                 required
@@ -254,11 +254,11 @@ export default function SpielplanTab({ team }) {
                 ))}
               </select>
               {opponents.length === 0 ? (
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="mt-1 text-xs text-gray-500">
                   Noch keine anderen Teams registriert.
                 </p>
               ) : filteredOpponents.length === 0 ? (
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="mt-1 text-xs text-gray-500">
                   Keine Teams für diesen Filter – Auswahl anpassen.
                 </p>
               ) : null}
@@ -277,7 +277,7 @@ export default function SpielplanTab({ team }) {
           <div className="grid sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">
-                Ort <span className="text-gray-400">(optional)</span>
+                Ort <span className="text-gray-500">(optional)</span>
               </label>
               <input
                 value={form.location}
@@ -288,7 +288,7 @@ export default function SpielplanTab({ team }) {
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">
-                Liga <span className="text-gray-400">(optional)</span>
+                Liga <span className="text-gray-500">(optional)</span>
               </label>
               <select
                 value={form.leagueId}
@@ -400,7 +400,7 @@ export default function SpielplanTab({ team }) {
                   </p>
                   <p className="text-xs text-gray-500">{formatDate(match.date)}</p>
                   {match.location && (
-                    <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                    <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
                       <FaMapMarkerAlt /> {match.location}
                     </p>
                   )}
@@ -419,7 +419,7 @@ export default function SpielplanTab({ team }) {
                     <button
                       onClick={() => removeMatch(match._id)}
                       disabled={busyId === match._id}
-                      className="text-gray-400 hover:text-red-600 disabled:opacity-60 p-1.5"
+                      className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
                       title="Spiel entfernen"
                     >
                       <FaTrash className="text-sm" />

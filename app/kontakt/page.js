@@ -92,7 +92,7 @@ export default function KontaktPage() {
             </form>
           )}
 
-          <p className="mt-6 text-center text-xs text-gray-400">
+          <p className="mt-6 text-center text-xs text-gray-500">
             Oder direkt:{" "}
             <a href="mailto:info@hoopsgermany.de" className="text-brand-600 hover:underline">
               info@hoopsgermany.de

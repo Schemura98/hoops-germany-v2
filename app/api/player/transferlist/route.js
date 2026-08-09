@@ -7,7 +7,7 @@ async function handler() {
   await connectDB();
   const players = await Player.find({ transferStatus: "verfuegbar" })
     .select(
-      "firstName lastName slug position profileImage nationality preferredLeague transferNote teamId bundesland hometown"
+      "firstName lastName slug position profileImage nationality preferredLeague transferNote teamId bundesland hometown isDemo"
     )
     .populate("teamId", "teamName slug")
     .sort({ lastName: 1, firstName: 1 });

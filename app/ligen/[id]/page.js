@@ -5,6 +5,7 @@ import Link from "next/link";
 import axios from "axios";
 import { FaUsers, FaBasketballBall, FaTrophy, FaCrown } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
+import DemoBadge from "@/components/DemoBadge";
 import Loading from "@/components/ui/Loading";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
@@ -101,7 +102,7 @@ export default function LigaDetailPage({ params }) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-gray-400 text-left border-b border-gray-100">
+                <tr className="text-xs text-gray-500 text-left border-b border-gray-100">
                   <th className="font-medium py-3 pl-4 w-8">#</th>
                   <th className="font-medium py-3">Team</th>
                   <th className="font-medium py-3 text-center w-12">Sp</th>
@@ -116,7 +117,7 @@ export default function LigaDetailPage({ params }) {
                     key={s.teamId}
                     className="border-b border-gray-50 last:border-0 hover:bg-gray-50"
                   >
-                    <td className="py-3 pl-4 font-semibold text-gray-400">
+                    <td className="py-3 pl-4 font-semibold text-gray-500">
                       {championId && String(s.teamId) === championId ? (
                         <FaCrown className="text-amber-500" title="Meister" />
                       ) : (
@@ -137,6 +138,7 @@ export default function LigaDetailPage({ params }) {
                           </span>
                         )}
                         <span className="truncate">{s.teamName}</span>
+                        {s.isDemo && <DemoBadge className="shrink-0" />}
                       </Link>
                     </td>
                     <td className="py-3 text-center text-gray-600">{s.games}</td>
@@ -156,13 +158,13 @@ export default function LigaDetailPage({ params }) {
           </div>
 
           {standings.length === 0 && (
-            <p className="px-4 py-8 text-center text-sm text-gray-400">
+            <p className="px-4 py-8 text-center text-sm text-gray-500">
               Noch keine Teams in dieser Liga.
             </p>
           )}
         </div>
 
-        <p className="mt-3 text-xs text-gray-400">
+        <p className="mt-3 text-xs text-gray-500">
           Sp = Spiele · S = Siege · N = Niederlagen · Diff = Korbdifferenz. Tabelle aus
           bestätigten Ergebnissen der Hauptrunde.
         </p>
@@ -182,7 +184,7 @@ export default function LigaDetailPage({ params }) {
             <div className="space-y-5">
               {playoffRounds.map(({ round, games }) => (
                 <div key={round}>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
                     {round}
                   </p>
                   <div className="space-y-2">

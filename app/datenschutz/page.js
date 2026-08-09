@@ -121,7 +121,7 @@ export default function DatenschutzPage() {
         DSGVO).
       </p>
 
-      <p className="text-xs text-gray-400 pt-2">
+      <p className="text-xs text-gray-500 pt-2">
         Stand: Juli 2026. Diese Datenschutzerklärung ersetzt keine Rechtsberatung.
       </p>
     </LegalShell>

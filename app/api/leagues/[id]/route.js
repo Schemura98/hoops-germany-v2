@@ -17,7 +17,7 @@ async function handler(req, ctx) {
   await connectDB();
   const league = await League.findById(id).populate(
     "teams",
-    "teamName slug logo"
+    "teamName slug logo isDemo"
   );
   if (!league) {
     return fail("Liga nicht gefunden", 404);

@@ -392,7 +392,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
         {searchQuery.trim().length >= 2 && (
           <div className="mt-2 divide-y divide-gray-50 rounded-lg border border-gray-100">
             {searching ? (
-              <p className="px-3 py-3 text-xs text-gray-400">Suche…</p>
+              <p className="px-3 py-3 text-xs text-gray-500">Suche…</p>
             ) : (
               (() => {
                 const list = searchResults.filter(
@@ -400,7 +400,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                 );
                 if (list.length === 0) {
                   return (
-                    <p className="px-3 py-3 text-xs text-gray-400">
+                    <p className="px-3 py-3 text-xs text-gray-500">
                       Keine passenden Spieler gefunden.
                     </p>
                   );
@@ -414,7 +414,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                     >
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">{p.name}</p>
-                        <p className="text-xs text-gray-400 truncate">
+                        <p className="text-xs text-gray-500 truncate">
                           {[p.position, p.teamName].filter(Boolean).join(" · ") || "Vereinslos"}
                         </p>
                       </div>
@@ -527,7 +527,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
             <button
               onClick={generateInvite}
               disabled={generatingInvite}
-              className="text-xs text-gray-400 hover:text-gray-600 underline px-1"
+              className="text-xs text-gray-500 hover:text-gray-600 underline px-1"
             >
               Neuer Link
             </button>
@@ -587,7 +587,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                         setNumberEditId(m.playerId);
                         setNumberValue(m.number || "");
                       }}
-                      className="text-gray-400 hover:text-brand-600 p-1.5"
+                      className="text-gray-500 hover:text-brand-600 p-1.5"
                       title="Rückennummer vergeben"
                     >
                       <FaHashtag className="text-sm" />
@@ -617,7 +617,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                       className={`p-1.5 ${
                         permEditId === m.playerId
                           ? "text-brand-600"
-                          : "text-gray-400 hover:text-brand-600"
+                          : "text-gray-500 hover:text-brand-600"
                       }`}
                       title="Teilrechte festlegen"
                     >
@@ -641,7 +641,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                       <button
                         onClick={() => setMemberAdmin(m.playerId, true, m.name)}
                         disabled={adminBusyId === m.playerId}
-                        className="text-gray-400 hover:text-brand-600 disabled:opacity-60 p-1.5"
+                        className="text-gray-500 hover:text-brand-600 disabled:opacity-60 p-1.5"
                         title="Zum Admin machen"
                       >
                         <FaUserShield className="text-sm" />
@@ -653,7 +653,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                     <button
                       onClick={() => removeMember(m.playerId)}
                       disabled={removingId === m.playerId}
-                      className="text-gray-400 hover:text-red-600 disabled:opacity-60 p-1.5"
+                      className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
                       title="Aus Team entfernen"
                     >
                       <FaUserMinus className="text-sm" />
@@ -699,7 +699,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                       Abbrechen
                     </button>
                   </div>
-                  <p className="mt-2 text-xs text-gray-400">
+                  <p className="mt-2 text-xs text-gray-500">
                     Alle Häkchen = voller Zugriff wie der Haupt-Admin. Keine = nur ansehen.
                   </p>
                 </div>
@@ -759,7 +759,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                     <button
                       onClick={() => removeSlot(slot._id)}
                       disabled={isBusy}
-                      className="text-gray-400 hover:text-red-600 disabled:opacity-60 p-1.5"
+                      className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
                       title="Slot entfernen"
                     >
                       <FaTrash className="text-sm" />

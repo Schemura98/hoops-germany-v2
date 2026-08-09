@@ -158,7 +158,7 @@ export default function PlayerUpdatePasswordPage() {
             {saving ? "Speichern…" : "Passwort ändern"}
           </Button>
 
-          <p className="text-center text-xs text-gray-400">
+          <p className="text-center text-xs text-gray-500">
             Google-Konto ohne Passwort?{" "}
             <Link href="/reset-password" className="text-brand-600 hover:underline">
               Hier ein Passwort setzen

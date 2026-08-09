@@ -283,7 +283,7 @@ export default function TeamJoinTokenPage({ params }) {
           >
             {submitting ? "Konto wird erstellt…" : "Konto erstellen & beitreten"}
           </button>
-          <p className="text-center text-xs text-gray-400">
+          <p className="text-center text-xs text-gray-500">
             Du hast schon ein Konto?{" "}
             <Link href="/login" className="text-brand-600 font-medium">
               Anmelden

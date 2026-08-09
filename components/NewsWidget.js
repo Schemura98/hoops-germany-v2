@@ -47,7 +47,7 @@ export default function NewsWidget({ compact = false }) {
           <FaNewspaper className="text-brand-500" /> Basketball-News
         </h3>
         {loading ? (
-          <p className="text-xs text-gray-400 py-2">Lädt…</p>
+          <p className="text-xs text-gray-500 py-2">Lädt…</p>
         ) : (
           <ul className="space-y-3 max-h-80 overflow-y-auto -mr-1 pr-1">
             {news.map((n, i) => (
@@ -61,7 +61,7 @@ export default function NewsWidget({ compact = false }) {
                   <p className="text-sm font-medium text-gray-800 leading-snug line-clamp-2 group-hover:text-brand-600">
                     {n.title}
                   </p>
-                  <div className="mt-1 flex items-center gap-1.5 text-[11px] text-gray-400">
+                  <div className="mt-1 flex items-center gap-1.5 text-[11px] text-gray-500">
                     <span className="truncate">{n.source || "News"}</span>
                     <span className="flex-shrink-0">· {formatDate(n.pubDate)}</span>
                   </div>
@@ -81,7 +81,7 @@ export default function NewsWidget({ compact = false }) {
       </h2>
 
       {loading ? (
-        <p className="text-sm text-gray-400">Lädt…</p>
+        <p className="text-sm text-gray-500">Lädt…</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {news.map((n, i) => (
@@ -95,7 +95,7 @@ export default function NewsWidget({ compact = false }) {
               <p className="font-medium text-gray-900 text-sm leading-snug line-clamp-3">
                 {n.title}
               </p>
-              <div className="mt-auto pt-3 flex items-center justify-between text-xs text-gray-400">
+              <div className="mt-auto pt-3 flex items-center justify-between text-xs text-gray-500">
                 <span className="truncate">{n.source || "News"}</span>
                 <span className="flex items-center gap-1 flex-shrink-0">
                   {formatDate(n.pubDate)} <FaExternalLinkAlt />

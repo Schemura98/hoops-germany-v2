@@ -109,7 +109,7 @@ export default function PostComposer({ player, onCreated }) {
           />
 
           {/* Kurzer Hinweis auf die Post-Funktionen (dezent, immer sichtbar). */}
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400">
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
             <span>
               <b className="font-semibold text-gray-500">@</b> erwähnt Spieler
             </span>

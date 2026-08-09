@@ -24,7 +24,7 @@ export default function CollapsibleWidget({ icon, title, defaultOpen = false, ch
           {icon} {title}
         </span>
         <FaChevronDown
-          className={`text-gray-400 text-xs transition-transform ${open ? "rotate-180" : ""}`}
+          className={`text-gray-500 text-xs transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && (

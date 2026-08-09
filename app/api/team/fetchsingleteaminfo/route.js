@@ -19,7 +19,7 @@ async function handler(req) {
 
   await connectDB();
   const team = await Team.findOne({ slug }).select(
-    "teamName slug about region logo banner rosterSlots followers adminPlayerId leagueId approved"
+    "teamName slug about region logo banner rosterSlots followers adminPlayerId leagueId approved isDemo"
   );
   // Noch nicht freigegebene Teams sind öffentlich nicht sichtbar (nur explizit false).
   if (!team || team.approved === false) {

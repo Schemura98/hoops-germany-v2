@@ -7,7 +7,7 @@ async function handler() {
   await connectDB();
   // Nur freigegebene Teams (Bestand ohne Feld = freigegeben; nur explizit false ausblenden).
   const teams = await Team.find({ approved: { $ne: false } })
-    .select("teamName slug logo region bundesland")
+    .select("teamName slug logo region bundesland isDemo")
     .sort({ teamName: 1 });
 
   return ok({ teams });

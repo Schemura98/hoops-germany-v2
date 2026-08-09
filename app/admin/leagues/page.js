@@ -263,7 +263,7 @@ export default function AdminLeaguesPage() {
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">
-              Region <span className="text-gray-400">(Bezirk/Kreis)</span>
+              Region <span className="text-gray-500">(Bezirk/Kreis)</span>
             </label>
             <input
               value={newLeague.region}
@@ -454,9 +454,9 @@ export default function AdminLeaguesPage() {
                   {openSeasons === l._id && (
                     <div className="mt-2 space-y-1.5">
                       {!seasonsByLeague[l._id] ? (
-                        <p className="text-xs text-gray-400">Lädt…</p>
+                        <p className="text-xs text-gray-500">Lädt…</p>
                       ) : seasonsByLeague[l._id].length === 0 ? (
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-gray-500">
                           Noch keine eingefrorenen Einträge – Saison (erneut) abschließen, um den
                           Endstand einzufrieren.
                         </p>
@@ -467,7 +467,7 @@ export default function AdminLeaguesPage() {
                               {r.placement ? `${r.placement}. ` : ""}
                               {r.teamName}
                               {r.champion ? " 🏆" : ""}
-                              <span className="text-gray-400"> ({r.wins}–{r.losses})</span>
+                              <span className="text-gray-500"> ({r.wins}–{r.losses})</span>
                             </span>
                             <select
                               value={r.status}
@@ -524,7 +524,7 @@ export default function AdminLeaguesPage() {
                   <button
                     onClick={() => remove(l._id, l.name)}
                     disabled={busyId === l._id}
-                    className="text-gray-400 hover:text-red-600 disabled:opacity-60 p-2"
+                    className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-2"
                     title="Löschen"
                   >
                     <FaTrash />

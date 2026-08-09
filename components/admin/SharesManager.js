@@ -96,7 +96,7 @@ export default function SharesManager() {
       )}
 
       {shares.length === 0 ? (
-        <p className="text-sm text-gray-400">Noch keine teilbaren Links.</p>
+        <p className="text-sm text-gray-500">Noch keine teilbaren Links.</p>
       ) : (
         <ul className="divide-y divide-gray-100 border border-gray-100 rounded-xl">
           {shares.map((s) => (
@@ -107,18 +107,18 @@ export default function SharesManager() {
                   {s.label || "Ohne Bezeichnung"}
                   {!s.active && <span className="ml-2 text-xs text-red-500">(deaktiviert)</span>}
                 </p>
-                <p className="text-xs text-gray-400 truncate">/sponsor-report/{s.token}</p>
+                <p className="text-xs text-gray-500 truncate">/sponsor-report/{s.token}</p>
               </div>
               {s.active && (
                 <>
                   <button
                     onClick={() => copy(s.token, s._id)}
                     title="Link kopieren"
-                    className="text-gray-400 hover:text-brand-600 p-1.5"
+                    className="text-gray-500 hover:text-brand-600 p-1.5"
                   >
                     {copiedId === s._id ? <FaCheck className="text-green-600 text-sm" /> : <FaCopy className="text-sm" />}
                   </button>
-                  <button onClick={() => revoke(s._id)} title="Deaktivieren" className="text-gray-400 hover:text-red-600 p-1.5">
+                  <button onClick={() => revoke(s._id)} title="Deaktivieren" className="text-gray-500 hover:text-red-600 p-1.5">
                     <FaTrash className="text-sm" />
                   </button>
                 </>
@@ -127,7 +127,7 @@ export default function SharesManager() {
           ))}
         </ul>
       )}
-      <p className="text-[11px] text-gray-400">
+      <p className="text-[11px] text-gray-500">
         Der Link zeigt nur aggregierte Zahlen (keine personenbezogenen Daten). Passwort separat (nicht per
         selbem Kanal) an den Sponsor weitergeben.
       </p>

@@ -55,7 +55,7 @@ export default function CityRadiusFilter({ value, onChange }) {
   return (
     <div className="flex flex-col sm:flex-row gap-2" ref={boxRef}>
       <div className="relative">
-        <FaMapMarkerAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+        <FaMapMarkerAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
         <input
           value={term}
           onChange={(e) => {
@@ -69,7 +69,7 @@ export default function CityRadiusFilter({ value, onChange }) {
         {value?.center && (
           <button
             onClick={clear}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
             aria-label="Stadt-Filter löschen"
           >
             <FaTimes className="text-sm" />
@@ -84,7 +84,7 @@ export default function CityRadiusFilter({ value, onChange }) {
                 className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between"
               >
                 <span className="text-gray-900">{c.n}</span>
-                <span className="text-xs text-gray-400">{c.s}</span>
+                <span className="text-xs text-gray-500">{c.s}</span>
               </button>
             ))}
           </div>

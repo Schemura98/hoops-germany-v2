@@ -100,7 +100,7 @@ function LoginForm() {
             <button
               type="button"
               onClick={() => setShowPw((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600"
               aria-label={showPw ? "Passwort verbergen" : "Passwort anzeigen"}
             >
               {showPw ? <FaEyeSlash /> : <FaEye />}
@@ -115,7 +115,7 @@ function LoginForm() {
 
       <div className="my-6 flex items-center gap-3">
         <div className="h-px flex-1 bg-gray-200" />
-        <span className="text-xs text-gray-400">oder</span>
+        <span className="text-xs text-gray-500">oder</span>
         <div className="h-px flex-1 bg-gray-200" />
       </div>
 
