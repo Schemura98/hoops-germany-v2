@@ -1375,3 +1375,27 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 >   Ronjas H1–H7-Validierung) + Checklisten-Punkte ergänzt.
 > Offen aus derselben Review-Runde (nicht Teil dieser Freigabe): neue Skill `deploy-hoops` (Ines),
 > Einsatzplan `dec-hoops-einsatzplan` (Ole), Analytics-`$switch`-Nachtrag für `/installieren` (Code-Änderung).
+
+---
+
+#### 🏷️ Welle 1 des Website-Review-Plans: Demo-Badges, /spiele-Fix, A11y (09.08.2026, `b77d5ad`, lokal verifiziert – Deploy ausstehend)
+> Umsetzung von 3 der 4 Welle-1-Pakete aus `dec-hoops-website-plan` (Reviews Mats/Ronja/Vivien):
+> - **Demo-Kennzeichnung plattformweit:** neue Komponente `components/DemoBadge.js` („Beispieldaten",
+>   Muster des Kreisliga-Badges); `Player.isDemo` additiv im Schema (analog Team/League); Badges in
+>   `/topscorer` (je Zeile), `/teams` (Karte), `/transfermarkt` (Spieler- + Vereins-Karten inkl.
+>   Matching-Widget), Liga-Tabelle (`/ligen/[id]`), Team-Detail-Hero. APIs liefern `isDemo` mit
+>   (topscorer-Aggregation, fetchteams, transferlist, recruiting-list, leagues/[id]-populate,
+>   fetchsingleteaminfo, `lib/standings.js`).
+> - **`scripts/backfill-demo-flags.mjs`** (additiv, idempotent, `--dry`): setzt `isDemo:true` anhand
+>   vorhandener `seedTag`s (nrw-demo/kreisliga-demo/-niers/world/showcase-posts) – nötig, weil
+>   `seed-nrw-demo` vor Einführung von `Team.isDemo` lief. Dev ausgeführt (6 Teams, 30 Spieler, 1 Liga).
+>   ⚠️ **Auf Prod noch NICHT ausgeführt** – ohne Backfill zeigen die neuen Badges dort nichts.
+> - **`/spiele`-Anstehend-Fix:** „Anstehend" = geplant UND heute/später; vergangene geplante Spiele
+>   erhalten Badge „Ergebnis ausstehend" (sichtbar in „Alle").
+> - **A11y-/Zustands-Paket:** `ui/Button`+`ui/Tabs` mit `focus-visible`-Ring, `active:scale-[0.97]`,
+>   `motion-reduce`; `ui/Loading` `motion-reduce:animate-none`; Kontrast-Pass `text-gray-400`→`500`
+>   auf hellen Flächen (~70 Dateien; Navy-Kontexte in Navbar-Mobilmenü/AdminNav bewusst belassen).
+> ✅ Verifiziert in Production-Runtime (`npm start`, Dev-DB mit NRW-Demo geseedet): Topscorer/
+>   Transfermarkt/Liga-Tabelle zeigen Badges korrekt nur auf seedTag-Daten, /spiele „Anstehend (2)"
+>   nur Zukunftstermine, keine Konsolenfehler. **Offen:** Deploy auf VPS + `backfill-demo-flags` auf
+>   hoops_prod (nach Freigabe), Welle-1-Paket 4 „Oberliga-Duplikat" (Prod-Analyse separat).
