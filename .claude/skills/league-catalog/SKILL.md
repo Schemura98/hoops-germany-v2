@@ -27,6 +27,17 @@ Tabellen · Spielen/Ergebnissen · Playoffs · Teamzuordnungen · Liga-Seeds/Imp
 6. **Keine Produktentscheidung als beiläufige UX-Änderung** umsetzen (Liste großer Entscheidungen s.
    Checkliste). Bei solchen Punkten: erst dem User vorlegen.
 
+## Erstläufe mit Prod-Risiko (besondere Vorsicht)
+Zwei Aufgaben aus der Roadmap sind Erstläufe gegen Produktivdaten – hier gelten Zusatzregeln:
+1. **Season-Rollover-Erstlauf** (Roadmap #7): `scripts/rollover-season.mjs` ist deployt, aber
+   **noch NIE auf Prod gelaufen**. Vor dem ersten echten Lauf: `--dry` auf Dev UND Prod-Datenstand,
+   10-Minuten-Sanity-Check gegen die WBV-Gruppenzahl der neuen Saison, und einplanen, dass Teams sich
+   der neuen Saison über den Liga-Wechsel-/Freigabeprozess neu zuordnen (kein Auto-Übertrag).
+2. **WBV-Kreisliga-PDF-Import** (Roadmap #5): PDF-Inhalt **sorgfältig prüfen, nicht blind übernehmen**
+   (inkl. Umlaute korrigieren), dann ins Seed-Muster analog `seed-nrw-leagues.mjs` (`official:true`,
+   `level:"Kreisliga"`, `region`=Kreis, idempotenter Upsert, `--dry`) → erst Dev testen, dann Prod.
+   Demo-Daten erst **danach** per `--purge` ersetzen, nie vorher.
+
 ## Ausgabeformat bei Nutzung dieses Skills
 > **Ist-Zustand** · **Betroffene Produktregeln** · **Gefundene Probleme** · **Sichere Änderungen** ·
 > **Architekturentscheidungen** · **Umgesetzte Änderungen** · **Tests** · **Offene Punkte**
@@ -34,7 +45,8 @@ Tabellen · Spielen/Ergebnissen · Playoffs · Teamzuordnungen · Liga-Seeds/Imp
 ## Referenzen
 - `references/current-architecture.md` – bestätigter technischer Ist-Zustand (Code-verifiziert).
 - `references/product-rules.md` – verbindliche Produktregeln (Soll-Zustand).
-- `references/wbv-nrw-catalog.md` – relevante NRW-Struktur + Basketballkreise (Kreis-Liste **provisorisch**).
+- `references/wbv-nrw-catalog.md` – relevante NRW-Struktur + Basketballkreise
+  (Kreis-Liste am 02.07.2026 gegen die offizielle WBV-Seite **verifiziert**, Commit `7e69f12`).
 - `references/change-checklist.md` – Pflicht-Checkliste pro Ligaänderung.
 
 ## Wichtiger Grundsatz

@@ -16,6 +16,10 @@ Checkliste, damit die Startseite und das Onboarding mitwachsen. Sie ergänzt `up
 - **Nicht** für interne Fixes, kleine UX-Tweaks oder Bugfixes ohne neuen nutzersichtbaren Wert – die
   Flächen bewusst knapp und ehrlich halten (nicht jede Kleinigkeit gehört auf die Landing/Tour).
 - Immer nur **prüfen und bei echtem Mehrwert ergänzen** – kein Zwang, überall etwas hinzuzufügen.
+- **Bedarfs-Kreislauf beachten:** Feature-/Scope-Entscheidungen laufen laut CLAUDE.md-Konvention
+  gegen `docs/BEDARFSANALYSE-2026-08-09.md` (Marktforscher Mats); nach der Implementierung validiert
+  die Retention-Analystin Ronja die Hypothesen H1–H7 am Live-Produkt. Befunde aus dieser Skill
+  (z. B. „Fläche X fehlt/verwirrt Neulinge") gehören in diesen Kreislauf zurückgemeldet.
 
 ## Die Flächen (Datei → was pflegen)
 
@@ -52,7 +56,12 @@ abgeleitet.
   zählen in Fortschritt/`allDone` – behutsam sein, sonst sehen „fertige" Bestandsnutzer die Karte wieder
   (Muster: PWA ist bewusst ein **Bonus**-Baustein, der NICHT in `allDone` zählt).
 
-## ⚠️ 6. Impressum & Datenschutz – NUR bei echten Faktenänderungen
+### 6. PWA-Einstieg (`/installieren`)
+Datei: **`app/installieren/page.js`** (+ Footer-Link, Onboarding-Bonus-Baustein in der Checklist).
+- Prüfen, ob eine neue Kernfunktion die Install-Argumente/Plattform-Akkordeons berührt
+  (selten – nur bei Features, die das „als App"-Erlebnis betreffen, z. B. Benachrichtigungen).
+
+## ⚠️ 7. Impressum & Datenschutz – NUR bei echten Faktenänderungen
 Dateien: **`app/impressum/page.js`**, **`app/datenschutz/page.js`** (Betreiber: Patrick Schemura, Viersen).
 
 **Das sind rechtlich verbindliche Texte – NICHT „vollständigkeitshalber" ergänzen.** Ein neues Feature
@@ -82,6 +91,7 @@ allein ist **kein** Grund, hier zu schreiben. Anfassen nur, wenn sich **reale Fa
 - [ ] Sinnvoller nächster Schritt? → `LandingHowItWorks.js` / `LandingHero.js` erwähnen/verlinken.
 - [ ] **Eigener Bereich erreichbar?** → Navbar (`Navbar.js`/`PlayerNav.js`) + ggf. Footer verlinkt.
 - [ ] Echter Erst-Schritt für Neue? → Onboarding-Checklist (`OnboardingChecklist.js`) – behutsam, ggf. Bonus.
+- [ ] App-Erlebnis berührt? → PWA-Seite `app/installieren/page.js` prüfen (selten nötig).
 - [ ] **Reale Fakten/Dritt-Dienste geändert?** → Impressum/Datenschutz prüfen; im Zweifel dem User zur
       rechtlichen Prüfung melden statt selbst zu formulieren.
 - [ ] Deploy + im Preview verifiziert + in CLAUDE.md dokumentiert.

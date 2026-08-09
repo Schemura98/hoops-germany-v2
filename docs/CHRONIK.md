@@ -1355,3 +1355,23 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
   (hoops_prod) live testbar; lokal über In-App-Notifs + Trigger-Logs verifizieren.
 - Schema-Änderungen erfordern Dev-Neustart (mongoose-Model-Cache). Nach Dev-Server-Lock ggf. `.next` löschen vor `npm run build`.
 - **Vor Deploy immer Production-Runtime testen** (`npm start`/VPS-Build), nicht nur `next dev` (s. populate-Bug).
+
+---
+
+#### 🧰 Skill-Wartung: 4 SKILL.md-Fixes nach Team-Review (09.08.2026, Backoffice-Freigabe `dec-malik-hoops-skills`)
+> Team-Review durch die Meta-Agenten (Hanna/Ole/Malik/Ines, General Backoffice) fand veraltete
+> Angaben in den vier Hoops-Skills; von Patrick freigegeben und umgesetzt (nur `.claude/skills/`, kein App-Code):
+> - **`league-catalog`**: Kreis-Listen-Vermerk von „provisorisch" auf **WBV-verifiziert** (02.07.2026,
+>   `7e69f12`) korrigiert; neuer Abschnitt **„Erstläufe mit Prod-Risiko"** (Rollover-Erstlauf mit `--dry`
+>   + WBV-Sanity-Check; WBV-PDF-Import-Regeln inkl. Umlaut-Prüfung, Demo-`--purge` erst danach).
+> - **`log-progress`**: auf die **Zwei-Ebenen-Struktur** seit `b3d4bf6` umgestellt (Abschnitt 0 kompakt,
+>   Protokolle in `docs/CHRONIK.md` unten anhängen); veraltete Zeilenangabe „~6–90" und Roadmap-Name
+>   „Pre-Live-Roadmap" entfernt.
+> - **`update-feedback-analytics`**: Pfad-Fix `app/api/analytics/summary/route.js` → **`lib/analyticsSummary.js`**
+>   (Route ist nur noch Wrapper); neue Pflicht-Regeln **Demo-Daten-Ausschluss** (`official:true` /
+>   `isDemo:{$ne:true}`, Muster `7e69f12`) und **Sponsor-Report mitprüfen** (`SponsorReportView`).
+> - **`update-onboarding-surfaces`**: neue Fläche **6. PWA-Einstieg `/installieren`** (Impressum/Datenschutz
+>   nun Abschnitt 7); Kopf-Verweis auf den Bedarfs-Kreislauf (Mats' `docs/BEDARFSANALYSE-2026-08-09.md`,
+>   Ronjas H1–H7-Validierung) + Checklisten-Punkte ergänzt.
+> Offen aus derselben Review-Runde (nicht Teil dieser Freigabe): neue Skill `deploy-hoops` (Ines),
+> Einsatzplan `dec-hoops-einsatzplan` (Ole), Analytics-`$switch`-Nachtrag für `/installieren` (Code-Änderung).
