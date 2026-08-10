@@ -1416,3 +1416,44 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 >   gespeichert + signup_src-Event; Admin-Analytics 'Registrierungen nach Quelle' (demo-bereinigt,
 >   inkl. CSV). Messbasis fuer die Flyer-QR-Codes der Tester-Kampagne (H5).
 > - E2E-Suite tests/e2e/ (Kai, 8 Auth-Tests, Dev-DB-Guard) nach jeder Welle 8/8 gruen, Builds gruen.
+
+---
+
+#### 🔧 Feedback-FAB: Hide-on-Scroll gegen Content-Überlappung (10.08.2026, unkommittiert)
+> Design-Gate-Befund: Der globale Feedback-FAB (components/FeedbackButton.js, fixed bottom-right)
+> verdeckte auf 375px den Titel "Teams & Kaderverwaltung" und auf 768px die MatchMock-Karte der
+> Landing-Feature-Sektion. Fix nach Material-Pattern: FAB blendet sich beim Runterscrollen aus
+> (translate-y + opacity + pointer-events-none, ab y>80 mit 4px-Toleranz) und erscheint beim
+> Hochscrollen bzw. oben wieder; auf Mobile kompakter Kreis (p-3.5, 44x44), sm+ weiterhin Pill mit
+> Text; Safe-Area-Inset via style bottom:max(1.25rem, env(safe-area-inset-bottom)); aria-hidden +
+> tabIndex=-1 im versteckten Zustand.
+> ✅ Verifiziert per JS-Checks (Browser-Pane ohne Anzeige, daher keine Screenshots) bei 375/768/1280:
+>   sichtbar+klickbar am Seitenanfang (elementFromPoint=FAB), versteckt nach Runterscrollen zur
+>   Feature-Sektion, wieder sichtbar nach Hochscrollen.
+> ⚠️ Nebenbefund: Lokale API-Routen liefern 500 wegen MongoServerError "bad auth" - die Atlas-
+>   Zugangsdaten in der lokalen .env sind aktuell ungültig (unabhängig vom FAB-Fix, bitte prüfen).
+
+---
+
+#### ✨ WOW-Runde: Motion-System, Skeleton-Loading, Deploy-Gate (10.08.2026, 804d484 + 1f3eafa + 0374d90 + fea96f4, live)
+> Erste Runde mit den neu installierten Werkzeugen (impeccable, ui-ux-pro-max, interface-design,
+> react-best-practices) und der neuen Organisation (Vivien fuehrt Design, Kai haelt das Deploy-Gate).
+> - **Motion-System (Vivien, 804d484/1f3eafa):** neue Bausteine lib/useInView.js (IntersectionObserver,
+>   reduced-motion-sicher), components/ui/Reveal.js (Scroll-/Load-Reveal mit delay), components/ui/CountUp.js
+>   (Zahlen zaehlen beim Einscrollen hoch), components/layout/PageTransition.js (CSS-Enter je pathname);
+>   tailwind.config.js um ease-out-strong + animate-page-in erweitert. Angewendet: LandingHero (gestaffelter
+>   Ladeeinstieg 0/90/180/270ms), LandingFeatures/HowItWorks/CTA (Scroll-Reveals + zaehlende Mock-Statistiken),
+>   PlayerProfileView (Karrierewerte), NotificationBell/Navbar (Badge-Pop nur bei Aenderung), Card + Teams-/
+>   Ligen-/Spiele-Karten (einheitlicher Hover-Lift). Selbstaudit via web-design-guidelines fand 'transition: all'
+>   im eigenen Code -> auf explizite Property-Listen korrigiert.
+> - **Performance/Skeletons (Phase 2, 0374d90):** blockierender Spinner auf 9 oeffentlichen Seiten durch
+>   layoutnahe Skeletons ersetzt (spieler/teams/ligen/ligen-[id]/spiele/topscorer/transfermarkt/team-detail +
+>   NewsWidget). Zwei echte Layout-Spruenge behoben: Liga-Detail und Team-Detail warfen im Ladezustand die
+>   komplette Navbar weg. Fetch-Wasserfall-Pruefung: kein weiterer Fall (transfermarkt hatte Promise.all bereits);
+>   Ueber-Optimierungen (React.memo etc.) bewusst verworfen.
+> - **Deploy-Gate (Kai, erster Ernstfall seiner Rolle aus dec-scouting-2026-08-10):** security-review + review
+>   auf den Diff df520d3..HEAD (23 Dateien), Suite 8/8, Build gruen -> GO. Ein Nicht-Blocker-Befund:
+>   CountUp fror bei spaeteren Wertaenderungen ein (reproduzierbar beim Saison-Filter im Spielerprofil);
+>   vor dem Deploy gefixt (fea96f4: Effekt haengt jetzt an [inView, target]).
+> ✅ Live verifiziert nach Deploy: /, /ligen, /spiele, /teams, /topscorer, /transfermarkt, /tryouts je 200.
+>   Rollback-Stand vor dieser Runde: df520d3.
