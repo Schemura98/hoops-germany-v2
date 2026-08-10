@@ -101,11 +101,16 @@
   (öffentlich, login-bewusst).
 - **Designsystem-Primitive (`components/ui/`):** `Button` (Varianten primary/secondary/ghost/danger/
   dangerGhost + Größen sm/md/lg, `href`→Link), `Tabs` (einheitlicher Pill-Umschalter), `Card`, `EmptyState`,
-  `Loading` (Basketball-Spinner), `Skeleton`/`SkeletonCard`/`SkeletonList`. Tokens in `lib/ui.js`
-  (`inputClass`, `inputClassSm`, `cardClass`). **Konvention:** neue/überarbeitete Seiten IMMER diese
-  Primitive nutzen (keine Ad-hoc-Buttons/Tabs/Spinner). **Rollout abgeschlossen (Wellen 1–5, Commits in der
-  Chronik).** Bewusst belassen (custom/kompakt): lokale `inputClass` in `team/claim`, `admin/leagues`,
-  `admin/update-match`. Optionaler Restschliff: Super-Admin-Tabellen/„Lädt…"-Texte auf `<Loading>`/`EmptyState`.
+  `Loading` (Basketball-Spinner), `Skeleton`/`SkeletonCard`/`SkeletonList`, `FormAlert`
+  (role=alert/aria-live), `ConfirmAction` (Bestätigungs-Popover statt `window.confirm`). Tokens in
+  `lib/ui.js` (`inputClass`, `inputClassSm`, `inputClassNum`/`inputClassStat` – die beiden Zahlenfelder
+  bewusst OHNE Breitenklasse, Breite setzt die aufrufende Stelle –, `cardClass`). Team-Admin-Tabs nutzen
+  zusätzlich `components/team/tabs/TabAlert.js` (FormAlert-Wrapper für ihr `{type,text}`-Format).
+  **Konvention:** neue/überarbeitete Seiten IMMER diese Primitive nutzen (keine Ad-hoc-Buttons/Tabs/
+  Spinner, kein `window.confirm`). **Rollout abgeschlossen (Wellen 1–5 + Welle 2b für das
+  Team-Admin-Panel, Commits in der Chronik).** Bewusst belassen (custom/kompakt): lokale `inputClass` in
+  `team/claim`, `admin/leagues`, `admin/update-match`. Optionaler Restschliff: Super-Admin-Tabellen/
+  „Lädt…"-Texte auf `<Loading>`/`EmptyState`.
 - **Geo-Suche:** Feld `bundesland` an Player/Team/League; `lib/geo.js` + `public/data/de-cities.json`
   (14.910 Orte mit lat/lng, lazy geladen) für Stadt+Umkreis (Haversine). Stadt-Eingabe per Typeahead
   setzt das Bundesland automatisch.
@@ -164,8 +169,14 @@
    einsatzbereit; ein echter Praxistest mit realer Anfrage steht noch aus.
 9. **Rechtliches (Betreiber):** Datenschutz-Abschnitt 10 (Klick-zum-Laden/YouTube-no-cookie) final juristisch
    prüfen lassen – die Formulierung ist ein Vorschlag, keine Rechtsberatung.
-10. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
-11. **Optional / bewusst offen:** Best-of-Serien + echte Playoff-Bracket-Grafik; Status-basierte
+10. **Design-Review-Restwellen:** `docs/DESIGN-REVIEW-2026-08-10.md` – **Welle 1, 2a und 2b sind
+    erledigt** (Team-Admin-Panel + Hero-Animation, Commit `a0dbe20`). Offen: **Welle 3** (Mobile-Tabellen
+    mit Sticky-Spalte auf Rangliste/Topscorer/Liga-Tabelle, einheitliche mobile Filterleisten,
+    optional `CountUp`/`Reveal` auf den öffentlichen Seiten) und **Welle 4** (LegalShell-Zeilenlänge,
+    Sprungnavigation Datenschutz – nur Gestaltung, Text gehört Nora –, oauth-landing-Fehlerzustand,
+    FeedbackButton-Position auf Formularseiten).
+11. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
+12. **Optional / bewusst offen:** Best-of-Serien + echte Playoff-Bracket-Grafik; Status-basierte
     Tabellen-Exklusion; Stat-Filter Hauptrunde/Playoffs/Gesamt; stabiler `leagueKey`; Benachrichtigung bei
     Team-Follow; sharp-Resize für gespeicherte Upload-JPEGs; Super-Admin-Tabellen auf `<Loading>`/`EmptyState`;
     Folge-Vorschläge nur für neue User; TransferEvents bleiben nach Team-Löschung als Historie (Design);

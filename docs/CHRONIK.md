@@ -1487,3 +1487,49 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > ⚠️ **Test-Falle dokumentiert:** Ein vor der DB-Passwort-Rotation gestarteter Zombie-Dev-Server auf
 > Port 3000 lieferte reproduzierbar 500er — und damit acht falsche Testfehler. Vor Testläufen
 > Port 3000 prüfen.
+
+---
+
+#### 🎨 Welle 2b: Team-Admin-Panel auf das Designsystem + Hero-Animation (11.08.2026, `a0dbe20`)
+> Arbeitsauftrag aus `docs/DESIGN-REVIEW-2026-08-10.md` (Punkte 1–8 + Hero-Auftrag) vollständig
+> abgearbeitet. Betroffen: `components/team/tabs/` (Kader, Anfragen, Spielplan, Ergebnisse,
+> Tryouts, Einstellungen), `lib/ui.js`, `app/team/create`, `app/player/edit-profile`,
+> `components/landing/HeroBallArc.js`.
+> - **Feld-Tokens zentralisiert:** `lib/ui.js` um `inputClassNum` (Ergebnis-Score) und
+>   `inputClassStat` (Statistik-Tabelle/Rückennummer) erweitert – beide bewusst **ohne**
+>   Breitenklasse, weil ein `w-full` in der Basis die lokale Breite überlagern würde (Tailwind
+>   sortiert nach eigener Reihenfolge, nicht nach String-Reihenfolge). Die lokalen
+>   `inputClass`/`numInput`/`statInput`-Kopien aller sechs Tabs sind ersetzt.
+> - **`components/team/tabs/TabAlert.js` (neu):** dünner Wrapper um `FormAlert`, mappt das
+>   `{type:"ok"|"err", text}`-Format der Tabs. Ersetzt den sechsfach kopierten Meldungsblock →
+>   Erfolg/Fehler haben jetzt überall `role="alert"` + `aria-live="polite"`.
+> - **Primitive statt Handarbeit:** vier eigene `FaBasketballBall animate-bounce`-Spinner (ohne
+>   `motion-reduce`) → `components/ui/Loading`; fünf gestrichelte Leerzustands-Boxen →
+>   `components/ui/EmptyState` (mit Icon, Text und – wo sinnvoll – direkter Aktion); primäre
+>   Buttons → `components/ui/Button`.
+> - **Barrierefreiheit:** `aria-label` an allen Icon-only-Buttons (Rückennummer, Teilrechte,
+>   Adminrechte, Entfernen, Slot-/Spiel-/Tryout-Löschen), `aria-expanded` an Aufklapp-Schaltern,
+>   `aria-label` an den sechs Liga-Filtern und an jedem Statistik-Feld (`Punkte <Name>` usw.),
+>   `htmlFor`/`id` an den Score-Feldern. DNP-Checkbox in `ErgebnisseTab` sitzt jetzt in einem
+>   `min-h-11 min-w-11`-Label → live gemessen 44×44 px (WCAG 2.5.5), ohne Mobil-Overflow.
+> - **Pflichtfelder:** konsistente `*`-Kennzeichnung + Legende in `EinstellungenTab` (dortiges
+>   `Field` hat jetzt `required`/`optional`), `app/team/create/page.js`,
+>   `app/player/edit-profile/page.js`.
+> - **Kader-Tab entlastet:** „Bestehenden Spieler einladen" ist der sichtbar geführte Standardweg
+>   (Brand-Rahmen + Badge „Schnellster Weg"), „Neuen Spieler anlegen" und „Team-Einladungslink"
+>   liegen im Akkordeon „Weitere Optionen". Der Einladungslink bleibt dort die **alleinige** Quelle
+>   (Welle-2a-Regel eingehalten). Die letzten beiden `window.confirm` (Slot entfernen, Adminrechte
+>   vergeben/entziehen) laufen jetzt über `ConfirmAction` – im Panel ist damit kein `window.confirm`
+>   mehr vorhanden.
+> - **Hero-Animation (`components/landing/HeroBallArc.js`):** neuer Ball (Radial-Verlauf, saubere
+>   Nähte, Schlagschatten – liest sich über dem dunklen Foto) und neuer Korb (Brett + Zielfeld,
+>   oranger Ring, Netz als Rautenmuster statt gerader Striche); der Ball bleibt am Ende nicht mehr
+>   auf dem Ring stehen, sondern fällt ab `t≈0.88` durch das Netz und blendet aus, während der Ring
+>   kurz nachgibt („Swish"). **Mobile-Entscheidung geprüft und bewusst beibehalten:** unter 1280px
+>   kein Bogen – die Gutter neben dem `max-w-4xl`-Block trägt ihn nicht, auf Telefonen würde jede
+>   Bahn Headline/Buttons kreuzen; Begründung steht als Kommentar in der Komponente. Die größere
+>   mobile Wirkung soll aus echtem Hallenmaterial kommen (KI-Video bleibt verworfen).
+> **Verifikation:** `npm run build` grün (nur die bekannte libheif-Warnung), Playwright 8/8,
+> Team-Admin-Panel live durchgeklickt (alle sechs Tabs, Desktop 1400px + 375px) – alle API-Aufrufe
+> 200, keine neuen Konsolenfehler; Hero-Bogen im Browser vermessen (kreuzt den Content-Block in
+> keiner Scroll-Position). Offen aus dem Review bleiben Welle 3 und 4.
