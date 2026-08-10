@@ -4,6 +4,7 @@ import AnalyticsTracker from "@/components/AnalyticsTracker";
 import FeedbackButton from "@/components/FeedbackButton";
 import TestPhaseBanner from "@/components/TestPhaseBanner";
 import WelcomeTour from "@/components/onboarding/WelcomeTour";
+import PageTransition from "@/components/layout/PageTransition";
 
 export const metadata = {
   title: "Hoops Germany – Amateur-Basketball Community",
@@ -30,7 +31,7 @@ export default function RootLayout({ children }) {
       >
         <AnalyticsTracker />
         <TestPhaseBanner />
-        {children}
+        <PageTransition>{children}</PageTransition>
         <FeedbackButton />
         <WelcomeTour />
       </body>

@@ -22,6 +22,7 @@ import {
 import { getPlayerToken, getStoredPlayer } from "@/lib/clientAuth";
 import { notificationHref } from "@/lib/notifications";
 import { timeAgo } from "@/lib/timeAgo";
+import Reveal from "@/components/ui/Reveal";
 
 const ICON = {
   follow: FaUserPlus,
@@ -106,9 +107,15 @@ export default function NotificationBell() {
         <span className="relative block">
           <FaBell className="text-lg" />
           {unread > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-brand-500 text-white text-[10px] font-bold flex items-center justify-center">
+            <Reveal
+              key={unread}
+              as="span"
+              direction="pop"
+              duration={200}
+              className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-brand-500 text-white text-[10px] font-bold flex items-center justify-center"
+            >
               {unread > 9 ? "9+" : unread}
-            </span>
+            </Reveal>
           )}
         </span>
       </button>

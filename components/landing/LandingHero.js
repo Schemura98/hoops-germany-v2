@@ -12,6 +12,7 @@ import {
   FaCommentDots,
 } from "react-icons/fa";
 import { getPlayerToken } from "@/lib/clientAuth";
+import Reveal from "@/components/ui/Reveal";
 
 // Einheitliche Hero-Buttons: ein primärer (orange) + gleichartige „Ghost"-Buttons,
 // damit der Button-Block farblich ruhig und konsistent wirkt.
@@ -64,20 +65,24 @@ export default function LandingHero() {
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto py-24">
         {checked && player ? (
           <>
-            <div className="mb-6">
+            <Reveal as="div" delay={0} className="mb-6">
               <span className="bg-brand-500 text-white text-xs font-bold px-4 py-2 rounded-full uppercase tracking-widest">
                 Willkommen zurück
               </span>
-            </div>
-            <h1 className="text-4xl md:text-6xl font-black mb-4 leading-tight">
+            </Reveal>
+            <Reveal as="h1" delay={90} className="text-4xl md:text-6xl font-black mb-4 leading-tight">
               Hey {player.firstName},
               <br />
               <span className="text-brand-400">schön, dass du da bist!</span>
-            </h1>
-            <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto leading-relaxed">
+            </Reveal>
+            <Reveal
+              as="p"
+              delay={180}
+              className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto leading-relaxed"
+            >
               Was möchtest du heute machen?
-            </p>
-            <div className="space-y-3 max-w-2xl mx-auto">
+            </Reveal>
+            <Reveal as="div" delay={270} className="space-y-3 max-w-2xl mx-auto">
               {/* Obere Reihe: 3 Buttons – primärer „Zum Feed" mittig */}
               <div className="flex flex-col sm:flex-row justify-center gap-3">
                 <Link href="/player/player-detail" className={`${HERO_GHOST} ${HERO_W}`}>
@@ -102,45 +107,49 @@ export default function LandingHero() {
                   <FaCommentDots /> Feedback
                 </Link>
               </div>
-            </div>
+            </Reveal>
           </>
         ) : (
           <>
-            <div className="mb-6">
+            <Reveal as="div" delay={0} className="mb-6">
               <span className="bg-brand-500 text-white text-xs font-bold px-4 py-2 rounded-full uppercase tracking-widest">
                 Amateur-Basketball in Deutschland
               </span>
-            </div>
-            <h1 className="text-4xl md:text-6xl font-black mb-6 leading-tight">
+            </Reveal>
+            <Reveal as="h1" delay={90} className="text-4xl md:text-6xl font-black mb-6 leading-tight">
               Deine Basketball-
               <span className="text-brand-400"> Community</span>
               <br />
               in Deutschland
-            </h1>
-            <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto leading-relaxed">
+            </Reveal>
+            <Reveal
+              as="p"
+              delay={180}
+              className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto leading-relaxed"
+            >
               Finde Spieler, tritt Vereinen bei und verfolge Ligen in deiner Region. Die
               Plattform für Amateur-Basketball – von Spielern, für Spieler.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            </Reveal>
+            <Reveal as="div" delay={270} className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/signup"
-                className="bg-brand-500 hover:bg-brand-600 text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center gap-2"
+                className="bg-brand-500 hover:bg-brand-600 text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center gap-2 transition-transform duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
               >
                 Als Spieler registrieren <FaArrowRight />
               </Link>
               <Link
                 href="/team/register"
-                className="border-2 border-white/70 bg-white/10 hover:bg-white hover:text-gray-900 text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center"
+                className="border-2 border-white/70 bg-white/10 hover:bg-white hover:text-gray-900 text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center transition-transform duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
               >
                 Team gründen
               </Link>
               <Link
                 href="/teams"
-                className="border-2 border-white/70 bg-white/10 hover:bg-white hover:text-gray-900 text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center gap-2"
+                className="border-2 border-white/70 bg-white/10 hover:bg-white hover:text-gray-900 text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center gap-2 transition-transform duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
               >
                 <FaUsers /> Teams entdecken
               </Link>
-            </div>
+            </Reveal>
           </>
         )}
       </div>

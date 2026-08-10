@@ -5,6 +5,7 @@ import Link from "next/link";
 import axios from "axios";
 import { FaUser, FaUsers, FaTrophy } from "react-icons/fa";
 import { getPlayerToken } from "@/lib/clientAuth";
+import Reveal from "@/components/ui/Reveal";
 
 // Ausgeloggt: klassische Onboarding-Schritte (Registrieren → Profil → Community).
 const STEPS = [
@@ -79,22 +80,23 @@ export default function LandingHowItWorks() {
           </h2>
           <p className="text-gray-500 mb-16">Hol mehr aus Hoops Germany raus</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {cards.map((c) => {
+            {cards.map((c, i) => {
               const Icon = c.icon;
               return (
-                <Link
-                  key={c.title}
-                  href={c.href}
-                  className="group text-center bg-gray-50 hover:bg-brand-50 border border-gray-100 hover:border-brand-200 rounded-xl p-8 transition-colors"
-                >
-                  <div className="bg-brand-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Icon className="text-brand-500 text-2xl" />
-                  </div>
-                  <h3 className="font-bold text-lg mb-2 text-gray-900 group-hover:text-brand-600">
-                    {c.title}
-                  </h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{c.text}</p>
-                </Link>
+                <Reveal key={c.title} delay={i * 90} className="h-full">
+                  <Link
+                    href={c.href}
+                    className="group block h-full text-center bg-gray-50 hover:bg-brand-50 border border-gray-100 hover:border-brand-200 rounded-xl p-8 transition-all duration-200 ease-out-strong hover:-translate-y-1 motion-reduce:hover:translate-y-0"
+                  >
+                    <div className="bg-brand-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Icon className="text-brand-500 text-2xl" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2 text-gray-900 group-hover:text-brand-600">
+                      {c.title}
+                    </h3>
+                    <p className="text-gray-500 text-sm leading-relaxed">{c.text}</p>
+                  </Link>
+                </Reveal>
               );
             })}
           </div>
@@ -109,8 +111,8 @@ export default function LandingHowItWorks() {
         <h2 className="text-3xl md:text-4xl font-black mb-4 text-gray-900">So funktionierts</h2>
         <p className="text-gray-500 mb-16">In 3 einfachen Schritten dabei</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {STEPS.map((s) => (
-            <div key={s.n} className="text-center">
+          {STEPS.map((s, i) => (
+            <Reveal key={s.n} delay={i * 90} className="text-center">
               <div
                 className={`w-16 h-16 ${
                   s.dark ? "bg-gradient-to-r from-slate-950 to-slate-800" : "bg-brand-500"
@@ -120,7 +122,7 @@ export default function LandingHowItWorks() {
               </div>
               <h3 className="font-bold text-lg mb-2 text-gray-900">{s.title}</h3>
               <p className="text-gray-500 text-sm">{s.text}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>

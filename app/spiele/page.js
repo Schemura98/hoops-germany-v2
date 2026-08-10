@@ -48,7 +48,7 @@ function MatchCard({ match }) {
   return (
     <Link
       href={`/match/${match._id}`}
-      className="block bg-white rounded-2xl shadow-sm border border-gray-100 p-4 hover:shadow-md hover:border-brand-200 transition-all"
+      className="block bg-white rounded-2xl shadow-sm border border-gray-100 p-4 hover:shadow-md hover:border-brand-200 hover:-translate-y-0.5 transition-all duration-200 ease-out-strong motion-reduce:hover:translate-y-0"
     >
       {(match.leagueId?.name || isPlayoff) && (
         <div className="mb-2 flex items-center justify-center gap-2">

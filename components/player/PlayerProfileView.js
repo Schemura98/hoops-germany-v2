@@ -17,6 +17,7 @@ import PlayerPosts from "@/components/posts/PlayerPosts";
 import Avatar from "@/components/Avatar";
 import ScrollHintRow from "@/components/ScrollHintRow";
 import Tabs from "@/components/ui/Tabs";
+import CountUp from "@/components/ui/CountUp";
 import { ageFromBirthdate, formatBirthdate } from "@/lib/age";
 import { positionLabel } from "@/lib/constants";
 
@@ -377,7 +378,9 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                       { v: bilanz.rpg, l: "RPG", s: "Rebounds/Spiel" },
                     ].map((x) => (
                       <div key={x.l} className="bg-gray-50 rounded-xl py-4 text-center">
-                        <p className="text-3xl font-black text-gray-900">{x.v.toFixed(1)}</p>
+                        <p className="text-3xl font-black text-gray-900">
+                          <CountUp value={x.v} decimals={1} />
+                        </p>
                         <p className="text-xs font-bold text-brand-500 mt-1">{x.l}</p>
                         <p className="text-[11px] text-gray-500">{x.s}</p>
                       </div>

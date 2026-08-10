@@ -9,6 +9,8 @@ import {
   FaRegComment,
   FaMapMarkerAlt,
 } from "react-icons/fa";
+import Reveal from "@/components/ui/Reveal";
+import CountUp from "@/components/ui/CountUp";
 
 // Feature-Sektion der Landing-Page: asymmetrisches Zickzack statt generischer
 // 3-Spalten-Icon-Karten. Jeder Block koppelt Text mit einer leichten,
@@ -79,12 +81,14 @@ function ProfileMock() {
       </div>
       <div className="grid grid-cols-3 gap-2 text-center border-t border-gray-100 pt-4">
         {[
-          ["18.4", "PTS"],
-          ["6.1", "AST"],
-          ["4.2", "REB"],
+          [18.4, "PTS"],
+          [6.1, "AST"],
+          [4.2, "REB"],
         ].map(([v, l]) => (
           <div key={l}>
-            <p className="font-black text-lg text-gray-900">{v}</p>
+            <p className="font-black text-lg text-gray-900">
+              <CountUp value={v} decimals={1} />
+            </p>
             <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">{l}</p>
           </div>
         ))}
@@ -138,7 +142,9 @@ function MatchMock() {
           <span className="text-[11px] font-semibold text-gray-600 text-center">Test Baskets</span>
         </div>
         <div className="text-center">
-          <p className="font-black text-2xl text-gray-900 tracking-tight">78 : 65</p>
+          <p className="font-black text-2xl text-gray-900 tracking-tight">
+            <CountUp value={78} /> : <CountUp value={65} />
+          </p>
           <span className="inline-block mt-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full uppercase tracking-wide">
             Bestätigt
           </span>
@@ -184,7 +190,7 @@ function TableMock() {
             </span>
             <span className="text-xs font-medium text-gray-800 truncate">{r.team}</span>
             <span className="text-xs text-center text-gray-500">{r.sp}</span>
-            <span className="text-xs text-center font-bold text-gray-900">{r.pkt}</span>
+            <CountUp value={r.pkt} className="text-xs text-center font-bold text-gray-900" />
           </div>
         ))}
       </div>
@@ -235,7 +241,7 @@ function FeedMock() {
       </div>
       <div className="flex items-center gap-4 text-gray-500 border-t border-gray-100 pt-3">
         <span className="flex items-center gap-1.5 text-xs font-semibold">
-          <FaHeart className="text-brand-500" /> 24
+          <FaHeart className="text-brand-500" /> <CountUp value={24} />
         </span>
         <span className="flex items-center gap-1.5 text-xs font-semibold">
           <FaRegComment /> 6
@@ -258,13 +264,17 @@ export default function LandingFeatures() {
   return (
     <section className="bg-gray-50 py-20 px-4">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl md:text-4xl font-black text-center mb-4 text-gray-900 text-balance">
+        <Reveal as="h2" className="text-3xl md:text-4xl font-black text-center mb-4 text-gray-900 text-balance">
           Alles, was du brauchst
-        </h2>
-        <p className="text-center text-gray-500 mb-16 md:mb-20 max-w-xl mx-auto">
+        </Reveal>
+        <Reveal
+          as="p"
+          delay={80}
+          className="text-center text-gray-500 mb-16 md:mb-20 max-w-xl mx-auto"
+        >
           Von deinem Spielerprofil bis hin zu Liga-Tabellen – Hoops Germany bringt die
           deutsche Basketball-Community zusammen.
-        </p>
+        </Reveal>
         <div className="space-y-16 md:space-y-24">
           {FEATURES.map((f, i) => {
             const Icon = f.icon;
@@ -277,16 +287,23 @@ export default function LandingFeatures() {
                   reversed ? "md:flex-row-reverse" : ""
                 }`}
               >
-                <div className="flex-1 max-w-md text-center md:text-left">
+                <Reveal
+                  direction={reversed ? "right" : "left"}
+                  className="flex-1 max-w-md text-center md:text-left"
+                >
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-brand-100 mb-5">
                     <Icon className="text-brand-500 text-xl" />
                   </div>
                   <h3 className="text-2xl font-black text-gray-900 mb-3 text-balance">{f.title}</h3>
                   <p className="text-gray-500 leading-relaxed">{f.text}</p>
-                </div>
-                <div className="flex-1 w-full flex justify-center">
+                </Reveal>
+                <Reveal
+                  delay={120}
+                  direction={reversed ? "left" : "right"}
+                  className="flex-1 w-full flex justify-center"
+                >
                   <Visual />
-                </div>
+                </Reveal>
               </div>
             );
           })}

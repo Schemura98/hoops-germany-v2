@@ -29,6 +29,7 @@ import {
 import { timeAgo } from "@/lib/timeAgo";
 import { notificationHref } from "@/lib/notifications";
 import Avatar from "@/components/Avatar";
+import Reveal from "@/components/ui/Reveal";
 
 // Öffentliche, login-bewusste Navigation im Navy-Look mit Wortmarken-Logo.
 // Saubere Neuimplementierung in v2-Architektur (Original-Design, ohne Altlasten).
@@ -252,9 +253,15 @@ export default function Navbar() {
                 >
                   <FaBell className="w-5 h-5" />
                   {unread > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center leading-none">
+                    <Reveal
+                      key={unread}
+                      as="span"
+                      direction="pop"
+                      duration={200}
+                      className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center leading-none"
+                    >
                       {unread > 9 ? "9+" : unread}
-                    </span>
+                    </Reveal>
                   )}
                 </button>
 
