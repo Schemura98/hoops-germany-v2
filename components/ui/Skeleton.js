@@ -1,6 +1,10 @@
 // Einheitliche Skeleton-Loader (Platzhalter beim Laden).
 export function Skeleton({ className = "" }) {
-  return <div className={`animate-pulse rounded bg-gray-200/70 ${className}`} />;
+  return (
+    <div
+      className={`animate-pulse motion-reduce:animate-none rounded bg-gray-200/70 ${className}`}
+    />
+  );
 }
 
 // Karten-Skeleton (für Listen/Grids), grob im Look der echten Karten.
