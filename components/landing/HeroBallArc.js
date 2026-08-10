@@ -100,16 +100,22 @@ export default function HeroBallArc() {
       ball.style.opacity = String(opacity);
     };
 
+    // Geplanten Frame merken, damit er beim Abmelden (z. B. Resize unter den
+    // Breakpoint mitten im Scrollen) nicht mehr gegen bereits entfernte Nodes
+    // läuft – Deploy-Gate-Befund Kai, 10.08.2026.
+    let raf = 0;
     const onScrollOrResize = () => {
       if (tickingRef.current) return;
       tickingRef.current = true;
-      requestAnimationFrame(apply);
+      raf = requestAnimationFrame(apply);
     };
 
     apply();
     window.addEventListener("scroll", onScrollOrResize, { passive: true });
     window.addEventListener("resize", onScrollOrResize);
     return () => {
+      if (raf) cancelAnimationFrame(raf);
+      tickingRef.current = false;
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);
     };
