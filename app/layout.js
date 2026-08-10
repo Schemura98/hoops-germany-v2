@@ -9,7 +9,7 @@ import PageTransition from "@/components/layout/PageTransition";
 export const metadata = {
   title: "Hoops Germany – Amateur-Basketball Community",
   description:
-    "Hoops Germany ist die Community-Plattform für Amateur-Basketball in Deutschland. Spieler, Teams, Ligen, Spiele, Tryouts und Transfers an einem Ort.",
+    "Hoops Germany ist die Community-Plattform für Amateur-Basketball in NRW. Spieler, Teams, Ligen, Spiele, Tryouts und Transfers an einem Ort.",
   metadataBase: new URL("https://hoopsgermany.de"),
   applicationName: "Hoops Germany",
   appleWebApp: {

@@ -7,7 +7,7 @@ export default function AboutPage() {
     <LegalShell title="Über uns">
       <p>
         <strong>Hoops Germany</strong> ist die Community-Plattform für Amateur-Basketball
-        in Deutschland. Wir bringen Spielerinnen und Spieler, Teams und Ligen an einem Ort
+        in NRW. Wir bringen Spielerinnen und Spieler, Teams und Ligen an einem Ort
         zusammen – abseits des Profibetriebs, mitten im Herz des deutschen Breitensports.
       </p>
 

@@ -116,14 +116,14 @@ export default function LandingHero() {
           <>
             <Reveal as="div" delay={0} className="mb-6">
               <span className="bg-brand-500 text-white text-xs font-bold px-4 py-2 rounded-full uppercase tracking-widest">
-                Amateur-Basketball in Deutschland
+                Amateur-Basketball in NRW
               </span>
             </Reveal>
             <Reveal as="h1" delay={90} className="text-4xl md:text-6xl font-black mb-6 leading-tight">
               Deine Basketball-
               <span className="text-brand-400"> Community</span>
               <br />
-              in Deutschland
+              in NRW
             </Reveal>
             <Reveal
               as="p"

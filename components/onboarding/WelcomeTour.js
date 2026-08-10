@@ -21,7 +21,7 @@ const STEPS = [
   {
     icon: FaBasketballBall,
     title: "Willkommen bei Hoops Germany! 🏀",
-    text: "Deine Community-Plattform für Amateur-Basketball in Deutschland – Spieler, Teams, Ligen, Spiele, Tryouts und Transfers an einem Ort. Hier ein kurzer Überblick, was du alles machen kannst.",
+    text: "Deine Community-Plattform für Amateur-Basketball in NRW – Spieler, Teams, Ligen, Spiele, Tryouts und Transfers an einem Ort. Hier ein kurzer Überblick, was du alles machen kannst.",
   },
   {
     icon: FaChartBar,

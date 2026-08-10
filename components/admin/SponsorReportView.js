@@ -91,7 +91,7 @@ export default function SponsorReportView({ summary, period, generatedAt, label 
       </header>
 
       <p className="text-sm text-gray-600">
-        Hoops Germany ist die Community-Plattform für Amateur-Basketball in Deutschland. Dieser Report fasst
+        Hoops Germany ist die Community-Plattform für Amateur-Basketball in NRW. Dieser Report fasst
         Reichweite, Wachstum, Zielgruppe und beliebteste Inhalte zusammen – alle Angaben sind aggregiert
         (keine personenbezogenen Daten).
       </p>
