@@ -74,6 +74,15 @@
 > (Impressum/Datenschutz) nur bei echten Faktenänderungen/Dritt-Diensten – im Zweifel dem User zur rechtlichen
 > Prüfung melden, nicht selbst formulieren.** Dafür gibt es die Skill **`update-onboarding-surfaces`**
 > (`.claude/skills/update-onboarding-surfaces/`).
+>
+> 📌 **KONVENTION (verbindlich): Feature-/Scope-Entscheidungen gegen die Bedarfsanalyse prüfen.**
+> Pflicht-Startpunkt bei neuen Features oder Priorisierungen: **`docs/BEDARFSANALYSE-2026-08-09.md`**
+> (Marktforscher **Mats**, globale Agenten-Definition `~/.claude/agents/marktforscher.md`) — inkl. der
+> „wird NICHT gebraucht"-Liste (kein Team-Chat, keine Trainingsverwaltung, keine Live-Ticker/Heatmaps).
+> Nach Implementierung nutzersichtbarer Funktionen prüft die Nutzungs- & Retention-Analystin **Ronja**
+> (`~/.claude/agents/retention-analystin.md`) die Hypothesen H1–H7 der Analyse am Live-Produkt
+> (Nutzerbrille, ehrliche Retention-Hebel, keine Dark Patterns); ihre Befunde gehen an Mats zurück.
+> Beide sind Vorschlags-Instanzen — kein Gate, Priorisierung entscheiden Patrick & Jonatan.
 
 ### Architektur-Konventionen (etabliert, bitte beibehalten)
 - **lib/**: `db.js`, `auth.js`, `serverAuth.js` (`getPlayerFromToken`, `getTeamFromToken`=Dual-Auth, `getAdminFromToken`), `clientAuth.js`, `apiResponse.js` (`ok`/`fail`/`withErrorHandling`), `slug.js`, `matchScore.js`, `timeAgo.js`, `constants.js`, `useCurrentPlayer/Team/Admin.js`.
