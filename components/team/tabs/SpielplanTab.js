@@ -6,6 +6,7 @@ import { FaPlus, FaTrash, FaMapMarkerAlt, FaBasketballBall } from "react-icons/f
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import { BUNDESLAENDER, MATCH_STAGES, PLAYOFF_ROUNDS } from "@/lib/constants";
 import LeagueReportLink from "@/components/team/LeagueReportLink";
+import ConfirmAction from "@/components/ui/ConfirmAction";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
@@ -109,7 +110,6 @@ export default function SpielplanTab({ team }) {
   }
 
   async function removeMatch(matchId) {
-    if (!window.confirm("Dieses Spiel wirklich entfernen?")) return;
     setBusyId(matchId);
     setMsg(null);
     try {
@@ -416,14 +416,22 @@ export default function SpielplanTab({ team }) {
                     {badge.label}
                   </span>
                   {match.status === "scheduled" && (
-                    <button
-                      onClick={() => removeMatch(match._id)}
-                      disabled={busyId === match._id}
-                      className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
-                      title="Spiel entfernen"
-                    >
-                      <FaTrash className="text-sm" />
-                    </button>
+                    <ConfirmAction
+                      trigger={({ onClick }) => (
+                        <button
+                          onClick={onClick}
+                          disabled={busyId === match._id}
+                          className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
+                          title="Spiel entfernen"
+                        >
+                          <FaTrash className="text-sm" />
+                        </button>
+                      )}
+                      message={`Spiel gegen ${opp?.teamName || "den Gegner"} wirklich entfernen?`}
+                      confirmLabel="Entfernen"
+                      busy={busyId === match._id}
+                      onConfirm={() => removeMatch(match._id)}
+                    />
                   )}
                 </div>
               </div>

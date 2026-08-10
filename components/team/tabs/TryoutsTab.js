@@ -12,6 +12,7 @@ import {
 } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import { POSITIONS, positionLabel } from "@/lib/constants";
+import ConfirmAction from "@/components/ui/ConfirmAction";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
@@ -113,7 +114,6 @@ export default function TryoutsTab() {
   }
 
   async function remove(tryoutId) {
-    if (!window.confirm("Dieses Tryout wirklich entfernen?")) return;
     setBusyId(tryoutId);
     setMsg(null);
     try {
@@ -296,14 +296,22 @@ export default function TryoutsTab() {
                       >
                         {t.status === "active" ? "Schließen" : "Öffnen"}
                       </button>
-                      <button
-                        onClick={() => remove(t._id)}
-                        disabled={busyId === t._id}
-                        className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
-                        title="Tryout entfernen"
-                      >
-                        <FaTrash className="text-sm" />
-                      </button>
+                      <ConfirmAction
+                        trigger={({ onClick }) => (
+                          <button
+                            onClick={onClick}
+                            disabled={busyId === t._id}
+                            className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
+                            title="Tryout entfernen"
+                          >
+                            <FaTrash className="text-sm" />
+                          </button>
+                        )}
+                        message="Dieses Tryout wirklich entfernen?"
+                        confirmLabel="Entfernen"
+                        busy={busyId === t._id}
+                        onConfirm={() => remove(t._id)}
+                      />
                     </div>
                   </div>
                 </div>

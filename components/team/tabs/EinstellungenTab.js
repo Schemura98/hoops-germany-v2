@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { FaCopy, FaCheck, FaLink, FaTrophy, FaBell, FaTimes } from "react-icons/fa";
+import { FaCheck, FaTrophy, FaBell, FaTimes } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import {
   BUNDESLAENDER,
@@ -69,6 +69,8 @@ export default function EinstellungenTab({ team, reload }) {
   // Benachrichtigungen: bei Beitritten/Anfragen alle Admins benachrichtigen
   const [notifyAllAdmins, setNotifyAllAdmins] = useState(!!team?.notifyAllAdmins);
   const [notifySaving, setNotifySaving] = useState(false);
+  const [notifySaved, setNotifySaved] = useState(false); // kurze Inline-Rückmeldung nach Erfolg
+  const [notifyMsg, setNotifyMsg] = useState(null); // { type: "err", text } – nur im Fehlerfall
 
   const toggleRecruitPos = (p) =>
     setRecruitPositions((list) =>
@@ -100,11 +102,18 @@ export default function EinstellungenTab({ team, reload }) {
 
   async function saveNotifyAdmins(next) {
     setNotifySaving(true);
+    setNotifyMsg(null);
     try {
       const token = getTeamAuthToken();
       await axios.post("/api/team/set-notify-admins", { token, notifyAllAdmins: next });
-    } catch {
+      setNotifySaved(true);
+      setTimeout(() => setNotifySaved(false), 2000);
+    } catch (err) {
       setNotifyAllAdmins(!next); // bei Fehler zurückrollen
+      setNotifyMsg({
+        type: "err",
+        text: err.response?.data?.message || "Speichern fehlgeschlagen.",
+      });
     } finally {
       setNotifySaving(false);
     }
@@ -245,16 +254,6 @@ export default function EinstellungenTab({ team, reload }) {
     }
   }
 
-  // Einladungslink
-  const [inviteToken, setInviteToken] = useState(team?.inviteToken || "");
-  const [origin, setOrigin] = useState("");
-  const [generating, setGenerating] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    setOrigin(window.location.origin);
-  }, []);
-
   const onChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
@@ -277,39 +276,28 @@ export default function EinstellungenTab({ team, reload }) {
     }
   }
 
-  async function onGenerate() {
-    setGenerating(true);
-    setMsg(null);
-    try {
-      const token = getTeamAuthToken();
-      const { data } = await axios.post("/api/team/generate-invite", { token });
-      setInviteToken(data.inviteToken);
-      setCopied(false);
-    } catch (err) {
-      setMsg({
-        type: "err",
-        text: err.response?.data?.message || "Link konnte nicht erstellt werden.",
-      });
-    } finally {
-      setGenerating(false);
-    }
-  }
-
-  const inviteLink = inviteToken ? `${origin}/team/join/${inviteToken}` : "";
-
-  async function copyLink() {
-    if (!inviteLink) return;
-    try {
-      await navigator.clipboard.writeText(inviteLink);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      /* Clipboard nicht verfügbar – Nutzer kann manuell kopieren */
-    }
-  }
-
   return (
     <div className="space-y-6">
+      {/* Sprungmarken – die Seite ist mobil sehr lang */}
+      <nav
+        aria-label="Bereiche"
+        className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl bg-gray-50 border border-gray-100 px-4 py-2.5 text-sm"
+      >
+        {[
+          { href: "#team-daten", label: "Team-Daten" },
+          { href: "#liga", label: "Liga" },
+          { href: "#verstaerkung", label: "Verstärkung" },
+          { href: "#benachrichtigungen", label: "Benachrichtigungen" },
+        ].map((l, i, arr) => (
+          <span key={l.href} className="flex items-center gap-x-2">
+            <a href={l.href} className="font-medium text-gray-600 hover:text-brand-600">
+              {l.label}
+            </a>
+            {i < arr.length - 1 && <span className="text-gray-300">·</span>}
+          </span>
+        ))}
+      </nav>
+
       {msg && (
         <div
           className={`rounded-lg border px-4 py-3 text-sm ${
@@ -324,8 +312,9 @@ export default function EinstellungenTab({ team, reload }) {
 
       {/* Stammdaten */}
       <form
+        id="team-daten"
         onSubmit={onSave}
-        className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5"
+        className="scroll-mt-24 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5"
       >
         <h2 className="text-lg font-semibold text-gray-900">Team-Daten</h2>
 
@@ -418,7 +407,7 @@ export default function EinstellungenTab({ team, reload }) {
       </form>
 
       {/* Liga */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+      <div id="liga" className="scroll-mt-24 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
         <div className="flex items-center gap-2">
           <FaTrophy className="text-brand-500" />
           <h2 className="text-lg font-semibold text-gray-900">Liga</h2>
@@ -635,7 +624,7 @@ export default function EinstellungenTab({ team, reload }) {
       </div>
 
       {/* Verstärkung suchen (Scouting) */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+      <div id="verstaerkung" className="scroll-mt-24 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
             <FaUserPlus className="text-brand-500" /> Verstärkung suchen
@@ -729,84 +718,62 @@ export default function EinstellungenTab({ team, reload }) {
       </div>
 
       {/* Benachrichtigungen */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-3">
+      <div id="benachrichtigungen" className="scroll-mt-24 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-3">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
             <FaBell className="text-brand-500" /> Benachrichtigungen
           </h2>
-          <button
-            type="button"
-            onClick={() => {
-              const next = !notifyAllAdmins;
-              setNotifyAllAdmins(next);
-              saveNotifyAdmins(next);
-            }}
-            disabled={notifySaving}
-            role="switch"
-            aria-checked={notifyAllAdmins}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${
-              notifyAllAdmins ? "bg-brand-500" : "bg-gray-300"
-            }`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                notifyAllAdmins ? "translate-x-6" : "translate-x-1"
+          <div className="flex items-center gap-2">
+            {notifySaved && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600">
+                <FaCheck className="text-[10px]" /> Gespeichert
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                const next = !notifyAllAdmins;
+                setNotifyAllAdmins(next);
+                saveNotifyAdmins(next);
+              }}
+              disabled={notifySaving}
+              role="switch"
+              aria-checked={notifyAllAdmins}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${
+                notifyAllAdmins ? "bg-brand-500" : "bg-gray-300"
               }`}
-            />
-          </button>
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  notifyAllAdmins ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
         </div>
         <p className="text-sm text-gray-500">
           {notifyAllAdmins
             ? "Bei Beitritten und Anfragen werden alle Team-Admins (Haupt-Admin + Co-Admins) benachrichtigt."
             : "Bei Beitritten und Anfragen wird nur der Haupt-Admin benachrichtigt. Aktiviere den Schalter, um alle Team-Admins zu benachrichtigen."}
         </p>
-      </div>
-
-      {/* Einladungslink */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
-        <div className="flex items-center gap-2">
-          <FaLink className="text-brand-500" />
-          <h2 className="text-lg font-semibold text-gray-900">Einladungslink</h2>
-        </div>
-        <p className="text-sm text-gray-500">
-          Teile diesen Link, damit Spieler deinem Team beitreten können. Beim Neu-Erstellen
-          wird der alte Link ungültig.
-        </p>
-
-        {inviteLink ? (
-          <div className="flex items-center gap-2">
-            <input
-              readOnly
-              value={inviteLink}
-              className={`${inputClass} bg-gray-50 text-gray-600`}
-              onFocus={(e) => e.target.select()}
-            />
-            <button
-              type="button"
-              onClick={copyLink}
-              className="flex-shrink-0 inline-flex items-center gap-2 border border-gray-300 hover:border-brand-500 text-gray-700 rounded-lg px-4 py-2.5 text-sm font-medium"
-            >
-              {copied ? <FaCheck className="text-green-600" /> : <FaCopy />}
-              {copied ? "Kopiert" : "Kopieren"}
-            </button>
+        {notifyMsg && (
+          <div className="rounded-lg border px-4 py-3 text-sm bg-red-50 border-red-200 text-red-700">
+            {notifyMsg.text}
           </div>
-        ) : (
-          <p className="text-sm text-gray-500">Noch kein Link erstellt.</p>
         )}
-
-        <button
-          type="button"
-          onClick={onGenerate}
-          disabled={generating}
-          className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 text-sm font-medium transition-colors"
-        >
-          {generating
-            ? "Erstellen…"
-            : inviteToken
-            ? "Neuen Link erstellen"
-            : "Einladungslink erstellen"}
-        </button>
       </div>
+
+      {/* Einladungslink – wird zentral im Kader-Tab verwaltet (ein Token, keine Dopplung) */}
+      <p className="text-center text-xs text-gray-400">
+        Den Team-Einladungslink verwaltest du im{" "}
+        <a
+          href="/team/admin?tab=kader"
+          className="font-medium text-brand-600 hover:text-brand-700 underline underline-offset-2"
+        >
+          Kader-Tab
+        </a>
+        .
+      </p>
     </div>
   );
 }

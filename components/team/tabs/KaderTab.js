@@ -23,6 +23,7 @@ import {
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import { POSITIONS, positionLabel } from "@/lib/constants";
 import { TEAM_PERMISSIONS } from "@/lib/teamPermissions";
+import ConfirmAction from "@/components/ui/ConfirmAction";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
@@ -81,7 +82,6 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
   }, []);
 
   async function removeMember(playerId) {
-    if (!window.confirm("Diesen Spieler aus dem Team entfernen?")) return;
     setRemovingId(playerId);
     setMsg(null);
     try {
@@ -524,13 +524,21 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
             >
               <FaWhatsapp className="text-green-600" /> WhatsApp
             </button>
-            <button
-              onClick={generateInvite}
-              disabled={generatingInvite}
-              className="text-xs text-gray-500 hover:text-gray-600 underline px-1"
-            >
-              Neuer Link
-            </button>
+            <ConfirmAction
+              trigger={({ onClick }) => (
+                <button
+                  onClick={onClick}
+                  disabled={generatingInvite}
+                  className="text-xs text-gray-500 hover:text-gray-600 underline px-1 disabled:opacity-60"
+                >
+                  Neuer Link
+                </button>
+              )}
+              message="Der alte Link wird sofort ungültig – bereits verschickte Links funktionieren dann nicht mehr. Trotzdem neu erstellen?"
+              confirmLabel="Neu erstellen"
+              busy={generatingInvite}
+              onConfirm={generateInvite}
+            />
           </div>
         ) : (
           <button
@@ -650,14 +658,22 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
 
                   {/* Entfernen nur für einfache Mitglieder (Admins vorher degradieren) */}
                   {!m.isFounder && !m.isAdmin && (
-                    <button
-                      onClick={() => removeMember(m.playerId)}
-                      disabled={removingId === m.playerId}
-                      className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
-                      title="Aus Team entfernen"
-                    >
-                      <FaUserMinus className="text-sm" />
-                    </button>
+                    <ConfirmAction
+                      trigger={({ onClick }) => (
+                        <button
+                          onClick={onClick}
+                          disabled={removingId === m.playerId}
+                          className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
+                          title="Aus Team entfernen"
+                        >
+                          <FaUserMinus className="text-sm" />
+                        </button>
+                      )}
+                      message={`${m.name} wirklich aus dem Team entfernen?`}
+                      confirmLabel="Entfernen"
+                      busy={removingId === m.playerId}
+                      onConfirm={() => removeMember(m.playerId)}
+                    />
                   )}
                 </div>
               </div>
