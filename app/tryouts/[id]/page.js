@@ -3,9 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaBasketballBall, FaUsers, FaMapMarkerAlt, FaCalendarAlt } from "react-icons/fa";
+import { FaUsers, FaMapMarkerAlt, FaCalendarAlt } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import PageHeader from "@/components/layout/PageHeader";
+import Button from "@/components/ui/Button";
+import Loading from "@/components/ui/Loading";
 import { getPlayerToken } from "@/lib/clientAuth";
 import { positionLabel } from "@/lib/constants";
 
@@ -68,7 +71,7 @@ export default function TryoutDetailPage({ params }) {
   if (state === "loading") {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
+        <Loading />
       </main>
     );
   }
@@ -95,6 +98,8 @@ export default function TryoutDetailPage({ params }) {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
 
+      <PageHeader eyebrow="Probetraining" title={`Tryout bei ${team?.teamName || "Team"}`} />
+
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           {/* Team */}
@@ -116,9 +121,7 @@ export default function TryoutDetailPage({ params }) {
             </div>
           </Link>
 
-          <h1 className="mt-5 text-xl font-bold text-gray-900">Tryout</h1>
-
-          <div className="mt-3 space-y-2 text-sm text-gray-600">
+          <div className="mt-5 space-y-2 text-sm text-gray-600">
             <p className="flex items-center gap-2">
               <FaCalendarAlt className="text-gray-500" /> {formatDate(tryout.date)}
             </p>
@@ -172,20 +175,13 @@ export default function TryoutDetailPage({ params }) {
             ) : closed ? (
               <p className="text-sm text-gray-500">Dieses Tryout ist geschlossen.</p>
             ) : loggedIn ? (
-              <button
-                onClick={apply}
-                disabled={applying}
-                className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-6 py-2.5 text-sm font-medium transition-colors"
-              >
+              <Button onClick={apply} disabled={applying}>
                 {applying ? "Senden…" : "Jetzt bewerben"}
-              </button>
+              </Button>
             ) : (
-              <Link
-                href="/login"
-                className="inline-block border border-gray-300 hover:border-brand-500 text-gray-700 rounded-lg px-6 py-2.5 text-sm font-medium"
-              >
+              <Button href="/login" variant="secondary">
                 Zum Bewerben anmelden
-              </Link>
+              </Button>
             )}
           </div>
         </div>

@@ -14,6 +14,7 @@ import {
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
+import Button from "@/components/ui/Button";
 import { inputClass } from "@/lib/ui";
 
 const TYPES = [
@@ -44,7 +45,7 @@ function Chip({ active, onClick, children }) {
     <button
       type="button"
       onClick={onClick}
-      className={`px-3 py-2 rounded-xl text-sm font-medium border transition-colors ${
+      className={`px-3 py-2 rounded-xl text-sm font-medium border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 ${
         active
           ? "bg-brand-500 text-white border-brand-500"
           : "bg-white text-gray-600 border-gray-200 hover:border-brand-300 hover:text-brand-600"
@@ -101,7 +102,7 @@ export default function FeedbackPage() {
         {done ? (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
             <FaRegSmile className="text-brand-500 text-4xl mx-auto mb-3" />
-            <p className="font-bold text-gray-900 text-lg">Danke für dein Feedback! 🙌</p>
+            <p className="font-bold text-gray-900 text-lg">Danke für dein Feedback!</p>
             <p className="text-sm text-gray-500 mt-1">
               Jede Rückmeldung hilft uns, die Plattform besser zu machen.
             </p>
@@ -228,13 +229,9 @@ export default function FeedbackPage() {
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={loading || !hasContent}
-              className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-3 font-medium transition-colors"
-            >
+            <Button type="submit" disabled={loading || !hasContent} className="w-full">
               {loading ? "Senden…" : "Feedback senden"}
-            </button>
+            </Button>
             {!hasContent && (
               <p className="text-center text-xs text-gray-500 -mt-3">
                 Wähle eine Bewertung/ein Thema oder schreib uns kurz etwas.

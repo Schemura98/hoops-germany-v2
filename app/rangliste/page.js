@@ -3,15 +3,39 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaBasketballBall } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import Avatar from "@/components/Avatar";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { BUNDESLAENDER } from "@/lib/constants";
+import { inputClassSm } from "@/lib/ui";
 
-const selectClass =
-  "rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+const selectClass = `${inputClassSm} sm:w-auto`;
+
+// Tabellenzeilen-Skeleton im Format der echten Rangliste (Rang + Team + Sp/S/N/+-).
+function RanglisteSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="divide-y divide-gray-50">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-3 px-4 py-3">
+            <Skeleton className="h-7 w-7 rounded-full flex-shrink-0" />
+            <Skeleton className="h-8 w-8 rounded-lg flex-shrink-0" />
+            <div className="flex-1">
+              <Skeleton className="h-3.5 w-1/3 mb-1.5" />
+              <Skeleton className="h-3 w-1/4" />
+            </div>
+            <Skeleton className="h-3 w-6" />
+            <Skeleton className="h-3 w-6" />
+            <Skeleton className="h-3 w-6" />
+            <Skeleton className="h-3 w-8" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function rankBadge(i) {
   const base =
@@ -134,9 +158,7 @@ export default function RanglistePage() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-16">
-            <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
-          </div>
+          <RanglisteSkeleton />
         ) : rows.length === 0 ? (
           <p className="text-center text-gray-500 py-16">
             Noch keine Ergebnisse für diese Auswahl.

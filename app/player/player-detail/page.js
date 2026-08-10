@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { FaPen } from "react-icons/fa";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import PlayerNav from "@/components/layout/PlayerNav";
@@ -41,18 +40,16 @@ export default function PlayerPlayerDetailPage() {
         viewerId={player?._id}
         actions={
           <>
-            <Link
-              href="/player/edit-profile"
-              className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors"
-            >
+            <Button href="/player/edit-profile">
               <FaPen className="text-xs" /> Profil bearbeiten
-            </Link>
-            <Link
+            </Button>
+            <Button
               href="/player/update-password"
-              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+              variant="ghost"
+              className="!bg-white/10 hover:!bg-white/20 !text-white"
             >
               Passwort
-            </Link>
+            </Button>
           </>
         }
       />

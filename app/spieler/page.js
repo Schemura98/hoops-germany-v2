@@ -180,7 +180,7 @@ export default function SpielerPage() {
               <Link
                 key={p._id}
                 href={`/player/view-player/${p.slug || p._id}`}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-brand-200 transition-all group overflow-hidden"
+                className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-brand-200 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 group overflow-hidden"
               >
                 <div className="aspect-square flex items-center justify-center overflow-hidden">
                   {p.profileImage ? (

@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import axios from "axios";
-import { FaEnvelope } from "react-icons/fa";
+import { FaCheckCircle, FaEnvelope } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import Button from "@/components/ui/Button";
+import FormAlert from "@/components/ui/FormAlert";
 import { inputClass } from "@/lib/ui";
 
 export default function KontaktPage() {
@@ -43,16 +45,13 @@ export default function KontaktPage() {
           </p>
 
           {done ? (
-            <div className="mt-6 rounded-lg bg-green-50 border border-green-200 px-4 py-4 text-sm text-green-700">
-              Danke! Wir melden uns bei dir. 📬
-            </div>
+            <FormAlert type="success" className="mt-6 flex items-center gap-2 py-4">
+              <FaCheckCircle className="flex-shrink-0" />
+              <span>Danke! Wir melden uns bei dir.</span>
+            </FormAlert>
           ) : (
             <form onSubmit={submit} className="mt-6 space-y-4">
-              {error && (
-                <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-                  {error}
-                </div>
-              )}
+              {error && <FormAlert>{error}</FormAlert>}
               <div className="grid sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
@@ -82,13 +81,13 @@ export default function KontaktPage() {
                   placeholder="Deine Nachricht…"
                 />
               </div>
-              <button
+              <Button
                 type="submit"
                 disabled={loading || !form.name.trim() || !form.email.trim() || !form.message.trim()}
-                className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
+                className="w-full"
               >
                 {loading ? "Senden…" : "Nachricht senden"}
-              </button>
+              </Button>
             </form>
           )}
 

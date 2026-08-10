@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
+import { FaCheckCircle } from "react-icons/fa";
 import AuthShell from "@/components/layout/AuthShell";
 import Button from "@/components/ui/Button";
+import FormAlert from "@/components/ui/FormAlert";
 import Loading from "@/components/ui/Loading";
 import { inputClass } from "@/lib/ui";
 
@@ -41,16 +43,10 @@ function RequestForm() {
       }
     >
       {message ? (
-        <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
-          {message}
-        </div>
+        <FormAlert type="success">{message}</FormAlert>
       ) : (
         <form onSubmit={onSubmit} className="space-y-4">
-          {error && (
-            <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-              {error}
-            </div>
-          )}
+          {error && <FormAlert>{error}</FormAlert>}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">E-Mail</label>
             <input
@@ -110,10 +106,14 @@ function ResetForm({ token }) {
 
   if (done) {
     return (
-      <AuthShell title="Erledigt 🎉">
-        <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
-          Dein Passwort wurde zurückgesetzt.
-        </div>
+      <AuthShell
+        title={
+          <span className="inline-flex items-center justify-center gap-2">
+            <FaCheckCircle className="text-green-500" /> Erledigt
+          </span>
+        }
+      >
+        <FormAlert type="success">Dein Passwort wurde zurückgesetzt.</FormAlert>
         <Button href="/login" className="mt-6 w-full">
           Jetzt anmelden
         </Button>
@@ -124,11 +124,7 @@ function ResetForm({ token }) {
   return (
     <AuthShell title="Neues Passwort" subtitle="Wähle ein neues Passwort für dein Konto.">
       <form onSubmit={onSubmit} className="space-y-4">
-        {error && (
-          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-            {error}
-          </div>
-        )}
+        {error && <FormAlert>{error}</FormAlert>}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Neues Passwort</label>
           <input

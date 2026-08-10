@@ -8,6 +8,7 @@ import { FaGoogle, FaEye, FaEyeSlash } from "react-icons/fa";
 import { setPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
 import AuthShell from "@/components/layout/AuthShell";
 import Button from "@/components/ui/Button";
+import FormAlert from "@/components/ui/FormAlert";
 import { inputClass } from "@/lib/ui";
 
 function LoginForm() {
@@ -59,11 +60,7 @@ function LoginForm() {
         </>
       }
     >
-      {error && (
-        <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-          {error}
-        </div>
-      )}
+      {error && <FormAlert className="mb-4">{error}</FormAlert>}
 
       <form onSubmit={onSubmit} className="space-y-4">
         <div>

@@ -3,13 +3,32 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaBasketballBall, FaBullhorn, FaMapMarkerAlt, FaUsers } from "react-icons/fa";
+import { FaBullhorn, FaMapMarkerAlt, FaUsers } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
-import Loading from "@/components/ui/Loading";
 import EmptyState from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { positionLabel } from "@/lib/constants";
+
+// Karten-Skeleton im Format der echten Tryout-Karte (Avatar + Textzeilen + Meta).
+function TryoutCardSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <div className="flex items-center gap-3">
+        <Skeleton className="h-10 w-10 rounded-full flex-shrink-0" />
+        <div className="flex-1">
+          <Skeleton className="h-3.5 w-1/3 mb-2" />
+          <Skeleton className="h-3 w-1/4" />
+        </div>
+      </div>
+      <div className="mt-3 flex gap-3">
+        <Skeleton className="h-3 w-24" />
+        <Skeleton className="h-3 w-16" />
+      </div>
+    </div>
+  );
+}
 
 function formatDate(d) {
   try {
@@ -60,7 +79,11 @@ export default function TryoutsPage() {
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
 
         {loading ? (
-          <Loading />
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <TryoutCardSkeleton key={i} />
+            ))}
+          </div>
         ) : error ? (
           <EmptyState title="Tryouts konnten nicht geladen werden." />
         ) : tryouts.length === 0 ? (
@@ -71,7 +94,7 @@ export default function TryoutsPage() {
               <Link
                 key={t._id}
                 href={`/tryouts/${t._id}`}
-                className="block bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 transition-all"
+                className="block bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
               >
                 <div className="flex items-center gap-3">
                   {t.team?.logo ? (

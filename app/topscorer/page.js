@@ -10,6 +10,7 @@ import PageHeader from "@/components/layout/PageHeader";
 import EmptyState from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { positionLabel } from "@/lib/constants";
+import { inputClassSm } from "@/lib/ui";
 import DemoBadge from "@/components/DemoBadge";
 
 // Tabellenzeilen-Skeleton im Format der echten Topscorer-Tabelle.
@@ -40,8 +41,7 @@ const RANK_COLOR = {
   3: "text-brand-700",
 };
 
-const selectClass =
-  "rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+const selectClass = `${inputClassSm} sm:w-auto`;
 
 export default function TopscorerPage() {
   const [scorers, setScorers] = useState([]);
