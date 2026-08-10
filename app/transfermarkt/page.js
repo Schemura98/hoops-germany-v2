@@ -11,8 +11,8 @@ import PageHeader from "@/components/layout/PageHeader";
 import CityRadiusFilter from "@/components/CityRadiusFilter";
 import Tabs from "@/components/ui/Tabs";
 import Button from "@/components/ui/Button";
-import Loading from "@/components/ui/Loading";
 import EmptyState from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import Avatar from "@/components/Avatar";
 import {
   BUNDESLAENDER,
@@ -27,6 +27,21 @@ const TABS = [
   { key: "players", label: "Spieler suchen Verein" },
   { key: "teams", label: "Vereine suchen Spieler" },
 ];
+
+// Karten-Skeleton im Format der echten Spieler-/Vereinskarte (Avatar + Textzeilen).
+function TransferCardSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-5">
+      <div className="flex items-center gap-3">
+        <Skeleton className="h-12 w-12 rounded-full flex-shrink-0" />
+        <div className="flex-1">
+          <Skeleton className="h-3.5 w-2/3 mb-2" />
+          <Skeleton className="h-3 w-1/2" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function TransfermarktPage() {
   const [view, setView] = useState("players");
@@ -324,14 +339,20 @@ export default function TransfermarktPage() {
           <CityRadiusFilter value={geo} onChange={setGeo} />
         </div>
 
-        {!loading && !error && (
+        {loading ? (
+          <Skeleton className="h-3.5 w-20 mb-4" />
+        ) : !error ? (
           <p className="text-xs text-gray-500 font-medium mb-4 uppercase tracking-wide">
             {list.length} {list.length === 1 ? "Eintrag" : "Einträge"}
           </p>
-        )}
+        ) : null}
 
         {loading ? (
-          <Loading />
+          <div className="grid gap-4 sm:grid-cols-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <TransferCardSkeleton key={i} />
+            ))}
+          </div>
         ) : error ? (
           <EmptyState title="Transferliste konnte nicht geladen werden." />
         ) : list.length === 0 ? (

@@ -10,11 +10,24 @@ import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import CityRadiusFilter from "@/components/CityRadiusFilter";
 import Button from "@/components/ui/Button";
-import Loading from "@/components/ui/Loading";
 import EmptyState from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { BUNDESLAENDER } from "@/lib/constants";
 import { loadCities, cityCoords, haversineKm } from "@/lib/geo";
 import { colorFor, initialsFor } from "@/components/Avatar";
+
+// Karten-Skeleton im Format der echten Teamkarte (Logo-Banner + Textzeilen).
+function TeamCardSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      <Skeleton className="h-40 w-full rounded-none" />
+      <div className="p-4">
+        <Skeleton className="h-4 w-2/3 mb-2" />
+        <Skeleton className="h-3 w-1/2" />
+      </div>
+    </div>
+  );
+}
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState([]);
@@ -116,14 +129,20 @@ export default function TeamsPage() {
           <CityRadiusFilter value={geo} onChange={setGeo} />
         </div>
 
-        {!loading && !error && (
+        {loading ? (
+          <Skeleton className="h-3.5 w-20 mb-4" />
+        ) : !error ? (
           <p className="text-xs text-gray-500 font-medium mb-4 uppercase tracking-wide">
             {filtered.length} Teams
           </p>
-        )}
+        ) : null}
 
         {loading ? (
-          <Loading className="py-24" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <TeamCardSkeleton key={i} />
+            ))}
+          </div>
         ) : error ? (
           <EmptyState title="Teams konnten nicht geladen werden." />
         ) : filtered.length === 0 ? (

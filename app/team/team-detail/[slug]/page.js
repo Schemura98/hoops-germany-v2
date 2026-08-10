@@ -17,7 +17,7 @@ import Navbar from "@/components/layout/Navbar";
 import DemoBadge from "@/components/DemoBadge";
 import Footer from "@/components/layout/Footer";
 import Tabs from "@/components/ui/Tabs";
-import Loading from "@/components/ui/Loading";
+import { Skeleton, SkeletonList } from "@/components/ui/Skeleton";
 import FollowButton from "@/components/FollowButton";
 import PostCard from "@/components/posts/PostCard";
 import { teamScores } from "@/lib/matchScore";
@@ -42,6 +42,34 @@ function formatDate(d) {
   } catch {
     return "";
   }
+}
+
+// Skeleton für die Team-Detailseite: Navy-Hero + Tabs + Kader-Liste bleiben in Form
+// bestehen, damit beim Nachladen kein Layout-Sprung entsteht (Navbar bleibt sichtbar).
+function TeamDetailSkeleton() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Navbar />
+      <div className="bg-gradient-to-r from-slate-950 to-slate-800">
+        <div className="max-w-3xl mx-auto px-4 py-10 flex flex-col sm:flex-row items-center sm:items-end gap-5">
+          <div className="h-24 w-24 rounded-2xl bg-white/10 animate-pulse motion-reduce:animate-none flex-shrink-0" />
+          <div className="min-w-0 flex-1 w-full text-center sm:text-left">
+            <div className="h-8 w-48 mx-auto sm:mx-0 rounded bg-white/10 animate-pulse motion-reduce:animate-none mb-3" />
+            <div className="h-4 w-56 mx-auto sm:mx-0 rounded bg-white/10 animate-pulse motion-reduce:animate-none" />
+          </div>
+        </div>
+      </div>
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+        <div className="flex gap-2 mb-5">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-9 w-24 rounded-full" />
+          ))}
+        </div>
+        <SkeletonList rows={6} />
+      </main>
+      <Footer />
+    </div>
+  );
 }
 
 export default function TeamTeamDetailSlugPage({ params }) {
@@ -113,11 +141,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
   }
 
   if (state === "loading") {
-    return (
-      <main className="min-h-screen flex items-center justify-center">
-        <Loading />
-      </main>
-    );
+    return <TeamDetailSkeleton />;
   }
 
   if (state === "notfound") {

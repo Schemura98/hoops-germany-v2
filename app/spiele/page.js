@@ -9,8 +9,8 @@ import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import Avatar from "@/components/Avatar";
 import Tabs from "@/components/ui/Tabs";
-import Loading from "@/components/ui/Loading";
 import EmptyState from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { inputClassSm } from "@/lib/ui";
 import { teamScores, matchVerification } from "@/lib/matchScore";
 
@@ -104,6 +104,45 @@ function MatchCard({ match }) {
         </div>
       )}
     </Link>
+  );
+}
+
+// Karten-Skeleton im Format der echten Spielkarte (Team-vs-Team + Datum), plus
+// Tabs-/Filter-Platzhalter für die Listenseite.
+function MatchCardSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-4">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-3.5 w-16" />
+        </div>
+        <Skeleton className="h-4 w-8" />
+        <div className="flex items-center gap-2 justify-end">
+          <Skeleton className="h-3.5 w-16" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+        </div>
+      </div>
+      <Skeleton className="h-3 w-24 mx-auto mt-3" />
+    </div>
+  );
+}
+
+function SpielePageSkeleton() {
+  return (
+    <div>
+      <Skeleton className="h-10 w-full max-w-md rounded-xl mb-4" />
+      <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-9 rounded-lg" />
+        ))}
+      </div>
+      <div className="space-y-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <MatchCardSkeleton key={i} />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -205,7 +244,7 @@ export default function SpielePage() {
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
         {loading ? (
-          <Loading />
+          <SpielePageSkeleton />
         ) : error ? (
           <EmptyState title="Spiele konnten nicht geladen werden." />
         ) : matches.length === 0 ? (

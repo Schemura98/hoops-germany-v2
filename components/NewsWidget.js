@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaNewspaper, FaExternalLinkAlt } from "react-icons/fa";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 function formatDate(d) {
   try {
@@ -47,7 +48,14 @@ export default function NewsWidget({ compact = false }) {
           <FaNewspaper className="text-brand-500" /> Basketball-News
         </h3>
         {loading ? (
-          <p className="text-xs text-gray-500 py-2">Lädt…</p>
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i}>
+                <Skeleton className="h-3.5 w-full mb-1.5" />
+                <Skeleton className="h-3 w-1/3" />
+              </div>
+            ))}
+          </div>
         ) : (
           <ul className="space-y-3 max-h-80 overflow-y-auto -mr-1 pr-1">
             {news.map((n, i) => (
@@ -81,7 +89,15 @@ export default function NewsWidget({ compact = false }) {
       </h2>
 
       {loading ? (
-        <p className="text-sm text-gray-500">Lädt…</p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5">
+              <Skeleton className="h-3.5 w-full mb-2" />
+              <Skeleton className="h-3.5 w-2/3 mb-4" />
+              <Skeleton className="h-3 w-1/3" />
+            </div>
+          ))}
+        </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {news.map((n, i) => (

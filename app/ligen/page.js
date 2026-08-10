@@ -7,8 +7,8 @@ import { FaUsers, FaTrophy, FaSearch, FaFilter, FaTimes } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
-import Loading from "@/components/ui/Loading";
 import EmptyState from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { getPlayerToken } from "@/lib/clientAuth";
 import {
   LEAGUE_LEVELS,
@@ -131,6 +131,38 @@ function LeagueCard({ l }) {
         </p>
       )}
     </Link>
+  );
+}
+
+// Karten-Skeleton im Format der echten Liga-Karte + Skeleton für die geführte Startansicht
+// (Schnellzugriffe + gruppierte Liga-Karten), damit beim Laden kein Layout-Sprung entsteht.
+function LeagueCardSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-5">
+      <Skeleton className="h-4 w-2/3 mb-2" />
+      <Skeleton className="h-3 w-1/2 mb-2" />
+      <Skeleton className="h-3 w-1/3" />
+    </div>
+  );
+}
+
+function LigenPageSkeleton() {
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-wrap gap-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-9 w-32 rounded-full" />
+        ))}
+      </div>
+      <div>
+        <Skeleton className="h-3.5 w-40 mb-3" />
+        <div className="grid gap-4 sm:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <LeagueCardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -440,7 +472,7 @@ export default function LigenPage() {
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
         {loading ? (
-          <Loading />
+          <LigenPageSkeleton />
         ) : error ? (
           <EmptyState title="Ligen konnten nicht geladen werden." />
         ) : leagues.length === 0 ? (

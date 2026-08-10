@@ -8,8 +8,8 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import CityRadiusFilter from "@/components/CityRadiusFilter";
-import Loading from "@/components/ui/Loading";
 import EmptyState from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import {
   BUNDESLAENDER,
   POSITIONS,
@@ -18,6 +18,20 @@ import {
 } from "@/lib/constants";
 import { loadCities, cityCoords, haversineKm } from "@/lib/geo";
 import { colorFor, initialsFor } from "@/components/Avatar";
+
+// Karten-Skeleton im Format der echten Spielerkarte (quadratisches Foto + Textzeilen).
+function PlayerCardSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      <Skeleton className="aspect-square w-full rounded-none" />
+      <div className="p-3">
+        <Skeleton className="h-3.5 w-3/4 mb-2" />
+        <Skeleton className="h-3 w-1/2 mb-1.5" />
+        <Skeleton className="h-3 w-2/3" />
+      </div>
+    </div>
+  );
+}
 
 export default function SpielerPage() {
   const [players, setPlayers] = useState([]);
@@ -136,14 +150,20 @@ export default function SpielerPage() {
           </select>
         </div>
 
-        {!loading && !error && (
+        {loading ? (
+          <Skeleton className="h-3.5 w-24 mb-4" />
+        ) : !error ? (
           <p className="text-xs text-gray-500 font-medium mb-4 uppercase tracking-wide">
             {filtered.length} Spieler
           </p>
-        )}
+        ) : null}
 
         {loading ? (
-          <Loading className="py-24" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <PlayerCardSkeleton key={i} />
+            ))}
+          </div>
         ) : error ? (
           <EmptyState title="Spieler konnten nicht geladen werden." />
         ) : filtered.length === 0 ? (

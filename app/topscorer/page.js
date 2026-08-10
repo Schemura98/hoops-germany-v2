@@ -7,10 +7,32 @@ import { FaBasketballBall, FaTrophy } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
-import Loading from "@/components/ui/Loading";
 import EmptyState from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { positionLabel } from "@/lib/constants";
 import DemoBadge from "@/components/DemoBadge";
+
+// Tabellenzeilen-Skeleton im Format der echten Topscorer-Tabelle.
+function TopscorerSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="divide-y divide-gray-50">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-3 px-4 py-3">
+            <Skeleton className="h-4 w-4 rounded" />
+            <div className="flex-1">
+              <Skeleton className="h-3.5 w-1/3 mb-1.5" />
+              <Skeleton className="h-3 w-1/4" />
+            </div>
+            <Skeleton className="h-3 w-6" />
+            <Skeleton className="h-3 w-8" />
+            <Skeleton className="h-3 w-8" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const RANK_COLOR = {
   1: "text-amber-500",
@@ -79,7 +101,7 @@ export default function TopscorerPage() {
         )}
 
         {loading ? (
-          <Loading />
+          <TopscorerSkeleton />
         ) : error ? (
           <EmptyState title="Tabelle konnte nicht geladen werden." />
         ) : scorers.length === 0 ? (

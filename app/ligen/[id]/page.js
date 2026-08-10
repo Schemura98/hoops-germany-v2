@@ -6,9 +6,30 @@ import axios from "axios";
 import { FaUsers, FaBasketballBall, FaTrophy, FaCrown } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import DemoBadge from "@/components/DemoBadge";
-import Loading from "@/components/ui/Loading";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
+import { Skeleton } from "@/components/ui/Skeleton";
+
+// Tabellen-Skeleton im Format der echten Standings-Tabelle, damit Navbar/PageHeader
+// beim Laden stehen bleiben (kein Layout-Sprung beim Wechsel auf den echten Inhalt).
+function StandingsSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="divide-y divide-gray-50">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-3 px-4 py-3">
+            <Skeleton className="h-4 w-4 rounded" />
+            <Skeleton className="h-6 w-6 rounded-full" />
+            <Skeleton className="h-3.5 flex-1 max-w-[140px]" />
+            <Skeleton className="h-3 w-6" />
+            <Skeleton className="h-3 w-6" />
+            <Skeleton className="h-3 w-8" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function LigaDetailPage({ params }) {
   const id = params.id;
@@ -35,9 +56,14 @@ export default function LigaDetailPage({ params }) {
 
   if (state === "loading") {
     return (
-      <main className="min-h-screen flex items-center justify-center">
-        <Loading />
-      </main>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <Navbar />
+        <PageHeader eyebrow="Liga-Tabelle" title="Liga" />
+        <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+          <StandingsSkeleton />
+        </main>
+        <Footer />
+      </div>
     );
   }
 
