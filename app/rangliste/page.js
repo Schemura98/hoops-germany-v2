@@ -18,7 +18,7 @@ function rankBadge(i) {
     "inline-flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold";
   if (i === 0) return `${base} bg-amber-100 text-amber-700`;
   if (i === 1) return `${base} bg-gray-200 text-gray-600`;
-  if (i === 2) return `${base} bg-orange-100 text-orange-700`;
+  if (i === 2) return `${base} bg-brand-100 text-brand-700`;
   return `${base} text-gray-500`;
 }
 

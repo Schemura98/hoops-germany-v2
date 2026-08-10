@@ -79,8 +79,8 @@ export default function PlayerNav({ player }) {
               aria-current={isActive(adminLink.href) ? "page" : undefined}
               className={`flex items-center gap-1.5 text-sm font-medium border-b-2 pb-0.5 ${
                 isActive(adminLink.href)
-                  ? "text-orange-300 border-brand-500"
-                  : "text-orange-400 hover:text-orange-300 border-transparent"
+                  ? "text-brand-300 border-brand-500"
+                  : "text-brand-400 hover:text-brand-300 border-transparent"
               }`}
             >
               <AdminIcon className="w-4 h-4" /> {adminLink.label}
@@ -112,7 +112,7 @@ export default function PlayerNav({ player }) {
           {/* Abmelden: auf Mobil im Hamburger-Menü, hier nur ab Desktop */}
           <button
             onClick={logout}
-            className="hidden lg:block p-2 -m-1 text-white/80 hover:text-orange-400 transition-colors"
+            className="hidden lg:block p-2 -m-1 text-white/80 hover:text-brand-400 transition-colors"
             aria-label="Abmelden"
             title="Abmelden"
           >
@@ -121,7 +121,7 @@ export default function PlayerNav({ player }) {
           {/* Mobile-Hamburger */}
           <button
             onClick={() => setMobileOpen((v) => !v)}
-            className="lg:hidden p-2 -m-1 text-white/80 hover:text-orange-400 transition-colors"
+            className="lg:hidden p-2 -m-1 text-white/80 hover:text-brand-400 transition-colors"
             aria-label="Menü"
           >
             {mobileOpen ? <FaTimes className="w-5 h-5" /> : <FaBars className="w-5 h-5" />}
@@ -154,8 +154,8 @@ export default function PlayerNav({ player }) {
               aria-current={isActive(adminLink.href) ? "page" : undefined}
               className={`flex items-center gap-3 px-5 py-3.5 border-l-4 transition-colors ${
                 isActive(adminLink.href)
-                  ? "bg-slate-800 text-orange-300 border-brand-500"
-                  : "text-orange-400 hover:bg-slate-800 border-transparent"
+                  ? "bg-slate-800 text-brand-300 border-brand-500"
+                  : "text-brand-400 hover:bg-slate-800 border-transparent"
               }`}
             >
               <AdminIcon className="w-4 h-4 flex-shrink-0" />

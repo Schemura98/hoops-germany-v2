@@ -30,7 +30,7 @@ export default function AdminNav() {
     <nav className="bg-gradient-to-r from-slate-950 to-slate-800 text-white sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-6 flex items-center justify-between h-14">
         <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold">
-          <FaShieldAlt className="text-orange-400" />
+          <FaShieldAlt className="text-brand-400" />
           Admin
         </Link>
 
@@ -58,7 +58,7 @@ export default function AdminNav() {
           </Link>
           <button
             onClick={logout}
-            className="ml-1 text-gray-400 hover:text-orange-400"
+            className="ml-1 text-gray-400 hover:text-brand-400"
             aria-label="Abmelden"
             title="Abmelden"
           >

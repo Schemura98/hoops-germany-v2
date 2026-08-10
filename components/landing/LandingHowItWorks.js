@@ -85,12 +85,12 @@ export default function LandingHowItWorks() {
                 <Link
                   key={c.title}
                   href={c.href}
-                  className="group text-center bg-gray-50 hover:bg-orange-50 border border-gray-100 hover:border-orange-200 rounded-xl p-8 transition-colors"
+                  className="group text-center bg-gray-50 hover:bg-brand-50 border border-gray-100 hover:border-brand-200 rounded-xl p-8 transition-colors"
                 >
-                  <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Icon className="text-orange-500 text-2xl" />
+                  <div className="bg-brand-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Icon className="text-brand-500 text-2xl" />
                   </div>
-                  <h3 className="font-bold text-lg mb-2 text-gray-900 group-hover:text-orange-600">
+                  <h3 className="font-bold text-lg mb-2 text-gray-900 group-hover:text-brand-600">
                     {c.title}
                   </h3>
                   <p className="text-gray-500 text-sm leading-relaxed">{c.text}</p>
@@ -113,7 +113,7 @@ export default function LandingHowItWorks() {
             <div key={s.n} className="text-center">
               <div
                 className={`w-16 h-16 ${
-                  s.dark ? "bg-gray-900" : "bg-orange-500"
+                  s.dark ? "bg-gradient-to-r from-slate-950 to-slate-800" : "bg-brand-500"
                 } text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-black`}
               >
                 {s.n}

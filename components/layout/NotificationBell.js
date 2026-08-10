@@ -100,7 +100,7 @@ export default function NotificationBell() {
     <div className="relative">
       <button
         onClick={toggle}
-        className="p-2 -m-1 text-white/80 hover:text-orange-400 transition-colors"
+        className="p-2 -m-1 text-white/80 hover:text-brand-400 transition-colors"
         aria-label="Benachrichtigungen"
       >
         <span className="relative block">

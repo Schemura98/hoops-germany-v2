@@ -43,7 +43,7 @@ export default function TeamNav({ team }) {
           )}
           <button
             onClick={logout}
-            className="text-white/80 hover:text-orange-400 transition-colors"
+            className="text-white/80 hover:text-brand-400 transition-colors"
             aria-label="Abmelden"
             title="Abmelden"
           >

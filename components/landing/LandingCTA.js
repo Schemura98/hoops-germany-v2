@@ -19,7 +19,7 @@ export default function LandingCTA() {
   if (!checked || loggedIn) return null;
 
   return (
-    <section className="bg-gray-900 text-white py-20 px-4 text-center">
+    <section className="bg-gradient-to-r from-slate-950 to-slate-800 text-white py-20 px-4 text-center">
       <h2 className="text-3xl md:text-4xl font-black mb-4">Bereit loszulegen?</h2>
       <p className="text-gray-300 mb-10 text-lg">
         Werde Teil der Community-Plattform für Amateur-Basketball in NRW.
@@ -27,7 +27,7 @@ export default function LandingCTA() {
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <Link
           href="/signup"
-          className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 px-10 rounded-lg text-lg flex items-center justify-center gap-2"
+          className="bg-brand-500 hover:bg-brand-600 text-white font-bold py-4 px-10 rounded-lg text-lg flex items-center justify-center gap-2"
         >
           Jetzt registrieren <FaArrowRight />
         </Link>

@@ -77,8 +77,8 @@ export default function Navbar() {
   const deskAdminClass = (href) =>
     `flex items-center gap-1.5 text-sm font-medium border-b-2 pb-0.5 ${
       isActive(href)
-        ? "text-orange-300 border-brand-500"
-        : "text-orange-400 hover:text-orange-300 border-transparent"
+        ? "text-brand-300 border-brand-500"
+        : "text-brand-400 hover:text-brand-300 border-transparent"
     }`;
   const mobClass = (href) =>
     `flex items-center gap-3 px-5 py-3.5 border-l-4 transition-colors ${
@@ -89,8 +89,8 @@ export default function Navbar() {
   const mobAdminClass = (href) =>
     `flex items-center gap-3 px-5 py-3.5 border-l-4 transition-colors ${
       isActive(href)
-        ? "bg-slate-800 text-orange-300 border-brand-500"
-        : "text-orange-400 hover:bg-slate-800 border-transparent"
+        ? "bg-slate-800 text-brand-300 border-brand-500"
+        : "text-brand-400 hover:bg-slate-800 border-transparent"
     }`;
 
   // Eigenes Profil + Benachrichtigungen laden
@@ -237,7 +237,7 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             <button
               onClick={openSearch}
-              className="text-white hover:text-orange-400 transition-colors"
+              className="text-white hover:text-brand-400 transition-colors"
               aria-label="Suche öffnen"
             >
               <FaSearch className="w-5 h-5" />
@@ -247,7 +247,7 @@ export default function Navbar() {
               <div className="relative" ref={notifRef}>
                 <button
                   onClick={toggleNotif}
-                  className="relative text-white hover:text-orange-400 transition-colors"
+                  className="relative text-white hover:text-brand-400 transition-colors"
                   aria-label="Benachrichtigungen"
                 >
                   <FaBell className="w-5 h-5" />
@@ -273,11 +273,11 @@ export default function Navbar() {
                           const href = notificationHref(n, me);
                           const inner = (
                             <div
-                              className={`flex gap-3 px-4 py-3 ${n.read ? "" : "bg-orange-50"} ${
+                              className={`flex gap-3 px-4 py-3 ${n.read ? "" : "bg-brand-50"} ${
                                 href ? "hover:bg-gray-50 transition-colors" : ""
                               }`}
                             >
-                              <span className="h-8 w-8 flex-shrink-0 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
+                              <span className="h-8 w-8 flex-shrink-0 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
                                 <FaBasketballBall className="text-sm" />
                               </span>
                               <div className="min-w-0">
@@ -375,7 +375,7 @@ export default function Navbar() {
                     </Link>
                     <Link
                       href="/signup"
-                      className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-4 py-1.5 text-sm font-medium transition-colors"
+                      className="bg-brand-500 hover:bg-brand-600 text-white rounded-full px-4 py-1.5 text-sm font-medium transition-colors"
                     >
                       Registrieren
                     </Link>
@@ -387,7 +387,7 @@ export default function Navbar() {
             {/* Mobile-Toggle */}
             <button
               onClick={() => setMobileOpen((v) => !v)}
-              className="lg:hidden text-white hover:text-orange-400 transition-colors"
+              className="lg:hidden text-white hover:text-brand-400 transition-colors"
               aria-label="Menü öffnen"
             >
               {mobileOpen ? <FaTimes className="w-5 h-5" /> : <FaBars className="w-5 h-5" />}
@@ -408,7 +408,7 @@ export default function Navbar() {
                   aria-current={isActive(l.href) ? "page" : undefined}
                   className={mobClass(l.href)}
                 >
-                  <Icon className="text-orange-400 w-4 h-4 flex-shrink-0" />
+                  <Icon className="text-brand-400 w-4 h-4 flex-shrink-0" />
                   <span className="text-sm font-medium">{l.label}</span>
                 </Link>
               );
@@ -422,7 +422,7 @@ export default function Navbar() {
                     aria-current={isActive(`/team/team-detail/${teamSlug}`) ? "page" : undefined}
                     className={mobClass(`/team/team-detail/${teamSlug}`)}
                   >
-                    <FaBasketballBall className="text-orange-400 w-4 h-4 flex-shrink-0" />
+                    <FaBasketballBall className="text-brand-400 w-4 h-4 flex-shrink-0" />
                     <span className="text-sm font-medium">Mein Team</span>
                   </Link>
                 )}
@@ -432,7 +432,7 @@ export default function Navbar() {
                   aria-current={isActive("/player/newsfeed") ? "page" : undefined}
                   className={mobClass("/player/newsfeed")}
                 >
-                  <FaRegNewspaper className="text-orange-400 w-4 h-4 flex-shrink-0" />
+                  <FaRegNewspaper className="text-brand-400 w-4 h-4 flex-shrink-0" />
                   <span className="text-sm font-medium">Feed</span>
                 </Link>
                 <Link
@@ -441,7 +441,7 @@ export default function Navbar() {
                   aria-current={isActive("/player/player-detail") ? "page" : undefined}
                   className={mobClass("/player/player-detail")}
                 >
-                  <FaUser className="text-orange-400 w-4 h-4 flex-shrink-0" />
+                  <FaUser className="text-brand-400 w-4 h-4 flex-shrink-0" />
                   <span className="text-sm font-medium">Mein Profil</span>
                 </Link>
                 {me?.isSuperAdmin && (
@@ -473,7 +473,7 @@ export default function Navbar() {
                     aria-current={isActive("/team/create") ? "page" : undefined}
                     className={mobClass("/team/create")}
                   >
-                    <FaUsers className="text-orange-400 w-4 h-4 flex-shrink-0" />
+                    <FaUsers className="text-brand-400 w-4 h-4 flex-shrink-0" />
                     <span className="text-sm font-medium">Team gründen</span>
                   </Link>
                 )}
@@ -496,13 +496,13 @@ export default function Navbar() {
                   aria-current={isActive("/login") ? "page" : undefined}
                   className={mobClass("/login")}
                 >
-                  <FaUser className="text-orange-400 w-4 h-4 flex-shrink-0" />
+                  <FaUser className="text-brand-400 w-4 h-4 flex-shrink-0" />
                   <span className="text-sm font-medium">Anmelden</span>
                 </Link>
                 <Link
                   href="/signup"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-5 py-3.5 text-orange-400 hover:bg-slate-800 transition-colors"
+                  className="flex items-center gap-3 px-5 py-3.5 text-brand-400 hover:bg-slate-800 transition-colors"
                 >
                   <FaBasketballBall className="w-4 h-4 flex-shrink-0" />
                   <span className="text-sm font-bold">Registrieren</span>
@@ -574,7 +574,7 @@ export default function Navbar() {
                       <p className="text-sm font-semibold text-gray-900 truncate">
                         {item.firstName} {item.lastName}
                       </p>
-                      <span className="text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                      <span className="text-[10px] font-bold text-brand-500 bg-brand-50 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
                         Spieler
                       </span>
                     </div>

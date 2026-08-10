@@ -39,7 +39,7 @@ function TeamBadge({ team }) {
         square
         ring="ring-2 ring-white/10"
       />
-      <span className="text-sm font-semibold text-white text-center truncate w-full group-hover:text-orange-300 transition-colors">
+      <span className="text-sm font-semibold text-white text-center truncate w-full group-hover:text-brand-300 transition-colors">
         {team?.teamName || "Unbekannt"}
       </span>
     </Link>
@@ -84,13 +84,13 @@ function StatTable({ stats }) {
                     <span className="text-gray-900">{name}</span>
                   )}
                   {isTop && (
-                    <span className="text-[10px] font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-bold text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded">
                       Top
                     </span>
                   )}
                 </span>
               </td>
-              <td className={`py-2 text-center font-semibold ${isTop ? "text-orange-600" : "text-gray-900"}`}>
+              <td className={`py-2 text-center font-semibold ${isTop ? "text-brand-600" : "text-gray-900"}`}>
                 {s.points ?? 0}
               </td>
               <td className="py-2 text-center text-gray-600">{s.assists ?? 0}</td>
@@ -168,7 +168,7 @@ export default function MatchIdPage({ params }) {
         <div className="max-w-2xl mx-auto px-4 py-10">
           {match.leagueId?.name && (
             <p
-              className={`text-center text-xs font-semibold text-orange-400 uppercase tracking-widest ${
+              className={`text-center text-xs font-semibold text-brand-400 uppercase tracking-widest ${
                 match.stage === "Playoffs" ? "mb-2" : "mb-6"
               }`}
             >
@@ -216,7 +216,7 @@ export default function MatchIdPage({ params }) {
             <span>{formatDate(match.date)}</span>
             {match.location && (
               <span className="flex items-center gap-1">
-                <FaMapMarkerAlt className="text-orange-400" /> {match.location}
+                <FaMapMarkerAlt className="text-brand-400" /> {match.location}
               </span>
             )}
             {verify && (verify.state === "unverified" || verify.state === "mismatch") && (

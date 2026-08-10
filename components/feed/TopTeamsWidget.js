@@ -13,7 +13,7 @@ const selectClass =
 function rankColor(i) {
   if (i === 0) return "text-amber-500";
   if (i === 1) return "text-gray-500";
-  if (i === 2) return "text-orange-400";
+  if (i === 2) return "text-brand-400";
   return "text-gray-300";
 }
 

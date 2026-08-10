@@ -15,7 +15,7 @@ import DemoBadge from "@/components/DemoBadge";
 const RANK_COLOR = {
   1: "text-amber-500",
   2: "text-gray-500",
-  3: "text-orange-700",
+  3: "text-brand-700",
 };
 
 const selectClass =

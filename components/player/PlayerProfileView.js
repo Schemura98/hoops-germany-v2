@@ -65,7 +65,7 @@ function SectionCard({ title, action, children }) {
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div className="bg-gradient-to-r from-slate-950 to-slate-800 px-5 py-3 flex items-center justify-between gap-2">
         <h2 className="text-sm font-bold text-white uppercase tracking-wide flex items-center gap-2">
-          <FaBasketballBall className="text-orange-400 text-sm" /> {title}
+          <FaBasketballBall className="text-brand-400 text-sm" /> {title}
         </h2>
         {action}
       </div>
@@ -219,7 +219,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
               ring="ring-4 ring-white/10"
             />
             <div className="min-w-0 flex-1">
-              <p className="text-orange-400 text-sm font-semibold flex items-center justify-center sm:justify-start gap-2">
+              <p className="text-brand-400 text-sm font-semibold flex items-center justify-center sm:justify-start gap-2">
                 {team?.slug ? (
                   <Link href={`/team/team-detail/${team.slug}`} className="hover:underline">
                     {team.teamName}
@@ -295,7 +295,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                   className="px-4 py-3 flex flex-col items-center justify-center min-w-[80px] hover:bg-white/5"
                 >
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">FIBA</span>
-                  <span className="text-orange-400 text-sm font-semibold mt-1 inline-flex items-center gap-1">
+                  <span className="text-brand-400 text-sm font-semibold mt-1 inline-flex items-center gap-1">
                     Link <FaExternalLinkAlt className="text-[10px]" />
                   </span>
                 </a>
