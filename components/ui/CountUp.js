@@ -11,11 +11,12 @@ export default function CountUp({ value, decimals = 0, duration = 900, className
   const [ref, inView] = useInView({ threshold: 0.4 });
   const target = Number(value) || 0;
   const [display, setDisplay] = useState(target);
-  const [started, setStarted] = useState(false);
 
+  // Läuft beim ersten Sichtbarwerden UND bei jeder späteren Wertänderung
+  // (z. B. Saison-Filter im Spielerprofil) – sonst friert die Anzeige auf dem
+  // zuerst animierten Wert ein (Deploy-Gate-Befund Kai, 10.08.2026).
   useEffect(() => {
-    if (!inView || started) return;
-    setStarted(true);
+    if (!inView) return;
     const reduced =
       typeof window !== "undefined" &&
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -36,7 +37,7 @@ export default function CountUp({ value, decimals = 0, duration = 900, className
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inView]);
+  }, [inView, target]);
 
   return (
     <span ref={ref} className={`tabular-nums ${className}`}>
