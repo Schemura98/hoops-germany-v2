@@ -4,6 +4,27 @@ import { FaArrowLeft } from "react-icons/fa";
 // Geteiltes Split-Screen-Layout für alle Auth-Seiten (Login, Signup, Reset,
 // Team-Login/Register). Links das Formular, rechts ein Vollbild-Motiv.
 // Präsentational, hält die Auth-Seiten schlank und konsistent.
+
+// Moderne Varianten der Auth-Motive (Milo, 11.08.2026, `docs/HERO-ASSETS-2026-08-11.md`):
+// native Auflösung, also identische Schärfe bei deutlich kleinerem Gewicht
+// (signupImage 277 KB → 135 KB AVIF). Unbekannte Pfade fallen still auf das JPEG zurück.
+const MODERN_SOURCES = {
+  "/images/login image.jpg": {
+    avif: "/images/login-image-1000.avif",
+    webp: "/images/login-image-1000.webp",
+  },
+  "/images/signupImage.jpg": {
+    avif: "/images/signup-image-1000.avif",
+    webp: "/images/signup-image-1000.webp",
+  },
+};
+
+// Das Motiv wird erst ab `lg` (1024px) angezeigt – unterhalb soll gar nichts geladen werden.
+const DESKTOP_ONLY = "(min-width: 1024px)";
+// 1x1-Transparenz als Fallback für <lg: kostet keine Netzwerkanfrage.
+const BLANK_PIXEL =
+  "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+
 export default function AuthShell({
   image = "/images/login image.jpg",
   imageAlt = "Basketball",
@@ -12,6 +33,8 @@ export default function AuthShell({
   children,
   footer,
 }) {
+  const modern = MODERN_SOURCES[image];
+
   return (
     <div className="relative min-h-screen lg:flex">
       <Link
@@ -43,7 +66,22 @@ export default function AuthShell({
       </div>
 
       <div className="hidden lg:block lg:w-1/2 relative">
-        <img src={image} alt={imageAlt} className="absolute inset-0 w-full h-full object-cover" />
+        {/* Das Motiv ist unter lg gar nicht sichtbar. Über `media` an den <source>-
+            Elementen lädt es unterhalb von 1024px deshalb GAR NICHT (Telefone –
+            u.a. der QR-Landepunkt /signup – sparen die volle Bilddatei), oberhalb
+            dagegen sofort (eager, kein loading="lazy", damit der Bildaufbau am
+            Desktop nicht verzögert wird). Reihenfolge: AVIF → WebP → Original-JPEG. */}
+        <picture>
+          {modern && <source media={DESKTOP_ONLY} srcSet={modern.avif} type="image/avif" />}
+          {modern && <source media={DESKTOP_ONLY} srcSet={modern.webp} type="image/webp" />}
+          <source media={DESKTOP_ONLY} srcSet={image} />
+          <img
+            src={BLANK_PIXEL}
+            alt={imageAlt}
+            decoding="async"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        </picture>
       </div>
     </div>
   );
