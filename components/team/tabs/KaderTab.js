@@ -19,14 +19,16 @@ import {
   FaSlidersH,
   FaSearch,
   FaUserPlus,
+  FaChevronDown,
 } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import { POSITIONS, positionLabel } from "@/lib/constants";
 import { TEAM_PERMISSIONS } from "@/lib/teamPermissions";
 import ConfirmAction from "@/components/ui/ConfirmAction";
-
-const inputClass =
-  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+import Button from "@/components/ui/Button";
+import EmptyState from "@/components/ui/EmptyState";
+import TabAlert from "@/components/team/tabs/TabAlert";
+import { inputClassSm, inputClassStat } from "@/lib/ui";
 
 const STATUS_BADGE = {
   empty: { label: "Frei", cls: "bg-gray-100 text-gray-600" },
@@ -59,6 +61,10 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
   const [inviteToken, setInviteToken] = useState(team?.inviteToken || "");
   const [generatingInvite, setGeneratingInvite] = useState(false);
   const [inviteCopied, setInviteCopied] = useState(false);
+
+  // Weitere Einlade-Wege sind eingeklappt – der Kader-Tab soll führen statt drei
+  // gleichwertige Optionen nebeneinanderzustellen (Design-Review Welle 2b).
+  const [moreOpen, setMoreOpen] = useState(false);
 
   // Bestehenden Account direkt einladen (Suche)
   const [searchQuery, setSearchQuery] = useState("");
@@ -96,11 +102,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
     }
   }
 
-  async function setMemberAdmin(playerId, makeAdmin, name) {
-    const q = makeAdmin
-      ? `${name} zum Team-Admin machen? Die Person kann dann Kader, Spiele & Ergebnisse verwalten.`
-      : `${name} die Adminrechte entziehen?`;
-    if (!window.confirm(q)) return;
+  async function setMemberAdmin(playerId, makeAdmin) {
     setAdminBusyId(playerId);
     setMsg(null);
     try {
@@ -277,7 +279,6 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
   }
 
   async function removeSlot(slotId) {
-    if (!window.confirm("Diesen Slot wirklich entfernen?")) return;
     setBusyId(slotId);
     setMsg(null);
     try {
@@ -354,27 +355,21 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
           Kader <span className="text-sm font-normal text-gray-500">· {members.length} Spieler</span>
         </h2>
         <p className="text-xs text-gray-500 mt-0.5">
-          Drei Wege, jemanden in dein Team zu holen:
+          So holst du jemanden in dein Team:
         </p>
       </div>
 
-      {msg && (
-        <div
-          className={`rounded-lg border px-4 py-3 text-sm ${
-            msg.type === "ok"
-              ? "bg-green-50 border-green-200 text-green-700"
-              : "bg-red-50 border-red-200 text-red-700"
-          }`}
-        >
-          {msg.text}
-        </div>
-      )}
+      <TabAlert msg={msg} />
 
-      {/* 1) Bestehenden Account direkt einladen (schon registriert) */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-        <div className="flex items-center gap-2 mb-1">
-          <FaUserPlus className="text-brand-500 text-sm" />
-          <h3 className="text-sm font-semibold text-gray-900">Bestehenden Spieler einladen</h3>
+      {/* 1) Bestehenden Account direkt einladen – der häufigste Fall, deshalb
+          optisch führend (Welle 2b: vorher drei gleichwertige Blöcke ohne Führung). */}
+      <div className="bg-white rounded-2xl shadow-sm border-2 border-brand-200 p-5">
+        <div className="flex flex-wrap items-center gap-2 mb-1">
+          <FaUserPlus className="text-brand-500" />
+          <h3 className="text-base font-semibold text-gray-900">Bestehenden Spieler einladen</h3>
+          <span className="ml-auto flex-shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand-600">
+            Schnellster Weg
+          </span>
         </div>
         <p className="text-xs text-gray-500 mb-3">
           Er ist <strong>schon bei Hoops Germany registriert?</strong> Such ihn und lade ihn ein – er wird
@@ -386,7 +381,8 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Name suchen…"
-            className={`${inputClass} pl-8`}
+            aria-label="Registrierten Spieler nach Namen suchen"
+            className={`${inputClassSm} pl-8`}
           />
         </div>
         {searchQuery.trim().length >= 2 && (
@@ -418,14 +414,15 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                           {[p.position, p.teamName].filter(Boolean).join(" · ") || "Vereinslos"}
                         </p>
                       </div>
-                      <button
+                      <Button
+                        size="sm"
                         onClick={() => invitePlayer(p)}
                         disabled={invitingId === p.playerId || already}
-                        className="flex-shrink-0 inline-flex items-center gap-1.5 bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-3 py-1.5 text-xs font-medium"
+                        className="flex-shrink-0"
                       >
                         {already ? <FaCheck /> : <FaUserPlus />}
                         {already ? "Eingeladen" : invitingId === p.playerId ? "…" : "Einladen"}
-                      </button>
+                      </Button>
                     </div>
                   );
                 });
@@ -435,8 +432,33 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
         )}
       </div>
 
+      {/* Weitere Wege – eingeklappt, damit oben ein klarer Standardweg führt.
+          ACHTUNG: Der allgemeine Team-Einladungslink lebt seit Welle 2a NUR hier
+          (Einstellungen verlinkt hierher) – beim Umbauen nicht entfernen. */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setMoreOpen((v) => !v)}
+          aria-expanded={moreOpen}
+          className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-gray-50 transition-colors"
+        >
+          <span className="flex-1 min-w-0">
+            <span className="block text-sm font-semibold text-gray-900">Weitere Optionen</span>
+            <span className="block text-xs text-gray-500">
+              Spieler ohne Account anlegen · Einladungslink für alle
+            </span>
+          </span>
+          <FaChevronDown
+            className={`text-gray-400 flex-shrink-0 transition-transform ${
+              moreOpen ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+
+        {moreOpen && (
+          <div className="border-t border-gray-100 divide-y divide-gray-100">
       {/* 2) Neuen Spieler anlegen (Account-Platz + persönlicher Einladungslink) */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+      <div className="p-5">
         <div className="flex items-center gap-2 mb-1">
           <FaIdBadge className="text-brand-500 text-sm" />
           <h3 className="text-sm font-semibold text-gray-900">Neuen Spieler anlegen</h3>
@@ -455,7 +477,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
             <input
               value={newSlot.name}
               onChange={(e) => setNewSlot((s) => ({ ...s, name: e.target.value }))}
-              className={inputClass}
+              className={inputClassSm}
               placeholder="Spielername"
             />
           </div>
@@ -464,7 +486,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
             <select
               value={newSlot.position}
               onChange={(e) => setNewSlot((s) => ({ ...s, position: e.target.value }))}
-              className={inputClass}
+              className={inputClassSm}
             >
               <option value="">–</option>
               {POSITIONS.map((p) => (
@@ -479,22 +501,18 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
             <input
               value={newSlot.number}
               onChange={(e) => setNewSlot((s) => ({ ...s, number: e.target.value }))}
-              className={inputClass}
+              className={inputClassSm}
               placeholder="#"
             />
           </div>
-          <button
-            type="submit"
-            disabled={adding || !newSlot.name.trim()}
-            className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2 text-sm font-medium h-[38px]"
-          >
+          <Button type="submit" disabled={adding || !newSlot.name.trim()} className="h-[38px]">
             {adding ? "…" : "Anlegen"}
-          </button>
+          </Button>
         </form>
       </div>
 
       {/* 3) Allgemeiner Team-Einladungslink (für alle, Selbst-Beitritt) */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+      <div className="p-5">
         <div className="flex items-center gap-2 mb-1">
           <FaLink className="text-brand-500 text-sm" />
           <h3 className="text-sm font-semibold text-gray-900">Team-Einladungslink (für alle)</h3>
@@ -509,21 +527,21 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
               readOnly
               value={inviteLink}
               onFocus={(e) => e.target.select()}
-              className={`${inputClass} flex-1 min-w-0 bg-gray-50`}
+              aria-label="Team-Einladungslink"
+              className={`${inputClassSm} flex-1 min-w-0 bg-gray-50`}
             />
-            <button
-              onClick={copyInvite}
-              className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-brand-500 text-gray-600 rounded-lg px-3 py-2 text-xs font-medium"
-            >
+            <Button variant="secondary" size="sm" onClick={copyInvite}>
               {inviteCopied ? <FaCheck className="text-green-600" /> : <FaCopy />}
               {inviteCopied ? "Kopiert" : "Kopieren"}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={shareInviteWhatsApp}
-              className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-green-500 hover:text-green-700 text-gray-600 rounded-lg px-3 py-2 text-xs font-medium"
+              className="hover:border-green-500 hover:text-green-700"
             >
               <FaWhatsapp className="text-green-600" /> WhatsApp
-            </button>
+            </Button>
             <ConfirmAction
               trigger={({ onClick }) => (
                 <button
@@ -541,14 +559,13 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
             />
           </div>
         ) : (
-          <button
-            onClick={generateInvite}
-            disabled={generatingInvite}
-            className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2 text-sm font-medium"
-          >
+          <Button onClick={generateInvite} disabled={generatingInvite}>
             <FaLink className="text-xs" />
             {generatingInvite ? "Wird erstellt…" : "Einladungslink erstellen"}
-          </button>
+          </Button>
+        )}
+      </div>
+          </div>
         )}
       </div>
 
@@ -578,13 +595,15 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                         onKeyDown={(e) => e.key === "Enter" && saveMemberNumber(m.playerId)}
                         maxLength={3}
                         placeholder="Nr."
-                        className="w-14 rounded-lg border border-gray-300 px-2 py-1 text-sm text-gray-900 outline-none focus:border-brand-500"
+                        aria-label={`Rückennummer für ${m.name}`}
+                        className={`w-14 ${inputClassStat}`}
                       />
                       <button
                         onClick={() => saveMemberNumber(m.playerId)}
                         disabled={numberBusyId === m.playerId}
                         className="text-green-600 hover:text-green-700 disabled:opacity-60 p-1.5"
                         title="Nummer speichern"
+                        aria-label={`Rückennummer für ${m.name} speichern`}
                       >
                         <FaCheck className="text-sm" />
                       </button>
@@ -597,6 +616,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                       }}
                       className="text-gray-500 hover:text-brand-600 p-1.5"
                       title="Rückennummer vergeben"
+                      aria-label={`Rückennummer für ${m.name} vergeben`}
                     >
                       <FaHashtag className="text-sm" />
                     </button>
@@ -628,6 +648,8 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                           : "text-gray-500 hover:text-brand-600"
                       }`}
                       title="Teilrechte festlegen"
+                      aria-label={`Teilrechte für ${m.name} festlegen`}
+                      aria-expanded={permEditId === m.playerId}
                     >
                       <FaSlidersH className="text-sm" />
                     </button>
@@ -637,23 +659,42 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                   {isMainAdmin &&
                     !m.isFounder &&
                     (m.isAdmin ? (
-                      <button
-                        onClick={() => setMemberAdmin(m.playerId, false, m.name)}
-                        disabled={adminBusyId === m.playerId}
-                        className="text-brand-600 hover:text-gray-500 disabled:opacity-60 p-1.5"
-                        title="Adminrechte entziehen"
-                      >
-                        <FaUserSlash className="text-sm" />
-                      </button>
+                      <ConfirmAction
+                        trigger={({ onClick }) => (
+                          <button
+                            onClick={onClick}
+                            disabled={adminBusyId === m.playerId}
+                            className="text-brand-600 hover:text-gray-500 disabled:opacity-60 p-1.5"
+                            title="Adminrechte entziehen"
+                            aria-label={`${m.name} die Adminrechte entziehen`}
+                          >
+                            <FaUserSlash className="text-sm" />
+                          </button>
+                        )}
+                        message={`${m.name} die Adminrechte entziehen?`}
+                        confirmLabel="Entziehen"
+                        busy={adminBusyId === m.playerId}
+                        onConfirm={() => setMemberAdmin(m.playerId, false)}
+                      />
                     ) : (
-                      <button
-                        onClick={() => setMemberAdmin(m.playerId, true, m.name)}
-                        disabled={adminBusyId === m.playerId}
-                        className="text-gray-500 hover:text-brand-600 disabled:opacity-60 p-1.5"
-                        title="Zum Admin machen"
-                      >
-                        <FaUserShield className="text-sm" />
-                      </button>
+                      <ConfirmAction
+                        trigger={({ onClick }) => (
+                          <button
+                            onClick={onClick}
+                            disabled={adminBusyId === m.playerId}
+                            className="text-gray-500 hover:text-brand-600 disabled:opacity-60 p-1.5"
+                            title="Zum Admin machen"
+                            aria-label={`${m.name} zum Team-Admin machen`}
+                          >
+                            <FaUserShield className="text-sm" />
+                          </button>
+                        )}
+                        message={`${m.name} zum Team-Admin machen? Die Person kann dann Kader, Spiele & Ergebnisse verwalten.`}
+                        confirmLabel="Zum Admin machen"
+                        confirmVariant="primary"
+                        busy={adminBusyId === m.playerId}
+                        onConfirm={() => setMemberAdmin(m.playerId, true)}
+                      />
                     ))}
 
                   {/* Entfernen nur für einfache Mitglieder (Admins vorher degradieren) */}
@@ -665,6 +706,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                           disabled={removingId === m.playerId}
                           className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
                           title="Aus Team entfernen"
+                          aria-label={`${m.name} aus dem Team entfernen`}
                         >
                           <FaUserMinus className="text-sm" />
                         </button>
@@ -701,19 +743,16 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                     ))}
                   </div>
                   <div className="mt-3 flex items-center gap-2">
-                    <button
+                    <Button
+                      size="sm"
                       onClick={() => savePerms(m.playerId)}
                       disabled={permBusyId === m.playerId}
-                      className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-1.5 text-sm font-medium"
                     >
                       {permBusyId === m.playerId ? "Speichern…" : "Rechte speichern"}
-                    </button>
-                    <button
-                      onClick={() => setPermEditId(null)}
-                      className="text-sm text-gray-500 hover:text-gray-700 px-2"
-                    >
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => setPermEditId(null)}>
                       Abbrechen
-                    </button>
+                    </Button>
                   </div>
                   <p className="mt-2 text-xs text-gray-500">
                     Alle Häkchen = voller Zugriff wie der Haupt-Admin. Keine = nur ansehen.
@@ -731,12 +770,16 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
 
       {/* Slot-Liste (über „Neuen Spieler anlegen" erstellt) */}
       {slots.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center">
-          <p className="text-sm text-gray-500">
-            Noch keine offenen Plätze. Über <strong>„Neuen Spieler anlegen“</strong> legst du jemandem
-            ohne Account einen Platz an – sein persönlicher Einladungslink erscheint dann hier.
-          </p>
-        </div>
+        <EmptyState
+          icon={FaIdBadge}
+          title="Noch keine offenen Plätze"
+          text="Über „Neuen Spieler anlegen“ legst du jemandem ohne Account einen Platz an – sein persönlicher Einladungslink erscheint dann hier."
+          action={
+            <Button variant="secondary" onClick={() => setMoreOpen(true)}>
+              <FaIdBadge className="text-xs" /> Neuen Spieler anlegen
+            </Button>
+          }
+        />
       ) : (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-100">
           {slots.map((slot) => {
@@ -767,50 +810,61 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                       <button
                         onClick={() => approveClaim(slot._id)}
                         disabled={isBusy}
+                        aria-label={`Anspruch auf den Platz von ${slot.name || "diesem Slot"} genehmigen`}
                         className="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white rounded-lg px-3 py-1.5 text-xs font-medium"
                       >
                         <FaUserCheck /> Genehmigen
                       </button>
                     )}
-                    <button
-                      onClick={() => removeSlot(slot._id)}
-                      disabled={isBusy}
-                      className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
-                      title="Slot entfernen"
-                    >
-                      <FaTrash className="text-sm" />
-                    </button>
+                    <ConfirmAction
+                      trigger={({ onClick }) => (
+                        <button
+                          onClick={onClick}
+                          disabled={isBusy}
+                          className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
+                          title="Slot entfernen"
+                          aria-label={`Platz von ${slot.name || "unbenanntem Slot"} entfernen`}
+                        >
+                          <FaTrash className="text-sm" />
+                        </button>
+                      )}
+                      message={`Den Platz von ${slot.name || "diesem Slot"} wirklich entfernen? Der persönliche Einladungslink wird damit ungültig.`}
+                      confirmLabel="Entfernen"
+                      busy={isBusy}
+                      onConfirm={() => removeSlot(slot._id)}
+                    />
                   </div>
                 </div>
 
                 {/* Einladungs-Aktionen (nur solange nicht bestätigt) */}
                 {slot.status !== "confirmed" && slot.claimToken && (
                   <div className="mt-3 flex flex-wrap items-center gap-2 pl-12">
-                    <button
-                      onClick={() => copyClaim(slot)}
-                      className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-brand-500 text-gray-600 rounded-lg px-3 py-1.5 text-xs font-medium"
-                    >
+                    <Button variant="secondary" size="sm" onClick={() => copyClaim(slot)}>
                       {copiedId === slot._id ? (
                         <FaCheck className="text-green-600" />
                       ) : (
                         <FaCopy />
                       )}
                       {copiedId === slot._id ? "Link kopiert" : "Claim-Link"}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       onClick={() => shareWhatsApp(slot)}
-                      className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-green-500 hover:text-green-700 text-gray-600 rounded-lg px-3 py-1.5 text-xs font-medium"
+                      className="hover:border-green-500 hover:text-green-700"
                     >
                       <FaWhatsapp className="text-green-600" /> WhatsApp
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      aria-expanded={inviteOpenId === slot._id}
                       onClick={() =>
                         setInviteOpenId((id) => (id === slot._id ? null : slot._id))
                       }
-                      className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-brand-500 text-gray-600 rounded-lg px-3 py-1.5 text-xs font-medium"
                     >
                       <FaEnvelope /> Per E-Mail einladen
-                    </button>
+                    </Button>
 
                     {inviteOpenId === slot._id && (
                       <div className="flex items-center gap-2 w-full mt-2">
@@ -818,16 +872,17 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                           type="email"
                           value={inviteEmail}
                           onChange={(e) => setInviteEmail(e.target.value)}
-                          className={inputClass}
+                          className={inputClassSm}
+                          aria-label={`E-Mail-Adresse für die Einladung von ${slot.name || "diesem Spieler"}`}
                           placeholder="spieler@beispiel.de"
                         />
-                        <button
+                        <Button
                           onClick={() => sendInvite(slot._id)}
                           disabled={sending || !inviteEmail.trim()}
-                          className="flex-shrink-0 bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2 text-sm font-medium"
+                          className="flex-shrink-0"
                         >
                           {sending ? "…" : "Senden"}
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>

@@ -35,10 +35,19 @@ const FIELDS = [
   "aboutPlayer",
 ];
 
-function Field({ label, children }) {
+// required markiert Pflichtfelder mit „*" – alle übrigen Felder sind optional
+// (Legende steht über dem Formular).
+function Field({ label, required = false, children }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+        {required && (
+          <span className="text-brand-600" aria-hidden="true">
+            {" *"}
+          </span>
+        )}
+      </label>
       {children}
     </div>
   );
@@ -157,12 +166,29 @@ export default function PlayerEditProfilePage() {
           onSubmit={onSubmit}
           className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5"
         >
+          <p className="text-xs text-gray-500">
+            Mit <span className="text-brand-600">*</span> markierte Felder sind Pflichtfelder – alle
+            anderen Angaben sind freiwillig.
+          </p>
+
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Vorname">
-              <input name="firstName" value={form.firstName} onChange={onChange} className={inputClass} />
+            <Field label="Vorname" required>
+              <input
+                name="firstName"
+                required
+                value={form.firstName}
+                onChange={onChange}
+                className={inputClass}
+              />
             </Field>
-            <Field label="Nachname">
-              <input name="lastName" value={form.lastName} onChange={onChange} className={inputClass} />
+            <Field label="Nachname" required>
+              <input
+                name="lastName"
+                required
+                value={form.lastName}
+                onChange={onChange}
+                className={inputClass}
+              />
             </Field>
           </div>
 

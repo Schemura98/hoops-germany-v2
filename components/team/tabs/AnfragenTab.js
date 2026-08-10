@@ -2,9 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import { FaCheck, FaTimes, FaBasketballBall } from "react-icons/fa";
+import { FaCheck, FaTimes, FaUserFriends } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import { positionLabel } from "@/lib/constants";
+import Loading from "@/components/ui/Loading";
+import EmptyState from "@/components/ui/EmptyState";
+import TabAlert from "@/components/team/tabs/TabAlert";
 
 export default function AnfragenTab() {
   const [requests, setRequests] = useState([]);
@@ -53,13 +56,7 @@ export default function AnfragenTab() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <FaBasketballBall className="text-brand-500 text-2xl animate-bounce" />
-      </div>
-    );
-  }
+  if (loading) return <Loading className="py-12" size="text-2xl" />;
 
   return (
     <div className="space-y-4">
@@ -68,25 +65,14 @@ export default function AnfragenTab() {
         <span className="text-sm font-normal text-gray-500">· {requests.length}</span>
       </h2>
 
-      {msg && (
-        <div
-          className={`rounded-lg border px-4 py-3 text-sm ${
-            msg.type === "ok"
-              ? "bg-green-50 border-green-200 text-green-700"
-              : "bg-red-50 border-red-200 text-red-700"
-          }`}
-        >
-          {msg.text}
-        </div>
-      )}
+      <TabAlert msg={msg} />
 
       {requests.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center">
-          <p className="text-sm text-gray-500">
-            Keine offenen Anfragen. Spieler können dein Team über das öffentliche Profil
-            anfragen.
-          </p>
-        </div>
+        <EmptyState
+          icon={FaUserFriends}
+          title="Keine offenen Anfragen"
+          text="Spieler können dein Team über das öffentliche Profil anfragen."
+        />
       ) : (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-100">
           {requests.map((p) => {

@@ -114,8 +114,16 @@ export default function TeamCreatePage() {
           onSubmit={onSubmit}
           className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4"
         >
+          <p className="text-xs text-gray-500">
+            Mit <span className="text-brand-600">*</span> markierte Felder sind Pflichtfelder.
+          </p>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Teamname</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Teamname{" "}
+              <span className="text-brand-600" aria-hidden="true">
+                *
+              </span>
+            </label>
             <input
               name="teamName"
               required

@@ -17,40 +17,16 @@
 - **Welle 2a** (läuft/gelaufen): Einladungslink entdoppelt + Bestätigung vor Neu-Erzeugen,
   `components/ui/ConfirmAction.js` statt `window.confirm` an 3 Stellen, Speicher-Rückmeldung am
   Benachrichtigungs-Schalter, Sprungmarken im Einstellungen-Tab.
+- **Welle 2b + Hero-Animation** (11.08.2026, erledigt – Punkte 1–8 und der Hero-Auftrag; Details
+  im Chronik-Protokoll): Feld-Tokens zentral (`lib/ui.js` um `inputClassNum`/`inputClassStat`
+  erweitert), `components/team/tabs/TabAlert.js` (FormAlert-Wrapper mit `role=alert`/`aria-live`),
+  `Loading`/`EmptyState`/`Button`-Primitive in allen 6 Tabs, `aria-label` an allen Icon-Buttons,
+  DNP-Touchziel 44×44, `*`-Pflichtfeldkennzeichnung (EinstellungenTab, `team/create`,
+  `player/edit-profile`), Kader-Tab mit geführtem Standardweg + „Weitere Optionen"-Akkordeon,
+  letzte zwei `window.confirm` (Slot entfernen, Adminrechte) auf `ConfirmAction`,
+  neue Korb-/Ball-Vektoren + „Swish"-Abschluss in `components/landing/HeroBallArc.js`.
 
 ---
-
-## Welle 2b – Team-Admin-Panel auf das Designsystem (mechanisch, hoher Nutzen)
-
-Betrifft `components/team/tabs/`: KaderTab, AnfragenTab, SpielplanTab, ErgebnisseTab, TryoutsTab,
-EinstellungenTab.
-
-1. **Lokale Klassen-Strings ersetzen:** Jeder Tab definiert eigene `inputClass`/`numInput`/
-   `statInput`/`selectCls` (KaderTab ~Z.27, SpielplanTab ~Z.10, TryoutsTab ~Z.16, ErgebnisseTab
-   ~Z.13–16, EinstellungenTab ~Z.19) → durch `inputClass`/`inputClassSm` aus `lib/ui.js` ersetzen.
-   (CLAUDE.md schreibt das vor; bewusst ausgenommen bleiben nur `team/claim`, `admin/leagues`,
-   `admin/update-match`.)
-2. **Ladezustände:** 4 Tabs bauen einen eigenen `FaBasketballBall animate-bounce` **ohne**
-   `motion-reduce` nach (AnfragenTab ~Z.56–62, SpielplanTab ~Z.161–167, ErgebnisseTab ~Z.231–237,
-   TryoutsTab ~Z.130–136) → `components/ui/Loading` verwenden.
-3. **Leerzustände:** handgebaute gestrichelte Boxen → `components/ui/EmptyState`.
-4. **Icon-only-Buttons brauchen `aria-label`** (bisher nur `title`): KaderTab (~Z.590 FaHashtag,
-   ~Z.613–625 FaSlidersH, ~Z.635–648 FaUserShield/FaUserSlash, ~Z.653–660 FaUserMinus, ~Z.760–790
-   FaTrash/FaCopy), SpielplanTab ~Z.419–426, TryoutsTab ~Z.299–306.
-5. **Flash-Meldungen ohne `aria-live`:** identischer Baustein in allen 6 Tabs (KaderTab ~Z.361–371,
-   AnfragenTab ~Z.71–81, SpielplanTab ~Z.183–193, ErgebnisseTab ~Z.249–259, TryoutsTab ~Z.152–162,
-   EinstellungenTab ~Z.313–323) → gemeinsame Komponente mit `aria-live="polite"` (ggf. `FormAlert`
-   wiederverwenden/erweitern).
-6. **Touch-Ziel:** DNP-Checkbox in `ErgebnisseTab.js` (~Z.462) ist `h-4 w-4` (16px) ohne erweiterte
-   Klickfläche → Wrapper mit `min-h-11` (44px WCAG).
-7. **Pflichtfelder markieren:** In `EinstellungenTab.js`, `app/team/create/page.js`,
-   `app/player/edit-profile/page.js` sind optionale Felder teils mit „(optional)" markiert,
-   Pflichtfelder aber nie → konsistente `*`-Kennzeichnung.
-8. **Kader-Tab entlasten** (~Z.373–546): Drei optisch gleichwertige Wege („Bestehenden Spieler
-   einladen", „Neuen Spieler anlegen", „Team-Einladungslink") ohne Führung. Häufigsten Fall
-   (bestehende Accounts einladen) visuell führend machen, die anderen in ein „Weitere Optionen"-
-   Accordion. **Hinweis:** Nach Welle 2a ist der Einladungslink-Block hier die alleinige Quelle –
-   beim Umbau nicht versehentlich entfernen.
 
 ## Welle 3 – Öffentliche Seiten, höchste Nutzerwirkung
 
@@ -82,20 +58,23 @@ EinstellungenTab.
     (analog zur bestehenden `/feedback`- und `/admin`-Ausnahme, `FeedbackButton.js` ~Z.32).
     ⚠️ Vor dem Anfassen prüfen, ob der Fix aus der Parallel-Session inzwischen committet ist.
 
-## Hero-Animation überarbeiten (Patrick-Auftrag, mit Milos neuen Werkzeugen)
+## Hero-Animation (11.08.2026 überarbeitet – offen bleibt nur der Hallen-Clip)
 
-Aktueller Stand: `components/landing/HeroBallArc.js` – inline-SVG-Ball zieht scroll-gesteuert einen
-Bogen zum Korb-Symbol, rechts neben dem Textblock, **erst ab 1280px sichtbar** (darunter bewusst
-ausgeblendet, weil der freie Rand zu schmal wird).
-- **Bessere Assets:** Milo hat seit 10.08. `svgo`, `sharp`, `ffmpeg` (in
-  `Desktop\Hoops-Marketing\_werkzeuge\`, Installationsvermerke dort). Ball und Korb/Netz als
-  sauber gezeichnete, svgo-optimierte Vektoren statt der schlichten Kugel.
-- **Mobile-Variante prüfen:** Die Zielgruppe der Tester-Kampagne kommt per QR-Code **mit dem Handy** –
-  dort ist der Effekt aktuell unsichtbar. Vivien soll bewerten, ob ein kürzerer Bogen unter dem
-  Textblock trägt oder ob „bewusst nur Desktop" die ehrlichere Lösung bleibt.
-- **Nicht** ohne echtes Material: KI-Videogenerierung wurde verworfen (`dec-milo-bewegtbild-tools`);
-  ein echter Hallen-Clip von Patrick/Jonatan wäre die Grundlage für eine größere Variante –
-  dann als eigener Abschnitt unterhalb des Heros, außerhalb des Ladepfads.
+Umgesetzt in `components/landing/HeroBallArc.js`:
+- **Bessere Assets (erledigt):** Ball mit Radial-Verlauf, sauberen Nähten und Schlagschatten
+  (liest sich jetzt auch über dem dunklen Foto), Korb mit Brett + Zielfeld, orangenem Ring und
+  Netz als Rautenmuster statt gerader Striche. Handgezeichnetes, kompaktes Inline-SVG
+  (keine zusätzliche Anfrage, kein Build-Schritt – deshalb kein svgo nötig).
+- **Bewegung (erledigt):** Der Ball bleibt am Ende nicht mehr auf dem Ring stehen, sondern fällt
+  ab `t≈0.88` durch das Netz und blendet dabei aus; der Ring gibt kurz nach („Swish").
+- **Mobile-Entscheidung (geprüft, bewusst Desktop-only):** Unter 1280px reicht die Gutter neben dem
+  `max-w-4xl`-Content-Block nicht; auf Telefonen läuft der Hero-Text bis an beide Ränder und füllt
+  bei kleinen Viewports die volle Höhe – jede Bahn würde Headline/Buttons kreuzen oder unter dem
+  Falz enden. Ein „kürzerer Bogen unter dem Textblock" wurde deshalb verworfen (Begründung steht
+  als Kommentar in der Komponente).
+- **Weiterhin offen:** die größere mobile Wirkung soll aus **echtem Hallenmaterial** kommen
+  (KI-Videogenerierung verworfen, `dec-milo-bewegtbild-tools`). Ein Clip von Patrick/Jonatan wäre
+  die Grundlage – dann als eigener Abschnitt unterhalb des Heros, außerhalb des Ladepfads.
 
 ## Arbeitsweise (verbindlich)
 - Vor jedem Deploy: `npm run build` + `npx playwright test -c tests/e2e/playwright.config.mjs` (8/8),

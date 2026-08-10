@@ -8,14 +8,16 @@ import {
   FaMapMarkerAlt,
   FaUsers,
   FaChevronDown,
-  FaBasketballBall,
+  FaBullhorn,
 } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import { POSITIONS, positionLabel } from "@/lib/constants";
 import ConfirmAction from "@/components/ui/ConfirmAction";
-
-const inputClass =
-  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+import Button from "@/components/ui/Button";
+import Loading from "@/components/ui/Loading";
+import EmptyState from "@/components/ui/EmptyState";
+import TabAlert from "@/components/team/tabs/TabAlert";
+import { inputClassSm } from "@/lib/ui";
 
 function formatDate(d) {
   try {
@@ -127,13 +129,7 @@ export default function TryoutsTab() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <FaBasketballBall className="text-brand-500 text-2xl animate-bounce" />
-      </div>
-    );
-  }
+  if (loading) return <Loading className="py-12" size="text-2xl" />;
 
   return (
     <div className="space-y-4">
@@ -141,25 +137,16 @@ export default function TryoutsTab() {
         <h2 className="text-lg font-semibold text-gray-900">
           Tryouts <span className="text-sm font-normal text-gray-500">· {tryouts.length}</span>
         </h2>
-        <button
+        <Button
           onClick={() => setShowAdd((v) => !v)}
-          className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+          aria-expanded={showAdd}
+          className="flex-shrink-0"
         >
           <FaPlus className="text-xs" /> Tryout ausschreiben
-        </button>
+        </Button>
       </div>
 
-      {msg && (
-        <div
-          className={`rounded-lg border px-4 py-3 text-sm ${
-            msg.type === "ok"
-              ? "bg-green-50 border-green-200 text-green-700"
-              : "bg-red-50 border-red-200 text-red-700"
-          }`}
-        >
-          {msg.text}
-        </div>
-      )}
+      <TabAlert msg={msg} />
 
       {showAdd && (
         <form
@@ -174,7 +161,7 @@ export default function TryoutsTab() {
                 required
                 value={form.date}
                 onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-                className={inputClass}
+                className={inputClassSm}
               />
             </div>
             <div>
@@ -183,7 +170,7 @@ export default function TryoutsTab() {
                 required
                 value={form.location}
                 onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
-                className={inputClass}
+                className={inputClassSm}
                 placeholder="z.B. Sporthalle Mitte"
               />
             </div>
@@ -222,29 +209,36 @@ export default function TryoutsTab() {
               rows={2}
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              className={`${inputClass} resize-none`}
+              className={`${inputClassSm} resize-none`}
               placeholder="Worauf achtet ihr, was sollten Bewerber mitbringen?"
             />
           </div>
 
           <div className="flex justify-end">
-            <button
+            <Button
               type="submit"
               disabled={saving || !form.date || !form.location.trim()}
-              className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-6 py-2 text-sm font-medium"
+              className="px-6"
             >
               {saving ? "Speichern…" : "Ausschreiben"}
-            </button>
+            </Button>
           </div>
         </form>
       )}
 
       {tryouts.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center">
-          <p className="text-sm text-gray-500">
-            Noch keine Tryouts ausgeschrieben. Lege das erste an, um Bewerber zu finden.
-          </p>
-        </div>
+        <EmptyState
+          icon={FaBullhorn}
+          title="Noch keine Tryouts ausgeschrieben"
+          text="Lege das erste an – es erscheint dann öffentlich unter /tryouts, damit Spieler sich bewerben können."
+          action={
+            !showAdd && (
+              <Button onClick={() => setShowAdd(true)}>
+                <FaPlus className="text-xs" /> Tryout ausschreiben
+              </Button>
+            )
+          }
+        />
       ) : (
         <div className="space-y-3">
           {tryouts.map((t) => {
@@ -289,13 +283,14 @@ export default function TryoutsTab() {
                       {t.status === "active" ? "Aktiv" : "Geschlossen"}
                     </span>
                     <div className="flex items-center gap-2">
-                      <button
+                      <Button
+                        variant="secondary"
+                        size="sm"
                         onClick={() => toggleStatus(t)}
                         disabled={busyId === t._id}
-                        className="text-xs border border-gray-300 hover:border-brand-500 text-gray-600 rounded-lg px-3 py-1.5 disabled:opacity-60"
                       >
                         {t.status === "active" ? "Schließen" : "Öffnen"}
-                      </button>
+                      </Button>
                       <ConfirmAction
                         trigger={({ onClick }) => (
                           <button
@@ -303,6 +298,7 @@ export default function TryoutsTab() {
                             disabled={busyId === t._id}
                             className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
                             title="Tryout entfernen"
+                            aria-label={`Tryout am ${formatDate(t.date)} entfernen`}
                           >
                             <FaTrash className="text-sm" />
                           </button>
@@ -319,6 +315,7 @@ export default function TryoutsTab() {
                 {/* Bewerber */}
                 <button
                   onClick={() => setExpandedId(isExpanded ? null : t._id)}
+                  aria-expanded={isExpanded}
                   className="mt-3 inline-flex items-center gap-2 text-sm text-gray-600 hover:text-brand-600"
                 >
                   <FaUsers />

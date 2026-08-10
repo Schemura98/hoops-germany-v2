@@ -9,11 +9,15 @@ import {
   FaChartBar,
 } from "react-icons/fa";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
+import Button from "@/components/ui/Button";
+import Loading from "@/components/ui/Loading";
+import EmptyState from "@/components/ui/EmptyState";
+import TabAlert from "@/components/team/tabs/TabAlert";
+import { inputClassNum, inputClassStat } from "@/lib/ui";
 
-const numInput =
-  "w-20 rounded-lg border border-gray-300 px-3 py-2 text-sm text-center text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
-const statInput =
-  "w-14 rounded-lg border border-gray-300 px-2 py-1.5 text-sm text-center text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+// Breiten lokal, Feld-Tokens zentral (lib/ui.js) – s. Kommentar dort.
+const numInput = `w-20 ${inputClassNum}`;
+const statInput = `w-14 ${inputClassStat}`;
 
 function formatDate(d) {
   try {
@@ -228,13 +232,7 @@ export default function ErgebnisseTab({ team }) {
     return isA ? match.teamB : match.teamA;
   }
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <FaBasketballBall className="text-brand-500 text-2xl animate-bounce" />
-      </div>
-    );
-  }
+  if (loading) return <Loading className="py-12" size="text-2xl" />;
 
   const relevant = matches.filter((m) => m.status !== "cancelled");
 
@@ -246,24 +244,14 @@ export default function ErgebnisseTab({ team }) {
         bestätigt. Spieler-Statistiken könnt ihr jederzeit erfassen.
       </p>
 
-      {msg && (
-        <div
-          className={`rounded-lg border px-4 py-3 text-sm ${
-            msg.type === "ok"
-              ? "bg-green-50 border-green-200 text-green-700"
-              : "bg-red-50 border-red-200 text-red-700"
-          }`}
-        >
-          {msg.text}
-        </div>
-      )}
+      <TabAlert msg={msg} />
 
       {relevant.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center">
-          <p className="text-sm text-gray-500">
-            Noch keine Spiele vorhanden. Trage zuerst Spiele im Spielplan ein.
-          </p>
-        </div>
+        <EmptyState
+          icon={FaBasketballBall}
+          title="Noch keine Spiele vorhanden"
+          text="Trage zuerst Spiele im Spielplan ein – danach könnt ihr hier Ergebnisse und Statistiken melden."
+        />
       ) : (
         <div className="space-y-3">
           {relevant.map((match) => {
@@ -348,41 +336,53 @@ export default function ErgebnisseTab({ team }) {
 
                     <div className="mt-3 flex flex-wrap items-end gap-3">
                       <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">
-                          Eigene Punkte
+                        <label
+                          htmlFor={`own-${match._id}`}
+                          className="block text-xs font-medium text-gray-600 mb-1"
+                        >
+                          Eigene Punkte <span className="text-brand-600">*</span>
                         </label>
                         <input
+                          id={`own-${match._id}`}
                           type="number"
                           min="0"
+                          required
                           value={form.ownPoints}
                           onChange={(e) => setField(match._id, "ownPoints", e.target.value)}
                           className={numInput}
                         />
                       </div>
-                      <span className="pb-2 text-gray-500 font-semibold">:</span>
+                      <span className="pb-2 text-gray-500 font-semibold" aria-hidden="true">
+                        :
+                      </span>
                       <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">
-                          Gegner-Punkte
+                        <label
+                          htmlFor={`opp-${match._id}`}
+                          className="block text-xs font-medium text-gray-600 mb-1"
+                        >
+                          Gegner-Punkte <span className="text-brand-600">*</span>
                         </label>
                         <input
+                          id={`opp-${match._id}`}
                           type="number"
                           min="0"
+                          required
                           value={form.opponentPoints}
                           onChange={(e) => setField(match._id, "opponentPoints", e.target.value)}
                           className={numInput}
                         />
                       </div>
-                      <button
+                      <Button
                         onClick={() => submit(match._id)}
                         disabled={
                           busyId === match._id ||
                           form.ownPoints === "" ||
                           form.opponentPoints === ""
                         }
-                        className="ml-auto bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-5 py-2 text-sm font-medium"
+                        className="ml-auto px-5"
                       >
                         {busyId === match._id ? "…" : ownSubmitted ? "Aktualisieren" : "Einreichen"}
-                      </button>
+                      </Button>
                     </div>
                   </>
                 )}
@@ -391,6 +391,7 @@ export default function ErgebnisseTab({ team }) {
                 <div className="mt-4 border-t border-gray-100 pt-3">
                   <button
                     onClick={() => toggleStats(match)}
+                    aria-expanded={statsOpen}
                     className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-brand-600"
                   >
                     <FaChartBar /> Spieler-Statistiken {statsOpen ? "ausblenden" : "erfassen"}
@@ -432,6 +433,7 @@ export default function ErgebnisseTab({ team }) {
                                           type="number"
                                           min="0"
                                           disabled={dnp}
+                                          aria-label={`Punkte ${r.name}`}
                                           value={row.points ?? ""}
                                           onChange={(e) => setStatField(match._id, r.key, "points", e.target.value)}
                                           className={`${statInput} disabled:bg-gray-50 disabled:text-gray-300`}
@@ -442,6 +444,7 @@ export default function ErgebnisseTab({ team }) {
                                           type="number"
                                           min="0"
                                           disabled={dnp}
+                                          aria-label={`Assists ${r.name}`}
                                           value={row.assists ?? ""}
                                           onChange={(e) => setStatField(match._id, r.key, "assists", e.target.value)}
                                           className={`${statInput} disabled:bg-gray-50 disabled:text-gray-300`}
@@ -452,18 +455,24 @@ export default function ErgebnisseTab({ team }) {
                                           type="number"
                                           min="0"
                                           disabled={dnp}
+                                          aria-label={`Rebounds ${r.name}`}
                                           value={row.rebounds ?? ""}
                                           onChange={(e) => setStatField(match._id, r.key, "rebounds", e.target.value)}
                                           className={`${statInput} disabled:bg-gray-50 disabled:text-gray-300`}
                                         />
                                       </td>
                                       <td className="py-1.5 text-center">
-                                        <input
-                                          type="checkbox"
-                                          checked={dnp}
-                                          onChange={(e) => setStatField(match._id, r.key, "didNotPlay", e.target.checked)}
-                                          className="h-4 w-4 accent-brand-500"
-                                        />
+                                        {/* Touch-Ziel: die Box selbst bleibt klein, die Klickfläche
+                                            ist 44px hoch (WCAG 2.5.5) – Welle-2b-Befund. */}
+                                        <label className="mx-auto flex min-h-11 min-w-11 items-center justify-center cursor-pointer">
+                                          <input
+                                            type="checkbox"
+                                            checked={dnp}
+                                            aria-label={`${r.name} hat nicht gespielt`}
+                                            onChange={(e) => setStatField(match._id, r.key, "didNotPlay", e.target.checked)}
+                                            className="h-4 w-4 accent-brand-500"
+                                          />
+                                        </label>
                                       </td>
                                     </tr>
                                   );
@@ -472,13 +481,13 @@ export default function ErgebnisseTab({ team }) {
                             </table>
                           </div>
                           <div className="mt-3 flex justify-end">
-                            <button
+                            <Button
                               onClick={() => saveStats(match._id)}
                               disabled={savingStatsId === match._id}
-                              className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-5 py-2 text-sm font-medium"
+                              className="px-5"
                             >
                               {savingStatsId === match._id ? "Speichern…" : "Statistiken speichern"}
-                            </button>
+                            </Button>
                           </div>
                         </>
                       )}

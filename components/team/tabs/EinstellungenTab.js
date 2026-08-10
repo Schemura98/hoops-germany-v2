@@ -15,14 +15,24 @@ import { FaUserPlus } from "react-icons/fa";
 import ImageUpload from "@/components/ImageUpload";
 import CityInput from "@/components/CityInput";
 import LeagueReportLink from "@/components/team/LeagueReportLink";
+import Button from "@/components/ui/Button";
+import TabAlert from "@/components/team/tabs/TabAlert";
+import { inputClass } from "@/lib/ui";
 
-const inputClass =
-  "w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
-
-function Field({ label, hint, children }) {
+// required: markiert Pflichtfelder mit „*" – optionale Felder tragen weiterhin
+// „(optional)" im Label, damit beide Seiten konsistent gekennzeichnet sind.
+function Field({ label, hint, required = false, optional = false, children }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+        {required && (
+          <span className="text-brand-600" aria-hidden="true">
+            {" *"}
+          </span>
+        )}
+        {optional && <span className="font-normal text-gray-500"> (optional)</span>}
+      </label>
       {children}
       {hint && <p className="mt-1 text-xs text-gray-500">{hint}</p>}
     </div>
@@ -298,17 +308,7 @@ export default function EinstellungenTab({ team, reload }) {
         ))}
       </nav>
 
-      {msg && (
-        <div
-          className={`rounded-lg border px-4 py-3 text-sm ${
-            msg.type === "ok"
-              ? "bg-green-50 border-green-200 text-green-700"
-              : "bg-red-50 border-red-200 text-red-700"
-          }`}
-        >
-          {msg.text}
-        </div>
-      )}
+      <TabAlert msg={msg} />
 
       {/* Stammdaten */}
       <form
@@ -319,7 +319,7 @@ export default function EinstellungenTab({ team, reload }) {
         <h2 className="text-lg font-semibold text-gray-900">Team-Daten</h2>
 
         <div className="grid sm:grid-cols-2 gap-4">
-          <Field label="Teamname">
+          <Field label="Teamname" required>
             <input
               name="teamName"
               required
@@ -328,7 +328,7 @@ export default function EinstellungenTab({ team, reload }) {
               className={inputClass}
             />
           </Field>
-          <Field label="Stadt/Region">
+          <Field label="Stadt/Region" optional>
             <CityInput
               value={form.region}
               onChange={(v) => setForm((f) => ({ ...f, region: v }))}
@@ -338,7 +338,7 @@ export default function EinstellungenTab({ team, reload }) {
               placeholder="z.B. Berlin"
             />
           </Field>
-          <Field label="Bundesland">
+          <Field label="Bundesland" optional>
             <select
               name="bundesland"
               value={form.bundesland}
@@ -355,7 +355,7 @@ export default function EinstellungenTab({ team, reload }) {
           </Field>
         </div>
 
-        <Field label="Über das Team">
+        <Field label="Über das Team" optional>
           <textarea
             name="about"
             rows={3}
@@ -367,7 +367,7 @@ export default function EinstellungenTab({ team, reload }) {
         </Field>
 
         <div className="grid sm:grid-cols-2 gap-4">
-          <Field label="Logo">
+          <Field label="Logo" optional>
             <ImageUpload
               endpoint="/api/upload/team-image"
               fields={{ token: getTeamAuthToken(), type: "logo" }}
@@ -380,7 +380,7 @@ export default function EinstellungenTab({ team, reload }) {
               }}
             />
           </Field>
-          <Field label="Banner">
+          <Field label="Banner" optional>
             <ImageUpload
               endpoint="/api/upload/team-image"
               fields={{ token: getTeamAuthToken(), type: "banner" }}
@@ -396,13 +396,9 @@ export default function EinstellungenTab({ team, reload }) {
         </div>
 
         <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={saving}
-            className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-6 py-2.5 font-medium transition-colors"
-          >
+          <Button type="submit" size="lg" disabled={saving} className="px-6">
             {saving ? "Speichern…" : "Speichern"}
-          </button>
+          </Button>
         </div>
       </form>
 
@@ -441,17 +437,7 @@ export default function EinstellungenTab({ team, reload }) {
           )}
         </div>
 
-        {leagueMsg && (
-          <div
-            className={`rounded-lg border px-4 py-3 text-sm ${
-              leagueMsg.type === "ok"
-                ? "bg-green-50 border-green-200 text-green-700"
-                : "bg-red-50 border-red-200 text-red-700"
-            }`}
-          >
-            {leagueMsg.text}
-          </div>
-        )}
+        <TabAlert msg={leagueMsg} />
 
         {requestsLoading ? null : pendingRequest ? (
           /* Offene Anfrage – kein neues Formular, solange diese läuft. */
@@ -483,6 +469,7 @@ export default function EinstellungenTab({ team, reload }) {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <select
+                aria-label="Bereich filtern"
                 value={leagueFilter.bereich}
                 onChange={(e) =>
                   setFilter({ bereich: e.target.value, kategorie: "", level: "", bezirk: "", kreis: "" })
@@ -495,6 +482,7 @@ export default function EinstellungenTab({ team, reload }) {
                 <option value="U16">U16</option>
               </select>
               <select
+                aria-label="Kategorie filtern"
                 value={leagueFilter.kategorie}
                 onChange={(e) => setFilter({ kategorie: e.target.value })}
                 className={inputClass}
@@ -506,6 +494,7 @@ export default function EinstellungenTab({ team, reload }) {
                 ))}
               </select>
               <select
+                aria-label="Spielklasse filtern"
                 value={leagueFilter.level}
                 onChange={(e) => setFilter({ level: e.target.value, bezirk: "", kreis: "" })}
                 className={inputClass}
@@ -519,6 +508,7 @@ export default function EinstellungenTab({ team, reload }) {
               </select>
               {showKreisFilter && (
                 <select
+                  aria-label="Regierungsbezirk filtern"
                   value={leagueFilter.bezirk}
                   onChange={(e) => setFilter({ bezirk: e.target.value, kreis: "" })}
                   className={inputClass}
@@ -533,6 +523,7 @@ export default function EinstellungenTab({ team, reload }) {
               )}
               {showKreisFilter && (
                 <select
+                  aria-label="Basketballkreis filtern"
                   value={leagueFilter.kreis}
                   onChange={(e) => setFilter({ kreis: e.target.value })}
                   className={inputClass}
@@ -550,6 +541,7 @@ export default function EinstellungenTab({ team, reload }) {
                 </select>
               )}
               <input
+                aria-label="Liga suchen"
                 value={leagueFilter.search}
                 onChange={(e) => setFilter({ search: e.target.value })}
                 placeholder="Liga, Region oder Basketballkreis suchen"
@@ -557,7 +549,7 @@ export default function EinstellungenTab({ team, reload }) {
               />
             </div>
 
-            <Field label="Ziel-Liga">
+            <Field label="Ziel-Liga" required>
               <select
                 value={leagueId}
                 onChange={(e) => setLeagueId(e.target.value)}
@@ -572,7 +564,7 @@ export default function EinstellungenTab({ team, reload }) {
               </select>
             </Field>
 
-            <Field label="Hinweis (optional)">
+            <Field label="Hinweis" optional>
               <textarea
                 value={requestNote}
                 onChange={(e) => setRequestNote(e.target.value)}
@@ -584,14 +576,15 @@ export default function EinstellungenTab({ team, reload }) {
 
             <div className="flex items-center justify-between gap-3">
               <LeagueReportLink bundesland={form.bundesland} />
-              <button
+              <Button
                 type="button"
+                size="lg"
                 onClick={onRequestLeague}
                 disabled={leagueSaving || !leagueId}
-                className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-6 py-2.5 font-medium transition-colors"
+                className="px-6"
               >
                 {leagueSaving ? "Sende…" : "Ligazuordnung anfragen"}
-              </button>
+              </Button>
             </div>
           </>
         )}
@@ -656,17 +649,7 @@ export default function EinstellungenTab({ team, reload }) {
             : "Aktiviere den Schalter, um dein Team im Transfermarkt als suchend zu listen."}
         </p>
 
-        {recruitMsg && (
-          <div
-            className={`rounded-lg border px-4 py-3 text-sm ${
-              recruitMsg.type === "ok"
-                ? "bg-green-50 border-green-200 text-green-700"
-                : "bg-red-50 border-red-200 text-red-700"
-            }`}
-          >
-            {recruitMsg.text}
-          </div>
-        )}
+        <TabAlert msg={recruitMsg} />
 
         {recruiting && (
           <div className="space-y-4">
@@ -694,7 +677,7 @@ export default function EinstellungenTab({ team, reload }) {
                 })}
               </div>
             </div>
-            <Field label="Notiz (optional)">
+            <Field label="Notiz" optional>
               <textarea
                 value={recruitNote}
                 onChange={(e) => setRecruitNote(e.target.value)}
@@ -704,14 +687,15 @@ export default function EinstellungenTab({ team, reload }) {
               />
             </Field>
             <div className="flex justify-end">
-              <button
+              <Button
                 type="button"
+                size="lg"
                 onClick={() => saveRecruiting(true)}
                 disabled={recruitSaving}
-                className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-6 py-2.5 font-medium transition-colors"
+                className="px-6"
               >
                 {recruitSaving ? "Speichern…" : "Speichern"}
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -756,11 +740,7 @@ export default function EinstellungenTab({ team, reload }) {
             ? "Bei Beitritten und Anfragen werden alle Team-Admins (Haupt-Admin + Co-Admins) benachrichtigt."
             : "Bei Beitritten und Anfragen wird nur der Haupt-Admin benachrichtigt. Aktiviere den Schalter, um alle Team-Admins zu benachrichtigen."}
         </p>
-        {notifyMsg && (
-          <div className="rounded-lg border px-4 py-3 text-sm bg-red-50 border-red-200 text-red-700">
-            {notifyMsg.text}
-          </div>
-        )}
+        <TabAlert msg={notifyMsg} />
       </div>
 
       {/* Einladungslink – wird zentral im Kader-Tab verwaltet (ein Token, keine Dopplung) */}
