@@ -190,6 +190,9 @@ export default function AdminAnalyticsPage() {
       ["Transferbereite Spieler", s.platform.transferAvailable, "", ""],
       ["Suchende Vereine", s.platform.recruitingTeams, "", ""],
       [],
+      ["Registrierungen nach Quelle (?src=)", "Anzahl"],
+      ...s.signupSources.map((x) => [x.src, x.count]),
+      [],
       ["Traffic nach Bereich", "Aufrufe"],
       ...s.sections.map((x) => [x.section, x.count]),
       [],
@@ -310,6 +313,11 @@ export default function AdminAnalyticsPage() {
           <EngagementCards eng={summary.engagement} period={periodLabel} />
           <RegionCard region={summary.region} />
           <ContentCard content={summary.content} period={periodLabel} />
+          {summary.signupSources?.length > 0 && (
+            <Card title="Registrierungen nach Quelle" hint="Aus ?src= beim Registrieren (z.B. Flyer-QR-Codes) · allzeit, nur echte Accounts">
+              <Bars items={summary.signupSources.map((s) => ({ label: s.src, value: s.count }))} />
+            </Card>
+          )}
 
           <Card title="Beliebteste Seiten" hint={`Im Zeitraum: ${periodLabel}`}>
             {summary.topPaths.length === 0 ? (

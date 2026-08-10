@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db";
 import Player from "@/models/Player";
+import AnalyticsEvent from "@/models/AnalyticsEvent";
 import { signPlayerToken } from "@/lib/auth";
 import { uniqueSlug } from "@/lib/slug";
 import { sendMail } from "@/lib/mailer";
@@ -9,6 +10,8 @@ import { getBaseUrl } from "@/lib/baseUrl";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Kampagnen-Quellen-Tracking (?src= bei /signup): nur [a-z0-9-_], max. 40 Zeichen.
+const SRC_RE = /^[a-z0-9-_]{1,40}$/;
 
 async function handler(req) {
   const body = await req.json();
@@ -37,6 +40,11 @@ async function handler(req) {
   const hashed = await bcrypt.hash(password, 10);
   const slug = await uniqueSlug(Player, `${firstName}-${lastName}`);
 
+  // Optionale Kampagnen-Quelle (?src= bei /signup) – serverseitig säubern, roh
+  // eingehende Werte nie ungeprüft übernehmen.
+  const rawSrc = body.signupSource?.toLowerCase().trim();
+  const signupSource = rawSrc && SRC_RE.test(rawSrc) ? rawSrc : undefined;
+
   const player = await Player.create({
     firstName,
     lastName,
@@ -44,9 +52,22 @@ async function handler(req) {
     slug,
     password: hashed,
     status: "active",
+    ...(signupSource ? { signupSource } : {}),
   });
 
   const token = signPlayerToken({ id: player._id.toString() });
+
+  // Analytics-Event für die Kampagnenauswertung – fire-and-forget, darf die
+  // Registrierung nie blockieren (analog Willkommensmail unten).
+  if (signupSource) {
+    AnalyticsEvent.create({
+      eventType: "signup_src",
+      path: "/signup",
+      sessionId: typeof body.sessionId === "string" ? body.sessionId.slice(0, 100) : "",
+      meta: signupSource,
+      playerId: player._id,
+    }).catch((err) => console.error("[SIGNUP SRC EVENT ERROR]", err?.message || err));
+  }
 
   // Willkommensmail – fire-and-forget, darf die Registrierung nie blockieren.
   const { subject, html, text } = welcomeEmail({

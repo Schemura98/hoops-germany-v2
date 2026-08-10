@@ -93,6 +93,10 @@ const playerSchema = new mongoose.Schema(
     teamJoinRequest: { type: mongoose.Schema.Types.ObjectId, ref: "teams" },
     followingTeams: [{ type: mongoose.Schema.Types.ObjectId, ref: "teams" }],
     instagram: String,
+    // Kampagnen-Quellen-Tracking (?src= bei /signup, z.B. Flyer-QR-Codes), serverseitig
+    // gesäubert auf [a-z0-9-_], max. 40 Zeichen. Optional – nur gesetzt, wenn beim
+    // Registrieren ein src-Parameter mitkam.
+    signupSource: String,
     // Onboarding-Checklist im Newsfeed dauerhaft ausgeblendet (Server-Flag, geräteübergreifend).
     onboardingDismissed: { type: Boolean, default: false },
     // Willkommens-Tour nach der Registrierung gesehen (Auto-Start nur einmal).

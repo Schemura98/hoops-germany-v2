@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { FaGoogle } from "react-icons/fa";
@@ -10,8 +10,14 @@ import AuthShell from "@/components/layout/AuthShell";
 import Button from "@/components/ui/Button";
 import { inputClass } from "@/lib/ui";
 
-export default function SignupPage() {
+// Kampagnen-Quellen-Tracking (?src=, z.B. Flyer-QR-Codes): serverseitige Regel ist
+// verbindlich, hier nur ein leichter Client-Filter vor dem Puffern in sessionStorage.
+const SRC_RE = /^[a-z0-9-_]{1,40}$/;
+const SIGNUP_SOURCE_KEY = "signupSource";
+
+function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -27,6 +33,16 @@ export default function SignupPage() {
     const next = new URLSearchParams(window.location.search).get("next");
     if (next) setGoogleHref(`/api/auth/google?next=${encodeURIComponent(next)}`);
   }, []);
+
+  // ?src= puffern, damit die Quelle einen Wechsel Login↔Signup überlebt (z.B.
+  // Flyer-Link landet auf /signup?src=flyer-koeln, Nutzer wechselt kurz zu /login
+  // und zurück zu /signup ohne Query-Param).
+  useEffect(() => {
+    const src = searchParams.get("src")?.toLowerCase().trim();
+    if (src && SRC_RE.test(src)) {
+      window.sessionStorage.setItem(SIGNUP_SOURCE_KEY, src);
+    }
+  }, [searchParams]);
 
   const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
@@ -45,11 +61,15 @@ export default function SignupPage() {
 
     setLoading(true);
     try {
+      const signupSource = window.sessionStorage.getItem(SIGNUP_SOURCE_KEY) || undefined;
+      const sessionId = window.localStorage.getItem("analyticsSessionId") || undefined;
       const { data } = await axios.post("/api/player/playerregister", {
         firstName: form.firstName,
         lastName: form.lastName,
         email: form.email,
         password: form.password,
+        signupSource,
+        sessionId,
       });
       setPlayerToken(data.token);
       setStoredPlayer(data.player);
@@ -175,5 +195,13 @@ export default function SignupPage() {
         Mit Google registrieren
       </a>
     </AuthShell>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense>
+      <SignupForm />
+    </Suspense>
   );
 }
