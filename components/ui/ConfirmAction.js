@@ -35,9 +35,15 @@ export default function ConfirmAction({
 }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
+  const triggerRef = useRef(null);
 
   useEffect(() => {
     if (!open) return;
+    // Fokus beim Schließen zum Auslöser zurückgeben (der Bestätigen-Button holt
+    // ihn beim Öffnen per autoFocus) – sonst verlieren Tastaturnutzer die Stelle,
+    // obwohl sich das Panel als modaler Dialog ausweist
+    // (Deploy-Gate-Befund Kai, 11.08.2026).
+    triggerRef.current = document.activeElement;
     function onDocClick(e) {
       if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
     }
@@ -49,6 +55,7 @@ export default function ConfirmAction({
     return () => {
       document.removeEventListener("mousedown", onDocClick);
       document.removeEventListener("keydown", onKey);
+      triggerRef.current?.focus?.();
     };
   }, [open]);
 
@@ -71,6 +78,7 @@ export default function ConfirmAction({
           <p className="text-sm font-medium text-gray-800">{message}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Button
+              autoFocus
               type="button"
               variant={confirmVariant}
               size="sm"
