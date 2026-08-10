@@ -13,6 +13,7 @@ import {
 } from "react-icons/fa";
 import { getPlayerToken } from "@/lib/clientAuth";
 import Reveal from "@/components/ui/Reveal";
+import HeroBallArc from "@/components/landing/HeroBallArc";
 
 // Einheitliche Hero-Buttons: ein primärer (orange) + gleichartige „Ghost"-Buttons,
 // damit der Button-Block farblich ruhig und konsistent wirkt.
@@ -61,6 +62,8 @@ export default function LandingHero() {
       }}
     >
       <div className="absolute inset-0 bg-black/65" />
+
+      <HeroBallArc />
 
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto py-24">
         {checked && player ? (
