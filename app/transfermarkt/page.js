@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaSearch, FaBasketballBall, FaMapMarkerAlt, FaUsers, FaExchangeAlt } from "react-icons/fa";
+import { FaSearch, FaBasketballBall, FaMapMarkerAlt, FaUsers, FaExchangeAlt, FaBullhorn, FaArrowRight } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
 import DemoBadge from "@/components/DemoBadge";
 import Footer from "@/components/layout/Footer";
@@ -260,6 +260,20 @@ export default function TransfermarktPage() {
 
         {/* Tabs */}
         <Tabs className="mb-5" tabs={TABS} value={view} onChange={setView} />
+
+        {/* Dezenter Querverweis auf Tryouts */}
+        <Link
+          href="/tryouts"
+          className="mb-6 flex items-center gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3 text-sm text-gray-600 shadow-sm hover:border-brand-200 hover:text-brand-700 transition-colors"
+        >
+          <FaBullhorn className="flex-shrink-0 text-brand-500" />
+          <span className="flex-1">
+            Auf der Suche nach einem Team? Schau auch bei offenen Probetrainings vorbei.
+          </span>
+          <span className="flex-shrink-0 inline-flex items-center gap-1 font-medium">
+            Probetrainings ansehen <FaArrowRight className="text-xs" />
+          </span>
+        </Link>
 
         {/* Filter */}
         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mb-6">

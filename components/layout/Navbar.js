@@ -18,6 +18,7 @@ import {
   FaChevronDown,
   FaRegNewspaper,
   FaExchangeAlt,
+  FaBullhorn,
 } from "react-icons/fa";
 import {
   getPlayerToken,
@@ -37,6 +38,7 @@ const PUBLIC_LINKS = [
   { href: "/teams", label: "Teams", icon: FaUsers },
   { href: "/spieler", label: "Spieler", icon: FaUser },
   { href: "/transfermarkt", label: "Transfermarkt", icon: FaExchangeAlt },
+  { href: "/tryouts", label: "Tryouts", icon: FaBullhorn },
   { href: "/topscorer", label: "Topscorer", icon: FaBasketballBall },
 ];
 

@@ -14,6 +14,7 @@ import {
   FaArrowRight,
 } from "react-icons/fa";
 import { getPlayerToken } from "@/lib/clientAuth";
+import { trackEvent } from "@/lib/trackEvent";
 
 // Inhalt der Willkommens-Tour (Anreiz: „Was kannst du hier alles tun?").
 const STEPS = [
@@ -83,8 +84,11 @@ export default function WelcomeTour() {
     return () => window.removeEventListener("hg:open-tour", handler);
   }, []);
 
-  async function close() {
+  // completed=true nur beim expliziten Abschluss auf der letzten Seite ("Los geht's"),
+  // sonst gilt die Tour als übersprungen (X-Button oder "Überspringen").
+  async function close(completed = false) {
     setOpen(false);
+    trackEvent(completed ? "tour_completed" : "tour_skipped", pathname);
     const token = getPlayerToken();
     if (token) {
       try {
@@ -106,7 +110,7 @@ export default function WelcomeTour() {
       <div className="relative w-full max-w-md rounded-2xl bg-white shadow-xl overflow-hidden">
         {/* Schließen */}
         <button
-          onClick={close}
+          onClick={() => close(false)}
           aria-label="Schließen"
           className="absolute top-3 right-3 text-white/70 hover:text-white p-1 z-10"
         >
@@ -152,7 +156,7 @@ export default function WelcomeTour() {
               </button>
             ) : (
               <button
-                onClick={close}
+                onClick={() => close(false)}
                 className="text-sm font-medium text-gray-500 hover:text-gray-600"
               >
                 Überspringen
@@ -161,7 +165,7 @@ export default function WelcomeTour() {
 
             {isLast ? (
               <button
-                onClick={close}
+                onClick={() => close(true)}
                 className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl px-5 py-2.5 text-sm"
               >
                 Los geht&apos;s

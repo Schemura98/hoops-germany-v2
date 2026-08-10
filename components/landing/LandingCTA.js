@@ -22,7 +22,7 @@ export default function LandingCTA() {
     <section className="bg-gray-900 text-white py-20 px-4 text-center">
       <h2 className="text-3xl md:text-4xl font-black mb-4">Bereit loszulegen?</h2>
       <p className="text-gray-300 mb-10 text-lg">
-        Werde Teil der größten Amateur-Basketball Community in Deutschland.
+        Werde Teil der Community-Plattform für Amateur-Basketball in NRW.
       </p>
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <Link

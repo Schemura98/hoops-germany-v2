@@ -29,6 +29,7 @@ async function handler(req) {
     browser,
     os,
     playerId,
+    meta: body.meta ? String(body.meta).slice(0, 100) : undefined,
   });
 
   return ok({});

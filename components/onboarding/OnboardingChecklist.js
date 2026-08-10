@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import axios from "axios";
 import {
   FaCheckCircle,
@@ -11,6 +12,7 @@ import {
   FaMobileAlt,
 } from "react-icons/fa";
 import { getPlayerToken } from "@/lib/clientAuth";
+import { trackEvent } from "@/lib/trackEvent";
 
 // Leitet den Erledigt-Status der 4 Kern-Schritte aus dem Spieler-Objekt ab (aus getmyinfo).
 function computeSteps(player) {
@@ -51,6 +53,8 @@ function computeSteps(player) {
 export default function OnboardingChecklist({ player, onDismiss }) {
   const [hidden, setHidden] = useState(false);
   const [appInstalled, setAppInstalled] = useState(false);
+  const pathname = usePathname();
+  const prevDoneRef = useRef(null);
 
   // App-Installation erkennen: läuft die Seite im Standalone-Modus (= installiert),
   // oder wurde sie auf diesem Gerät schon einmal installiert (gemerkt via appinstalled).
@@ -83,6 +87,20 @@ export default function OnboardingChecklist({ player, onDismiss }) {
   const doneCount = steps.filter((s) => s.done).length;
   const allDone = doneCount === steps.length;
 
+  // Feuert checklist_step_done für jeden Schritt, der neu (in dieser Sitzung) erledigt
+  // wurde – nicht beim ersten Mount, sonst würden bereits erledigte Alt-Schritte mitzählen.
+  useEffect(() => {
+    const doneMap = Object.fromEntries(steps.map((s) => [s.key, s.done]));
+    if (prevDoneRef.current) {
+      for (const s of steps) {
+        if (!prevDoneRef.current[s.key] && s.done) {
+          trackEvent("checklist_step_done", pathname, s.key);
+        }
+      }
+    }
+    prevDoneRef.current = doneMap;
+  }, [steps, pathname]);
+
   if (!player || hidden || player.onboardingDismissed || allDone) return null;
 
   // Bonus-Baustein (zählt NICHT in den Fortschritt) – Hoops Germany als App aufs Handy.
@@ -98,6 +116,7 @@ export default function OnboardingChecklist({ player, onDismiss }) {
 
   async function dismiss() {
     setHidden(true); // sofort ausblenden (optimistisch)
+    trackEvent("checklist_dismissed", pathname);
     try {
       await axios.post("/api/player/dismiss-onboarding", { token: getPlayerToken() });
     } catch {

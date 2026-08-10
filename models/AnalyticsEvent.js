@@ -5,6 +5,7 @@ const analyticsEventSchema = new mongoose.Schema(
     eventType: String,
     path: String,
     sessionId: String, // persistenter Besucher-Identifier (localStorage)
+    meta: String, // optionaler Zusatzkontext für Custom-Events (z.B. Onboarding-Checklist-Schritt)
     // Gerät/Umgebung (serverseitig aus User-Agent abgeleitet, nicht personenbezogen)
     device: String, // "mobile" | "desktop" | "tablet"
     browser: String,
