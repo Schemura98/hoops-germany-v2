@@ -85,7 +85,7 @@ function ProfileMock() {
         ].map(([v, l]) => (
           <div key={l}>
             <p className="font-black text-lg text-gray-900">{v}</p>
-            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">{l}</p>
+            <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">{l}</p>
           </div>
         ))}
       </div>
@@ -107,7 +107,7 @@ function RosterMock() {
         </span>
         <div className="min-w-0">
           <p className="font-bold text-gray-900 text-sm truncate">Test Baskets</p>
-          <p className="text-[11px] text-gray-400">12 Spieler im Kader</p>
+          <p className="text-[11px] text-gray-500">12 Spieler im Kader</p>
         </div>
       </div>
       <div className="space-y-1.5">
@@ -150,7 +150,7 @@ function MatchMock() {
           <span className="text-[11px] font-semibold text-gray-600 text-center">Rhein Hawks</span>
         </div>
       </div>
-      <div className="flex items-center gap-1.5 text-[11px] text-gray-400 border-t border-gray-100 pt-3">
+      <div className="flex items-center gap-1.5 text-[11px] text-gray-500 border-t border-gray-100 pt-3">
         <FaMapMarkerAlt className="text-brand-400 flex-shrink-0" /> Sa, 20:00 · Sporthalle Nord
       </div>
     </MockFrame>
@@ -165,7 +165,7 @@ function TableMock() {
   ];
   return (
     <MockFrame>
-      <div className="grid grid-cols-[1.5rem_1fr_2.5rem_2.5rem] gap-1 text-[10px] font-bold text-gray-400 uppercase tracking-wide px-1 mb-1.5">
+      <div className="grid grid-cols-[1.5rem_1fr_2.5rem_2.5rem] gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-wide px-1 mb-1.5">
         <span>#</span>
         <span>Team</span>
         <span className="text-center">Sp</span>
@@ -179,7 +179,7 @@ function TableMock() {
               r.pos === 1 ? "bg-brand-50" : ""
             }`}
           >
-            <span className={`text-xs font-black ${r.pos === 1 ? "text-brand-600" : "text-gray-400"}`}>
+            <span className={`text-xs font-black ${r.pos === 1 ? "text-brand-600" : "text-gray-500"}`}>
               {r.pos}
             </span>
             <span className="text-xs font-medium text-gray-800 truncate">{r.team}</span>
@@ -226,14 +226,14 @@ function FeedMock() {
         </span>
         <div>
           <p className="text-xs font-bold text-gray-900">Max Bauer</p>
-          <p className="text-[10px] text-gray-400">vor 2 Std</p>
+          <p className="text-[10px] text-gray-500">vor 2 Std</p>
         </div>
       </div>
       <div className="space-y-1.5 mb-4">
         <div className="h-2 rounded-full bg-gray-100 w-full" />
         <div className="h-2 rounded-full bg-gray-100 w-2/3" />
       </div>
-      <div className="flex items-center gap-4 text-gray-400 border-t border-gray-100 pt-3">
+      <div className="flex items-center gap-4 text-gray-500 border-t border-gray-100 pt-3">
         <span className="flex items-center gap-1.5 text-xs font-semibold">
           <FaHeart className="text-brand-500" /> 24
         </span>
