@@ -86,7 +86,7 @@ export default function LandingHowItWorks() {
                 <Reveal key={c.title} delay={i * 90} className="h-full">
                   <Link
                     href={c.href}
-                    className="group block h-full text-center bg-gray-50 hover:bg-brand-50 border border-gray-100 hover:border-brand-200 rounded-xl p-8 transition-all duration-200 ease-out-strong hover:-translate-y-1 motion-reduce:hover:translate-y-0"
+                    className="group block h-full text-center bg-gray-50 hover:bg-brand-50 border border-gray-100 hover:border-brand-200 rounded-xl p-8 transition-[transform,background-color,border-color] duration-200 ease-out-strong hover:-translate-y-1 motion-reduce:hover:translate-y-0"
                   >
                     <div className="bg-brand-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                       <Icon className="text-brand-500 text-2xl" />

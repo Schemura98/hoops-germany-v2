@@ -147,7 +147,7 @@ export default function TeamsPage() {
               <Link
                 key={t._id}
                 href={`/team/team-detail/${t.slug}`}
-                className="group bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-brand-200 hover:-translate-y-1 transition-all duration-200 ease-out-strong motion-reduce:hover:translate-y-0 overflow-hidden flex flex-col"
+                className="group bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-brand-200 hover:-translate-y-1 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong motion-reduce:hover:translate-y-0 overflow-hidden flex flex-col"
               >
                 <div className="bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center h-40 w-full">
                   {t.logo ? (

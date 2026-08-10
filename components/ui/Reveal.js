@@ -31,7 +31,7 @@ export default function Reveal({
   return (
     <Tag
       ref={ref}
-      className={`transition-all ease-out-strong motion-reduce:transition-opacity motion-reduce:!duration-300 motion-reduce:!translate-x-0 motion-reduce:!translate-y-0 motion-reduce:!scale-100 ${
+      className={`transition-[opacity,transform] ease-out-strong motion-reduce:transition-opacity motion-reduce:!duration-300 motion-reduce:!translate-x-0 motion-reduce:!translate-y-0 motion-reduce:!scale-100 ${
         inView ? "opacity-100 translate-x-0 translate-y-0 scale-100" : `opacity-0 ${offset}`
       } ${className}`}
       style={{

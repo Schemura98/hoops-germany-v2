@@ -99,7 +99,7 @@ function LeagueCard({ l }) {
   return (
     <Link
       href={`/ligen/${l._id}`}
-      className="block min-w-0 bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 hover:-translate-y-0.5 transition-all duration-200 ease-out-strong motion-reduce:hover:translate-y-0"
+      className="block min-w-0 bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 hover:-translate-y-0.5 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong motion-reduce:hover:translate-y-0"
     >
       <div className="flex items-start justify-between gap-2">
         <p className="font-semibold text-gray-900 break-words min-w-0">{l.name}</p>

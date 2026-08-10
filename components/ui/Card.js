@@ -6,7 +6,7 @@ export default function Card({ className = "", padding = "p-5", hover = false, c
     <div
       className={`rounded-2xl border border-gray-100 bg-white shadow-sm ${padding} ${
         hover
-          ? "transition-all duration-200 ease-out-strong hover:shadow-md hover:border-brand-200 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
+          ? "transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:shadow-md hover:border-brand-200 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
           : ""
       } ${className}`}
       {...props}
