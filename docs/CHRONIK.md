@@ -1457,3 +1457,33 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 >   vor dem Deploy gefixt (fea96f4: Effekt haengt jetzt an [inView, target]).
 > ✅ Live verifiziert nach Deploy: /, /ligen, /spiele, /teams, /topscorer, /transfermarkt, /tryouts je 200.
 >   Rollback-Stand vor dieser Runde: df520d3.
+
+---
+
+#### 🎨 Unterseiten-Design-Review + Wellen 1/2a (10.–11.08.2026, `fe6ca42` + `0ce7846` + `530d3b6`)
+> **Review:** Drei parallele Bündel von Vivien (öffentliche Listen-/Detailseiten · eingeloggte
+> Bereiche · Info-/Rechts-/Auth-Seiten), Code + Live-Prüfung, Werkzeuge `impeccable` /
+> `interface-design` / `ui-ux-pro-max` / `web-design-guidelines`. 29 Befunde; die offenen stehen mit
+> Datei- und Zeilenangaben in **`docs/DESIGN-REVIEW-2026-08-10.md`** (Arbeitsauftrag Welle 2b/3/4
+> inkl. Hero-Animation). Zwei Produktentscheidungen traf **Ronja** nach Live-Test als
+> Demo-Team-Admin (von Patrick ausdrücklich delegiert).
+> - **Welle 1 (`fe6ca42` + `0ce7846`, live):** `app/not-found.js` (eigene deutsche 404-Seite statt
+>   englischer Next-Standardseite), `components/ui/FormAlert.js` mit `role=alert`/`aria-live` ersetzt
+>   vier duplizierte Fehlerboxen (login/signup/reset-password/kontakt), Skeleton-Ladezustände auf
+>   rangliste/tryouts + zwei handgerollte Spinner ohne `motion-reduce` entfernt, `tryouts/[id]` mit
+>   `PageHeader` und Button-Primitiven (fiel als einzige Seite aus dem Muster), Button-Primitive in
+>   kontakt/feedback/player-detail, Select-Tokens auf `inputClassSm`, Karten-Hover auf das
+>   `Card.js`-Muster, Emoji durch Icons ersetzt, `AuthShell` mobil gestrafft (Kampagnen-Landepunkt
+>   `/signup`), `Skeleton.js` mit `motion-reduce` (Kais Gate-Befund).
+> - **Welle 2a (`530d3b6`):** Einladungslink entdoppelt — Ronja hatte live reproduziert, dass ein im
+>   Kader-Tab erzeugter Link im Einstellungen-Tab derselben Sitzung als „nicht vorhanden" erschien
+>   und ein Klick dort kommentarlos einen zweiten Token erzeugte (bereits verschickte Links wurden
+>   still ungültig). Kader-Tab ist jetzt alleinige Quelle, Einstellungen verweist nur noch dorthin;
+>   Neu-Erzeugen verlangt eine Bestätigung. Neue `components/ui/ConfirmAction.js` (Popover im
+>   Markendesign) ersetzt `window.confirm` bei Spieler entfernen / Spiel löschen / Tryout löschen.
+>   Benachrichtigungs-Schalter bekam die fehlende Speicher-Rückmeldung (laut Ronja das einzige
+>   inkonsistente Element, das den Eindruck „ich weiß nie, was gespeichert ist" erzeugte);
+>   Einstellungen-Tab zusätzlich Sprungmarken.
+> ⚠️ **Test-Falle dokumentiert:** Ein vor der DB-Passwort-Rotation gestarteter Zombie-Dev-Server auf
+> Port 3000 lieferte reproduzierbar 500er — und damit acht falsche Testfehler. Vor Testläufen
+> Port 3000 prüfen.
