@@ -1399,3 +1399,20 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 >   Transfermarkt/Liga-Tabelle zeigen Badges korrekt nur auf seedTag-Daten, /spiele „Anstehend (2)"
 >   nur Zukunftstermine, keine Konsolenfehler. **Offen:** Deploy auf VPS + `backfill-demo-flags` auf
 >   hoops_prod (nach Freigabe), Welle-1-Paket 4 „Oberliga-Duplikat" (Prod-Analyse separat).
+
+---
+
+#### 🚀 Wellen 2+3 + Kampagnen-Tracking (10.08.2026, Commits 74985ab + bfd3003 + 0b6dbfc)
+> **Korrektur zum Welle-1-Eintrag oben:** Welle 1 (b77d5ad) wurde am 10.08. vormittags auf Prod
+> deployt und backfill-demo-flags auf hoops_prod ausgefuehrt (46 Teams / 379 Spieler / 11 Ligen,
+> von Patrick freigegeben) - der dortige Vermerk 'Deploy ausstehend' ist ueberholt.
+> - **Welle 2 (74985ab):** Tryouts erreichbar (Navbar/Footer/Transfermarkt-Querlink); Superlativ
+>   ersetzt ('Community-Plattform fuer Amateur-Basketball in NRW'); Onboarding-Tracking
+>   (tour_completed/_skipped, checklist_step_done/_dismissed; lib/trackEvent.js; AnalyticsEvent.meta additiv).
+> - **Welle 3+4 (bfd3003):** components/landing/LandingFeatures.js (asymmetrisches Zickzack mit 6
+>   CSS-Produkt-Miniaturen statt Icon-Grid); orange-* zu brand-* in 16 Dateien; gray-900-Flaechen
+>   auf Navy-Gradient; PageHeader font-black; 26 MB ungenutzte JPEGs entfernt.
+> - **Kampagnen-Tracking (0b6dbfc):** /signup?src= wird sanitisiert als Player.signupSource
+>   gespeichert + signup_src-Event; Admin-Analytics 'Registrierungen nach Quelle' (demo-bereinigt,
+>   inkl. CSV). Messbasis fuer die Flyer-QR-Codes der Tester-Kampagne (H5).
+> - E2E-Suite tests/e2e/ (Kai, 8 Auth-Tests, Dev-DB-Guard) nach jeder Welle 8/8 gruen, Builds gruen.
