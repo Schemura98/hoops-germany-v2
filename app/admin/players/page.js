@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaTrash, FaTimes } from "react-icons/fa";
+import { FaTrash, FaTimes, FaFlask } from "react-icons/fa";
 import AdminShell from "@/components/layout/AdminShell";
 import { getAdminToken } from "@/lib/clientAuth";
 
@@ -34,6 +34,28 @@ export default function AdminPlayersPage() {
       }
     })();
   }, [load]);
+
+  // Internes Testkonto: real angelegt, aber uns selbst gehoerend - zaehlt nicht
+  // in Beteiligungszahlen (siehe lib/echteZahlen.js).
+  async function toggleIntern(p) {
+    setBusyId(p._id);
+    try {
+      const token = getAdminToken();
+      const { data } = await axios.post("/api/admin/set-internal", {
+        token,
+        art: "spieler",
+        id: p._id,
+        isInternal: !p.isInternal,
+      });
+      setPlayers((list) =>
+        list.map((x) => (x._id === p._id ? { ...x, isInternal: data.isInternal } : x))
+      );
+    } catch {
+      /* Fehler bleibt sichtbar durch unveraenderten Zustand */
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   async function remove(id, name) {
     if (!window.confirm(`Spieler „${name}" wirklich löschen? Beiträge werden mit entfernt.`)) return;
@@ -123,6 +145,16 @@ export default function AdminPlayersPage() {
                         Admin
                       </span>
                     )}
+                    {p.isDemo && (
+                      <span className="ml-2 text-[11px] font-medium rounded-full px-2 py-0.5 bg-slate-100 text-slate-600">
+                        Beispieldaten
+                      </span>
+                    )}
+                    {p.isInternal && (
+                      <span className="ml-2 text-[11px] font-medium rounded-full px-2 py-0.5 bg-sky-100 text-sky-700">
+                        intern
+                      </span>
+                    )}
                   </td>
                   <td className="py-3 text-gray-600">{p.email}</td>
                   <td className="py-3">
@@ -166,7 +198,27 @@ export default function AdminPlayersPage() {
                       </span>
                     )}
                   </td>
-                  <td className="py-3 pr-4 text-right">
+                  <td className="py-3 pr-4 text-right whitespace-nowrap">
+                    <button
+                      onClick={() => toggleIntern(p)}
+                      disabled={busyId === p._id}
+                      className={`p-1.5 disabled:opacity-60 ${
+                        p.isInternal ? "text-sky-600" : "text-gray-500 hover:text-sky-600"
+                      }`}
+                      title={
+                        p.isInternal
+                          ? "Internes Testkonto – aus Beteiligungszahlen ausgenommen. Klicken, um die Markierung aufzuheben."
+                          : "Als internes Testkonto markieren (zählt dann nicht in Beteiligungszahlen)"
+                      }
+                      aria-label={
+                        p.isInternal
+                          ? `${p.firstName} ${p.lastName}: Markierung als internes Testkonto aufheben`
+                          : `${p.firstName} ${p.lastName} als internes Testkonto markieren`
+                      }
+                      aria-pressed={!!p.isInternal}
+                    >
+                      <FaFlask />
+                    </button>
                     <button
                       onClick={() => remove(p._id, `${p.firstName} ${p.lastName}`)}
                       disabled={busyId === p._id}

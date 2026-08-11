@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { getTokenFromRequest } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import Player from "@/models/Player";
@@ -23,6 +24,12 @@ async function handler(req) {
   const isInternal = !!body.isInternal;
   if (!id || (art !== "team" && art !== "spieler")) {
     return fail("Ungültige Angaben (art muss 'team' oder 'spieler' sein)", 400);
+  }
+  // Ohne diese Prüfung wirft Mongoose bei einer strukturell ungültigen ID einen
+  // CastError, der als 500 herauskommt – fachlich ist es aber eine
+  // Falscheingabe (Befund Kai, 12.08.2026).
+  if (!mongoose.isValidObjectId(id)) {
+    return fail("Ungültige ID", 400);
   }
 
   await connectDB();
