@@ -100,6 +100,11 @@ async function handler(req) {
       logo: team.logo,
       banner: team.banner,
       followersCount: team.followers?.length || 0,
+      // Ohne dieses Feld blieb die Beispieldaten-Kennzeichnung auf der
+      // Team-Detailseite wirkungslos: Die Seite prueft team.isDemo, die
+      // Antwort enthielt es aber nie (beim Kennzeichnen der Seed-Teams am
+      // 12.08.2026 aufgefallen - die Abfrage selektierte das Feld bereits).
+      isDemo: !!team.isDemo,
       // Belegte (pending/confirmed) UND vom Admin benannte Plätze öffentlich zeigen
       // (benannte „empty"-Slots erscheinen als „eingeladen"); nur namenlose Leer-Slots ausblenden.
       rosterSlots: (team.rosterSlots || []).filter(
