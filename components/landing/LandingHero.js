@@ -12,6 +12,43 @@ import {
   FaCommentDots,
 } from "react-icons/fa";
 import { getPlayerToken } from "@/lib/clientAuth";
+
+// Rückkehr-Signal: Welche offene Sache zeigen wir dem eingeloggten Nutzer?
+// Reihenfolge = Dringlichkeit. Es wird ausschließlich gezeigt, was tatsächlich
+// ungelesen vorliegt – gibt es nichts, bleibt die neutrale Frage stehen
+// (Befund Ronja O3, Rolle Lina/Skill update-onboarding-surfaces).
+const SIGNALE = [
+  {
+    typ: "join_request",
+    href: "/team/admin?tab=anfragen",
+    text: (n) => (n === 1 ? "1 Beitrittsanfrage wartet auf dich" : `${n} Beitrittsanfragen warten auf dich`),
+  },
+  {
+    typ: "pending_result",
+    href: "/team/admin?tab=ergebnisse",
+    text: (n) => (n === 1 ? "1 Spiel wartet auf dein Ergebnis" : `${n} Spiele warten auf dein Ergebnis`),
+  },
+  {
+    typ: "match_result",
+    href: "/spiele",
+    text: (n) => (n === 1 ? "1 neues Ergebnis ist da" : `${n} neue Ergebnisse sind da`),
+  },
+];
+
+function rueckkehrSignal(notifications) {
+  const offen = (notifications || []).filter((n) => !n.read);
+  for (const s of SIGNALE) {
+    const treffer = offen.filter((n) => n.type === s.typ).length;
+    if (treffer > 0) return { href: s.href, text: s.text(treffer) };
+  }
+  if (offen.length > 0) {
+    return {
+      href: "/home",
+      text: offen.length === 1 ? "1 neue Benachrichtigung" : `${offen.length} neue Benachrichtigungen`,
+    };
+  }
+  return null;
+}
 import Reveal from "@/components/ui/Reveal";
 import HeroScrollStage from "@/components/landing/HeroScrollStage";
 
@@ -34,6 +71,7 @@ const HERO_W = "w-full sm:w-52";
 export default function LandingHero() {
   const [player, setPlayer] = useState(null); // null = lädt / ausgeloggt
   const [checked, setChecked] = useState(false);
+  const [signal, setSignal] = useState(null); // offene Sache für Wiederkehrer
   const ctaRef = useRef(null);
   // Textblock (Badge + Headline + Subline): Der fallende Ball blendet aus, solange er
   // auf dieser Hoehe ist – sonst kreuzt er je nach Zeilenumbruch den Fliesstext
@@ -54,6 +92,16 @@ export default function LandingHero() {
       })
       .catch(() => active && setPlayer(null))
       .finally(() => active && setChecked(true));
+    // Zweiter, unabhängiger Aufruf: Schlägt er fehl, bleibt der Hero exakt wie
+    // vorher – das Signal ist eine Zugabe, keine Voraussetzung.
+    axios
+      .post("/api/player/getnotifications", { token })
+      .then(({ data }) => {
+        if (active) setSignal(rueckkehrSignal(data.notifications));
+      })
+      .catch(() => {
+        /* ohne Signal ist der Hero unveraendert nutzbar */
+      });
     return () => {
       active = false;
     };
@@ -78,11 +126,23 @@ export default function LandingHero() {
               <span className="text-brand-400">schön, dass du da bist!</span>
             </Reveal>
             <Reveal
-              as="p"
+              as="div"
               delay={180}
-              className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto leading-relaxed"
+              className="mb-10 max-w-2xl mx-auto"
             >
-              Was möchtest du heute machen?
+              {signal ? (
+                <Link
+                  href={signal.href}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-base md:text-lg text-white hover:bg-white hover:text-gray-900 transition-colors"
+                >
+                  <span className="h-2 w-2 flex-shrink-0 rounded-full bg-brand-400" aria-hidden="true" />
+                  {signal.text}
+                </Link>
+              ) : (
+                <p className="text-lg md:text-xl text-gray-200 leading-relaxed">
+                  Was möchtest du heute machen?
+                </p>
+              )}
             </Reveal>
             </div>
             <Reveal as="div" delay={270} className="space-y-3 max-w-2xl mx-auto">
