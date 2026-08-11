@@ -1797,3 +1797,23 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > ⚠️ **Bewusst offen:** Auf der Produktivseite ist **kein einziges Konto markiert** – welche Konten
 > intern sind, entscheiden Patrick und Jonatan, nicht die Sitzung. Erst danach ist die Zahl „externe
 > Teams" im Dashboard aussagekräftig.
+>
+> **Nachtrag (12.08.2026): Interne Konten auf der Produktivseite markiert** (Datenpflege, kein Code).
+> Auf Patricks Anweisung, mit Trockenlauf vorab und Gegenprüfung danach; geschrieben wurde
+> ausschließlich `isInternal`, nichts gelöscht oder verborgen.
+> - **Vier Teams tragen exakt die Namen aus `scripts/seed-demo.mjs`** (Test Baskets, Rhein Ballers,
+>   Munich Hoops, Hamburg Towers United) und wurden alle am **24.06.2026** angelegt – dem Go-Live-Tag.
+>   Beim Start ist also ein Demo-Seed gegen `hoops_prod` gelaufen; die Teams tragen kein `isDemo`, weil
+>   es das Feld damals noch nicht gab. → als intern markiert.
+> - **48 Spielerprofile** mit `@test.de`/`@nrw-demo.de` (davon 18 vorher als echte Nutzer gezählt) und
+>   drei Profile, die wörtlich „Test" heißen (`Patrick Test`, `Pat Test`, `Patrick Test 2`,
+>   Adressvarianten des Betreibers) → intern.
+> - **Viersen Hoops II** (ebenfalls 24.06.) hat Patrick auf Rückfrage als sein eigenes Team benannt
+>   → intern.
+> - **Bewusst extern belassen:** `Mönchengladbach Scorpions e.V.` (28.06. angelegt, „e.V." im Namen)
+>   sowie die Hauptprofile von Patrick und Jonatan – auf Patricks ausdrückliche Entscheidung, weil sie
+>   selbst spielen und sich sonst kleinrechnen würden.
+> **Ergebnis der Zählung:** externe Teams **6 → 1**, externe Nutzer **31 → 10**. Das ist die ehrliche
+> Ausgangslage für Neles Schwelle (20–25 externe Teams, bevor eine öffentliche Beteiligungszahl
+> sinnvoll wird). Offen geblieben: ob `Jonny Vo` (Kampagnenhelfer?) extern zählt – Patrick hat dazu
+> nichts entschieden, das Profil zählt weiterhin mit.
