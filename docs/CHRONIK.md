@@ -1621,3 +1621,50 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > hinter dem Text, reine Gestaltungsfrage, Tobias: kein Blocker), Test auf echtem Low-End-Android,
 > sowie ein **vorbestehender** 8-px-Horizontalüberlauf auf Mobile aus dem `-translate-x-6`-Startversatz
 > in `components/ui/Reveal.js` (Feature-Karten) – nachweislich nicht Teil dieses Diffs.
+
+---
+
+#### 🌙 Nachtschicht: Startseite als Scroll-Erlebnis, Wellen 3 und 4 (11./12.08.2026, `38c864b` · `ed4751c` · `49e60aa` · `600aef6`)
+> Patrick hat vor dem Schlafengehen Blankofreigabe für die Nacht erteilt („komplette Website zu einer
+> Traum-Website gestalten"), mit der Auflage, die Gates einzuhalten und den Rollback-Punkt zu notieren.
+> Ausgangspunkt war seine Kritik am Live-Stand: Der Hero-Akzent sei noch kein „innovatives Design wie
+> bei Apple" – die Darstellung solle modern, sportlich, interaktiv und beweglich sein und beim Scrollen
+> **sinnhaft die „Alles, was du brauchst"-Sektion durchlaufen**, damit man die Funktionen spielerisch
+> kennenlernt. Grundlage: `docs/LANDING-KONZEPT-2026-08-11.md` (Vivien, „Ein Spielzug in sechs Szenen",
+> inkl. Nachtrag Abschnitt 16) und `docs/LANDING-COPY-2026-08-11.md` (Nele).
+>
+> - **Feature-Strecke Stufe 1 (`ef0b532`, s. eigener Eintrag oben):** `components/landing/FeatureMocks.js`.
+> - **Welle 3 (`38c864b`):** `components/ui/ScrollTable.js` (neu) – waagerecht scrollbare Tabelle mit
+>   Kanten-Verlauf, der nur erscheint, solange in diese Richtung Inhalt liegt; dazu `sticky`-Rang- und
+>   Namensspalte (`bg-inherit`, damit Hover erhalten bleibt) auf Rangliste, Topscorer und Liga-Tabelle.
+>   Gemessen bei 375px: 74px bzw. 43px Überlauf, Name bleibt beim Wischen stehen, letzte Spalte
+>   erreichbar. Filterleisten von `/spieler`, `/teams`, `/transfermarkt` auf das `/spiele`-Muster
+>   (Suche volle Breite, Auswahlfelder zweispaltig, Umkreis eigene Zeile). `components/ui/Tabs.js`
+>   bekam `max-w-full` – der Pill-Umschalter ragte auf 375px um 1px hinaus und erzeugte damit
+>   waagerechtes Scrollen der **ganzen** Seite. Dazu Neles Texte: „Eine Saison, sechs Spielzüge",
+>   Eyebrow-Labels 1/6…6/6, Karte 3 nennt jetzt die doppelte Bestätigung, Karte 4 verliert das
+>   ungedeckte „in Echtzeit".
+> - **Welle 4 (`ed4751c`):** `LegalShell` auf `max-w-xl` (Zeilenlänge 75–80 → 47 mobil / 77 auf 1280px)
+>   und ab sechs Abschnitten ein automatisches Sprungmenü: Die Hülle liest die Überschriften aus ihren
+>   eigenen Kindern, vergibt die IDs selbst und klont die Überschrift mit ID – die Rechtstexte bleiben
+>   unangetastet. ⚠️ Beim Prüfen selbst gestolpert: IDs, die mit einer Ziffer beginnen („1-verantwortlicher"),
+>   sind als CSS-Selektor ungültig – im Browser fällt das nicht auf, bricht aber jedes Testwerkzeug;
+>   daher Präfix `abschnitt-`. `app/oauth-landing` bekam den Markenrahmen (Wortmarke, `FormAlert`,
+>   Rückweg zur Anmeldung) statt einer nackten Fehlerzeile.
+> - **Feature-Strecke Stufe 2 (`49e60aa`):** `components/landing/FeatureProgressRail.js` – mobil ein
+>   Balken unter der Navbar mit Kurzlabel („3 / 6 · Doppelt bestätigt"), ab xl ein Punkte-Streifen am
+>   rechten Rand. Ein Scroll-Listener für die ganze Sektion, ein rAF-Tick, Label nur bei Abschnittswechsel
+>   geschrieben. Bei reduzierter Bewegung wird der Balken zur neutralen Linie – er hätte sonst dauerhaft
+>   auf 0 % gestanden und wie ein Fehler gewirkt.
+> - **Feinschliff (`600aef6`):** Viviens Nachtrag – mittlere Karte in „Deine nächsten Schritte" auf Navy
+>   (dreimal dieselbe orange Geste direkt unter der Feature-Strecke), Reveal-Stagger im NewsWidget
+>   (einziger Karten-Grid ohne), News-Abschnitt `py-16` → `py-20`, und `CountUp` **nur für Rang 1–3** auf
+>   Rangliste/Topscorer: `useInView` legt pro Zahl einen eigenen IntersectionObserver an, bei 31 Zeilen
+>   wären das 60+ – jetzt 6 bzw. 9, und die Bewegung verstärkt die ohnehin farblich gesetzte Hierarchie.
+>   Bewusst **nicht** gebaut: eine Verbindungslinie in „So funktionierts" (dritte Scroll-Bewegung in
+>   Folge ohne neue Information – Viviens Restraint-Test).
+>
+> **Verifikation:** Automatischer Sweep über 19 öffentliche Seiten bei 375px – überall 0px waagerechter
+> Überlauf, keine Konsolenfehler, keine 4xx/5xx. Choreografie, Fortschritts-Anzeige und Sprungmenü je
+> einzeln vermessen (Werte in den Commit-Nachrichten). Playwright 8/8 nach jedem Schritt.
+> Kais Code-/Security-Gate für Stufe 1: freigabefähig ohne Befund.
