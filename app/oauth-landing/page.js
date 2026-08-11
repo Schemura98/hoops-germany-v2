@@ -1,9 +1,29 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FaBasketballBall } from "react-icons/fa";
 import { setPlayerToken } from "@/lib/clientAuth";
+import Loading from "@/components/ui/Loading";
+import FormAlert from "@/components/ui/FormAlert";
+import Button from "@/components/ui/Button";
+
+// Landepunkt nach dem Google-Login. Im Normalfall sieht man diese Seite nur
+// für den Bruchteil einer Sekunde – im Fehlerfall aber schon, und dann stand
+// hier bisher nur eine nackte Fehlerzeile ohne Logo und ohne Ausweg
+// (Design-Review 10.08.2026, Welle 4). Jetzt trägt sie den Marken-Rahmen der
+// Auth-Seiten und einen sichtbaren Weg zurück zur Anmeldung.
+function Rahmen({ children }) {
+  return (
+    <main className="min-h-screen flex flex-col items-center justify-center gap-6 px-6 py-12 text-center">
+      <Link href="/">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/logo-hoops.svg" alt="Hoops Germany" className="mx-auto h-auto w-40 sm:w-48" />
+      </Link>
+      {children}
+    </main>
+  );
+}
 
 function OauthLandingInner() {
   const router = useRouter();
@@ -26,13 +46,26 @@ function OauthLandingInner() {
     router.replace(dest);
   }, [searchParams, router]);
 
+  if (error) {
+    return (
+      <Rahmen>
+        <div className="w-full max-w-sm space-y-4">
+          <FormAlert>{error}</FormAlert>
+          <p className="text-sm text-gray-500">
+            Wir leiten dich gleich automatisch weiter.
+          </p>
+          <Button href="/login" className="w-full">
+            Zurück zur Anmeldung
+          </Button>
+        </div>
+      </Rahmen>
+    );
+  }
+
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
-      <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
-      <p className="mt-4 text-gray-600">
-        {error || "Anmeldung wird abgeschlossen…"}
-      </p>
-    </main>
+    <Rahmen>
+      <Loading className="py-0" label="Anmeldung wird abgeschlossen…" />
+    </Rahmen>
   );
 }
 
@@ -40,9 +73,9 @@ export default function OauthLandingPage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen flex items-center justify-center">
-          <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
-        </main>
+        <Rahmen>
+          <Loading className="py-0" label="Anmeldung wird abgeschlossen…" />
+        </Rahmen>
       }
     >
       <OauthLandingInner />
