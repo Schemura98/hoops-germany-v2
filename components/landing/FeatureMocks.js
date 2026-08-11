@@ -160,11 +160,19 @@ export function RosterMock() {
 // einer Tabelle, die einer allein pflegt.
 export function MatchMock() {
   const [ref, animate, reduced] = useChoreography();
-  // Schritte: 1 Team A gemeldet · 2 Team B gemeldet · 3 Tags weg · 4 Endstand · 5 bestätigt
-  const step = useSequence(animate, reduced, [0, 450, 900, 950, 1150]);
+  // Schritte: 1 Team A meldet · 2 Team B meldet · 3 Endstand · 4 bestätigt.
+  // Die beiden Team-Meldungen blenden NICHT mehr aus: Ronja hat gemessen, dass
+  // beide vorher nur ~200ms gleichzeitig zu sehen waren – das Verständnis hing
+  // daran, im richtigen Moment hinzusehen. Jetzt stehen alle drei Zahlen
+  // dauerhaft nebeneinander („meldet 78" · „78 : 65 Bestätigt" · „meldet 65"),
+  // der Mechanismus ist damit ein Dauerzustand statt eines Zeitfensters
+  // (Entscheid Vivien, docs/LANDING-KONZEPT-2026-08-11.md §17.1).
+  const step = useSequence(animate, reduced, [0, 650, 1550, 1750]);
 
+  // 11px statt 9px: Das ist die Mikro-Textgröße, die diese Karte für die
+  // Team-Namen ohnehin nutzt – kein dritter Wert.
   const tagBase =
-    "absolute left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full";
+    "absolute left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-semibold px-1.5 py-0.5 rounded-full";
   const fade = (visible, delay = 0) => ({
     opacity: visible ? 1 : 0,
     // Verzögerung bewusst Teil der Kurzform: transition + transitionDelay
@@ -174,7 +182,7 @@ export function MatchMock() {
 
   return (
     <MockFrame innerRef={ref}>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-7">
         <div className="relative flex flex-col items-center gap-1.5 w-16">
           <span className="h-10 w-10 rounded-full bg-slate-800 text-white font-bold flex items-center justify-center text-xs">
             TB
@@ -182,10 +190,10 @@ export function MatchMock() {
           <span className="text-[11px] font-semibold text-gray-600 text-center">Test Baskets</span>
           <span
             aria-hidden="true"
-            className={`${tagBase} -bottom-4 bg-slate-100 text-slate-600`}
-            style={fade(step >= 1 && step < 3)}
+            className={`${tagBase} -bottom-5 bg-slate-100 text-slate-600`}
+            style={fade(step >= 1)}
           >
-            eingereicht
+            meldet <span className="font-black text-slate-800">78</span>
           </span>
         </div>
 
@@ -193,8 +201,8 @@ export function MatchMock() {
           <p
             className="font-black text-2xl text-gray-900 tracking-tight"
             style={{
-              opacity: step >= 4 ? 1 : 0,
-              transform: step >= 4 ? "scale(1)" : "scale(0.92)",
+              opacity: step >= 3 ? 1 : 0,
+              transform: step >= 3 ? "scale(1)" : "scale(0.92)",
               transition: reduced ? "none" : `opacity 350ms ${EASE}, transform 350ms ${EASE}`,
             }}
           >
@@ -202,7 +210,7 @@ export function MatchMock() {
           </p>
           <span
             className="inline-block mt-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full uppercase tracking-wide"
-            style={fade(step >= 5)}
+            style={fade(step >= 4)}
           >
             Bestätigt
           </span>
@@ -215,10 +223,10 @@ export function MatchMock() {
           <span className="text-[11px] font-semibold text-gray-600 text-center">Rhein Hawks</span>
           <span
             aria-hidden="true"
-            className={`${tagBase} -bottom-4 bg-slate-100 text-slate-600`}
-            style={fade(step >= 2 && step < 3)}
+            className={`${tagBase} -bottom-5 bg-slate-100 text-slate-600`}
+            style={fade(step >= 2)}
           >
-            eingereicht
+            meldet <span className="font-black text-slate-800">65</span>
           </span>
         </div>
       </div>

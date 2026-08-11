@@ -48,8 +48,14 @@ const BALL_R = 14; // halbe Kantenlänge des Ball-SVG (28px)
 const EMBLEM_W = 20;
 const EMBLEM_H = 14;
 
-// Weicher Puffer, über den der Ball vor und nach dem Textblock aus-/einblendet.
+// Weicher Puffer, über den der Ball vor und nach dem Textblock abdunkelt.
 const TEXT_FADE_MARGIN = 24;
+// Bodenwert statt hartem 0: Bei 0 verschwand der Ball auf 375px praktisch die
+// ganze Fallstrecke (Ronjas Messung – der Textblock füllt dort fast alles bis
+// zur Schaltfläche). 20% halten die Bewegung durchgehend erkennbar, ohne das
+// scharfkantige Aufblitzen zwischen den Buchstaben, das der Grund für die 0 war
+// (Entscheid Vivien, docs/LANDING-KONZEPT-2026-08-11.md §17.2).
+const TEXT_DIM_FLOOR = 0.2;
 
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 
@@ -63,11 +69,13 @@ function ballOpacityNearText(ballCenterY, textRect) {
   if (!textRect) return 1;
   if (ballCenterY < textRect.top - TEXT_FADE_MARGIN) return 1;
   if (ballCenterY < textRect.top) {
-    return 1 - (ballCenterY - (textRect.top - TEXT_FADE_MARGIN)) / TEXT_FADE_MARGIN;
+    const t = (ballCenterY - (textRect.top - TEXT_FADE_MARGIN)) / TEXT_FADE_MARGIN;
+    return 1 - t * (1 - TEXT_DIM_FLOOR);
   }
-  if (ballCenterY <= textRect.bottom) return 0;
+  if (ballCenterY <= textRect.bottom) return TEXT_DIM_FLOOR;
   if (ballCenterY <= textRect.bottom + TEXT_FADE_MARGIN) {
-    return (ballCenterY - textRect.bottom) / TEXT_FADE_MARGIN;
+    const t = (ballCenterY - textRect.bottom) / TEXT_FADE_MARGIN;
+    return TEXT_DIM_FLOOR + t * (1 - TEXT_DIM_FLOOR);
   }
   return 1;
 }

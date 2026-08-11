@@ -448,3 +448,155 @@ Ja zu `CountUp`, aber begrenzt — genau der Mittelweg, den ich beim Bauen prüf
 „Würde ein gutes Designstudio das mit seinem Namen unterschreiben?" — Ja. Die auffälligste
 Entscheidung hier ist ein Nein (keine Verbindungslinie) und eine Grenze (Podium statt aller Zeilen)
 — beides bewusster Verzicht zugunsten des einen Moments, der schon trägt, statt ihn zu verwässern.
+
+---
+
+## 17. Nachtrag 12.08.2026: Zwei Entscheidungen aus Ronjas Verständnisprüfung
+
+Grundlage: `docs/RONJA-LANDING-2026-08-12.md` — gemessen (Live-DOM, 100-ms-Raster), nicht geschätzt.
+Quellcode selbst nachgesehen (`components/landing/FeatureMocks.js`, `HeroScrollStage.js`) vor der
+Entscheidung, nicht nur Ronjas Zahlen übernommen.
+
+### 17.1 M1 — Szene 3 „Doppelt bestätigt": Inhalt statt nur Timing ändern
+
+**Befund bestätigt und selbst nachvollzogen:** `useSequence(animate, reduced, [0, 450, 900, 950,
+1150])` in `MatchMock` (`FeatureMocks.js` Zeile 164) erzeugt genau das gemessene Fenster — beide
+`text-[9px]`-„eingereicht"-Badges sind rechnerisch von ~800 ms (B fertig eingeblendet) bis 900 ms
+(beide beginnen auszublenden) gemeinsam sichtbar: **~100–180 ms**, deckt sich mit Ronjas 180–250 ms.
+
+**Entscheidung: Ich gehe weiter als der Vorschlag — nicht nur länger zeigen, sondern die Badges
+nie wieder verschwinden lassen.** Der Vorschlag (Zeitfenster auf ~950 ms strecken) behebt das
+Symptom, lässt aber ein Zeitfenster-Problem übrig: Die Aussage bleibt daran gebunden, dass jemand
+im richtigen Moment hinschaut. Der eigentliche Fehler ist struktureller Natur — zwei unabhängige
+Meldungen als **Zustand** („eingereicht") statt als **Inhalt** (die gemeldete Zahl) zu zeigen, der
+danach automatisch wieder ausgeblendet wird. Die robustere Lösung macht die Aussage zeitlos wahr,
+nicht nur langsamer falsch:
+
+1. **Inhalt statt Zustand, wie vorgeschlagen:** Aus „eingereicht" wird die tatsächlich gemeldete
+   Zahl — „meldet 78" unter Team A, „meldet 65" unter Team B. Übernommen, das ist der wichtigste
+   Teil des Vorschlags.
+2. **Die beiden Team-Meldungen verschwinden nicht mehr — sie bleiben Teil des Endzustands.**
+   Statt „A meldet → B meldet → beide weg → Endstand → Bestätigt" wird die Sequenz auf vier Schritte
+   verkürzt: „A meldet → B meldet → Endstand erscheint → Bestätigt" — die beiden Team-Zahlen bleiben
+   stehen, während der zusammengeführte Endstand daneben aufscheint. Damit hängt das Verständnis
+   nicht mehr an einem Zeitfenster, das man treffen muss (und sei es 950 ms statt 200 ms) — jeder,
+   der die Karte zu **irgendeinem** Zeitpunkt nach Ablauf der Animation ansieht, sieht alle drei
+   Zahlen gleichzeitig: „meldet 78" · „78 : 65 Bestätigt" · „meldet 65". Das ist der Mechanismus als
+   Dauerzustand, nicht nur als Duschblick.
+3. **Neue Zeitleiste** (4 statt 5 Marken, `marks = [0, 650, 1550, 1750]`):
+   - `t=0`: Team-A-Wert „meldet 78" blendet ein (250 ms) — bleibt sichtbar.
+   - `t=650`: Team-B-Wert „meldet 65" blendet ein (250 ms) — bleibt sichtbar. 650 ms Abstand statt
+     450 ms, damit A sichtbar allein steht, bevor B folgt (unterstreicht „nacheinander, unabhängig").
+   - `t=1550`: Endstand „78 : 65" skaliert ein (0,92→1,04→1, 350 ms) — **überlappt bewusst mit den
+     weiterhin sichtbaren Team-Werten** statt sie erst auszublenden. Das ist der Moment, der den
+     „Zwei-werden-eins"-Mechanismus tatsächlich zeigt: Ursache (zwei Zahlen) und Wirkung (eine
+     Zahl) stehen gleichzeitig im Bild.
+   - `t=1750`: „Bestätigt"-Pill blendet ein (250 ms).
+   - Bedingungen vereinfachen sich gegenüber heute: `step>=1`/`step>=2` für die Team-Werte (kein
+     `&& step<3` mehr, weil nichts mehr ausblendet), `step>=3` für den Endstand, `step>=4` für die
+     Pill.
+   - Gesamtlaufzeit ≈2,0 s (heute 1,4 s) — länger, aber vertretbar: die Karte kostet weiterhin
+     **keine** Scrollzeit (IntersectionObserver, kein Pin), und die Zusatzlänge kauft dauerhafte
+     statt transiente Information.
+4. **Textgröße:** `text-[9px]` → **`text-[11px]`**, nicht nur auf 10px. Begründung: Dieselbe Karte
+   nutzt bereits `text-[11px]` für die Team-Namen direkt darüber („Test Baskets"/„Rhein Hawks") —
+   11px ist die vorhandene Mikro-Textgröße dieser Karte, kein dritter neuer Wert. Zusätzlich die
+   Zahl im Label stärker gewichten als das Verb, damit das Auge die Ziffer zuerst greift:
+   ```jsx
+   <span className="text-[11px] font-semibold text-slate-600 ...">
+     meldet <span className="font-black text-slate-800">78</span>
+   </span>
+   ```
+5. **`prefers-reduced-motion`: bewusst ANDERS als vorgeschlagen — nicht unverändert lassen.**
+   Heute überspringt die reduzierte Fassung die Badges komplett (Ronjas eigener Beleg, dass das
+   Vertrauensmerkmal strukturell nur im Fließtext lebt). Weil die Team-Werte jetzt zum **dauerhaften
+   Endzustand** gehören und nicht mehr transient sind, ist das Argument von gestern („kein Grund,
+   etwas zu zeigen, das gleich wieder weg ist") nicht mehr gültig. Reduzierte Bewegung soll denselben
+   Endzustand **sofort** zeigen (kein Timing, aber `step` direkt auf 4) statt ihn wegzulassen — mehr
+   Information für reduzierte Bewegung, nicht weniger, ohne dass dafür irgendetwas bewegt werden
+   muss (deckt sich mit der schon etablierten Regel „gleicher Endzustand, nur ohne Übergang").
+6. **Layout-Risiko, offen benannt statt verschwiegen:** Die Badges sitzen `absolute -bottom-4`
+   unterhalb der Avatar-Spalte, kalkuliert für einen **transienten** Zustand. Da sie jetzt dauerhaft
+   sichtbar bleiben, muss geprüft werden, ob sie mit der `mb-4`-Lücke vor der Fußzeile („Sa, 20:00 ·
+   Sporthalle Nord“) kollidieren. Ich habe das nicht selbst im Browser verifiziert (kein
+   Live-Zugriff in diesem Auftrag) — **falls es eng wird, `mb-4` auf `mb-6` an der Avatar-Zeile
+   erhöhen** (löst 8px zusätzlichen Puffer, ohne die Kartenhöhe der übrigen fünf Mockups zu
+   berühren, da nur `MatchMock` betroffen ist). Bitte von Tobias vor Freigabe gegenprüfen.
+
+**Prüfbarkeit:** Ronjas eigene Methode (Live-DOM-Opacity-Auslese alle 100 ms) direkt wiederholbar —
+Erfolgskriterium jetzt einfacher als vorher: Ab `t≈1800 ms` müssen alle drei Werte („meldet 78“,
+„78 : 65 Bestätigt“, „meldet 65“) dauerhaft mit Opacity 1 im DOM stehen, nicht nur für ein Fenster.
+
+### 17.2 S2 — Ball auf 375 px sichtbar machen: Dimmen statt Ausblenden
+
+**Ursache selbst nachvollzogen:** `ballOpacityNearText()` (Entscheidung vom 11.08., gegen die
+430-px-Textkollision) setzt die Ball-Opacity auf **0**, solange die Ball-Mitte innerhalb des
+Textblock-Rects (Badge+Headline+Subline) liegt. Auf 375 px füllt dieser Block einen so großen Teil
+der Fallstrecke bis zur Schaltfläche, dass die Regel, die bei 430 px richtig war, auf dem von
+Patrick benannten Hauptfall-Breakpoint die Bewegung faktisch verschluckt.
+
+**Entscheidung: c) Abschwächen statt Ausblenden — mit konkretem Bodenwert, nicht nur „irgendwie
+schwächer".** Begründung gegen die Alternativen:
+- **a) Pro-Zeile statt Block messen:** Löst das Problem nur teilweise (gewinnt Sichtbarkeit in den
+  Zeilenzwischenräumen, nicht während der Textzeilen selbst) und bringt echten Mehraufwand
+  (`Range.getClientRects()` für umbrechenden Text, mehrere Rects pro Frame statt eines). Für den
+  Gewinn nicht gerechtfertigt, wenn (c) das eigentliche Problem direkter löst.
+- **b) Bahn nach außen versetzen:** Widerspricht meiner eigenen Begründung vom 11.08. für die
+  vertikale Bahn — auf 375 px gibt es nachweislich keinen seitlichen Freiraum (daher vertikal statt
+  seitlich). Verworfen.
+- **d) Ball auf Mobil ganz streichen:** Wäre das Ende des mobilen Signature-Moments, den Patrick
+  gerade erst gegenüber dem reinen CTA-Puls als Mindestanspruch bestätigt hat. Verworfen.
+
+**Konkreter Wert:** Bodenwert **0,2** statt 0 (Ball bleibt schwach, aber durchgehend sichtbar, statt
+komplett zu verschwinden):
+
+```js
+const TEXT_DIM_FLOOR = 0.2; // vorher: harte 0
+
+function ballOpacityNearText(ballCenterY, textRect) {
+  if (ballCenterY < textRect.top - TEXT_FADE_MARGIN) return 1;
+  if (ballCenterY < textRect.top) {
+    const t = (ballCenterY - (textRect.top - TEXT_FADE_MARGIN)) / TEXT_FADE_MARGIN;
+    return 1 - t * (1 - TEXT_DIM_FLOOR);
+  }
+  if (ballCenterY <= textRect.bottom) return TEXT_DIM_FLOOR;
+  if (ballCenterY <= textRect.bottom + TEXT_FADE_MARGIN) {
+    const t = (ballCenterY - textRect.bottom) / TEXT_FADE_MARGIN;
+    return TEXT_DIM_FLOOR + t * (1 - TEXT_DIM_FLOOR);
+  }
+  return 1;
+}
+```
+
+Warum 0,2 und nicht z. B. 0,5: Bei 20 % Deckkraft entsteht hinter dem Text kein scharfkantiges
+„Aufblitzen zwischen Buchstaben“ mehr (das war der eigentliche Grund für die 0-Entscheidung gestern)
+— nur ein schwacher warmer Schimmer, der die Bewegung durchgehend erkennbar hält, ohne mit dem Text
+zu konkurrieren. Sobald die Ball-Mitte den Textblock verlässt (inkl. 24-px-Fade-Puffer, unverändert),
+kehrt die volle Opacity 1 zurück — insbesondere für die Ziel-Ankunft am Korb-Emblem, die laut
+Konzept ohnehin **außerhalb** des Textblocks liegt (CTA-Block kommt nach der Subline) und dadurch
+bereits mit voller Deckkraft läuft.
+
+**Offen benanntes Restrisiko:** Bei 430 px könnte die ursprünglich behobene Textkollision in stark
+abgeschwächter Form wieder minimal wahrnehmbar werden (20 % statt 0 % Deckkraft hinter dem Wort
+„Ligen“). Das ist ein bewusst akzeptierter Kompromiss, kein Übersehen — bei 20 % Deckkraft entsteht
+kein scharfer Buchstaben-Kontrast mehr, der wie ein Rendering-Fehler wirkt. **Tobias sollte beide
+Breiten (375 px und 430 px) nach der Umsetzung gegenprüfen**, damit diese Einschätzung nicht nur
+behauptet, sondern verifiziert im Gate steht.
+
+### 17.3 Kollegen einbezogen
+
+- **Ronja:** Grundlage dieses Nachtrags, kein neuer Auftrag — ihre Messmethode (Live-DOM-Opacity,
+  100-ms-Raster) ist in 17.1 direkt als Prüfvorschlag für die Nachbesserung übernommen.
+- **Niemand sonst neu.** Beide Entscheidungen sind reine Timing-/Werte-/Inhalts-Korrekturen an
+  bereits bestehender, freigegebener Mikro-Copy („eingereicht“ → „meldet X“ ist Zahlen-Beschriftung
+  einer Mockup-Karte, keine Marketing-Aussage — fällt nicht unter Neles Zuständigkeit). Tobias prüft
+  beide Punkte im nächsten Gate-Durchlauf (17.1 Layout-Kollision, 17.2 Restrisiko 430 px).
+
+### 17.4 Selbsttest
+
+„Würde ein gutes Designstudio das mit seinem Namen unterschreiben?“ — Ja, mit einer bewussten
+Abweichung vom Vorschlag, die ich offen begründet habe: Ein längeres Zeitfenster wäre die bequemere,
+kleinere Änderung gewesen. Die dauerhafte Zwei-Zahlen-Anzeige ist die unbequemere, weil sie eine
+zusätzliche Zeile Zustand im UI hinzufügt (und ein Layout-Risiko, das ich nicht selbst verifizieren
+konnte) — aber sie löst das Problem strukturell statt es nur zu verlangsamen, und das ist der
+Maßstab, den ich an meine eigene Szene anlege.
