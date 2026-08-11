@@ -3,13 +3,13 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import {
-  FaPlus,
-  FaTrash,
-  FaMapMarkerAlt,
-  FaUsers,
-  FaChevronDown,
-  FaBullhorn,
-} from "react-icons/fa";
+  PiPlusBold,
+  PiTrashBold,
+  PiMapPinBold,
+  PiUsersBold,
+  PiCaretDownBold,
+  PiMegaphoneBold,
+} from "react-icons/pi";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import { POSITIONS, positionLabel } from "@/lib/constants";
 import ConfirmAction from "@/components/ui/ConfirmAction";
@@ -134,15 +134,15 @@ export default function TryoutsTab() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">
-          Tryouts <span className="text-sm font-normal text-gray-500">· {tryouts.length}</span>
+        <h2 className="text-lg font-semibold text-paper-50">
+          Tryouts <span className="text-sm font-normal text-mist-400">· {tryouts.length}</span>
         </h2>
         <Button
           onClick={() => setShowAdd((v) => !v)}
           aria-expanded={showAdd}
           className="flex-shrink-0"
         >
-          <FaPlus className="text-xs" /> Tryout ausschreiben
+          <PiPlusBold className="text-xs" /> Tryout ausschreiben
         </Button>
       </div>
 
@@ -151,11 +151,11 @@ export default function TryoutsTab() {
       {showAdd && (
         <form
           onSubmit={create}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3"
+          className="bg-ink-800 rounded-md border border-ink-600 p-4 space-y-3"
         >
           <div className="grid sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Datum & Uhrzeit</label>
+              <label className="block text-xs font-medium text-mist-400 mb-1">Datum & Uhrzeit</label>
               <input
                 type="datetime-local"
                 required
@@ -165,7 +165,7 @@ export default function TryoutsTab() {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Ort</label>
+              <label className="block text-xs font-medium text-mist-400 mb-1">Ort</label>
               <input
                 required
                 value={form.location}
@@ -177,7 +177,7 @@ export default function TryoutsTab() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-mist-400 mb-1">
               Gesuchte Positionen
             </label>
             <div className="flex flex-wrap gap-2">
@@ -188,10 +188,10 @@ export default function TryoutsTab() {
                     key={p}
                     type="button"
                     onClick={() => togglePosition(p)}
-                    className={`rounded-lg px-3 py-1.5 text-sm font-medium border transition-colors ${
+                    className={`rounded-sm px-3 py-1.5 text-sm font-medium border transition-colors ${
                       active
-                        ? "bg-brand-500 border-brand-500 text-white"
-                        : "border-gray-300 text-gray-600 hover:border-brand-500"
+                        ? "bg-brand-500 border-brand-500 text-ink-950"
+                        : "border-ink-600 text-mist-400 hover:border-brand-500"
                     }`}
                   >
                     {p}
@@ -202,8 +202,8 @@ export default function TryoutsTab() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              Beschreibung <span className="text-gray-500">(optional)</span>
+            <label className="block text-xs font-medium text-mist-400 mb-1">
+              Beschreibung <span className="text-mist-400">(optional)</span>
             </label>
             <textarea
               rows={2}
@@ -228,13 +228,13 @@ export default function TryoutsTab() {
 
       {tryouts.length === 0 ? (
         <EmptyState
-          icon={FaBullhorn}
+          icon={PiMegaphoneBold}
           title="Noch keine Tryouts ausgeschrieben"
           text="Lege das erste an – es erscheint dann öffentlich unter /tryouts, damit Spieler sich bewerben können."
           action={
             !showAdd && (
               <Button onClick={() => setShowAdd(true)}>
-                <FaPlus className="text-xs" /> Tryout ausschreiben
+                <PiPlusBold className="text-xs" /> Tryout ausschreiben
               </Button>
             )
           }
@@ -247,20 +247,20 @@ export default function TryoutsTab() {
             return (
               <div
                 key={t._id}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5"
+                className="bg-ink-800 rounded-md border border-ink-600 p-5"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-medium text-gray-900">{formatDate(t.date)}</p>
-                    <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
-                      <FaMapMarkerAlt /> {t.location}
+                    <p className="font-medium text-paper-50">{formatDate(t.date)}</p>
+                    <p className="text-xs text-mist-400 flex items-center gap-1 mt-0.5">
+                      <PiMapPinBold /> {t.location}
                     </p>
                     {t.positions?.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {t.positions.map((p) => (
                           <span
                             key={p}
-                            className="text-xs font-medium bg-brand-50 text-brand-700 rounded-full px-2 py-0.5"
+                            className="text-xs font-medium bg-brand-500/10 text-brand-400 rounded-sm px-2 py-0.5"
                           >
                             {positionLabel(p)}
                           </span>
@@ -268,7 +268,7 @@ export default function TryoutsTab() {
                       </div>
                     )}
                     {t.description && (
-                      <p className="text-sm text-gray-600 mt-2">{t.description}</p>
+                      <p className="text-sm text-mist-400 mt-2">{t.description}</p>
                     )}
                   </div>
 
@@ -276,8 +276,8 @@ export default function TryoutsTab() {
                     <span
                       className={`text-xs font-medium rounded-full px-3 py-1 ${
                         t.status === "active"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-600"
+                          ? "bg-signal-ok/15 text-signal-ok"
+                          : "bg-ink-700 text-mist-400"
                       }`}
                     >
                       {t.status === "active" ? "Aktiv" : "Geschlossen"}
@@ -296,11 +296,11 @@ export default function TryoutsTab() {
                           <button
                             onClick={onClick}
                             disabled={busyId === t._id}
-                            className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
+                            className="text-mist-400 hover:text-signal-error disabled:opacity-60 p-1.5"
                             title="Tryout entfernen"
                             aria-label={`Tryout am ${formatDate(t.date)} entfernen`}
                           >
-                            <FaTrash className="text-sm" />
+                            <PiTrashBold className="text-sm" />
                           </button>
                         )}
                         message="Dieses Tryout wirklich entfernen?"
@@ -316,19 +316,19 @@ export default function TryoutsTab() {
                 <button
                   onClick={() => setExpandedId(isExpanded ? null : t._id)}
                   aria-expanded={isExpanded}
-                  className="mt-3 inline-flex items-center gap-2 text-sm text-gray-600 hover:text-brand-600"
+                  className="mt-3 inline-flex items-center gap-2 text-sm text-mist-400 hover:text-brand-400"
                 >
-                  <FaUsers />
+                  <PiUsersBold />
                   {applicants.length} Bewerber
                   {applicants.length > 0 && (
-                    <FaChevronDown
+                    <PiCaretDownBold
                       className={`text-xs transition-transform ${isExpanded ? "rotate-180" : ""}`}
                     />
                   )}
                 </button>
 
                 {isExpanded && applicants.length > 0 && (
-                  <ul className="mt-2 divide-y divide-gray-100 border-t border-gray-100">
+                  <ul className="mt-2 divide-y divide-ink-600 border-t border-ink-600">
                     {applicants.map((a) => (
                       <li key={a._id} className="flex items-center gap-3 py-2">
                         {a.playerId.profileImage ? (
@@ -339,15 +339,15 @@ export default function TryoutsTab() {
                             className="h-8 w-8 rounded-full object-cover"
                           />
                         ) : (
-                          <span className="h-8 w-8 rounded-full bg-brand-100 text-brand-700 text-xs font-semibold flex items-center justify-center">
+                          <span className="h-8 w-8 rounded-full bg-brand-500/15 text-brand-400 text-xs font-semibold flex items-center justify-center">
                             {(a.playerId.firstName?.[0] || "") + (a.playerId.lastName?.[0] || "")}
                           </span>
                         )}
                         <div>
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium text-paper-50">
                             {a.playerId.firstName} {a.playerId.lastName}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-mist-400">
                             {positionLabel(a.playerId.position) || "Position offen"}
                           </p>
                         </div>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FaArrowLeft } from "react-icons/fa";
+import { PiArrowLeftBold } from "react-icons/pi";
 
 // Geteiltes Split-Screen-Layout für alle Auth-Seiten (Login, Signup, Reset,
 // Team-Login/Register). Links das Formular, rechts ein Vollbild-Motiv.
@@ -39,9 +39,9 @@ export default function AuthShell({
     <div className="relative min-h-screen lg:flex">
       <Link
         href="/"
-        className="absolute top-5 left-5 z-10 inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-gray-200 shadow-sm text-sm font-medium text-gray-600 hover:text-gray-900 hover:border-gray-400 hover:shadow-md transition-all"
+        className="absolute top-5 left-5 z-10 inline-flex items-center gap-2 px-3 py-2 rounded-md bg-ink-800 border border-ink-600 text-sm font-medium text-mist-400 hover:text-paper-50 hover:border-ink-500 transition-all"
       >
-        <FaArrowLeft className="text-xs" />
+        <PiArrowLeftBold className="text-xs" />
         <span className="hidden sm:inline">Zur Startseite</span>
       </Link>
 
@@ -50,18 +50,18 @@ export default function AuthShell({
           <div className="text-center mb-5 sm:mb-8">
             <Link href="/">
               <img
-                src="/images/logo-hoops.svg"
+                src="/images/logo.svg"
                 alt="Hoops Germany"
                 className="w-40 sm:w-56 h-auto mx-auto mb-6"
               />
             </Link>
-            {title && <h1 className="text-2xl font-bold text-gray-900">{title}</h1>}
-            {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
+            {title && <h1 className="font-display uppercase tracking-tight text-2xl font-black text-paper-50">{title}</h1>}
+            {subtitle && <p className="mt-1 text-sm text-mist-400">{subtitle}</p>}
           </div>
 
           {children}
 
-          {footer && <div className="mt-6 text-center text-sm text-gray-500">{footer}</div>}
+          {footer && <div className="mt-6 text-center text-sm text-mist-400">{footer}</div>}
         </div>
       </div>
 

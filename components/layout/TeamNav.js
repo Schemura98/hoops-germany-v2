@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FaUsers, FaSignOutAlt, FaExternalLinkAlt } from "react-icons/fa";
+import { PiUsersBold, PiSignOutBold, PiArrowSquareOutBold } from "react-icons/pi";
 import { clearTeamToken, clearPlayerToken } from "@/lib/clientAuth";
 
 export default function TeamNav({ team }) {
@@ -16,18 +16,18 @@ export default function TeamNav({ team }) {
   }
 
   return (
-    <nav className="bg-gradient-to-r from-slate-950 to-slate-800 sticky top-0 z-50">
+    <nav className="bg-ink-900 sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-6 flex items-center justify-between h-16">
-        <Link href="/team/admin" className="flex items-center gap-2 font-bold text-white">
+        <Link href="/team/admin" className="flex items-center gap-2 font-bold text-paper-50">
           {team?.logo ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={team.logo}
               alt={team.teamName}
-              className="h-8 w-8 rounded-full object-cover ring-2 ring-white/15"
+              className="h-8 w-8 rounded-full object-cover ring-2 ring-paper-50/15"
             />
           ) : (
-            <FaUsers className="text-brand-400" />
+            <PiUsersBold className="text-brand-400" />
           )}
           <span className="truncate max-w-[180px]">{team?.teamName || "Team"}</span>
         </Link>
@@ -36,18 +36,18 @@ export default function TeamNav({ team }) {
           {team?.slug && (
             <Link
               href={`/team/team-detail/${team.slug}`}
-              className="hidden sm:inline-flex items-center gap-1.5 text-sm text-gray-300 hover:text-white"
+              className="hidden sm:inline-flex items-center gap-1.5 text-sm text-mist-300 hover:text-paper-50"
             >
-              Öffentliches Profil <FaExternalLinkAlt className="text-xs" />
+              Öffentliches Profil <PiArrowSquareOutBold className="text-xs" />
             </Link>
           )}
           <button
             onClick={logout}
-            className="text-white/80 hover:text-brand-400 transition-colors"
+            className="text-paper-50/80 hover:text-brand-400 transition-colors"
             aria-label="Abmelden"
             title="Abmelden"
           >
-            <FaSignOutAlt />
+            <PiSignOutBold />
           </button>
         </div>
       </div>

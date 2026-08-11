@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaUsers, FaMapMarkerAlt, FaCalendarAlt } from "react-icons/fa";
+import { PiUsersBold, PiMapPinBold, PiCalendarBlankBold } from "react-icons/pi";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
@@ -78,11 +78,11 @@ export default function TryoutDetailPage({ params }) {
 
   if (state === "notfound") {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-screen bg-ink-950 flex flex-col">
         <Navbar />
         <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-          <h1 className="text-xl font-bold text-gray-900">Tryout nicht gefunden</h1>
-          <Link href="/tryouts" className="mt-4 text-brand-600 hover:underline">
+          <h1 className="text-xl font-bold text-paper-50">Tryout nicht gefunden</h1>
+          <Link href="/tryouts" className="mt-4 text-brand-400 hover:underline">
             Zurück zur Übersicht
           </Link>
         </main>
@@ -95,13 +95,13 @@ export default function TryoutDetailPage({ params }) {
   const closed = tryout.status !== "active";
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-ink-950 flex flex-col">
       <Navbar />
 
       <PageHeader eyebrow="Probetraining" title={`Tryout bei ${team?.teamName || "Team"}`} />
 
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div className="bg-ink-800 rounded-md border border-ink-600 p-6">
           {/* Team */}
           <Link
             href={team?.slug ? `/team/team-detail/${team.slug}` : "#"}
@@ -111,38 +111,38 @@ export default function TryoutDetailPage({ params }) {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={team.logo} alt="" className="h-12 w-12 rounded-full object-cover" />
             ) : (
-              <span className="h-12 w-12 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
-                <FaUsers />
+              <span className="h-12 w-12 rounded-full bg-brand-500/15 text-brand-400 flex items-center justify-center">
+                <PiUsersBold />
               </span>
             )}
             <div>
-              <p className="font-semibold text-gray-900">{team?.teamName}</p>
-              {team?.region && <p className="text-xs text-gray-500">{team.region}</p>}
+              <p className="font-semibold text-paper-50">{team?.teamName}</p>
+              {team?.region && <p className="text-xs text-mist-400">{team.region}</p>}
             </div>
           </Link>
 
-          <div className="mt-5 space-y-2 text-sm text-gray-600">
+          <div className="mt-5 space-y-2 text-sm text-mist-400">
             <p className="flex items-center gap-2">
-              <FaCalendarAlt className="text-gray-500" /> {formatDate(tryout.date)}
+              <PiCalendarBlankBold className="text-mist-400" /> {formatDate(tryout.date)}
             </p>
             {tryout.location && (
               <p className="flex items-center gap-2">
-                <FaMapMarkerAlt className="text-gray-500" /> {tryout.location}
+                <PiMapPinBold className="text-mist-400" /> {tryout.location}
               </p>
             )}
             <p className="flex items-center gap-2">
-              <FaUsers className="text-gray-500" /> {tryout.applicantCount} Bewerber
+              <PiUsersBold className="text-mist-400" /> {tryout.applicantCount} Bewerber
             </p>
           </div>
 
           {tryout.positions?.length > 0 && (
             <div className="mt-4">
-              <p className="text-xs font-medium text-gray-500 mb-1">Gesuchte Positionen</p>
+              <p className="text-xs font-medium text-mist-400 mb-1">Gesuchte Positionen</p>
               <div className="flex flex-wrap gap-1">
                 {tryout.positions.map((p) => (
                   <span
                     key={p}
-                    className="text-xs font-medium bg-brand-50 text-brand-700 rounded-full px-2 py-0.5"
+                    className="text-xs font-medium bg-brand-500/10 text-brand-400 rounded-sm px-2 py-0.5"
                   >
                     {positionLabel(p)}
                   </span>
@@ -153,8 +153,8 @@ export default function TryoutDetailPage({ params }) {
 
           {tryout.description && (
             <div className="mt-4">
-              <p className="text-xs font-medium text-gray-500 mb-1">Beschreibung</p>
-              <p className="text-sm text-gray-600 whitespace-pre-line">
+              <p className="text-xs font-medium text-mist-400 mb-1">Beschreibung</p>
+              <p className="text-sm text-mist-400 whitespace-pre-line">
                 {tryout.description}
               </p>
             </div>
@@ -164,16 +164,16 @@ export default function TryoutDetailPage({ params }) {
           <div className="mt-6">
             {applyMsg ? (
               <div
-                className={`rounded-lg border px-4 py-3 text-sm ${
+                className={`rounded-sm border px-4 py-3 text-sm ${
                   applyMsg.type === "ok"
-                    ? "bg-green-50 border-green-200 text-green-700"
-                    : "bg-red-50 border-red-200 text-red-700"
+                    ? "bg-signal-ok/10 border-signal-ok/50 text-signal-ok"
+                    : "bg-signal-error/10 border-signal-error/50 text-signal-error"
                 }`}
               >
                 {applyMsg.text}
               </div>
             ) : closed ? (
-              <p className="text-sm text-gray-500">Dieses Tryout ist geschlossen.</p>
+              <p className="text-sm text-mist-400">Dieses Tryout ist geschlossen.</p>
             ) : loggedIn ? (
               <Button onClick={apply} disabled={applying}>
                 {applying ? "Senden…" : "Jetzt bewerben"}

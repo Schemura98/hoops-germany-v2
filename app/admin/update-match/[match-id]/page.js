@@ -8,7 +8,7 @@ import AdminShell from "@/components/layout/AdminShell";
 import { getAdminToken } from "@/lib/clientAuth";
 
 const inputClass =
-  "w-24 rounded-lg border border-gray-300 px-3 py-2 text-center text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+  "w-24 rounded-sm border border-ink-600 px-3 py-2 text-center text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
 
 export default function AdminUpdateMatchPage({ params }) {
   const id = params["match-id"];
@@ -79,13 +79,13 @@ export default function AdminUpdateMatchPage({ params }) {
   }
 
   if (state === "loading") {
-    return <AdminShell title="Spiel bearbeiten"><p className="text-gray-500">Lädt…</p></AdminShell>;
+    return <AdminShell title="Spiel bearbeiten"><p className="text-mist-400">Lädt…</p></AdminShell>;
   }
   if (state === "notfound") {
     return (
       <AdminShell title="Spiel bearbeiten">
-        <p className="text-gray-500">Spiel nicht gefunden.</p>
-        <Link href="/admin/matches" className="mt-4 inline-block text-brand-600 hover:underline">
+        <p className="text-mist-400">Spiel nicht gefunden.</p>
+        <Link href="/admin/matches" className="mt-4 inline-block text-brand-400 hover:underline">
           Zurück zur Spieleliste
         </Link>
       </AdminShell>
@@ -94,17 +94,17 @@ export default function AdminUpdateMatchPage({ params }) {
 
   return (
     <AdminShell title="Spiel bearbeiten">
-      <div className="max-w-lg bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <p className="text-lg font-semibold text-gray-900">
-          {match.teamA?.teamName} <span className="text-gray-500">vs</span> {match.teamB?.teamName}
+      <div className="max-w-lg bg-ink-800 rounded-md border border-ink-600 p-6">
+        <p className="text-lg font-semibold text-paper-50">
+          {match.teamA?.teamName} <span className="text-mist-400">vs</span> {match.teamB?.teamName}
         </p>
 
         {msg && (
           <div
-            className={`mt-4 rounded-lg border px-4 py-3 text-sm ${
+            className={`mt-4 rounded-sm border px-4 py-3 text-sm ${
               msg.type === "ok"
-                ? "bg-green-50 border-green-200 text-green-700"
-                : "bg-red-50 border-red-200 text-red-700"
+                ? "bg-signal-ok/10 border-signal-ok/50 text-signal-ok"
+                : "bg-signal-error/10 border-signal-error/50 text-signal-error"
             }`}
           >
             {msg.text}
@@ -112,8 +112,8 @@ export default function AdminUpdateMatchPage({ params }) {
         )}
 
         {match.resultStatus === "mismatch" && (
-          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
-            <p className="text-sm font-semibold text-red-700">
+          <div className="mt-4 rounded-sm border border-signal-error/50 bg-signal-error/10 p-4">
+            <p className="text-sm font-semibold text-signal-error">
               Widersprüchliche Meldungen – bitte richtiges Ergebnis festlegen
             </p>
             <div className="mt-3 space-y-2">
@@ -131,9 +131,9 @@ export default function AdminUpdateMatchPage({ params }) {
               ].map((r, i) =>
                 r.a != null && r.b != null ? (
                   <div key={i} className="flex items-center justify-between gap-3">
-                    <span className="text-sm text-gray-700">
+                    <span className="text-sm text-mist-300">
                       <strong>{r.label}</strong> meldet{" "}
-                      <span className="font-semibold text-gray-900">
+                      <span className="font-semibold text-paper-50">
                         {r.a} : {r.b}
                       </span>
                     </span>
@@ -144,7 +144,7 @@ export default function AdminUpdateMatchPage({ params }) {
                         setAPts(String(r.a));
                         setBPts(String(r.b));
                       }}
-                      className="text-xs border border-red-300 hover:border-red-500 text-red-700 rounded-lg px-3 py-1"
+                      className="text-xs border border-signal-error/50 hover:border-signal-error text-signal-error rounded-sm px-3 py-1"
                     >
                       Übernehmen
                     </button>
@@ -156,11 +156,11 @@ export default function AdminUpdateMatchPage({ params }) {
         )}
 
         <div className="mt-5">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <label className="block text-sm font-medium text-mist-300 mb-1">Status</label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+            className="w-full rounded-sm border border-ink-600 px-4 py-2.5 text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
           >
             <option value="scheduled">Geplant (Ergebnis zurücksetzen)</option>
             <option value="completed">Beendet (Ergebnis setzen)</option>
@@ -171,7 +171,7 @@ export default function AdminUpdateMatchPage({ params }) {
         {status === "completed" && (
           <div className="mt-4 flex items-end gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
+              <label className="block text-xs font-medium text-mist-400 mb-1">
                 {match.teamA?.teamName}
               </label>
               <input
@@ -182,9 +182,9 @@ export default function AdminUpdateMatchPage({ params }) {
                 className={inputClass}
               />
             </div>
-            <span className="pb-2 text-gray-500 font-semibold">:</span>
+            <span className="pb-2 text-mist-400 font-semibold">:</span>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
+              <label className="block text-xs font-medium text-mist-400 mb-1">
                 {match.teamB?.teamName}
               </label>
               <input
@@ -202,13 +202,13 @@ export default function AdminUpdateMatchPage({ params }) {
           <button
             onClick={save}
             disabled={saving}
-            className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-6 py-2.5 font-medium"
+            className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-6 py-2.5 font-medium"
           >
             {saving ? "Speichern…" : "Speichern"}
           </button>
           <Link
             href="/admin/matches"
-            className="border border-gray-300 hover:border-brand-500 text-gray-700 rounded-lg px-6 py-2.5 font-medium"
+            className="border border-ink-600 hover:border-brand-500 text-mist-300 rounded-sm px-6 py-2.5 font-medium"
           >
             Abbrechen
           </Link>
@@ -216,22 +216,22 @@ export default function AdminUpdateMatchPage({ params }) {
       </div>
 
       {/* Änderungsverlauf (Audit-Log) */}
-      <div className="max-w-lg mt-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h2 className="text-sm font-semibold text-gray-900 mb-3">Änderungsverlauf</h2>
+      <div className="max-w-lg mt-6 bg-ink-800 rounded-md border border-ink-600 p-6">
+        <h2 className="text-sm font-semibold text-paper-50 mb-3">Änderungsverlauf</h2>
         {audit.length === 0 ? (
-          <p className="text-sm text-gray-500">Noch keine protokollierten Änderungen.</p>
+          <p className="text-sm text-mist-400">Noch keine protokollierten Änderungen.</p>
         ) : (
           <ul className="space-y-3">
             {audit.map((a) => (
               <li key={a._id} className="flex gap-3 text-sm">
                 <span
                   className={`mt-1 h-2 w-2 flex-shrink-0 rounded-full ${
-                    a.actorRole === "super_admin" ? "bg-amber-500" : "bg-brand-500"
+                    a.actorRole === "super_admin" ? "bg-signal-wait" : "bg-brand-500"
                   }`}
                 />
                 <div>
-                  <p className="text-gray-800">{a.summary}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-paper-50">{a.summary}</p>
+                  <p className="text-xs text-mist-400">
                     {a.actorName}
                     {a.actorRole === "super_admin" ? " (Super-Admin)" : ""} ·{" "}
                     {new Date(a.createdAt).toLocaleString("de-DE")}

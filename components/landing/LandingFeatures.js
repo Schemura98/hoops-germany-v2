@@ -1,11 +1,11 @@
 import {
-  FaChartBar,
-  FaUsers,
-  FaCalendarAlt,
-  FaTrophy,
-  FaExchangeAlt,
-  FaRegNewspaper,
-} from "react-icons/fa";
+  PiChartBarBold,
+  PiUsersBold,
+  PiCalendarBlankBold,
+  PiTrophyBold,
+  PiArrowsLeftRightBold,
+  PiNewspaperClippingBold,
+} from "react-icons/pi";
 import Reveal from "@/components/ui/Reveal";
 import FeatureProgressRail from "@/components/landing/FeatureProgressRail";
 import {
@@ -28,21 +28,21 @@ import {
 
 const FEATURES = [
   {
-    icon: FaChartBar,
+    icon: PiChartBarBold,
     eyebrow: "Aufstellung",
     title: "Spielerprofile & Statistiken",
     text: "Erstelle dein Profil, sammle Punkte, Assists & Rebounds und verfolge deine komplette Karrierehistorie – sichtbar für Vereine und Scouts.",
     visual: "profile",
   },
   {
-    icon: FaUsers,
+    icon: PiUsersBold,
     eyebrow: "Kader füllt sich",
     title: "Teams & Kaderverwaltung",
     text: "Gründe ein Team oder tritt einem bei, verwalte deinen Kader, lade Spieler ein und organisiere alles an einem Ort.",
     visual: "roster",
   },
   {
-    icon: FaCalendarAlt,
+    icon: PiCalendarBlankBold,
     eyebrow: "Doppelt bestätigt",
     title: "Spielplan & Ergebnisse",
     // Der bisherige Text erwähnte die doppelte Bestätigung nicht – genau das ist
@@ -51,7 +51,7 @@ const FEATURES = [
     visual: "match",
   },
   {
-    icon: FaTrophy,
+    icon: PiTrophyBold,
     eyebrow: "Tabelle sortiert sich",
     title: "Ligen & Tabellen",
     // „in Echtzeit" behauptete einen Live-Ticker, den es bewusst nicht gibt –
@@ -60,14 +60,14 @@ const FEATURES = [
     visual: "table",
   },
   {
-    icon: FaExchangeAlt,
+    icon: PiArrowsLeftRightBold,
     eyebrow: "Der nächste Zug",
     title: "Tryouts & Transfermarkt",
     text: "Schreibe Probetrainings aus oder bewirb dich, finde transferbereite Spieler und neue Vereine in deiner Region.",
     visual: "scouting",
   },
   {
-    icon: FaRegNewspaper,
+    icon: PiNewspaperClippingBold,
     eyebrow: "Nachspielzeit",
     title: "Community & News",
     text: "Teile Beiträge, folge Spielern und Teams, bleib per Benachrichtigung am Ball und lies aktuelle Basketball-News.",
@@ -93,15 +93,18 @@ export default function LandingFeatures() {
     // jedes position:sticky darin ausser Kraft - genau daran ist die Fortschritts-
     // Anzeige gescheitert (zweiter Befund Tobias, 12.08.2026). `clip` schneidet
     // identisch ab, ohne einen Scroll-Container zu erzeugen.
-    <section className="relative bg-gray-50 py-20 px-4 overflow-x-clip">
+    <section className="relative bg-ink-950 py-20 px-4 overflow-x-clip">
       <div className="max-w-6xl mx-auto">
-        <Reveal as="h2" className="text-3xl md:text-4xl font-black text-center mb-4 text-gray-900 text-balance">
+        <Reveal
+          as="h2"
+          className="font-display uppercase tracking-tight text-4xl md:text-6xl font-black text-center mb-4 text-paper-50 text-balance"
+        >
           Eine Saison, sechs Spielzüge
         </Reveal>
         <Reveal
           as="p"
           delay={80}
-          className="text-center text-gray-500 mb-16 md:mb-20 max-w-xl mx-auto"
+          className="text-center text-mist-400 mb-16 md:mb-20 max-w-xl mx-auto"
         >
           Vom eigenen Profil bis zur Liga-Tabelle: So läuft eine Saison bei Hoops Germany
           ab – Schritt für Schritt, mitten in der Basketball-Community NRW.
@@ -124,16 +127,16 @@ export default function LandingFeatures() {
                   direction={reversed ? "right" : "left"}
                   className="flex-1 max-w-md text-center md:text-left"
                 >
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-brand-100 mb-5">
-                    <Icon className="text-brand-500 text-xl" />
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-md bg-brand-500/15 mb-5">
+                    <Icon className="text-brand-400 text-xl" />
                   </div>
                   {f.eyebrow && (
-                    <p className="mb-1.5 text-xs font-bold uppercase tracking-widest text-brand-600">
-                      <span className="text-gray-400">{i + 1}/6 ·</span> {f.eyebrow}
+                    <p className="mb-1.5 text-xs font-bold uppercase tracking-widest text-brand-400">
+                      <span className="text-mist-600">{i + 1}/6 ·</span> {f.eyebrow}
                     </p>
                   )}
-                  <h3 className="text-2xl font-black text-gray-900 mb-3 text-balance">{f.title}</h3>
-                  <p className="text-gray-500 leading-relaxed">{f.text}</p>
+                  <h3 className="text-2xl font-black text-paper-50 mb-3 text-balance">{f.title}</h3>
+                  <p className="text-mist-400 leading-relaxed">{f.text}</p>
                 </Reveal>
                 <Reveal
                   delay={120}

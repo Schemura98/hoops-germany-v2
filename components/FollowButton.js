@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaCheck, FaPlus } from "react-icons/fa";
+import { PiCheckBold, PiPlusBold } from "react-icons/pi";
 import { getPlayerToken } from "@/lib/clientAuth";
 
 // Wiederverwendbarer Folgen-Button für Spieler oder Teams.
@@ -61,7 +61,7 @@ export default function FollowButton({ type, targetId, onCountChange }) {
 
   if (!ready) {
     return (
-      <span className="inline-block h-[42px] w-28 rounded-lg bg-gray-100 animate-pulse" />
+      <span className="inline-block h-[42px] w-28 rounded-sm bg-ink-700 animate-pulse" />
     );
   }
 
@@ -69,9 +69,9 @@ export default function FollowButton({ type, targetId, onCountChange }) {
     return (
       <Link
         href="/login"
-        className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-5 py-2.5 text-sm font-medium"
+        className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-ink-950 rounded-sm px-5 py-2.5 text-sm font-medium"
       >
-        <FaPlus className="text-xs" /> Folgen
+        <PiPlusBold className="text-xs" /> Folgen
       </Link>
     );
   }
@@ -80,19 +80,19 @@ export default function FollowButton({ type, targetId, onCountChange }) {
     <button
       onClick={toggle}
       disabled={busy}
-      className={`inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-colors disabled:opacity-60 ${
+      className={`inline-flex items-center gap-2 rounded-sm px-5 py-2.5 text-sm font-medium transition-colors disabled:opacity-60 ${
         following
-          ? "border border-gray-300 text-gray-700 hover:border-red-400 hover:text-red-600"
-          : "bg-brand-500 hover:bg-brand-600 text-white"
+          ? "border border-ink-600 text-mist-300 hover:border-signal-error hover:text-signal-error"
+          : "bg-brand-500 hover:bg-brand-400 text-ink-950"
       }`}
     >
       {following ? (
         <>
-          <FaCheck className="text-xs" /> Gefolgt
+          <PiCheckBold className="text-xs" /> Gefolgt
         </>
       ) : (
         <>
-          <FaPlus className="text-xs" /> Folgen
+          <PiPlusBold className="text-xs" /> Folgen
         </>
       )}
     </button>

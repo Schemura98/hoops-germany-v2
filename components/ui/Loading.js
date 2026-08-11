@@ -1,11 +1,11 @@
-import { FaBasketballBall } from "react-icons/fa";
+import { PiBasketballBold } from "react-icons/pi";
 
 // Einheitlicher Ladezustand (springender Basketball). Plattformweit verwenden.
 export default function Loading({ className = "py-16", size = "text-3xl", label }) {
   return (
     <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
-      <FaBasketballBall className={`text-brand-500 ${size} animate-bounce motion-reduce:animate-none`} />
-      {label && <p className="text-sm text-gray-500">{label}</p>}
+      <PiBasketballBold className={`text-brand-400 ${size} animate-bounce motion-reduce:animate-none`} />
+      {label && <p className="text-sm text-mist-400">{label}</p>}
     </div>
   );
 }

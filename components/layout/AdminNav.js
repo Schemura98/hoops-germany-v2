@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { FaShieldAlt, FaSignOutAlt, FaArrowLeft } from "react-icons/fa";
+import { PiShieldCheckBold, PiSignOutBold, PiArrowLeftBold } from "react-icons/pi";
 import { clearAdminToken } from "@/lib/clientAuth";
 
 const links = [
@@ -27,10 +27,10 @@ export default function AdminNav() {
   }
 
   return (
-    <nav className="bg-gradient-to-r from-slate-950 to-slate-800 text-white sticky top-0 z-50">
+    <nav className="bg-ink-900 text-paper-50 sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-6 flex items-center justify-between h-14">
         <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold">
-          <FaShieldAlt className="text-brand-400" />
+          <PiShieldCheckBold className="text-brand-400" />
           Admin
         </Link>
 
@@ -41,8 +41,8 @@ export default function AdminNav() {
               <Link
                 key={l.href}
                 href={l.href}
-                className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                  active ? "bg-brand-500 text-white" : "text-gray-300 hover:bg-slate-800"
+                className={`whitespace-nowrap px-3 py-1.5 rounded-sm text-sm transition-colors ${
+                  active ? "bg-brand-500 text-ink-950" : "text-mist-300 hover:bg-ink-700"
                 }`}
               >
                 {l.label}
@@ -51,18 +51,18 @@ export default function AdminNav() {
           })}
           <Link
             href="/player/newsfeed"
-            className="ml-2 inline-flex items-center gap-1.5 whitespace-nowrap text-gray-300 hover:text-white text-sm"
+            className="ml-2 inline-flex items-center gap-1.5 whitespace-nowrap text-mist-300 hover:text-paper-50 text-sm"
             title="Zurück zur Seite"
           >
-            <FaArrowLeft className="text-xs" /> Zur Seite
+            <PiArrowLeftBold className="text-xs" /> Zur Seite
           </Link>
           <button
             onClick={logout}
-            className="ml-1 text-gray-400 hover:text-brand-400"
+            className="ml-1 text-mist-600 hover:text-brand-400"
             aria-label="Abmelden"
             title="Abmelden"
           >
-            <FaSignOutAlt />
+            <PiSignOutBold />
           </button>
         </div>
       </div>

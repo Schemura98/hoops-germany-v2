@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaBullhorn, FaMapMarkerAlt, FaUsers } from "react-icons/fa";
+import { PiMegaphoneBold, PiMapPinBold, PiUsersBold } from "react-icons/pi";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
@@ -14,7 +14,7 @@ import { positionLabel } from "@/lib/constants";
 // Karten-Skeleton im Format der echten Tryout-Karte (Avatar + Textzeilen + Meta).
 function TryoutCardSkeleton() {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+    <div className="bg-ink-800 rounded-md border border-ink-600 p-5">
       <div className="flex items-center gap-3">
         <Skeleton className="h-10 w-10 rounded-full flex-shrink-0" />
         <div className="flex-1">
@@ -67,7 +67,7 @@ export default function TryoutsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-ink-950 flex flex-col">
       <Navbar />
 
       <PageHeader
@@ -87,36 +87,36 @@ export default function TryoutsPage() {
         ) : error ? (
           <EmptyState title="Tryouts konnten nicht geladen werden." />
         ) : tryouts.length === 0 ? (
-          <EmptyState icon={FaBullhorn} title="Aktuell sind keine Tryouts ausgeschrieben." />
+          <EmptyState icon={PiMegaphoneBold} title="Aktuell sind keine Tryouts ausgeschrieben." />
         ) : (
           <div className="space-y-3">
             {tryouts.map((t) => (
               <Link
                 key={t._id}
                 href={`/tryouts/${t._id}`}
-                className="block bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
+                className="block bg-ink-800 rounded-md border border-ink-600 p-5 hover:border-brand-500/50 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
               >
                 <div className="flex items-center gap-3">
                   {t.team?.logo ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={t.team.logo} alt="" className="h-10 w-10 rounded-full object-cover" />
                   ) : (
-                    <span className="h-10 w-10 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
-                      <FaUsers />
+                    <span className="h-10 w-10 rounded-full bg-brand-500/15 text-brand-400 flex items-center justify-center">
+                      <PiUsersBold />
                     </span>
                   )}
                   <div className="min-w-0">
-                    <p className="font-semibold text-gray-900 truncate">
+                    <p className="font-semibold text-paper-50 truncate">
                       {t.team?.teamName || "Team"}
                     </p>
-                    <p className="text-xs text-gray-500">{formatDate(t.date)}</p>
+                    <p className="text-xs text-mist-400">{formatDate(t.date)}</p>
                   </div>
                 </div>
 
-                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-mist-400">
                   {t.location && (
                     <span className="flex items-center gap-1">
-                      <FaMapMarkerAlt /> {t.location}
+                      <PiMapPinBold /> {t.location}
                     </span>
                   )}
                   <span>{t.applicantCount} Bewerber</span>
@@ -127,7 +127,7 @@ export default function TryoutsPage() {
                     {t.positions.map((p) => (
                       <span
                         key={p}
-                        className="text-xs font-medium bg-brand-50 text-brand-700 rounded-full px-2 py-0.5"
+                        className="text-xs font-medium bg-brand-500/10 text-brand-400 rounded-sm px-2 py-0.5"
                       >
                         {positionLabel(p)}
                       </span>

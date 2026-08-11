@@ -1,5 +1,5 @@
 import "./globals.css";
-import { inter } from "@/lib/fonts";
+import { display, sans, mono } from "@/lib/fonts";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import FeedbackButton from "@/components/FeedbackButton";
 import TestPhaseBanner from "@/components/TestPhaseBanner";
@@ -27,7 +27,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="de">
       <body
-        className={`${inter.variable} font-sans antialiased bg-gray-50 text-gray-900`}
+        className={`${sans.variable} ${display.variable} ${mono.variable} font-sans antialiased bg-ink-950 text-paper-50`}
       >
         <AnalyticsTracker />
         <TestPhaseBanner />

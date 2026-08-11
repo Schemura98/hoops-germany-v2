@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaBasketballBall } from "react-icons/fa";
+import { PiBasketballBold } from "react-icons/pi";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PlayerProfileView from "@/components/player/PlayerProfileView";
@@ -48,11 +48,11 @@ export default function PlayerViewPlayerSlugPage({ params }) {
 
   if (state === "notfound") {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-screen bg-ink-950 flex flex-col">
         <Navbar />
         <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-          <h1 className="text-xl font-bold text-gray-900">Spieler nicht gefunden</h1>
-          <Link href="/spieler" className="mt-4 text-brand-600 hover:underline">
+          <h1 className="text-xl font-bold text-paper-50">Spieler nicht gefunden</h1>
+          <Link href="/spieler" className="mt-4 text-brand-400 hover:underline">
             Zurück zur Spielerübersicht
           </Link>
         </main>
@@ -62,7 +62,7 @@ export default function PlayerViewPlayerSlugPage({ params }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-ink-950 flex flex-col">
       <Navbar />
       <div className="flex-1">
         <PlayerProfileView

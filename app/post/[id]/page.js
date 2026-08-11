@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
-import { FaArrowLeft, FaNewspaper } from "react-icons/fa";
+import { PiArrowLeftBold, PiNewspaperBold } from "react-icons/pi";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import PlayerNav from "@/components/layout/PlayerNav";
 import PostCard from "@/components/posts/PostCard";
@@ -38,21 +38,21 @@ export default function PostDetailPage() {
   }, [id]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-ink-950">
       <PlayerNav player={player} />
       <div className="max-w-xl mx-auto px-4 py-8">
         <Link
           href="/player/newsfeed"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-brand-600 mb-4"
+          className="inline-flex items-center gap-2 text-sm text-mist-400 hover:text-brand-400 mb-4"
         >
-          <FaArrowLeft /> Zum Feed
+          <PiArrowLeftBold /> Zum Feed
         </Link>
 
         {status === "loading" ? (
           <Loading className="py-10" />
         ) : status === "error" || !post ? (
           <EmptyState
-            icon={FaNewspaper}
+            icon={PiNewspaperBold}
             title="Beitrag nicht gefunden"
             text="Dieser Beitrag existiert nicht mehr oder wurde entfernt."
           />

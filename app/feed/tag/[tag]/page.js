@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
-import { FaArrowLeft, FaHashtag, FaNewspaper } from "react-icons/fa";
+import { PiArrowLeftBold, PiHashBold, PiNewspaperBold } from "react-icons/pi";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import PlayerNav from "@/components/layout/PlayerNav";
 import PostCard from "@/components/posts/PostCard";
@@ -59,28 +59,28 @@ export default function HashtagFeedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-ink-950">
       <PlayerNav player={player} />
       <div className="max-w-xl mx-auto px-4 py-8">
         <Link
           href="/player/newsfeed"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-brand-600 mb-4"
+          className="inline-flex items-center gap-2 text-sm text-mist-400 hover:text-brand-400 mb-4"
         >
-          <FaArrowLeft /> Zum Feed
+          <PiArrowLeftBold /> Zum Feed
         </Link>
 
-        <h1 className="flex items-center gap-2 text-2xl font-black text-gray-900 mb-5">
-          <FaHashtag className="text-brand-500" />
+        <h1 className="font-display uppercase tracking-tight flex items-center gap-2 text-2xl font-black text-paper-50 mb-5">
+          <PiHashBold className="text-brand-400" />
           {decodedTag}
         </h1>
 
         {status === "loading" ? (
           <Loading className="py-10" />
         ) : status === "error" ? (
-          <EmptyState icon={FaNewspaper} title="Konnte nicht geladen werden" />
+          <EmptyState icon={PiNewspaperBold} title="Konnte nicht geladen werden" />
         ) : posts.length === 0 ? (
           <EmptyState
-            icon={FaHashtag}
+            icon={PiHashBold}
             title="Noch keine Beiträge"
             text={`Sei der Erste, der #${decodedTag} verwendet.`}
           />

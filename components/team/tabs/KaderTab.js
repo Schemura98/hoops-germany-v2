@@ -3,24 +3,24 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import {
-  FaIdBadge,
-  FaTrash,
-  FaCopy,
-  FaCheck,
-  FaEnvelope,
-  FaUserCheck,
-  FaUserMinus,
-  FaUser,
-  FaWhatsapp,
-  FaUserShield,
-  FaUserSlash,
-  FaLink,
-  FaHashtag,
-  FaSlidersH,
-  FaSearch,
-  FaUserPlus,
-  FaChevronDown,
-} from "react-icons/fa";
+  PiIdentificationBadgeBold,
+  PiTrashBold,
+  PiCopyBold,
+  PiCheckBold,
+  PiEnvelopeSimpleBold,
+  PiUserCheckBold,
+  PiUserMinusBold,
+  PiUserBold,
+  PiWhatsappLogoBold,
+  PiUserGearBold,
+  PiProhibitBold,
+  PiLinkBold,
+  PiHashBold,
+  PiSlidersHorizontalBold,
+  PiMagnifyingGlassBold,
+  PiUserPlusBold,
+  PiCaretDownBold,
+} from "react-icons/pi";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import { POSITIONS, positionLabel } from "@/lib/constants";
 import { TEAM_PERMISSIONS } from "@/lib/teamPermissions";
@@ -31,9 +31,9 @@ import TabAlert from "@/components/team/tabs/TabAlert";
 import { inputClassSm, inputClassStat } from "@/lib/ui";
 
 const STATUS_BADGE = {
-  empty: { label: "Frei", cls: "bg-gray-100 text-gray-600" },
-  pending: { label: "Ausstehend", cls: "bg-amber-100 text-amber-700" },
-  confirmed: { label: "Bestätigt", cls: "bg-green-100 text-green-700" },
+  empty: { label: "Frei", cls: "bg-ink-700 text-mist-400" },
+  pending: { label: "Ausstehend", cls: "bg-signal-wait/15 text-signal-wait" },
+  confirmed: { label: "Bestätigt", cls: "bg-signal-ok/15 text-signal-ok" },
 };
 
 export default function KaderTab({ team, reload, isMainAdmin = true }) {
@@ -351,10 +351,10 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">
-          Kader <span className="text-sm font-normal text-gray-500">· {members.length} Spieler</span>
+        <h2 className="text-lg font-semibold text-paper-50">
+          Kader <span className="text-sm font-normal text-mist-400">· {members.length} Spieler</span>
         </h2>
-        <p className="text-xs text-gray-500 mt-0.5">
+        <p className="text-xs text-mist-400 mt-0.5">
           So holst du jemanden in dein Team:
         </p>
       </div>
@@ -363,20 +363,20 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
 
       {/* 1) Bestehenden Account direkt einladen – der häufigste Fall, deshalb
           optisch führend (Welle 2b: vorher drei gleichwertige Blöcke ohne Führung). */}
-      <div className="bg-white rounded-2xl shadow-sm border-2 border-brand-200 p-5">
+      <div className="bg-ink-800 rounded-md border-2 border-brand-500/50 p-5">
         <div className="flex flex-wrap items-center gap-2 mb-1">
-          <FaUserPlus className="text-brand-500" />
-          <h3 className="text-base font-semibold text-gray-900">Bestehenden Spieler einladen</h3>
-          <span className="ml-auto flex-shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand-600">
+          <PiUserPlusBold className="text-brand-400" />
+          <h3 className="text-base font-semibold text-paper-50">Bestehenden Spieler einladen</h3>
+          <span className="ml-auto flex-shrink-0 rounded-sm bg-brand-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand-400">
             Schnellster Weg
           </span>
         </div>
-        <p className="text-xs text-gray-500 mb-3">
+        <p className="text-xs text-mist-400 mb-3">
           Er ist <strong>schon bei Hoops Germany registriert?</strong> Such ihn und lade ihn ein – er wird
           per Glocke &amp; E-Mail gefragt und ist nach seiner Zustimmung im Kader (mit Karriere-Eintrag).
         </p>
         <div className="relative">
-          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
+          <PiMagnifyingGlassBold className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-500 text-xs" />
           <input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -386,9 +386,9 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
           />
         </div>
         {searchQuery.trim().length >= 2 && (
-          <div className="mt-2 divide-y divide-gray-50 rounded-lg border border-gray-100">
+          <div className="mt-2 divide-y divide-ink-600 rounded-sm border border-ink-600">
             {searching ? (
-              <p className="px-3 py-3 text-xs text-gray-500">Suche…</p>
+              <p className="px-3 py-3 text-xs text-mist-400">Suche…</p>
             ) : (
               (() => {
                 const list = searchResults.filter(
@@ -396,7 +396,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                 );
                 if (list.length === 0) {
                   return (
-                    <p className="px-3 py-3 text-xs text-gray-500">
+                    <p className="px-3 py-3 text-xs text-mist-400">
                       Keine passenden Spieler gefunden.
                     </p>
                   );
@@ -409,8 +409,8 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                       className="flex items-center justify-between gap-2 px-3 py-2"
                     >
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{p.name}</p>
-                        <p className="text-xs text-gray-500 truncate">
+                        <p className="text-sm font-medium text-paper-50 truncate">{p.name}</p>
+                        <p className="text-xs text-mist-400 truncate">
                           {[p.position, p.teamName].filter(Boolean).join(" · ") || "Vereinslos"}
                         </p>
                       </div>
@@ -420,7 +420,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                         disabled={invitingId === p.playerId || already}
                         className="flex-shrink-0"
                       >
-                        {already ? <FaCheck /> : <FaUserPlus />}
+                        {already ? <PiCheckBold /> : <PiUserPlusBold />}
                         {already ? "Eingeladen" : invitingId === p.playerId ? "…" : "Einladen"}
                       </Button>
                     </div>
@@ -435,35 +435,35 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
       {/* Weitere Wege – eingeklappt, damit oben ein klarer Standardweg führt.
           ACHTUNG: Der allgemeine Team-Einladungslink lebt seit Welle 2a NUR hier
           (Einstellungen verlinkt hierher) – beim Umbauen nicht entfernen. */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
         <button
           type="button"
           onClick={() => setMoreOpen((v) => !v)}
           aria-expanded={moreOpen}
-          className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-gray-50 transition-colors"
+          className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-ink-700 transition-colors"
         >
           <span className="flex-1 min-w-0">
-            <span className="block text-sm font-semibold text-gray-900">Weitere Optionen</span>
-            <span className="block text-xs text-gray-500">
+            <span className="block text-sm font-semibold text-paper-50">Weitere Optionen</span>
+            <span className="block text-xs text-mist-400">
               Spieler ohne Account anlegen · Einladungslink für alle
             </span>
           </span>
-          <FaChevronDown
-            className={`text-gray-400 flex-shrink-0 transition-transform ${
+          <PiCaretDownBold
+            className={`text-mist-600 flex-shrink-0 transition-transform ${
               moreOpen ? "rotate-180" : ""
             }`}
           />
         </button>
 
         {moreOpen && (
-          <div className="border-t border-gray-100 divide-y divide-gray-100">
+          <div className="border-t border-ink-600 divide-y divide-ink-600">
       {/* 2) Neuen Spieler anlegen (Account-Platz + persönlicher Einladungslink) */}
       <div className="p-5">
         <div className="flex items-center gap-2 mb-1">
-          <FaIdBadge className="text-brand-500 text-sm" />
-          <h3 className="text-sm font-semibold text-gray-900">Neuen Spieler anlegen</h3>
+          <PiIdentificationBadgeBold className="text-brand-400 text-sm" />
+          <h3 className="text-sm font-semibold text-paper-50">Neuen Spieler anlegen</h3>
         </div>
-        <p className="text-xs text-gray-500 mb-3">
+        <p className="text-xs text-mist-400 mb-3">
           Er hat <strong>noch keinen Account?</strong> Leg ihm hier einen Platz an – du erhältst seinen
           <strong> persönlichen Einladungslink</strong>, den du ihm per Kopieren, WhatsApp oder E-Mail schickst.
           Er registriert sich darüber und ist sofort im Kader. (Erscheint unten unter „Eingeladene &amp; offene Plätze“.)
@@ -473,7 +473,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
           className="grid sm:grid-cols-[1fr_140px_90px_auto] gap-3 items-end"
         >
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Name</label>
+            <label className="block text-xs font-medium text-mist-400 mb-1">Name</label>
             <input
               value={newSlot.name}
               onChange={(e) => setNewSlot((s) => ({ ...s, name: e.target.value }))}
@@ -482,7 +482,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Position</label>
+            <label className="block text-xs font-medium text-mist-400 mb-1">Position</label>
             <select
               value={newSlot.position}
               onChange={(e) => setNewSlot((s) => ({ ...s, position: e.target.value }))}
@@ -497,7 +497,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Nr.</label>
+            <label className="block text-xs font-medium text-mist-400 mb-1">Nr.</label>
             <input
               value={newSlot.number}
               onChange={(e) => setNewSlot((s) => ({ ...s, number: e.target.value }))}
@@ -514,10 +514,10 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
       {/* 3) Allgemeiner Team-Einladungslink (für alle, Selbst-Beitritt) */}
       <div className="p-5">
         <div className="flex items-center gap-2 mb-1">
-          <FaLink className="text-brand-500 text-sm" />
-          <h3 className="text-sm font-semibold text-gray-900">Team-Einladungslink (für alle)</h3>
+          <PiLinkBold className="text-brand-400 text-sm" />
+          <h3 className="text-sm font-semibold text-paper-50">Team-Einladungslink (für alle)</h3>
         </div>
-        <p className="text-xs text-gray-500 mb-3">
+        <p className="text-xs text-mist-400 mb-3">
           <strong>Ein Link für alle:</strong> teile ihn z.&nbsp;B. in eurer WhatsApp-Gruppe. Jeder erstellt sich
           selbst einen Account und ist über den Link <strong>automatisch im Team</strong>.
         </p>
@@ -528,26 +528,26 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
               value={inviteLink}
               onFocus={(e) => e.target.select()}
               aria-label="Team-Einladungslink"
-              className={`${inputClassSm} flex-1 min-w-0 bg-gray-50`}
+              className={`${inputClassSm} flex-1 min-w-0 bg-ink-950`}
             />
             <Button variant="secondary" size="sm" onClick={copyInvite}>
-              {inviteCopied ? <FaCheck className="text-green-600" /> : <FaCopy />}
+              {inviteCopied ? <PiCheckBold className="text-signal-ok" /> : <PiCopyBold />}
               {inviteCopied ? "Kopiert" : "Kopieren"}
             </Button>
             <Button
               variant="secondary"
               size="sm"
               onClick={shareInviteWhatsApp}
-              className="hover:border-green-500 hover:text-green-700"
+              className="hover:border-signal-ok hover:text-signal-ok"
             >
-              <FaWhatsapp className="text-green-600" /> WhatsApp
+              <PiWhatsappLogoBold className="text-signal-ok" /> WhatsApp
             </Button>
             <ConfirmAction
               trigger={({ onClick }) => (
                 <button
                   onClick={onClick}
                   disabled={generatingInvite}
-                  className="text-xs text-gray-500 hover:text-gray-600 underline px-1 disabled:opacity-60"
+                  className="text-xs text-mist-400 hover:text-mist-400 underline px-1 disabled:opacity-60"
                 >
                   Neuer Link
                 </button>
@@ -560,7 +560,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
           </div>
         ) : (
           <Button onClick={generateInvite} disabled={generatingInvite}>
-            <FaLink className="text-xs" />
+            <PiLinkBold className="text-xs" />
             {generatingInvite ? "Wird erstellt…" : "Einladungslink erstellen"}
           </Button>
         )}
@@ -571,17 +571,17 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
 
       {/* Mitglieder (Account-Spieler) */}
       {members.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-100">
+        <div className="bg-ink-800 rounded-md border border-ink-600 divide-y divide-ink-600">
           {members.map((m) => (
             <div key={m.playerId} className="px-5 py-3">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <span className="h-9 w-9 flex-shrink-0 rounded-full bg-brand-100 text-brand-700 text-sm font-semibold flex items-center justify-center">
-                    {m.number ? `#${m.number}` : <FaUser className="text-sm" />}
+                  <span className="h-9 w-9 flex-shrink-0 rounded-full bg-brand-500/15 text-brand-400 text-sm font-semibold flex items-center justify-center">
+                    {m.number ? `#${m.number}` : <PiUserBold className="text-sm" />}
                   </span>
                   <div className="min-w-0">
-                    <p className="font-medium text-gray-900 truncate">{m.name}</p>
-                    <p className="text-xs text-gray-500">{positionLabel(m.position) || "Position offen"}</p>
+                    <p className="font-medium text-paper-50 truncate">{m.name}</p>
+                    <p className="text-xs text-mist-400">{positionLabel(m.position) || "Position offen"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
@@ -601,11 +601,11 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                       <button
                         onClick={() => saveMemberNumber(m.playerId)}
                         disabled={numberBusyId === m.playerId}
-                        className="text-green-600 hover:text-green-700 disabled:opacity-60 p-1.5"
+                        className="text-signal-ok hover:text-signal-ok disabled:opacity-60 p-1.5"
                         title="Nummer speichern"
                         aria-label={`Rückennummer für ${m.name} speichern`}
                       >
-                        <FaCheck className="text-sm" />
+                        <PiCheckBold className="text-sm" />
                       </button>
                     </div>
                   ) : (
@@ -614,24 +614,24 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                         setNumberEditId(m.playerId);
                         setNumberValue(m.number || "");
                       }}
-                      className="text-gray-500 hover:text-brand-600 p-1.5"
+                      className="text-mist-400 hover:text-brand-400 p-1.5"
                       title="Rückennummer vergeben"
                       aria-label={`Rückennummer für ${m.name} vergeben`}
                     >
-                      <FaHashtag className="text-sm" />
+                      <PiHashBold className="text-sm" />
                     </button>
                   )}
 
                   {m.isFounder ? (
-                    <span className="text-xs font-medium rounded-full px-3 py-1 bg-brand-100 text-brand-700">
+                    <span className="text-xs font-medium rounded-sm px-3 py-1 bg-brand-500/15 text-brand-400">
                       Haupt-Admin
                     </span>
                   ) : m.isAdmin ? (
-                    <span className="text-xs font-medium rounded-full px-3 py-1 bg-brand-100 text-brand-700">
+                    <span className="text-xs font-medium rounded-sm px-3 py-1 bg-brand-500/15 text-brand-400">
                       Admin
                     </span>
                   ) : (
-                    <span className="text-xs font-medium rounded-full px-3 py-1 bg-green-100 text-green-700">
+                    <span className="text-xs font-medium rounded-sm px-3 py-1 bg-signal-ok/15 text-signal-ok">
                       Mitglied
                     </span>
                   )}
@@ -644,14 +644,14 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                       }
                       className={`p-1.5 ${
                         permEditId === m.playerId
-                          ? "text-brand-600"
-                          : "text-gray-500 hover:text-brand-600"
+                          ? "text-brand-400"
+                          : "text-mist-400 hover:text-brand-400"
                       }`}
                       title="Teilrechte festlegen"
                       aria-label={`Teilrechte für ${m.name} festlegen`}
                       aria-expanded={permEditId === m.playerId}
                     >
-                      <FaSlidersH className="text-sm" />
+                      <PiSlidersHorizontalBold className="text-sm" />
                     </button>
                   )}
 
@@ -664,11 +664,11 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                           <button
                             onClick={onClick}
                             disabled={adminBusyId === m.playerId}
-                            className="text-brand-600 hover:text-gray-500 disabled:opacity-60 p-1.5"
+                            className="text-brand-400 hover:text-mist-400 disabled:opacity-60 p-1.5"
                             title="Adminrechte entziehen"
                             aria-label={`${m.name} die Adminrechte entziehen`}
                           >
-                            <FaUserSlash className="text-sm" />
+                            <PiProhibitBold className="text-sm" />
                           </button>
                         )}
                         message={`${m.name} die Adminrechte entziehen?`}
@@ -682,11 +682,11 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                           <button
                             onClick={onClick}
                             disabled={adminBusyId === m.playerId}
-                            className="text-gray-500 hover:text-brand-600 disabled:opacity-60 p-1.5"
+                            className="text-mist-400 hover:text-brand-400 disabled:opacity-60 p-1.5"
                             title="Zum Admin machen"
                             aria-label={`${m.name} zum Team-Admin machen`}
                           >
-                            <FaUserShield className="text-sm" />
+                            <PiUserGearBold className="text-sm" />
                           </button>
                         )}
                         message={`${m.name} zum Team-Admin machen? Die Person kann dann Kader, Spiele & Ergebnisse verwalten.`}
@@ -704,11 +704,11 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                         <button
                           onClick={onClick}
                           disabled={removingId === m.playerId}
-                          className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
+                          className="text-mist-400 hover:text-signal-error disabled:opacity-60 p-1.5"
                           title="Aus Team entfernen"
                           aria-label={`${m.name} aus dem Team entfernen`}
                         >
-                          <FaUserMinus className="text-sm" />
+                          <PiUserMinusBold className="text-sm" />
                         </button>
                       )}
                       message={`${m.name} wirklich aus dem Team entfernen?`}
@@ -722,8 +722,8 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
 
               {/* Teilrechte-Panel (nur Haupt-Admin) */}
               {isMainAdmin && permEditId === m.playerId && (
-                <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 p-4">
-                  <p className="text-sm font-medium text-gray-700 mb-2">
+                <div className="mt-3 rounded-md border border-ink-600 bg-ink-950 p-4">
+                  <p className="text-sm font-medium text-mist-300 mb-2">
                     Welche Bereiche darf <strong>{m.name}</strong> verwalten?
                   </p>
                   <div className="space-y-2">
@@ -736,8 +736,8 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                           className="mt-0.5 h-4 w-4 accent-brand-500"
                         />
                         <span className="min-w-0">
-                          <span className="block text-sm font-medium text-gray-800">{p.label}</span>
-                          <span className="block text-xs text-gray-500">{p.desc}</span>
+                          <span className="block text-sm font-medium text-paper-50">{p.label}</span>
+                          <span className="block text-xs text-mist-400">{p.desc}</span>
                         </span>
                       </label>
                     ))}
@@ -754,7 +754,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                       Abbrechen
                     </Button>
                   </div>
-                  <p className="mt-2 text-xs text-gray-500">
+                  <p className="mt-2 text-xs text-mist-400">
                     Alle Häkchen = voller Zugriff wie der Haupt-Admin. Keine = nur ansehen.
                   </p>
                 </div>
@@ -764,24 +764,24 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
         </div>
       )}
 
-      <h3 className="text-sm font-semibold text-gray-700 pt-2">
+      <h3 className="text-sm font-semibold text-mist-300 pt-2">
         Eingeladene &amp; offene Plätze
       </h3>
 
       {/* Slot-Liste (über „Neuen Spieler anlegen" erstellt) */}
       {slots.length === 0 ? (
         <EmptyState
-          icon={FaIdBadge}
+          icon={PiIdentificationBadgeBold}
           title="Noch keine offenen Plätze"
           text="Über „Neuen Spieler anlegen“ legst du jemandem ohne Account einen Platz an – sein persönlicher Einladungslink erscheint dann hier."
           action={
             <Button variant="secondary" onClick={() => setMoreOpen(true)}>
-              <FaIdBadge className="text-xs" /> Neuen Spieler anlegen
+              <PiIdentificationBadgeBold className="text-xs" /> Neuen Spieler anlegen
             </Button>
           }
         />
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-100">
+        <div className="bg-ink-800 rounded-md border border-ink-600 divide-y divide-ink-600">
           {slots.map((slot) => {
             const badge = STATUS_BADGE[slot.status] || STATUS_BADGE.empty;
             const isBusy = busyId === slot._id;
@@ -789,14 +789,14 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
               <div key={slot._id} className="px-5 py-3">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="h-9 w-9 flex-shrink-0 rounded-full bg-brand-100 text-brand-700 text-sm font-semibold flex items-center justify-center">
+                    <span className="h-9 w-9 flex-shrink-0 rounded-full bg-brand-500/15 text-brand-400 text-sm font-semibold flex items-center justify-center">
                       {slot.number || "–"}
                     </span>
                     <div className="min-w-0">
-                      <p className="font-medium text-gray-900 truncate">
+                      <p className="font-medium text-paper-50 truncate">
                         {slot.name || "Unbenannter Slot"}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-mist-400">
                         {positionLabel(slot.position) || "Position offen"}
                       </p>
                     </div>
@@ -811,9 +811,9 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                         onClick={() => approveClaim(slot._id)}
                         disabled={isBusy}
                         aria-label={`Anspruch auf den Platz von ${slot.name || "diesem Slot"} genehmigen`}
-                        className="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white rounded-lg px-3 py-1.5 text-xs font-medium"
+                        className="inline-flex items-center gap-1.5 bg-signal-ok hover:brightness-110 disabled:opacity-60 text-paper-50 rounded-sm px-3 py-1.5 text-xs font-medium"
                       >
-                        <FaUserCheck /> Genehmigen
+                        <PiUserCheckBold /> Genehmigen
                       </button>
                     )}
                     <ConfirmAction
@@ -821,11 +821,11 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                         <button
                           onClick={onClick}
                           disabled={isBusy}
-                          className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
+                          className="text-mist-400 hover:text-signal-error disabled:opacity-60 p-1.5"
                           title="Slot entfernen"
                           aria-label={`Platz von ${slot.name || "unbenanntem Slot"} entfernen`}
                         >
-                          <FaTrash className="text-sm" />
+                          <PiTrashBold className="text-sm" />
                         </button>
                       )}
                       message={`Den Platz von ${slot.name || "diesem Slot"} wirklich entfernen? Der persönliche Einladungslink wird damit ungültig.`}
@@ -841,9 +841,9 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                   <div className="mt-3 flex flex-wrap items-center gap-2 pl-12">
                     <Button variant="secondary" size="sm" onClick={() => copyClaim(slot)}>
                       {copiedId === slot._id ? (
-                        <FaCheck className="text-green-600" />
+                        <PiCheckBold className="text-signal-ok" />
                       ) : (
-                        <FaCopy />
+                        <PiCopyBold />
                       )}
                       {copiedId === slot._id ? "Link kopiert" : "Claim-Link"}
                     </Button>
@@ -851,9 +851,9 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                       variant="secondary"
                       size="sm"
                       onClick={() => shareWhatsApp(slot)}
-                      className="hover:border-green-500 hover:text-green-700"
+                      className="hover:border-signal-ok hover:text-signal-ok"
                     >
-                      <FaWhatsapp className="text-green-600" /> WhatsApp
+                      <PiWhatsappLogoBold className="text-signal-ok" /> WhatsApp
                     </Button>
                     <Button
                       variant="secondary"
@@ -863,7 +863,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                         setInviteOpenId((id) => (id === slot._id ? null : slot._id))
                       }
                     >
-                      <FaEnvelope /> Per E-Mail einladen
+                      <PiEnvelopeSimpleBold /> Per E-Mail einladen
                     </Button>
 
                     {inviteOpenId === slot._id && (

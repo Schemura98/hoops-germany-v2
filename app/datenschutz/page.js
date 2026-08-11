@@ -16,7 +16,7 @@ export default function DatenschutzPage() {
         41748 Viersen, Deutschland
         <br />
         E-Mail:{" "}
-        <a href="mailto:info@hoopsgermany.de" className="text-brand-600 hover:underline">
+        <a href="mailto:info@hoopsgermany.de" className="text-brand-400 hover:underline">
           info@hoopsgermany.de
         </a>
       </p>
@@ -62,7 +62,7 @@ export default function DatenschutzPage() {
       <p>
         Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der
         Verarbeitung, Datenübertragbarkeit sowie Widerspruch. Wende dich dazu an{" "}
-        <a href="mailto:info@hoopsgermany.de" className="text-brand-600 hover:underline">
+        <a href="mailto:info@hoopsgermany.de" className="text-brand-400 hover:underline">
           info@hoopsgermany.de
         </a>
         . Zudem steht dir ein Beschwerderecht bei einer Datenschutz-Aufsichtsbehörde zu.
@@ -108,7 +108,7 @@ export default function DatenschutzPage() {
         Einfluss; YouTube/Google kann dabei Cookies setzen. Wir binden YouTube-Videos im
         erweiterten Datenschutzmodus (youtube-nocookie.com) ein. Informationen zur
         Datenverarbeitung durch Google findest du unter{" "}
-        <a href="https://policies.google.com/privacy" className="text-brand-600 hover:underline">
+        <a href="https://policies.google.com/privacy" className="text-brand-400 hover:underline">
           policies.google.com/privacy
         </a>
         .
@@ -121,7 +121,7 @@ export default function DatenschutzPage() {
         DSGVO).
       </p>
 
-      <p className="text-xs text-gray-500 pt-2">
+      <p className="text-xs text-mist-400 pt-2">
         Stand: Juli 2026. Diese Datenschutzerklärung ersetzt keine Rechtsberatung.
       </p>
     </LegalShell>

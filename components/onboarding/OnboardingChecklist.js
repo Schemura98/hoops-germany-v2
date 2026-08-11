@@ -5,12 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import axios from "axios";
 import {
-  FaCheckCircle,
-  FaRegCircle,
-  FaTimes,
-  FaArrowRight,
-  FaMobileAlt,
-} from "react-icons/fa";
+  PiCheckCircleBold,
+  PiCircleBold,
+  PiXBold,
+  PiArrowRightBold,
+  PiDeviceMobileBold,
+} from "react-icons/pi";
 import { getPlayerToken } from "@/lib/clientAuth";
 import { trackEvent } from "@/lib/trackEvent";
 
@@ -111,7 +111,7 @@ export default function OnboardingChecklist({ player, onDismiss }) {
     href: "/installieren",
     done: appInstalled,
     bonus: true,
-    Icon: FaMobileAlt,
+    Icon: PiDeviceMobileBold,
   };
 
   async function dismiss() {
@@ -129,32 +129,32 @@ export default function OnboardingChecklist({ player, onDismiss }) {
   const greetName = player.firstName ? `, ${player.firstName}` : "";
 
   return (
-    <div className="rounded-2xl bg-gradient-to-r from-slate-950 to-slate-800 text-white p-5 sm:p-6 shadow-sm mb-6">
+    <div className="rounded-md bg-ink-900 text-paper-50 p-5 sm:p-6 mb-6">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-lg sm:text-xl font-black">Willkommen{greetName}! 🏀</h2>
-          <p className="text-sm text-white/70 mt-0.5">
+          <p className="text-sm text-paper-50/70 mt-0.5">
             Richte dein Profil ein, um direkt loszulegen.
           </p>
         </div>
         <button
           onClick={dismiss}
           aria-label="Ausblenden"
-          className="text-white/50 hover:text-white p-1 flex-shrink-0"
+          className="text-paper-50/50 hover:text-paper-50 p-1 flex-shrink-0"
         >
-          <FaTimes />
+          <PiXBold />
         </button>
       </div>
 
       {/* Fortschritt */}
       <div className="mt-4">
-        <div className="flex items-center justify-between text-xs text-white/70 mb-1">
+        <div className="flex items-center justify-between text-xs text-paper-50/70 mb-1">
           <span>
             {doneCount} von {steps.length} erledigt
           </span>
           <span>{pct}%</span>
         </div>
-        <div className="h-2 rounded-full bg-white/15 overflow-hidden">
+        <div className="h-2 rounded-full bg-ink-800/15 overflow-hidden">
           <div
             className="h-full bg-brand-500 transition-all duration-500"
             style={{ width: `${pct}%` }}
@@ -168,21 +168,21 @@ export default function OnboardingChecklist({ player, onDismiss }) {
           <li key={s.key}>
             <Link
               href={s.href}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition ${
-                s.done ? "bg-white/5" : "bg-white/10 hover:bg-white/20"
+              className={`flex items-center gap-3 rounded-md px-3 py-2.5 transition ${
+                s.done ? "bg-ink-800/5" : "bg-ink-800/10 hover:bg-ink-700/20"
               }`}
             >
               {s.done ? (
-                <FaCheckCircle className="text-brand-500 flex-shrink-0" />
+                <PiCheckCircleBold className="text-brand-400 flex-shrink-0" />
               ) : s.Icon ? (
-                <s.Icon className="text-white/60 flex-shrink-0" />
+                <s.Icon className="text-paper-50/60 flex-shrink-0" />
               ) : (
-                <FaRegCircle className="text-white/40 flex-shrink-0" />
+                <PiCircleBold className="text-paper-50/40 flex-shrink-0" />
               )}
               <span className="flex-1 min-w-0">
                 <span
                   className={`block text-sm font-semibold ${
-                    s.done ? "line-through text-white/50" : "text-white"
+                    s.done ? "line-through text-paper-50/50" : "text-paper-50"
                   }`}
                 >
                   {s.label}
@@ -192,9 +192,9 @@ export default function OnboardingChecklist({ player, onDismiss }) {
                     </span>
                   )}
                 </span>
-                {!s.done && <span className="block text-xs text-white/60">{s.desc}</span>}
+                {!s.done && <span className="block text-xs text-paper-50/60">{s.desc}</span>}
               </span>
-              {!s.done && <FaArrowRight className="text-white/40 flex-shrink-0 text-xs" />}
+              {!s.done && <PiArrowRightBold className="text-paper-50/40 flex-shrink-0 text-xs" />}
             </Link>
           </li>
         ))}
@@ -202,7 +202,7 @@ export default function OnboardingChecklist({ player, onDismiss }) {
 
       <button
         onClick={dismiss}
-        className="mt-3 text-xs text-white/50 hover:text-white/80 underline"
+        className="mt-3 text-xs text-paper-50/50 hover:text-paper-50/80 underline"
       >
         Nicht mehr anzeigen
       </button>

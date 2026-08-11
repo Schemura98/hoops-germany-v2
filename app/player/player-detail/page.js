@@ -1,6 +1,6 @@
 "use client";
 
-import { FaPen } from "react-icons/fa";
+import { PiPencilSimpleBold } from "react-icons/pi";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import PlayerNav from "@/components/layout/PlayerNav";
 import Footer from "@/components/layout/Footer";
@@ -23,7 +23,7 @@ export default function PlayerPlayerDetailPage() {
   if (status === "error") {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
-        <p className="text-gray-700">Profil konnte nicht geladen werden.</p>
+        <p className="text-mist-300">Profil konnte nicht geladen werden.</p>
         <Button onClick={() => window.location.reload()} className="mt-4">
           Erneut versuchen
         </Button>
@@ -32,7 +32,7 @@ export default function PlayerPlayerDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-ink-950">
       <PlayerNav player={player} />
 
       <PlayerProfileView
@@ -41,12 +41,12 @@ export default function PlayerPlayerDetailPage() {
         actions={
           <>
             <Button href="/player/edit-profile">
-              <FaPen className="text-xs" /> Profil bearbeiten
+              <PiPencilSimpleBold className="text-xs" /> Profil bearbeiten
             </Button>
             <Button
               href="/player/update-password"
               variant="ghost"
-              className="!bg-white/10 hover:!bg-white/20 !text-white"
+              className="!bg-ink-800/10 hover:!bg-ink-800/20 !text-paper-50"
             >
               Passwort
             </Button>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { FaShieldAlt } from "react-icons/fa";
+import { PiShieldCheckBold } from "react-icons/pi";
 import { setAdminToken } from "@/lib/clientAuth";
 import { inputClass } from "@/lib/ui";
 
@@ -31,25 +31,25 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6 py-12 bg-gray-900">
+    <main className="min-h-screen flex items-center justify-center px-6 py-12 bg-ink-900">
       <div className="w-full max-w-sm">
-        <div className="flex items-center justify-center gap-2 font-bold text-white mb-8">
-          <FaShieldAlt className="text-brand-500 text-xl" />
+        <div className="flex items-center justify-center gap-2 font-bold text-paper-50 mb-8">
+          <PiShieldCheckBold className="text-brand-400 text-xl" />
           Hoops Germany · Admin
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          <h1 className="text-2xl font-bold text-gray-900">Admin-Login</h1>
+        <div className="bg-ink-800 rounded-md p-8">
+          <h1 className="font-display uppercase tracking-tight text-2xl font-black text-paper-50">Admin-Login</h1>
 
           {error && (
-            <div className="mt-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            <div className="mt-4 rounded-sm bg-signal-error/10 border border-signal-error/50 px-4 py-3 text-sm text-signal-error">
               {error}
             </div>
           )}
 
           <form onSubmit={onSubmit} className="mt-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Benutzername</label>
+              <label className="block text-sm font-medium text-mist-300 mb-1">Benutzername</label>
               <input
                 name="username"
                 required
@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Passwort</label>
+              <label className="block text-sm font-medium text-mist-300 mb-1">Passwort</label>
               <input
                 type="password"
                 name="password"
@@ -72,7 +72,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
+              className="w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
             >
               {loading ? "Anmelden…" : "Anmelden"}
             </button>

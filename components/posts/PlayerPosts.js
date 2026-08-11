@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaBasketballBall } from "react-icons/fa";
+import { PiBasketballBold } from "react-icons/pi";
 import PostCard from "@/components/posts/PostCard";
 
 // Zeigt die Beiträge eines Spielers (für Profilseiten).
@@ -33,15 +33,15 @@ export default function PlayerPosts({ playerId, currentPlayerId }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-sm font-semibold text-gray-900">Beiträge</h2>
+      <h2 className="text-sm font-semibold text-paper-50">Beiträge</h2>
 
       {loading ? (
         <div className="flex justify-center py-6">
-          <FaBasketballBall className="text-brand-500 text-2xl animate-bounce" />
+          <PiBasketballBold className="text-brand-400 text-2xl animate-bounce" />
         </div>
       ) : posts.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-center">
-          <p className="text-sm text-gray-500">Noch keine Beiträge.</p>
+        <div className="bg-ink-800 rounded-md border border-ink-600 p-6 text-center">
+          <p className="text-sm text-mist-400">Noch keine Beiträge.</p>
         </div>
       ) : (
         posts.map((post) => (

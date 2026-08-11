@@ -2,19 +2,18 @@
 // Zeigt das Bild, wenn vorhanden – sonst ein aus dem Namen generiertes
 // Initialen-Logo mit deterministischer Farbe (für Spieler & Teams).
 
+// Gedaempfte, warme Fuellfarben statt der bunten 500er-Toene: Auf dem dunklen
+// Grund waren die alten Werte die hellsten Flaechen der Seite und zogen den
+// Blick von den Inhalten weg. Alle Werte tragen paper-50 mit >= 6:1.
 const PALETTE = [
-  "bg-rose-500",
-  "bg-brand-500",
-  "bg-amber-500",
-  "bg-emerald-500",
-  "bg-teal-500",
-  "bg-sky-500",
-  "bg-blue-600",
-  "bg-indigo-500",
-  "bg-violet-500",
-  "bg-fuchsia-500",
-  "bg-slate-600",
-  "bg-red-500",
+  "bg-[#6B4A2F]",
+  "bg-[#7A3F2E]",
+  "bg-[#5E5233]",
+  "bg-[#3F5A4A]",
+  "bg-[#33505E]",
+  "bg-[#4A3F63]",
+  "bg-[#6B3F4E]",
+  "bg-[#4A4A44]",
 ];
 
 function hash(str) {
@@ -42,7 +41,7 @@ export default function Avatar({
   square = false,
   ring = "",
 }) {
-  const shape = square ? "rounded-2xl" : "rounded-full";
+  const shape = square ? "rounded-md" : "rounded-full";
 
   if (src) {
     return (
@@ -50,14 +49,14 @@ export default function Avatar({
       <img
         src={src}
         alt={name || ""}
-        className={`${className} ${shape} object-cover flex-shrink-0 bg-white ${ring}`}
+        className={`${className} ${shape} object-cover flex-shrink-0 bg-ink-800 ${ring}`}
       />
     );
   }
 
   return (
     <span
-      className={`${className} ${shape} ${colorFor(name)} text-white font-bold flex items-center justify-center flex-shrink-0 ${textClass} ${ring}`}
+      className={`${className} ${shape} ${colorFor(name)} text-paper-50 font-bold flex items-center justify-center flex-shrink-0 ${textClass} ${ring}`}
     >
       {initialsFor(name)}
     </span>

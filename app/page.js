@@ -28,7 +28,7 @@ export default function LandingPage() {
           erreicht (Befund Ronja O4, Entscheid Nele: Sichtbarkeit statt
           Zahlensignal – eine Beteiligungszahl waere in der Testphase entweder
           unehrlich oder entmutigend). */}
-      <section className="bg-white py-20 px-4">
+      <section className="bg-ink-800 py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <NewsWidget />
         </div>

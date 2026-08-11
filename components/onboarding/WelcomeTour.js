@@ -4,42 +4,42 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import axios from "axios";
 import {
-  FaBasketballBall,
-  FaChartBar,
-  FaUsers,
-  FaTrophy,
-  FaExchangeAlt,
-  FaTimes,
-  FaArrowLeft,
-  FaArrowRight,
-} from "react-icons/fa";
+  PiBasketballBold,
+  PiChartBarBold,
+  PiUsersBold,
+  PiTrophyBold,
+  PiArrowsLeftRightBold,
+  PiXBold,
+  PiArrowLeftBold,
+  PiArrowRightBold,
+} from "react-icons/pi";
 import { getPlayerToken } from "@/lib/clientAuth";
 import { trackEvent } from "@/lib/trackEvent";
 
 // Inhalt der Willkommens-Tour (Anreiz: „Was kannst du hier alles tun?").
 const STEPS = [
   {
-    icon: FaBasketballBall,
+    icon: PiBasketballBold,
     title: "Willkommen bei Hoops Germany! 🏀",
     text: "Deine Community-Plattform für Amateur-Basketball in NRW – Spieler, Teams, Ligen, Spiele, Tryouts und Transfers an einem Ort. Hier ein kurzer Überblick, was du alles machen kannst.",
   },
   {
-    icon: FaChartBar,
+    icon: PiChartBarBold,
     title: "Dein Profil & deine Statistiken",
     text: "Lege ein aussagekräftiges Profil an – mit Foto, Position, Verein und Steckbrief. Deine Spiele zahlen automatisch auf deine Karriere-Statistiken (Punkte, Assists, Rebounds) und deine Spielerhistorie ein.",
   },
   {
-    icon: FaUsers,
+    icon: PiUsersBold,
     title: "Teams & Kader",
     text: "Tritt deinem Verein bei – oder gründe dein eigenes Team und werde automatisch Team-Admin. Verwalte deinen Kader, lade Mitspieler ein und ernenne weitere Admins.",
   },
   {
-    icon: FaTrophy,
+    icon: PiTrophyBold,
     title: "Spiele, Ligen & Tabellen",
     text: "Trage Spiele und Ergebnisse ein, verfolge offizielle Ligen mit Tabellen und Playoffs und sieh dir die Topscorer an. Beide Teams bestätigen Ergebnisse – fair und transparent.",
   },
   {
-    icon: FaExchangeAlt,
+    icon: PiArrowsLeftRightBold,
     title: "Transfermarkt, Tryouts & Community",
     text: "Finde Spieler oder Vereine im Transfermarkt, bewirb dich auf Tryouts und bleib im Newsfeed auf dem Laufenden – folge Spielern und Teams und teile deine Highlights: mit Fotos, @Erwähnungen, #Hashtags und Video-Links (z. B. YouTube).",
   },
@@ -107,27 +107,27 @@ export default function WelcomeTour() {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60">
-      <div className="relative w-full max-w-md rounded-2xl bg-white shadow-xl overflow-hidden">
+      <div className="relative w-full max-w-md rounded-md bg-ink-800 overflow-hidden">
         {/* Schließen */}
         <button
           onClick={() => close(false)}
           aria-label="Schließen"
-          className="absolute top-3 right-3 text-white/70 hover:text-white p-1 z-10"
+          className="absolute top-3 right-3 text-paper-50/70 hover:text-paper-50 p-1 z-10"
         >
-          <FaTimes />
+          <PiXBold />
         </button>
 
         {/* Navy-Kopf mit Icon */}
-        <div className="bg-gradient-to-r from-slate-950 to-slate-800 px-6 pt-8 pb-6 text-center">
-          <div className="mx-auto mb-3 h-14 w-14 rounded-2xl bg-brand-500 flex items-center justify-center text-white text-2xl">
+        <div className="bg-ink-900 px-6 pt-8 pb-6 text-center">
+          <div className="mx-auto mb-3 h-14 w-14 rounded-md bg-brand-500 flex items-center justify-center text-ink-950 text-2xl">
             <Icon />
           </div>
-          <h2 className="text-white font-black text-lg">{s.title}</h2>
+          <h2 className="text-paper-50 font-black text-lg">{s.title}</h2>
         </div>
 
         {/* Text */}
         <div className="px-6 py-5">
-          <p className="text-sm text-gray-600 leading-relaxed text-center min-h-[88px]">
+          <p className="text-sm text-mist-400 leading-relaxed text-center min-h-[88px]">
             {s.text}
           </p>
 
@@ -139,7 +139,7 @@ export default function WelcomeTour() {
                 onClick={() => setStep(i)}
                 aria-label={`Schritt ${i + 1}`}
                 className={`h-2 rounded-full transition-all ${
-                  i === step ? "w-6 bg-brand-500" : "w-2 bg-gray-300 hover:bg-gray-400"
+                  i === step ? "w-6 bg-brand-500" : "w-2 bg-ink-600 hover:bg-ink-600"
                 }`}
               />
             ))}
@@ -150,14 +150,14 @@ export default function WelcomeTour() {
             {step > 0 ? (
               <button
                 onClick={() => setStep((n) => n - 1)}
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-800"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-mist-400 hover:text-paper-50"
               >
-                <FaArrowLeft className="text-xs" /> Zurück
+                <PiArrowLeftBold className="text-xs" /> Zurück
               </button>
             ) : (
               <button
                 onClick={() => close(false)}
-                className="text-sm font-medium text-gray-500 hover:text-gray-600"
+                className="text-sm font-medium text-mist-400 hover:text-mist-400"
               >
                 Überspringen
               </button>
@@ -166,16 +166,16 @@ export default function WelcomeTour() {
             {isLast ? (
               <button
                 onClick={() => close(true)}
-                className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl px-5 py-2.5 text-sm"
+                className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-ink-950 font-semibold rounded-md px-5 py-2.5 text-sm"
               >
                 Los geht&apos;s
               </button>
             ) : (
               <button
                 onClick={() => setStep((n) => n + 1)}
-                className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl px-5 py-2.5 text-sm"
+                className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-ink-950 font-semibold rounded-md px-5 py-2.5 text-sm"
               >
-                Weiter <FaArrowRight className="text-xs" />
+                Weiter <PiArrowRightBold className="text-xs" />
               </button>
             )}
           </div>

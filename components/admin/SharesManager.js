@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaLink, FaCopy, FaCheck, FaTrash, FaPlus } from "react-icons/fa";
+import { PiLinkBold, PiCopyBold, PiCheckBold, PiTrashBold, PiPlusBold } from "react-icons/pi";
 import { getAdminToken } from "@/lib/clientAuth";
 
 // Verwaltung teilbarer, passwortgeschützter Sponsor-Report-Links.
@@ -74,52 +74,52 @@ export default function SharesManager() {
           value={label}
           onChange={(e) => setLabel(e.target.value)}
           placeholder="Bezeichnung (z.B. Autohaus Müller)"
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand-500"
+          className="flex-1 rounded-sm border border-ink-600 px-3 py-2 text-sm outline-none focus:border-brand-500"
         />
         <input
           type="text"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Passwort (min. 4 Zeichen)"
-          className="sm:w-52 rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand-500"
+          className="sm:w-52 rounded-sm border border-ink-600 px-3 py-2 text-sm outline-none focus:border-brand-500"
         />
         <button
           type="submit"
           disabled={creating}
-          className="inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white font-semibold rounded-lg px-4 py-2 text-sm whitespace-nowrap"
+          className="inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 font-semibold rounded-sm px-4 py-2 text-sm whitespace-nowrap"
         >
-          <FaPlus className="text-xs" /> Link erstellen
+          <PiPlusBold className="text-xs" /> Link erstellen
         </button>
       </form>
       {msg && (
-        <p className={`text-xs ${msg.type === "ok" ? "text-green-600" : "text-red-600"}`}>{msg.text}</p>
+        <p className={`text-xs ${msg.type === "ok" ? "text-signal-ok" : "text-signal-error"}`}>{msg.text}</p>
       )}
 
       {shares.length === 0 ? (
-        <p className="text-sm text-gray-500">Noch keine teilbaren Links.</p>
+        <p className="text-sm text-mist-400">Noch keine teilbaren Links.</p>
       ) : (
-        <ul className="divide-y divide-gray-100 border border-gray-100 rounded-xl">
+        <ul className="divide-y divide-ink-600 border border-ink-600 rounded-md">
           {shares.map((s) => (
             <li key={s._id} className="flex items-center gap-3 px-4 py-2.5">
-              <FaLink className={`flex-shrink-0 text-sm ${s.active ? "text-brand-500" : "text-gray-300"}`} />
+              <PiLinkBold className={`flex-shrink-0 text-sm ${s.active ? "text-brand-400" : "text-ink-500"}`} />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-medium text-paper-50 truncate">
                   {s.label || "Ohne Bezeichnung"}
-                  {!s.active && <span className="ml-2 text-xs text-red-500">(deaktiviert)</span>}
+                  {!s.active && <span className="ml-2 text-xs text-signal-error">(deaktiviert)</span>}
                 </p>
-                <p className="text-xs text-gray-500 truncate">/sponsor-report/{s.token}</p>
+                <p className="text-xs text-mist-400 truncate">/sponsor-report/{s.token}</p>
               </div>
               {s.active && (
                 <>
                   <button
                     onClick={() => copy(s.token, s._id)}
                     title="Link kopieren"
-                    className="text-gray-500 hover:text-brand-600 p-1.5"
+                    className="text-mist-400 hover:text-brand-400 p-1.5"
                   >
-                    {copiedId === s._id ? <FaCheck className="text-green-600 text-sm" /> : <FaCopy className="text-sm" />}
+                    {copiedId === s._id ? <PiCheckBold className="text-signal-ok text-sm" /> : <PiCopyBold className="text-sm" />}
                   </button>
-                  <button onClick={() => revoke(s._id)} title="Deaktivieren" className="text-gray-500 hover:text-red-600 p-1.5">
-                    <FaTrash className="text-sm" />
+                  <button onClick={() => revoke(s._id)} title="Deaktivieren" className="text-mist-400 hover:text-signal-error p-1.5">
+                    <PiTrashBold className="text-sm" />
                   </button>
                 </>
               )}
@@ -127,7 +127,7 @@ export default function SharesManager() {
           ))}
         </ul>
       )}
-      <p className="text-[11px] text-gray-500">
+      <p className="text-[11px] text-mist-400">
         Der Link zeigt nur aggregierte Zahlen (keine personenbezogenen Daten). Passwort separat (nicht per
         selbem Kanal) an den Sponsor weitergeben.
       </p>

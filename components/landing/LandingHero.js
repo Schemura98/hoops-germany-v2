@@ -4,13 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
 import {
-  FaArrowRight,
-  FaUsers,
-  FaUser,
-  FaNewspaper,
-  FaCalendarAlt,
-  FaCommentDots,
-} from "react-icons/fa";
+  PiArrowRightBold,
+  PiUsersBold,
+  PiUserBold,
+  PiNewspaperBold,
+  PiCalendarBlankBold,
+  PiChatCircleDotsBold,
+} from "react-icons/pi";
 import { getPlayerToken } from "@/lib/clientAuth";
 
 // Rückkehr-Signal: Welche offene Sache zeigen wir dem eingeloggten Nutzer?
@@ -55,14 +55,14 @@ import HeroScrollStage from "@/components/landing/HeroScrollStage";
 // Einheitliche Hero-Buttons: ein primärer (orange) + gleichartige „Ghost"-Buttons,
 // damit der Button-Block farblich ruhig und konsistent wirkt.
 const HERO_BTN =
-  "font-bold py-3.5 px-6 rounded-lg text-base flex items-center justify-center gap-2 transition-colors";
-const HERO_PRIMARY = `${HERO_BTN} bg-brand-500 hover:bg-brand-600 text-white`;
-const HERO_GHOST = `${HERO_BTN} border-2 border-white/70 bg-white/10 hover:bg-white hover:text-gray-900 text-white`;
+  "font-bold py-3.5 px-6 rounded-sm text-base flex items-center justify-center gap-2 transition-colors";
+const HERO_PRIMARY = `${HERO_BTN} bg-brand-500 hover:bg-brand-400 text-ink-950`;
+const HERO_GHOST = `${HERO_BTN} border border-ink-600 hover:border-brand-500 hover:bg-ink-800 text-paper-50`;
 const HERO_W = "w-full sm:w-52";
 
-// Vollbild-Hero mit Hintergrundbild + dunklem Overlay.
-// Zeigt einen personalisierten Bereich für eingeloggte Spieler, sonst die
-// öffentliche Call-to-Action. Original-Design, v2-Architektur.
+// Vollbild-Hero auf ruhiger Fläche (seit 12.08.2026 ohne Foto, Begründung in
+// HeroScrollStage.js). Zeigt einen personalisierten Bereich für eingeloggte
+// Spieler, sonst die öffentliche Call-to-Action.
 //
 // Die Fläche selbst liefert `HeroScrollStage` (scroll-gesteuerte Bewegung,
 // Konzept docs/HERO-KONZEPT-2026-08-11.md). Der Inhalt hier bleibt unverändert –
@@ -110,17 +110,21 @@ export default function LandingHero() {
   const teamSlug = player?.team?.slug || null;
 
   return (
-    <HeroScrollStage ctaRef={ctaRef} textRef={textRef} backgroundImage="/images/login image.jpg">
+    <HeroScrollStage ctaRef={ctaRef} textRef={textRef}>
       <>
         {checked && player ? (
           <>
             <div ref={textRef}>
             <Reveal as="div" delay={0} className="mb-6">
-              <span className="bg-brand-500 text-white text-xs font-bold px-4 py-2 rounded-full uppercase tracking-widest">
+              <span className="font-display bg-brand-500 text-ink-950 text-sm font-bold px-4 py-1.5 rounded-sm uppercase tracking-[0.2em]">
                 Willkommen zurück
               </span>
             </Reveal>
-            <Reveal as="h1" delay={90} className="text-4xl md:text-6xl font-black mb-4 leading-tight">
+            <Reveal
+              as="h1"
+              delay={90}
+              className="font-display text-5xl sm:text-6xl md:text-8xl font-black uppercase tracking-tight mb-4 leading-[0.9]"
+            >
               Hey {player.firstName},
               <br />
               <span className="text-brand-400">schön, dass du da bist!</span>
@@ -136,13 +140,13 @@ export default function LandingHero() {
               {signal ? (
                 <Link
                   href={signal.href}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-2 text-base md:text-lg text-white hover:bg-white hover:text-gray-900 transition-colors"
+                  className="inline-flex items-center gap-2 rounded-sm border border-ink-600 bg-ink-800 px-4 py-2 text-base md:text-lg text-paper-50 hover:border-brand-500 transition-colors"
                 >
                   <span className="h-2 w-2 flex-shrink-0 rounded-full bg-brand-400" aria-hidden="true" />
                   {signal.text}
                 </Link>
               ) : (
-                <p className="text-lg md:text-xl text-gray-200 leading-relaxed">
+                <p className="text-lg md:text-xl text-mist-400 leading-relaxed">
                   Was möchtest du heute machen?
                 </p>
               )}
@@ -152,16 +156,16 @@ export default function LandingHero() {
               {/* Obere Reihe: 3 Buttons – primärer „Zum Feed" mittig */}
               <div className="flex flex-col sm:flex-row justify-center gap-3">
                 <Link href="/player/player-detail" className={`${HERO_GHOST} ${HERO_W}`}>
-                  <FaUser /> Mein Profil
+                  <PiUserBold /> Mein Profil
                 </Link>
                 <Link ref={ctaRef} href="/home" className={`${HERO_PRIMARY} ${HERO_W}`}>
-                  <FaNewspaper /> Zum Feed
+                  <PiNewspaperBold /> Zum Feed
                 </Link>
                 <Link
                   href={teamSlug ? `/team/team-detail/${teamSlug}` : "/teams"}
                   className={`${HERO_GHOST} ${HERO_W}`}
                 >
-                  <FaUsers /> {teamSlug ? "Mein Team" : "Teams"}
+                  <PiUsersBold /> {teamSlug ? "Mein Team" : "Teams"}
                 </Link>
               </div>
               {/* Untere Reihe: Feedback steht bewusst vorn und traegt den
@@ -173,15 +177,15 @@ export default function LandingHero() {
               <div className="flex flex-col sm:flex-row justify-center gap-3">
                 <Link
                   href="/feedback"
-                  className={`${HERO_BTN} ${HERO_W} group border-2 border-amber-300/70 bg-amber-300/10 text-white hover:bg-amber-300 hover:text-gray-900`}
+                  className={`${HERO_BTN} ${HERO_W} group border border-signal-wait/70 bg-signal-wait/10 text-paper-50 hover:bg-signal-wait hover:text-ink-950`}
                 >
                   {/* Icon-Farbe an den Hover-Zustand koppeln: Beim Hover wird die
-                      Flaeche solide amber-300 - ein fest verdrahtetes text-amber-300
+                      Flaeche solide amber-300 - ein fest verdrahtetes text-signal-wait
                       liesse das Icon darin verschwinden (Befund Tobias, 12.08.2026). */}
-                  <FaCommentDots className="text-amber-300 group-hover:text-gray-900" /> Feedback
+                  <PiChatCircleDotsBold className="text-signal-wait group-hover:text-ink-950" /> Feedback
                 </Link>
                 <Link href="/spiele" className={`${HERO_GHOST} ${HERO_W}`}>
-                  <FaCalendarAlt /> Spielplan
+                  <PiCalendarBlankBold /> Spielplan
                 </Link>
               </div>
             </Reveal>
@@ -190,11 +194,15 @@ export default function LandingHero() {
           <>
             <div ref={textRef}>
             <Reveal as="div" delay={0} className="mb-6">
-              <span className="bg-brand-500 text-white text-xs font-bold px-4 py-2 rounded-full uppercase tracking-widest">
+              <span className="font-display bg-brand-500 text-ink-950 text-sm font-bold px-4 py-1.5 rounded-sm uppercase tracking-[0.2em]">
                 Amateur-Basketball in NRW
               </span>
             </Reveal>
-            <Reveal as="h1" delay={90} className="text-4xl md:text-6xl font-black mb-6 leading-tight">
+            <Reveal
+              as="h1"
+              delay={90}
+              className="font-display text-5xl sm:text-6xl md:text-8xl font-black uppercase tracking-tight mb-6 leading-[0.9]"
+            >
               Deine Basketball-
               <span className="text-brand-400"> Community</span>
               <br />
@@ -203,7 +211,7 @@ export default function LandingHero() {
             <Reveal
               as="p"
               delay={180}
-              className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto leading-relaxed"
+              className="text-lg md:text-xl text-mist-400 mb-10 max-w-2xl mx-auto leading-relaxed"
             >
               Finde Spieler, tritt Vereinen bei und verfolge Ligen in deiner Region. Die
               Plattform für Amateur-Basketball – von Spielern, für Spieler.
@@ -213,21 +221,21 @@ export default function LandingHero() {
               <Link
                 ref={ctaRef}
                 href="/signup"
-                className="bg-brand-500 hover:bg-brand-600 text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center gap-2 transition-transform duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
+                className="bg-brand-500 hover:bg-brand-400 text-ink-950 font-bold py-4 px-8 rounded-md text-lg flex items-center justify-center gap-2 transition-[transform,background-color] duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
               >
-                Als Spieler registrieren <FaArrowRight />
+                Als Spieler registrieren <PiArrowRightBold />
               </Link>
               <Link
                 href="/team/register"
-                className="border-2 border-white/70 bg-white/10 hover:bg-white hover:text-gray-900 text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center transition-transform duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
+                className="border border-ink-600 hover:border-brand-500 hover:bg-ink-800 text-paper-50 font-bold py-4 px-8 rounded-md text-lg flex items-center justify-center transition-[transform,background-color,border-color] duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
               >
                 Team gründen
               </Link>
               <Link
                 href="/teams"
-                className="border-2 border-white/70 bg-white/10 hover:bg-white hover:text-gray-900 text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center gap-2 transition-transform duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
+                className="border border-ink-600 hover:border-brand-500 hover:bg-ink-800 text-paper-50 font-bold py-4 px-8 rounded-md text-lg flex items-center justify-center gap-2 transition-[transform,background-color,border-color] duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
               >
-                <FaUsers /> Teams entdecken
+                <PiUsersBold /> Teams entdecken
               </Link>
             </Reveal>
           </>

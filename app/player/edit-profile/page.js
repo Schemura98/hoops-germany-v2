@@ -40,10 +40,10 @@ const FIELDS = [
 function Field({ label, required = false, children }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label className="block text-sm font-medium text-mist-300 mb-1">
         {label}
         {required && (
-          <span className="text-brand-600" aria-hidden="true">
+          <span className="text-brand-400" aria-hidden="true">
             {" *"}
           </span>
         )}
@@ -131,7 +131,7 @@ export default function PlayerEditProfilePage() {
   if (status === "error") {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
-        <p className="text-gray-700">Profil konnte nicht geladen werden.</p>
+        <p className="text-mist-300">Profil konnte nicht geladen werden.</p>
         <Button onClick={() => window.location.reload()} className="mt-4">
           Erneut versuchen
         </Button>
@@ -142,32 +142,32 @@ export default function PlayerEditProfilePage() {
   const computedAge = ageFromBirthdate(form.birthdate);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-ink-950">
       <PlayerNav player={player} />
 
       <main className="max-w-2xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Profil bearbeiten</h1>
+          <h1 className="font-display uppercase tracking-tight text-2xl font-black text-paper-50">Profil bearbeiten</h1>
           <Link
             href="/player/player-detail"
-            className="text-sm text-gray-500 hover:text-brand-600"
+            className="text-sm text-mist-400 hover:text-brand-400"
           >
             Abbrechen
           </Link>
         </div>
 
         {error && (
-          <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          <div className="mb-4 rounded-sm bg-signal-error/10 border border-signal-error/50 px-4 py-3 text-sm text-signal-error">
             {error}
           </div>
         )}
 
         <form
           onSubmit={onSubmit}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5"
+          className="bg-ink-800 rounded-md border border-ink-600 p-6 space-y-5"
         >
-          <p className="text-xs text-gray-500">
-            Mit <span className="text-brand-600">*</span> markierte Felder sind Pflichtfelder – alle
+          <p className="text-xs text-mist-400">
+            Mit <span className="text-brand-400">*</span> markierte Felder sind Pflichtfelder – alle
             anderen Angaben sind freiwillig.
           </p>
 
@@ -221,7 +221,7 @@ export default function PlayerEditProfilePage() {
                 max={new Date().toISOString().slice(0, 10)}
                 className={inputClass}
               />
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-mist-400">
                 {computedAge != null
                   ? `Alter: ${computedAge} Jahre (wird automatisch aktualisiert)`
                   : "Dein Alter wird daraus berechnet."}
@@ -317,7 +317,7 @@ export default function PlayerEditProfilePage() {
           </Field>
 
           {player.isTeamAdmin && (
-            <div className="border-t border-gray-100 pt-4">
+            <div className="border-t border-ink-600 pt-4">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -328,10 +328,10 @@ export default function PlayerEditProfilePage() {
                   className="mt-0.5 h-4 w-4 accent-brand-500"
                 />
                 <span>
-                  <span className="block text-sm font-medium text-gray-800">
+                  <span className="block text-sm font-medium text-paper-50">
                     E-Mail-Erinnerung bei ausstehenden Ergebnissen
                   </span>
-                  <span className="block text-xs text-gray-500">
+                  <span className="block text-xs text-mist-400">
                     Als Team-Admin bekommst du eine Mail, wenn nach einem Spiel noch das
                     Ergebnis fehlt. Die Glocken-Benachrichtigung bleibt unabhängig davon.
                   </span>
@@ -351,9 +351,9 @@ export default function PlayerEditProfilePage() {
         </form>
 
         {/* Gefahrenzone: Konto löschen */}
-        <div className="mt-8 bg-white rounded-2xl border border-red-200 p-6">
-          <h2 className="text-base font-bold text-red-700">Konto löschen</h2>
-          <p className="text-sm text-gray-600 mt-1">
+        <div className="mt-8 bg-ink-800 rounded-md border border-signal-error/50 p-6">
+          <h2 className="text-base font-bold text-signal-error">Konto löschen</h2>
+          <p className="text-sm text-mist-400 mt-1">
             Dein Profil, deine Beiträge und Verknüpfungen werden dauerhaft entfernt. Das kann nicht
             rückgängig gemacht werden.
           </p>
@@ -369,11 +369,11 @@ export default function PlayerEditProfilePage() {
               Konto löschen…
             </Button>
           ) : (
-            <div className="mt-4 rounded-xl bg-red-50 border border-red-200 p-4">
-              <p className="text-sm font-medium text-gray-800">
+            <div className="mt-4 rounded-md bg-signal-error/10 border border-signal-error/50 p-4">
+              <p className="text-sm font-medium text-paper-50">
                 Bist du sicher? Diese Aktion ist endgültig.
               </p>
-              {deleteError && <p className="mt-2 text-sm text-red-600">{deleteError}</p>}
+              {deleteError && <p className="mt-2 text-sm text-signal-error">{deleteError}</p>}
               <div className="mt-3 flex flex-wrap gap-3">
                 <Button variant="danger" size="lg" onClick={deleteAccount} disabled={deleting}>
                   {deleting ? "Wird gelöscht…" : "Ja, Konto endgültig löschen"}

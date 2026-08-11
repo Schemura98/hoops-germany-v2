@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaUsers, FaSearch, FaBasketballBall, FaMapMarkerAlt, FaPlus } from "react-icons/fa";
+import { PiUsersBold, PiMagnifyingGlassBold, PiBasketballBold, PiMapPinBold, PiPlusBold } from "react-icons/pi";
 import Navbar from "@/components/layout/Navbar";
 import DemoBadge from "@/components/DemoBadge";
 import Footer from "@/components/layout/Footer";
@@ -20,7 +20,7 @@ import { colorFor, initialsFor } from "@/components/Avatar";
 // Karten-Skeleton im Format der echten Teamkarte (Logo-Banner + Textzeilen).
 function TeamCardSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+    <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
       <Skeleton className="h-40 w-full rounded-none" />
       <div className="p-4">
         <Skeleton className="h-4 w-2/3 mb-2" />
@@ -84,7 +84,7 @@ export default function TeamsPage() {
   }, [teams, query, land, geo, cityMap]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-ink-950 flex flex-col">
       <Navbar />
 
       <PageHeader
@@ -94,11 +94,11 @@ export default function TeamsPage() {
       >
         <div className="mt-5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
           <Button href="/team/create" size="lg" className="whitespace-nowrap">
-            <FaPlus /> Eigenes Team gründen
+            <PiPlusBold /> Eigenes Team gründen
           </Button>
-          <p className="text-slate-400 text-sm">
+          <p className="text-mist-400 text-sm">
             Dein Team ist nicht dabei? Gründe es selbst – du wirst automatisch{" "}
-            <span className="text-slate-200 font-medium">Team-Admin</span> und verwaltest Kader,
+            <span className="text-mist-300 font-medium">Team-Admin</span> und verwaltest Kader,
             Spiele &amp; mehr.
           </p>
         </div>
@@ -108,12 +108,12 @@ export default function TeamsPage() {
         {/* Filterleiste: siehe /spieler – ein Muster für alle Listenseiten. */}
         <div className="mb-6 space-y-3">
           <div className="relative">
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
+            <PiMagnifyingGlassBold className="absolute left-3 top-1/2 -translate-y-1/2 text-mist-400 text-sm" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Team oder Stadt suchen…"
-              className="w-full rounded-xl border border-gray-200 pl-9 pr-4 py-3 text-sm text-gray-900 outline-none focus:border-brand-400 bg-white shadow-sm"
+              className="w-full rounded-md border border-ink-600 pl-9 pr-4 py-3 text-sm text-paper-50 outline-none focus:border-brand-400 bg-ink-800"
             />
           </div>
           <select
@@ -135,7 +135,7 @@ export default function TeamsPage() {
         {loading ? (
           <Skeleton className="h-3.5 w-20 mb-4" />
         ) : !error ? (
-          <p className="text-xs text-gray-500 font-medium mb-4 uppercase tracking-wide">
+          <p className="text-xs text-mist-400 font-medium mb-4 uppercase tracking-wide">
             {filtered.length} Teams
           </p>
         ) : null}
@@ -150,7 +150,7 @@ export default function TeamsPage() {
           <EmptyState title="Teams konnten nicht geladen werden." />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon={FaUsers}
+            icon={PiUsersBold}
             title="Keine Teams gefunden"
             text={
               query
@@ -159,7 +159,7 @@ export default function TeamsPage() {
             }
             action={
               <Button href="/team/create">
-                <FaPlus /> Eigenes Team gründen
+                <PiPlusBold /> Eigenes Team gründen
               </Button>
             }
           />
@@ -169,30 +169,30 @@ export default function TeamsPage() {
               <Link
                 key={t._id}
                 href={`/team/team-detail/${t.slug}`}
-                className="group bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-brand-200 hover:-translate-y-1 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong motion-reduce:hover:translate-y-0 overflow-hidden flex flex-col"
+                className="group bg-ink-800 rounded-md border border-ink-600 hover:border-brand-500/50 hover:-translate-y-1 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong motion-reduce:hover:translate-y-0 overflow-hidden flex flex-col"
               >
-                <div className="bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center h-40 w-full">
+                <div className="bg-gradient-to-br from-ink-900 to-ink-800 flex items-center justify-center h-40 w-full">
                   {t.logo ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={t.logo} alt={t.teamName} className="h-28 w-28 object-contain" />
                   ) : (
                     <div
-                      className={`h-24 w-24 rounded-2xl ${colorFor(
+                      className={`h-24 w-24 rounded-md ${colorFor(
                         t.teamName
-                      )} flex items-center justify-center text-white text-3xl font-black`}
+                      )} flex items-center justify-center text-paper-50 text-3xl font-black`}
                     >
                       {initialsFor(t.teamName)}
                     </div>
                   )}
                 </div>
                 <div className="p-4 flex flex-col flex-1">
-                  <h2 className="font-bold text-gray-900 text-base leading-tight group-hover:text-brand-600 transition-colors truncate">
+                  <h2 className="font-bold text-paper-50 text-base leading-tight group-hover:text-brand-400 transition-colors truncate">
                     {t.teamName}
                   </h2>
                   {t.isDemo && <DemoBadge className="mt-1.5 self-start" />}
                   {t.region && (
-                    <div className="flex items-center gap-1.5 mt-1.5 text-gray-500 text-xs">
-                      <FaMapMarkerAlt className="flex-shrink-0 text-brand-400" />
+                    <div className="flex items-center gap-1.5 mt-1.5 text-mist-400 text-xs">
+                      <PiMapPinBold className="flex-shrink-0 text-brand-400" />
                       <span className="truncate">{t.region}</span>
                     </div>
                   )}

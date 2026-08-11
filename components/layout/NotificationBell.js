@@ -4,40 +4,40 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
 import {
-  FaBell,
-  FaUserPlus,
-  FaUsers,
-  FaCheckCircle,
-  FaBasketballBall,
-  FaExclamationTriangle,
-  FaExchangeAlt,
-  FaHeart,
-  FaRegComment,
-  FaReply,
-  FaAt,
-  FaEnvelopeOpenText,
-  FaCheck,
-  FaTimes,
-} from "react-icons/fa";
+  PiBellBold,
+  PiUserPlusBold,
+  PiUsersBold,
+  PiCheckCircleBold,
+  PiBasketballBold,
+  PiWarningBold,
+  PiArrowsLeftRightBold,
+  PiHeartFill,
+  PiChatCircleBold,
+  PiArrowBendUpLeftBold,
+  PiAtBold,
+  PiEnvelopeOpenBold,
+  PiCheckBold,
+  PiXBold,
+} from "react-icons/pi";
 import { getPlayerToken, getStoredPlayer } from "@/lib/clientAuth";
 import { notificationHref } from "@/lib/notifications";
 import { timeAgo } from "@/lib/timeAgo";
 import Reveal from "@/components/ui/Reveal";
 
 const ICON = {
-  follow: FaUserPlus,
-  join_request: FaUsers,
-  join_approved: FaCheckCircle,
-  member_joined: FaUserPlus,
-  team_invite: FaEnvelopeOpenText,
-  match_result: FaBasketballBall,
-  pending_result: FaBasketballBall,
-  result_mismatch: FaExclamationTriangle,
-  transfer: FaExchangeAlt,
-  post_like: FaHeart,
-  post_comment: FaRegComment,
-  comment_reply: FaReply,
-  mention: FaAt,
+  follow: PiUserPlusBold,
+  join_request: PiUsersBold,
+  join_approved: PiCheckCircleBold,
+  member_joined: PiUserPlusBold,
+  team_invite: PiEnvelopeOpenBold,
+  match_result: PiBasketballBold,
+  pending_result: PiBasketballBold,
+  result_mismatch: PiWarningBold,
+  transfer: PiArrowsLeftRightBold,
+  post_like: PiHeartFill,
+  post_comment: PiChatCircleBold,
+  comment_reply: PiArrowBendUpLeftBold,
+  mention: PiAtBold,
 };
 
 export default function NotificationBell() {
@@ -101,18 +101,18 @@ export default function NotificationBell() {
     <div className="relative">
       <button
         onClick={toggle}
-        className="p-2 -m-1 text-white/80 hover:text-brand-400 transition-colors"
+        className="p-2 -m-1 text-paper-50/80 hover:text-brand-400 transition-colors"
         aria-label="Benachrichtigungen"
       >
         <span className="relative block">
-          <FaBell className="text-lg" />
+          <PiBellBold className="text-lg" />
           {unread > 0 && (
             <Reveal
               key={unread}
               as="span"
               direction="pop"
               duration={200}
-              className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-brand-500 text-white text-[10px] font-bold flex items-center justify-center"
+              className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-brand-500 text-ink-950 text-[10px] font-bold flex items-center justify-center"
             >
               {unread > 9 ? "9+" : unread}
             </Reveal>
@@ -124,19 +124,19 @@ export default function NotificationBell() {
         <>
           {/* Klick-außerhalb-Backdrop */}
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80 max-h-[70vh] sm:max-h-96 overflow-y-auto bg-white rounded-2xl shadow-lg border border-gray-100 z-50">
-            <div className="px-4 py-3 border-b border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-900">Benachrichtigungen</h3>
+          <div className="fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80 max-h-[70vh] sm:max-h-96 overflow-y-auto bg-ink-800 rounded-md border border-ink-600 z-50">
+            <div className="px-4 py-3 border-b border-ink-600">
+              <h3 className="text-sm font-semibold text-paper-50">Benachrichtigungen</h3>
             </div>
 
             {items.length === 0 ? (
-              <p className="px-4 py-8 text-center text-sm text-gray-500">
+              <p className="px-4 py-8 text-center text-sm text-mist-400">
                 Keine Benachrichtigungen.
               </p>
             ) : (
-              <ul className="divide-y divide-gray-50">
+              <ul className="divide-y divide-ink-600">
                 {items.map((n) => {
-                  const Icon = ICON[n.type] || FaBell;
+                  const Icon = ICON[n.type] || PiBellBold;
                   const isInvite = n.type === "team_invite";
                   const href = isInvite ? null : notificationHref(n, me);
                   const status = isInvite ? responded[String(n.teamId)] : null;
@@ -144,22 +144,22 @@ export default function NotificationBell() {
                   const inner = (
                     <div
                       className={`flex gap-3 px-4 py-3 ${
-                        n.read ? "" : "bg-brand-50/50"
-                      } ${href ? "hover:bg-gray-50" : ""}`}
+                        n.read ? "" : "bg-brand-500/50"
+                      } ${href ? "hover:bg-ink-700" : ""}`}
                     >
-                      <span className="h-8 w-8 flex-shrink-0 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
+                      <span className="h-8 w-8 flex-shrink-0 rounded-full bg-brand-500/15 text-brand-400 flex items-center justify-center">
                         <Icon className="text-sm" />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm text-gray-800">{n.message}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{timeAgo(n.createdAt)}</p>
+                        <p className="text-sm text-paper-50">{n.message}</p>
+                        <p className="text-xs text-mist-400 mt-0.5">{timeAgo(n.createdAt)}</p>
 
                         {/* Kader-Einladung: annehmen / ablehnen */}
                         {isInvite && (
                           status ? (
                             <p
                               className={`mt-2 text-xs font-semibold ${
-                                status === "accepted" ? "text-green-600" : "text-gray-500"
+                                status === "accepted" ? "text-signal-ok" : "text-mist-400"
                               }`}
                             >
                               {status === "accepted" ? "✓ Angenommen" : "Abgelehnt"}
@@ -169,16 +169,16 @@ export default function NotificationBell() {
                               <button
                                 onClick={() => respondInvite(n, true)}
                                 disabled={busy}
-                                className="inline-flex items-center gap-1.5 bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-3 py-1.5 text-xs font-semibold"
+                                className="inline-flex items-center gap-1.5 bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-3 py-1.5 text-xs font-semibold"
                               >
-                                <FaCheck className="text-[10px]" /> Annehmen
+                                <PiCheckBold className="text-[10px]" /> Annehmen
                               </button>
                               <button
                                 onClick={() => respondInvite(n, false)}
                                 disabled={busy}
-                                className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-gray-400 text-gray-600 rounded-lg px-3 py-1.5 text-xs font-medium"
+                                className="inline-flex items-center gap-1.5 border border-ink-600 hover:border-ink-500 text-mist-400 rounded-sm px-3 py-1.5 text-xs font-medium"
                               >
-                                <FaTimes className="text-[10px]" /> Ablehnen
+                                <PiXBold className="text-[10px]" /> Ablehnen
                               </button>
                             </div>
                           )

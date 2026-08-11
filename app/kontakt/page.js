@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import axios from "axios";
-import { FaCheckCircle, FaEnvelope } from "react-icons/fa";
+import { PiCheckCircleBold, PiEnvelopeSimpleBold } from "react-icons/pi";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Button from "@/components/ui/Button";
@@ -32,21 +32,21 @@ export default function KontaktPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-ink-950 flex flex-col">
       <Navbar />
 
       <main className="flex-1 max-w-lg mx-auto w-full px-4 py-12">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <FaEnvelope className="text-brand-500" /> Kontakt
+        <div className="bg-ink-800 rounded-md border border-ink-600 p-8">
+          <h1 className="font-display uppercase tracking-tight text-2xl font-black text-paper-50 flex items-center gap-2">
+            <PiEnvelopeSimpleBold className="text-brand-400" /> Kontakt
           </h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-mist-400">
             Fragen, Anregungen oder Kooperationen? Schreib uns.
           </p>
 
           {done ? (
             <FormAlert type="success" className="mt-6 flex items-center gap-2 py-4">
-              <FaCheckCircle className="flex-shrink-0" />
+              <PiCheckCircleBold className="flex-shrink-0" />
               <span>Danke! Wir melden uns bei dir.</span>
             </FormAlert>
           ) : (
@@ -54,11 +54,11 @@ export default function KontaktPage() {
               {error && <FormAlert>{error}</FormAlert>}
               <div className="grid sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                  <label className="block text-sm font-medium text-mist-300 mb-1">Name</label>
                   <input name="name" required value={form.name} onChange={onChange} className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">E-Mail</label>
+                  <label className="block text-sm font-medium text-mist-300 mb-1">E-Mail</label>
                   <input
                     type="email"
                     name="email"
@@ -70,7 +70,7 @@ export default function KontaktPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nachricht</label>
+                <label className="block text-sm font-medium text-mist-300 mb-1">Nachricht</label>
                 <textarea
                   name="message"
                   required
@@ -91,9 +91,9 @@ export default function KontaktPage() {
             </form>
           )}
 
-          <p className="mt-6 text-center text-xs text-gray-500">
+          <p className="mt-6 text-center text-xs text-mist-400">
             Oder direkt:{" "}
-            <a href="mailto:info@hoopsgermany.de" className="text-brand-600 hover:underline">
+            <a href="mailto:info@hoopsgermany.de" className="text-brand-400 hover:underline">
               info@hoopsgermany.de
             </a>
           </p>

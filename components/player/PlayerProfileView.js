@@ -4,15 +4,15 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
 import {
-  FaUsers,
-  FaInstagram,
-  FaExternalLinkAlt,
-  FaBasketballBall,
-  FaChartBar,
-  FaIdCard,
-  FaRegNewspaper,
-  FaChevronDown,
-} from "react-icons/fa";
+  PiUsersBold,
+  PiInstagramLogoBold,
+  PiArrowSquareOutBold,
+  PiBasketballBold,
+  PiChartBarBold,
+  PiIdentificationCardBold,
+  PiNewspaperClippingBold,
+  PiCaretDownBold,
+} from "react-icons/pi";
 import PlayerPosts from "@/components/posts/PlayerPosts";
 import Avatar from "@/components/Avatar";
 import ScrollHintRow from "@/components/ScrollHintRow";
@@ -38,15 +38,15 @@ function gameDate(d) {
 function StatCell({ label, value, sub, small }) {
   return (
     <div className="px-4 py-3 text-center min-w-[84px]">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-mist-400">{label}</p>
       <p
         className={`${
           small ? "text-sm" : "text-lg"
-        } font-bold text-white leading-tight mt-0.5 break-words hyphens-auto`}
+        } font-bold text-paper-50 leading-tight mt-0.5 break-words hyphens-auto`}
       >
         {value ?? "–"}
       </p>
-      {sub && <p className="text-[10px] text-slate-400 mt-0.5">{sub}</p>}
+      {sub && <p className="text-[10px] text-mist-400 mt-0.5">{sub}</p>}
     </div>
   );
 }
@@ -54,19 +54,19 @@ function StatCell({ label, value, sub, small }) {
 function InfoRow({ label, value }) {
   if (!value) return null;
   return (
-    <div className="flex justify-between py-2 border-b border-gray-100 last:border-0">
-      <span className="text-sm text-gray-500">{label}</span>
-      <span className="text-sm font-medium text-gray-900 text-right">{value}</span>
+    <div className="flex justify-between py-2 border-b border-ink-600 last:border-0">
+      <span className="text-sm text-mist-400">{label}</span>
+      <span className="text-sm font-medium text-paper-50 text-right">{value}</span>
     </div>
   );
 }
 
 function SectionCard({ title, action, children }) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="bg-gradient-to-r from-slate-950 to-slate-800 px-5 py-3 flex items-center justify-between gap-2">
-        <h2 className="text-sm font-bold text-white uppercase tracking-wide flex items-center gap-2">
-          <FaBasketballBall className="text-brand-400 text-sm" /> {title}
+    <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
+      <div className="bg-ink-900 px-5 py-3 flex items-center justify-between gap-2">
+        <h2 className="text-sm font-bold text-paper-50 uppercase tracking-wide flex items-center gap-2">
+          <PiBasketballBold className="text-brand-400 text-sm" /> {title}
         </h2>
         {action}
       </div>
@@ -76,9 +76,9 @@ function SectionCard({ title, action, children }) {
 }
 
 const TABS = [
-  { key: "stats", label: "Stats", icon: FaChartBar },
-  { key: "steckbrief", label: "Steckbrief", icon: FaIdCard },
-  { key: "beitraege", label: "Beiträge", icon: FaRegNewspaper },
+  { key: "stats", label: "Stats", icon: PiChartBarBold },
+  { key: "steckbrief", label: "Steckbrief", icon: PiIdentificationCardBold },
+  { key: "beitraege", label: "Beiträge", icon: PiNewspaperClippingBold },
 ];
 
 export default function PlayerProfileView({ player, viewerId, actions }) {
@@ -209,7 +209,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
   return (
     <div>
       {/* Navy-Hero mit Stats-Leiste */}
-      <div className="bg-gradient-to-r from-slate-950 to-slate-800">
+      <div className="bg-ink-900">
         <div className="max-w-4xl mx-auto px-4 pt-8 pb-0">
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-5 text-center sm:text-left">
             <Avatar
@@ -217,7 +217,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
               src={player?.profileImage}
               className="h-28 w-28"
               textClass="text-3xl"
-              ring="ring-4 ring-white/10"
+              ring="ring-4 ring-paper-50/10"
             />
             <div className="min-w-0 flex-1">
               <p className="text-brand-400 text-sm font-semibold flex items-center justify-center sm:justify-start gap-2">
@@ -228,19 +228,19 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                 ) : (
                   team?.teamName || "Vereinslos"
                 )}
-                {player?.position && <span className="text-slate-400">| {positionLabel(player.position)}</span>}
-                {player?.number && <span className="text-slate-400">· #{player.number}</span>}
+                {player?.position && <span className="text-mist-400">| {positionLabel(player.position)}</span>}
+                {player?.number && <span className="text-mist-400">· #{player.number}</span>}
               </p>
-              <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight">{fullName}</h1>
-              <div className="mt-1.5 flex items-center justify-center sm:justify-start gap-4 text-sm text-slate-300">
+              <h1 className="font-display uppercase tracking-tight text-3xl sm:text-4xl font-black text-paper-50 leading-tight">{fullName}</h1>
+              <div className="mt-1.5 flex items-center justify-center sm:justify-start gap-4 text-sm text-mist-300">
                 <span>
-                  <strong className="text-white">{player?.followersCount ?? 0}</strong> Follower
+                  <strong className="text-paper-50">{player?.followersCount ?? 0}</strong> Follower
                 </span>
                 <span>
-                  <strong className="text-white">{player?.followingCount ?? 0}</strong> Folgt
+                  <strong className="text-paper-50">{player?.followingCount ?? 0}</strong> Folgt
                 </span>
                 {player?.transferStatus === "verfuegbar" && (
-                  <span className="text-xs font-semibold bg-green-500/20 text-green-300 rounded-full px-3 py-1">
+                  <span className="text-xs font-semibold bg-signal-ok/20 text-signal-ok rounded-sm px-3 py-1">
                     Transferbereit
                   </span>
                 )}
@@ -255,19 +255,19 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
 
           {/* Stats-Leiste (horizontal scrollbar mit Scroll-Hinweis) */}
           <ScrollHintRow className="mt-6">
-            <div className="inline-flex min-w-full rounded-t-2xl bg-white/5 divide-x divide-white/10 border border-white/10 border-b-0">
+            <div className="inline-flex min-w-full rounded-t-md bg-ink-800/5 divide-x divide-paper-50/10 border border-ink-600/10 border-b-0">
               <div className="px-4 py-3 flex flex-col items-center justify-center min-w-[110px]">
                 {team?.slug ? (
                   <Link href={`/team/team-detail/${team.slug}`} className="flex flex-col items-center group">
                     <Avatar name={team?.teamName} src={team?.logo} className="h-9 w-9" textClass="text-xs" square />
-                    <span className="text-[10px] text-slate-300 mt-1 truncate max-w-[96px] group-hover:text-white">
+                    <span className="text-[10px] text-mist-300 mt-1 truncate max-w-[96px] group-hover:text-paper-50">
                       {team?.teamName || "—"}
                     </span>
                   </Link>
                 ) : (
                   <>
                     <Avatar name={team?.teamName} src={team?.logo} className="h-9 w-9" textClass="text-xs" square />
-                    <span className="text-[10px] text-slate-300 mt-1 truncate max-w-[96px]">
+                    <span className="text-[10px] text-mist-300 mt-1 truncate max-w-[96px]">
                       {team?.teamName || "—"}
                     </span>
                   </>
@@ -276,15 +276,15 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
               <StatCell label="PPG" value={stats ? stats.ppg.toFixed(1) : "–"} />
               <StatCell label="APG" value={stats ? stats.apg.toFixed(1) : "–"} />
               <StatCell label="RPG" value={stats ? stats.rpg.toFixed(1) : "–"} />
-              <div className="grid grid-cols-1 divide-y divide-white/10 min-w-[120px]">
+              <div className="grid grid-cols-1 divide-y divide-paper-50/10 min-w-[120px]">
                 <StatCell label="Größe" value={player?.height} small />
                 <StatCell label="Alter" value={ageFromBirthdate(player?.birthdate) ?? player?.age} small />
               </div>
-              <div className="grid grid-cols-1 divide-y divide-white/10 min-w-[120px]">
+              <div className="grid grid-cols-1 divide-y divide-paper-50/10 min-w-[120px]">
                 <StatCell label="Gewicht" value={player?.weight} small />
                 <StatCell label="Heimatort" value={player?.hometown} small />
               </div>
-              <div className="grid grid-cols-1 divide-y divide-white/10 min-w-[110px]">
+              <div className="grid grid-cols-1 divide-y divide-paper-50/10 min-w-[110px]">
                 <StatCell label="Nationalität" value={player?.nationality} small />
                 <StatCell label="Bundesland" value={player?.bundesland} small />
               </div>
@@ -293,11 +293,11 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                   href={player.fibaLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-3 flex flex-col items-center justify-center min-w-[80px] hover:bg-white/5"
+                  className="px-4 py-3 flex flex-col items-center justify-center min-w-[80px] hover:bg-ink-700/5"
                 >
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">FIBA</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-mist-400">FIBA</span>
                   <span className="text-brand-400 text-sm font-semibold mt-1 inline-flex items-center gap-1">
-                    Link <FaExternalLinkAlt className="text-[10px]" />
+                    Link <PiArrowSquareOutBold className="text-[10px]" />
                   </span>
                 </a>
               )}
@@ -306,10 +306,10 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                   href={`https://instagram.com/${ig}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-3 flex flex-col items-center justify-center min-w-[80px] hover:bg-white/5"
+                  className="px-4 py-3 flex flex-col items-center justify-center min-w-[80px] hover:bg-ink-700/5"
                 >
-                  <FaInstagram className="text-white text-lg" />
-                  <span className="text-[10px] text-slate-300 mt-1">Instagram</span>
+                  <PiInstagramLogoBold className="text-paper-50 text-lg" />
+                  <span className="text-[10px] text-mist-300 mt-1">Instagram</span>
                 </a>
               )}
             </div>
@@ -317,7 +317,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
         </div>
 
         {/* Tabs */}
-        <div className="bg-white border-b border-gray-100">
+        <div className="bg-ink-800 border-b border-ink-600">
           <div className="max-w-4xl mx-auto px-4 py-3 overflow-x-auto">
             <Tabs
               value={tab}
@@ -345,13 +345,13 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                   <select
                     value={season}
                     onChange={(e) => setSeason(e.target.value)}
-                    className="text-xs bg-white/10 text-white rounded-lg px-2 py-1 outline-none border border-white/10"
+                    className="text-xs bg-ink-800/10 text-paper-50 rounded-sm px-2 py-1 outline-none border border-ink-600/10"
                   >
-                    <option className="text-gray-900" value="">
+                    <option className="text-paper-50" value="">
                       Alle Saisons
                     </option>
                     {seasons.map((s) => (
-                      <option className="text-gray-900" key={s} value={s}>
+                      <option className="text-paper-50" key={s} value={s}>
                         {s}
                       </option>
                     ))}
@@ -360,16 +360,16 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
               }
             >
               {bilanz.games === 0 ? (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-mist-400">
                   {season ? "Keine Spiele in dieser Saison." : "Noch keine Spiele erfasst."}
                 </p>
               ) : (
                 <>
-                  <p className="text-sm text-gray-500 mb-4">
-                    <strong className="text-gray-900">{bilanz.games}</strong> Spiele ·{" "}
-                    <strong className="text-gray-900">{bilanz.points}</strong> Punkte ·{" "}
-                    <strong className="text-gray-900">{bilanz.assists}</strong> Assists ·{" "}
-                    <strong className="text-gray-900">{bilanz.rebounds}</strong> Rebounds
+                  <p className="text-sm text-mist-400 mb-4">
+                    <strong className="text-paper-50">{bilanz.games}</strong> Spiele ·{" "}
+                    <strong className="text-paper-50">{bilanz.points}</strong> Punkte ·{" "}
+                    <strong className="text-paper-50">{bilanz.assists}</strong> Assists ·{" "}
+                    <strong className="text-paper-50">{bilanz.rebounds}</strong> Rebounds
                   </p>
                   <div className="grid grid-cols-3 gap-3">
                     {[
@@ -377,12 +377,12 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                       { v: bilanz.apg, l: "APG", s: "Assists/Spiel" },
                       { v: bilanz.rpg, l: "RPG", s: "Rebounds/Spiel" },
                     ].map((x) => (
-                      <div key={x.l} className="bg-gray-50 rounded-xl py-4 text-center">
-                        <p className="text-3xl font-black text-gray-900">
+                      <div key={x.l} className="bg-ink-950 rounded-md py-4 text-center">
+                        <p className="text-3xl font-black text-paper-50">
                           <CountUp value={x.v} decimals={1} />
                         </p>
-                        <p className="text-xs font-bold text-brand-500 mt-1">{x.l}</p>
-                        <p className="text-[11px] text-gray-500">{x.s}</p>
+                        <p className="text-xs font-bold text-brand-400 mt-1">{x.l}</p>
+                        <p className="text-[11px] text-mist-400">{x.s}</p>
                       </div>
                     ))}
                   </div>
@@ -392,15 +392,15 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
 
             <SectionCard title="Spielerhistorie">
               {filteredStations.length === 0 ? (
-                <p className="text-sm text-gray-500">Noch keine Spiele erfasst.</p>
+                <p className="text-sm text-mist-400">Noch keine Spiele erfasst.</p>
               ) : (
                 <div className="overflow-x-auto">
-                  <p className="text-xs text-gray-500 mb-2">
+                  <p className="text-xs text-mist-400 mb-2">
                     Tippe auf eine Station, um die einzelnen Spiele zu sehen.
                   </p>
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-xs text-gray-500 text-left">
+                      <tr className="text-xs text-mist-400 text-left">
                         <th className="font-medium py-2">Team / Liga</th>
                         <th className="font-medium py-2 text-center w-12">Sp.</th>
                         <th className="font-medium py-2 text-center w-16">PTS</th>
@@ -417,14 +417,14 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                           <Fragment key={i}>
                             <tr
                               onClick={() => toggleStation(s)}
-                              className={`border-t border-gray-100 cursor-pointer transition-colors ${
-                                isOpen ? "bg-gray-50" : "hover:bg-gray-50"
+                              className={`border-t border-ink-600 cursor-pointer transition-colors ${
+                                isOpen ? "bg-ink-950" : "hover:bg-ink-700"
                               }`}
                             >
                               <td className="py-2.5">
                                 <div className="flex items-center gap-2.5">
-                                  <FaChevronDown
-                                    className={`text-gray-300 text-xs flex-shrink-0 transition-transform ${
+                                  <PiCaretDownBold
+                                    className={`text-ink-500 text-xs flex-shrink-0 transition-transform ${
                                       isOpen ? "rotate-180" : ""
                                     }`}
                                   />
@@ -434,66 +434,66 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                                       <Link
                                         href={`/team/team-detail/${s.teamSlug}`}
                                         onClick={(e) => e.stopPropagation()}
-                                        className="font-semibold text-gray-900 hover:text-brand-600"
+                                        className="font-semibold text-paper-50 hover:text-brand-400"
                                       >
                                         {s.teamName}
                                       </Link>
                                     ) : (
-                                      <span className="font-semibold text-gray-900">{s.teamName}</span>
+                                      <span className="font-semibold text-paper-50">{s.teamName}</span>
                                     )}
-                                    <p className="text-xs text-gray-500">
+                                    <p className="text-xs text-mist-400">
                                       {s.leagueName || (s.games === 0 ? "Noch kein Spiel" : "")}
                                       {s.season ? ` · ${s.season}` : ""}
                                     </p>
                                   </div>
                                 </div>
                               </td>
-                              <td className="py-2.5 text-center font-medium text-gray-900">{s.games}</td>
-                              <td className="py-2.5 text-center">
-                                <span className="font-semibold text-gray-900">{s.points}</span>
-                                <span className="block text-[10px] text-gray-500">{s.ppg.toFixed(1)}ø</span>
+                              <td className="font-mono tabular-nums py-2.5 text-center font-medium text-paper-50">{s.games}</td>
+                              <td className="font-mono tabular-nums py-2.5 text-center">
+                                <span className="font-semibold text-paper-50">{s.points}</span>
+                                <span className="block text-[10px] text-mist-400">{s.ppg.toFixed(1)}ø</span>
                               </td>
-                              <td className="py-2.5 text-center">
-                                <span className="font-semibold text-gray-900">{s.assists}</span>
-                                <span className="block text-[10px] text-gray-500">{s.apg.toFixed(1)}ø</span>
+                              <td className="font-mono tabular-nums py-2.5 text-center">
+                                <span className="font-semibold text-paper-50">{s.assists}</span>
+                                <span className="block text-[10px] text-mist-400">{s.apg.toFixed(1)}ø</span>
                               </td>
-                              <td className="py-2.5 text-center">
-                                <span className="font-semibold text-gray-900">{s.rebounds}</span>
-                                <span className="block text-[10px] text-gray-500">{s.rpg.toFixed(1)}ø</span>
+                              <td className="font-mono tabular-nums py-2.5 text-center">
+                                <span className="font-semibold text-paper-50">{s.rebounds}</span>
+                                <span className="block text-[10px] text-mist-400">{s.rpg.toFixed(1)}ø</span>
                               </td>
                             </tr>
 
                             {isOpen && (
-                              <tr className="bg-gray-50/60">
+                              <tr className="bg-ink-950/60">
                                 <td colSpan={5} className="px-1 pb-3 pt-0">
                                   {!games ? (
                                     <div className="flex justify-center py-4">
-                                      <FaBasketballBall className="text-brand-500 animate-bounce" />
+                                      <PiBasketballBold className="text-brand-400 animate-bounce" />
                                     </div>
                                   ) : games.length === 0 ? (
-                                    <p className="text-xs text-gray-500 py-3 px-2">
+                                    <p className="text-xs text-mist-400 py-3 px-2">
                                       Keine Einzelspiele gefunden.
                                     </p>
                                   ) : (
                                     <>
-                                      <p className="px-2 pt-1 pb-1.5 text-[11px] text-gray-500">
+                                      <p className="px-2 pt-1 pb-1.5 text-[11px] text-mist-400">
                                         Endstand · deine Werte als{" "}
-                                        <span className="font-medium text-gray-500">PKT·AST·REB</span>
+                                        <span className="font-medium text-mist-400">PKT·AST·REB</span>
                                       </p>
                                       <div className="space-y-0.5">
                                         {games.map((g) => (
                                           <Link
                                             key={g.matchId}
                                             href={`/match/${g.matchId}`}
-                                            className="flex items-center gap-2.5 rounded-lg px-2 py-2 hover:bg-white transition-colors"
+                                            className="flex items-center gap-2.5 rounded-sm px-2 py-2 hover:bg-ink-700 transition-colors"
                                           >
                                             <span
                                               className={`w-5 shrink-0 text-center text-xs font-extrabold ${
                                                 g.result === "W"
-                                                  ? "text-green-600"
+                                                  ? "text-signal-ok"
                                                   : g.result === "L"
-                                                  ? "text-red-500"
-                                                  : "text-gray-500"
+                                                  ? "text-signal-error"
+                                                  : "text-mist-400"
                                               }`}
                                             >
                                               {g.result || "–"}
@@ -506,21 +506,21 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                                               square
                                             />
                                             <div className="min-w-0 flex-1">
-                                              <p className="text-sm font-medium text-gray-800 truncate">
+                                              <p className="text-sm font-medium text-paper-50 truncate">
                                                 {g.opponent?.teamName || "Unbekannt"}
                                               </p>
-                                              <p className="text-[11px] text-gray-500">{gameDate(g.date)}</p>
+                                              <p className="text-[11px] text-mist-400">{gameDate(g.date)}</p>
                                             </div>
-                                            <span className="shrink-0 text-sm font-bold text-gray-900 tabular-nums">
+                                            <span className="shrink-0 text-sm font-bold text-paper-50 tabular-nums">
                                               {g.own ?? "–"}
-                                              <span className="mx-0.5 text-gray-300">:</span>
+                                              <span className="mx-0.5 text-ink-500">:</span>
                                               {g.opp ?? "–"}
                                             </span>
                                             <span className="shrink-0 w-16 text-right text-[11px] tabular-nums">
                                               {g.didNotPlay ? (
-                                                <span className="italic text-gray-500">DNP</span>
+                                                <span className="italic text-mist-400">DNP</span>
                                               ) : (
-                                                <span className="text-gray-500">
+                                                <span className="text-mist-400">
                                                   {g.points}·{g.assists}·{g.rebounds}
                                                 </span>
                                               )}
@@ -548,7 +548,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
           <>
             {player?.aboutPlayer && (
               <SectionCard title="Über">
-                <p className="text-sm text-gray-600 whitespace-pre-line">{player.aboutPlayer}</p>
+                <p className="text-sm text-mist-400 whitespace-pre-line">{player.aboutPlayer}</p>
               </SectionCard>
             )}
             <SectionCard title="Steckbrief">
@@ -571,7 +571,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                   {[...teamHistory].reverse().map((h, i) => {
                     const isCurrent = i === 0 && teamHistory.length > 1;
                     const inner = (
-                      <div className="flex items-center gap-3 rounded-xl border border-gray-100 p-3 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center gap-3 rounded-md border border-ink-600 p-3 hover:bg-ink-700 transition-colors">
                         <Avatar
                           name={h.teamName}
                           src={h.teamLogo}
@@ -579,16 +579,16 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                           textClass="text-sm"
                           square
                         />
-                        <p className="flex-1 min-w-0 font-semibold text-gray-900 truncate">
+                        <p className="flex-1 min-w-0 font-semibold text-paper-50 truncate">
                           {h.teamName}
                         </p>
                         {isCurrent && (
-                          <span className="flex-shrink-0 text-[10px] font-semibold uppercase tracking-wide text-brand-600 bg-brand-50 rounded-full px-2 py-0.5">
+                          <span className="flex-shrink-0 text-[10px] font-semibold uppercase tracking-wide text-brand-400 bg-brand-500/10 rounded-sm px-2 py-0.5">
                             Aktuell
                           </span>
                         )}
                         {h.season && (
-                          <span className="flex-shrink-0 text-sm text-gray-500 whitespace-nowrap">
+                          <span className="flex-shrink-0 text-sm text-mist-400 whitespace-nowrap">
                             {h.season}
                           </span>
                         )}
@@ -604,7 +604,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                   })}
                 </div>
                 {teamHistory.length === 1 && (
-                  <p className="mt-3 text-xs text-gray-500">Noch kein Vereinswechsel.</p>
+                  <p className="mt-3 text-xs text-mist-400">Noch kein Vereinswechsel.</p>
                 )}
               </SectionCard>
             )}

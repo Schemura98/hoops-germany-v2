@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaCheckCircle } from "react-icons/fa";
+import { PiCheckCircleBold } from "react-icons/pi";
 import AuthShell from "@/components/layout/AuthShell";
 import Button from "@/components/ui/Button";
 import FormAlert from "@/components/ui/FormAlert";
@@ -37,7 +37,7 @@ function RequestForm() {
       title="Passwort vergessen"
       subtitle="Gib deine E-Mail-Adresse ein – wir senden dir einen Link zum Zurücksetzen."
       footer={
-        <Link href="/login" className="text-brand-600 font-medium hover:underline">
+        <Link href="/login" className="text-brand-400 font-medium hover:underline">
           Zurück zum Login
         </Link>
       }
@@ -48,7 +48,7 @@ function RequestForm() {
         <form onSubmit={onSubmit} className="space-y-4">
           {error && <FormAlert>{error}</FormAlert>}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">E-Mail</label>
+            <label className="block text-sm font-medium text-mist-300 mb-1">E-Mail</label>
             <input
               type="email"
               required
@@ -109,7 +109,7 @@ function ResetForm({ token }) {
       <AuthShell
         title={
           <span className="inline-flex items-center justify-center gap-2">
-            <FaCheckCircle className="text-green-500" /> Erledigt
+            <PiCheckCircleBold className="text-signal-ok" /> Erledigt
           </span>
         }
       >
@@ -126,7 +126,7 @@ function ResetForm({ token }) {
       <form onSubmit={onSubmit} className="space-y-4">
         {error && <FormAlert>{error}</FormAlert>}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Neues Passwort</label>
+          <label className="block text-sm font-medium text-mist-300 mb-1">Neues Passwort</label>
           <input
             type="password"
             name="newPassword"
@@ -139,7 +139,7 @@ function ResetForm({ token }) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-mist-300 mb-1">
             Passwort bestätigen
           </label>
           <input

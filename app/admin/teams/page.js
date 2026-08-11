@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaTrash, FaCheck, FaTimes, FaUserShield, FaFlask } from "react-icons/fa";
+import { PiTrashBold, PiCheckBold, PiXBold, PiUserGearBold, PiFlaskBold } from "react-icons/pi";
 import AdminShell from "@/components/layout/AdminShell";
 import { getAdminToken } from "@/lib/clientAuth";
 
@@ -133,23 +133,23 @@ export default function AdminTeamsPage() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Suche nach Name oder E-Mail…"
-        className="mb-4 w-full sm:w-80 rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+        className="mb-4 w-full sm:w-80 rounded-sm border border-ink-600 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
       />
 
       {!loading && pending.length > 0 && (
-        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-4">
-          <h2 className="text-sm font-bold text-amber-800 mb-3">
+        <div className="mb-6 bg-signal-wait/10 border border-signal-wait/50 rounded-md p-4">
+          <h2 className="text-sm font-bold text-signal-wait mb-3">
             Wartet auf Freigabe ({pending.length})
           </h2>
           <ul className="space-y-2">
             {pending.map((t) => (
               <li
                 key={t._id}
-                className="flex items-center justify-between gap-3 bg-white rounded-xl border border-amber-100 px-4 py-2.5"
+                className="flex items-center justify-between gap-3 bg-ink-800 rounded-md border border-signal-wait/40 px-4 py-2.5"
               >
                 <div className="min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{t.teamName}</p>
-                  <p className="text-xs text-gray-500 truncate">
+                  <p className="font-medium text-paper-50 truncate">{t.teamName}</p>
+                  <p className="text-xs text-mist-400 truncate">
                     {adminName(t) ? `Haupt-Admin: ${adminName(t)}` : "—"}
                     {t.region ? ` · ${t.region}` : ""}
                   </p>
@@ -158,16 +158,16 @@ export default function AdminTeamsPage() {
                   <button
                     onClick={() => decide(t._id, t.teamName, true)}
                     disabled={busyId === t._id}
-                    className="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white rounded-lg px-3 py-1.5 text-sm font-medium"
+                    className="inline-flex items-center gap-1.5 bg-signal-ok hover:brightness-110 disabled:opacity-60 text-paper-50 rounded-sm px-3 py-1.5 text-sm font-medium"
                   >
-                    <FaCheck className="text-xs" /> Freigeben
+                    <PiCheckBold className="text-xs" /> Freigeben
                   </button>
                   <button
                     onClick={() => decide(t._id, t.teamName, false)}
                     disabled={busyId === t._id}
-                    className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-red-400 hover:text-red-600 text-gray-600 rounded-lg px-3 py-1.5 text-sm font-medium"
+                    className="inline-flex items-center gap-1.5 border border-ink-600 hover:border-signal-error hover:text-signal-error text-mist-400 rounded-sm px-3 py-1.5 text-sm font-medium"
                   >
-                    <FaTimes className="text-xs" /> Ablehnen
+                    <PiXBold className="text-xs" /> Ablehnen
                   </button>
                 </div>
               </li>
@@ -177,12 +177,12 @@ export default function AdminTeamsPage() {
       )}
 
       {loading ? (
-        <p className="text-gray-500">Lädt…</p>
+        <p className="text-mist-400">Lädt…</p>
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
+        <div className="bg-ink-800 rounded-md border border-ink-600 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-xs text-gray-500 text-left border-b border-gray-100">
+              <tr className="text-xs text-mist-400 text-left border-b border-ink-600">
                 <th className="font-medium py-3 pl-4">Team</th>
                 <th className="font-medium py-3">E-Mail</th>
                 <th className="font-medium py-3">Region</th>
@@ -191,38 +191,38 @@ export default function AdminTeamsPage() {
             </thead>
             <tbody>
               {filtered.map((t) => (
-                <tr key={t._id} className="border-b border-gray-50 last:border-0">
+                <tr key={t._id} className="border-b border-ink-600 last:border-0">
                   <td className="py-3 pl-4">
                     <Link
                       href={`/team/team-detail/${t.slug}`}
-                      className="font-medium text-gray-900 hover:text-brand-600"
+                      className="font-medium text-paper-50 hover:text-brand-400"
                     >
                       {t.teamName}
                     </Link>
                     {t.approved === false && (
-                      <span className="ml-2 text-[11px] font-medium rounded-full px-2 py-0.5 bg-amber-100 text-amber-700">
+                      <span className="ml-2 text-[11px] font-medium rounded-sm px-2 py-0.5 bg-signal-wait/15 text-signal-wait">
                         in Prüfung
                       </span>
                     )}
                     {t.isDemo && (
-                      <span className="ml-2 text-[11px] font-medium rounded-full px-2 py-0.5 bg-slate-100 text-slate-600">
+                      <span className="ml-2 text-[11px] font-medium rounded-sm px-2 py-0.5 bg-ink-700 text-mist-400">
                         Beispieldaten
                       </span>
                     )}
                     {t.isInternal && (
-                      <span className="ml-2 text-[11px] font-medium rounded-full px-2 py-0.5 bg-sky-100 text-sky-700">
+                      <span className="ml-2 text-[11px] font-medium rounded-sm px-2 py-0.5 bg-ink-700 text-mist-300">
                         intern
                       </span>
                     )}
                   </td>
-                  <td className="py-3 text-gray-600">{t.email}</td>
-                  <td className="py-3 text-gray-600">{t.region || "—"}</td>
+                  <td className="py-3 text-mist-400">{t.email}</td>
+                  <td className="py-3 text-mist-400">{t.region || "—"}</td>
                   <td className="py-3 pr-4 text-right whitespace-nowrap">
                     <button
                       onClick={() => toggleIntern(t)}
                       disabled={busyId === t._id}
                       className={`p-1.5 disabled:opacity-60 ${
-                        t.isInternal ? "text-sky-600" : "text-gray-500 hover:text-sky-600"
+                        t.isInternal ? "text-mist-300" : "text-mist-400 hover:text-mist-300"
                       }`}
                       title={
                         t.isInternal
@@ -236,22 +236,22 @@ export default function AdminTeamsPage() {
                       }
                       aria-pressed={!!t.isInternal}
                     >
-                      <FaFlask />
+                      <PiFlaskBold />
                     </button>
                     <button
                       onClick={() => openManage(t._id)}
-                      className="text-gray-500 hover:text-brand-600 p-1.5"
+                      className="text-mist-400 hover:text-brand-400 p-1.5"
                       title="Team-Admin verwalten"
                     >
-                      <FaUserShield />
+                      <PiUserGearBold />
                     </button>
                     <button
                       onClick={() => remove(t._id, t.teamName)}
                       disabled={busyId === t._id}
-                      className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
+                      className="text-mist-400 hover:text-signal-error disabled:opacity-60 p-1.5"
                       title="Löschen"
                     >
-                      <FaTrash />
+                      <PiTrashBold />
                     </button>
                   </td>
                 </tr>
@@ -259,7 +259,7 @@ export default function AdminTeamsPage() {
             </tbody>
           </table>
           {filtered.length === 0 && (
-            <p className="px-4 py-8 text-center text-sm text-gray-500">Keine Teams gefunden.</p>
+            <p className="px-4 py-8 text-center text-sm text-mist-400">Keine Teams gefunden.</p>
           )}
         </div>
       )}
@@ -267,35 +267,35 @@ export default function AdminTeamsPage() {
       {/* Team-Admin verwalten (Übertragung) */}
       {manage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setManage(null)}>
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md bg-ink-800 rounded-md p-6" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between gap-3">
-              <h2 className="text-base font-bold text-gray-900">
+              <h2 className="text-base font-bold text-paper-50">
                 Team-Admin verwalten{manage.teamName ? ` · ${manage.teamName}` : ""}
               </h2>
-              <button onClick={() => setManage(null)} className="text-gray-500 hover:text-gray-700 p-1">
-                <FaTimes />
+              <button onClick={() => setManage(null)} className="text-mist-400 hover:text-mist-300 p-1">
+                <PiXBold />
               </button>
             </div>
 
             {manage.error ? (
-              <p className="mt-4 text-sm text-red-600">Mitglieder konnten nicht geladen werden.</p>
+              <p className="mt-4 text-sm text-signal-error">Mitglieder konnten nicht geladen werden.</p>
             ) : manage.members.length === 0 ? (
-              <p className="mt-4 text-sm text-gray-500">Dieses Team hat keine Mitglieder mit Konto.</p>
+              <p className="mt-4 text-sm text-mist-400">Dieses Team hat keine Mitglieder mit Konto.</p>
             ) : (
               <>
-                <p className="mt-3 text-sm text-gray-600">
+                <p className="mt-3 text-sm text-mist-400">
                   Aktueller Admin:{" "}
-                  <span className="font-medium text-gray-900">
+                  <span className="font-medium text-paper-50">
                     {manage.members.find((m) => m.id === manage.currentAdminId)?.name || "—"}
                   </span>
                 </p>
-                <label className="block text-sm font-medium text-gray-700 mt-4 mb-1">
+                <label className="block text-sm font-medium text-mist-300 mt-4 mb-1">
                   Neuen Team-Admin wählen
                 </label>
                 <select
                   value={selPlayer}
                   onChange={(e) => setSelPlayer(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-brand-500"
+                  className="w-full rounded-sm border border-ink-600 px-3 py-2.5 text-sm outline-none focus:border-brand-500"
                 >
                   <option value="">– Mitglied auswählen –</option>
                   {manage.members.map((m) => (
@@ -305,27 +305,27 @@ export default function AdminTeamsPage() {
                     </option>
                   ))}
                 </select>
-                <p className="mt-2 text-xs text-gray-500">
+                <p className="mt-2 text-xs text-mist-400">
                   Der bisherige Admin wird zu einem normalen Mitglied. Der neue Admin wird benachrichtigt.
                 </p>
                 {mMsg && (
-                  <p className={`mt-2 text-sm ${mMsg.type === "ok" ? "text-green-600" : "text-red-600"}`}>
+                  <p className={`mt-2 text-sm ${mMsg.type === "ok" ? "text-signal-ok" : "text-signal-error"}`}>
                     {mMsg.text}
                   </p>
                 )}
                 <div className="mt-4 flex justify-end gap-2">
                   <button
                     onClick={() => setManage(null)}
-                    className="border border-gray-300 hover:border-gray-400 text-gray-700 rounded-lg px-4 py-2 text-sm font-medium"
+                    className="border border-ink-600 hover:border-ink-500 text-mist-300 rounded-sm px-4 py-2 text-sm font-medium"
                   >
                     Schließen
                   </button>
                   <button
                     onClick={transferAdmin}
                     disabled={!selPlayer || mBusy}
-                    className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2 text-sm font-medium"
+                    className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-4 py-2 text-sm font-medium"
                   >
-                    <FaUserShield className="text-xs" /> Als Admin übertragen
+                    <PiUserGearBold className="text-xs" /> Als Admin übertragen
                   </button>
                 </div>
               </>

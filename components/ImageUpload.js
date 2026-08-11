@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import axios from "axios";
-import { FaUpload, FaSpinner } from "react-icons/fa";
+import { PiUploadSimpleBold, PiSpinnerBold } from "react-icons/pi";
 
 // Muss zu lib/uploadFile.js (Server) passen.
 const MAX_MB = 4;
@@ -98,7 +98,7 @@ export default function ImageUpload({
   // → läuft nicht aus schmalen Spalten heraus. Avatar: kompakte Zeile.
   const isBanner = variant === "banner";
   const previewBox = isBanner
-    ? "h-28 w-full rounded-lg"
+    ? "h-28 w-full rounded-sm"
     : "h-16 w-16 rounded-full flex-shrink-0";
 
   return (
@@ -108,13 +108,13 @@ export default function ImageUpload({
       }`}
     >
       <div
-        className={`${previewBox} bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center`}
+        className={`${previewBox} bg-ink-700 border border-ink-600 overflow-hidden flex items-center justify-center`}
       >
         {preview ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={preview} alt="Vorschau" className="h-full w-full object-cover" />
         ) : (
-          <span className="text-xs text-gray-500">kein Bild</span>
+          <span className="text-xs text-mist-400">kein Bild</span>
         )}
       </div>
 
@@ -130,13 +130,13 @@ export default function ImageUpload({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="inline-flex items-center gap-2 border border-gray-300 hover:border-brand-500 text-gray-700 rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-60"
+          className="inline-flex items-center gap-2 border border-ink-600 hover:border-brand-500 text-mist-300 rounded-sm px-4 py-2 text-sm font-medium disabled:opacity-60"
         >
-          {uploading ? <FaSpinner className="animate-spin" /> : <FaUpload />}
+          {uploading ? <PiSpinnerBold className="animate-spin" /> : <PiUploadSimpleBold />}
           {uploading ? "Lädt…" : label}
         </button>
-        {error && <p className="mt-1 text-xs text-red-600 break-words">{error}</p>}
-        <p className="mt-1 text-xs text-gray-500 break-words">
+        {error && <p className="mt-1 text-xs text-signal-error break-words">{error}</p>}
+        <p className="mt-1 text-xs text-mist-400 break-words">
           {DISPLAY_FORMATS} · max. {MAX_MB} MB · iPhone-Fotos (HEIC) werden automatisch umgewandelt
         </p>
       </div>

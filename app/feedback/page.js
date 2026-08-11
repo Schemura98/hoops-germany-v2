@@ -3,14 +3,14 @@
 import { useState } from "react";
 import axios from "axios";
 import {
-  FaStar,
-  FaThumbsUp,
-  FaThumbsDown,
-  FaLightbulb,
-  FaBug,
-  FaRegSmile,
-  FaRegFrown,
-} from "react-icons/fa";
+  PiStarFill,
+  PiThumbsUpBold,
+  PiThumbsDownBold,
+  PiLightbulbBold,
+  PiBugBold,
+  PiSmileyBold,
+  PiSmileySadBold,
+} from "react-icons/pi";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
@@ -18,10 +18,10 @@ import Button from "@/components/ui/Button";
 import { inputClass } from "@/lib/ui";
 
 const TYPES = [
-  { key: "Lob", label: "Lob", icon: FaThumbsUp },
-  { key: "Kritik", label: "Kritik", icon: FaThumbsDown },
-  { key: "Idee", label: "Idee", icon: FaLightbulb },
-  { key: "Bug", label: "Bug", icon: FaBug },
+  { key: "Lob", label: "Lob", icon: PiThumbsUpBold },
+  { key: "Kritik", label: "Kritik", icon: PiThumbsDownBold },
+  { key: "Idee", label: "Idee", icon: PiLightbulbBold },
+  { key: "Bug", label: "Bug", icon: PiBugBold },
 ];
 
 const AREAS = [
@@ -45,10 +45,10 @@ function Chip({ active, onClick, children }) {
     <button
       type="button"
       onClick={onClick}
-      className={`px-3 py-2 rounded-xl text-sm font-medium border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 ${
+      className={`px-3 py-2 rounded-md text-sm font-medium border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 ${
         active
-          ? "bg-brand-500 text-white border-brand-500"
-          : "bg-white text-gray-600 border-gray-200 hover:border-brand-300 hover:text-brand-600"
+          ? "bg-brand-500 text-ink-950 border-brand-500"
+          : "bg-ink-800 text-mist-400 border-ink-600 hover:border-brand-300 hover:text-brand-400"
       }`}
     >
       {children}
@@ -89,7 +89,7 @@ export default function FeedbackPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-ink-950 flex flex-col">
       <Navbar />
 
       <PageHeader
@@ -100,10 +100,10 @@ export default function FeedbackPage() {
 
       <main className="flex-1 max-w-xl mx-auto w-full px-4 py-8">
         {done ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
-            <FaRegSmile className="text-brand-500 text-4xl mx-auto mb-3" />
-            <p className="font-bold text-gray-900 text-lg">Danke für dein Feedback!</p>
-            <p className="text-sm text-gray-500 mt-1">
+          <div className="bg-ink-800 rounded-md border border-ink-600 p-8 text-center">
+            <PiSmileyBold className="text-brand-400 text-4xl mx-auto mb-3" />
+            <p className="font-bold text-paper-50 text-lg">Danke für dein Feedback!</p>
+            <p className="text-sm text-mist-400 mt-1">
               Jede Rückmeldung hilft uns, die Plattform besser zu machen.
             </p>
             <button
@@ -115,7 +115,7 @@ export default function FeedbackPage() {
                 setDislikes("");
                 setSuggestions("");
               }}
-              className="mt-6 text-sm text-brand-600 font-medium hover:underline"
+              className="mt-6 text-sm text-brand-400 font-medium hover:underline"
             >
               Weiteres Feedback geben
             </button>
@@ -123,17 +123,17 @@ export default function FeedbackPage() {
         ) : (
           <form
             onSubmit={submit}
-            className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 space-y-7"
+            className="bg-ink-800 rounded-md border border-ink-600 p-6 sm:p-8 space-y-7"
           >
             {error && (
-              <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              <div className="rounded-sm bg-signal-error/10 border border-signal-error/50 px-4 py-3 text-sm text-signal-error">
                 {error}
               </div>
             )}
 
             {/* Gesamteindruck */}
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <label className="block text-sm font-semibold text-paper-50 mb-2">
                 Wie gefällt dir Hoops Germany insgesamt?
               </label>
               <div className="flex items-center gap-2">
@@ -144,19 +144,19 @@ export default function FeedbackPage() {
                     onClick={() => setRating(n)}
                     aria-label={`${n} von 5`}
                     className={`text-2xl transition-colors ${
-                      n <= rating ? "text-amber-400" : "text-gray-300 hover:text-amber-200"
+                      n <= rating ? "text-signal-wait" : "text-ink-500 hover:text-signal-wait"
                     }`}
                   >
-                    <FaStar />
+                    <PiStarFill />
                   </button>
                 ))}
-                {rating > 0 && <span className="ml-2 text-sm text-gray-500">{rating}/5</span>}
+                {rating > 0 && <span className="ml-2 text-sm text-mist-400">{rating}/5</span>}
               </div>
             </div>
 
             {/* Art */}
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <label className="block text-sm font-semibold text-paper-50 mb-2">
                 Was ist es für eine Rückmeldung?
               </label>
               <div className="flex flex-wrap gap-2">
@@ -175,9 +175,9 @@ export default function FeedbackPage() {
 
             {/* Themen */}
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <label className="block text-sm font-semibold text-paper-50 mb-2">
                 Worum geht es?{" "}
-                <span className="font-normal text-gray-500">(Mehrfachauswahl)</span>
+                <span className="font-normal text-mist-400">(Mehrfachauswahl)</span>
               </label>
               <div className="flex flex-wrap gap-2">
                 {AREAS.map((a) => (
@@ -190,8 +190,8 @@ export default function FeedbackPage() {
 
             {/* Gezielte Fragen */}
             <div>
-              <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-1">
-                <FaRegSmile className="text-green-500" /> Was gefällt dir gut?
+              <label className="flex items-center gap-2 text-sm font-semibold text-paper-50 mb-1">
+                <PiSmileyBold className="text-signal-ok" /> Was gefällt dir gut?
               </label>
               <textarea
                 rows={2}
@@ -203,8 +203,8 @@ export default function FeedbackPage() {
             </div>
 
             <div>
-              <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-1">
-                <FaRegFrown className="text-red-400" /> Was gefällt dir nicht / stört dich?
+              <label className="flex items-center gap-2 text-sm font-semibold text-paper-50 mb-1">
+                <PiSmileySadBold className="text-signal-error" /> Was gefällt dir nicht / stört dich?
               </label>
               <textarea
                 rows={2}
@@ -216,8 +216,8 @@ export default function FeedbackPage() {
             </div>
 
             <div>
-              <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-1">
-                <FaLightbulb className="text-amber-400" /> Was würdest du anders machen / dir
+              <label className="flex items-center gap-2 text-sm font-semibold text-paper-50 mb-1">
+                <PiLightbulbBold className="text-signal-wait" /> Was würdest du anders machen / dir
                 wünschen?
               </label>
               <textarea
@@ -233,7 +233,7 @@ export default function FeedbackPage() {
               {loading ? "Senden…" : "Feedback senden"}
             </Button>
             {!hasContent && (
-              <p className="text-center text-xs text-gray-500 -mt-3">
+              <p className="text-center text-xs text-mist-400 -mt-3">
                 Wähle eine Bewertung/ein Thema oder schreib uns kurz etwas.
               </p>
             )}

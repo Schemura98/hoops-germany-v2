@@ -23,7 +23,7 @@ export const CourtArc = forwardRef(function CourtArc(props, ref) {
     >
       <path
         d="M24 200 L24 132 A176 176 0 0 0 376 132 L376 200"
-        stroke="#f97316"
+        stroke="#F07A27"
         strokeWidth="2"
         strokeLinecap="round"
         vectorEffect="non-scaling-stroke"
@@ -48,17 +48,17 @@ export const BallGlyph = forwardRef(function BallGlyph(props, ref) {
     >
       <defs>
         <radialGradient id="hoopsBall" cx="36%" cy="30%" r="78%">
-          <stop offset="0%" stopColor="#fdba74" />
-          <stop offset="55%" stopColor="#f97316" />
-          <stop offset="100%" stopColor="#c2410c" />
+          <stop offset="0%" stopColor="#FFC58C" />
+          <stop offset="55%" stopColor="#F07A27" />
+          <stop offset="100%" stopColor="#B04D0D" />
         </radialGradient>
       </defs>
       <circle cx="14" cy="14" r="12" fill="url(#hoopsBall)" />
-      <g stroke="#7c2d12" strokeOpacity=".85" strokeWidth="1.2" strokeLinecap="round" fill="none">
+      <g stroke="#4F2107" strokeOpacity=".85" strokeWidth="1.2" strokeLinecap="round" fill="none">
         <path d="M2.2 14h23.6M14 2.2v23.6" />
         <path d="M5.1 5.1c4.3 4.9 4.3 12.9 0 17.8M22.9 5.1c-4.3 4.9-4.3 12.9 0 17.8" />
       </g>
-      <circle cx="14" cy="14" r="12" stroke="#7c2d12" strokeOpacity=".45" strokeWidth="1" />
+      <circle cx="14" cy="14" r="12" stroke="#4F2107" strokeOpacity=".45" strokeWidth="1" />
     </svg>
   );
 });
@@ -78,8 +78,8 @@ export const HoopEmblem = forwardRef(function HoopEmblem(props, ref) {
       style={{ transformOrigin: "10px 3px" }}
       {...props}
     >
-      <ellipse cx="10" cy="3" rx="8.5" ry="2.4" stroke="#fb923c" strokeWidth="1.6" />
-      <g stroke="#ffffff" strokeOpacity=".55" strokeWidth="0.9" strokeLinecap="round">
+      <ellipse cx="10" cy="3" rx="8.5" ry="2.4" stroke="#F68C3E" strokeWidth="1.6" />
+      <g stroke="#FAF7F2" strokeOpacity=".55" strokeWidth="0.9" strokeLinecap="round">
         <path d="M2.2 3.6Q3.4 9 6.6 12.4M17.8 3.6Q16.6 9 13.4 12.4M10 5.4V12.8" />
         <path d="M4 6.6Q10 8.9 16 6.6M5.8 9.8Q10 11.6 14.2 9.8" />
       </g>

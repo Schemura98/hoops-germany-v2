@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import axios from "axios";
-import { FaExchangeAlt } from "react-icons/fa";
+import { PiArrowsLeftRightBold } from "react-icons/pi";
 import { getPlayerToken } from "@/lib/clientAuth";
 import { LEAGUE_LEVELS } from "@/lib/constants";
 
 const inputClass =
-  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+  "w-full rounded-sm border border-ink-600 px-3 py-2 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
 
 // Transfer-Status & -Infos im eigenen Profil verwalten.
 export default function TransferControl({ player }) {
@@ -45,10 +45,10 @@ export default function TransferControl({ player }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <div className="bg-ink-800 rounded-md border border-ink-600 p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-          <FaExchangeAlt className="text-brand-500" /> Transfermarkt
+        <h2 className="text-sm font-semibold text-paper-50 flex items-center gap-2">
+          <PiArrowsLeftRightBold className="text-brand-400" /> Transfermarkt
         </h2>
         {/* Verfügbarkeits-Schalter */}
         <button
@@ -57,18 +57,18 @@ export default function TransferControl({ player }) {
           role="switch"
           aria-checked={available}
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${
-            available ? "bg-brand-500" : "bg-gray-300"
+            available ? "bg-brand-500" : "bg-ink-600"
           }`}
         >
           <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+            className={`inline-block h-4 w-4 transform rounded-full bg-ink-800 transition-transform ${
               available ? "translate-x-6" : "translate-x-1"
             }`}
           />
         </button>
       </div>
 
-      <p className="mt-1 text-xs text-gray-500">
+      <p className="mt-1 text-xs text-mist-400">
         {available
           ? "Du bist als transferbereit gelistet und erscheinst im Transfermarkt."
           : "Aktiviere den Schalter, um dich als transferbereit zu listen."}
@@ -77,7 +77,7 @@ export default function TransferControl({ player }) {
       {available && (
         <div className="mt-4 space-y-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-mist-400 mb-1">
               Bevorzugte Spielklasse
             </label>
             <select
@@ -94,7 +94,7 @@ export default function TransferControl({ player }) {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-mist-400 mb-1">
               Notiz
             </label>
             <textarea
@@ -109,7 +109,7 @@ export default function TransferControl({ player }) {
             <button
               onClick={() => save(true)}
               disabled={saving}
-              className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-5 py-2 text-sm font-medium"
+              className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-5 py-2 text-sm font-medium"
             >
               {saving ? "Speichern…" : "Speichern"}
             </button>
@@ -120,7 +120,7 @@ export default function TransferControl({ player }) {
       {msg && (
         <p
           className={`mt-3 text-sm ${
-            msg.type === "ok" ? "text-green-600" : "text-red-600"
+            msg.type === "ok" ? "text-signal-ok" : "text-signal-error"
           }`}
         >
           {msg.text}

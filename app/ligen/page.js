@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaUsers, FaTrophy, FaSearch, FaFilter, FaTimes } from "react-icons/fa";
+import { PiUsersBold, PiTrophyBold, PiMagnifyingGlassBold, PiFunnelBold, PiXBold } from "react-icons/pi";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
@@ -99,35 +99,35 @@ function LeagueCard({ l }) {
   return (
     <Link
       href={`/ligen/${l._id}`}
-      className="block min-w-0 bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 hover:-translate-y-0.5 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong motion-reduce:hover:translate-y-0"
+      className="block min-w-0 bg-ink-800 rounded-md border border-ink-600 p-5 hover:border-brand-500/50 hover:-translate-y-0.5 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong motion-reduce:hover:translate-y-0"
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="font-semibold text-gray-900 break-words min-w-0">{l.name}</p>
+        <p className="font-semibold text-paper-50 break-words min-w-0">{l.name}</p>
         <div className="flex flex-col items-end gap-1 shrink-0">
           {l.isDemo && (
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-sky-700 bg-sky-100 rounded-full px-2 py-0.5">
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-mist-300 bg-ink-700 rounded-sm px-2 py-0.5">
               Beispieldaten
             </span>
           )}
           {l.finished ? (
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-amber-700 bg-amber-100 rounded-full px-2 py-0.5">
-              <FaTrophy className="text-[9px]" /> Abgeschlossen
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-signal-wait bg-signal-wait/15 rounded-sm px-2 py-0.5">
+              <PiTrophyBold className="text-[9px]" /> Abgeschlossen
             </span>
           ) : empty ? (
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 bg-gray-100 rounded-full px-2 py-0.5">
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-mist-400 bg-ink-700 rounded-sm px-2 py-0.5">
               In Vorbereitung
             </span>
           ) : null}
         </div>
       </div>
-      {line2 && <p className="mt-1 text-xs text-gray-500 break-words">{line2}</p>}
-      <p className="mt-1 text-xs text-gray-500">
+      {line2 && <p className="mt-1 text-xs text-mist-400 break-words">{line2}</p>}
+      <p className="mt-1 text-xs text-mist-400">
         {l.season ? `Saison ${l.season} · ` : ""}
         {l.teamCount} {l.teamCount === 1 ? "Team" : "Teams"}
       </p>
       {l.finished && l.champion && (
-        <p className="mt-1 text-xs font-medium text-amber-700 flex items-center gap-1">
-          <FaTrophy className="text-[9px]" /> Meister: {l.champion.teamName}
+        <p className="mt-1 text-xs font-medium text-signal-wait flex items-center gap-1">
+          <PiTrophyBold className="text-[9px]" /> Meister: {l.champion.teamName}
         </p>
       )}
     </Link>
@@ -138,7 +138,7 @@ function LeagueCard({ l }) {
 // (Schnellzugriffe + gruppierte Liga-Karten), damit beim Laden kein Layout-Sprung entsteht.
 function LeagueCardSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5">
+    <div className="bg-ink-800 rounded-md border border-ink-600 p-5">
       <Skeleton className="h-4 w-2/3 mb-2" />
       <Skeleton className="h-3 w-1/2 mb-2" />
       <Skeleton className="h-3 w-1/3" />
@@ -457,7 +457,7 @@ export default function LigenPage() {
   ].filter(Boolean);
 
   const selectCls =
-    "w-full min-w-0 rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-gray-700 bg-white shadow-sm outline-none focus:border-brand-400";
+    "w-full min-w-0 rounded-md border border-ink-600 px-3 py-2.5 text-sm text-mist-300 bg-ink-800 outline-none focus:border-brand-400";
 
   // Basketballkreise fürs Dropdown: bei gewähltem Bezirk nur dessen Kreise, sonst alle 22
   // (gruppiert nach Bezirk). Kreise ohne Liga bleiben SICHTBAR, aber deaktiviert.
@@ -466,7 +466,7 @@ export default function LigenPage() {
     : BASKETBALLKREISE_NRW_GRUPPIERT;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-ink-950 flex flex-col overflow-x-hidden">
       <Navbar />
       <PageHeader eyebrow="Wettbewerb" title="Ligen" subtitle="Tabellen und Wettbewerbe." />
 
@@ -476,12 +476,12 @@ export default function LigenPage() {
         ) : error ? (
           <EmptyState title="Ligen konnten nicht geladen werden." />
         ) : leagues.length === 0 ? (
-          <EmptyState icon={FaTrophy} title="Noch keine Ligen vorhanden." />
+          <EmptyState icon={PiTrophyBold} title="Noch keine Ligen vorhanden." />
         ) : !browse ? (
           /* ══ Geführte Startansicht ══ */
           <div className="space-y-8">
             {!showBundesland && (
-              <p className="text-xs text-gray-500">Region: {NRW} · weitere Bundesländer folgen</p>
+              <p className="text-xs text-mist-400">Region: {NRW} · weitere Bundesländer folgen</p>
             )}
 
             {/* Schnellzugriffe (nur Voreinstellungen) */}
@@ -491,7 +491,7 @@ export default function LigenPage() {
                   key={q.label}
                   type="button"
                   onClick={() => applyQuick(q.apply)}
-                  className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:border-brand-400 hover:text-brand-600 transition-colors"
+                  className="rounded-full border border-ink-600 bg-ink-800 px-4 py-2 text-sm font-medium text-mist-300 hover:border-brand-400 hover:text-brand-400 transition-colors"
                 >
                   {q.label}
                 </button>
@@ -500,7 +500,7 @@ export default function LigenPage() {
 
             {myLeague && (
               <section>
-                <h2 className="mb-3 text-sm font-bold text-gray-900">Deine Liga</h2>
+                <h2 className="mb-3 text-sm font-bold text-paper-50">Deine Liga</h2>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <LeagueCard l={myLeague} />
                 </div>
@@ -508,13 +508,13 @@ export default function LigenPage() {
             )}
 
             <section className="space-y-6">
-              <h2 className="text-sm font-bold text-gray-900">Aktive Ligen entdecken</h2>
+              <h2 className="text-sm font-bold text-paper-50">Aktive Ligen entdecken</h2>
               {guidedGroups.length === 0 ? (
                 <EmptyState title="Aktuell keine laufenden Ligen mit Teams." text="Durchsuche den vollständigen Katalog." />
               ) : (
                 guidedGroups.map((g) => (
                   <div key={g.key}>
-                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">{g.label}</h3>
+                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-mist-400">{g.label}</h3>
                     <div className="grid gap-4 sm:grid-cols-2">
                       {g.items.map((l) => (
                         <LeagueCard key={l._id} l={l} />
@@ -528,7 +528,7 @@ export default function LigenPage() {
             <button
               type="button"
               onClick={() => setBrowse(true)}
-              className="w-full rounded-xl bg-slate-900 text-white py-3 text-sm font-semibold hover:bg-slate-800 transition-colors"
+              className="w-full rounded-md bg-ink-900 text-paper-50 py-3 text-sm font-semibold hover:bg-ink-700 transition-colors"
             >
               Alle {leagues.length} Ligen durchsuchen
             </button>
@@ -539,19 +539,19 @@ export default function LigenPage() {
             {/* Zeile 1: Zähler + Suche (volle Breite) */}
             <div className="mb-3 flex flex-col gap-2">
               <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-mist-300">
                   {filtered.length} {filtered.length === 1 ? "Liga" : "Ligen"}
                 </span>
                 <button
                   type="button"
                   onClick={() => setShowFilters((v) => !v)}
-                  className="sm:hidden inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm"
+                  className="sm:hidden inline-flex items-center gap-2 rounded-md border border-ink-600 bg-ink-800 px-3 py-2 text-sm font-medium text-mist-300"
                 >
-                  <FaFilter className="text-xs" /> Filter{chips.length ? ` (${chips.length})` : ""}
+                  <PiFunnelBold className="text-xs" /> Filter{chips.length ? ` (${chips.length})` : ""}
                 </button>
               </div>
               <div className="relative">
-                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500" />
+                <PiMagnifyingGlassBold className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-mist-400" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -660,7 +660,7 @@ export default function LigenPage() {
                 <button
                   type="button"
                   onClick={() => setShowFilters(false)}
-                  className="sm:hidden rounded-xl bg-brand-500 text-white py-2.5 text-sm font-semibold"
+                  className="sm:hidden rounded-md bg-brand-500 text-ink-950 py-2.5 text-sm font-semibold"
                 >
                   Ergebnisse anzeigen
                 </button>
@@ -675,7 +675,7 @@ export default function LigenPage() {
                   setBezirk(bezirkOfKreis(preferredKreis));
                   setKreis(preferredKreis);
                 }}
-                className="mb-3 text-xs font-medium text-brand-600 hover:underline"
+                className="mb-3 text-xs font-medium text-brand-400 hover:underline"
               >
                 Dein Kreis: {preferredKreis} auswählen
               </button>
@@ -688,12 +688,12 @@ export default function LigenPage() {
                   key={c.k}
                   type="button"
                   onClick={c.clear}
-                  className="inline-flex items-center gap-1 rounded-full bg-brand-50 text-brand-700 text-xs font-medium px-2.5 py-1 hover:bg-brand-100"
+                  className="inline-flex items-center gap-1 rounded-sm bg-brand-500/10 text-brand-400 text-xs font-medium px-2.5 py-1 hover:bg-brand-500/15"
                 >
-                  {c.label} <FaTimes className="text-[9px]" />
+                  {c.label} <PiXBold className="text-[9px]" />
                 </button>
               ))}
-              <button type="button" onClick={resetAll} className="text-xs font-medium text-gray-500 hover:text-brand-600 underline">
+              <button type="button" onClick={resetAll} className="text-xs font-medium text-mist-400 hover:text-brand-400 underline">
                 Alle Filter zurücksetzen
               </button>
             </div>
@@ -713,20 +713,20 @@ export default function LigenPage() {
               <div className="space-y-8">
                 {kreisligaNested.map((be) => (
                   <div key={be.bezirk}>
-                    <h3 className="mb-3 text-sm font-bold text-gray-900">{be.bezirk}</h3>
-                    <div className="space-y-5 pl-3 border-l-2 border-gray-100">
+                    <h3 className="mb-3 text-sm font-bold text-paper-50">{be.bezirk}</h3>
+                    <div className="space-y-5 pl-3 border-l-2 border-ink-600">
                       {be.kreise.map((kg) => (
                         <div key={kg.kreisName}>
-                          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-mist-400">
                             {kg.kreisName}
                             {preferredKreis === kg.kreisName && (
-                              <span className="ml-1.5 normal-case text-brand-600">· dein Kreis</span>
+                              <span className="ml-1.5 normal-case text-brand-400">· dein Kreis</span>
                             )}
                           </h4>
                           <div className="space-y-3">
                             {kg.brackets.map((br) => (
                               <div key={br.key}>
-                                <p className="mb-1.5 text-[11px] font-medium text-gray-500">{br.label}</p>
+                                <p className="mb-1.5 text-[11px] font-medium text-mist-400">{br.label}</p>
                                 <div className="grid gap-3 sm:grid-cols-2">
                                   {br.items.map((l) => (
                                     <LeagueCard key={l._id} l={l} />
@@ -751,7 +751,7 @@ export default function LigenPage() {
               <div className="space-y-6">
                 {catalogGroups.map((g) => (
                   <div key={g.key}>
-                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">{g.label}</h3>
+                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-mist-400">{g.label}</h3>
                     <div className="grid gap-4 sm:grid-cols-2">
                       {g.items.map((l) => (
                         <LeagueCard key={l._id} l={l} />

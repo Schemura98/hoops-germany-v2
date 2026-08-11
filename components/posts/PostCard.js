@@ -4,16 +4,16 @@ import { useState } from "react";
 import Link from "next/link";
 import axios from "axios";
 import {
-  FaRegHeart,
-  FaHeart,
-  FaRegComment,
-  FaBasketballBall,
-  FaExchangeAlt,
-  FaUsers,
-  FaBullhorn,
-  FaSearch,
-  FaUserPlus,
-} from "react-icons/fa";
+  PiHeartBold,
+  PiHeartFill,
+  PiChatCircleBold,
+  PiBasketballBold,
+  PiArrowsLeftRightBold,
+  PiUsersBold,
+  PiMegaphoneBold,
+  PiMagnifyingGlassBold,
+  PiUserPlusBold,
+} from "react-icons/pi";
 import { getPlayerToken } from "@/lib/clientAuth";
 import { timeAgo } from "@/lib/timeAgo";
 import Avatar from "./Avatar";
@@ -24,14 +24,14 @@ import MentionTextarea from "./MentionTextarea";
 
 // Darstellung der automatischen Ereignis-Beiträge (Icon + Badge je Typ).
 const AUTO = {
-  match_result: { Icon: FaBasketballBall, label: "Spielergebnis", color: "bg-brand-100 text-brand-600" },
-  transfer: { Icon: FaExchangeAlt, label: "Transfer", color: "bg-blue-100 text-blue-600" },
-  team_founded: { Icon: FaUsers, label: "Neues Team", color: "bg-green-100 text-green-600" },
-  tryout: { Icon: FaBullhorn, label: "Tryout", color: "bg-purple-100 text-purple-600" },
-  recruiting: { Icon: FaSearch, label: "Spieler gesucht", color: "bg-indigo-100 text-indigo-600" },
-  transfer_available: { Icon: FaUserPlus, label: "Auf Vereinssuche", color: "bg-teal-100 text-teal-600" },
+  match_result: { Icon: PiBasketballBold, label: "Spielergebnis", color: "bg-brand-500/15 text-brand-400" },
+  transfer: { Icon: PiArrowsLeftRightBold, label: "Transfer", color: "bg-ink-700 text-mist-300" },
+  team_founded: { Icon: PiUsersBold, label: "Neues Team", color: "bg-signal-ok/15 text-signal-ok" },
+  tryout: { Icon: PiMegaphoneBold, label: "Tryout", color: "bg-ink-700 text-mist-300" },
+  recruiting: { Icon: PiMagnifyingGlassBold, label: "Spieler gesucht", color: "bg-ink-700 text-mist-300" },
+  transfer_available: { Icon: PiUserPlusBold, label: "Auf Vereinssuche", color: "bg-ink-700 text-mist-300" },
 };
-const AUTO_FALLBACK = { Icon: FaBasketballBall, label: "Update", color: "bg-gray-100 text-gray-600" };
+const AUTO_FALLBACK = { Icon: PiBasketballBold, label: "Update", color: "bg-ink-700 text-mist-400" };
 
 function authorLink(player) {
   return player?.slug || player?._id
@@ -46,10 +46,10 @@ function LikeButton({ liked, count, busy, onToggle }) {
       onClick={onToggle}
       disabled={busy}
       className={`inline-flex items-center gap-1 text-xs ${
-        liked ? "text-brand-600" : "text-gray-500 hover:text-brand-600"
+        liked ? "text-brand-400" : "text-mist-400 hover:text-brand-400"
       }`}
     >
-      {liked ? <FaHeart /> : <FaRegHeart />}
+      {liked ? <PiHeartFill /> : <PiHeartBold />}
       {count > 0 && <span>{count}</span>}
     </button>
   );
@@ -93,14 +93,14 @@ function ReplyItem({ reply, postId, commentId, currentPlayerId }) {
         <Avatar player={reply.player} className="h-7 w-7" />
       </Link>
       <div className="flex-1">
-        <div className="bg-gray-50 rounded-2xl px-3 py-2">
+        <div className="bg-ink-950 rounded-md px-3 py-2">
           <Link
             href={authorLink(reply.player)}
-            className="text-sm font-medium text-gray-900 hover:text-brand-600"
+            className="text-sm font-medium text-paper-50 hover:text-brand-400"
           >
             {reply.player?.firstName} {reply.player?.lastName}
           </Link>
-          <p className="text-sm text-gray-700 whitespace-pre-line break-words">
+          <p className="text-sm text-mist-300 whitespace-pre-line break-words">
             <RichText text={reply.text} mentions={reply.mentions} />
           </p>
         </div>
@@ -175,14 +175,14 @@ function CommentItem({ comment, postId, currentPlayerId }) {
         <Avatar player={comment.player} className="h-8 w-8" />
       </Link>
       <div className="flex-1 min-w-0">
-        <div className="bg-gray-50 rounded-2xl px-3 py-2">
+        <div className="bg-ink-950 rounded-md px-3 py-2">
           <Link
             href={authorLink(comment.player)}
-            className="text-sm font-medium text-gray-900 hover:text-brand-600"
+            className="text-sm font-medium text-paper-50 hover:text-brand-400"
           >
             {comment.player?.firstName} {comment.player?.lastName}
           </Link>
-          <p className="text-sm text-gray-700 whitespace-pre-line break-words">
+          <p className="text-sm text-mist-300 whitespace-pre-line break-words">
             <RichText text={comment.text} mentions={comment.mentions} />
           </p>
         </div>
@@ -192,7 +192,7 @@ function CommentItem({ comment, postId, currentPlayerId }) {
           <LikeButton liked={liked} count={likeCount} busy={likeBusy} onToggle={toggleLike} />
           <button
             onClick={() => setShowReply((v) => !v)}
-            className="text-xs font-medium text-gray-500 hover:text-brand-600"
+            className="text-xs font-medium text-mist-400 hover:text-brand-400"
           >
             Antworten
           </button>
@@ -224,12 +224,12 @@ function CommentItem({ comment, postId, currentPlayerId }) {
               onEnter={addReply}
               placeholder="Antworten…"
               wrapperClassName="relative flex-1"
-              className="w-full rounded-full border border-gray-200 px-4 py-1.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              className="w-full rounded-full border border-ink-600 px-4 py-1.5 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
             <button
               onClick={addReply}
               disabled={replying || !replyText.trim()}
-              className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-full px-4 py-1.5 text-sm font-medium"
+              className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-full px-4 py-1.5 text-sm font-medium"
             >
               Senden
             </button>
@@ -309,7 +309,7 @@ export default function PostCard({ post, currentPlayerId }) {
     : "#";
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+    <div className="bg-ink-800 rounded-md border border-ink-600 p-4">
       {isAuto ? (
         <>
           {/* Kopf (Ereignis) */}
@@ -320,28 +320,28 @@ export default function PostCard({ post, currentPlayerId }) {
               <auto.Icon />
             </span>
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+              <span className="text-xs font-semibold uppercase tracking-wide text-mist-400">
                 {auto.label}
               </span>
-              <p className="text-xs text-gray-500">{timeAgo(post.createdAt)}</p>
+              <p className="text-xs text-mist-400">{timeAgo(post.createdAt)}</p>
             </div>
           </div>
 
           {/* Inhalt (verlinkt aufs Ereignis) */}
           {post.meta?.href ? (
             <Link href={post.meta.href} className="block mt-3 group">
-              <p className="font-semibold text-gray-900 group-hover:text-brand-600">
+              <p className="font-semibold text-paper-50 group-hover:text-brand-400">
                 {post.content}
               </p>
               {post.meta?.note && (
-                <p className="text-xs text-gray-500 mt-0.5">{post.meta.note}</p>
+                <p className="text-xs text-mist-400 mt-0.5">{post.meta.note}</p>
               )}
             </Link>
           ) : (
             <div className="mt-3">
-              <p className="font-semibold text-gray-900">{post.content}</p>
+              <p className="font-semibold text-paper-50">{post.content}</p>
               {post.meta?.note && (
-                <p className="text-xs text-gray-500 mt-0.5">{post.meta.note}</p>
+                <p className="text-xs text-mist-400 mt-0.5">{post.meta.note}</p>
               )}
             </div>
           )}
@@ -361,12 +361,12 @@ export default function PostCard({ post, currentPlayerId }) {
               <div>
                 <Link
                   href={teamLink}
-                  className="font-medium text-gray-900 hover:text-brand-600"
+                  className="font-medium text-paper-50 hover:text-brand-400"
                 >
                   {teamAuthor.teamName}
                 </Link>
-                <p className="text-xs text-gray-500">
-                  <span className="text-brand-600 font-medium">Verein</span> ·{" "}
+                <p className="text-xs text-mist-400">
+                  <span className="text-brand-400 font-medium">Verein</span> ·{" "}
                   {timeAgo(post.createdAt)}
                 </p>
               </div>
@@ -379,18 +379,18 @@ export default function PostCard({ post, currentPlayerId }) {
               <div>
                 <Link
                   href={authorLink(author)}
-                  className="font-medium text-gray-900 hover:text-brand-600"
+                  className="font-medium text-paper-50 hover:text-brand-400"
                 >
                   {author?.firstName} {author?.lastName}
                 </Link>
-                <p className="text-xs text-gray-500">{timeAgo(post.createdAt)}</p>
+                <p className="text-xs text-mist-400">{timeAgo(post.createdAt)}</p>
               </div>
             </div>
           )}
 
           {/* Inhalt */}
           {post.content && (
-            <p className="mt-3 text-gray-800 whitespace-pre-line">
+            <p className="mt-3 text-paper-50 whitespace-pre-line">
               <RichText text={post.content} mentions={post.mentions} />
             </p>
           )}
@@ -399,7 +399,7 @@ export default function PostCard({ post, currentPlayerId }) {
             <img
               src={post.image}
               alt=""
-              className="mt-3 rounded-xl max-h-96 w-full object-cover"
+              className="mt-3 rounded-md max-h-96 w-full object-cover"
             />
           )}
           <PostEmbed embed={post.embed} />
@@ -407,20 +407,20 @@ export default function PostCard({ post, currentPlayerId }) {
       )}
 
       {/* Aktionen */}
-      <div className="mt-3 flex items-center gap-5 text-sm text-gray-500 border-t border-gray-100 pt-3">
+      <div className="mt-3 flex items-center gap-5 text-sm text-mist-400 border-t border-ink-600 pt-3">
         <button
           onClick={toggleLike}
           className={`inline-flex items-center gap-1.5 ${
-            liked ? "text-brand-600" : "hover:text-brand-600"
+            liked ? "text-brand-400" : "hover:text-brand-400"
           }`}
         >
-          {liked ? <FaHeart /> : <FaRegHeart />} {likeCount}
+          {liked ? <PiHeartFill /> : <PiHeartBold />} {likeCount}
         </button>
         <button
           onClick={() => setShowComments((v) => !v)}
-          className="inline-flex items-center gap-1.5 hover:text-brand-600"
+          className="inline-flex items-center gap-1.5 hover:text-brand-400"
         >
-          <FaRegComment /> {commentTotal}
+          <PiChatCircleBold /> {commentTotal}
         </button>
       </div>
 
@@ -444,12 +444,12 @@ export default function PostCard({ post, currentPlayerId }) {
               onEnter={addComment}
               placeholder="Kommentieren…"
               wrapperClassName="relative flex-1"
-              className="w-full rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              className="w-full rounded-full border border-ink-600 px-4 py-2 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
             <button
               onClick={addComment}
               disabled={commenting || !commentText.trim()}
-              className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-full px-4 py-2 text-sm font-medium"
+              className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-full px-4 py-2 text-sm font-medium"
             >
               Senden
             </button>

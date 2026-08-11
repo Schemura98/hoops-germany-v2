@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
-import { FaGoogle, FaEye, FaEyeSlash } from "react-icons/fa";
+import { PiGoogleLogoBold, PiEyeBold, PiEyeSlashBold } from "react-icons/pi";
 import { setPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
 import AuthShell from "@/components/layout/AuthShell";
 import Button from "@/components/ui/Button";
@@ -54,7 +54,7 @@ function LoginForm() {
       footer={
         <>
           Noch kein Konto?{" "}
-          <Link href="/signup" className="text-brand-600 font-medium hover:underline">
+          <Link href="/signup" className="text-brand-400 font-medium hover:underline">
             Jetzt registrieren
           </Link>
         </>
@@ -64,7 +64,7 @@ function LoginForm() {
 
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">E-Mail</label>
+          <label className="block text-sm font-medium text-mist-300 mb-1">E-Mail</label>
           <input
             type="email"
             name="email"
@@ -78,8 +78,8 @@ function LoginForm() {
         </div>
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="block text-sm font-medium text-gray-700">Passwort</label>
-            <Link href="/reset-password" className="text-xs text-brand-600 hover:underline">
+            <label className="block text-sm font-medium text-mist-300">Passwort</label>
+            <Link href="/reset-password" className="text-xs text-brand-400 hover:underline">
               Vergessen?
             </Link>
           </div>
@@ -97,10 +97,10 @@ function LoginForm() {
             <button
               type="button"
               onClick={() => setShowPw((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-mist-400 hover:text-mist-400"
               aria-label={showPw ? "Passwort verbergen" : "Passwort anzeigen"}
             >
-              {showPw ? <FaEyeSlash /> : <FaEye />}
+              {showPw ? <PiEyeSlashBold /> : <PiEyeBold />}
             </button>
           </div>
         </div>
@@ -111,16 +111,16 @@ function LoginForm() {
       </form>
 
       <div className="my-6 flex items-center gap-3">
-        <div className="h-px flex-1 bg-gray-200" />
-        <span className="text-xs text-gray-500">oder</span>
-        <div className="h-px flex-1 bg-gray-200" />
+        <div className="h-px flex-1 bg-ink-700" />
+        <span className="text-xs text-mist-400">oder</span>
+        <div className="h-px flex-1 bg-ink-700" />
       </div>
 
       <a
         href={googleHref}
-        className="w-full flex items-center justify-center gap-2 border border-gray-300 hover:border-brand-500 text-gray-700 rounded-lg px-4 py-2.5 font-medium transition-colors"
+        className="w-full flex items-center justify-center gap-2 border border-ink-600 hover:border-brand-500 text-mist-300 rounded-sm px-4 py-2.5 font-medium transition-colors"
       >
-        <FaGoogle className="text-brand-500" />
+        <PiGoogleLogoBold className="text-brand-400" />
         Mit Google anmelden
       </a>
     </AuthShell>

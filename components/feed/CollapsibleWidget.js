@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FaChevronDown } from "react-icons/fa";
+import { PiCaretDownBold } from "react-icons/pi";
 
 /**
  * Einklappbarer Wrapper für die Feed-Seitenwidgets (nur Mobil).
@@ -13,22 +13,22 @@ export default function CollapsibleWidget({ icon, title, defaultOpen = false, ch
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+    <div className="rounded-md border border-ink-600 bg-ink-800 overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left"
       >
-        <span className="flex items-center gap-2 text-sm font-bold text-gray-900">
+        <span className="flex items-center gap-2 text-sm font-bold text-paper-50">
           {icon} {title}
         </span>
-        <FaChevronDown
-          className={`text-gray-500 text-xs transition-transform ${open ? "rotate-180" : ""}`}
+        <PiCaretDownBold
+          className={`text-mist-400 text-xs transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && (
-        <div className="border-t border-gray-100 [&>div]:border-0 [&>div]:rounded-none [&>div]:shadow-none [&>div]:bg-transparent [&>div]:pt-3 [&>div>h3]:hidden">
+        <div className="border-t border-ink-600 [&>div]:border-0 [&>div]:rounded-none [&>div]:shadow-none [&>div]:bg-transparent [&>div]:pt-3 [&>div>h3]:hidden">
           {children}
         </div>
       )}

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaSearch, FaBasketballBall, FaMapMarkerAlt } from "react-icons/fa";
+import { PiMagnifyingGlassBold, PiBasketballBold, PiMapPinBold } from "react-icons/pi";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
@@ -23,7 +23,7 @@ import { colorFor, initialsFor } from "@/components/Avatar";
 // Karten-Skeleton im Format der echten Spielerkarte (quadratisches Foto + Textzeilen).
 function PlayerCardSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+    <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
       <Skeleton className="aspect-square w-full rounded-none" />
       <div className="p-3">
         <Skeleton className="h-3.5 w-3/4 mb-2" />
@@ -93,7 +93,7 @@ export default function SpielerPage() {
   }, [players, query, position, land, geo, cityMap]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-ink-950 flex flex-col">
       <Navbar />
 
       <PageHeader
@@ -108,12 +108,12 @@ export default function SpielerPage() {
             Zeilen – gleiches Muster wie auf /spiele (Design-Review Welle 3). */}
         <div className="mb-6 space-y-3">
           <div className="relative">
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
+            <PiMagnifyingGlassBold className="absolute left-3 top-1/2 -translate-y-1/2 text-mist-400 text-sm" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Name, Team oder Stadt suchen…"
-              className="w-full border border-gray-200 rounded-xl pl-9 pr-4 py-3 text-sm text-gray-900 outline-none focus:border-brand-400 bg-white shadow-sm"
+              className="w-full border border-ink-600 rounded-md pl-9 pr-4 py-3 text-sm text-paper-50 outline-none focus:border-brand-400 bg-ink-800"
             />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -159,7 +159,7 @@ export default function SpielerPage() {
         {loading ? (
           <Skeleton className="h-3.5 w-24 mb-4" />
         ) : !error ? (
-          <p className="text-xs text-gray-500 font-medium mb-4 uppercase tracking-wide">
+          <p className="text-xs text-mist-400 font-medium mb-4 uppercase tracking-wide">
             {filtered.length} Spieler
           </p>
         ) : null}
@@ -174,7 +174,7 @@ export default function SpielerPage() {
           <EmptyState title="Spieler konnten nicht geladen werden." />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon={FaBasketballBall}
+            icon={PiBasketballBold}
             title="Keine Spieler gefunden"
             text={
               query || position ? "Versuche einen anderen Filter." : "Noch keine Spieler registriert."
@@ -186,7 +186,7 @@ export default function SpielerPage() {
               <Link
                 key={p._id}
                 href={`/player/view-player/${p.slug || p._id}`}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-brand-200 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 group overflow-hidden"
+                className="bg-ink-800 rounded-md border border-ink-600 hover:border-brand-500/50 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 group overflow-hidden"
               >
                 <div className="aspect-square flex items-center justify-center overflow-hidden">
                   {p.profileImage ? (
@@ -200,23 +200,23 @@ export default function SpielerPage() {
                     <div
                       className={`w-full h-full ${colorFor(
                         `${p.firstName} ${p.lastName}`
-                      )} flex items-center justify-center text-white text-4xl font-bold`}
+                      )} flex items-center justify-center text-paper-50 text-4xl font-bold`}
                     >
                       {initialsFor(`${p.firstName} ${p.lastName}`)}
                     </div>
                   )}
                 </div>
                 <div className="p-3">
-                  <p className="text-sm font-bold text-gray-900 group-hover:text-brand-600 transition-colors leading-tight truncate">
+                  <p className="text-sm font-bold text-paper-50 group-hover:text-brand-400 transition-colors leading-tight truncate">
                     {p.firstName} {p.lastName}
                   </p>
                   {p.position && (
-                    <span className="inline-block text-xs font-semibold text-brand-500 bg-brand-50 px-1.5 py-0.5 rounded-md mt-1">
+                    <span className="inline-block text-xs font-semibold text-brand-400 bg-brand-500/10 px-1.5 py-0.5 rounded-md mt-1">
                       {positionLabel(p.position)}
                     </span>
                   )}
                   {p.teamId?.teamName && (
-                    <p className="text-xs text-gray-500 mt-1.5 truncate flex items-center gap-1">
+                    <p className="text-xs text-mist-400 mt-1.5 truncate flex items-center gap-1">
                       {p.teamId.logo && (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -229,8 +229,8 @@ export default function SpielerPage() {
                     </p>
                   )}
                   {p.hometown && (
-                    <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1 truncate">
-                      <FaMapMarkerAlt className="flex-shrink-0 text-gray-300" />
+                    <p className="text-xs text-mist-400 mt-0.5 flex items-center gap-1 truncate">
+                      <PiMapPinBold className="flex-shrink-0 text-ink-500" />
                       {p.hometown}
                     </p>
                   )}

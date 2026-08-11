@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { FaPlus, FaTrash, FaMapMarkerAlt, FaCalendarAlt } from "react-icons/fa";
+import { PiPlusBold, PiTrashBold, PiMapPinBold, PiCalendarBlankBold } from "react-icons/pi";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import { BUNDESLAENDER, MATCH_STAGES, PLAYOFF_ROUNDS } from "@/lib/constants";
 import LeagueReportLink from "@/components/team/LeagueReportLink";
@@ -14,9 +14,9 @@ import TabAlert from "@/components/team/tabs/TabAlert";
 import { inputClassSm } from "@/lib/ui";
 
 const STATUS_BADGE = {
-  scheduled: { label: "Geplant", cls: "bg-blue-100 text-blue-700" },
-  completed: { label: "Abgeschlossen", cls: "bg-green-100 text-green-700" },
-  cancelled: { label: "Abgesagt", cls: "bg-red-100 text-red-700" },
+  scheduled: { label: "Geplant", cls: "bg-ink-700 text-mist-300" },
+  completed: { label: "Abgeschlossen", cls: "bg-signal-ok/15 text-signal-ok" },
+  cancelled: { label: "Abgesagt", cls: "bg-signal-error/15 text-signal-error" },
 };
 
 function formatDate(d) {
@@ -165,15 +165,15 @@ export default function SpielplanTab({ team }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">
-          Spielplan <span className="text-sm font-normal text-gray-500">· {matches.length} Spiele</span>
+        <h2 className="text-lg font-semibold text-paper-50">
+          Spielplan <span className="text-sm font-normal text-mist-400">· {matches.length} Spiele</span>
         </h2>
         <Button
           onClick={() => setShowAdd((v) => !v)}
           aria-expanded={showAdd}
           className="flex-shrink-0"
         >
-          <FaPlus className="text-xs" /> Spiel hinzufügen
+          <PiPlusBold className="text-xs" /> Spiel hinzufügen
         </Button>
       </div>
 
@@ -182,12 +182,12 @@ export default function SpielplanTab({ team }) {
       {showAdd && (
         <form
           onSubmit={addMatch}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3"
+          className="bg-ink-800 rounded-md border border-ink-600 p-4 space-y-3"
         >
           {/* Gegner eingrenzen (Bundesland/Liga) – hält das Dropdown übersichtlich */}
           {opponents.length > 0 && (availableBL.length > 0 || leagues.length > 0) && (
-            <div className="rounded-lg bg-gray-50 border border-gray-100 p-3">
-              <p className="text-xs font-medium text-gray-600 mb-2">Gegner eingrenzen (optional)</p>
+            <div className="rounded-sm bg-ink-950 border border-ink-600 p-3">
+              <p className="text-xs font-medium text-mist-400 mb-2">Gegner eingrenzen (optional)</p>
               <div className="grid sm:grid-cols-2 gap-3">
                 <select
                   value={filterBundesland}
@@ -222,9 +222,9 @@ export default function SpielplanTab({ team }) {
 
           <div className="grid sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
+              <label className="block text-xs font-medium text-mist-400 mb-1">
                 Gegner{" "}
-                <span className="text-gray-500 font-normal">· {filteredOpponents.length}</span>
+                <span className="text-mist-400 font-normal">· {filteredOpponents.length}</span>
               </label>
               <select
                 required
@@ -241,17 +241,17 @@ export default function SpielplanTab({ team }) {
                 ))}
               </select>
               {opponents.length === 0 ? (
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-mist-400">
                   Noch keine anderen Teams registriert.
                 </p>
               ) : filteredOpponents.length === 0 ? (
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-mist-400">
                   Keine Teams für diesen Filter – Auswahl anpassen.
                 </p>
               ) : null}
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Datum & Uhrzeit</label>
+              <label className="block text-xs font-medium text-mist-400 mb-1">Datum & Uhrzeit</label>
               <input
                 type="datetime-local"
                 required
@@ -263,8 +263,8 @@ export default function SpielplanTab({ team }) {
           </div>
           <div className="grid sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Ort <span className="text-gray-500">(optional)</span>
+              <label className="block text-xs font-medium text-mist-400 mb-1">
+                Ort <span className="text-mist-400">(optional)</span>
               </label>
               <input
                 value={form.location}
@@ -274,8 +274,8 @@ export default function SpielplanTab({ team }) {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Liga <span className="text-gray-500">(optional)</span>
+              <label className="block text-xs font-medium text-mist-400 mb-1">
+                Liga <span className="text-mist-400">(optional)</span>
               </label>
               <select
                 value={form.leagueId}
@@ -305,7 +305,7 @@ export default function SpielplanTab({ team }) {
           {form.leagueId && (
             <div className="grid sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Spieltyp</label>
+                <label className="block text-xs font-medium text-mist-400 mb-1">Spieltyp</label>
                 <select
                   value={form.stage}
                   onChange={(e) =>
@@ -326,7 +326,7 @@ export default function SpielplanTab({ team }) {
               </div>
               {form.stage === "Playoffs" && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Playoff-Runde</label>
+                  <label className="block text-xs font-medium text-mist-400 mb-1">Playoff-Runde</label>
                   <select
                     required
                     value={form.playoffRound}
@@ -346,7 +346,7 @@ export default function SpielplanTab({ team }) {
           )}
 
           {/* Ligen werden nicht mehr selbst angelegt – nur aus dem Katalog gewählt. */}
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-mist-400">
             Fehlt deine Liga in der Auswahl?{" "}
             <LeagueReportLink bundesland={team?.bundesland || ""} className="align-middle" />
           </div>
@@ -370,39 +370,39 @@ export default function SpielplanTab({ team }) {
 
       {matches.length === 0 ? (
         <EmptyState
-          icon={FaCalendarAlt}
+          icon={PiCalendarBlankBold}
           title="Noch keine Spiele eingetragen"
           text="Lege das erste Spiel an – es erscheint dann auch im öffentlichen Spielplan."
           action={
             !showAdd && (
               <Button onClick={() => setShowAdd(true)}>
-                <FaPlus className="text-xs" /> Spiel hinzufügen
+                <PiPlusBold className="text-xs" /> Spiel hinzufügen
               </Button>
             )
           }
         />
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-100">
+        <div className="bg-ink-800 rounded-md border border-ink-600 divide-y divide-ink-600">
           {matches.map((match) => {
             const opp = opponentOf(match);
             const badge = STATUS_BADGE[match.status] || STATUS_BADGE.scheduled;
             return (
               <div key={match._id} className="flex items-center justify-between gap-3 px-5 py-3">
                 <div className="min-w-0">
-                  <p className="font-medium text-gray-900 truncate">
+                  <p className="font-medium text-paper-50 truncate">
                     vs. {opp?.teamName || "Unbekannt"}
                   </p>
-                  <p className="text-xs text-gray-500">{formatDate(match.date)}</p>
+                  <p className="text-xs text-mist-400">{formatDate(match.date)}</p>
                   {match.location && (
-                    <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
-                      <FaMapMarkerAlt /> {match.location}
+                    <p className="text-xs text-mist-400 flex items-center gap-1 mt-0.5">
+                      <PiMapPinBold /> {match.location}
                     </p>
                   )}
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
                   {match.status === "completed" &&
                     match.winningTeamPoints != null && (
-                      <span className="text-sm font-semibold text-gray-700">
+                      <span className="text-sm font-semibold text-mist-300">
                         {match.winningTeamPoints}:{match.losingTeamPoints}
                       </span>
                     )}
@@ -415,11 +415,11 @@ export default function SpielplanTab({ team }) {
                         <button
                           onClick={onClick}
                           disabled={busyId === match._id}
-                          className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5"
+                          className="text-mist-400 hover:text-signal-error disabled:opacity-60 p-1.5"
                           title="Spiel entfernen"
                           aria-label={`Spiel gegen ${opp?.teamName || "Gegner"} entfernen`}
                         >
-                          <FaTrash className="text-sm" />
+                          <PiTrashBold className="text-sm" />
                         </button>
                       )}
                       message={`Spiel gegen ${opp?.teamName || "den Gegner"} wirklich entfernen?`}

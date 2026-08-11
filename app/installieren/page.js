@@ -2,20 +2,20 @@
 
 import { useEffect, useState } from "react";
 import {
-  FaMobileAlt,
-  FaApple,
-  FaAndroid,
-  FaDesktop,
-  FaShareSquare,
-  FaPlusSquare,
-  FaEllipsisV,
-  FaCheckCircle,
-  FaBolt,
-  FaSyncAlt,
-  FaWifi,
-  FaChevronDown,
-  FaDownload,
-} from "react-icons/fa";
+  PiDeviceMobileBold,
+  PiAppleLogoBold,
+  PiAndroidLogoBold,
+  PiDesktopBold,
+  PiShareNetworkBold,
+  PiPlusSquareBold,
+  PiDotsThreeVerticalBold,
+  PiCheckCircleBold,
+  PiLightningBold,
+  PiArrowsClockwiseBold,
+  PiWifiHighBold,
+  PiCaretDownBold,
+  PiDownloadSimpleBold,
+} from "react-icons/pi";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
@@ -23,10 +23,10 @@ import PageHeader from "@/components/layout/PageHeader";
 function Step({ n, children }) {
   return (
     <li className="flex gap-3">
-      <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-brand-500 text-sm font-bold text-white">
+      <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-brand-500 text-sm font-bold text-ink-950">
         {n}
       </span>
-      <span className="pt-0.5 text-gray-700">{children}</span>
+      <span className="pt-0.5 text-mist-300">{children}</span>
     </li>
   );
 }
@@ -34,21 +34,21 @@ function Step({ n, children }) {
 // Aufklappbarer Plattform-Abschnitt.
 function Section({ icon: Icon, title, badge, open, onToggle, children }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+    <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
       <button
         onClick={onToggle}
         aria-expanded={open}
-        className="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-gray-50 transition-colors"
+        className="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-ink-700 transition-colors"
       >
-        <Icon className="text-gray-800 text-lg flex-shrink-0" />
-        <span className="font-bold text-gray-900 flex-1">{title}</span>
+        <Icon className="text-paper-50 text-lg flex-shrink-0" />
+        <span className="font-bold text-paper-50 flex-1">{title}</span>
         {badge && (
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-brand-600 bg-brand-50 rounded-full px-2 py-0.5">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-brand-400 bg-brand-500/10 rounded-sm px-2 py-0.5">
             {badge}
           </span>
         )}
-        <FaChevronDown
-          className={`text-gray-500 flex-shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+        <PiCaretDownBold
+          className={`text-mist-400 flex-shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && <div className="px-6 pb-6 -mt-1">{children}</div>}
@@ -102,7 +102,7 @@ export default function InstallierenPage() {
   const detectedLabel = { ios: "iPhone / iPad", android: "Android", desktop: "Desktop" }[detected];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-ink-950 flex flex-col">
       <Navbar />
       <PageHeader
         eyebrow="Hoops Germany"
@@ -114,23 +114,23 @@ export default function InstallierenPage() {
         {/* Vorteile */}
         <div className="grid grid-cols-3 gap-3">
           {[
-            { icon: FaMobileAlt, t: "Vollbild" },
-            { icon: FaSyncAlt, t: "Immer aktuell" },
-            { icon: FaBolt, t: "Schneller Start" },
+            { icon: PiDeviceMobileBold, t: "Vollbild" },
+            { icon: PiArrowsClockwiseBold, t: "Immer aktuell" },
+            { icon: PiLightningBold, t: "Schneller Start" },
           ].map((b) => (
-            <div key={b.t} className="bg-white rounded-2xl border border-gray-100 p-4 text-center">
-              <b.icon className="mx-auto text-brand-500 text-xl" />
-              <p className="mt-2 text-xs font-medium text-gray-700">{b.t}</p>
+            <div key={b.t} className="bg-ink-800 rounded-md border border-ink-600 p-4 text-center">
+              <b.icon className="mx-auto text-brand-400 text-xl" />
+              <p className="mt-2 text-xs font-medium text-mist-300">{b.t}</p>
             </div>
           ))}
         </div>
 
         {installed ? (
-          <div className="bg-white rounded-2xl border border-green-200 p-6 flex items-center gap-3">
-            <FaCheckCircle className="text-green-500 text-2xl flex-shrink-0" />
+          <div className="bg-ink-800 rounded-md border border-signal-ok/50 p-6 flex items-center gap-3">
+            <PiCheckCircleBold className="text-signal-ok text-2xl flex-shrink-0" />
             <div>
-              <p className="font-semibold text-gray-900">Schon installiert 🎉</p>
-              <p className="text-sm text-gray-600">
+              <p className="font-semibold text-paper-50">Schon installiert 🎉</p>
+              <p className="text-sm text-mist-400">
                 Du nutzt Hoops Germany bereits als App. Viel Spaß!
               </p>
             </div>
@@ -139,29 +139,29 @@ export default function InstallierenPage() {
           <>
             {/* Direkter Install-Button, wenn der Browser ihn anbietet (Chrome/Edge/Opera, Android+Desktop) */}
             {deferred && (
-              <div className="bg-white rounded-2xl border border-brand-200 p-6 text-center">
-                <p className="text-sm text-gray-600 mb-3">
+              <div className="bg-ink-800 rounded-md border border-brand-500/50 p-6 text-center">
+                <p className="text-sm text-mist-400 mb-3">
                   Dein Browser unterstützt die direkte Installation – ein Klick genügt:
                 </p>
                 <button
                   onClick={install}
-                  className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-6 py-3 font-semibold"
+                  className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-ink-950 rounded-sm px-6 py-3 font-semibold"
                 >
-                  <FaDownload /> App installieren
+                  <PiDownloadSimpleBold /> App installieren
                 </button>
               </div>
             )}
 
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-mist-400">
               Oder wähle dein Gerät{" "}
-              <span className="text-gray-500">
+              <span className="text-mist-400">
                 (wir haben <strong>{detectedLabel}</strong> erkannt und passend geöffnet):
               </span>
             </p>
 
             {/* iPhone / iPad */}
             <Section
-              icon={FaApple}
+              icon={PiAppleLogoBold}
               title="iPhone / iPad (Safari)"
               badge={detected === "ios" ? "Dein Gerät" : null}
               open={open === "ios"}
@@ -171,11 +171,11 @@ export default function InstallierenPage() {
                 <Step n="1">
                   Öffne diese Seite in <strong>Safari</strong> und tippe unten (bzw. oben) auf das{" "}
                   <strong>Teilen-Symbol</strong>{" "}
-                  <FaShareSquare className="inline -mt-0.5 text-brand-500" />.
+                  <PiShareNetworkBold className="inline -mt-0.5 text-brand-400" />.
                 </Step>
                 <Step n="2">
                   Wähle <strong>„Zum Home-Bildschirm“</strong>{" "}
-                  <FaPlusSquare className="inline -mt-0.5 text-brand-500" />.
+                  <PiPlusSquareBold className="inline -mt-0.5 text-brand-400" />.
                 </Step>
                 <Step n="3">
                   Tippe auf <strong>„Hinzufügen“</strong> – das Hoops-Germany-Icon erscheint auf dem
@@ -186,7 +186,7 @@ export default function InstallierenPage() {
 
             {/* Android */}
             <Section
-              icon={FaAndroid}
+              icon={PiAndroidLogoBold}
               title="Android (Chrome)"
               badge={detected === "android" ? "Dein Gerät" : null}
               open={open === "android"}
@@ -195,7 +195,7 @@ export default function InstallierenPage() {
               <ol className="space-y-3 text-sm">
                 <Step n="1">
                   Tippe oben rechts auf das <strong>Menü</strong>{" "}
-                  <FaEllipsisV className="inline -mt-0.5 text-brand-500" />.
+                  <PiDotsThreeVerticalBold className="inline -mt-0.5 text-brand-400" />.
                 </Step>
                 <Step n="2">
                   Wähle <strong>„App installieren“</strong> bzw.{" "}
@@ -207,7 +207,7 @@ export default function InstallierenPage() {
 
             {/* Desktop */}
             <Section
-              icon={FaDesktop}
+              icon={PiDesktopBold}
               title="Desktop (Chrome, Edge, Opera)"
               badge={detected === "desktop" ? "Dein Gerät" : null}
               open={open === "desktop"}
@@ -217,7 +217,7 @@ export default function InstallierenPage() {
                 <Step n="1">
                   Klicke rechts in der <strong>Adressleiste</strong> auf das{" "}
                   <strong>Installations-Symbol</strong> (Monitor mit Pfeil bzw.{" "}
-                  <FaPlusSquare className="inline -mt-0.5 text-brand-500" />
+                  <PiPlusSquareBold className="inline -mt-0.5 text-brand-400" />
                   ).
                 </Step>
                 <Step n="2">
@@ -227,7 +227,7 @@ export default function InstallierenPage() {
                 </Step>
                 <Step n="3">Bestätigen – Hoops Germany öffnet sich künftig als eigenes Fenster.</Step>
               </ol>
-              <p className="mt-3 text-xs text-gray-500">
+              <p className="mt-3 text-xs text-mist-400">
                 Mac-Safari: Menü <strong>„Ablage“ → „Zum Dock hinzufügen“</strong>. Firefox unterstützt
                 die Installation aktuell nicht – dort die Seite einfach als Lesezeichen speichern.
               </p>
@@ -235,8 +235,8 @@ export default function InstallierenPage() {
           </>
         )}
 
-        <p className="flex items-center justify-center gap-2 text-xs text-gray-500 pt-2">
-          <FaWifi /> Die App ist die Website selbst – sie ist immer automatisch synchron, ohne Update
+        <p className="flex items-center justify-center gap-2 text-xs text-mist-400 pt-2">
+          <PiWifiHighBold /> Die App ist die Website selbst – sie ist immer automatisch synchron, ohne Update
           aus einem Store.
         </p>
       </main>

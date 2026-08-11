@@ -18,7 +18,7 @@ function Rahmen({ children }) {
     <main className="min-h-screen flex flex-col items-center justify-center gap-6 px-6 py-12 text-center">
       <Link href="/">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/logo-hoops.svg" alt="Hoops Germany" className="mx-auto h-auto w-40 sm:w-48" />
+        <img src="/images/logo.svg" alt="Hoops Germany" className="mx-auto h-auto w-40 sm:w-48" />
       </Link>
       {children}
     </main>
@@ -51,7 +51,7 @@ function OauthLandingInner() {
       <Rahmen>
         <div className="w-full max-w-sm space-y-4">
           <FormAlert>{error}</FormAlert>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-mist-400">
             Wir leiten dich gleich automatisch weiter.
           </p>
           <Button href="/login" className="w-full">

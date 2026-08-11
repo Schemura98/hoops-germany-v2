@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import { FaCheck, FaTimes, FaUserFriends } from "react-icons/fa";
+import { PiCheckBold, PiXBold, PiUsersThreeBold } from "react-icons/pi";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import { positionLabel } from "@/lib/constants";
 import Loading from "@/components/ui/Loading";
@@ -60,21 +60,21 @@ export default function AnfragenTab() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-gray-900">
+      <h2 className="text-lg font-semibold text-paper-50">
         Beitrittsanfragen{" "}
-        <span className="text-sm font-normal text-gray-500">· {requests.length}</span>
+        <span className="text-sm font-normal text-mist-400">· {requests.length}</span>
       </h2>
 
       <TabAlert msg={msg} />
 
       {requests.length === 0 ? (
         <EmptyState
-          icon={FaUserFriends}
+          icon={PiUsersThreeBold}
           title="Keine offenen Anfragen"
           text="Spieler können dein Team über das öffentliche Profil anfragen."
         />
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-100">
+        <div className="bg-ink-800 rounded-md border border-ink-600 divide-y divide-ink-600">
           {requests.map((p) => {
             const initials =
               `${p.firstName?.[0] || ""}${p.lastName?.[0] || ""}`.toUpperCase();
@@ -90,15 +90,15 @@ export default function AnfragenTab() {
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   ) : (
-                    <span className="h-10 w-10 rounded-full bg-brand-100 text-brand-700 text-sm font-semibold flex items-center justify-center">
+                    <span className="h-10 w-10 rounded-full bg-brand-500/15 text-brand-400 text-sm font-semibold flex items-center justify-center">
                       {initials || "?"}
                     </span>
                   )}
                   <div className="min-w-0">
-                    <p className="font-medium text-gray-900 truncate">
+                    <p className="font-medium text-paper-50 truncate">
                       {p.firstName} {p.lastName}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-mist-400">
                       {positionLabel(p.position) || "Position offen"}
                       {p.nationality ? ` · ${p.nationality}` : ""}
                     </p>
@@ -109,16 +109,16 @@ export default function AnfragenTab() {
                   <button
                     onClick={() => handle(p._id, "approve")}
                     disabled={isBusy}
-                    className="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white rounded-lg px-3 py-1.5 text-xs font-medium"
+                    className="inline-flex items-center gap-1.5 bg-signal-ok hover:brightness-110 disabled:opacity-60 text-paper-50 rounded-sm px-3 py-1.5 text-xs font-medium"
                   >
-                    <FaCheck /> Annehmen
+                    <PiCheckBold /> Annehmen
                   </button>
                   <button
                     onClick={() => handle(p._id, "reject")}
                     disabled={isBusy}
-                    className="inline-flex items-center gap-1.5 border border-gray-300 hover:border-red-400 text-gray-600 hover:text-red-600 rounded-lg px-3 py-1.5 text-xs font-medium disabled:opacity-60"
+                    className="inline-flex items-center gap-1.5 border border-ink-600 hover:border-signal-error text-mist-400 hover:text-signal-error rounded-sm px-3 py-1.5 text-xs font-medium disabled:opacity-60"
                   >
-                    <FaTimes /> Ablehnen
+                    <PiXBold /> Ablehnen
                   </button>
                 </div>
               </div>

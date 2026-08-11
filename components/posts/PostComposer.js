@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaImage, FaTimes, FaYoutube } from "react-icons/fa";
+import { PiImageBold, PiXBold, PiYoutubeLogoBold } from "react-icons/pi";
 import { getPlayerToken } from "@/lib/clientAuth";
 import ImageUpload from "@/components/ImageUpload";
 import Avatar from "./Avatar";
@@ -66,7 +66,7 @@ export default function PostComposer({ player, onCreated }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+    <div className="bg-ink-800 rounded-md border border-ink-600 p-4">
       <div className="flex gap-3">
         {asTeam && team ? (
           <BaseAvatar name={team.teamName} src={team.logo} square />
@@ -76,12 +76,12 @@ export default function PostComposer({ player, onCreated }) {
         <div className="flex-1">
           {/* Autorenwahl (nur Team-Admins) */}
           {team && (
-            <div className="mb-2 inline-flex rounded-lg bg-gray-100 p-0.5 text-sm">
+            <div className="mb-2 inline-flex rounded-sm bg-ink-700 p-0.5 text-sm">
               <button
                 type="button"
                 onClick={() => setAsTeam(false)}
                 className={`px-3 py-1 rounded-md font-medium transition-colors ${
-                  !asTeam ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
+                  !asTeam ? "bg-ink-800 text-paper-50" : "text-mist-400"
                 }`}
               >
                 Als Spieler
@@ -90,7 +90,7 @@ export default function PostComposer({ player, onCreated }) {
                 type="button"
                 onClick={() => setAsTeam(true)}
                 className={`px-3 py-1 rounded-md font-medium transition-colors ${
-                  asTeam ? "bg-white text-brand-600 shadow-sm" : "text-gray-500"
+                  asTeam ? "bg-ink-800 text-brand-400" : "text-mist-400"
                 }`}
               >
                 Als {team.teamName}
@@ -105,22 +105,22 @@ export default function PostComposer({ player, onCreated }) {
               asTeam ? "Neuigkeit vom Verein teilen…" : "Was gibt's Neues? Tippe @ für Erwähnungen"
             }
             rows={2}
-            className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+            className="w-full resize-none rounded-sm border border-ink-600 px-3 py-2 text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
           />
 
           {/* Kurzer Hinweis auf die Post-Funktionen (dezent, immer sichtbar). */}
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-mist-400">
             <span>
-              <b className="font-semibold text-gray-500">@</b> erwähnt Spieler
+              <b className="font-semibold text-mist-400">@</b> erwähnt Spieler
             </span>
             <span>
-              <b className="font-semibold text-gray-500">#</b> Hashtag
+              <b className="font-semibold text-mist-400">#</b> Hashtag
             </span>
             <span className="inline-flex items-center gap-1">
-              <FaYoutube className="text-[11px]" /> Links &amp; YouTube werden als Vorschau eingebettet
+              <PiYoutubeLogoBold className="text-[11px]" /> Links &amp; YouTube werden als Vorschau eingebettet
             </span>
             <span className="inline-flex items-center gap-1">
-              <FaImage className="text-[10px]" /> Foto anhängen
+              <PiImageBold className="text-[10px]" /> Foto anhängen
             </span>
           </div>
 
@@ -139,30 +139,30 @@ export default function PostComposer({ player, onCreated }) {
                 <button
                   type="button"
                   onClick={clearImage}
-                  className="mt-2 inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-red-600"
+                  className="mt-2 inline-flex items-center gap-1.5 text-xs text-mist-400 hover:text-signal-error"
                 >
-                  <FaTimes /> Bild entfernen
+                  <PiXBold /> Bild entfernen
                 </button>
               )}
             </div>
           )}
 
-          {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+          {error && <p className="mt-2 text-sm text-signal-error">{error}</p>}
 
           <div className="mt-2 flex items-center justify-between">
             <button
               type="button"
               onClick={() => setShowImage((v) => !v)}
               className={`inline-flex items-center gap-1.5 text-sm ${
-                showImage ? "text-brand-600" : "text-gray-500 hover:text-brand-600"
+                showImage ? "text-brand-400" : "text-mist-400 hover:text-brand-400"
               }`}
             >
-              <FaImage /> Bild
+              <PiImageBold /> Bild
             </button>
             <button
               onClick={submit}
               disabled={posting || (!content.trim() && !image.trim())}
-              className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-5 py-2 text-sm font-medium transition-colors"
+              className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-5 py-2 text-sm font-medium transition-colors"
             >
               {posting ? "Posten…" : "Posten"}
             </button>

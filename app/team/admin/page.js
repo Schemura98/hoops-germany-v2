@@ -2,14 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  FaUsers,
-  FaUserPlus,
-  FaCalendarAlt,
-  FaClipboardList,
-  FaBullhorn,
-  FaCog,
-  FaBasketballBall,
-} from "react-icons/fa";
+  PiUsersBold,
+  PiUserPlusBold,
+  PiCalendarBlankBold,
+  PiClipboardTextBold,
+  PiMegaphoneBold,
+  PiGearBold,
+  PiBasketballBold,
+} from "react-icons/pi";
 import { useCurrentTeam } from "@/lib/useCurrentTeam";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { hasTeamPermission, TAB_PERMISSION } from "@/lib/teamPermissions";
@@ -25,12 +25,12 @@ import TryoutsTab from "@/components/team/tabs/TryoutsTab";
 import EinstellungenTab from "@/components/team/tabs/EinstellungenTab";
 
 const TABS = [
-  { key: "kader", label: "Kader", icon: FaUsers, Comp: KaderTab },
-  { key: "anfragen", label: "Anfragen", icon: FaUserPlus, Comp: AnfragenTab },
-  { key: "spielplan", label: "Spielplan", icon: FaCalendarAlt, Comp: SpielplanTab },
-  { key: "ergebnisse", label: "Ergebnisse", icon: FaClipboardList, Comp: ErgebnisseTab },
-  { key: "tryouts", label: "Tryouts", icon: FaBullhorn, Comp: TryoutsTab },
-  { key: "einstellungen", label: "Einstellungen", icon: FaCog, Comp: EinstellungenTab },
+  { key: "kader", label: "Kader", icon: PiUsersBold, Comp: KaderTab },
+  { key: "anfragen", label: "Anfragen", icon: PiUserPlusBold, Comp: AnfragenTab },
+  { key: "spielplan", label: "Spielplan", icon: PiCalendarBlankBold, Comp: SpielplanTab },
+  { key: "ergebnisse", label: "Ergebnisse", icon: PiClipboardTextBold, Comp: ErgebnisseTab },
+  { key: "tryouts", label: "Tryouts", icon: PiMegaphoneBold, Comp: TryoutsTab },
+  { key: "einstellungen", label: "Einstellungen", icon: PiGearBold, Comp: EinstellungenTab },
 ];
 
 export default function TeamAdminPage() {
@@ -86,7 +86,7 @@ export default function TeamAdminPage() {
   if (status === "error") {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
-        <p className="text-gray-700">Team-Daten konnten nicht geladen werden.</p>
+        <p className="text-mist-300">Team-Daten konnten nicht geladen werden.</p>
         <Button onClick={() => window.location.reload()} className="mt-4">
           Erneut versuchen
         </Button>
@@ -97,22 +97,22 @@ export default function TeamAdminPage() {
   const ActiveComp = TABS.find((t) => t.key === active)?.Comp || KaderTab;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-ink-950">
       <TeamNav team={team} />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Team-Verwaltung</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="font-display uppercase tracking-tight text-2xl font-black text-paper-50">Team-Verwaltung</h1>
+          <p className="text-sm text-mist-400">
             {team?.teamName}
             {team?.region ? ` · ${team.region}` : ""}
           </p>
         </div>
 
         {team?.approved === false && (
-          <div className="mb-6 rounded-2xl bg-amber-50 border border-amber-200 p-4">
-            <p className="text-sm font-semibold text-amber-800">⏳ Dein Team wird gerade geprüft</p>
-            <p className="text-sm text-amber-700 mt-1">
+          <div className="mb-6 rounded-md bg-signal-wait/10 border border-signal-wait/50 p-4">
+            <p className="text-sm font-semibold text-signal-wait">⏳ Dein Team wird gerade geprüft</p>
+            <p className="text-sm text-signal-wait mt-1">
               Du kannst dein Team schon einrichten (Kader, Logo, Spiele vorbereiten). Öffentlich
               sichtbar wird es, sobald ein Administrator es freigegeben hat – du bekommst dann eine
               Benachrichtigung.
@@ -121,7 +121,7 @@ export default function TeamAdminPage() {
         )}
 
         {/* Tab-Navigation (einheitlicher Pill-Stil; Refs für Auto-Scroll/Deeplink bleiben) */}
-        <div ref={tabBarRef} className="relative flex gap-1 overflow-x-auto bg-gray-100 rounded-xl p-1 mb-6">
+        <div ref={tabBarRef} className="relative flex gap-1 overflow-x-auto bg-ink-700 rounded-md p-1 mb-6">
           {visibleTabs.map((t) => {
             const Icon = t.icon;
             const isActive = t.key === active;
@@ -132,10 +132,10 @@ export default function TeamAdminPage() {
                   tabRefs.current[t.key] = el;
                 }}
                 onClick={() => setActive(t.key)}
-                className={`flex items-center gap-1.5 whitespace-nowrap px-3 sm:px-4 py-1.5 rounded-lg text-sm font-medium transition ${
+                className={`flex items-center gap-1.5 whitespace-nowrap px-3 sm:px-4 py-1.5 rounded-sm text-sm font-medium transition ${
                   isActive
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-500 hover:text-gray-800"
+                    ? "bg-ink-800 text-paper-50"
+                    : "text-mist-400 hover:text-paper-50"
                 }`}
               >
                 <Icon className="text-xs" />

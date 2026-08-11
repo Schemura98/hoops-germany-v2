@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { FaCheck, FaTrophy, FaBell, FaTimes } from "react-icons/fa";
+import { PiCheckBold, PiTrophyBold, PiBellBold, PiXBold } from "react-icons/pi";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import {
   BUNDESLAENDER,
@@ -11,7 +11,7 @@ import {
   ALL_ROLES,
   bezirkOfKreis,
 } from "@/lib/constants";
-import { FaUserPlus } from "react-icons/fa";
+import { PiUserPlusBold } from "react-icons/pi";
 import ImageUpload from "@/components/ImageUpload";
 import CityInput from "@/components/CityInput";
 import LeagueReportLink from "@/components/team/LeagueReportLink";
@@ -24,17 +24,17 @@ import { inputClass } from "@/lib/ui";
 function Field({ label, hint, required = false, optional = false, children }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label className="block text-sm font-medium text-mist-300 mb-1">
         {label}
         {required && (
-          <span className="text-brand-600" aria-hidden="true">
+          <span className="text-brand-400" aria-hidden="true">
             {" *"}
           </span>
         )}
-        {optional && <span className="font-normal text-gray-500"> (optional)</span>}
+        {optional && <span className="font-normal text-mist-400"> (optional)</span>}
       </label>
       {children}
-      {hint && <p className="mt-1 text-xs text-gray-500">{hint}</p>}
+      {hint && <p className="mt-1 text-xs text-mist-400">{hint}</p>}
     </div>
   );
 }
@@ -291,7 +291,7 @@ export default function EinstellungenTab({ team, reload }) {
       {/* Sprungmarken – die Seite ist mobil sehr lang */}
       <nav
         aria-label="Bereiche"
-        className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl bg-gray-50 border border-gray-100 px-4 py-2.5 text-sm"
+        className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md bg-ink-950 border border-ink-600 px-4 py-2.5 text-sm"
       >
         {[
           { href: "#team-daten", label: "Team-Daten" },
@@ -300,10 +300,10 @@ export default function EinstellungenTab({ team, reload }) {
           { href: "#benachrichtigungen", label: "Benachrichtigungen" },
         ].map((l, i, arr) => (
           <span key={l.href} className="flex items-center gap-x-2">
-            <a href={l.href} className="font-medium text-gray-600 hover:text-brand-600">
+            <a href={l.href} className="font-medium text-mist-400 hover:text-brand-400">
               {l.label}
             </a>
-            {i < arr.length - 1 && <span className="text-gray-300">·</span>}
+            {i < arr.length - 1 && <span className="text-ink-500">·</span>}
           </span>
         ))}
       </nav>
@@ -314,9 +314,9 @@ export default function EinstellungenTab({ team, reload }) {
       <form
         id="team-daten"
         onSubmit={onSave}
-        className="scroll-mt-24 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5"
+        className="scroll-mt-24 bg-ink-800 rounded-md border border-ink-600 p-6 space-y-5"
       >
-        <h2 className="text-lg font-semibold text-gray-900">Team-Daten</h2>
+        <h2 className="text-lg font-semibold text-paper-50">Team-Daten</h2>
 
         <div className="grid sm:grid-cols-2 gap-4">
           <Field label="Teamname" required>
@@ -403,21 +403,21 @@ export default function EinstellungenTab({ team, reload }) {
       </form>
 
       {/* Liga */}
-      <div id="liga" className="scroll-mt-24 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+      <div id="liga" className="scroll-mt-24 bg-ink-800 rounded-md border border-ink-600 p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <FaTrophy className="text-brand-500" />
-          <h2 className="text-lg font-semibold text-gray-900">Liga</h2>
+          <PiTrophyBold className="text-brand-400" />
+          <h2 className="text-lg font-semibold text-paper-50">Liga</h2>
         </div>
 
         {/* Aktuelle Liga – SCHREIBGESCHÜTZT. Ändert sich nur nach Super-Admin-Freigabe. */}
-        <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+        <div className="rounded-md border border-ink-600 bg-ink-950 p-4">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-mist-400">
             Aktuelle Liga
           </p>
           {currentLeague ? (
             <div className="space-y-0.5 text-sm">
-              <p className="font-semibold text-gray-900">{currentLeague.name}</p>
-              <p className="text-gray-500">
+              <p className="font-semibold text-paper-50">{currentLeague.name}</p>
+              <p className="text-mist-400">
                 {[
                   currentLeague.season ? `Saison ${currentLeague.season}` : null,
                   currentLeague.ageGroup,
@@ -428,12 +428,12 @@ export default function EinstellungenTab({ team, reload }) {
                   .filter(Boolean)
                   .join(" · ")}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-mist-400">
                 Status: {currentLeague.finished ? "Abgeschlossen" : currentLeague.active ? "Aktiv" : "Inaktiv"}
               </p>
             </div>
           ) : (
-            <p className="text-sm text-gray-500">Noch keine Liga zugeordnet.</p>
+            <p className="text-sm text-mist-400">Noch keine Liga zugeordnet.</p>
           )}
         </div>
 
@@ -441,28 +441,28 @@ export default function EinstellungenTab({ team, reload }) {
 
         {requestsLoading ? null : pendingRequest ? (
           /* Offene Anfrage – kein neues Formular, solange diese läuft. */
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
+          <div className="rounded-md border border-signal-wait/50 bg-signal-wait/10 p-4 space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-signal-wait">
               Ligazuordnung ausstehend
             </p>
-            <p className="text-sm text-gray-800">
+            <p className="text-sm text-paper-50">
               Angefragt: <strong>{pendingRequest.requestedLeagueId?.name}</strong>
               {pendingRequest.requestedLeagueId?.season ? ` · Saison ${pendingRequest.requestedLeagueId.season}` : ""}
             </p>
-            <p className="text-xs text-gray-500">Ein Super-Admin prüft die Anfrage.</p>
+            <p className="text-xs text-mist-400">Ein Super-Admin prüft die Anfrage.</p>
             <button
               type="button"
               onClick={() => onCancelRequest(pendingRequest._id)}
               disabled={cancelingId === pendingRequest._id}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-signal-error hover:text-signal-error disabled:opacity-60"
             >
-              <FaTimes className="text-[10px]" />
+              <PiXBold className="text-[10px]" />
               {cancelingId === pendingRequest._id ? "Storniere…" : "Anfrage stornieren"}
             </button>
           </div>
         ) : (
           <>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-mist-400">
               Ligazuordnung ändern? Wähle die gewünschte Liga aus dem offiziellen Katalog –
               ein Super-Admin prüft die Anfrage, bevor sie wirksam wird.
             </p>
@@ -590,21 +590,21 @@ export default function EinstellungenTab({ team, reload }) {
         )}
 
         {historyRequests.length > 0 && (
-          <div className="pt-2 border-t border-gray-100">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <div className="pt-2 border-t border-ink-600">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-mist-400">
               Letzte Anfragen
             </p>
             <ul className="space-y-1.5">
               {historyRequests.map((r) => (
-                <li key={r._id} className="flex items-center justify-between gap-3 text-xs text-gray-500">
+                <li key={r._id} className="flex items-center justify-between gap-3 text-xs text-mist-400">
                   <span className="truncate">{r.requestedLeagueId?.name || "Liga"}</span>
                   <span
                     className={`shrink-0 rounded-full px-2 py-0.5 font-medium ${
                       r.status === "genehmigt"
-                        ? "bg-green-50 text-green-700"
+                        ? "bg-signal-ok/10 text-signal-ok"
                         : r.status === "abgelehnt"
-                        ? "bg-red-50 text-red-700"
-                        : "bg-gray-100 text-gray-600"
+                        ? "bg-signal-error/10 text-signal-error"
+                        : "bg-ink-700 text-mist-400"
                     }`}
                   >
                     {r.status}
@@ -617,10 +617,10 @@ export default function EinstellungenTab({ team, reload }) {
       </div>
 
       {/* Verstärkung suchen (Scouting) */}
-      <div id="verstaerkung" className="scroll-mt-24 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+      <div id="verstaerkung" className="scroll-mt-24 bg-ink-800 rounded-md border border-ink-600 p-6 space-y-4">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <FaUserPlus className="text-brand-500" /> Verstärkung suchen
+          <h2 className="text-lg font-semibold text-paper-50 flex items-center gap-2">
+            <PiUserPlusBold className="text-brand-400" /> Verstärkung suchen
           </h2>
           <button
             type="button"
@@ -633,17 +633,17 @@ export default function EinstellungenTab({ team, reload }) {
             role="switch"
             aria-checked={recruiting}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${
-              recruiting ? "bg-brand-500" : "bg-gray-300"
+              recruiting ? "bg-brand-500" : "bg-ink-600"
             }`}
           >
             <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+              className={`inline-block h-4 w-4 transform rounded-full bg-ink-800 transition-transform ${
                 recruiting ? "translate-x-6" : "translate-x-1"
               }`}
             />
           </button>
         </div>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-mist-400">
           {recruiting
             ? 'Dein Team erscheint im Transfermarkt-Tab „Vereine suchen Spieler".'
             : "Aktiviere den Schalter, um dein Team im Transfermarkt als suchend zu listen."}
@@ -654,7 +654,7 @@ export default function EinstellungenTab({ team, reload }) {
         {recruiting && (
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-2">
+              <label className="block text-xs font-medium text-mist-400 mb-2">
                 Gesuchte Positionen / Rollen
               </label>
               <div className="flex flex-wrap gap-2">
@@ -667,8 +667,8 @@ export default function EinstellungenTab({ team, reload }) {
                       onClick={() => toggleRecruitPos(p)}
                       className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                         active
-                          ? "bg-brand-500 text-white border-brand-500"
-                          : "bg-white text-gray-600 border-gray-200 hover:border-brand-300"
+                          ? "bg-brand-500 text-ink-950 border-brand-500"
+                          : "bg-ink-800 text-mist-400 border-ink-600 hover:border-brand-300"
                       }`}
                     >
                       {p}
@@ -702,15 +702,15 @@ export default function EinstellungenTab({ team, reload }) {
       </div>
 
       {/* Benachrichtigungen */}
-      <div id="benachrichtigungen" className="scroll-mt-24 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-3">
+      <div id="benachrichtigungen" className="scroll-mt-24 bg-ink-800 rounded-md border border-ink-600 p-6 space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <FaBell className="text-brand-500" /> Benachrichtigungen
+          <h2 className="text-lg font-semibold text-paper-50 flex items-center gap-2">
+            <PiBellBold className="text-brand-400" /> Benachrichtigungen
           </h2>
           <div className="flex items-center gap-2">
             {notifySaved && (
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600">
-                <FaCheck className="text-[10px]" /> Gespeichert
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-signal-ok">
+                <PiCheckBold className="text-[10px]" /> Gespeichert
               </span>
             )}
             <button
@@ -724,18 +724,18 @@ export default function EinstellungenTab({ team, reload }) {
               role="switch"
               aria-checked={notifyAllAdmins}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${
-                notifyAllAdmins ? "bg-brand-500" : "bg-gray-300"
+                notifyAllAdmins ? "bg-brand-500" : "bg-ink-600"
               }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                className={`inline-block h-4 w-4 transform rounded-full bg-ink-800 transition-transform ${
                   notifyAllAdmins ? "translate-x-6" : "translate-x-1"
                 }`}
               />
             </button>
           </div>
         </div>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-mist-400">
           {notifyAllAdmins
             ? "Bei Beitritten und Anfragen werden alle Team-Admins (Haupt-Admin + Co-Admins) benachrichtigt."
             : "Bei Beitritten und Anfragen wird nur der Haupt-Admin benachrichtigt. Aktiviere den Schalter, um alle Team-Admins zu benachrichtigen."}
@@ -744,11 +744,11 @@ export default function EinstellungenTab({ team, reload }) {
       </div>
 
       {/* Einladungslink – wird zentral im Kader-Tab verwaltet (ein Token, keine Dopplung) */}
-      <p className="text-center text-xs text-gray-400">
+      <p className="text-center text-xs text-mist-600">
         Den Team-Einladungslink verwaltest du im{" "}
         <a
           href="/team/admin?tab=kader"
-          className="font-medium text-brand-600 hover:text-brand-700 underline underline-offset-2"
+          className="font-medium text-brand-400 hover:text-brand-400 underline underline-offset-2"
         >
           Kader-Tab
         </a>

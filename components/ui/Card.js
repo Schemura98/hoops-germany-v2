@@ -1,12 +1,18 @@
-// Einheitliche Karte: weiße Fläche, rounded-2xl, dezenter Rahmen + Schatten.
-// padding: Tailwind-Padding-Klasse (Default p-5). hover: dezenter Hover-Effekt
-// (Schatten/Rahmen + leichtes Anheben, gleiche Kurve wie Teams/Ligen/Spiele-Karten).
+// Einheitliche Karte („Panel" der Richtung Anzeigetafel): ink-800-Fläche auf
+// ink-950-Grund, 1px Rahmen in ink-600, kein Schatten. Tiefe entsteht durch die
+// Flächenstufe, nicht durch Weichzeichnung – Schatten auf dunklem Grund sind
+// ohnehin unsichtbar und kosten nur Rendering.
+// padding: Tailwind-Padding-Klasse (Default p-5).
+// hover: Rahmen zieht auf Brand an, Fläche hellt eine Stufe auf.
 export default function Card({ className = "", padding = "p-5", hover = false, children, ...props }) {
   return (
     <div
-      className={`rounded-2xl border border-gray-100 bg-white shadow-sm ${padding} ${
+      className={`rounded-md border border-ink-600 bg-ink-800 ${padding} ${
         hover
-          ? "transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:shadow-md hover:border-brand-200 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
+          ? // Kein Anheben mehr: Das war die Material-Design-Standardgeste. Auf
+            // dem dunklen Panel-Grund liest sich „heller werden" wie ein
+            // angehendes Licht – näher am Bild der Anzeigetafel.
+            "transition-[background-color,border-color] duration-200 ease-out-strong hover:border-brand-500 hover:bg-ink-700"
           : ""
       } ${className}`}
       {...props}

@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
-import { FaGoogle } from "react-icons/fa";
+import { PiGoogleLogoBold } from "react-icons/pi";
 import { setPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
 import AuthShell from "@/components/layout/AuthShell";
 import Button from "@/components/ui/Button";
@@ -93,7 +93,7 @@ function SignupForm() {
       footer={
         <>
           Bereits ein Konto?{" "}
-          <Link href="/login" className="text-brand-600 font-medium hover:underline">
+          <Link href="/login" className="text-brand-400 font-medium hover:underline">
             Jetzt anmelden
           </Link>
         </>
@@ -104,7 +104,7 @@ function SignupForm() {
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Vorname</label>
+            <label className="block text-sm font-medium text-mist-300 mb-1">Vorname</label>
             <input
               name="firstName"
               autoComplete="given-name"
@@ -116,7 +116,7 @@ function SignupForm() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nachname</label>
+            <label className="block text-sm font-medium text-mist-300 mb-1">Nachname</label>
             <input
               name="lastName"
               autoComplete="family-name"
@@ -130,7 +130,7 @@ function SignupForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">E-Mail</label>
+          <label className="block text-sm font-medium text-mist-300 mb-1">E-Mail</label>
           <input
             type="email"
             name="email"
@@ -144,7 +144,7 @@ function SignupForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Passwort</label>
+          <label className="block text-sm font-medium text-mist-300 mb-1">Passwort</label>
           <input
             type="password"
             name="password"
@@ -158,7 +158,7 @@ function SignupForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-mist-300 mb-1">
             Passwort bestätigen
           </label>
           <input
@@ -179,16 +179,16 @@ function SignupForm() {
       </form>
 
       <div className="my-6 flex items-center gap-3">
-        <div className="h-px flex-1 bg-gray-200" />
-        <span className="text-xs text-gray-500">oder</span>
-        <div className="h-px flex-1 bg-gray-200" />
+        <div className="h-px flex-1 bg-ink-700" />
+        <span className="text-xs text-mist-400">oder</span>
+        <div className="h-px flex-1 bg-ink-700" />
       </div>
 
       <a
         href={googleHref}
-        className="w-full flex items-center justify-center gap-2 border border-gray-300 hover:border-brand-500 text-gray-700 rounded-lg px-4 py-2.5 font-medium transition-colors"
+        className="w-full flex items-center justify-center gap-2 border border-ink-600 hover:border-brand-500 text-mist-300 rounded-sm px-4 py-2.5 font-medium transition-colors"
       >
-        <FaGoogle className="text-brand-500" />
+        <PiGoogleLogoBold className="text-brand-400" />
         Mit Google registrieren
       </a>
     </AuthShell>

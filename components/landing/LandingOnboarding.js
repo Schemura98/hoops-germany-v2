@@ -28,7 +28,7 @@ export default function LandingOnboarding() {
   if (!player) return null;
 
   return (
-    <section className="bg-gray-50 px-4 pt-8">
+    <section className="bg-ink-950 px-4 pt-8">
       <div className="max-w-6xl mx-auto">
         <OnboardingChecklist player={player} />
       </div>

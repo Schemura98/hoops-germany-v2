@@ -1,6 +1,6 @@
 "use client";
 
-import { FaBasketballBall } from "react-icons/fa";
+import { PiBasketballBold } from "react-icons/pi";
 import { useCurrentAdmin } from "@/lib/useCurrentAdmin";
 import AdminNav from "@/components/layout/AdminNav";
 
@@ -10,19 +10,19 @@ export default function AdminShell({ title, children }) {
 
   if (status === "loading") {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-50">
-        <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
+      <main className="min-h-screen flex items-center justify-center bg-ink-950">
+        <PiBasketballBold className="text-brand-400 text-3xl animate-bounce" />
       </main>
     );
   }
 
   if (status === "error") {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-8 text-center">
-        <p className="text-gray-700">Konnte nicht geladen werden.</p>
+      <main className="min-h-screen flex flex-col items-center justify-center bg-ink-950 p-8 text-center">
+        <p className="text-mist-300">Konnte nicht geladen werden.</p>
         <button
           onClick={() => window.location.reload()}
-          className="mt-4 bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2 font-medium"
+          className="mt-4 bg-brand-500 hover:bg-brand-400 text-ink-950 rounded-sm px-4 py-2 font-medium"
         >
           Erneut versuchen
         </button>
@@ -31,10 +31,10 @@ export default function AdminShell({ title, children }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-ink-950">
       <AdminNav />
       <main className="max-w-5xl mx-auto px-4 py-8">
-        {title && <h1 className="text-2xl font-bold text-gray-900 mb-6">{title}</h1>}
+        {title && <h1 className="font-display uppercase tracking-tight text-2xl font-black text-paper-50 mb-6">{title}</h1>}
         {children}
       </main>
     </div>

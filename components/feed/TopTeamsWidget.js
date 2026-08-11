@@ -3,18 +3,18 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaTrophy } from "react-icons/fa";
+import { PiTrophyBold } from "react-icons/pi";
 import Avatar from "@/components/Avatar";
 import { BUNDESLAENDER } from "@/lib/constants";
 
 const selectClass =
-  "rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs text-gray-700 outline-none focus:border-brand-500";
+  "rounded-sm border border-ink-600 bg-ink-800 px-2 py-1 text-xs text-mist-300 outline-none focus:border-brand-500";
 
 function rankColor(i) {
-  if (i === 0) return "text-amber-500";
-  if (i === 1) return "text-gray-500";
+  if (i === 0) return "text-signal-wait";
+  if (i === 1) return "text-mist-400";
   if (i === 2) return "text-brand-400";
-  return "text-gray-300";
+  return "text-mist-400";
 }
 
 export default function TopTeamsWidget() {
@@ -58,9 +58,9 @@ export default function TopTeamsWidget() {
   }, [standings, bundesland]);
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-      <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-        <FaTrophy className="text-brand-500" /> Top-Teams
+    <div className="bg-ink-800 rounded-md border border-ink-600 p-4">
+      <h3 className="text-sm font-bold text-paper-50 flex items-center gap-2">
+        <PiTrophyBold className="text-brand-400" /> Top-Teams
       </h3>
 
       {/* Filter */}
@@ -99,9 +99,9 @@ export default function TopTeamsWidget() {
       {/* Rangliste (gedeckelte Höhe + interner Scroll) */}
       <div className="mt-3 max-h-80 overflow-y-auto -mr-1 pr-1">
         {loading ? (
-          <p className="text-xs text-gray-500 py-4">Lädt…</p>
+          <p className="text-xs text-mist-400 py-4">Lädt…</p>
         ) : rows.length === 0 ? (
-          <p className="text-xs text-gray-500 py-4">
+          <p className="text-xs text-mist-400 py-4">
             Noch keine Ergebnisse für diese Auswahl.
           </p>
         ) : (
@@ -110,7 +110,7 @@ export default function TopTeamsWidget() {
               <li key={t.teamId}>
                 <Link
                   href={`/team/team-detail/${t.slug}`}
-                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-ink-700 transition-colors"
                 >
                   <span className={`w-4 text-center text-sm font-bold ${rankColor(i)}`}>
                     {i + 1}
@@ -122,10 +122,10 @@ export default function TopTeamsWidget() {
                     textClass="text-[9px]"
                     square
                   />
-                  <span className="flex-1 truncate text-sm text-gray-800">
+                  <span className="flex-1 truncate text-sm text-paper-50">
                     {t.teamName}
                   </span>
-                  <span className="text-xs font-medium text-gray-500 tabular-nums whitespace-nowrap">
+                  <span className="text-xs font-medium text-mist-400 tabular-nums whitespace-nowrap">
                     {t.wins}-{t.losses}
                   </span>
                 </Link>
@@ -138,7 +138,7 @@ export default function TopTeamsWidget() {
       {!loading && rows.length > 0 && (
         <Link
           href="/rangliste"
-          className="mt-2 block text-center text-xs font-medium text-brand-600 hover:text-brand-700"
+          className="mt-2 block text-center text-xs font-medium text-brand-400 hover:text-brand-400"
         >
           Komplette Rangliste
         </Link>

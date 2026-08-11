@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaPlus, FaUserFriends } from "react-icons/fa";
+import { PiPlusBold, PiUsersThreeBold } from "react-icons/pi";
 import { getPlayerToken } from "@/lib/clientAuth";
 import BaseAvatar from "@/components/Avatar";
 
@@ -83,9 +83,9 @@ export default function FollowSuggestions() {
   if (!loaded || items.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-      <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-3">
-        <FaUserFriends className="text-brand-500" /> Vorschläge für dich
+    <div className="bg-ink-800 rounded-md border border-ink-600 p-4">
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-paper-50 mb-3">
+        <PiUsersThreeBold className="text-brand-400" /> Vorschläge für dich
       </h3>
       <ul className="space-y-2">
         {items.map((item) => (
@@ -101,20 +101,20 @@ export default function FollowSuggestions() {
             <div className="min-w-0 flex-1">
               <Link
                 href={item.href}
-                className="block truncate text-sm font-medium text-gray-900 hover:text-brand-600"
+                className="block truncate text-sm font-medium text-paper-50 hover:text-brand-400"
               >
                 {item.name}
               </Link>
-              <p className="truncate text-xs text-gray-500">
+              <p className="truncate text-xs text-mist-400">
                 {item.type === "team" ? "Verein" : "Spieler"}
                 {item.subtitle ? ` · ${item.subtitle}` : ""}
               </p>
             </div>
             <button
               onClick={() => follow(item)}
-              className="inline-flex items-center gap-1.5 flex-shrink-0 bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
+              className="inline-flex items-center gap-1.5 flex-shrink-0 bg-brand-500 hover:bg-brand-400 text-ink-950 rounded-sm px-3 py-1.5 text-xs font-medium transition-colors"
             >
-              <FaPlus className="text-[10px]" /> Folgen
+              <PiPlusBold className="text-[10px]" /> Folgen
             </button>
           </li>
         ))}

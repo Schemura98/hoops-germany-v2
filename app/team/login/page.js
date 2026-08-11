@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getPlayerToken } from "@/lib/clientAuth";
-import { FaBasketballBall } from "react-icons/fa";
+import { PiBasketballBold } from "react-icons/pi";
 
 // Team-Login wurde entfernt: Teams sind spieler-geführt.
 // Eingeloggte Spieler → Team-Admin/-Gründung, sonst Spieler-Login.
@@ -14,7 +14,7 @@ export default function TeamLoginRedirect() {
   }, [router]);
   return (
     <main className="min-h-screen flex items-center justify-center">
-      <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
+      <PiBasketballBold className="text-brand-400 text-3xl animate-bounce" />
     </main>
   );
 }

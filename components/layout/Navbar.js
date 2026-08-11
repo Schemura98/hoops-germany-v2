@@ -5,21 +5,21 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import {
-  FaSearch,
-  FaBell,
-  FaTimes,
-  FaBars,
-  FaUser,
-  FaUsers,
-  FaShieldAlt,
-  FaTrophy,
-  FaBasketballBall,
-  FaCalendarAlt,
-  FaChevronDown,
-  FaRegNewspaper,
-  FaExchangeAlt,
-  FaBullhorn,
-} from "react-icons/fa";
+  PiMagnifyingGlassBold,
+  PiBellBold,
+  PiXBold,
+  PiListBold,
+  PiUserBold,
+  PiUsersBold,
+  PiShieldCheckBold,
+  PiTrophyBold,
+  PiBasketballBold,
+  PiCalendarBlankBold,
+  PiCaretDownBold,
+  PiNewspaperClippingBold,
+  PiArrowsLeftRightBold,
+  PiMegaphoneBold,
+} from "react-icons/pi";
 import {
   getPlayerToken,
   clearPlayerToken,
@@ -31,16 +31,18 @@ import { notificationHref } from "@/lib/notifications";
 import Avatar from "@/components/Avatar";
 import Reveal from "@/components/ui/Reveal";
 
-// Öffentliche, login-bewusste Navigation im Navy-Look mit Wortmarken-Logo.
+// Öffentliche, login-bewusste Navigation auf ink-900 mit Wortmarken-Logo.
+// Der aktive Punkt wird durch die 2px-Brand-Leiste markiert – dasselbe Signal
+// wie am aktiven Tab (visuelle Richtung „Anzeigetafel", Abschnitt 4).
 // Saubere Neuimplementierung in v2-Architektur (Original-Design, ohne Altlasten).
 const PUBLIC_LINKS = [
-  { href: "/ligen", label: "Ligen", icon: FaTrophy },
-  { href: "/spiele", label: "Spiele", icon: FaCalendarAlt },
-  { href: "/teams", label: "Teams", icon: FaUsers },
-  { href: "/spieler", label: "Spieler", icon: FaUser },
-  { href: "/transfermarkt", label: "Transfermarkt", icon: FaExchangeAlt },
-  { href: "/tryouts", label: "Tryouts", icon: FaBullhorn },
-  { href: "/topscorer", label: "Topscorer", icon: FaBasketballBall },
+  { href: "/ligen", label: "Ligen", icon: PiTrophyBold },
+  { href: "/spiele", label: "Spiele", icon: PiCalendarBlankBold },
+  { href: "/teams", label: "Teams", icon: PiUsersBold },
+  { href: "/spieler", label: "Spieler", icon: PiUserBold },
+  { href: "/transfermarkt", label: "Transfermarkt", icon: PiArrowsLeftRightBold },
+  { href: "/tryouts", label: "Tryouts", icon: PiMegaphoneBold },
+  { href: "/topscorer", label: "Topscorer", icon: PiBasketballBold },
 ];
 
 export default function Navbar() {
@@ -72,8 +74,8 @@ export default function Navbar() {
   const deskClass = (href) =>
     `text-sm transition-colors border-b-2 pb-0.5 ${
       isActive(href)
-        ? "text-white font-semibold border-brand-500"
-        : "text-gray-300 hover:text-white border-transparent"
+        ? "text-paper-50 font-semibold border-brand-500"
+        : "text-mist-300 hover:text-paper-50 border-transparent"
     }`;
   const deskAdminClass = (href) =>
     `flex items-center gap-1.5 text-sm font-medium border-b-2 pb-0.5 ${
@@ -84,14 +86,14 @@ export default function Navbar() {
   const mobClass = (href) =>
     `flex items-center gap-3 px-5 py-3.5 border-l-4 transition-colors ${
       isActive(href)
-        ? "bg-slate-800 text-white border-brand-500"
-        : "text-white hover:bg-slate-800 border-transparent"
+        ? "bg-ink-800 text-paper-50 border-brand-500"
+        : "text-paper-50 hover:bg-ink-700 border-transparent"
     }`;
   const mobAdminClass = (href) =>
     `flex items-center gap-3 px-5 py-3.5 border-l-4 transition-colors ${
       isActive(href)
-        ? "bg-slate-800 text-brand-300 border-brand-500"
-        : "text-brand-400 hover:bg-slate-800 border-transparent"
+        ? "bg-ink-800 text-brand-300 border-brand-500"
+        : "text-brand-400 hover:bg-ink-700 border-transparent"
     }`;
 
   // Eigenes Profil + Benachrichtigungen laden
@@ -206,7 +208,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 bg-gradient-to-r from-slate-950 to-slate-800 text-white">
+      <nav className="sticky top-0 z-50 bg-ink-900 text-paper-50 border-b border-ink-600">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 h-16">
           {/* Logo */}
           <Link
@@ -238,27 +240,27 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             <button
               onClick={openSearch}
-              className="text-white hover:text-brand-400 transition-colors"
+              className="text-paper-50 hover:text-brand-400 transition-colors"
               aria-label="Suche öffnen"
             >
-              <FaSearch className="w-5 h-5" />
+              <PiMagnifyingGlassBold className="w-5 h-5" />
             </button>
 
             {isLoggedIn && (
               <div className="relative" ref={notifRef}>
                 <button
                   onClick={toggleNotif}
-                  className="relative text-white hover:text-brand-400 transition-colors"
+                  className="relative text-paper-50 hover:text-brand-400 transition-colors"
                   aria-label="Benachrichtigungen"
                 >
-                  <FaBell className="w-5 h-5" />
+                  <PiBellBold className="w-5 h-5" />
                   {unread > 0 && (
                     <Reveal
                       key={unread}
                       as="span"
                       direction="pop"
                       duration={200}
-                      className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center leading-none"
+                      className="absolute -top-1.5 -right-1.5 bg-signal-error text-paper-50 text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center leading-none"
                     >
                       {unread > 9 ? "9+" : unread}
                     </Reveal>
@@ -266,13 +268,13 @@ export default function Navbar() {
                 </button>
 
                 {notifOpen && (
-                  <div className="fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-9 sm:w-80 bg-white rounded-2xl shadow-2xl z-50 overflow-hidden">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <h3 className="font-bold text-gray-900 text-sm">Benachrichtigungen</h3>
+                  <div className="fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-9 sm:w-80 bg-ink-800 border border-ink-600 rounded-md z-50 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-ink-600">
+                      <h3 className="font-bold text-paper-50 text-sm">Benachrichtigungen</h3>
                     </div>
-                    <div className="max-h-80 overflow-y-auto divide-y divide-gray-50">
+                    <div className="max-h-80 overflow-y-auto divide-y divide-ink-600">
                       {notifs.length === 0 ? (
-                        <p className="px-4 py-8 text-center text-gray-500 text-sm">
+                        <p className="px-4 py-8 text-center text-mist-400 text-sm">
                           Keine Benachrichtigungen
                         </p>
                       ) : (
@@ -280,16 +282,16 @@ export default function Navbar() {
                           const href = notificationHref(n, me);
                           const inner = (
                             <div
-                              className={`flex gap-3 px-4 py-3 ${n.read ? "" : "bg-brand-50"} ${
-                                href ? "hover:bg-gray-50 transition-colors" : ""
+                              className={`flex gap-3 px-4 py-3 ${n.read ? "" : "bg-brand-500/10"} ${
+                                href ? "hover:bg-ink-700 transition-colors" : ""
                               }`}
                             >
-                              <span className="h-8 w-8 flex-shrink-0 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
-                                <FaBasketballBall className="text-sm" />
+                              <span className="h-8 w-8 flex-shrink-0 rounded-full bg-brand-500/15 text-brand-400 flex items-center justify-center">
+                                <PiBasketballBold className="text-sm" />
                               </span>
                               <div className="min-w-0">
-                                <p className="text-sm text-gray-800 leading-snug">{n.message}</p>
-                                <p className="text-xs text-gray-500 mt-0.5">{timeAgo(n.createdAt)}</p>
+                                <p className="text-sm text-paper-50 leading-snug">{n.message}</p>
+                                <p className="text-xs text-mist-400 mt-0.5">{timeAgo(n.createdAt)}</p>
                               </div>
                             </div>
                           );
@@ -319,7 +321,7 @@ export default function Navbar() {
                         aria-current={isActive("/admin/dashboard") ? "page" : undefined}
                         className={deskAdminClass("/admin/dashboard")}
                       >
-                        <FaShieldAlt className="w-4 h-4" /> Admin
+                        <PiShieldCheckBold className="w-4 h-4" /> Admin
                       </Link>
                     )}
                     {me?.isTeamAdmin && !me?.isSuperAdmin && (
@@ -328,7 +330,7 @@ export default function Navbar() {
                         aria-current={isActive("/team/admin") ? "page" : undefined}
                         className={deskAdminClass("/team/admin")}
                       >
-                        <FaTrophy className="w-4 h-4" /> Team-Admin
+                        <PiTrophyBold className="w-4 h-4" /> Team-Admin
                       </Link>
                     )}
                     {!me?.isTeamAdmin && !me?.isSuperAdmin && (
@@ -366,7 +368,7 @@ export default function Navbar() {
                     </Link>
                     <button
                       onClick={logout}
-                      className="text-sm text-gray-300 hover:text-white transition-colors"
+                      className="text-sm text-mist-300 hover:text-paper-50 transition-colors"
                     >
                       Abmelden
                     </button>
@@ -382,7 +384,7 @@ export default function Navbar() {
                     </Link>
                     <Link
                       href="/signup"
-                      className="bg-brand-500 hover:bg-brand-600 text-white rounded-full px-4 py-1.5 text-sm font-medium transition-colors"
+                      className="bg-brand-500 hover:bg-brand-400 text-ink-950 rounded-md px-4 py-1.5 text-sm font-semibold transition-colors"
                     >
                       Registrieren
                     </Link>
@@ -394,17 +396,17 @@ export default function Navbar() {
             {/* Mobile-Toggle */}
             <button
               onClick={() => setMobileOpen((v) => !v)}
-              className="lg:hidden text-white hover:text-brand-400 transition-colors"
+              className="lg:hidden text-paper-50 hover:text-brand-400 transition-colors"
               aria-label="Menü öffnen"
             >
-              {mobileOpen ? <FaTimes className="w-5 h-5" /> : <FaBars className="w-5 h-5" />}
+              {mobileOpen ? <PiXBold className="w-5 h-5" /> : <PiListBold className="w-5 h-5" />}
             </button>
           </div>
         </div>
 
         {/* Mobile-Menü */}
         {mobileOpen && (
-          <div className="lg:hidden bg-slate-900 border-t border-slate-700 divide-y divide-slate-700/60">
+          <div className="lg:hidden bg-ink-900 border-t border-ink-600 divide-y divide-ink-600/60">
             {PUBLIC_LINKS.map((l) => {
               const Icon = l.icon;
               return (
@@ -429,7 +431,7 @@ export default function Navbar() {
                     aria-current={isActive(`/team/team-detail/${teamSlug}`) ? "page" : undefined}
                     className={mobClass(`/team/team-detail/${teamSlug}`)}
                   >
-                    <FaBasketballBall className="text-brand-400 w-4 h-4 flex-shrink-0" />
+                    <PiBasketballBold className="text-brand-400 w-4 h-4 flex-shrink-0" />
                     <span className="text-sm font-medium">Mein Team</span>
                   </Link>
                 )}
@@ -439,7 +441,7 @@ export default function Navbar() {
                   aria-current={isActive("/player/newsfeed") ? "page" : undefined}
                   className={mobClass("/player/newsfeed")}
                 >
-                  <FaRegNewspaper className="text-brand-400 w-4 h-4 flex-shrink-0" />
+                  <PiNewspaperClippingBold className="text-brand-400 w-4 h-4 flex-shrink-0" />
                   <span className="text-sm font-medium">Feed</span>
                 </Link>
                 <Link
@@ -448,7 +450,7 @@ export default function Navbar() {
                   aria-current={isActive("/player/player-detail") ? "page" : undefined}
                   className={mobClass("/player/player-detail")}
                 >
-                  <FaUser className="text-brand-400 w-4 h-4 flex-shrink-0" />
+                  <PiUserBold className="text-brand-400 w-4 h-4 flex-shrink-0" />
                   <span className="text-sm font-medium">Mein Profil</span>
                 </Link>
                 {me?.isSuperAdmin && (
@@ -458,7 +460,7 @@ export default function Navbar() {
                     aria-current={isActive("/admin/dashboard") ? "page" : undefined}
                     className={mobAdminClass("/admin/dashboard")}
                   >
-                    <FaShieldAlt className="w-4 h-4 flex-shrink-0" />
+                    <PiShieldCheckBold className="w-4 h-4 flex-shrink-0" />
                     <span className="text-sm font-medium">Super Admin</span>
                   </Link>
                 )}
@@ -469,7 +471,7 @@ export default function Navbar() {
                     aria-current={isActive("/team/admin") ? "page" : undefined}
                     className={mobAdminClass("/team/admin")}
                   >
-                    <FaTrophy className="w-4 h-4 flex-shrink-0" />
+                    <PiTrophyBold className="w-4 h-4 flex-shrink-0" />
                     <span className="text-sm font-medium">Team-Admin</span>
                   </Link>
                 )}
@@ -480,7 +482,7 @@ export default function Navbar() {
                     aria-current={isActive("/team/create") ? "page" : undefined}
                     className={mobClass("/team/create")}
                   >
-                    <FaUsers className="text-brand-400 w-4 h-4 flex-shrink-0" />
+                    <PiUsersBold className="text-brand-400 w-4 h-4 flex-shrink-0" />
                     <span className="text-sm font-medium">Team gründen</span>
                   </Link>
                 )}
@@ -489,9 +491,9 @@ export default function Navbar() {
                     logout();
                     setMobileOpen(false);
                   }}
-                  className="flex items-center gap-3 px-5 py-3.5 w-full text-left text-gray-400 hover:bg-slate-800 transition-colors"
+                  className="flex items-center gap-3 px-5 py-3.5 w-full text-left text-mist-600 hover:bg-ink-700 transition-colors"
                 >
-                  <FaTimes className="w-4 h-4 flex-shrink-0" />
+                  <PiXBold className="w-4 h-4 flex-shrink-0" />
                   <span className="text-sm font-medium">Abmelden</span>
                 </button>
               </>
@@ -503,15 +505,15 @@ export default function Navbar() {
                   aria-current={isActive("/login") ? "page" : undefined}
                   className={mobClass("/login")}
                 >
-                  <FaUser className="text-brand-400 w-4 h-4 flex-shrink-0" />
+                  <PiUserBold className="text-brand-400 w-4 h-4 flex-shrink-0" />
                   <span className="text-sm font-medium">Anmelden</span>
                 </Link>
                 <Link
                   href="/signup"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-5 py-3.5 text-brand-400 hover:bg-slate-800 transition-colors"
+                  className="flex items-center gap-3 px-5 py-3.5 text-brand-400 hover:bg-ink-700 transition-colors"
                 >
-                  <FaBasketballBall className="w-4 h-4 flex-shrink-0" />
+                  <PiBasketballBold className="w-4 h-4 flex-shrink-0" />
                   <span className="text-sm font-bold">Registrieren</span>
                 </Link>
               </>
@@ -523,28 +525,28 @@ export default function Navbar() {
       {/* Such-Overlay */}
       {searchOpen && (
         <div className="fixed inset-0 z-[999] bg-black/60 flex items-start justify-center pt-20 px-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
-              <FaSearch className="text-gray-400 flex-shrink-0" />
+          <div className="bg-ink-800 border border-ink-600 rounded-md w-full max-w-lg overflow-hidden">
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-ink-600">
+              <PiMagnifyingGlassBold className="text-mist-600 flex-shrink-0" />
               <input
                 ref={searchInputRef}
                 type="text"
                 placeholder="Spieler oder Team suchen…"
-                className="flex-1 outline-none text-sm text-gray-800 placeholder-gray-400"
+                className="flex-1 outline-none text-sm text-paper-50 placeholder-ink-500"
                 value={searchTerm}
                 onChange={onSearchChange}
               />
               <button
                 onClick={closeSearch}
-                className="text-gray-500 hover:text-gray-700 transition-colors"
+                className="text-mist-400 hover:text-mist-300 transition-colors"
                 aria-label="Suche schließen"
               >
-                <FaTimes className="w-4 h-4" />
+                <PiXBold className="w-4 h-4" />
               </button>
             </div>
-            <div className="max-h-80 overflow-y-auto divide-y divide-gray-50">
+            <div className="max-h-80 overflow-y-auto divide-y divide-ink-600">
               {searchTerm && results.length === 0 && (
-                <div className="px-4 py-6 text-center text-gray-500 text-sm">
+                <div className="px-4 py-6 text-center text-mist-400 text-sm">
                   {searchData ? "Keine Ergebnisse" : "Lädt…"}
                 </div>
               )}
@@ -554,12 +556,12 @@ export default function Navbar() {
                     key={`t-${item._id}`}
                     href={`/team/team-detail/${item.slug}`}
                     onClick={closeSearch}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-ink-700 transition-colors"
                   >
                     <Avatar name={item.teamName} src={item.logo} className="w-9 h-9" textClass="text-xs" square />
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{item.teamName}</p>
-                      <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                      <p className="text-sm font-semibold text-paper-50 truncate">{item.teamName}</p>
+                      <span className="text-[10px] font-bold text-mist-400 bg-ink-700 px-1.5 py-0.5 rounded-sm uppercase tracking-wide">
                         Team
                       </span>
                     </div>
@@ -569,7 +571,7 @@ export default function Navbar() {
                     key={`p-${item._id}`}
                     href={item.slug ? `/player/view-player/${item.slug}` : "#"}
                     onClick={closeSearch}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-ink-700 transition-colors"
                   >
                     <Avatar
                       name={`${item.firstName} ${item.lastName}`}
@@ -578,10 +580,10 @@ export default function Navbar() {
                       textClass="text-xs"
                     />
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">
+                      <p className="text-sm font-semibold text-paper-50 truncate">
                         {item.firstName} {item.lastName}
                       </p>
-                      <span className="text-[10px] font-bold text-brand-500 bg-brand-50 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                      <span className="text-[10px] font-bold text-brand-400 bg-brand-500/10 px-1.5 py-0.5 rounded-sm uppercase tracking-wide">
                         Spieler
                       </span>
                     </div>

@@ -70,7 +70,7 @@ export default function PlayerUpdatePasswordPage() {
   if (status === "error") {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
-        <p className="text-gray-700">Seite konnte nicht geladen werden.</p>
+        <p className="text-mist-300">Seite konnte nicht geladen werden.</p>
         <Button onClick={() => window.location.reload()} className="mt-4">
           Erneut versuchen
         </Button>
@@ -79,37 +79,37 @@ export default function PlayerUpdatePasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-ink-950">
       <PlayerNav player={player} />
 
       <main className="max-w-md mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Passwort ändern</h1>
+          <h1 className="font-display uppercase tracking-tight text-2xl font-black text-paper-50">Passwort ändern</h1>
           <Link
             href="/player/player-detail"
-            className="text-sm text-gray-500 hover:text-brand-600"
+            className="text-sm text-mist-400 hover:text-brand-400"
           >
             Zurück
           </Link>
         </div>
 
         {error && (
-          <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          <div className="mb-4 rounded-sm bg-signal-error/10 border border-signal-error/50 px-4 py-3 text-sm text-signal-error">
             {error}
           </div>
         )}
         {success && (
-          <div className="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
+          <div className="mb-4 rounded-sm bg-signal-ok/10 border border-signal-ok/50 px-4 py-3 text-sm text-signal-ok">
             {success}
           </div>
         )}
 
         <form
           onSubmit={onSubmit}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4"
+          className="bg-ink-800 rounded-md border border-ink-600 p-6 space-y-4"
         >
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-mist-300 mb-1">
               Aktuelles Passwort
             </label>
             <input
@@ -124,7 +124,7 @@ export default function PlayerUpdatePasswordPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-mist-300 mb-1">
               Neues Passwort
             </label>
             <input
@@ -139,7 +139,7 @@ export default function PlayerUpdatePasswordPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-mist-300 mb-1">
               Neues Passwort bestätigen
             </label>
             <input
@@ -158,9 +158,9 @@ export default function PlayerUpdatePasswordPage() {
             {saving ? "Speichern…" : "Passwort ändern"}
           </Button>
 
-          <p className="text-center text-xs text-gray-500">
+          <p className="text-center text-xs text-mist-400">
             Google-Konto ohne Passwort?{" "}
-            <Link href="/reset-password" className="text-brand-600 hover:underline">
+            <Link href="/reset-password" className="text-brand-400 hover:underline">
               Hier ein Passwort setzen
             </Link>
           </p>

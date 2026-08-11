@@ -3,15 +3,15 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaPen } from "react-icons/fa";
+import { PiPencilSimpleBold } from "react-icons/pi";
 import AdminShell from "@/components/layout/AdminShell";
 import { getAdminToken } from "@/lib/clientAuth";
 import { teamScores } from "@/lib/matchScore";
 
 const STATUS_BADGE = {
-  scheduled: { label: "Geplant", cls: "bg-blue-100 text-blue-700" },
-  completed: { label: "Beendet", cls: "bg-green-100 text-green-700" },
-  cancelled: { label: "Abgesagt", cls: "bg-red-100 text-red-700" },
+  scheduled: { label: "Geplant", cls: "bg-ink-700 text-mist-300" },
+  completed: { label: "Beendet", cls: "bg-signal-ok/15 text-signal-ok" },
+  cancelled: { label: "Abgesagt", cls: "bg-signal-error/15 text-signal-error" },
 };
 
 function formatDate(d) {
@@ -47,14 +47,14 @@ export default function AdminMatchesPage() {
   return (
     <AdminShell title="Spiele verwalten">
       {loading ? (
-        <p className="text-gray-500">Lädt…</p>
+        <p className="text-mist-400">Lädt…</p>
       ) : matches.length === 0 ? (
-        <p className="text-gray-500">Keine Spiele vorhanden.</p>
+        <p className="text-mist-400">Keine Spiele vorhanden.</p>
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
+        <div className="bg-ink-800 rounded-md border border-ink-600 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-xs text-gray-500 text-left border-b border-gray-100">
+              <tr className="text-xs text-mist-400 text-left border-b border-ink-600">
                 <th className="font-medium py-3 pl-4">Datum</th>
                 <th className="font-medium py-3">Partie</th>
                 <th className="font-medium py-3 text-center">Ergebnis</th>
@@ -67,13 +67,13 @@ export default function AdminMatchesPage() {
                 const score = teamScores(m);
                 const badge = STATUS_BADGE[m.status] || STATUS_BADGE.scheduled;
                 return (
-                  <tr key={m._id} className="border-b border-gray-50 last:border-0">
-                    <td className="py-3 pl-4 text-gray-600">{formatDate(m.date)}</td>
-                    <td className="py-3 text-gray-900">
-                      {m.teamA?.teamName || "?"} <span className="text-gray-500">vs</span>{" "}
+                  <tr key={m._id} className="border-b border-ink-600 last:border-0">
+                    <td className="py-3 pl-4 text-mist-400">{formatDate(m.date)}</td>
+                    <td className="py-3 text-paper-50">
+                      {m.teamA?.teamName || "?"} <span className="text-mist-400">vs</span>{" "}
                       {m.teamB?.teamName || "?"}
                     </td>
-                    <td className="py-3 text-center font-semibold text-gray-900">
+                    <td className="py-3 text-center font-semibold text-paper-50">
                       {score ? `${score.a} : ${score.b}` : "–"}
                     </td>
                     <td className="py-3">
@@ -81,7 +81,7 @@ export default function AdminMatchesPage() {
                         {badge.label}
                       </span>
                       {m.resultStatus === "mismatch" && (
-                        <span className="ml-1.5 text-xs font-medium rounded-full px-2 py-0.5 bg-red-100 text-red-700">
+                        <span className="ml-1.5 text-xs font-medium rounded-sm px-2 py-0.5 bg-signal-error/15 text-signal-error">
                           Strittig
                         </span>
                       )}
@@ -89,9 +89,9 @@ export default function AdminMatchesPage() {
                     <td className="py-3 pr-4 text-right">
                       <Link
                         href={`/admin/update-match/${m._id}`}
-                        className="inline-flex items-center gap-1.5 text-xs border border-gray-300 hover:border-brand-500 text-gray-600 rounded-lg px-3 py-1.5"
+                        className="inline-flex items-center gap-1.5 text-xs border border-ink-600 hover:border-brand-500 text-mist-400 rounded-sm px-3 py-1.5"
                       >
-                        <FaPen /> Bearbeiten
+                        <PiPencilSimpleBold /> Bearbeiten
                       </Link>
                     </td>
                   </tr>

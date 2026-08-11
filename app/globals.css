@@ -2,12 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Design-System (Spezifikation Abschnitt 9):
-   Hintergrund gray-50, Cards weiß, Text gray-900, Primärfarbe Orange #f97316 */
+/* Visuelle Richtung „Anzeigetafel" (docs/VISUELLE-RICHTUNG-2026-08-12.md):
+   warmer dunkler Grund, Text paper-50, ein Akzent – das Logo-Orange #F07A27. */
 
 :root {
-  --background: #f9fafb; /* gray-50 */
-  --foreground: #111827; /* gray-900 */
+  --background: #120e0b; /* ink-950 */
+  --foreground: #faf7f2; /* paper-50 */
+
+  /* Sagt dem Browser, dass die Seite dunkel ist. Ohne diese Zeile rendert er
+     alle Elemente, die er selbst zeichnet, weiterhin hell: Datums-/Zeit-Picker,
+     das aufgeklappte <select>, Bildlaufleisten, Autofill-Flächen. Genau das war
+     auf /spiele zu sehen – ein weißes Kalendersymbol im dunklen Feld. */
+  color-scheme: dark;
 }
 
 body {

@@ -25,7 +25,7 @@ export default function RichText({ text, mentions = [] }) {
               href={part}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-brand-600 hover:underline break-all"
+              className="text-brand-400 hover:underline break-all"
             >
               {part}
             </a>
@@ -37,7 +37,7 @@ export default function RichText({ text, mentions = [] }) {
             <Link
               key={i}
               href={`/feed/tag/${encodeURIComponent(tag)}`}
-              className="text-brand-600 hover:underline"
+              className="text-brand-400 hover:underline"
             >
               {part}
             </Link>
@@ -50,7 +50,7 @@ export default function RichText({ text, mentions = [] }) {
               <Link
                 key={i}
                 href={`/player/view-player/${slug}`}
-                className="text-brand-600 font-medium hover:underline"
+                className="text-brand-400 font-medium hover:underline"
               >
                 {part}
               </Link>

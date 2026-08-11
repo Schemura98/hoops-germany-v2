@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
-import { FaBasketballBall, FaPrint, FaArrowLeft } from "react-icons/fa";
+import { PiBasketballBold, PiPrinterBold, PiArrowLeftBold } from "react-icons/pi";
 import Link from "next/link";
 import SponsorReportView from "@/components/admin/SponsorReportView";
 import { getAdminToken } from "@/lib/clientAuth";
@@ -34,23 +34,23 @@ function ReportInner() {
   }, [period]);
 
   if (status === "loading")
-    return <div className="min-h-screen flex items-center justify-center"><FaBasketballBall className="text-brand-500 text-3xl animate-bounce" /></div>;
+    return <div className="min-h-screen flex items-center justify-center"><PiBasketballBold className="text-brand-400 text-3xl animate-bounce" /></div>;
   if (status === "denied")
-    return <div className="min-h-screen flex items-center justify-center p-8 text-gray-600">Kein Zugriff – bitte als Admin anmelden.</div>;
+    return <div className="min-h-screen flex items-center justify-center p-8 text-mist-400">Kein Zugriff – bitte als Admin anmelden.</div>;
   if (status === "error" || !summary)
-    return <div className="min-h-screen flex items-center justify-center p-8 text-gray-600">Report konnte nicht geladen werden.</div>;
+    return <div className="min-h-screen flex items-center justify-center p-8 text-mist-400">Report konnte nicht geladen werden.</div>;
 
   return (
-    <div className="min-h-screen bg-gray-100 print:bg-white py-8 print:py-0">
+    <div className="min-h-screen bg-ink-700 print:bg-ink-800 py-8 print:py-0">
       <div className="max-w-3xl mx-auto px-4 mb-4 flex items-center justify-between print:hidden">
-        <Link href="/admin/analytics" className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900">
-          <FaArrowLeft className="text-xs" /> Zurück
+        <Link href="/admin/analytics" className="inline-flex items-center gap-1.5 text-sm text-mist-400 hover:text-paper-50">
+          <PiArrowLeftBold className="text-xs" /> Zurück
         </Link>
         <button
           onClick={() => window.print()}
-          className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl px-4 py-2.5 text-sm"
+          className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-ink-950 font-semibold rounded-md px-4 py-2.5 text-sm"
         >
-          <FaPrint /> Drucken / als PDF speichern
+          <PiPrinterBold /> Drucken / als PDF speichern
         </button>
       </div>
       <SponsorReportView summary={summary} period={period} generatedAt={generatedAt} />
@@ -60,7 +60,7 @@ function ReportInner() {
 
 export default function SponsorReportPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><FaBasketballBall className="text-brand-500 text-3xl animate-bounce" /></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><PiBasketballBold className="text-brand-400 text-3xl animate-bounce" /></div>}>
       <ReportInner />
     </Suspense>
   );

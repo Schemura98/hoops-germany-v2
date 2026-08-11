@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { FaBasketballBall, FaTrophy, FaExchangeAlt, FaNewspaper } from "react-icons/fa";
+import { PiBasketballBold, PiTrophyBold, PiArrowsLeftRightBold, PiNewspaperBold } from "react-icons/pi";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { useMediaQuery } from "@/lib/useMediaQuery";
 import { getPlayerToken } from "@/lib/clientAuth";
@@ -119,7 +119,7 @@ export default function PlayerNewsfeedPage() {
   if (status === "error") {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
-        <p className="text-gray-700">Profil konnte nicht geladen werden.</p>
+        <p className="text-mist-300">Profil konnte nicht geladen werden.</p>
         <Button onClick={() => window.location.reload()} className="mt-4">
           Erneut versuchen
         </Button>
@@ -128,7 +128,7 @@ export default function PlayerNewsfeedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-ink-950">
       <PlayerNav player={player} />
 
       <div className="max-w-6xl mx-auto px-4 py-8">
@@ -144,7 +144,7 @@ export default function PlayerNewsfeedPage() {
               <Loading className="py-10" size="text-2xl" />
             ) : posts.length === 0 ? (
               <EmptyState
-                icon={FaNewspaper}
+                icon={PiNewspaperBold}
                 title={mode === "following" ? "Noch nichts in deinem Feed" : "Noch keine Beiträge"}
                 text={
                   mode === "following"
@@ -163,7 +163,7 @@ export default function PlayerNewsfeedPage() {
                     <Button variant="ghost" size="sm" onClick={loadMore} disabled={loadingMore}>
                       {loadingMore ? (
                         <>
-                          <FaBasketballBall className="animate-bounce" /> Lädt…
+                          <PiBasketballBold className="animate-bounce" /> Lädt…
                         </>
                       ) : (
                         "Mehr laden"
@@ -171,7 +171,7 @@ export default function PlayerNewsfeedPage() {
                     </Button>
                   </div>
                 ) : (
-                  <p className="text-center text-xs text-gray-500 py-2">
+                  <p className="text-center text-xs text-mist-400 py-2">
                     Das war alles.
                   </p>
                 )}
@@ -213,26 +213,26 @@ export default function PlayerNewsfeedPage() {
               <FollowSuggestions />
               <div className="space-y-3">
                 <CollapsibleWidget
-                  icon={<FaBasketballBall className="text-brand-500" />}
+                  icon={<PiBasketballBold className="text-brand-400" />}
                   title="Spiele"
                   defaultOpen
                 >
                   <TeamMatchesWidget />
                 </CollapsibleWidget>
                 <CollapsibleWidget
-                  icon={<FaTrophy className="text-brand-500" />}
+                  icon={<PiTrophyBold className="text-brand-400" />}
                   title="Top-Teams"
                 >
                   <TopTeamsWidget />
                 </CollapsibleWidget>
                 <CollapsibleWidget
-                  icon={<FaExchangeAlt className="text-brand-500" />}
+                  icon={<PiArrowsLeftRightBold className="text-brand-400" />}
                   title="Transfers"
                 >
                   <TransferFeedWidget />
                 </CollapsibleWidget>
                 <CollapsibleWidget
-                  icon={<FaNewspaper className="text-brand-500" />}
+                  icon={<PiNewspaperBold className="text-brand-400" />}
                   title="Basketball-News"
                 >
                   <NewsWidget compact />

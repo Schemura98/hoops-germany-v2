@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import { FaCheck, FaStar } from "react-icons/fa";
+import { PiCheckBold, PiStarFill } from "react-icons/pi";
 import AdminShell from "@/components/layout/AdminShell";
 import { getAdminToken } from "@/lib/clientAuth";
 import { timeAgo } from "@/lib/timeAgo";
@@ -44,48 +44,48 @@ export default function AdminFeedbackPage() {
   return (
     <AdminShell title="Feedback">
       {loading ? (
-        <p className="text-gray-500">Lädt…</p>
+        <p className="text-mist-400">Lädt…</p>
       ) : items.length === 0 ? (
-        <p className="text-gray-500">Kein Feedback vorhanden.</p>
+        <p className="text-mist-400">Kein Feedback vorhanden.</p>
       ) : (
         <div className="space-y-3">
           {items.map((f) => (
             <div
               key={f._id}
-              className={`bg-white rounded-2xl shadow-sm border p-5 ${
-                f.status === "new" ? "border-brand-200" : "border-gray-100"
+              className={`bg-ink-800 rounded-md border p-5 ${
+                f.status === "new" ? "border-brand-500/50" : "border-ink-600"
               }`}
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium bg-gray-100 text-gray-700 rounded-full px-2 py-0.5">
+                  <span className="text-xs font-medium bg-ink-700 text-mist-300 rounded-sm px-2 py-0.5">
                     {f.type}
                   </span>
                   {f.status === "new" && (
-                    <span className="text-xs font-medium bg-brand-100 text-brand-700 rounded-full px-2 py-0.5">
+                    <span className="text-xs font-medium bg-brand-500/15 text-brand-400 rounded-sm px-2 py-0.5">
                       neu
                     </span>
                   )}
-                  <span className="text-xs text-gray-500">{timeAgo(f.createdAt)}</span>
+                  <span className="text-xs text-mist-400">{timeAgo(f.createdAt)}</span>
                 </div>
                 {f.status === "new" && (
                   <button
                     onClick={() => markRead(f._id)}
                     disabled={busyId === f._id}
-                    className="inline-flex items-center gap-1.5 text-xs border border-gray-300 hover:border-brand-500 text-gray-600 rounded-lg px-3 py-1.5 disabled:opacity-60"
+                    className="inline-flex items-center gap-1.5 text-xs border border-ink-600 hover:border-brand-500 text-mist-400 rounded-sm px-3 py-1.5 disabled:opacity-60"
                   >
-                    <FaCheck /> Als gelesen
+                    <PiCheckBold /> Als gelesen
                   </button>
                 )}
               </div>
               {(f.rating || (f.areas && f.areas.length > 0)) && (
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {f.rating > 0 && (
-                    <span className="inline-flex items-center gap-0.5 text-amber-400">
+                    <span className="inline-flex items-center gap-0.5 text-signal-wait">
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <FaStar
+                        <PiStarFill
                           key={i}
-                          className={i < f.rating ? "text-amber-400" : "text-gray-200"}
+                          className={i < f.rating ? "text-signal-wait" : "text-ink-600"}
                         />
                       ))}
                     </span>
@@ -93,14 +93,14 @@ export default function AdminFeedbackPage() {
                   {(f.areas || []).map((a) => (
                     <span
                       key={a}
-                      className="text-xs font-medium bg-slate-100 text-slate-600 rounded-full px-2 py-0.5"
+                      className="text-xs font-medium bg-ink-700 text-mist-400 rounded-sm px-2 py-0.5"
                     >
                       {a}
                     </span>
                   ))}
                 </div>
               )}
-              <p className="mt-2 text-sm text-gray-700 whitespace-pre-line">{f.message}</p>
+              <p className="mt-2 text-sm text-mist-300 whitespace-pre-line">{f.message}</p>
             </div>
           ))}
         </div>

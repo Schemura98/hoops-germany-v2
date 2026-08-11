@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
-  FaSignOutAlt,
-  FaBars,
-  FaTimes,
-  FaShieldAlt,
-  FaTrophy,
-} from "react-icons/fa";
+  PiSignOutBold,
+  PiListBold,
+  PiXBold,
+  PiShieldCheckBold,
+  PiTrophyBold,
+} from "react-icons/pi";
 import { clearPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
 import NotificationBell from "@/components/layout/NotificationBell";
 
@@ -44,14 +44,14 @@ export default function PlayerNav({ player }) {
 
   // Admin-Verknüpfung je nach Rolle (Super-Admin > Team-Admin).
   const adminLink = player?.isSuperAdmin
-    ? { href: "/admin/dashboard", label: "Super Admin", Icon: FaShieldAlt }
+    ? { href: "/admin/dashboard", label: "Super Admin", Icon: PiShieldCheckBold }
     : player?.isTeamAdmin
-    ? { href: "/team/admin", label: "Team-Admin", Icon: FaTrophy }
+    ? { href: "/team/admin", label: "Team-Admin", Icon: PiTrophyBold }
     : null;
   const AdminIcon = adminLink?.Icon;
 
   return (
-    <nav className="bg-gradient-to-r from-slate-950 to-slate-800 sticky top-0 z-50">
+    <nav className="bg-ink-900 sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
         <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
           <img src="/images/logo.svg" alt="Hoops Germany" className="h-9 w-auto object-contain" />
@@ -66,8 +66,8 @@ export default function PlayerNav({ player }) {
               aria-current={isActive(l.href) ? "page" : undefined}
               className={`text-sm transition-colors border-b-2 pb-0.5 ${
                 isActive(l.href)
-                  ? "text-white font-semibold border-brand-500"
-                  : "text-gray-300 hover:text-white border-transparent"
+                  ? "text-paper-50 font-semibold border-brand-500"
+                  : "text-mist-300 hover:text-paper-50 border-transparent"
               }`}
             >
               {l.label}
@@ -92,7 +92,7 @@ export default function PlayerNav({ player }) {
           <NotificationBell />
           <Link
             href="/player/player-detail"
-            className="flex items-center gap-2 px-1 rounded-full hover:bg-white/5 transition-colors"
+            className="flex items-center gap-2 px-1 rounded-full hover:bg-ink-700/5 transition-colors"
             title="Mein Profil"
           >
             {player?.profileImage ? (
@@ -100,38 +100,38 @@ export default function PlayerNav({ player }) {
               <img
                 src={player.profileImage}
                 alt={initials}
-                className="h-8 w-8 rounded-full object-cover ring-2 ring-white/15"
+                className="h-8 w-8 rounded-full object-cover ring-2 ring-paper-50/15"
               />
             ) : (
               <span className="h-8 w-8 rounded-full bg-brand-500/20 text-brand-300 text-xs font-semibold flex items-center justify-center">
                 {initials}
               </span>
             )}
-            <span className="hidden sm:block text-sm text-gray-200 hover:text-white">{player?.firstName}</span>
+            <span className="hidden sm:block text-sm text-mist-300 hover:text-paper-50">{player?.firstName}</span>
           </Link>
           {/* Abmelden: auf Mobil im Hamburger-Menü, hier nur ab Desktop */}
           <button
             onClick={logout}
-            className="hidden lg:block p-2 -m-1 text-white/80 hover:text-brand-400 transition-colors"
+            className="hidden lg:block p-2 -m-1 text-paper-50/80 hover:text-brand-400 transition-colors"
             aria-label="Abmelden"
             title="Abmelden"
           >
-            <FaSignOutAlt />
+            <PiSignOutBold />
           </button>
           {/* Mobile-Hamburger */}
           <button
             onClick={() => setMobileOpen((v) => !v)}
-            className="lg:hidden p-2 -m-1 text-white/80 hover:text-brand-400 transition-colors"
+            className="lg:hidden p-2 -m-1 text-paper-50/80 hover:text-brand-400 transition-colors"
             aria-label="Menü"
           >
-            {mobileOpen ? <FaTimes className="w-5 h-5" /> : <FaBars className="w-5 h-5" />}
+            {mobileOpen ? <PiXBold className="w-5 h-5" /> : <PiListBold className="w-5 h-5" />}
           </button>
         </div>
       </div>
 
       {/* Mobile-Menü */}
       {mobileOpen && (
-        <div className="lg:hidden bg-slate-900 border-t border-slate-700 divide-y divide-slate-700/60">
+        <div className="lg:hidden bg-ink-900 border-t border-ink-600 divide-y divide-ink-600/60">
           {links.map((l) => (
             <Link
               key={l.href}
@@ -140,8 +140,8 @@ export default function PlayerNav({ player }) {
               aria-current={isActive(l.href) ? "page" : undefined}
               className={`block px-5 py-3.5 text-sm font-medium border-l-4 transition-colors ${
                 isActive(l.href)
-                  ? "bg-slate-800 text-white border-brand-500"
-                  : "text-gray-200 hover:bg-slate-800 hover:text-white border-transparent"
+                  ? "bg-ink-800 text-paper-50 border-brand-500"
+                  : "text-mist-300 hover:bg-ink-700 hover:text-paper-50 border-transparent"
               }`}
             >
               {l.label}
@@ -154,8 +154,8 @@ export default function PlayerNav({ player }) {
               aria-current={isActive(adminLink.href) ? "page" : undefined}
               className={`flex items-center gap-3 px-5 py-3.5 border-l-4 transition-colors ${
                 isActive(adminLink.href)
-                  ? "bg-slate-800 text-brand-300 border-brand-500"
-                  : "text-brand-400 hover:bg-slate-800 border-transparent"
+                  ? "bg-ink-800 text-brand-300 border-brand-500"
+                  : "text-brand-400 hover:bg-ink-700 border-transparent"
               }`}
             >
               <AdminIcon className="w-4 h-4 flex-shrink-0" />
@@ -167,9 +167,9 @@ export default function PlayerNav({ player }) {
               setMobileOpen(false);
               logout();
             }}
-            className="flex w-full items-center gap-3 px-5 py-3.5 border-l-4 border-transparent text-gray-300 hover:bg-slate-800 hover:text-white transition-colors"
+            className="flex w-full items-center gap-3 px-5 py-3.5 border-l-4 border-transparent text-mist-400 hover:bg-ink-700 hover:text-paper-50 transition-colors"
           >
-            <FaSignOutAlt className="w-4 h-4 flex-shrink-0" />
+            <PiSignOutBold className="w-4 h-4 flex-shrink-0" />
             <span className="text-sm font-medium">Abmelden</span>
           </button>
         </div>

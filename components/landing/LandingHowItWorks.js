@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaUser, FaUsers, FaTrophy } from "react-icons/fa";
+import { PiUserBold, PiUsersBold, PiTrophyBold } from "react-icons/pi";
 import { getPlayerToken } from "@/lib/clientAuth";
 import Reveal from "@/components/ui/Reveal";
 
@@ -58,14 +58,14 @@ export default function LandingHowItWorks() {
 
     const cards = [
       {
-        icon: FaUser,
+        icon: PiUserBold,
         href: "/player/edit-profile",
         title: "Profil vervollständigen",
         text: "Ergänze Stats, Position und ein Foto – so finden dich Vereine und Scouts leichter.",
       },
-      { icon: FaUsers, ...teamCard },
+      { icon: PiUsersBold, ...teamCard },
       {
-        icon: FaTrophy,
+        icon: PiTrophyBold,
         href: "/ligen",
         title: "Ligen & Topscorer verfolgen",
         text: "Behalte Tabellen, Spielpläne und die Topscorer-Liste deiner Region im Blick.",
@@ -73,12 +73,12 @@ export default function LandingHowItWorks() {
     ];
 
     return (
-      <section className="bg-gray-50 py-20 px-4">
+      <section className="bg-ink-950 py-20 px-4">
         <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-black mb-4 text-gray-900">
+          <h2 className="font-display uppercase tracking-tight text-3xl md:text-4xl font-black mb-4 text-paper-50">
             Deine nächsten Schritte
           </h2>
-          <p className="text-gray-500 mb-16">Hol mehr aus Hoops Germany raus</p>
+          <p className="text-mist-400 mb-16">Hol mehr aus Hoops Germany raus</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {cards.map((c, i) => {
               const Icon = c.icon;
@@ -89,19 +89,19 @@ export default function LandingHowItWorks() {
                 <Reveal key={c.title} delay={i * 90} className="h-full">
                   <Link
                     href={c.href}
-                    className="group block h-full text-center bg-gray-50 hover:bg-brand-50 border border-gray-100 hover:border-brand-200 rounded-xl p-8 transition-[transform,background-color,border-color] duration-200 ease-out-strong hover:-translate-y-1 motion-reduce:hover:translate-y-0"
+                    className="group block h-full text-center bg-ink-950 hover:bg-brand-500/10 border border-ink-600 hover:border-brand-500/50 rounded-md p-8 transition-[transform,background-color,border-color] duration-200 ease-out-strong hover:-translate-y-1 motion-reduce:hover:translate-y-0"
                   >
                     <div
                       className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 ${
-                        navy ? "bg-gradient-to-r from-slate-950 to-slate-800" : "bg-brand-100"
+                        navy ? "bg-ink-900" : "bg-brand-500/15"
                       }`}
                     >
-                      <Icon className={`text-2xl ${navy ? "text-white" : "text-brand-500"}`} />
+                      <Icon className={`text-2xl ${navy ? "text-paper-50" : "text-brand-400"}`} />
                     </div>
-                    <h3 className="font-bold text-lg mb-2 text-gray-900 group-hover:text-brand-600">
+                    <h3 className="font-bold text-lg mb-2 text-paper-50 group-hover:text-brand-400">
                       {c.title}
                     </h3>
-                    <p className="text-gray-500 text-sm leading-relaxed">{c.text}</p>
+                    <p className="text-mist-400 text-sm leading-relaxed">{c.text}</p>
                   </Link>
                 </Reveal>
               );
@@ -113,22 +113,24 @@ export default function LandingHowItWorks() {
   }
 
   return (
-    <section className="bg-gray-50 py-20 px-4">
+    <section className="bg-ink-950 py-20 px-4">
       <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-3xl md:text-4xl font-black mb-4 text-gray-900">So funktionierts</h2>
-        <p className="text-gray-500 mb-16">In 3 einfachen Schritten dabei</p>
+        <h2 className="font-display uppercase tracking-tight text-3xl md:text-4xl font-black mb-4 text-paper-50">So funktionierts</h2>
+        <p className="text-mist-400 mb-16">In 3 einfachen Schritten dabei</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {STEPS.map((s, i) => (
             <Reveal key={s.n} delay={i * 90} className="text-center">
               <div
-                className={`w-16 h-16 ${
-                  s.dark ? "bg-gradient-to-r from-slate-950 to-slate-800" : "bg-brand-500"
-                } text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-black`}
+                // Textfarbe haengt an der Flaeche: Auf der orangen Ziffer waere
+                // paper-50 bei 2,61:1 - dort steht ink-950 (7,1:1).
+                className={`w-16 h-16 font-display ${
+                  s.dark ? "bg-ink-900 text-paper-50 border border-ink-600" : "bg-brand-500 text-ink-950"
+                } rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-black`}
               >
                 {s.n}
               </div>
-              <h3 className="font-bold text-lg mb-2 text-gray-900">{s.title}</h3>
-              <p className="text-gray-500 text-sm">{s.text}</p>
+              <h3 className="font-bold text-lg mb-2 text-paper-50">{s.title}</h3>
+              <p className="text-mist-400 text-sm">{s.text}</p>
             </Reveal>
           ))}
         </div>

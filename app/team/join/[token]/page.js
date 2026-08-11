@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaBasketballBall, FaUsers } from "react-icons/fa";
+import { PiBasketballBold, PiUsersBold } from "react-icons/pi";
 import { getPlayerToken, setPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
 
 function Shell({ children }) {
@@ -12,19 +12,19 @@ function Shell({ children }) {
       <div className="w-full max-w-md">
         <Link
           href="/"
-          className="flex items-center justify-center gap-2 font-bold text-gray-900 mb-8"
+          className="flex items-center justify-center gap-2 font-bold text-paper-50 mb-8"
         >
-          <FaBasketballBall className="text-brand-500 text-xl" />
+          <PiBasketballBold className="text-brand-400 text-xl" />
           Hoops Germany
         </Link>
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">{children}</div>
+        <div className="bg-ink-800 rounded-md border border-ink-600 p-8">{children}</div>
       </div>
     </main>
   );
 }
 
 const inputClass =
-  "w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+  "w-full rounded-sm border border-ink-600 px-3 py-2.5 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
 
 export default function TeamJoinTokenPage({ params }) {
   const inviteToken = params.token;
@@ -116,7 +116,7 @@ export default function TeamJoinTokenPage({ params }) {
   if (state === "loading") {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
+        <PiBasketballBold className="text-brand-400 text-3xl animate-bounce" />
       </main>
     );
   }
@@ -124,14 +124,14 @@ export default function TeamJoinTokenPage({ params }) {
   if (state === "invalid") {
     return (
       <Shell>
-        <h1 className="text-xl font-bold text-gray-900">Link ungültig</h1>
-        <p className="mt-2 text-sm text-gray-500">
+        <h1 className="text-xl font-bold text-paper-50">Link ungültig</h1>
+        <p className="mt-2 text-sm text-mist-400">
           Dieser Einladungslink ist ungültig oder abgelaufen. Bitte fordere beim Team einen neuen
           Link an.
         </p>
         <Link
           href="/"
-          className="mt-6 block text-center bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2.5 font-medium"
+          className="mt-6 block text-center bg-brand-500 hover:bg-brand-400 text-ink-950 rounded-sm px-4 py-2.5 font-medium"
         >
           Zur Startseite
         </Link>
@@ -142,20 +142,20 @@ export default function TeamJoinTokenPage({ params }) {
   if (state === "done") {
     return (
       <Shell>
-        <h1 className="text-xl font-bold text-gray-900">Willkommen im Kader! 🎉</h1>
-        <p className="mt-2 text-sm text-gray-500">
+        <h1 className="text-xl font-bold text-paper-50">Willkommen im Kader! 🎉</h1>
+        <p className="mt-2 text-sm text-mist-400">
           Du bist jetzt im Kader von <strong>{team?.teamName}</strong>. Vervollständige jetzt dein
           Profil – Foto, Position und Co. – damit dich alle finden.
         </p>
         <Link
           href="/player/edit-profile"
-          className="mt-6 block text-center bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2.5 font-medium"
+          className="mt-6 block text-center bg-brand-500 hover:bg-brand-400 text-ink-950 rounded-sm px-4 py-2.5 font-medium"
         >
           Profil jetzt vervollständigen
         </Link>
         <Link
           href="/player/newsfeed"
-          className="mt-3 block text-center text-sm text-gray-500 hover:text-brand-600"
+          className="mt-3 block text-center text-sm text-mist-400 hover:text-brand-400"
         >
           Später – zum Newsfeed
         </Link>
@@ -171,25 +171,25 @@ export default function TeamJoinTokenPage({ params }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={team.logo} alt={team.teamName} className="h-12 w-12 rounded-full object-cover" />
         ) : (
-          <span className="h-12 w-12 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
-            <FaUsers />
+          <span className="h-12 w-12 rounded-full bg-brand-500/15 text-brand-400 flex items-center justify-center">
+            <PiUsersBold />
           </span>
         )}
         <div>
-          <h1 className="text-lg font-bold text-gray-900">{team?.teamName}</h1>
-          {team?.region && <p className="text-xs text-gray-500">{team.region}</p>}
+          <h1 className="text-lg font-bold text-paper-50">{team?.teamName}</h1>
+          {team?.region && <p className="text-xs text-mist-400">{team.region}</p>}
         </div>
       </div>
 
-      <div className="mt-5 rounded-lg bg-gray-50 border border-gray-100 p-4">
-        <p className="text-sm text-gray-700">
+      <div className="mt-5 rounded-sm bg-ink-950 border border-ink-600 p-4">
+        <p className="text-sm text-mist-300">
           Du wurdest eingeladen, <strong>{team?.teamName}</strong> beizutreten. Über diesen Link
           landest du direkt im Kader.
         </p>
       </div>
 
       {error && (
-        <div className="mt-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+        <div className="mt-4 rounded-sm bg-signal-error/10 border border-signal-error/50 px-4 py-3 text-sm text-signal-error">
           {error}
         </div>
       )}
@@ -198,12 +198,12 @@ export default function TeamJoinTokenPage({ params }) {
         myTeam && team && myTeam.slug === team.slug ? (
           // Schon in genau diesem Team
           <div className="mt-6">
-            <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
+            <div className="rounded-sm bg-signal-ok/10 border border-signal-ok/50 px-4 py-3 text-sm text-signal-ok">
               Du bist bereits im Kader von <strong>{team.teamName}</strong>.
             </div>
             <Link
               href={`/team/team-detail/${team.slug}`}
-              className="mt-4 block text-center bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2.5 font-medium"
+              className="mt-4 block text-center bg-brand-500 hover:bg-brand-400 text-ink-950 rounded-sm px-4 py-2.5 font-medium"
             >
               Zur Teamseite
             </Link>
@@ -211,20 +211,20 @@ export default function TeamJoinTokenPage({ params }) {
         ) : myTeam ? (
           // In einem ANDEREN Team → Wechsel-Hinweis (Sicherheitsabfrage)
           <div className="mt-6 space-y-3">
-            <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+            <div className="rounded-sm bg-signal-wait/10 border border-signal-wait/50 px-4 py-3 text-sm text-signal-wait">
               Du bist aktuell bei <strong>{myTeam.teamName}</strong>. Wenn du beitrittst, verlässt du
               dieses Team und wechselst zu <strong>{team?.teamName}</strong>.
             </div>
             <button
               onClick={joinTeam}
               disabled={joining}
-              className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
+              className="w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
             >
               {joining ? "Wechsle…" : `Zu ${team?.teamName} wechseln`}
             </button>
             <Link
               href="/"
-              className="block text-center text-sm text-gray-500 hover:text-brand-600"
+              className="block text-center text-sm text-mist-400 hover:text-brand-400"
             >
               Abbrechen
             </Link>
@@ -234,14 +234,14 @@ export default function TeamJoinTokenPage({ params }) {
           <button
             onClick={joinTeam}
             disabled={joining}
-            className="mt-6 w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
+            className="mt-6 w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
           >
             {joining ? "Trete bei…" : "Dem Team beitreten"}
           </button>
         )
       ) : (
         <form onSubmit={registerAndJoin} className="mt-6 space-y-3">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-mist-400">
             Erstelle in wenigen Sekunden dein Konto und tritt dem Team bei:
           </p>
           <div className="grid grid-cols-2 gap-3">
@@ -279,13 +279,13 @@ export default function TeamJoinTokenPage({ params }) {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
+            className="w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
           >
             {submitting ? "Konto wird erstellt…" : "Konto erstellen & beitreten"}
           </button>
-          <p className="text-center text-xs text-gray-500">
+          <p className="text-center text-xs text-mist-400">
             Du hast schon ein Konto?{" "}
-            <Link href="/login" className="text-brand-600 font-medium">
+            <Link href="/login" className="text-brand-400 font-medium">
               Anmelden
             </Link>{" "}
             und dann zu diesem Link zurückkehren.

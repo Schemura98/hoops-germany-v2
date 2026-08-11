@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaSearch, FaBasketballBall, FaMapMarkerAlt, FaUsers, FaExchangeAlt, FaBullhorn, FaArrowRight } from "react-icons/fa";
+import { PiMagnifyingGlassBold, PiBasketballBold, PiMapPinBold, PiUsersBold, PiArrowsLeftRightBold, PiMegaphoneBold, PiArrowRightBold } from "react-icons/pi";
 import Navbar from "@/components/layout/Navbar";
 import DemoBadge from "@/components/DemoBadge";
 import Footer from "@/components/layout/Footer";
@@ -32,7 +32,7 @@ const TABS = [
 // Karten-Skeleton im Format der echten Spieler-/Vereinskarte (Avatar + Textzeilen).
 function TransferCardSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5">
+    <div className="bg-ink-800 rounded-md border border-ink-600 p-5">
       <div className="flex items-center gap-3">
         <Skeleton className="h-12 w-12 rounded-full flex-shrink-0" />
         <div className="flex-1">
@@ -201,10 +201,10 @@ export default function TransfermarktPage() {
       .slice(0, 4);
   }, [players, myRecruitingTeam]);
 
-  const selectCls = `${inputClassSm} shadow-sm`;
+  const selectCls = `${inputClassSm}`;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-ink-950 flex flex-col">
       <Navbar />
 
       <PageHeader
@@ -216,26 +216,26 @@ export default function TransfermarktPage() {
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
         {/* Passende Treffer (personalisiert) */}
         {(matchTeams.length > 0 || matchPlayers.length > 0) && (
-          <div className="mb-6 rounded-2xl border border-brand-200 bg-brand-50/50 p-5">
-            <h2 className="text-sm font-bold text-brand-700 mb-3">Passende Treffer für dich</h2>
+          <div className="mb-6 rounded-md border border-brand-500/50 bg-brand-500/50 p-5">
+            <h2 className="text-sm font-bold text-brand-400 mb-3">Passende Treffer für dich</h2>
 
             {matchTeams.length > 0 && (
               <div className="mb-2">
-                <p className="text-xs text-gray-500 mb-2">Vereine, die jemanden wie dich suchen:</p>
+                <p className="text-xs text-mist-400 mb-2">Vereine, die jemanden wie dich suchen:</p>
                 <div className="grid sm:grid-cols-2 gap-2">
                   {matchTeams.map((t) => (
                     <Link
                       key={t._id}
                       href={`/team/team-detail/${t.slug}`}
-                      className="flex items-center gap-2 bg-white rounded-xl border border-gray-100 px-3 py-2 hover:border-brand-300"
+                      className="flex items-center gap-2 bg-ink-800 rounded-md border border-ink-600 px-3 py-2 hover:border-brand-300"
                     >
                       <Avatar name={t.teamName} src={t.logo} className="h-8 w-8" textClass="text-[10px]" square />
                       <span className="min-w-0">
-                        <span className="block text-sm font-medium text-gray-900 truncate">
+                        <span className="block text-sm font-medium text-paper-50 truncate">
                           {t.teamName}
                           {t.isDemo && <DemoBadge className="ml-1.5 align-middle" />}
                         </span>
-                        <span className="block text-xs text-gray-500 truncate">
+                        <span className="block text-xs text-mist-400 truncate">
                           {(t.positions || []).map(positionLabel).join(", ") || t.bundesland}
                         </span>
                       </span>
@@ -247,21 +247,21 @@ export default function TransfermarktPage() {
 
             {matchPlayers.length > 0 && (
               <div>
-                <p className="text-xs text-gray-500 mb-2">Spieler, die zu eurer Suche passen:</p>
+                <p className="text-xs text-mist-400 mb-2">Spieler, die zu eurer Suche passen:</p>
                 <div className="grid sm:grid-cols-2 gap-2">
                   {matchPlayers.map((p) => (
                     <Link
                       key={p._id}
                       href={`/player/view-player/${p.slug || p._id}`}
-                      className="flex items-center gap-2 bg-white rounded-xl border border-gray-100 px-3 py-2 hover:border-brand-300"
+                      className="flex items-center gap-2 bg-ink-800 rounded-md border border-ink-600 px-3 py-2 hover:border-brand-300"
                     >
                       <Avatar name={`${p.firstName} ${p.lastName}`} src={p.profileImage} className="h-8 w-8" textClass="text-[10px]" />
                       <span className="min-w-0">
-                        <span className="block text-sm font-medium text-gray-900 truncate">
+                        <span className="block text-sm font-medium text-paper-50 truncate">
                           {p.firstName} {p.lastName}
                           {p.isDemo && <DemoBadge className="ml-1.5 align-middle" />}
                         </span>
-                        <span className="block text-xs text-gray-500 truncate">
+                        <span className="block text-xs text-mist-400 truncate">
                           {[positionLabel(p.position), p.bundesland].filter(Boolean).join(" · ")}
                         </span>
                       </span>
@@ -279,14 +279,14 @@ export default function TransfermarktPage() {
         {/* Dezenter Querverweis auf Tryouts */}
         <Link
           href="/tryouts"
-          className="mb-6 flex items-center gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3 text-sm text-gray-600 shadow-sm hover:border-brand-200 hover:text-brand-700 transition-colors"
+          className="mb-6 flex items-center gap-3 rounded-md border border-ink-600 bg-ink-800 px-4 py-3 text-sm text-mist-400 hover:border-brand-500/50 hover:text-brand-400 transition-colors"
         >
-          <FaBullhorn className="flex-shrink-0 text-brand-500" />
+          <PiMegaphoneBold className="flex-shrink-0 text-brand-400" />
           <span className="flex-1">
             Auf der Suche nach einem Team? Schau auch bei offenen Probetrainings vorbei.
           </span>
           <span className="flex-shrink-0 inline-flex items-center gap-1 font-medium">
-            Probetrainings ansehen <FaArrowRight className="text-xs" />
+            Probetrainings ansehen <PiArrowRightBold className="text-xs" />
           </span>
         </Link>
 
@@ -295,12 +295,12 @@ export default function TransfermarktPage() {
             Umkreis eigene Zeile – gleiches Muster wie /spieler und /teams. */}
         <div className="mb-6 space-y-3">
           <div className="relative">
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
+            <PiMagnifyingGlassBold className="absolute left-3 top-1/2 -translate-y-1/2 text-mist-400 text-sm" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={view === "players" ? "Name, Rolle, Liga oder Stadt…" : "Team, Rolle oder Stadt…"}
-              className="w-full rounded-lg border border-gray-300 pl-9 pr-4 py-2.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              className="w-full rounded-sm border border-ink-600 pl-9 pr-4 py-2.5 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -346,7 +346,7 @@ export default function TransfermarktPage() {
         {loading ? (
           <Skeleton className="h-3.5 w-20 mb-4" />
         ) : !error ? (
-          <p className="text-xs text-gray-500 font-medium mb-4 uppercase tracking-wide">
+          <p className="text-xs text-mist-400 font-medium mb-4 uppercase tracking-wide">
             {list.length} {list.length === 1 ? "Eintrag" : "Einträge"}
           </p>
         ) : null}
@@ -361,7 +361,7 @@ export default function TransfermarktPage() {
           <EmptyState title="Transferliste konnte nicht geladen werden." />
         ) : list.length === 0 ? (
           <EmptyState
-            icon={FaExchangeAlt}
+            icon={PiArrowsLeftRightBold}
             title={
               query || position || land || geo.center
                 ? "Keine passenden Einträge gefunden."
@@ -379,7 +379,7 @@ export default function TransfermarktPage() {
                 <Link
                   key={p._id}
                   href={`/player/view-player/${p.slug || p._id}`}
-                  className="min-w-0 break-words bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
+                  className="min-w-0 break-words bg-ink-800 rounded-md border border-ink-600 p-5 hover:border-brand-500/50 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
                 >
                   <div className="flex items-center gap-3">
                     {p.profileImage ? (
@@ -390,22 +390,22 @@ export default function TransfermarktPage() {
                         className="h-12 w-12 flex-shrink-0 rounded-full object-cover"
                       />
                     ) : (
-                      <span className="h-12 w-12 flex-shrink-0 rounded-full bg-brand-100 text-brand-700 font-semibold flex items-center justify-center">
+                      <span className="h-12 w-12 flex-shrink-0 rounded-full bg-brand-500/15 text-brand-400 font-semibold flex items-center justify-center">
                         {initials || "?"}
                       </span>
                     )}
                     <div className="min-w-0">
-                      <p className="font-semibold text-gray-900 truncate">
+                      <p className="font-semibold text-paper-50 truncate">
                         {p.firstName} {p.lastName}
                         {p.isDemo && <DemoBadge className="ml-2 align-middle" />}
                       </p>
-                      <p className="text-xs text-gray-500 truncate">
+                      <p className="text-xs text-mist-400 truncate">
                         {positionLabel(p.position) || "Position offen"}
                         {p.teamId?.teamName ? ` · aktuell: ${p.teamId.teamName}` : ""}
                       </p>
                       {(p.hometown || p.bundesland) && (
-                        <p className="text-xs text-gray-500 truncate flex items-center gap-1 mt-0.5">
-                          <FaMapMarkerAlt className="flex-shrink-0 text-gray-300" />
+                        <p className="text-xs text-mist-400 truncate flex items-center gap-1 mt-0.5">
+                          <PiMapPinBold className="flex-shrink-0 text-ink-500" />
                           {[p.hometown, p.bundesland].filter(Boolean).join(" · ")}
                         </p>
                       )}
@@ -413,15 +413,15 @@ export default function TransfermarktPage() {
                   </div>
 
                   {(p.preferredLeague || p.transferNote) && (
-                    <div className="mt-3 border-t border-gray-100 pt-3 space-y-1">
+                    <div className="mt-3 border-t border-ink-600 pt-3 space-y-1">
                       {p.preferredLeague && (
-                        <p className="text-xs text-gray-500">
-                          <span className="font-medium text-gray-700">Spielklasse:</span>{" "}
+                        <p className="text-xs text-mist-400">
+                          <span className="font-medium text-mist-300">Spielklasse:</span>{" "}
                           {p.preferredLeague}
                         </p>
                       )}
                       {p.transferNote && (
-                        <p className="text-sm text-gray-600 break-words">{p.transferNote}</p>
+                        <p className="text-sm text-mist-400 break-words">{p.transferNote}</p>
                       )}
                     </div>
                   )}
@@ -436,7 +436,7 @@ export default function TransfermarktPage() {
               return (
                 <div
                   key={t._id}
-                  className="min-w-0 break-words bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:border-brand-200 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
+                  className="min-w-0 break-words bg-ink-800 rounded-md border border-ink-600 p-5 hover:border-brand-500/50 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
                 >
                   <Link
                     href={`/team/team-detail/${t.slug}`}
@@ -444,16 +444,16 @@ export default function TransfermarktPage() {
                   >
                     <Avatar name={t.teamName} src={t.logo} className="h-12 w-12" textClass="text-sm" square />
                     <div className="min-w-0">
-                      <p className="font-semibold text-gray-900 truncate group-hover:text-brand-600">
+                      <p className="font-semibold text-paper-50 truncate group-hover:text-brand-400">
                         {t.teamName}
                         {t.isDemo && <DemoBadge className="ml-2 align-middle" />}
                       </p>
-                      <p className="text-xs text-gray-500 truncate">
+                      <p className="text-xs text-mist-400 truncate">
                         {t.league?.name ? t.league.name : "Verein"}
                       </p>
                       {(t.region || t.bundesland) && (
-                        <p className="text-xs text-gray-500 truncate flex items-center gap-1 mt-0.5">
-                          <FaMapMarkerAlt className="flex-shrink-0 text-gray-300" />
+                        <p className="text-xs text-mist-400 truncate flex items-center gap-1 mt-0.5">
+                          <PiMapPinBold className="flex-shrink-0 text-ink-500" />
                           {[t.region, t.bundesland].filter(Boolean).join(" · ")}
                         </p>
                       )}
@@ -465,7 +465,7 @@ export default function TransfermarktPage() {
                       {t.positions.map((p) => (
                         <span
                           key={p}
-                          className="text-xs font-medium bg-brand-50 text-brand-700 rounded-full px-2 py-0.5"
+                          className="text-xs font-medium bg-brand-500/10 text-brand-400 rounded-sm px-2 py-0.5"
                         >
                           {positionLabel(p)}
                         </span>
@@ -473,13 +473,13 @@ export default function TransfermarktPage() {
                     </div>
                   )}
                   {t.note && (
-                    <p className="mt-2 text-sm text-gray-600 break-words border-t border-gray-100 pt-2">{t.note}</p>
+                    <p className="mt-2 text-sm text-mist-400 break-words border-t border-ink-600 pt-2">{t.note}</p>
                   )}
 
                   {/* Direktkontakt: Beitritt anfragen */}
-                  <div className="mt-3 border-t border-gray-100 pt-3">
+                  <div className="mt-3 border-t border-ink-600 pt-3">
                     {js.msg ? (
-                      <p className={`text-xs ${js.type === "ok" ? "text-green-600" : "text-red-600"}`}>
+                      <p className={`text-xs ${js.type === "ok" ? "text-signal-ok" : "text-signal-error"}`}>
                         {js.msg}
                       </p>
                     ) : loggedIn ? (

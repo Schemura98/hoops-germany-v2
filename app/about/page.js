@@ -28,11 +28,11 @@ export default function AboutPage() {
       <LegalHeading>Kontakt</LegalHeading>
       <p>
         Fragen, Ideen oder Feedback? Schreib uns über das{" "}
-        <a href="/kontakt" className="text-brand-600 hover:underline">
+        <a href="/kontakt" className="text-brand-400 hover:underline">
           Kontaktformular
         </a>{" "}
         oder per E-Mail an{" "}
-        <a href="mailto:info@hoopsgermany.de" className="text-brand-600 hover:underline">
+        <a href="mailto:info@hoopsgermany.de" className="text-brand-400 hover:underline">
           info@hoopsgermany.de
         </a>
         .

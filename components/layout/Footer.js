@@ -13,9 +13,9 @@ const legal = [
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-100 mt-16">
+    <footer className="bg-ink-900 border-t border-ink-600 mt-16">
       <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-mist-600">
           © {new Date().getFullYear()} Hoops Germany. Alle Rechte vorbehalten.
         </p>
         <div className="flex flex-wrap items-center gap-4">
@@ -23,7 +23,7 @@ export default function Footer() {
             <Link
               key={l.href}
               href={l.href}
-              className="text-sm text-gray-500 hover:text-brand-600"
+              className="text-sm text-mist-400 hover:text-brand-400 transition-colors"
             >
               {l.label}
             </Link>

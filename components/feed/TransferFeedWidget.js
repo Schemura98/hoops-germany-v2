@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaExchangeAlt } from "react-icons/fa";
+import { PiArrowsLeftRightBold } from "react-icons/pi";
 import { getPlayerToken } from "@/lib/clientAuth";
 import Avatar from "@/components/Avatar";
 import { timeAgo } from "@/lib/timeAgo";
@@ -18,7 +18,7 @@ function teamLink(t) {
 function TeamTag({ team }) {
   if (!team) return null;
   return (
-    <Link href={teamLink(team)} className="font-medium text-gray-700 hover:text-brand-600">
+    <Link href={teamLink(team)} className="font-medium text-mist-300 hover:text-brand-400">
       {team.teamName}
     </Link>
   );
@@ -81,14 +81,14 @@ export default function TransferFeedWidget() {
   if (!loading && transfers.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-      <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-        <FaExchangeAlt className="text-brand-500" /> Transfers
+    <div className="bg-ink-800 rounded-md border border-ink-600 p-4">
+      <h3 className="text-sm font-bold text-paper-50 flex items-center gap-2">
+        <PiArrowsLeftRightBold className="text-brand-400" /> Transfers
       </h3>
 
       <div className="mt-3 max-h-80 overflow-y-auto -mr-1 pr-1">
         {loading ? (
-          <p className="text-xs text-gray-500 py-2">Lädt…</p>
+          <p className="text-xs text-mist-400 py-2">Lädt…</p>
         ) : (
           <ul className="space-y-3">
             {transfers.map((t) => (
@@ -97,16 +97,16 @@ export default function TransferFeedWidget() {
                   <Avatar player={t.player} className="h-8 w-8" />
                 </Link>
                 <div className="min-w-0 text-sm leading-snug">
-                  <p className="text-gray-600">
+                  <p className="text-mist-400">
                     <Link
                       href={playerLink(t.player)}
-                      className="font-medium text-gray-900 hover:text-brand-600"
+                      className="font-medium text-paper-50 hover:text-brand-400"
                     >
                       {t.player?.firstName} {t.player?.lastName}
                     </Link>{" "}
                     <TransferText t={t} />
                   </p>
-                  <p className="text-[11px] text-gray-500">{timeAgo(t.createdAt)}</p>
+                  <p className="text-[11px] text-mist-400">{timeAgo(t.createdAt)}</p>
                 </div>
               </li>
             ))}

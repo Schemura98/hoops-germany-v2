@@ -3,11 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import {
-  FaBasketballBall,
-  FaCheckCircle,
-  FaExclamationTriangle,
-  FaChartBar,
-} from "react-icons/fa";
+  PiBasketballBold,
+  PiCheckCircleBold,
+  PiWarningBold,
+  PiChartBarBold,
+} from "react-icons/pi";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
 import Button from "@/components/ui/Button";
 import Loading from "@/components/ui/Loading";
@@ -238,8 +238,8 @@ export default function ErgebnisseTab({ team }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-gray-900">Ergebnisse</h2>
-      <p className="text-sm text-gray-500 -mt-2">
+      <h2 className="text-lg font-semibold text-paper-50">Ergebnisse</h2>
+      <p className="text-sm text-mist-400 -mt-2">
         Beide Teams melden ihr Ergebnis. Stimmen die Angaben überein, wird das Spiel
         bestätigt. Spieler-Statistiken könnt ihr jederzeit erfassen.
       </p>
@@ -248,7 +248,7 @@ export default function ErgebnisseTab({ team }) {
 
       {relevant.length === 0 ? (
         <EmptyState
-          icon={FaBasketballBall}
+          icon={PiBasketballBold}
           title="Noch keine Spiele vorhanden"
           text="Trage zuerst Spiele im Spielplan ein – danach könnt ihr hier Ergebnisse und Statistiken melden."
         />
@@ -273,27 +273,27 @@ export default function ErgebnisseTab({ team }) {
             return (
               <div
                 key={match._id}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5"
+                className="bg-ink-800 rounded-md border border-ink-600 p-5"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-gray-900">vs. {opp?.teamName || "Unbekannt"}</p>
-                    <p className="text-xs text-gray-500">{formatDate(match.date)}</p>
+                    <p className="font-medium text-paper-50">vs. {opp?.teamName || "Unbekannt"}</p>
+                    <p className="text-xs text-mist-400">{formatDate(match.date)}</p>
                   </div>
                   {confirmed && (
-                    <span className="inline-flex items-center gap-1.5 text-green-700 text-sm font-semibold">
-                      <FaCheckCircle /> Bestätigt
+                    <span className="inline-flex items-center gap-1.5 text-signal-ok text-sm font-semibold">
+                      <PiCheckCircleBold /> Bestätigt
                     </span>
                   )}
                   {mismatch && (
-                    <span className="inline-flex items-center gap-1.5 text-red-600 text-sm font-semibold">
-                      <FaExclamationTriangle /> Widerspruch
+                    <span className="inline-flex items-center gap-1.5 text-signal-error text-sm font-semibold">
+                      <PiWarningBold /> Widerspruch
                     </span>
                   )}
                 </div>
 
                 {!canEnter ? (
-                  <div className="mt-3 rounded-lg bg-gray-50 border border-gray-100 px-4 py-3 text-sm text-gray-500">
+                  <div className="mt-3 rounded-sm bg-ink-950 border border-ink-600 px-4 py-3 text-sm text-mist-400">
                     ⏳ Dieses Spiel findet erst am <strong>{formatDate(match.date)}</strong> statt –
                     Ergebnis &amp; Statistiken kannst du danach eintragen.
                   </div>
@@ -301,16 +301,16 @@ export default function ErgebnisseTab({ team }) {
                   <>
                 {/* Score */}
                 {confirmed ? (
-                  <div className="mt-3 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-center">
-                    <span className="text-2xl font-bold text-gray-900">
+                  <div className="mt-3 rounded-sm bg-signal-ok/10 border border-signal-ok/50 px-4 py-3 text-center">
+                    <span className="text-2xl font-bold text-paper-50">
                       {own.ownPoints} : {own.opponentPoints}
                     </span>
-                    <p className="text-xs text-gray-500 mt-1">Endstand (dein Team : Gegner)</p>
+                    <p className="text-xs text-mist-400 mt-1">Endstand (dein Team : Gegner)</p>
                   </div>
                 ) : (
                   <>
                     {mismatch && (
-                      <div className="mt-3 rounded-lg bg-red-50 border border-red-200 px-4 py-2 text-xs text-red-700">
+                      <div className="mt-3 rounded-sm bg-signal-error/10 border border-signal-error/50 px-4 py-2 text-xs text-signal-error">
                         Eure Meldung: <strong>{own?.ownPoints}:{own?.opponentPoints}</strong>
                         {otherSubmitted && (
                           <>
@@ -324,12 +324,12 @@ export default function ErgebnisseTab({ team }) {
                       </div>
                     )}
                     {!mismatch && ownSubmitted && !otherSubmitted && (
-                      <div className="mt-3 rounded-lg bg-amber-50 border border-amber-200 px-4 py-2 text-xs text-amber-700">
+                      <div className="mt-3 rounded-sm bg-signal-wait/10 border border-signal-wait/50 px-4 py-2 text-xs text-signal-wait">
                         Deine Meldung ist eingegangen – warte auf die Bestätigung des Gegners.
                       </div>
                     )}
                     {!mismatch && !ownSubmitted && otherSubmitted && (
-                      <div className="mt-3 rounded-lg bg-blue-50 border border-blue-200 px-4 py-2 text-xs text-blue-700">
+                      <div className="mt-3 rounded-sm bg-ink-700 border border-ink-600 px-4 py-2 text-xs text-mist-300">
                         Der Gegner hat bereits gemeldet. Trage jetzt euer Ergebnis ein.
                       </div>
                     )}
@@ -338,9 +338,9 @@ export default function ErgebnisseTab({ team }) {
                       <div>
                         <label
                           htmlFor={`own-${match._id}`}
-                          className="block text-xs font-medium text-gray-600 mb-1"
+                          className="block text-xs font-medium text-mist-400 mb-1"
                         >
-                          Eigene Punkte <span className="text-brand-600">*</span>
+                          Eigene Punkte <span className="text-brand-400">*</span>
                         </label>
                         <input
                           id={`own-${match._id}`}
@@ -352,15 +352,15 @@ export default function ErgebnisseTab({ team }) {
                           className={numInput}
                         />
                       </div>
-                      <span className="pb-2 text-gray-500 font-semibold" aria-hidden="true">
+                      <span className="pb-2 text-mist-400 font-semibold" aria-hidden="true">
                         :
                       </span>
                       <div>
                         <label
                           htmlFor={`opp-${match._id}`}
-                          className="block text-xs font-medium text-gray-600 mb-1"
+                          className="block text-xs font-medium text-mist-400 mb-1"
                         >
-                          Gegner-Punkte <span className="text-brand-600">*</span>
+                          Gegner-Punkte <span className="text-brand-400">*</span>
                         </label>
                         <input
                           id={`opp-${match._id}`}
@@ -388,19 +388,19 @@ export default function ErgebnisseTab({ team }) {
                 )}
 
                 {/* Statistik-Editor */}
-                <div className="mt-4 border-t border-gray-100 pt-3">
+                <div className="mt-4 border-t border-ink-600 pt-3">
                   <button
                     onClick={() => toggleStats(match)}
                     aria-expanded={statsOpen}
-                    className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-brand-600"
+                    className="inline-flex items-center gap-2 text-sm text-mist-400 hover:text-brand-400"
                   >
-                    <FaChartBar /> Spieler-Statistiken {statsOpen ? "ausblenden" : "erfassen"}
+                    <PiChartBarBold /> Spieler-Statistiken {statsOpen ? "ausblenden" : "erfassen"}
                   </button>
 
                   {statsOpen && (
                     <div className="mt-3">
                       {rosterList.length === 0 ? (
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-mist-400">
                           Kein Kader erfasst. Lege Slots im Kader-Tab an oder nimm Spieler auf.
                         </p>
                       ) : (
@@ -408,7 +408,7 @@ export default function ErgebnisseTab({ team }) {
                           <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                               <thead>
-                                <tr className="text-xs text-gray-500 text-left">
+                                <tr className="text-xs text-mist-400 text-left">
                                   <th className="font-medium py-1 pr-2">Spieler</th>
                                   <th className="font-medium py-1 text-center">PKT</th>
                                   <th className="font-medium py-1 text-center">AST</th>
@@ -421,11 +421,11 @@ export default function ErgebnisseTab({ team }) {
                                   const row = sForm[r.key] || {};
                                   const dnp = !!row.didNotPlay;
                                   return (
-                                    <tr key={r.key} className="border-t border-gray-100">
+                                    <tr key={r.key} className="border-t border-ink-600">
                                       <td className="py-1.5 pr-2">
-                                        <span className="text-gray-900">{r.name}</span>
+                                        <span className="text-paper-50">{r.name}</span>
                                         {r.position && (
-                                          <span className="text-xs text-gray-500"> · {r.position}</span>
+                                          <span className="text-xs text-mist-400"> · {r.position}</span>
                                         )}
                                       </td>
                                       <td className="py-1.5 text-center">
@@ -436,7 +436,7 @@ export default function ErgebnisseTab({ team }) {
                                           aria-label={`Punkte ${r.name}`}
                                           value={row.points ?? ""}
                                           onChange={(e) => setStatField(match._id, r.key, "points", e.target.value)}
-                                          className={`${statInput} disabled:bg-gray-50 disabled:text-gray-300`}
+                                          className={`${statInput} disabled:bg-ink-950 disabled:text-ink-500`}
                                         />
                                       </td>
                                       <td className="py-1.5 text-center">
@@ -447,7 +447,7 @@ export default function ErgebnisseTab({ team }) {
                                           aria-label={`Assists ${r.name}`}
                                           value={row.assists ?? ""}
                                           onChange={(e) => setStatField(match._id, r.key, "assists", e.target.value)}
-                                          className={`${statInput} disabled:bg-gray-50 disabled:text-gray-300`}
+                                          className={`${statInput} disabled:bg-ink-950 disabled:text-ink-500`}
                                         />
                                       </td>
                                       <td className="py-1.5 text-center">
@@ -458,7 +458,7 @@ export default function ErgebnisseTab({ team }) {
                                           aria-label={`Rebounds ${r.name}`}
                                           value={row.rebounds ?? ""}
                                           onChange={(e) => setStatField(match._id, r.key, "rebounds", e.target.value)}
-                                          className={`${statInput} disabled:bg-gray-50 disabled:text-gray-300`}
+                                          className={`${statInput} disabled:bg-ink-950 disabled:text-ink-500`}
                                         />
                                       </td>
                                       <td className="py-1.5 text-center">

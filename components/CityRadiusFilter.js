@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FaMapMarkerAlt, FaTimes } from "react-icons/fa";
+import { PiMapPinBold, PiXBold } from "react-icons/pi";
 import { loadCities, normalizeCity } from "@/lib/geo";
 
 const RADII = [10, 25, 50, 100];
@@ -55,7 +55,7 @@ export default function CityRadiusFilter({ value, onChange }) {
   return (
     <div className="flex flex-col sm:flex-row gap-2" ref={boxRef}>
       <div className="relative">
-        <FaMapMarkerAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
+        <PiMapPinBold className="absolute left-3 top-1/2 -translate-y-1/2 text-mist-400 text-sm" />
         <input
           value={term}
           onChange={(e) => {
@@ -64,27 +64,27 @@ export default function CityRadiusFilter({ value, onChange }) {
           }}
           onFocus={() => setOpen(true)}
           placeholder="Stadt (Umkreis)…"
-          className="w-full sm:w-56 rounded-xl border border-gray-200 pl-9 pr-8 py-3 text-sm text-gray-900 outline-none focus:border-brand-400 bg-white shadow-sm"
+          className="w-full sm:w-56 rounded-md border border-ink-600 pl-9 pr-8 py-3 text-sm text-paper-50 outline-none focus:border-brand-400 bg-ink-800"
         />
         {value?.center && (
           <button
             onClick={clear}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-mist-400 hover:text-mist-300"
             aria-label="Stadt-Filter löschen"
           >
-            <FaTimes className="text-sm" />
+            <PiXBold className="text-sm" />
           </button>
         )}
         {open && suggestions.length > 0 && (
-          <div className="absolute z-30 mt-1 w-full sm:w-72 bg-white rounded-xl shadow-lg border border-gray-100 max-h-64 overflow-y-auto">
+          <div className="absolute z-30 mt-1 w-full sm:w-72 bg-ink-800 rounded-md border border-ink-600 max-h-64 overflow-y-auto">
             {suggestions.map((c, i) => (
               <button
                 key={`${c.n}-${i}`}
                 onClick={() => pick(c)}
-                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between"
+                className="w-full text-left px-4 py-2 text-sm hover:bg-ink-700 flex items-center justify-between"
               >
-                <span className="text-gray-900">{c.n}</span>
-                <span className="text-xs text-gray-500">{c.s}</span>
+                <span className="text-paper-50">{c.n}</span>
+                <span className="text-xs text-mist-400">{c.s}</span>
               </button>
             ))}
           </div>
@@ -97,7 +97,7 @@ export default function CityRadiusFilter({ value, onChange }) {
           onChange({ center: value?.center || null, radiusKm: Number(e.target.value) })
         }
         disabled={!value?.center}
-        className="rounded-xl border border-gray-200 px-3 py-3 text-sm text-gray-700 bg-white shadow-sm outline-none focus:border-brand-400 disabled:opacity-50"
+        className="rounded-md border border-ink-600 px-3 py-3 text-sm text-mist-300 bg-ink-800 outline-none focus:border-brand-400 disabled:opacity-50"
       >
         {RADII.map((r) => (
           <option key={r} value={r}>

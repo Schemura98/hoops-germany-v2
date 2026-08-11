@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaBasketballBall, FaMapMarkerAlt, FaTrophy } from "react-icons/fa";
+import { PiBasketballBold, PiMapPinBold, PiTrophyBold } from "react-icons/pi";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
@@ -18,7 +18,7 @@ function TeamSide({ team, align = "left" }) {
   return (
     <div className={`flex items-center gap-2 min-w-0 ${align === "right" ? "flex-row-reverse text-right" : ""}`}>
       <Avatar name={team?.teamName} src={team?.logo} className="h-8 w-8" textClass="text-[10px]" square />
-      <span className="text-sm font-medium text-gray-900 truncate">
+      <span className="text-sm font-medium text-paper-50 truncate">
         {team?.teamName || "Unbekannt"}
       </span>
     </div>
@@ -48,19 +48,19 @@ function MatchCard({ match }) {
   return (
     <Link
       href={`/match/${match._id}`}
-      className="block bg-white rounded-2xl shadow-sm border border-gray-100 p-4 hover:shadow-md hover:border-brand-200 hover:-translate-y-0.5 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong motion-reduce:hover:translate-y-0"
+      className="block bg-ink-800 rounded-md border border-ink-600 p-4 hover:border-brand-500/50 hover:-translate-y-0.5 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong motion-reduce:hover:translate-y-0"
     >
       {(match.leagueId?.name || isPlayoff) && (
         <div className="mb-2 flex items-center justify-center gap-2">
           {match.leagueId?.name && (
-            <span className="text-[11px] font-medium text-gray-500">
+            <span className="text-[11px] font-medium text-mist-400">
               {match.leagueId.name}
               {match.leagueId.season ? ` · ${match.leagueId.season}` : ""}
             </span>
           )}
           {isPlayoff && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 text-[10px] font-semibold px-2 py-0.5">
-              <FaTrophy className="text-[9px]" /> Playoffs
+            <span className="inline-flex items-center gap-1 rounded-sm bg-signal-wait/10 text-signal-wait text-[10px] font-semibold px-2 py-0.5">
+              <PiTrophyBold className="text-[9px]" /> Playoffs
               {match.playoffRound ? ` · ${match.playoffRound}` : ""}
             </span>
           )}
@@ -70,25 +70,25 @@ function MatchCard({ match }) {
         <TeamSide team={match.teamA} />
         <div className="text-center">
           {score ? (
-            <span className="text-lg font-bold text-gray-900 whitespace-nowrap">
+            <span className="text-lg font-bold text-paper-50 whitespace-nowrap">
               {score.a} : {score.b}
             </span>
           ) : (
-            <span className="text-xs text-gray-500 font-medium">vs</span>
+            <span className="text-xs text-mist-400 font-medium">vs</span>
           )}
         </div>
         <TeamSide team={match.teamB} align="right" />
       </div>
-      <div className="mt-3 flex items-center justify-center gap-3 text-xs text-gray-500">
+      <div className="mt-3 flex items-center justify-center gap-3 text-xs text-mist-400">
         <span>{formatDate(match.date)}</span>
         {match.location && (
           <span className="flex items-center gap-1">
-            <FaMapMarkerAlt /> {match.location}
+            <PiMapPinBold /> {match.location}
           </span>
         )}
       </div>
       {resultPending && (
-        <div className="mt-2 text-center text-[11px] font-medium rounded-full px-3 py-1 bg-gray-100 text-gray-600">
+        <div className="mt-2 text-center text-[11px] font-medium rounded-sm px-3 py-1 bg-ink-700 text-mist-400">
           Ergebnis ausstehend
         </div>
       )}
@@ -96,8 +96,8 @@ function MatchCard({ match }) {
         <div
           className={`mt-2 text-center text-[11px] font-medium rounded-full px-3 py-1 ${
             verify.state === "mismatch"
-              ? "bg-red-50 text-red-600"
-              : "bg-amber-50 text-amber-700"
+              ? "bg-signal-error/10 text-signal-error"
+              : "bg-signal-wait/10 text-signal-wait"
           }`}
         >
           {verify.label}
@@ -111,7 +111,7 @@ function MatchCard({ match }) {
 // Tabs-/Filter-Platzhalter für die Listenseite.
 function MatchCardSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-4">
+    <div className="bg-ink-800 rounded-md border border-ink-600 p-4">
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
         <div className="flex items-center gap-2">
           <Skeleton className="h-8 w-8 rounded-full" />
@@ -131,10 +131,10 @@ function MatchCardSkeleton() {
 function SpielePageSkeleton() {
   return (
     <div>
-      <Skeleton className="h-10 w-full max-w-md rounded-xl mb-4" />
+      <Skeleton className="h-10 w-full max-w-md rounded-md mb-4" />
       <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 gap-2">
         {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-9 rounded-lg" />
+          <Skeleton key={i} className="h-9 rounded-sm" />
         ))}
       </div>
       <div className="space-y-3">
@@ -233,7 +233,7 @@ export default function SpielePage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-ink-950 flex flex-col">
       <Navbar />
 
       <PageHeader
@@ -248,7 +248,7 @@ export default function SpielePage() {
         ) : error ? (
           <EmptyState title="Spiele konnten nicht geladen werden." />
         ) : matches.length === 0 ? (
-          <EmptyState icon={FaBasketballBall} title="Noch keine Spiele angesetzt." />
+          <EmptyState icon={PiBasketballBold} title="Noch keine Spiele angesetzt." />
         ) : (
           <div>
             <Tabs
@@ -309,7 +309,7 @@ export default function SpielePage() {
                     setOrt("");
                     setDateFrom("");
                   }}
-                  className="rounded-lg border border-gray-200 text-sm text-gray-500 hover:text-brand-600 hover:border-brand-300"
+                  className="rounded-sm border border-ink-600 text-sm text-mist-400 hover:text-brand-400 hover:border-brand-300"
                 >
                   Filter zurücksetzen
                 </button>

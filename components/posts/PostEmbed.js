@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FaGlobe, FaExternalLinkAlt, FaPlay, FaImage } from "react-icons/fa";
+import { PiGlobeBold, PiArrowSquareOutBold, PiPlayBold, PiImageBold } from "react-icons/pi";
 
 // Rendert das denormalisierte Embed eines Beitrags. Inhalte von Drittanbietern
 // (YouTube-Player, externe Vorschaubilder) werden aus Datenschutzgründen NICHT
@@ -18,7 +18,7 @@ export default function PostEmbed({ embed }) {
   if (embed.type === "youtube" && embed.videoId) {
     return (
       <div
-        className="mt-3 relative w-full overflow-hidden rounded-xl bg-slate-900"
+        className="mt-3 relative w-full overflow-hidden rounded-md bg-ink-900"
         style={{ paddingBottom: "56.25%" }}
       >
         {ytLoaded ? (
@@ -35,13 +35,13 @@ export default function PostEmbed({ embed }) {
           <button
             type="button"
             onClick={() => setYtLoaded(true)}
-            className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/90 transition-colors hover:bg-slate-800"
+            className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-paper-50/90 transition-colors hover:bg-ink-700"
           >
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg">
-              <FaPlay className="ml-1" />
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-500 text-ink-950">
+              <PiPlayBold className="ml-1" />
             </span>
             <span className="text-sm font-medium">Video von YouTube laden</span>
-            <span className="max-w-xs px-6 text-center text-[11px] leading-snug text-white/50">
+            <span className="max-w-xs px-6 text-center text-[11px] leading-snug text-paper-50/50">
               Erst beim Klick wird eine Verbindung zu YouTube (Google) hergestellt.
             </span>
           </button>
@@ -54,7 +54,7 @@ export default function PostEmbed({ embed }) {
   if (embed.type === "link" && embed.url) {
     if (embed.title || embed.image) {
       return (
-        <div className="mt-3 overflow-hidden rounded-xl border border-gray-200">
+        <div className="mt-3 overflow-hidden rounded-md border border-ink-600">
           {embed.image &&
             (imgLoaded ? (
               <a href={embed.url} target="_blank" rel="noopener noreferrer">
@@ -64,34 +64,34 @@ export default function PostEmbed({ embed }) {
                   alt=""
                   loading="lazy"
                   referrerPolicy="no-referrer"
-                  className="h-44 w-full bg-gray-100 object-cover"
+                  className="h-44 w-full bg-ink-700 object-cover"
                 />
               </a>
             ) : (
               <button
                 type="button"
                 onClick={() => setImgLoaded(true)}
-                className="flex h-28 w-full items-center justify-center gap-2 bg-gray-100 text-xs text-gray-500 transition-colors hover:bg-gray-200"
+                className="flex h-28 w-full items-center justify-center gap-2 bg-ink-700 text-xs text-mist-400 transition-colors hover:bg-ink-700"
               >
-                <FaImage /> Vorschaubild laden
+                <PiImageBold /> Vorschaubild laden
               </button>
             ))}
           <a
             href={embed.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="block p-3 transition-colors hover:bg-gray-50"
+            className="block p-3 transition-colors hover:bg-ink-700"
           >
-            <span className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-gray-500">
-              <FaGlobe className="text-[10px]" /> {embed.domain}
+            <span className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-mist-400">
+              <PiGlobeBold className="text-[10px]" /> {embed.domain}
             </span>
             {embed.title && (
-              <span className="mt-1 block text-sm font-semibold text-gray-900 line-clamp-2">
+              <span className="mt-1 block text-sm font-semibold text-paper-50 line-clamp-2">
                 {embed.title}
               </span>
             )}
             {embed.description && (
-              <span className="mt-1 block text-xs text-gray-500 line-clamp-2">
+              <span className="mt-1 block text-xs text-mist-400 line-clamp-2">
                 {embed.description}
               </span>
             )}
@@ -106,16 +106,16 @@ export default function PostEmbed({ embed }) {
         href={embed.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-3 flex items-center gap-3 rounded-xl border border-gray-200 p-3 transition-colors hover:border-brand-300 hover:bg-gray-50"
+        className="mt-3 flex items-center gap-3 rounded-md border border-ink-600 p-3 transition-colors hover:border-brand-300 hover:bg-ink-700"
       >
-        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500">
-          <FaGlobe />
+        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-sm bg-ink-700 text-mist-400">
+          <PiGlobeBold />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-sm font-medium text-gray-900">{embed.domain}</span>
-          <span className="block truncate text-xs text-gray-500">{embed.url}</span>
+          <span className="block text-sm font-medium text-paper-50">{embed.domain}</span>
+          <span className="block truncate text-xs text-mist-400">{embed.url}</span>
         </span>
-        <FaExternalLinkAlt className="flex-shrink-0 text-xs text-gray-500" />
+        <PiArrowSquareOutBold className="flex-shrink-0 text-xs text-mist-400" />
       </a>
     );
   }

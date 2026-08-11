@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaTrash, FaRegHeart, FaRegComment } from "react-icons/fa";
+import { PiTrashBold, PiHeartBold, PiChatCircleBold } from "react-icons/pi";
 import AdminShell from "@/components/layout/AdminShell";
 import { getAdminToken } from "@/lib/clientAuth";
 import { timeAgo } from "@/lib/timeAgo";
@@ -43,12 +43,12 @@ export default function AdminModerationPage() {
 
   return (
     <AdminShell title="Moderation">
-      <p className="text-sm text-gray-500 -mt-4 mb-6">Neueste Beiträge der Community.</p>
+      <p className="text-sm text-mist-400 -mt-4 mb-6">Neueste Beiträge der Community.</p>
 
       {loading ? (
-        <p className="text-gray-500">Lädt…</p>
+        <p className="text-mist-400">Lädt…</p>
       ) : posts.length === 0 ? (
-        <p className="text-gray-500">Keine Beiträge vorhanden.</p>
+        <p className="text-mist-400">Keine Beiträge vorhanden.</p>
       ) : (
         <div className="space-y-3">
           {posts.map((post) => {
@@ -56,7 +56,7 @@ export default function AdminModerationPage() {
             return (
               <div
                 key={post._id}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4"
+                className="bg-ink-800 rounded-md border border-ink-600 p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
@@ -64,41 +64,41 @@ export default function AdminModerationPage() {
                     <div className="min-w-0">
                       <Link
                         href={a?.slug || a?._id ? `/player/view-player/${a.slug || a._id}` : "#"}
-                        className="text-sm font-medium text-gray-900 hover:text-brand-600"
+                        className="text-sm font-medium text-paper-50 hover:text-brand-400"
                       >
                         {a?.firstName} {a?.lastName}
                       </Link>
-                      <p className="text-xs text-gray-500">{timeAgo(post.createdAt)}</p>
+                      <p className="text-xs text-mist-400">{timeAgo(post.createdAt)}</p>
                     </div>
                   </div>
                   <button
                     onClick={() => remove(post._id)}
                     disabled={busyId === post._id}
-                    className="text-gray-500 hover:text-red-600 disabled:opacity-60 p-1.5 flex-shrink-0"
+                    className="text-mist-400 hover:text-signal-error disabled:opacity-60 p-1.5 flex-shrink-0"
                     title="Beitrag löschen"
                   >
-                    <FaTrash />
+                    <PiTrashBold />
                   </button>
                 </div>
 
                 {post.content && (
-                  <p className="mt-2 text-sm text-gray-800 whitespace-pre-line">{post.content}</p>
+                  <p className="mt-2 text-sm text-paper-50 whitespace-pre-line">{post.content}</p>
                 )}
                 {post.image && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={post.image}
                     alt=""
-                    className="mt-2 rounded-xl max-h-60 w-full object-cover"
+                    className="mt-2 rounded-md max-h-60 w-full object-cover"
                   />
                 )}
 
-                <div className="mt-3 flex items-center gap-5 text-xs text-gray-500">
+                <div className="mt-3 flex items-center gap-5 text-xs text-mist-400">
                   <span className="inline-flex items-center gap-1">
-                    <FaRegHeart /> {(post.likes || []).length}
+                    <PiHeartBold /> {(post.likes || []).length}
                   </span>
                   <span className="inline-flex items-center gap-1">
-                    <FaRegComment /> {(post.comments || []).length}
+                    <PiChatCircleBold /> {(post.comments || []).length}
                   </span>
                 </div>
               </div>

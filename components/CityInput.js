@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FaMapMarkerAlt } from "react-icons/fa";
+import { PiMapPinBold } from "react-icons/pi";
 import { loadCities, normalizeCity } from "@/lib/geo";
 
 // Stadt-Eingabe mit Typeahead aus dem deutschen Städte-Datensatz.
@@ -41,7 +41,7 @@ export default function CityInput({ value = "", onChange, onPick, placeholder = 
 
   const inputClass =
     className ||
-    "w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+    "w-full rounded-sm border border-ink-600 px-4 py-2.5 text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
 
   function pick(c) {
     onChange?.(c.n);
@@ -51,7 +51,7 @@ export default function CityInput({ value = "", onChange, onPick, placeholder = 
 
   return (
     <div className="relative" ref={boxRef}>
-      <FaMapMarkerAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none" />
+      <PiMapPinBold className="absolute left-3 top-1/2 -translate-y-1/2 text-mist-400 text-sm pointer-events-none" />
       <input
         value={value}
         onChange={(e) => {
@@ -64,16 +64,16 @@ export default function CityInput({ value = "", onChange, onPick, placeholder = 
         autoComplete="off"
       />
       {open && suggestions.length > 0 && (
-        <div className="absolute z-30 mt-1 w-full bg-white rounded-xl shadow-lg border border-gray-100 max-h-60 overflow-y-auto">
+        <div className="absolute z-30 mt-1 w-full bg-ink-800 rounded-md border border-ink-600 max-h-60 overflow-y-auto">
           {suggestions.map((c, i) => (
             <button
               key={`${c.n}-${i}`}
               type="button"
               onClick={() => pick(c)}
-              className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between"
+              className="w-full text-left px-4 py-2 text-sm hover:bg-ink-700 flex items-center justify-between"
             >
-              <span className="text-gray-900">{c.n}</span>
-              <span className="text-xs text-gray-500">{c.s}</span>
+              <span className="text-paper-50">{c.n}</span>
+              <span className="text-xs text-mist-400">{c.s}</span>
             </button>
           ))}
         </div>

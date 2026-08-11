@@ -18,12 +18,12 @@ const selectClass = `${inputClassSm} sm:w-auto`;
 // Tabellenzeilen-Skeleton im Format der echten Rangliste (Rang + Team + Sp/S/N/+-).
 function RanglisteSkeleton() {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="divide-y divide-gray-50">
+    <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
+      <div className="divide-y divide-ink-600">
         {Array.from({ length: 10 }).map((_, i) => (
           <div key={i} className="flex items-center gap-3 px-4 py-3">
             <Skeleton className="h-7 w-7 rounded-full flex-shrink-0" />
-            <Skeleton className="h-8 w-8 rounded-lg flex-shrink-0" />
+            <Skeleton className="h-8 w-8 rounded-sm flex-shrink-0" />
             <div className="flex-1">
               <Skeleton className="h-3.5 w-1/3 mb-1.5" />
               <Skeleton className="h-3 w-1/4" />
@@ -42,10 +42,10 @@ function RanglisteSkeleton() {
 function rankBadge(i) {
   const base =
     "inline-flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold";
-  if (i === 0) return `${base} bg-amber-100 text-amber-700`;
-  if (i === 1) return `${base} bg-gray-200 text-gray-600`;
-  if (i === 2) return `${base} bg-brand-100 text-brand-700`;
-  return `${base} text-gray-500`;
+  if (i === 0) return `${base} bg-signal-wait/15 text-signal-wait`;
+  if (i === 1) return `${base} bg-ink-700 text-mist-400`;
+  if (i === 2) return `${base} bg-brand-500/15 text-brand-400`;
+  return `${base} text-mist-400`;
 }
 
 export default function RanglistePage() {
@@ -98,7 +98,7 @@ export default function RanglistePage() {
   }, [standings, bundesland]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-ink-950 flex flex-col">
       <Navbar />
 
       <PageHeader
@@ -162,18 +162,18 @@ export default function RanglistePage() {
         {loading ? (
           <RanglisteSkeleton />
         ) : rows.length === 0 ? (
-          <p className="text-center text-gray-500 py-16">
+          <p className="text-center text-mist-400 py-16">
             Noch keine Ergebnisse für diese Auswahl.
           </p>
         ) : (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
             <ScrollTable label="Rangliste, seitlich scrollbar">
             <table className="w-full text-sm">
               <thead>
                 {/* Rang und Team bleiben beim seitlichen Wischen stehen –
                     sonst sieht man auf dem Handy entweder den Namen oder die
                     Korbdifferenz, nie beides (Design-Review Welle 3). */}
-                <tr className="bg-white text-xs uppercase tracking-wide text-gray-500 border-b border-gray-100">
+                <tr className="bg-ink-800 text-xs uppercase tracking-wide text-mist-400 border-b border-ink-600">
                   <th className="sticky left-0 z-10 bg-inherit text-left font-medium px-3 py-3 w-14">#</th>
                   <th className="sticky left-14 z-10 bg-inherit text-left font-medium px-2 py-3">Team</th>
                   <th className="text-center font-medium px-2 py-3 w-12">Sp</th>
@@ -182,9 +182,9 @@ export default function RanglistePage() {
                   <th className="text-center font-medium px-3 py-3 w-16">+/–</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-ink-600">
                 {rows.map((t, i) => (
-                  <tr key={t.teamId} className="bg-white hover:bg-gray-50 transition-colors">
+                  <tr key={t.teamId} className="bg-ink-800 hover:bg-ink-700 transition-colors">
                     <td className="sticky left-0 z-10 bg-inherit px-3 py-3 w-14">
                       <span className={rankBadge(i)}>{i + 1}</span>
                     </td>
@@ -201,34 +201,34 @@ export default function RanglistePage() {
                           square
                         />
                         <span className="min-w-0">
-                          <span className="block truncate font-medium text-gray-900 group-hover:text-brand-600">
+                          <span className="block truncate font-medium text-paper-50 group-hover:text-brand-400">
                             {t.teamName}
                           </span>
                           {t.bundesland && (
-                            <span className="block text-xs text-gray-500">
+                            <span className="block text-xs text-mist-400">
                               {t.bundesland}
                             </span>
                           )}
                         </span>
                       </Link>
                     </td>
-                    <td className="text-center px-2 py-3 text-gray-600 tabular-nums">
+                    <td className="font-mono tabular-nums text-center px-2 py-3 text-mist-400 tabular-nums">
                       {t.games}
                     </td>
                     {/* Podium zaehlt hoch, der Rest steht sofort (Entscheid Vivien) */}
-                    <td className="text-center px-2 py-3 font-semibold text-gray-900 tabular-nums">
+                    <td className="font-mono tabular-nums text-center px-2 py-3 font-semibold text-paper-50 tabular-nums">
                       {i < 3 ? <CountUp value={t.wins} /> : t.wins}
                     </td>
-                    <td className="text-center px-2 py-3 text-gray-500 tabular-nums">
+                    <td className="font-mono tabular-nums text-center px-2 py-3 text-mist-400 tabular-nums">
                       {i < 3 ? <CountUp value={t.losses} /> : t.losses}
                     </td>
                     <td
                       className={`text-center px-3 py-3 font-medium tabular-nums ${
                         t.diff > 0
-                          ? "text-green-600"
+                          ? "text-signal-ok"
                           : t.diff < 0
-                          ? "text-red-500"
-                          : "text-gray-500"
+                          ? "text-signal-error"
+                          : "text-mist-400"
                       }`}
                     >
                       {i < 3 ? (

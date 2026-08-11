@@ -159,7 +159,7 @@ export default function MentionTextarea({
       {multiline ? <textarea {...shared} rows={rows} /> : <input {...shared} />}
 
       {open && results.length > 0 && (
-        <ul className="absolute z-20 left-0 right-0 mt-1 max-h-64 overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
+        <ul className="absolute z-20 left-0 right-0 mt-1 max-h-64 overflow-y-auto rounded-md border border-ink-600 bg-ink-800 py-1">
           {results.map((p, i) => (
             <li key={p.playerId}>
               <button
@@ -171,7 +171,7 @@ export default function MentionTextarea({
                 }}
                 onMouseEnter={() => setIndex(i)}
                 className={`flex w-full items-center gap-2 px-3 py-2 text-left ${
-                  i === index ? "bg-brand-50" : "hover:bg-gray-50"
+                  i === index ? "bg-brand-500/10" : "hover:bg-ink-700"
                 }`}
               >
                 <BaseAvatar
@@ -181,11 +181,11 @@ export default function MentionTextarea({
                   textClass="text-[10px]"
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-gray-900">
+                  <span className="block truncate text-sm font-medium text-paper-50">
                     {p.name}
                   </span>
                   {(p.position || p.teamName) && (
-                    <span className="block truncate text-xs text-gray-500">
+                    <span className="block truncate text-xs text-mist-400">
                       {[p.position, p.teamName].filter(Boolean).join(" · ")}
                     </span>
                   )}

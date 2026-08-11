@@ -46,16 +46,16 @@ export default function LegalShell({ title, eyebrow = "Rechtliches", children })
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-ink-950 flex flex-col">
       <Navbar />
       <PageHeader eyebrow={eyebrow} title={title} />
       <main className="flex-1 max-w-xl mx-auto w-full px-4 py-10">
         {abschnitte.length > 5 && (
           <nav
             aria-label="Abschnitte dieser Seite"
-            className="mb-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
+            className="mb-4 rounded-md border border-ink-600 bg-ink-800 p-4"
           >
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-mist-400">
               Auf dieser Seite
             </p>
             {/* Als Chips statt als Fließliste: Bei zehn Abschnitten mit langen
@@ -65,7 +65,7 @@ export default function LegalShell({ title, eyebrow = "Rechtliches", children })
                 <li key={a.id}>
                   <a
                     href={`#${a.id}`}
-                    className="inline-block rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-brand-50 hover:text-brand-700"
+                    className="inline-block rounded-full bg-ink-950 px-3 py-1.5 text-xs font-medium text-mist-400 transition-colors hover:bg-brand-500/10 hover:text-brand-400"
                   >
                     {a.text}
                   </a>
@@ -74,7 +74,7 @@ export default function LegalShell({ title, eyebrow = "Rechtliches", children })
             </ol>
           </nav>
         )}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-4 text-sm text-gray-600 leading-relaxed">
+        <div className="bg-ink-800 rounded-md border border-ink-600 p-8 space-y-4 text-sm text-mist-400 leading-relaxed">
           {inhalt}
         </div>
       </main>
@@ -88,7 +88,7 @@ export default function LegalShell({ title, eyebrow = "Rechtliches", children })
 // unter der klebenden Navbar sichtbar.
 export function LegalHeading({ id, children }) {
   return (
-    <h2 id={id} className="scroll-mt-24 text-base font-semibold text-gray-900 pt-2">
+    <h2 id={id} className="scroll-mt-24 text-base font-semibold text-paper-50 pt-2">
       {children}
     </h2>
   );

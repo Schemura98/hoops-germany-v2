@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import axios from "axios";
-import { FaFlag } from "react-icons/fa";
+import { PiFlagBold } from "react-icons/pi";
 import { getPlayerToken } from "@/lib/clientAuth";
 
 // „Liga melden": meldet eine fehlende oder falsche Liga an die Super-Admins.
@@ -36,7 +36,7 @@ export default function LeagueReportLink({ bundesland = "", className = "" }) {
 
   if (done) {
     return (
-      <p className={`text-xs text-green-600 ${className}`}>
+      <p className={`text-xs text-signal-ok ${className}`}>
         Danke! Deine Liga-Meldung ist bei den Admins eingegangen.
       </p>
     );
@@ -47,43 +47,43 @@ export default function LeagueReportLink({ bundesland = "", className = "" }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`text-xs text-brand-600 hover:underline inline-flex items-center gap-1 ${className}`}
+        className={`text-xs text-brand-400 hover:underline inline-flex items-center gap-1 ${className}`}
       >
-        <FaFlag className="text-[10px]" /> Liga fehlt oder stimmt nicht? Den Admins melden
+        <PiFlagBold className="text-[10px]" /> Liga fehlt oder stimmt nicht? Den Admins melden
       </button>
     );
   }
 
   return (
-    <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 space-y-2">
-      <p className="text-xs font-medium text-amber-800">Liga melden (geht an die Super-Admins)</p>
+    <div className="rounded-sm bg-signal-wait/10 border border-signal-wait/50 p-3 space-y-2">
+      <p className="text-xs font-medium text-signal-wait">Liga melden (geht an die Super-Admins)</p>
       <input
         value={leagueName}
         onChange={(e) => setLeagueName(e.target.value)}
         placeholder="Name der Liga (falls bekannt)"
-        className="w-full rounded-md border border-gray-300 px-2.5 py-1.5 text-sm outline-none focus:border-brand-500"
+        className="w-full rounded-md border border-ink-600 px-2.5 py-1.5 text-sm outline-none focus:border-brand-500"
       />
       <textarea
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         rows={3}
         placeholder="Was fehlt oder stimmt nicht?"
-        className="w-full rounded-md border border-gray-300 px-2.5 py-1.5 text-sm outline-none focus:border-brand-500 resize-none"
+        className="w-full rounded-md border border-ink-600 px-2.5 py-1.5 text-sm outline-none focus:border-brand-500 resize-none"
       />
-      {err && <p className="text-xs text-red-600">{err}</p>}
+      {err && <p className="text-xs text-signal-error">{err}</p>}
       <div className="flex gap-2">
         <button
           type="button"
           onClick={submit}
           disabled={sending}
-          className="text-xs bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-md px-3 py-1.5 font-medium"
+          className="text-xs bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-md px-3 py-1.5 font-medium"
         >
           {sending ? "Senden…" : "Melden"}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="text-xs text-gray-500 hover:text-gray-800 px-2 py-1.5"
+          className="text-xs text-mist-400 hover:text-paper-50 px-2 py-1.5"
         >
           Abbrechen
         </button>

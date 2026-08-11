@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaBasketballBall, FaMapMarkerAlt } from "react-icons/fa";
+import { PiBasketballBold, PiMapPinBold } from "react-icons/pi";
 import { getPlayerToken } from "@/lib/clientAuth";
 import Avatar from "@/components/Avatar";
 import Tabs from "@/components/ui/Tabs";
@@ -36,7 +36,7 @@ function TeamRow({ team, points, isWinner }) {
       />
       <span
         className={`flex-1 truncate text-sm ${
-          isWinner ? "font-semibold text-gray-900" : "text-gray-700"
+          isWinner ? "font-semibold text-paper-50" : "text-mist-300"
         }`}
       >
         {team?.teamName || "Unbekannt"}
@@ -44,7 +44,7 @@ function TeamRow({ team, points, isWinner }) {
       {points != null && (
         <span
           className={`text-sm tabular-nums ${
-            isWinner ? "font-bold text-gray-900" : "text-gray-500"
+            isWinner ? "font-bold text-paper-50" : "text-mist-400"
           }`}
         >
           {points}
@@ -64,17 +64,17 @@ function MatchMini({ match }) {
   return (
     <Link
       href={`/match/${match._id}`}
-      className="block rounded-xl border border-gray-100 hover:border-brand-200 hover:bg-gray-50 px-3 py-2.5 transition-colors"
+      className="block rounded-md border border-ink-600 hover:border-brand-500/50 hover:bg-ink-700 px-3 py-2.5 transition-colors"
     >
       <div className="space-y-1.5">
         <TeamRow team={match.teamA} points={score?.a} isWinner={!!winId && winId === aId} />
         <TeamRow team={match.teamB} points={score?.b} isWinner={!!winId && winId === bId} />
       </div>
-      <div className="mt-2 flex items-center gap-2 text-[11px] text-gray-500">
+      <div className="mt-2 flex items-center gap-2 text-[11px] text-mist-400">
         <span className="whitespace-nowrap">{dateLabel(match.date)}</span>
         {match.location && (
           <span className="flex items-center gap-1 min-w-0 truncate">
-            <FaMapMarkerAlt className="flex-shrink-0" /> {match.location}
+            <PiMapPinBold className="flex-shrink-0" /> {match.location}
           </span>
         )}
       </div>
@@ -82,8 +82,8 @@ function MatchMini({ match }) {
         <div
           className={`mt-1.5 text-[10px] font-medium rounded-full px-2 py-0.5 inline-block ${
             verify.state === "mismatch"
-              ? "bg-red-50 text-red-600"
-              : "bg-amber-50 text-amber-700"
+              ? "bg-signal-error/10 text-signal-error"
+              : "bg-signal-wait/10 text-signal-wait"
           }`}
         >
           {verify.label}
@@ -151,17 +151,17 @@ export default function TeamMatchesWidget() {
   const list = tab === "upcoming" ? upcoming : results;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-      <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-        <FaBasketballBall className="text-brand-500" /> Spiele
+    <div className="bg-ink-800 rounded-md border border-ink-600 p-4">
+      <h3 className="text-sm font-bold text-paper-50 flex items-center gap-2">
+        <PiBasketballBold className="text-brand-400" /> Spiele
       </h3>
 
       {showScopeToggle && (
-        <div className="mt-3 grid grid-cols-2 gap-1 rounded-lg bg-gray-100 p-1 text-xs font-medium">
+        <div className="mt-3 grid grid-cols-2 gap-1 rounded-sm bg-ink-700 p-1 text-xs font-medium">
           <button
             onClick={() => setScope("mine")}
             className={`rounded-md px-2 py-1.5 transition-colors ${
-              scope === "mine" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
+              scope === "mine" ? "bg-ink-800 text-paper-50" : "text-mist-400"
             }`}
           >
             Mein Team
@@ -169,7 +169,7 @@ export default function TeamMatchesWidget() {
           <button
             onClick={() => setScope("followed")}
             className={`rounded-md px-2 py-1.5 transition-colors ${
-              scope === "followed" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
+              scope === "followed" ? "bg-ink-800 text-paper-50" : "text-mist-400"
             }`}
           >
             Gefolgte
@@ -193,14 +193,14 @@ export default function TeamMatchesWidget() {
         {loading ? (
           <Loading className="py-6" size="text-xl" />
         ) : !hasMine && !hasFollowed ? (
-          <p className="text-xs text-gray-500 py-4">
+          <p className="text-xs text-mist-400 py-4">
             Tritt einem Team bei oder folge Teams, um ihre Spiele hier zu sehen.{" "}
-            <Link href="/teams" className="text-brand-600 font-medium">
+            <Link href="/teams" className="text-brand-400 font-medium">
               Teams entdecken
             </Link>
           </p>
         ) : list.length === 0 ? (
-          <p className="text-xs text-gray-500 py-4">
+          <p className="text-xs text-mist-400 py-4">
             {tab === "upcoming"
               ? "Keine anstehenden Spiele."
               : "Noch keine Ergebnisse."}
@@ -212,7 +212,7 @@ export default function TeamMatchesWidget() {
             ))}
             <Link
               href="/spiele"
-              className="block text-center text-xs font-medium text-brand-600 hover:text-brand-700 pt-1"
+              className="block text-center text-xs font-medium text-brand-400 hover:text-brand-400 pt-1"
             >
               Alle Spiele ansehen
             </Link>

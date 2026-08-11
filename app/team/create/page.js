@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
-import { FaBasketballBall, FaUsers } from "react-icons/fa";
+import { PiBasketballBold, PiUsersBold } from "react-icons/pi";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { getPlayerToken } from "@/lib/clientAuth";
 import { BUNDESLAENDER, LEAGUE_LEVELS, LEAGUE_GENDERS, LEAGUE_AGE_GROUPS } from "@/lib/constants";
@@ -89,38 +89,38 @@ export default function TeamCreatePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-ink-950">
       <PlayerNav player={player} />
 
       <main className="max-w-lg mx-auto px-4 py-10">
         <div className="text-center mb-6">
-          <span className="inline-flex h-14 w-14 rounded-2xl bg-brand-100 text-brand-600 items-center justify-center mb-3">
-            <FaUsers className="text-2xl" />
+          <span className="inline-flex h-14 w-14 rounded-md bg-brand-500/15 text-brand-400 items-center justify-center mb-3">
+            <PiUsersBold className="text-2xl" />
           </span>
-          <h1 className="text-2xl font-bold text-gray-900">Team gründen</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="font-display uppercase tracking-tight text-2xl font-black text-paper-50">Team gründen</h1>
+          <p className="text-sm text-mist-400 mt-1">
             Erstelle dein Team – du wirst automatisch Team-Admin und kannst Kader,
             Spiele, Ergebnisse und Tryouts verwalten.
           </p>
         </div>
 
         {error && (
-          <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          <div className="mb-4 rounded-sm bg-signal-error/10 border border-signal-error/50 px-4 py-3 text-sm text-signal-error">
             {error}
           </div>
         )}
 
         <form
           onSubmit={onSubmit}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4"
+          className="bg-ink-800 rounded-md border border-ink-600 p-6 space-y-4"
         >
-          <p className="text-xs text-gray-500">
-            Mit <span className="text-brand-600">*</span> markierte Felder sind Pflichtfelder.
+          <p className="text-xs text-mist-400">
+            Mit <span className="text-brand-400">*</span> markierte Felder sind Pflichtfelder.
           </p>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-mist-300 mb-1">
               Teamname{" "}
-              <span className="text-brand-600" aria-hidden="true">
+              <span className="text-brand-400" aria-hidden="true">
                 *
               </span>
             </label>
@@ -135,8 +135,8 @@ export default function TeamCreatePage() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Stadt/Region <span className="text-gray-500">(optional)</span>
+              <label className="block text-sm font-medium text-mist-300 mb-1">
+                Stadt/Region <span className="text-mist-400">(optional)</span>
               </label>
               <CityInput
                 value={form.region}
@@ -148,8 +148,8 @@ export default function TeamCreatePage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Bundesland <span className="text-gray-500">(optional)</span>
+              <label className="block text-sm font-medium text-mist-300 mb-1">
+                Bundesland <span className="text-mist-400">(optional)</span>
               </label>
               <select
                 name="bundesland"
@@ -167,12 +167,12 @@ export default function TeamCreatePage() {
             </div>
           </div>
           {/* Liga-Auswahl aus dem offiziellen Katalog */}
-          <div className="rounded-xl border border-gray-200 p-4 space-y-3">
+          <div className="rounded-md border border-ink-600 p-4 space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Liga <span className="text-gray-500">(optional)</span>
+              <label className="block text-sm font-medium text-mist-300">
+                Liga <span className="text-mist-400">(optional)</span>
               </label>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-mist-400 mt-0.5">
                 Wähle die Liga, in der dein Team spielt – grenze sie über Bundesland (oben) und
                 die Filter ein.
               </p>
@@ -230,7 +230,7 @@ export default function TeamCreatePage() {
               ))}
             </select>
             {matchingLeagues.length === 0 && (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-mist-400">
                 Keine passende Liga gefunden. Du kannst dein Team auch ohne Liga gründen und sie
                 später wählen.
               </p>
@@ -239,8 +239,8 @@ export default function TeamCreatePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Über das Team <span className="text-gray-500">(optional)</span>
+            <label className="block text-sm font-medium text-mist-300 mb-1">
+              Über das Team <span className="text-mist-400">(optional)</span>
             </label>
             <textarea
               name="about"
@@ -257,8 +257,8 @@ export default function TeamCreatePage() {
           </Button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-gray-500">
-          <Link href="/teams" className="text-brand-600 hover:underline">
+        <p className="mt-4 text-center text-sm text-mist-400">
+          <Link href="/teams" className="text-brand-400 hover:underline">
             Erst Teams entdecken
           </Link>
         </p>

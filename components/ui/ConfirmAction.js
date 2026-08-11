@@ -71,11 +71,11 @@ export default function ConfirmAction({
         <div
           role="dialog"
           aria-modal="true"
-          className={`absolute z-20 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-gray-200 bg-white p-4 shadow-lg ${
+          className={`absolute z-20 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-md border border-ink-600 bg-ink-800 p-4 ${
             align === "right" ? "right-0" : "left-0"
           } ${panelClassName}`}
         >
-          <p className="text-sm font-medium text-gray-800">{message}</p>
+          <p className="text-sm font-medium text-paper-50">{message}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Button
               autoFocus

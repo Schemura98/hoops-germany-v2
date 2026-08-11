@@ -4,15 +4,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
 import {
-  FaUsers,
-  FaMapMarkerAlt,
-  FaBasketballBall,
-  FaCalendarAlt,
-  FaNewspaper,
-  FaTrophy,
-  FaHistory,
-  FaCrown,
-} from "react-icons/fa";
+  PiUsersBold,
+  PiMapPinBold,
+  PiBasketballBold,
+  PiCalendarBlankBold,
+  PiNewspaperBold,
+  PiTrophyBold,
+  PiClockCounterClockwiseBold,
+  PiCrownBold,
+} from "react-icons/pi";
 import Navbar from "@/components/layout/Navbar";
 import DemoBadge from "@/components/DemoBadge";
 import Footer from "@/components/layout/Footer";
@@ -26,10 +26,10 @@ import { getPlayerToken } from "@/lib/clientAuth";
 import Avatar from "@/components/Avatar";
 
 const TABS = [
-  { key: "kader", label: "Kader", icon: FaUsers },
-  { key: "spielplan", label: "Spielplan", icon: FaCalendarAlt },
-  { key: "saisons", label: "Saisons", icon: FaHistory },
-  { key: "news", label: "News", icon: FaNewspaper },
+  { key: "kader", label: "Kader", icon: PiUsersBold },
+  { key: "spielplan", label: "Spielplan", icon: PiCalendarBlankBold },
+  { key: "saisons", label: "Saisons", icon: PiClockCounterClockwiseBold },
+  { key: "news", label: "News", icon: PiNewspaperBold },
 ];
 
 function formatDate(d) {
@@ -48,14 +48,14 @@ function formatDate(d) {
 // bestehen, damit beim Nachladen kein Layout-Sprung entsteht (Navbar bleibt sichtbar).
 function TeamDetailSkeleton() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-ink-950 flex flex-col">
       <Navbar />
-      <div className="bg-gradient-to-r from-slate-950 to-slate-800">
+      <div className="bg-ink-900">
         <div className="max-w-3xl mx-auto px-4 py-10 flex flex-col sm:flex-row items-center sm:items-end gap-5">
-          <div className="h-24 w-24 rounded-2xl bg-white/10 animate-pulse motion-reduce:animate-none flex-shrink-0" />
+          <div className="h-24 w-24 rounded-md bg-ink-800/10 animate-pulse motion-reduce:animate-none flex-shrink-0" />
           <div className="min-w-0 flex-1 w-full text-center sm:text-left">
-            <div className="h-8 w-48 mx-auto sm:mx-0 rounded bg-white/10 animate-pulse motion-reduce:animate-none mb-3" />
-            <div className="h-4 w-56 mx-auto sm:mx-0 rounded bg-white/10 animate-pulse motion-reduce:animate-none" />
+            <div className="h-8 w-48 mx-auto sm:mx-0 rounded bg-ink-800/10 animate-pulse motion-reduce:animate-none mb-3" />
+            <div className="h-4 w-56 mx-auto sm:mx-0 rounded bg-ink-800/10 animate-pulse motion-reduce:animate-none" />
           </div>
         </div>
       </div>
@@ -146,11 +146,11 @@ export default function TeamTeamDetailSlugPage({ params }) {
 
   if (state === "notfound") {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-screen bg-ink-950 flex flex-col">
         <Navbar />
         <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-          <h1 className="text-xl font-bold text-gray-900">Team nicht gefunden</h1>
-          <Link href="/teams" className="mt-4 text-brand-600 hover:underline">
+          <h1 className="text-xl font-bold text-paper-50">Team nicht gefunden</h1>
+          <Link href="/teams" className="mt-4 text-brand-400 hover:underline">
             Zurück zur Team-Übersicht
           </Link>
         </main>
@@ -167,15 +167,15 @@ export default function TeamTeamDetailSlugPage({ params }) {
     : "";
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-ink-950 flex flex-col">
       <Navbar />
 
       {/* Navy-Hero */}
       <div
-        className="bg-gradient-to-r from-slate-950 to-slate-800 relative bg-cover bg-center"
+        className="bg-ink-900 relative bg-cover bg-center"
         style={team.banner ? { backgroundImage: `url('${team.banner}')` } : undefined}
       >
-        {team.banner && <div className="absolute inset-0 bg-slate-950/70" />}
+        {team.banner && <div className="absolute inset-0 bg-ink-950/70" />}
         <div className="relative max-w-3xl mx-auto px-4 py-10 flex flex-col sm:flex-row items-center sm:items-end gap-5 text-center sm:text-left">
           <Avatar
             name={team.teamName}
@@ -183,15 +183,15 @@ export default function TeamTeamDetailSlugPage({ params }) {
             className="h-24 w-24"
             textClass="text-3xl"
             square
-            ring="ring-4 ring-white/10"
+            ring="ring-4 ring-paper-50/10"
           />
           <div className="min-w-0 flex-1">
-            <h1 className="text-3xl sm:text-4xl font-black text-white">{team.teamName}</h1>
+            <h1 className="font-display uppercase tracking-tight text-3xl sm:text-4xl font-black text-paper-50">{team.teamName}</h1>
             {team.isDemo && <DemoBadge className="mt-2" />}
-            <div className="mt-1 flex flex-wrap items-center justify-center sm:justify-start gap-3 text-sm text-slate-300">
+            <div className="mt-1 flex flex-wrap items-center justify-center sm:justify-start gap-3 text-sm text-mist-300">
               {team.region && (
                 <span className="flex items-center gap-1">
-                  <FaMapMarkerAlt className="text-brand-400" /> {team.region}
+                  <PiMapPinBold className="text-brand-400" /> {team.region}
                 </span>
               )}
               <span>{followerCount} Follower</span>
@@ -204,14 +204,14 @@ export default function TeamTeamDetailSlugPage({ params }) {
               <button
                 onClick={join}
                 disabled={joining}
-                className="bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-5 py-2.5 text-sm font-medium transition-colors"
+                className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-5 py-2.5 text-sm font-medium transition-colors"
               >
                 {joining ? "Senden…" : "Team beitreten"}
               </button>
             ) : (
               <Link
                 href="/login"
-                className="bg-white/10 hover:bg-white/20 text-white rounded-lg px-5 py-2.5 text-sm font-medium transition-colors"
+                className="bg-ink-800/10 hover:bg-ink-700/20 text-paper-50 rounded-sm px-5 py-2.5 text-sm font-medium transition-colors"
               >
                 Zum Beitreten anmelden
               </Link>
@@ -223,10 +223,10 @@ export default function TeamTeamDetailSlugPage({ params }) {
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
         {joinMsg && (
           <div
-            className={`mb-4 rounded-lg border px-4 py-3 text-sm ${
+            className={`mb-4 rounded-sm border px-4 py-3 text-sm ${
               joinMsg.type === "ok"
-                ? "bg-green-50 border-green-200 text-green-700"
-                : "bg-red-50 border-red-200 text-red-700"
+                ? "bg-signal-ok/10 border-signal-ok/50 text-signal-ok"
+                : "bg-signal-error/10 border-signal-error/50 text-signal-error"
             }`}
           >
             {joinMsg.text}
@@ -237,38 +237,38 @@ export default function TeamTeamDetailSlugPage({ params }) {
         {league && (
           <Link
             href={`/ligen/${league._id}`}
-            className="mb-6 block bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 transition-all"
+            className="mb-6 block bg-ink-800 rounded-md border border-ink-600 p-5 hover:border-brand-500/50 transition-all"
           >
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-mist-400">
                   Liga{league.season ? ` · ${league.season}` : ""}
                 </p>
-                <p className="font-semibold text-gray-900 truncate">{league.name}</p>
-                {leagueMeta && <p className="text-xs text-gray-500">{leagueMeta}</p>}
+                <p className="font-semibold text-paper-50 truncate">{league.name}</p>
+                {leagueMeta && <p className="text-xs text-mist-400">{leagueMeta}</p>}
               </div>
               {league.isChampion ? (
-                <span className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-100 rounded-full px-3 py-1">
-                  <FaTrophy className="text-[10px]" /> Meister
+                <span className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-signal-wait bg-signal-wait/15 rounded-sm px-3 py-1">
+                  <PiTrophyBold className="text-[10px]" /> Meister
                 </span>
               ) : league.rank ? (
                 <div className="shrink-0 text-right">
-                  <p className="text-xl font-black text-gray-900 leading-none">
+                  <p className="text-xl font-black text-paper-50 leading-none">
                     {league.rank}.
                   </p>
-                  <p className="text-[11px] text-gray-500">von {league.totalTeams}</p>
+                  <p className="text-[11px] text-mist-400">von {league.totalTeams}</p>
                 </div>
               ) : null}
             </div>
             {league.record && league.record.games > 0 && (
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-2 text-xs text-mist-400">
                 {league.record.wins}S · {league.record.losses}N
-                <span className="text-gray-500">
+                <span className="text-mist-400">
                   {" "}
                   · Korbdiff {league.record.diff > 0 ? `+${league.record.diff}` : league.record.diff}
                 </span>
                 {league.finished && (
-                  <span className="ml-2 text-amber-700 font-medium">Saison abgeschlossen</span>
+                  <span className="ml-2 text-signal-wait font-medium">Saison abgeschlossen</span>
                 )}
               </p>
             )}
@@ -276,8 +276,8 @@ export default function TeamTeamDetailSlugPage({ params }) {
         )}
 
         {team.about && (
-          <div className="mb-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <p className="text-sm text-gray-600 whitespace-pre-line">{team.about}</p>
+          <div className="mb-6 bg-ink-800 rounded-md border border-ink-600 p-6">
+            <p className="text-sm text-mist-400 whitespace-pre-line">{team.about}</p>
           </div>
         )}
 
@@ -298,18 +298,18 @@ export default function TeamTeamDetailSlugPage({ params }) {
 
         {/* Kader */}
         {tab === "kader" && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div className="bg-ink-800 rounded-md border border-ink-600 p-6">
             {members.length === 0 && team.rosterSlots.length === 0 ? (
-              <p className="text-sm text-gray-500">Noch keine Kaderinformationen.</p>
+              <p className="text-sm text-mist-400">Noch keine Kaderinformationen.</p>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-ink-600">
                 {members.map((m) => {
                   const initials = `${m.firstName?.[0] || ""}${m.lastName?.[0] || ""}`.toUpperCase();
                   return (
                     <Link
                       key={m._id}
                       href={`/player/view-player/${m.slug || m._id}`}
-                      className="flex items-center gap-3 py-3 hover:bg-gray-50 -mx-2 px-2 rounded-lg transition-colors"
+                      className="flex items-center gap-3 py-3 hover:bg-ink-700 -mx-2 px-2 rounded-sm transition-colors"
                     >
                       <Avatar
                         name={`${m.firstName} ${m.lastName}`}
@@ -318,18 +318,18 @@ export default function TeamTeamDetailSlugPage({ params }) {
                         textClass="text-xs"
                       />
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium text-paper-50 truncate">
                           {m.firstName} {m.lastName}
                           {m.number && (
-                            <span className="ml-1.5 text-xs font-semibold text-gray-500">
+                            <span className="ml-1.5 text-xs font-semibold text-mist-400">
                               #{m.number}
                             </span>
                           )}
                         </p>
-                        <p className="text-xs text-gray-500">{positionLabel(m.position) || "—"}</p>
+                        <p className="text-xs text-mist-400">{positionLabel(m.position) || "—"}</p>
                       </div>
                       {m.position && (
-                        <span className="text-xs font-semibold text-brand-500 bg-brand-50 px-2 py-0.5 rounded-md">
+                        <span className="text-xs font-semibold text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded-md">
                           {positionLabel(m.position)}
                         </span>
                       )}
@@ -341,16 +341,16 @@ export default function TeamTeamDetailSlugPage({ params }) {
                   .filter((s) => !s.claimedBy)
                   .map((slot) => (
                     <div key={slot._id} className="flex items-center gap-3 py-3 opacity-70">
-                      <span className="h-10 w-10 rounded-full bg-gray-100 text-gray-500 text-xs font-semibold flex items-center justify-center">
+                      <span className="h-10 w-10 rounded-full bg-ink-700 text-mist-400 text-xs font-semibold flex items-center justify-center">
                         {slot.number || "–"}
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-700 truncate">
+                        <p className="text-sm font-medium text-mist-300 truncate">
                           {slot.name || "Offener Platz"}
                         </p>
-                        <p className="text-xs text-gray-500">{positionLabel(slot.position) || "—"}</p>
+                        <p className="text-xs text-mist-400">{positionLabel(slot.position) || "—"}</p>
                       </div>
-                      <span className="text-xs font-medium rounded-full px-3 py-1 bg-amber-100 text-amber-700">
+                      <span className="text-xs font-medium rounded-sm px-3 py-1 bg-signal-wait/15 text-signal-wait">
                         {slot.status === "pending" ? "Ausstehend" : "eingeladen"}
                       </span>
                     </div>
@@ -390,7 +390,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
                   ]}
                 />
                 {list.length === 0 ? (
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center text-sm text-gray-500">
+                  <div className="bg-ink-800 rounded-md border border-ink-600 p-10 text-center text-sm text-mist-400">
                     Keine Spiele in dieser Ansicht.
                   </div>
                 ) : (
@@ -405,19 +405,19 @@ export default function TeamTeamDetailSlugPage({ params }) {
                     return (
                       <div
                         key={m._id}
-                        className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center justify-between gap-4"
+                        className="bg-ink-800 rounded-md border border-ink-600 p-4 flex items-center justify-between gap-4"
                       >
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p className="text-sm font-medium text-paper-50 truncate">
                             {isHome ? "vs." : "@"} {opponent?.teamName || "Unbekannt"}
                             {isPlayoff && (
-                              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 text-[10px] font-semibold px-2 py-0.5 align-middle">
-                                <FaTrophy className="text-[9px]" />
+                              <span className="ml-2 inline-flex items-center gap-1 rounded-sm bg-signal-wait/10 text-signal-wait text-[10px] font-semibold px-2 py-0.5 align-middle">
+                                <PiTrophyBold className="text-[9px]" />
                                 {m.playoffRound || "Playoffs"}
                               </span>
                             )}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-mist-400">
                             {formatDate(m.date)}
                             {m.location ? ` · ${m.location}` : ""}
                             {m.leagueId?.name ? ` · ${m.leagueId.name}` : ""}
@@ -426,13 +426,13 @@ export default function TeamTeamDetailSlugPage({ params }) {
                         {score ? (
                           <span
                             className={`text-lg font-bold flex-shrink-0 ${
-                              won ? "text-green-600" : "text-gray-900"
+                              won ? "text-signal-ok" : "text-paper-50"
                             }`}
                           >
                             {own} : {opp}
                           </span>
                         ) : (
-                          <span className="text-xs font-medium text-amber-600 bg-amber-50 rounded-full px-3 py-1 flex-shrink-0">
+                          <span className="text-xs font-medium text-signal-wait bg-signal-wait/10 rounded-sm px-3 py-1 flex-shrink-0">
                             Anstehend
                           </span>
                         )}
@@ -448,16 +448,16 @@ export default function TeamTeamDetailSlugPage({ params }) {
         {tab === "saisons" && (
           <div>
             {history.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center text-sm text-gray-500">
+              <div className="bg-ink-800 rounded-md border border-ink-600 p-10 text-center text-sm text-mist-400">
                 Noch keine abgeschlossene Saison. Die Historie (Liga, Platz, Bilanz,
                 Status) wird beim Saisonabschluss eingefroren.
               </div>
             ) : (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-xs text-gray-500 text-left border-b border-gray-100">
+                      <tr className="text-xs text-mist-400 text-left border-b border-ink-600">
                         <th className="font-medium py-3 pl-4">Saison</th>
                         <th className="font-medium py-3">Liga</th>
                         <th className="font-medium py-3 text-center">Platz</th>
@@ -468,43 +468,43 @@ export default function TeamTeamDetailSlugPage({ params }) {
                     </thead>
                     <tbody>
                       {history.map((h) => (
-                        <tr key={h._id} className="border-b border-gray-50 last:border-0">
-                          <td className="py-3 pl-4 font-medium text-gray-900">{h.season || "—"}</td>
-                          <td className="py-3 text-gray-700">
+                        <tr key={h._id} className="border-b border-ink-600 last:border-0">
+                          <td className="py-3 pl-4 font-medium text-paper-50">{h.season || "—"}</td>
+                          <td className="py-3 text-mist-300">
                             {h.leagueId ? (
-                              <Link href={`/ligen/${h.leagueId}`} className="hover:text-brand-600">
+                              <Link href={`/ligen/${h.leagueId}`} className="hover:text-brand-400">
                                 {h.leagueName}
                               </Link>
                             ) : (
                               h.leagueName || "—"
                             )}
                           </td>
-                          <td className="py-3 text-center text-gray-700">
+                          <td className="py-3 text-center text-mist-300">
                             {h.champion ? (
-                              <span className="inline-flex items-center gap-1 text-amber-600 font-semibold">
-                                <FaCrown className="text-xs" /> Meister
+                              <span className="inline-flex items-center gap-1 text-signal-wait font-semibold">
+                                <PiCrownBold className="text-xs" /> Meister
                               </span>
                             ) : (
                               h.placement ?? "—"
                             )}
                           </td>
-                          <td className="py-3 text-center text-gray-600">
+                          <td className="py-3 text-center text-mist-400">
                             {h.wins}–{h.losses}
                           </td>
                           <td
                             className={`py-3 text-center font-medium ${
-                              h.diff > 0 ? "text-green-600" : h.diff < 0 ? "text-red-600" : "text-gray-500"
+                              h.diff > 0 ? "text-signal-ok" : h.diff < 0 ? "text-signal-error" : "text-mist-400"
                             }`}
                           >
                             {h.diff > 0 ? `+${h.diff}` : h.diff}
                           </td>
                           <td className="py-3 pr-4">
                             {h.status && h.status !== "aktiv" ? (
-                              <span className="text-xs rounded-full bg-gray-100 text-gray-600 px-2 py-0.5">
+                              <span className="text-xs rounded-sm bg-ink-700 text-mist-400 px-2 py-0.5">
                                 {teamSeasonStatusLabel(h.status)}
                               </span>
                             ) : (
-                              <span className="text-xs text-gray-500">Aktiv</span>
+                              <span className="text-xs text-mist-400">Aktiv</span>
                             )}
                           </td>
                         </tr>
@@ -521,7 +521,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
         {tab === "news" && (
           <div className="space-y-4">
             {posts.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center text-sm text-gray-500">
+              <div className="bg-ink-800 rounded-md border border-ink-600 p-10 text-center text-sm text-mist-400">
                 Noch keine Beiträge.
               </div>
             ) : (

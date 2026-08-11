@@ -7,7 +7,7 @@ export default function TourLink({ className = "" }) {
     <button
       type="button"
       onClick={() => window.dispatchEvent(new CustomEvent("hg:open-tour"))}
-      className={className || "text-sm text-gray-500 hover:text-brand-600"}
+      className={className || "text-sm text-mist-400 hover:text-brand-400"}
     >
       Plattform-Tour
     </button>

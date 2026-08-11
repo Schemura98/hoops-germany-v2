@@ -6,10 +6,18 @@ import { BallGlyph, CourtArc, HoopEmblem } from "@/components/landing/HeroGlyphs
 // Scroll-gesteuerte Hero-Bühne „Sprungball" – Stufe 1 (mobil zuerst).
 // Spezifikation: docs/HERO-KONZEPT-2026-08-11.md (Vivien, v2 vom 11.08.2026).
 //
-// Erzählung: Während der Hero beim normalen Scrollen vorbeizieht, vertieft sich
-// die Fläche (Navy-Tint + Overlay), ein Spielfeld-Bogen blendet auf und ein Ball
-// fällt von oben durch die Szene – er landet in einem kleinen Korb-Emblem an der
-// oberen Ecke der primären Schaltfläche und fällt mit einem kurzen Swish durchs Netz.
+// Erzählung: Während der Hero beim normalen Scrollen vorbeizieht, blendet ein
+// Spielfeld-Bogen auf und ein Ball fällt von oben durch die Szene – er landet in
+// einem kleinen Korb-Emblem an der oberen Ecke der primären Schaltfläche und
+// fällt mit einem kurzen Swish durchs Netz.
+//
+// Seit dem Redesign (12.08.2026) trägt die Bühne KEIN Foto mehr. Der Grund ist
+// nicht Geschmack: Das Motiv war 1000x652px, wurde formatfüllend bis ~5x
+// hochskaliert und musste unter einem 65-%-Schwarz-Overlay verschwinden, damit
+// die Headline lesbar blieb – ein teures Bild, das am Ende fast nur als graue
+// Fläche wirkte. Jetzt steht die Typografie auf der ink-950-Fläche, der Bogen
+// darf sichtbar sein statt bei 14 % Deckkraft zu verhungern, und der Hero lädt
+// ohne ein einziges Byte Bilddaten.
 //
 // Bewusste Randbedingungen (alle aus dem Konzept, nicht frei gewählt):
 // - KEIN Pinning, KEINE zusätzliche Scrollstrecke: Die Hero-Höhe bleibt exakt
@@ -18,9 +26,6 @@ import { BallGlyph, CourtArc, HoopEmblem } from "@/components/landing/HeroGlyphs
 // - Der Zielpunkt wird zur Laufzeit am Rechteck der primären Schaltfläche
 //   gemessen – deshalb stimmt er bei 3 wie bei 5 Schaltflächen und auch nach
 //   Textänderungen (z.B. „…in NRW" statt „…in Deutschland").
-// - KEIN Foto-Zoom: Das Hero-Foto ist nur 1000x652px und wird formatfüllend
-//   ohnehin bis ~5x hochskaliert (Milos Messung, docs/HERO-ASSETS-2026-08-11.md).
-//   Jede zusätzliche Vergrößerung würde die Weichzeichnung sichtbar verstärken.
 // - Nur transform/opacity, ein Scroll-Listener, ein rAF-Tick, direkte
 //   Style-Mutation statt React-Re-Render pro Frame.
 // - prefers-reduced-motion: ruhiger Endzustand, Ball und Emblem entfallen ganz.
@@ -34,11 +39,11 @@ const PROGRESS_SPAN = 0.45; // Anteil der Hero-Höhe, über den t von 0 auf 1 l�
 // Ankunft muss sichtbar stattfinden, nicht hinter der Oberkante.
 const BALL_SPAN = 0.75;
 
-const OVERLAY_FROM = 0.65; // heutiger Wert (bg-black/65) – Startpunkt
-const OVERLAY_TO = 0.72; // leichte Vertiefung zum Ende
-const NAVY_MAX = 0.5; // Marken-Tint, bewusst kein Vollwechsel
-const NAVY_STATIC = 0.2; // prefers-reduced-motion
-const ARC_MAX = 0.14; // Deckkraft des Spielfeld-Bogens
+// Der Bogen darf jetzt wirklich gesehen werden: Über dem Foto musste er auf
+// 0.14 gedrosselt werden, um im Bildrauschen nicht zu zerfasern. Auf der ruhigen
+// Fläche ist er die einzige Zeichnung im Hintergrund und trägt bei 0.55 die
+// Tiefe, die vorher das Overlay liefern musste.
+const ARC_MAX = 0.55; // Deckkraft des Spielfeld-Bogens
 
 const EMBLEM_FROM = 0.85; // ab hier blendet das Korb-Emblem auf
 const SWISH_FROM = 0.9; // ab hier fällt der Ball durchs Netz und blendet aus
@@ -80,10 +85,8 @@ function ballOpacityNearText(ballCenterY, textRect) {
   return 1;
 }
 
-export default function HeroScrollStage({ ctaRef, textRef, backgroundImage, className = "", children }) {
+export default function HeroScrollStage({ ctaRef, textRef, className = "", children }) {
   const stageRef = useRef(null);
-  const navyRef = useRef(null);
-  const overlayRef = useRef(null);
   const arcRef = useRef(null);
   const ballRef = useRef(null);
   const emblemRef = useRef(null);
@@ -113,10 +116,6 @@ export default function HeroScrollStage({ ctaRef, textRef, backgroundImage, clas
 
       const t = clamp((NAVBAR_HEIGHT - rect.top) / (rect.height * PROGRESS_SPAN), 0, 1);
 
-      if (navyRef.current) navyRef.current.style.opacity = (t * NAVY_MAX).toFixed(3);
-      if (overlayRef.current) {
-        overlayRef.current.style.opacity = (OVERLAY_FROM + (OVERLAY_TO - OVERLAY_FROM) * t).toFixed(3);
-      }
       if (arcRef.current) arcRef.current.style.opacity = (t * ARC_MAX).toFixed(3);
 
       const cta = ctaRef?.current;
@@ -198,29 +197,9 @@ export default function HeroScrollStage({ ctaRef, textRef, backgroundImage, clas
   return (
     <div
       ref={stageRef}
-      className={`relative flex items-center justify-center overflow-hidden text-white ${className}`}
-      style={{
-        backgroundImage: `url('${backgroundImage}')`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        minHeight: "calc(100vh - 4rem)",
-      }}
+      className={`relative flex items-center justify-center overflow-hidden bg-ink-950 text-paper-50 ${className}`}
+      style={{ minHeight: "calc(100vh - 4rem)" }}
     >
-      {/* Marken-Navy als Vertiefung über dem Foto (kein Vollwechsel) */}
-      <div
-        ref={navyRef}
-        aria-hidden="true"
-        className="absolute inset-0 bg-gradient-to-br from-slate-950 to-slate-800"
-        style={{ opacity: animated ? 0 : NAVY_STATIC }}
-      />
-      {/* Kontrast-Overlay – trägt die Lesbarkeit der Headline */}
-      <div
-        ref={overlayRef}
-        aria-hidden="true"
-        className="absolute inset-0 bg-black"
-        style={{ opacity: OVERLAY_FROM }}
-      />
-
       <CourtArc ref={arcRef} style={animated ? undefined : { opacity: ARC_MAX }} />
 
       {/* Ball und Korb-Emblem nur bei erlaubter Bewegung */}

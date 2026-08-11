@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { FaChevronRight } from "react-icons/fa";
+import { PiCaretRightBold } from "react-icons/pi";
 
 /**
  * Horizontal scrollbarer Container mit Scroll-Affordance:
@@ -9,7 +9,7 @@ import { FaChevronRight } from "react-icons/fa";
  * Inhalt zum Wischen gibt (links/rechts je nach Scroll-Position).
  * Hilft Nutzern zu verstehen, dass sich die Kacheln zur Seite bewegen lassen.
  */
-export default function ScrollHintRow({ children, className = "", fadeColor = "from-slate-900" }) {
+export default function ScrollHintRow({ children, className = "", fadeColor = "from-ink-900" }) {
   const ref = useRef(null);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(true); // Standard: kein Hinweis, bis Overflow bekannt ist
@@ -49,7 +49,7 @@ export default function ScrollHintRow({ children, className = "", fadeColor = "f
         <div
           className={`pointer-events-none absolute right-0 top-0 bottom-0 w-10 flex items-center justify-end pr-1.5 rounded-tr-2xl bg-gradient-to-l ${fadeColor} to-transparent`}
         >
-          <FaChevronRight className="text-white/80 text-sm animate-pulse" />
+          <PiCaretRightBold className="text-paper-50/80 text-sm animate-pulse" />
         </div>
       )}
     </div>

@@ -21,7 +21,7 @@ export default function ImpressumPage() {
         Telefon: +49 176 62310523
         <br />
         E-Mail:{" "}
-        <a href="mailto:info@hoopsgermany.de" className="text-brand-600 hover:underline">
+        <a href="mailto:info@hoopsgermany.de" className="text-brand-400 hover:underline">
           info@hoopsgermany.de
         </a>
         <br />
@@ -30,7 +30,7 @@ export default function ImpressumPage() {
           href="https://www.hoopsgermany.de"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-brand-600 hover:underline"
+          className="text-brand-400 hover:underline"
         >
           www.hoopsgermany.de
         </a>
@@ -76,7 +76,7 @@ export default function ImpressumPage() {
           href="https://ec.europa.eu/consumers/odr"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-brand-600 hover:underline"
+          className="text-brand-400 hover:underline"
         >
           https://ec.europa.eu/consumers/odr
         </a>

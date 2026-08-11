@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getPlayerToken } from "@/lib/clientAuth";
-import { FaBasketballBall } from "react-icons/fa";
+import { PiBasketballBold } from "react-icons/pi";
 
 // Team-Registrierung (eigener Account) wurde entfernt: Teams sind spieler-geführt.
 // Eingeloggte Spieler → Team gründen, sonst Spieler-Login (danach Team gründen).
@@ -14,7 +14,7 @@ export default function TeamRegisterRedirect() {
   }, [router]);
   return (
     <main className="min-h-screen flex items-center justify-center">
-      <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
+      <PiBasketballBold className="text-brand-400 text-3xl animate-bounce" />
     </main>
   );
 }

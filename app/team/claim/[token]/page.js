@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaBasketballBall, FaUsers } from "react-icons/fa";
+import { PiBasketballBold, PiUsersBold } from "react-icons/pi";
 import { getPlayerToken, setPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
 import { positionLabel } from "@/lib/constants";
 
@@ -13,12 +13,12 @@ function Shell({ children }) {
       <div className="w-full max-w-md">
         <Link
           href="/"
-          className="flex items-center justify-center gap-2 font-bold text-gray-900 mb-8"
+          className="flex items-center justify-center gap-2 font-bold text-paper-50 mb-8"
         >
-          <FaBasketballBall className="text-brand-500 text-xl" />
+          <PiBasketballBold className="text-brand-400 text-xl" />
           Hoops Germany
         </Link>
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        <div className="bg-ink-800 rounded-md border border-ink-600 p-8">
           {children}
         </div>
       </div>
@@ -32,7 +32,7 @@ const SLOT_STATUS_TEXT = {
 };
 
 const inputClass =
-  "w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+  "w-full rounded-sm border border-ink-600 px-3 py-2.5 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
 
 // Vollen Slot-Namen in Vor-/Nachname aufteilen (zum Vorbefüllen).
 function splitName(name) {
@@ -126,7 +126,7 @@ export default function TeamClaimTokenPage({ params }) {
   if (state === "loading") {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <FaBasketballBall className="text-brand-500 text-3xl animate-bounce" />
+        <PiBasketballBold className="text-brand-400 text-3xl animate-bounce" />
       </main>
     );
   }
@@ -134,14 +134,14 @@ export default function TeamClaimTokenPage({ params }) {
   if (state === "invalid") {
     return (
       <Shell>
-        <h1 className="text-xl font-bold text-gray-900">Link ungültig</h1>
-        <p className="mt-2 text-sm text-gray-500">
+        <h1 className="text-xl font-bold text-paper-50">Link ungültig</h1>
+        <p className="mt-2 text-sm text-mist-400">
           Dieser Einladungslink ist ungültig oder abgelaufen. Bitte fordere beim Team
           einen neuen Link an.
         </p>
         <Link
           href="/"
-          className="mt-6 block text-center bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2.5 font-medium"
+          className="mt-6 block text-center bg-brand-500 hover:bg-brand-400 text-ink-950 rounded-sm px-4 py-2.5 font-medium"
         >
           Zur Startseite
         </Link>
@@ -152,20 +152,20 @@ export default function TeamClaimTokenPage({ params }) {
   if (state === "done") {
     return (
       <Shell>
-        <h1 className="text-xl font-bold text-gray-900">Willkommen im Kader! 🎉</h1>
-        <p className="mt-2 text-sm text-gray-500">
+        <h1 className="text-xl font-bold text-paper-50">Willkommen im Kader! 🎉</h1>
+        <p className="mt-2 text-sm text-mist-400">
           Du bist jetzt im Kader von <strong>{info?.team?.teamName}</strong>. Vervollständige
           jetzt dein Profil – Foto, Position und Co. – damit dich alle finden.
         </p>
         <Link
           href="/player/edit-profile"
-          className="mt-6 block text-center bg-brand-500 hover:bg-brand-600 text-white rounded-lg px-4 py-2.5 font-medium"
+          className="mt-6 block text-center bg-brand-500 hover:bg-brand-400 text-ink-950 rounded-sm px-4 py-2.5 font-medium"
         >
           Profil jetzt vervollständigen
         </Link>
         <Link
           href="/player/newsfeed"
-          className="mt-3 block text-center text-sm text-gray-500 hover:text-brand-600"
+          className="mt-3 block text-center text-sm text-mist-400 hover:text-brand-400"
         >
           Später – zum Newsfeed
         </Link>
@@ -183,19 +183,19 @@ export default function TeamClaimTokenPage({ params }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={team.logo} alt={team.teamName} className="h-12 w-12 rounded-full object-cover" />
         ) : (
-          <span className="h-12 w-12 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
-            <FaUsers />
+          <span className="h-12 w-12 rounded-full bg-brand-500/15 text-brand-400 flex items-center justify-center">
+            <PiUsersBold />
           </span>
         )}
         <div>
-          <h1 className="text-lg font-bold text-gray-900">{team?.teamName}</h1>
-          {team?.region && <p className="text-xs text-gray-500">{team.region}</p>}
+          <h1 className="text-lg font-bold text-paper-50">{team?.teamName}</h1>
+          {team?.region && <p className="text-xs text-mist-400">{team.region}</p>}
         </div>
       </div>
 
-      <div className="mt-5 rounded-lg bg-gray-50 border border-gray-100 p-4">
-        <p className="text-sm text-gray-500">Du wurdest eingeladen für:</p>
-        <p className="mt-1 font-semibold text-gray-900">
+      <div className="mt-5 rounded-sm bg-ink-950 border border-ink-600 p-4">
+        <p className="text-sm text-mist-400">Du wurdest eingeladen für:</p>
+        <p className="mt-1 font-semibold text-paper-50">
           {slot?.name || "Kaderplatz"}
           {slot?.position ? ` · ${positionLabel(slot.position)}` : ""}
           {slot?.number ? ` · #${slot.number}` : ""}
@@ -203,26 +203,26 @@ export default function TeamClaimTokenPage({ params }) {
       </div>
 
       {error && (
-        <div className="mt-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+        <div className="mt-4 rounded-sm bg-signal-error/10 border border-signal-error/50 px-4 py-3 text-sm text-signal-error">
           {error}
         </div>
       )}
 
       {!claimable ? (
-        <div className="mt-5 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-700">
+        <div className="mt-5 rounded-sm bg-signal-wait/10 border border-signal-wait/50 px-4 py-3 text-sm text-signal-wait">
           {SLOT_STATUS_TEXT[slot?.status] || "Dieser Platz ist aktuell nicht verfügbar."}
         </div>
       ) : loggedIn ? (
         <button
           onClick={claim}
           disabled={claiming}
-          className="mt-6 w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
+          className="mt-6 w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
         >
           {claiming ? "Trete bei…" : "Dem Kader beitreten"}
         </button>
       ) : (
         <form onSubmit={registerAndClaim} className="mt-6 space-y-3">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-mist-400">
             Erstelle in wenigen Sekunden dein Konto und übernimm deinen Platz im Kader:
           </p>
           <div className="grid grid-cols-2 gap-3">
@@ -260,13 +260,13 @@ export default function TeamClaimTokenPage({ params }) {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white rounded-lg px-4 py-2.5 font-medium transition-colors"
+            className="w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
           >
             {submitting ? "Konto wird erstellt…" : "Konto erstellen & Platz annehmen"}
           </button>
-          <p className="text-center text-xs text-gray-500">
+          <p className="text-center text-xs text-mist-400">
             Du hast schon ein Konto?{" "}
-            <Link href="/login" className="text-brand-600 font-medium">
+            <Link href="/login" className="text-brand-400 font-medium">
               Anmelden
             </Link>{" "}
             und dann zu diesem Link zurückkehren.
