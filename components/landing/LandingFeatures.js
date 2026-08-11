@@ -262,7 +262,11 @@ const VISUALS = {
 
 export default function LandingFeatures() {
   return (
-    <section className="bg-gray-50 py-20 px-4">
+    // overflow-x-hidden: Der Einblend-Versatz der Reveal-Spalten (-translate-x-6 = 24px)
+    // ist breiter als das Section-Padding (px-4 = 16px) und erzeugte sonst 8px
+    // horizontalen Ueberlauf auf Mobile, solange die Karten noch nicht eingeblendet sind
+    // (Befund Tobias 11.08.2026, Entscheid Vivien).
+    <section className="bg-gray-50 py-20 px-4 overflow-x-hidden">
       <div className="max-w-6xl mx-auto">
         <Reveal as="h2" className="text-3xl md:text-4xl font-black text-center mb-4 text-gray-900 text-balance">
           Alles, was du brauchst

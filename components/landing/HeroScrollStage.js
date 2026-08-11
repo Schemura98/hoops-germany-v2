@@ -48,9 +48,31 @@ const BALL_R = 14; // halbe Kantenlänge des Ball-SVG (28px)
 const EMBLEM_W = 20;
 const EMBLEM_H = 14;
 
+// Weicher Puffer, über den der Ball vor und nach dem Textblock aus-/einblendet.
+const TEXT_FADE_MARGIN = 24;
+
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 
-export default function HeroScrollStage({ ctaRef, backgroundImage, className = "", children }) {
+// Deckkraft des Balls in Abhängigkeit vom Textblock: Auf Höhe von Badge/Headline/
+// Subline blendet er VOLLSTÄNDIG aus (nicht nur abgesenkt – eine reduzierte
+// Deckkraft würde das Flackern hinter den Buchstaben nur abschwächen, nicht lösen).
+// Wird zur Laufzeit gemessen und ist damit breitenunabhängig: Zeilenumbrüche lassen
+// sich nicht verlässlich vorhersagen, deshalb kein Sonderwert je Breakpoint.
+// Entscheid Vivien 11.08.2026 auf Tobias' Befund bei 430px.
+function ballOpacityNearText(ballCenterY, textRect) {
+  if (!textRect) return 1;
+  if (ballCenterY < textRect.top - TEXT_FADE_MARGIN) return 1;
+  if (ballCenterY < textRect.top) {
+    return 1 - (ballCenterY - (textRect.top - TEXT_FADE_MARGIN)) / TEXT_FADE_MARGIN;
+  }
+  if (ballCenterY <= textRect.bottom) return 0;
+  if (ballCenterY <= textRect.bottom + TEXT_FADE_MARGIN) {
+    return (ballCenterY - textRect.bottom) / TEXT_FADE_MARGIN;
+  }
+  return 1;
+}
+
+export default function HeroScrollStage({ ctaRef, textRef, backgroundImage, className = "", children }) {
   const stageRef = useRef(null);
   const navyRef = useRef(null);
   const overlayRef = useRef(null);
@@ -122,10 +144,15 @@ export default function HeroScrollStage({ ctaRef, backgroundImage, className = "
         swish = Math.sin(through * Math.PI);
       }
 
+      // Textblock-Ausblendung mit der Bahn-Deckkraft verrechnen (beide Ursachen
+      // multiplizieren sich, damit weder Einblenden noch Swish überschrieben wird).
+      const textRect = textRef?.current?.getBoundingClientRect();
+      ballOpacity *= ballOpacityNearText(rect.top + y, textRect);
+
       ball.style.transform = `translate3d(${(x - BALL_R).toFixed(1)}px, ${(y - BALL_R).toFixed(
         1
       )}px, 0) rotate(${(tb * 280).toFixed(1)}deg)`;
-      ball.style.opacity = ballOpacity.toFixed(3);
+      ball.style.opacity = clamp(ballOpacity, 0, 1).toFixed(3);
 
       // Swish als Teil des transform-Strings (nicht als eigene `scale`-Property –
       // die kennt älteres Safari nicht).
@@ -158,7 +185,7 @@ export default function HeroScrollStage({ ctaRef, backgroundImage, className = "
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);
     };
-  }, [animated, ctaRef]);
+  }, [animated, ctaRef, textRef]);
 
   return (
     <div

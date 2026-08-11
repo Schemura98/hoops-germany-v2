@@ -376,3 +376,103 @@ Schärfe-Problem nicht (gleiche 1000×652-Quelle), sparen aber Ladezeit und soll
 diesem Konzept eingebunden werden. Optionale Ausbaustufe mit echtem Video bleibt wie in v1
 beschrieben (4–6s Loop, ≤1,5MB Desktop/≤600KB Mobil, Poster-Frame Pflicht) — weiterhin explizit
 **nicht** Voraussetzung.
+
+---
+
+## Nachtrag 11.08.2026 (nach Live-Gang Stufe 1, Commit `c2fcf1a`)
+
+Stufe 1 („Einwurf", mobile Grundfassung) ist live, spezifikationsgetreu gebaut. Tobias' Browser-Gate
+hat einen offenen Punkt gefunden und an mich übergeben, dazu diese Entscheidung — kein neuer
+Versionsstand, dieser Nachtrag ergänzt v2.
+
+### Befund: Ball kreuzt Fließtext bei 430×932 (nicht bei 375×812)
+
+Die x-Spur des Balls (`ctaRect.right + sin(t·π·2,2)·6`) liegt konstant an der rechten Kante des
+`w-full`-CTA-Buttons. Bei 430×932 bricht die Subline („…verfolge Ligen in deiner Region…") so um,
+dass eine Zeile genau in dieser Spur liegt — der fallende Ball läuft auf halber Strecke sichtbar
+hinter dem Wort „Ligen" durch. Bei 375×812 bricht der Absatz anders um, keine Kollision. Der Text
+bleibt technisch lesbar (Content hat `z-10`, Deko-Layer keinen z-index, Text liegt immer über dem
+Ball) — es ist kein Defekt, sondern eine unbeabsichtigte Bildwirkung: ein voller, oranger Ball, der
+hinter einzelnen Buchstaben mit Wortzwischenräumen „aufblitzt", liest sich wie ein Rendering-Fehler,
+nicht wie eine gewollte Verdeckung (anders als das Korb-Emblem an der CTA-Ecke, das genau dafür schon
+geprüft ist).
+
+### Entscheidung: **b) Anpassen** — Ball blendet beim Kreuzen von Text-Layern aus
+
+Kein „so lassen": Ein zufälliges Zusammentreffen von Ball und Wort, das je nach Zeilenumbruch mal
+auftritt und mal nicht, ist kein getroffener gestalterischer Entscheid, sondern ein Kollisions-Fall,
+der in der ursprünglichen Spezifikation schlicht nicht geregelt war (dort war nur das Emblem gegen
+Label-Überlappung geprüft, der fallende Ball selbst nicht). Der Fix ist bewusst **breitenunabhängig**
+gelöst (misst zur Laufzeit, nicht pro Breakpoint hart codiert) — genau deshalb, weil der Befund selbst
+zeigt, dass sich Zeilenumbrüche nicht zuverlässig vorhersagen lassen.
+
+**Lösung:** Ball blendet aus, während er sich vertikal auf Höhe des Text-Blocks (Badge + Headline +
+Subline, **nicht** der CTA-Block) befindet — er „taucht kurz ab" statt durch Buchstaben zu flackern,
+und taucht danach sauber wieder auf.
+
+```js
+// Neuer Ref um Badge+Headline+Subline (NICHT um den CTA-Block) in LandingHero.js:
+// <div ref={textBlockRef}>{badge}{headline}{subline}</div>
+// Messung im selben rAF-Callback wie ctaRect (ein Messdurchlauf, kein zusätzlicher Listener).
+
+const TEXT_FADE_MARGIN = 24; // px, weicher Ein-/Ausblend-Puffer vor/nach dem Textblock
+
+function ballOpacityNearText(ballCenterY, textRect) {
+  if (ballCenterY < textRect.top - TEXT_FADE_MARGIN) return 1;
+  if (ballCenterY < textRect.top) {
+    return 1 - (ballCenterY - (textRect.top - TEXT_FADE_MARGIN)) / TEXT_FADE_MARGIN;
+  }
+  if (ballCenterY <= textRect.bottom) return 0; // vollständig ausgeblendet hinter dem Textblock
+  if (ballCenterY <= textRect.bottom + TEXT_FADE_MARGIN) {
+    return (ballCenterY - textRect.bottom) / TEXT_FADE_MARGIN;
+  }
+  return 1;
+}
+// ball.style.opacity = String(ballOpacityNearText(y, textBlockRect));
+```
+
+- **Volle 0, nicht nur abgesenkt (z. B. 0.15):** Eine abgesenkte, aber sichtbare Deckkraft würde das
+  Flacker-Problem nur abschwächen, nicht lösen — zwischen Buchstaben bliebe weiterhin ein
+  unregelmäßig aufblitzender Ball sichtbar. Volles Ausblenden liest sich als klare, kurze
+  Verdeckungs-Geste („taucht hinter dem Text ab"), nicht als Darstellungsfehler.
+- **24px Puffer** vor/nach dem Textblock statt hartem Sprung: entspricht ungefähr einer Zeilenhöhe
+  der Subline (`leading-relaxed` bei `text-lg`, ≈29px) — der Übergang wirkt wie ein Ein-/Ausblenden,
+  nicht wie ein Pop.
+- **Warum der Textblock-Wrapper und nicht nur die Subline:** Der ursprüngliche Fund betrifft die
+  Subline, aber derselbe Mechanismus (Zeilenumbruch-abhängige Kollision) kann bei anderen Breiten
+  ebenso Badge oder Headline treffen. Ein Wrapper um alle drei ist genauso einfach zu messen wie
+  einer um nur die Subline, deckt aber den ganzen Fallweg oberhalb der CTA ab.
+- **Ein zusätzlicher `getBoundingClientRect()`-Aufruf pro Frame** (auf den neuen Wrapper), im selben
+  rAF-Callback wie die bestehende CTA-Rect-Messung — bleibt innerhalb des in der Mobile-Spezifikation
+  festgelegten Layer-/Messbudgets, kein neuer Listener.
+
+**Prüfbarkeit (Vorschlag für Tobias' Gate, analog zur bereits gefahrenen Emblem-Prüfung):**
+Für jede Scroll-Stufe an den vier Standard-iPhone-Breiten (375×812, 390×844, 414×896, 430×932): wenn
+`ballCenterY` innerhalb `[textRect.top, textRect.bottom]` liegt, muss die berechnete Ball-Opacity
+`0` sein — automatisiert über alle Scroll-Schritte, 0 Treffer mit sichtbarem Ball im Textband ist das
+Erfolgskriterium, exakt im selben Format wie der bereits vorliegende Emblem/Label-Check.
+
+### Vorbestehender 8px-Horizontalüberlauf (`Reveal.js` in den Feature-Karten) — Ursache geprüft, Fix jetzt statt Backlog
+
+Nachgesehen in `components/landing/LandingFeatures.js`: Die Text-Spalte jedes Feature-Blocks nutzt
+`<Reveal direction={reversed ? "right" : "left"} ...>`. Vor dem Einblenden steht das Element auf
+`-translate-x-6` (linke Variante) bzw. `translate-x-6` (rechte Variante) — laut
+`components/ui/Reveal.js` sind das **24px** Versatz. Die Section hat `px-4` (16px) Innenabstand und
+**kein** `overflow-x-hidden`. 24px Offset minus 16px Padding ergibt exakt die von Tobias gemessenen
+**8px** Überlauf — die Ursache ist damit nicht vermutet, sondern belegt.
+
+**Entscheidung: jetzt mitentscheiden, nicht auf den Backlog.** Kein „vielleicht" nötig — Ursache ist
+eindeutig lokalisiert, Fix ist eine einzeilige, risikoarme Ergänzung: `overflow-x-hidden` auf die
+`<section>` in `LandingFeatures.js` (Zeile mit `className="bg-gray-50 py-20 px-4"`). Wirkt sich nicht
+auf den fertig eingeblendeten Zustand aus (`translate-x-0` liegt vollständig innerhalb der Section),
+betrifft ausschließlich den kurzen Vor-Einblend-Zustand, der ohnehin außerhalb des sichtbaren Bereichs
+gedacht war. Kein neuer CSS-Wert nötig, keine Rücksprache mit mir erforderlich für die Umsetzung —
+Tobias sollte die vier o. g. Breiten danach kurz gegenprüfen, da horizontaler Überlauf einer der
+harten Ausschlussregeln ist (keine horizontalen Scrollbalken).
+
+### Desktop-Ausbaustufe
+
+Unverändert wartend auf Patricks Startsignal — keine Änderung an der Spezifikation aus dem Hauptteil
+nötig durch diesen Nachtrag; die Textblock-Ausblend-Logik gilt für die Desktop-Fallbahn (Szene C)
+identisch, falls dort dieselbe Kollisionsklasse auftreten sollte (dort ist durch den seitlichen
+Gutter-Bogen unwahrscheinlicher, aber die Lösung ist ohnehin breakpoint-generisch formuliert).

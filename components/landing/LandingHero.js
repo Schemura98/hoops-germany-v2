@@ -35,6 +35,10 @@ export default function LandingHero() {
   const [player, setPlayer] = useState(null); // null = lädt / ausgeloggt
   const [checked, setChecked] = useState(false);
   const ctaRef = useRef(null);
+  // Textblock (Badge + Headline + Subline): Der fallende Ball blendet aus, solange er
+  // auf dieser Hoehe ist – sonst kreuzt er je nach Zeilenumbruch den Fliesstext
+  // (Befund Tobias bei 430px, Entscheid Vivien 11.08.2026).
+  const textRef = useRef(null);
 
   useEffect(() => {
     const token = getPlayerToken();
@@ -58,10 +62,11 @@ export default function LandingHero() {
   const teamSlug = player?.team?.slug || null;
 
   return (
-    <HeroScrollStage ctaRef={ctaRef} backgroundImage="/images/login image.jpg">
+    <HeroScrollStage ctaRef={ctaRef} textRef={textRef} backgroundImage="/images/login image.jpg">
       <>
         {checked && player ? (
           <>
+            <div ref={textRef}>
             <Reveal as="div" delay={0} className="mb-6">
               <span className="bg-brand-500 text-white text-xs font-bold px-4 py-2 rounded-full uppercase tracking-widest">
                 Willkommen zurück
@@ -79,6 +84,7 @@ export default function LandingHero() {
             >
               Was möchtest du heute machen?
             </Reveal>
+            </div>
             <Reveal as="div" delay={270} className="space-y-3 max-w-2xl mx-auto">
               {/* Obere Reihe: 3 Buttons – primärer „Zum Feed" mittig */}
               <div className="flex flex-col sm:flex-row justify-center gap-3">
@@ -108,6 +114,7 @@ export default function LandingHero() {
           </>
         ) : (
           <>
+            <div ref={textRef}>
             <Reveal as="div" delay={0} className="mb-6">
               <span className="bg-brand-500 text-white text-xs font-bold px-4 py-2 rounded-full uppercase tracking-widest">
                 Amateur-Basketball in NRW
@@ -127,6 +134,7 @@ export default function LandingHero() {
               Finde Spieler, tritt Vereinen bei und verfolge Ligen in deiner Region. Die
               Plattform für Amateur-Basketball – von Spielern, für Spieler.
             </Reveal>
+            </div>
             <Reveal as="div" delay={270} className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 ref={ctaRef}
