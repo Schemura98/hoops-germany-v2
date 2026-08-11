@@ -110,9 +110,12 @@ export default function LandingHero() {
               <div className="flex flex-col sm:flex-row justify-center gap-3">
                 <Link
                   href="/feedback"
-                  className={`${HERO_BTN} ${HERO_W} border-2 border-amber-300/70 bg-amber-300/10 text-white hover:bg-amber-300 hover:text-gray-900`}
+                  className={`${HERO_BTN} ${HERO_W} group border-2 border-amber-300/70 bg-amber-300/10 text-white hover:bg-amber-300 hover:text-gray-900`}
                 >
-                  <FaCommentDots className="text-amber-300" /> Feedback
+                  {/* Icon-Farbe an den Hover-Zustand koppeln: Beim Hover wird die
+                      Flaeche solide amber-300 - ein fest verdrahtetes text-amber-300
+                      liesse das Icon darin verschwinden (Befund Tobias, 12.08.2026). */}
+                  <FaCommentDots className="text-amber-300 group-hover:text-gray-900" /> Feedback
                 </Link>
                 <Link href="/spiele" className={`${HERO_GHOST} ${HERO_W}`}>
                   <FaCalendarAlt /> Spielplan
