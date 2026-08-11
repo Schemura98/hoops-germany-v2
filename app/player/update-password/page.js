@@ -79,7 +79,7 @@ export default function PlayerUpdatePasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-ink-950">
+    <div className="min-h-screen bg-navy-950">
       <PlayerNav player={player} />
 
       <main className="max-w-md mx-auto px-4 py-8">
@@ -106,7 +106,7 @@ export default function PlayerUpdatePasswordPage() {
 
         <form
           onSubmit={onSubmit}
-          className="bg-ink-800 rounded-md border border-ink-600 p-6 space-y-4"
+          className="bg-navy-800 rounded-md border border-navy-600 p-6 space-y-4"
         >
           <div>
             <label className="block text-sm font-medium text-mist-300 mb-1">

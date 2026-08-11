@@ -56,10 +56,10 @@ export default function PublicSponsorReportPage() {
   // Passwort-Gate
   if (!unlocked) {
     return (
-      <div className="min-h-screen bg-ink-900 flex items-center justify-center p-4">
-        <form onSubmit={onSubmit} className="w-full max-w-sm bg-ink-800 rounded-md p-8">
+      <div className="min-h-screen bg-navy-900 flex items-center justify-center p-4">
+        <form onSubmit={onSubmit} className="w-full max-w-sm bg-navy-800 rounded-md p-8">
           <div className="flex items-center gap-2 text-paper-50 mb-1">
-            <span className="h-9 w-9 rounded-md bg-brand-500 flex items-center justify-center text-ink-950">
+            <span className="h-9 w-9 rounded-md bg-brand-500 flex items-center justify-center text-navy-950">
               <PiBasketballBold />
             </span>
             <span className="font-black text-lg">Hoops Germany</span>
@@ -76,14 +76,14 @@ export default function PublicSponsorReportPage() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Passwort"
               autoFocus
-              className="w-full rounded-md border border-ink-600 pl-9 pr-4 py-3 text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              className="w-full rounded-md border border-navy-600 pl-9 pr-4 py-3 text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
           </div>
           {error && <p className="mt-2 text-sm text-signal-error">{error}</p>}
           <button
             type="submit"
             disabled={loading || !password}
-            className="mt-4 w-full inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 font-semibold rounded-md px-4 py-3"
+            className="mt-4 w-full inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 font-semibold rounded-md px-4 py-3"
           >
             {loading ? <PiBasketballBold className="animate-bounce" /> : "Report ansehen"}
           </button>
@@ -94,7 +94,7 @@ export default function PublicSponsorReportPage() {
 
   // Entsperrt → Report
   return (
-    <div className="min-h-screen bg-ink-700 print:bg-ink-800 py-8 print:py-0">
+    <div className="min-h-screen bg-navy-700 print:bg-navy-800 py-8 print:py-0">
       <div className="max-w-3xl mx-auto px-4 mb-4 flex flex-wrap items-center gap-2 justify-between print:hidden">
         <div className="flex items-center gap-1">
           {PERIODS.map((p) => (
@@ -102,7 +102,7 @@ export default function PublicSponsorReportPage() {
               key={p.v}
               onClick={() => changePeriod(p.v)}
               className={`px-3 py-1.5 rounded-sm text-sm font-medium transition ${
-                period === p.v ? "bg-brand-500 text-ink-950" : "bg-ink-800 border border-ink-600 text-mist-400 hover:border-brand-300"
+                period === p.v ? "bg-brand-500 text-navy-950" : "bg-navy-800 border border-navy-600 text-mist-400 hover:border-brand-300"
               }`}
             >
               {p.l}
@@ -111,7 +111,7 @@ export default function PublicSponsorReportPage() {
         </div>
         <button
           onClick={() => window.print()}
-          className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-ink-950 font-semibold rounded-md px-4 py-2.5 text-sm"
+          className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-navy-950 font-semibold rounded-md px-4 py-2.5 text-sm"
         >
           <PiPrinterBold /> Drucken / als PDF speichern
         </button>

@@ -56,7 +56,7 @@ export default function AdminModerationPage() {
             return (
               <div
                 key={post._id}
-                className="bg-ink-800 rounded-md border border-ink-600 p-4"
+                className="bg-navy-800 rounded-md border border-navy-600 p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">

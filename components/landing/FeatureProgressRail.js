@@ -20,11 +20,11 @@ const NAVBAR_HEIGHT = 64;
 
 // Die beiden Farbwerte stehen hier als Konstanten, weil sie per style-Property
 // gesetzt werden (Tailwind-Klassen kaemen pro Frame nicht in Frage). Sie muessen
-// mit brand-500 und ink-600 aus tailwind.config.js uebereinstimmen – beim
+// mit brand-500 und navy-600 aus tailwind.config.js uebereinstimmen – beim
 // Redesign am 12.08.2026 waren die alten Werte (#f97316/#e5e7eb) die einzige
 // Stelle, die das Farbschema nicht mitbekommen hat.
 const FARBE_AKTIV = "#F07A27"; // brand-500
-const FARBE_RUHE = "#4A3C31"; // ink-600
+const FARBE_RUHE = "#2E3F63"; // navy-600
 
 export default function FeatureProgressRail({ labels = [] }) {
   const wrapRef = useRef(null);
@@ -98,14 +98,14 @@ export default function FeatureProgressRail({ labels = [] }) {
     // Spielraum keine Strecke zum Kleben (Befund Tobias, 12.08.2026).
     <div ref={wrapRef} aria-hidden="true" style={{ display: "contents" }}>
       {/* Mobil/Tablet: dünner Balken unter der Navbar + Kurz-Beschriftung */}
-      <div className="sticky top-16 z-20 -mx-4 mb-10 bg-ink-950/90 px-4 pb-2 pt-2 backdrop-blur-sm xl:hidden">
+      <div className="sticky top-16 z-20 -mx-4 mb-10 bg-navy-950/90 px-4 pb-2 pt-2 backdrop-blur-sm xl:hidden">
         <p
           ref={labelRef}
           className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-mist-400"
         >
           {`1 / ${labels.length} · ${labels[0] || ""}`}
         </p>
-        <div className="h-1 w-full overflow-hidden rounded-full bg-ink-700">
+        <div className="h-1 w-full overflow-hidden rounded-full bg-navy-700">
           <div
             ref={barRef}
             className="h-full w-full origin-left rounded-full bg-brand-500"
@@ -124,7 +124,7 @@ export default function FeatureProgressRail({ labels = [] }) {
                 dotsRef.current[i] = el;
               }}
               title={label}
-              className="h-2 w-2 rounded-full bg-ink-700 transition-transform duration-300 motion-reduce:transition-none"
+              className="h-2 w-2 rounded-full bg-navy-700 transition-transform duration-300 motion-reduce:transition-none"
             />
           ))}
         </div>

@@ -31,7 +31,7 @@ function Growth({ v }) {
 
 function Kpi({ label, value, growth }) {
   return (
-    <div className="rounded-md border border-ink-600 p-4">
+    <div className="rounded-md border border-navy-600 p-4">
       <p className="text-xs text-mist-400">{label}</p>
       <p className="mt-1 text-2xl font-bold text-paper-50">{typeof value === "number" ? nf(value) : value}</p>
       {growth !== undefined && <Growth v={growth} />}
@@ -47,7 +47,7 @@ function Bars({ items }) {
       {items.map((it) => (
         <div key={it.label} className="flex items-center gap-3">
           <span className="w-40 text-xs text-mist-400 truncate">{it.label}</span>
-          <div className="flex-1 bg-ink-700 rounded-full h-2.5 overflow-hidden">
+          <div className="flex-1 bg-navy-700 rounded-full h-2.5 overflow-hidden">
             <div className="bg-brand-500 h-full rounded-full" style={{ width: `${(it.value / max) * 100}%` }} />
           </div>
           <span className="w-12 text-right text-xs font-semibold text-paper-50">{nf(it.value)}</span>
@@ -60,7 +60,7 @@ function Bars({ items }) {
 function Section({ title, children }) {
   return (
     <section className="break-inside-avoid">
-      <h2 className="text-base font-black text-paper-50 border-b border-ink-600 pb-1 mb-3">{title}</h2>
+      <h2 className="text-base font-black text-paper-50 border-b border-navy-600 pb-1 mb-3">{title}</h2>
       {children}
     </section>
   );
@@ -72,11 +72,11 @@ export default function SponsorReportView({ summary, period, generatedAt, label 
   if (!summary) return null;
   const p = summary.platform;
   return (
-    <div className="max-w-3xl mx-auto bg-ink-800 print:shadow-none rounded-md print:rounded-none border border-ink-600 print:border-0 p-8 space-y-7">
-      <header className="flex items-start justify-between gap-4 border-b border-ink-600 pb-4">
+    <div className="max-w-3xl mx-auto bg-navy-800 print:shadow-none rounded-md print:rounded-none border border-navy-600 print:border-0 p-8 space-y-7">
+      <header className="flex items-start justify-between gap-4 border-b border-navy-600 pb-4">
         <div>
           <div className="flex items-center gap-2 text-paper-50">
-            <span className="h-9 w-9 rounded-md bg-brand-500 flex items-center justify-center text-ink-950">
+            <span className="h-9 w-9 rounded-md bg-brand-500 flex items-center justify-center text-navy-950">
               <PiBasketballBold />
             </span>
             <span className="font-black text-lg">Hoops Germany</span>
@@ -166,7 +166,7 @@ export default function SponsorReportView({ summary, period, generatedAt, label 
       </Section>
 
       <Section title="Beliebteste Seiten">
-        <ul className="divide-y divide-ink-600">
+        <ul className="divide-y divide-navy-600">
           {summary.topPaths.slice(0, 8).map((x) => (
             <li key={x.path} className="flex items-center justify-between py-1.5">
               <span className="text-sm text-mist-300 truncate">{x.path}</span>
@@ -180,14 +180,14 @@ export default function SponsorReportView({ summary, period, generatedAt, label 
         <p className="text-sm text-mist-400 mb-2">Verfügbare Werbeflächen für Sponsoren:</p>
         <div className="flex flex-wrap gap-2">
           {AD_PLACEMENTS.map((a) => (
-            <span key={a} className="text-xs bg-ink-700 text-mist-300 rounded-sm px-3 py-1">
+            <span key={a} className="text-xs bg-navy-700 text-mist-300 rounded-sm px-3 py-1">
               {a}
             </span>
           ))}
         </div>
       </Section>
 
-      <footer className="border-t border-ink-600 pt-3 text-[11px] text-mist-400">
+      <footer className="border-t border-navy-600 pt-3 text-[11px] text-mist-400">
         Hoops Germany · hoopsgermany.de · Aggregierte Statistiken{generatedAt ? `, Stand ${generatedAt}` : ""}
       </footer>
     </div>

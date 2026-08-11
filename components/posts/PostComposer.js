@@ -66,7 +66,7 @@ export default function PostComposer({ player, onCreated }) {
   }
 
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 p-4">
+    <div className="bg-navy-800 rounded-md border border-navy-600 p-4">
       <div className="flex gap-3">
         {asTeam && team ? (
           <BaseAvatar name={team.teamName} src={team.logo} square />
@@ -76,12 +76,12 @@ export default function PostComposer({ player, onCreated }) {
         <div className="flex-1">
           {/* Autorenwahl (nur Team-Admins) */}
           {team && (
-            <div className="mb-2 inline-flex rounded-sm bg-ink-700 p-0.5 text-sm">
+            <div className="mb-2 inline-flex rounded-sm bg-navy-700 p-0.5 text-sm">
               <button
                 type="button"
                 onClick={() => setAsTeam(false)}
                 className={`px-3 py-1 rounded-md font-medium transition-colors ${
-                  !asTeam ? "bg-ink-800 text-paper-50" : "text-mist-400"
+                  !asTeam ? "bg-navy-800 text-paper-50" : "text-mist-400"
                 }`}
               >
                 Als Spieler
@@ -90,7 +90,7 @@ export default function PostComposer({ player, onCreated }) {
                 type="button"
                 onClick={() => setAsTeam(true)}
                 className={`px-3 py-1 rounded-md font-medium transition-colors ${
-                  asTeam ? "bg-ink-800 text-brand-400" : "text-mist-400"
+                  asTeam ? "bg-navy-800 text-brand-400" : "text-mist-400"
                 }`}
               >
                 Als {team.teamName}
@@ -105,7 +105,7 @@ export default function PostComposer({ player, onCreated }) {
               asTeam ? "Neuigkeit vom Verein teilen…" : "Was gibt's Neues? Tippe @ für Erwähnungen"
             }
             rows={2}
-            className="w-full resize-none rounded-sm border border-ink-600 px-3 py-2 text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+            className="w-full resize-none rounded-sm border border-navy-600 px-3 py-2 text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
           />
 
           {/* Kurzer Hinweis auf die Post-Funktionen (dezent, immer sichtbar). */}
@@ -162,7 +162,7 @@ export default function PostComposer({ player, onCreated }) {
             <button
               onClick={submit}
               disabled={posting || (!content.trim() && !image.trim())}
-              className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-5 py-2 text-sm font-medium transition-colors"
+              className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-5 py-2 text-sm font-medium transition-colors"
             >
               {posting ? "Posten…" : "Posten"}
             </button>

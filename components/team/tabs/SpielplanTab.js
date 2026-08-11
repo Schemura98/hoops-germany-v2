@@ -14,7 +14,7 @@ import TabAlert from "@/components/team/tabs/TabAlert";
 import { inputClassSm } from "@/lib/ui";
 
 const STATUS_BADGE = {
-  scheduled: { label: "Geplant", cls: "bg-ink-700 text-mist-300" },
+  scheduled: { label: "Geplant", cls: "bg-navy-700 text-mist-300" },
   completed: { label: "Abgeschlossen", cls: "bg-signal-ok/15 text-signal-ok" },
   cancelled: { label: "Abgesagt", cls: "bg-signal-error/15 text-signal-error" },
 };
@@ -182,11 +182,11 @@ export default function SpielplanTab({ team }) {
       {showAdd && (
         <form
           onSubmit={addMatch}
-          className="bg-ink-800 rounded-md border border-ink-600 p-4 space-y-3"
+          className="bg-navy-800 rounded-md border border-navy-600 p-4 space-y-3"
         >
           {/* Gegner eingrenzen (Bundesland/Liga) – hält das Dropdown übersichtlich */}
           {opponents.length > 0 && (availableBL.length > 0 || leagues.length > 0) && (
-            <div className="rounded-sm bg-ink-950 border border-ink-600 p-3">
+            <div className="rounded-sm bg-navy-950 border border-navy-600 p-3">
               <p className="text-xs font-medium text-mist-400 mb-2">Gegner eingrenzen (optional)</p>
               <div className="grid sm:grid-cols-2 gap-3">
                 <select
@@ -382,7 +382,7 @@ export default function SpielplanTab({ team }) {
           }
         />
       ) : (
-        <div className="bg-ink-800 rounded-md border border-ink-600 divide-y divide-ink-600">
+        <div className="bg-navy-800 rounded-md border border-navy-600 divide-y divide-navy-600">
           {matches.map((match) => {
             const opp = opponentOf(match);
             const badge = STATUS_BADGE[match.status] || STATUS_BADGE.scheduled;

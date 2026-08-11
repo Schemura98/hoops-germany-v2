@@ -83,7 +83,7 @@ export default function FollowSuggestions() {
   if (!loaded || items.length === 0) return null;
 
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 p-4">
+    <div className="bg-navy-800 rounded-md border border-navy-600 p-4">
       <h3 className="flex items-center gap-2 text-sm font-semibold text-paper-50 mb-3">
         <PiUsersThreeBold className="text-brand-400" /> Vorschläge für dich
       </h3>
@@ -112,7 +112,7 @@ export default function FollowSuggestions() {
             </div>
             <button
               onClick={() => follow(item)}
-              className="inline-flex items-center gap-1.5 flex-shrink-0 bg-brand-500 hover:bg-brand-400 text-ink-950 rounded-sm px-3 py-1.5 text-xs font-medium transition-colors"
+              className="inline-flex items-center gap-1.5 flex-shrink-0 bg-brand-500 hover:bg-brand-400 text-navy-950 rounded-sm px-3 py-1.5 text-xs font-medium transition-colors"
             >
               <PiPlusBold className="text-[10px]" /> Folgen
             </button>

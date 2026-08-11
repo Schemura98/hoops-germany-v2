@@ -3,11 +3,12 @@
 @tailwind utilities;
 
 /* Visuelle Richtung „Anzeigetafel" (docs/VISUELLE-RICHTUNG-2026-08-12.md):
-   warmer dunkler Grund, Text paper-50, ein Akzent – das Logo-Orange #F07A27. */
+   nachtblauer Grund (Entscheid Patrick 12.08.2026: Navy + Orange als
+   Basketball-Paarung), Text paper-50, ein Akzent – das Logo-Orange #F07A27. */
 
 :root {
-  --background: #120e0b; /* ink-950 */
-  --foreground: #faf7f2; /* paper-50 */
+  --background: #060b16; /* navy-950 */
+  --foreground: #f4f7fb; /* paper-50 */
 
   /* Sagt dem Browser, dass die Seite dunkel ist. Ohne diese Zeile rendert er
      alle Elemente, die er selbst zeichnet, weiterhin hell: Datums-/Zeit-Picker,

@@ -6,14 +6,14 @@
 // Grund waren die alten Werte die hellsten Flaechen der Seite und zogen den
 // Blick von den Inhalten weg. Alle Werte tragen paper-50 mit >= 6:1.
 const PALETTE = [
-  "bg-[#6B4A2F]",
-  "bg-[#7A3F2E]",
-  "bg-[#5E5233]",
-  "bg-[#3F5A4A]",
-  "bg-[#33505E]",
+  "bg-[#2F4A6B]",
+  "bg-[#3B5A7A]",
+  "bg-[#334F5E]",
+  "bg-[#3F5A55]",
   "bg-[#4A3F63]",
+  "bg-[#5A3F5E]",
   "bg-[#6B3F4E]",
-  "bg-[#4A4A44]",
+  "bg-[#414B63]",
 ];
 
 function hash(str) {
@@ -49,7 +49,7 @@ export default function Avatar({
       <img
         src={src}
         alt={name || ""}
-        className={`${className} ${shape} object-cover flex-shrink-0 bg-ink-800 ${ring}`}
+        className={`${className} ${shape} object-cover flex-shrink-0 bg-navy-800 ${ring}`}
       />
     );
   }

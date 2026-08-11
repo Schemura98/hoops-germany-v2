@@ -8,7 +8,7 @@ export default function StatCard({ label, value, growth = null, hint, icon: Icon
   const hasGrowth = growth !== null && growth !== undefined;
   const up = (growth ?? 0) >= 0;
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 p-4">
+    <div className="bg-navy-800 rounded-md border border-navy-600 p-4">
       <div className="flex items-center justify-between">
         <p className="text-xs text-mist-400">{label}</p>
         {Icon && <Icon className="text-brand-400 text-sm" />}

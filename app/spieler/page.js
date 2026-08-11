@@ -23,7 +23,7 @@ import { colorFor, initialsFor } from "@/components/Avatar";
 // Karten-Skeleton im Format der echten Spielerkarte (quadratisches Foto + Textzeilen).
 function PlayerCardSkeleton() {
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
+    <div className="bg-navy-800 rounded-md border border-navy-600 overflow-hidden">
       <Skeleton className="aspect-square w-full rounded-none" />
       <div className="p-3">
         <Skeleton className="h-3.5 w-3/4 mb-2" />
@@ -93,7 +93,7 @@ export default function SpielerPage() {
   }, [players, query, position, land, geo, cityMap]);
 
   return (
-    <div className="min-h-screen bg-ink-950 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
 
       <PageHeader
@@ -113,7 +113,7 @@ export default function SpielerPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Name, Team oder Stadt suchen…"
-              className="w-full border border-ink-600 rounded-md pl-9 pr-4 py-3 text-sm text-paper-50 outline-none focus:border-brand-400 bg-ink-800"
+              className="w-full border border-navy-600 rounded-md pl-9 pr-4 py-3 text-sm text-paper-50 outline-none focus:border-brand-400 bg-navy-800"
             />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -186,7 +186,7 @@ export default function SpielerPage() {
               <Link
                 key={p._id}
                 href={`/player/view-player/${p.slug || p._id}`}
-                className="bg-ink-800 rounded-md border border-ink-600 hover:border-brand-500/50 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 group overflow-hidden"
+                className="bg-navy-800 rounded-md border border-navy-600 hover:border-brand-500/50 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 group overflow-hidden"
               >
                 <div className="aspect-square flex items-center justify-center overflow-hidden">
                   {p.profileImage ? (
@@ -230,7 +230,7 @@ export default function SpielerPage() {
                   )}
                   {p.hometown && (
                     <p className="text-xs text-mist-400 mt-0.5 flex items-center gap-1 truncate">
-                      <PiMapPinBold className="flex-shrink-0 text-ink-500" />
+                      <PiMapPinBold className="flex-shrink-0 text-navy-500" />
                       {p.hometown}
                     </p>
                   )}

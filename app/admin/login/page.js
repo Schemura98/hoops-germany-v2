@@ -31,14 +31,14 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6 py-12 bg-ink-900">
+    <main className="min-h-screen flex items-center justify-center px-6 py-12 bg-navy-900">
       <div className="w-full max-w-sm">
         <div className="flex items-center justify-center gap-2 font-bold text-paper-50 mb-8">
           <PiShieldCheckBold className="text-brand-400 text-xl" />
           Hoops Germany · Admin
         </div>
 
-        <div className="bg-ink-800 rounded-md p-8">
+        <div className="bg-navy-800 rounded-md p-8">
           <h1 className="font-display uppercase tracking-tight text-2xl font-black text-paper-50">Admin-Login</h1>
 
           {error && (
@@ -72,7 +72,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
+              className="w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
             >
               {loading ? "Anmelden…" : "Anmelden"}
             </button>

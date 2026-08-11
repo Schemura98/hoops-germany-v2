@@ -112,7 +112,7 @@ export default function NotificationBell() {
               as="span"
               direction="pop"
               duration={200}
-              className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-brand-500 text-ink-950 text-[10px] font-bold flex items-center justify-center"
+              className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-brand-500 text-navy-950 text-[10px] font-bold flex items-center justify-center"
             >
               {unread > 9 ? "9+" : unread}
             </Reveal>
@@ -124,8 +124,8 @@ export default function NotificationBell() {
         <>
           {/* Klick-außerhalb-Backdrop */}
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80 max-h-[70vh] sm:max-h-96 overflow-y-auto bg-ink-800 rounded-md border border-ink-600 z-50">
-            <div className="px-4 py-3 border-b border-ink-600">
+          <div className="fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80 max-h-[70vh] sm:max-h-96 overflow-y-auto bg-navy-800 rounded-md border border-navy-600 z-50">
+            <div className="px-4 py-3 border-b border-navy-600">
               <h3 className="text-sm font-semibold text-paper-50">Benachrichtigungen</h3>
             </div>
 
@@ -134,7 +134,7 @@ export default function NotificationBell() {
                 Keine Benachrichtigungen.
               </p>
             ) : (
-              <ul className="divide-y divide-ink-600">
+              <ul className="divide-y divide-navy-600">
                 {items.map((n) => {
                   const Icon = ICON[n.type] || PiBellBold;
                   const isInvite = n.type === "team_invite";
@@ -145,7 +145,7 @@ export default function NotificationBell() {
                     <div
                       className={`flex gap-3 px-4 py-3 ${
                         n.read ? "" : "bg-brand-500/50"
-                      } ${href ? "hover:bg-ink-700" : ""}`}
+                      } ${href ? "hover:bg-navy-700" : ""}`}
                     >
                       <span className="h-8 w-8 flex-shrink-0 rounded-full bg-brand-500/15 text-brand-400 flex items-center justify-center">
                         <Icon className="text-sm" />
@@ -169,14 +169,14 @@ export default function NotificationBell() {
                               <button
                                 onClick={() => respondInvite(n, true)}
                                 disabled={busy}
-                                className="inline-flex items-center gap-1.5 bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-3 py-1.5 text-xs font-semibold"
+                                className="inline-flex items-center gap-1.5 bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-3 py-1.5 text-xs font-semibold"
                               >
                                 <PiCheckBold className="text-[10px]" /> Annehmen
                               </button>
                               <button
                                 onClick={() => respondInvite(n, false)}
                                 disabled={busy}
-                                className="inline-flex items-center gap-1.5 border border-ink-600 hover:border-ink-500 text-mist-400 rounded-sm px-3 py-1.5 text-xs font-medium"
+                                className="inline-flex items-center gap-1.5 border border-navy-600 hover:border-navy-500 text-mist-400 rounded-sm px-3 py-1.5 text-xs font-medium"
                               >
                                 <PiXBold className="text-[10px]" /> Ablehnen
                               </button>

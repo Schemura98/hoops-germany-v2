@@ -159,7 +159,7 @@ export default function MentionTextarea({
       {multiline ? <textarea {...shared} rows={rows} /> : <input {...shared} />}
 
       {open && results.length > 0 && (
-        <ul className="absolute z-20 left-0 right-0 mt-1 max-h-64 overflow-y-auto rounded-md border border-ink-600 bg-ink-800 py-1">
+        <ul className="absolute z-20 left-0 right-0 mt-1 max-h-64 overflow-y-auto rounded-md border border-navy-600 bg-navy-800 py-1">
           {results.map((p, i) => (
             <li key={p.playerId}>
               <button
@@ -171,7 +171,7 @@ export default function MentionTextarea({
                 }}
                 onMouseEnter={() => setIndex(i)}
                 className={`flex w-full items-center gap-2 px-3 py-2 text-left ${
-                  i === index ? "bg-brand-500/10" : "hover:bg-ink-700"
+                  i === index ? "bg-brand-500/10" : "hover:bg-navy-700"
                 }`}
               >
                 <BaseAvatar

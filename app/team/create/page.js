@@ -89,7 +89,7 @@ export default function TeamCreatePage() {
   }
 
   return (
-    <div className="min-h-screen bg-ink-950">
+    <div className="min-h-screen bg-navy-950">
       <PlayerNav player={player} />
 
       <main className="max-w-lg mx-auto px-4 py-10">
@@ -112,7 +112,7 @@ export default function TeamCreatePage() {
 
         <form
           onSubmit={onSubmit}
-          className="bg-ink-800 rounded-md border border-ink-600 p-6 space-y-4"
+          className="bg-navy-800 rounded-md border border-navy-600 p-6 space-y-4"
         >
           <p className="text-xs text-mist-400">
             Mit <span className="text-brand-400">*</span> markierte Felder sind Pflichtfelder.
@@ -167,7 +167,7 @@ export default function TeamCreatePage() {
             </div>
           </div>
           {/* Liga-Auswahl aus dem offiziellen Katalog */}
-          <div className="rounded-md border border-ink-600 p-4 space-y-3">
+          <div className="rounded-md border border-navy-600 p-4 space-y-3">
             <div>
               <label className="block text-sm font-medium text-mist-300">
                 Liga <span className="text-mist-400">(optional)</span>

@@ -97,7 +97,7 @@ function LoginForm() {
             <button
               type="button"
               onClick={() => setShowPw((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-mist-400 hover:text-mist-400"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-mist-400 hover:text-paper-50 transition-colors"
               aria-label={showPw ? "Passwort verbergen" : "Passwort anzeigen"}
             >
               {showPw ? <PiEyeSlashBold /> : <PiEyeBold />}
@@ -111,14 +111,14 @@ function LoginForm() {
       </form>
 
       <div className="my-6 flex items-center gap-3">
-        <div className="h-px flex-1 bg-ink-700" />
+        <div className="h-px flex-1 bg-navy-700" />
         <span className="text-xs text-mist-400">oder</span>
-        <div className="h-px flex-1 bg-ink-700" />
+        <div className="h-px flex-1 bg-navy-700" />
       </div>
 
       <a
         href={googleHref}
-        className="w-full flex items-center justify-center gap-2 border border-ink-600 hover:border-brand-500 text-mist-300 rounded-sm px-4 py-2.5 font-medium transition-colors"
+        className="w-full flex items-center justify-center gap-2 border border-navy-600 hover:border-brand-500 text-mist-300 rounded-sm px-4 py-2.5 font-medium transition-colors"
       >
         <PiGoogleLogoBold className="text-brand-400" />
         Mit Google anmelden

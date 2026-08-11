@@ -39,7 +39,7 @@ export default function AuthShell({
     <div className="relative min-h-screen lg:flex">
       <Link
         href="/"
-        className="absolute top-5 left-5 z-10 inline-flex items-center gap-2 px-3 py-2 rounded-md bg-ink-800 border border-ink-600 text-sm font-medium text-mist-400 hover:text-paper-50 hover:border-ink-500 transition-all"
+        className="absolute top-5 left-5 z-10 inline-flex items-center gap-2 px-3 py-2 rounded-md bg-navy-800 border border-navy-600 text-sm font-medium text-mist-400 hover:text-paper-50 hover:border-navy-500 transition-all"
       >
         <PiArrowLeftBold className="text-xs" />
         <span className="hidden sm:inline">Zur Startseite</span>

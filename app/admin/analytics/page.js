@@ -49,7 +49,7 @@ function Bars({ items, empty = "Noch keine Daten." }) {
       {items.map((it, i) => (
         <div key={`${it.label}-${i}`} className="flex items-center gap-3">
           <span className="w-36 sm:w-44 text-xs text-mist-400 truncate">{it.label}</span>
-          <div className="flex-1 bg-ink-700 rounded-full h-3 overflow-hidden">
+          <div className="flex-1 bg-navy-700 rounded-full h-3 overflow-hidden">
             <div className="bg-brand-500 h-full rounded-full" style={{ width: `${(it.value / max) * 100}%` }} />
           </div>
           <span className="w-12 text-right text-xs font-semibold text-paper-50">{nf(it.value)}</span>
@@ -61,7 +61,7 @@ function Bars({ items, empty = "Noch keine Daten." }) {
 
 function Card({ title, hint, children, right }) {
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 p-5">
+    <div className="bg-navy-800 rounded-md border border-navy-600 p-5">
       <div className="flex items-start justify-between gap-3 mb-1">
         <h2 className="text-sm font-semibold text-paper-50">{title}</h2>
         {right}
@@ -241,13 +241,13 @@ export default function AdminAnalyticsPage() {
     <AdminShell title="Analytics">
       {/* Steuerleiste: Tabs + Zeitraum */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
-        <div className="flex gap-1 bg-ink-700 rounded-md p-1">
+        <div className="flex gap-1 bg-navy-700 rounded-md p-1">
           {TABS.map((t) => (
             <button
               key={t.k}
               onClick={() => setTab(t.k)}
               className={`px-3 py-1.5 rounded-sm text-sm font-medium transition ${
-                tab === t.k ? "bg-ink-800 text-paper-50" : "text-mist-400 hover:text-paper-50"
+                tab === t.k ? "bg-navy-800 text-paper-50" : "text-mist-400 hover:text-paper-50"
               }`}
             >
               {t.l}
@@ -261,8 +261,8 @@ export default function AdminAnalyticsPage() {
               onClick={() => setPeriod(p.v)}
               className={`px-3 py-1.5 rounded-sm text-sm font-medium transition ${
                 period === p.v
-                  ? "bg-brand-500 text-ink-950"
-                  : "bg-ink-800 border border-ink-600 text-mist-400 hover:border-brand-300"
+                  ? "bg-brand-500 text-navy-950"
+                  : "bg-navy-800 border border-navy-600 text-mist-400 hover:border-brand-300"
               }`}
             >
               {p.l}
@@ -271,7 +271,7 @@ export default function AdminAnalyticsPage() {
           <button
             onClick={() => load(period)}
             title="Aktualisieren"
-            className="ml-1 p-2 rounded-sm bg-ink-800 border border-ink-600 text-mist-400 hover:text-brand-400"
+            className="ml-1 p-2 rounded-sm bg-navy-800 border border-navy-600 text-mist-400 hover:text-brand-400"
           >
             <PiArrowClockwiseBold className="text-xs" />
           </button>
@@ -362,7 +362,7 @@ export default function AdminAnalyticsPage() {
             {summary.topPaths.length === 0 ? (
               <p className="text-sm text-mist-400">Noch keine Aufrufe.</p>
             ) : (
-              <ul className="divide-y divide-ink-600">
+              <ul className="divide-y divide-navy-600">
                 {summary.topPaths.map((p) => (
                   <li key={p.path} className="flex items-center justify-between py-2">
                     <span className="text-sm text-mist-300 truncate">{p.path}</span>
@@ -379,13 +379,13 @@ export default function AdminAnalyticsPage() {
           <div className="flex flex-wrap gap-2">
             <Link
               href={`/admin/sponsor-report?period=${period}`}
-              className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-ink-950 font-semibold rounded-md px-4 py-2.5 text-sm"
+              className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-navy-950 font-semibold rounded-md px-4 py-2.5 text-sm"
             >
               <PiFilePdfBold /> Sponsoring-Report öffnen
             </Link>
             <button
               onClick={exportCsv}
-              className="inline-flex items-center gap-2 bg-ink-800 border border-ink-600 hover:border-brand-300 text-mist-300 font-semibold rounded-md px-4 py-2.5 text-sm"
+              className="inline-flex items-center gap-2 bg-navy-800 border border-navy-600 hover:border-brand-300 text-mist-300 font-semibold rounded-md px-4 py-2.5 text-sm"
             >
               <PiFileCsvBold /> CSV exportieren
             </button>
@@ -436,7 +436,7 @@ export default function AdminAnalyticsPage() {
             {summary.topPaths.length === 0 ? (
               <p className="text-sm text-mist-400">Noch keine Aufrufe.</p>
             ) : (
-              <ul className="divide-y divide-ink-600">
+              <ul className="divide-y divide-navy-600">
                 {summary.topPaths.map((p) => (
                   <li key={p.path} className="flex items-center justify-between py-2">
                     <span className="text-sm text-mist-300 truncate">{p.path}</span>

@@ -41,7 +41,7 @@ export default function CityInput({ value = "", onChange, onPick, placeholder = 
 
   const inputClass =
     className ||
-    "w-full rounded-sm border border-ink-600 px-4 py-2.5 text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+    "w-full rounded-sm border border-navy-600 px-4 py-2.5 text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
 
   function pick(c) {
     onChange?.(c.n);
@@ -64,13 +64,13 @@ export default function CityInput({ value = "", onChange, onPick, placeholder = 
         autoComplete="off"
       />
       {open && suggestions.length > 0 && (
-        <div className="absolute z-30 mt-1 w-full bg-ink-800 rounded-md border border-ink-600 max-h-60 overflow-y-auto">
+        <div className="absolute z-30 mt-1 w-full bg-navy-800 rounded-md border border-navy-600 max-h-60 overflow-y-auto">
           {suggestions.map((c, i) => (
             <button
               key={`${c.n}-${i}`}
               type="button"
               onClick={() => pick(c)}
-              className="w-full text-left px-4 py-2 text-sm hover:bg-ink-700 flex items-center justify-between"
+              className="w-full text-left px-4 py-2 text-sm hover:bg-navy-700 flex items-center justify-between"
             >
               <span className="text-paper-50">{c.n}</span>
               <span className="text-xs text-mist-400">{c.s}</span>

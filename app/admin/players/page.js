@@ -114,16 +114,16 @@ export default function AdminPlayersPage() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Suche nach Name oder E-Mail…"
-        className="mb-4 w-full sm:w-80 rounded-sm border border-ink-600 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+        className="mb-4 w-full sm:w-80 rounded-sm border border-navy-600 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
       />
 
       {loading ? (
         <p className="text-mist-400">Lädt…</p>
       ) : (
-        <div className="bg-ink-800 rounded-md border border-ink-600 overflow-x-auto">
+        <div className="bg-navy-800 rounded-md border border-navy-600 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-xs text-mist-400 text-left border-b border-ink-600">
+              <tr className="text-xs text-mist-400 text-left border-b border-navy-600">
                 <th className="font-medium py-3 pl-4">Name</th>
                 <th className="font-medium py-3">E-Mail</th>
                 <th className="font-medium py-3">Team-Admin</th>
@@ -132,7 +132,7 @@ export default function AdminPlayersPage() {
             </thead>
             <tbody>
               {filtered.map((p) => (
-                <tr key={p._id} className="border-b border-ink-600 last:border-0 align-top">
+                <tr key={p._id} className="border-b border-navy-600 last:border-0 align-top">
                   <td className="py-3 pl-4">
                     <Link
                       href={`/player/view-player/${p.slug || p._id}`}
@@ -141,17 +141,17 @@ export default function AdminPlayersPage() {
                       {p.firstName} {p.lastName}
                     </Link>
                     {p.isSuperAdmin && (
-                      <span className="ml-2 text-xs bg-ink-900 text-paper-50 rounded-sm px-2 py-0.5">
+                      <span className="ml-2 text-xs bg-navy-900 text-paper-50 rounded-sm px-2 py-0.5">
                         Admin
                       </span>
                     )}
                     {p.isDemo && (
-                      <span className="ml-2 text-[11px] font-medium rounded-sm px-2 py-0.5 bg-ink-700 text-mist-400">
+                      <span className="ml-2 text-[11px] font-medium rounded-sm px-2 py-0.5 bg-navy-700 text-mist-400">
                         Beispieldaten
                       </span>
                     )}
                     {p.isInternal && (
-                      <span className="ml-2 text-[11px] font-medium rounded-sm px-2 py-0.5 bg-ink-700 text-mist-300">
+                      <span className="ml-2 text-[11px] font-medium rounded-sm px-2 py-0.5 bg-navy-700 text-mist-300">
                         intern
                       </span>
                     )}
@@ -179,7 +179,7 @@ export default function AdminPlayersPage() {
                           onChange={(e) =>
                             setPicked((s) => ({ ...s, [p._id]: e.target.value }))
                           }
-                          className="rounded-sm border border-ink-600 px-2 py-1 text-xs outline-none focus:border-brand-500"
+                          className="rounded-sm border border-navy-600 px-2 py-1 text-xs outline-none focus:border-brand-500"
                         >
                           <option value="">Team wählen…</option>
                           {teams.map((t) => (
@@ -191,7 +191,7 @@ export default function AdminPlayersPage() {
                         <button
                           onClick={() => assignAdmin(p._id)}
                           disabled={busyId === p._id || !picked[p._id]}
-                          className="text-xs bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-3 py-1 font-medium"
+                          className="text-xs bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-3 py-1 font-medium"
                         >
                           Setzen
                         </button>

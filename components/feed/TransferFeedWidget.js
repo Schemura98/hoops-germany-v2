@@ -81,7 +81,7 @@ export default function TransferFeedWidget() {
   if (!loading && transfers.length === 0) return null;
 
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 p-4">
+    <div className="bg-navy-800 rounded-md border border-navy-600 p-4">
       <h3 className="text-sm font-bold text-paper-50 flex items-center gap-2">
         <PiArrowsLeftRightBold className="text-brand-400" /> Transfers
       </h3>

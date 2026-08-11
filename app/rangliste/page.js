@@ -18,8 +18,8 @@ const selectClass = `${inputClassSm} sm:w-auto`;
 // Tabellenzeilen-Skeleton im Format der echten Rangliste (Rang + Team + Sp/S/N/+-).
 function RanglisteSkeleton() {
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
-      <div className="divide-y divide-ink-600">
+    <div className="bg-navy-800 rounded-md border border-navy-600 overflow-hidden">
+      <div className="divide-y divide-navy-600">
         {Array.from({ length: 10 }).map((_, i) => (
           <div key={i} className="flex items-center gap-3 px-4 py-3">
             <Skeleton className="h-7 w-7 rounded-full flex-shrink-0" />
@@ -43,7 +43,7 @@ function rankBadge(i) {
   const base =
     "inline-flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold";
   if (i === 0) return `${base} bg-signal-wait/15 text-signal-wait`;
-  if (i === 1) return `${base} bg-ink-700 text-mist-400`;
+  if (i === 1) return `${base} bg-navy-700 text-mist-400`;
   if (i === 2) return `${base} bg-brand-500/15 text-brand-400`;
   return `${base} text-mist-400`;
 }
@@ -98,7 +98,7 @@ export default function RanglistePage() {
   }, [standings, bundesland]);
 
   return (
-    <div className="min-h-screen bg-ink-950 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
 
       <PageHeader
@@ -166,14 +166,14 @@ export default function RanglistePage() {
             Noch keine Ergebnisse für diese Auswahl.
           </p>
         ) : (
-          <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
+          <div className="bg-navy-800 rounded-md border border-navy-600 overflow-hidden">
             <ScrollTable label="Rangliste, seitlich scrollbar">
             <table className="w-full text-sm">
               <thead>
                 {/* Rang und Team bleiben beim seitlichen Wischen stehen –
                     sonst sieht man auf dem Handy entweder den Namen oder die
                     Korbdifferenz, nie beides (Design-Review Welle 3). */}
-                <tr className="bg-ink-800 text-xs uppercase tracking-wide text-mist-400 border-b border-ink-600">
+                <tr className="bg-navy-800 text-xs uppercase tracking-wide text-mist-400 border-b border-navy-600">
                   <th className="sticky left-0 z-10 bg-inherit text-left font-medium px-3 py-3 w-14">#</th>
                   <th className="sticky left-14 z-10 bg-inherit text-left font-medium px-2 py-3">Team</th>
                   <th className="text-center font-medium px-2 py-3 w-12">Sp</th>
@@ -182,9 +182,9 @@ export default function RanglistePage() {
                   <th className="text-center font-medium px-3 py-3 w-16">+/–</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-ink-600">
+              <tbody className="divide-y divide-navy-600">
                 {rows.map((t, i) => (
-                  <tr key={t.teamId} className="bg-ink-800 hover:bg-ink-700 transition-colors">
+                  <tr key={t.teamId} className="bg-navy-800 hover:bg-navy-700 transition-colors">
                     <td className="sticky left-0 z-10 bg-inherit px-3 py-3 w-14">
                       <span className={rankBadge(i)}>{i + 1}</span>
                     </td>

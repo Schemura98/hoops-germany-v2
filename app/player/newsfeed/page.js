@@ -128,7 +128,7 @@ export default function PlayerNewsfeedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-ink-950">
+    <div className="min-h-screen bg-navy-950">
       <PlayerNav player={player} />
 
       <div className="max-w-6xl mx-auto px-4 py-8">

@@ -51,7 +51,7 @@ export default function PlayerNav({ player }) {
   const AdminIcon = adminLink?.Icon;
 
   return (
-    <nav className="bg-ink-900 sticky top-0 z-50">
+    <nav className="bg-navy-900 sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
         <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
           <img src="/images/logo.svg" alt="Hoops Germany" className="h-9 w-auto object-contain" />
@@ -92,7 +92,7 @@ export default function PlayerNav({ player }) {
           <NotificationBell />
           <Link
             href="/player/player-detail"
-            className="flex items-center gap-2 px-1 rounded-full hover:bg-ink-700/5 transition-colors"
+            className="flex items-center gap-2 px-1 rounded-full hover:bg-navy-700/5 transition-colors"
             title="Mein Profil"
           >
             {player?.profileImage ? (
@@ -131,7 +131,7 @@ export default function PlayerNav({ player }) {
 
       {/* Mobile-Menü */}
       {mobileOpen && (
-        <div className="lg:hidden bg-ink-900 border-t border-ink-600 divide-y divide-ink-600/60">
+        <div className="lg:hidden bg-navy-900 border-t border-navy-600 divide-y divide-navy-600/60">
           {links.map((l) => (
             <Link
               key={l.href}
@@ -140,8 +140,8 @@ export default function PlayerNav({ player }) {
               aria-current={isActive(l.href) ? "page" : undefined}
               className={`block px-5 py-3.5 text-sm font-medium border-l-4 transition-colors ${
                 isActive(l.href)
-                  ? "bg-ink-800 text-paper-50 border-brand-500"
-                  : "text-mist-300 hover:bg-ink-700 hover:text-paper-50 border-transparent"
+                  ? "bg-navy-800 text-paper-50 border-brand-500"
+                  : "text-mist-300 hover:bg-navy-700 hover:text-paper-50 border-transparent"
               }`}
             >
               {l.label}
@@ -154,8 +154,8 @@ export default function PlayerNav({ player }) {
               aria-current={isActive(adminLink.href) ? "page" : undefined}
               className={`flex items-center gap-3 px-5 py-3.5 border-l-4 transition-colors ${
                 isActive(adminLink.href)
-                  ? "bg-ink-800 text-brand-300 border-brand-500"
-                  : "text-brand-400 hover:bg-ink-700 border-transparent"
+                  ? "bg-navy-800 text-brand-300 border-brand-500"
+                  : "text-brand-400 hover:bg-navy-700 border-transparent"
               }`}
             >
               <AdminIcon className="w-4 h-4 flex-shrink-0" />
@@ -167,7 +167,7 @@ export default function PlayerNav({ player }) {
               setMobileOpen(false);
               logout();
             }}
-            className="flex w-full items-center gap-3 px-5 py-3.5 border-l-4 border-transparent text-mist-400 hover:bg-ink-700 hover:text-paper-50 transition-colors"
+            className="flex w-full items-center gap-3 px-5 py-3.5 border-l-4 border-transparent text-mist-400 hover:bg-navy-700 hover:text-paper-50 transition-colors"
           >
             <PiSignOutBold className="w-4 h-4 flex-shrink-0" />
             <span className="text-sm font-medium">Abmelden</span>

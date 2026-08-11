@@ -15,7 +15,7 @@ import { BallGlyph, CourtArc, HoopEmblem } from "@/components/landing/HeroGlyphs
 // nicht Geschmack: Das Motiv war 1000x652px, wurde formatfüllend bis ~5x
 // hochskaliert und musste unter einem 65-%-Schwarz-Overlay verschwinden, damit
 // die Headline lesbar blieb – ein teures Bild, das am Ende fast nur als graue
-// Fläche wirkte. Jetzt steht die Typografie auf der ink-950-Fläche, der Bogen
+// Fläche wirkte. Jetzt steht die Typografie auf der navy-950-Fläche, der Bogen
 // darf sichtbar sein statt bei 14 % Deckkraft zu verhungern, und der Hero lädt
 // ohne ein einziges Byte Bilddaten.
 //
@@ -197,7 +197,7 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", child
   return (
     <div
       ref={stageRef}
-      className={`relative flex items-center justify-center overflow-hidden bg-ink-950 text-paper-50 ${className}`}
+      className={`relative flex items-center justify-center overflow-hidden bg-navy-950 text-paper-50 ${className}`}
       style={{ minHeight: "calc(100vh - 4rem)" }}
     >
       <CourtArc ref={arcRef} style={animated ? undefined : { opacity: ARC_MAX }} />

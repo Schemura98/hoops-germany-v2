@@ -9,7 +9,7 @@ import { PiCaretRightBold } from "react-icons/pi";
  * Inhalt zum Wischen gibt (links/rechts je nach Scroll-Position).
  * Hilft Nutzern zu verstehen, dass sich die Kacheln zur Seite bewegen lassen.
  */
-export default function ScrollHintRow({ children, className = "", fadeColor = "from-ink-900" }) {
+export default function ScrollHintRow({ children, className = "", fadeColor = "from-navy-900" }) {
   const ref = useRef(null);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(true); // Standard: kein Hinweis, bis Overflow bekannt ist

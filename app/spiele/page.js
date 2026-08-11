@@ -48,7 +48,7 @@ function MatchCard({ match }) {
   return (
     <Link
       href={`/match/${match._id}`}
-      className="block bg-ink-800 rounded-md border border-ink-600 p-4 hover:border-brand-500/50 hover:-translate-y-0.5 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong motion-reduce:hover:translate-y-0"
+      className="block bg-navy-800 rounded-md border border-navy-600 p-4 hover:border-brand-500/50 hover:-translate-y-0.5 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong motion-reduce:hover:translate-y-0"
     >
       {(match.leagueId?.name || isPlayoff) && (
         <div className="mb-2 flex items-center justify-center gap-2">
@@ -88,7 +88,7 @@ function MatchCard({ match }) {
         )}
       </div>
       {resultPending && (
-        <div className="mt-2 text-center text-[11px] font-medium rounded-sm px-3 py-1 bg-ink-700 text-mist-400">
+        <div className="mt-2 text-center text-[11px] font-medium rounded-sm px-3 py-1 bg-navy-700 text-mist-400">
           Ergebnis ausstehend
         </div>
       )}
@@ -111,7 +111,7 @@ function MatchCard({ match }) {
 // Tabs-/Filter-Platzhalter für die Listenseite.
 function MatchCardSkeleton() {
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 p-4">
+    <div className="bg-navy-800 rounded-md border border-navy-600 p-4">
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
         <div className="flex items-center gap-2">
           <Skeleton className="h-8 w-8 rounded-full" />
@@ -233,7 +233,7 @@ export default function SpielePage() {
   );
 
   return (
-    <div className="min-h-screen bg-ink-950 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
 
       <PageHeader
@@ -309,7 +309,7 @@ export default function SpielePage() {
                     setOrt("");
                     setDateFrom("");
                   }}
-                  className="rounded-sm border border-ink-600 text-sm text-mist-400 hover:text-brand-400 hover:border-brand-300"
+                  className="rounded-sm border border-navy-600 text-sm text-mist-400 hover:text-brand-400 hover:border-brand-300"
                 >
                   Filter zurücksetzen
                 </button>

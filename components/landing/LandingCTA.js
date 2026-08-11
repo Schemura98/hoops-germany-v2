@@ -20,7 +20,7 @@ export default function LandingCTA() {
   if (!checked || loggedIn) return null;
 
   return (
-    <section className="bg-ink-900 text-paper-50 py-20 px-4 text-center">
+    <section className="bg-navy-900 text-paper-50 py-20 px-4 text-center">
       <Reveal
         as="h2"
         className="font-display uppercase tracking-tight text-4xl md:text-6xl font-black mb-4"
@@ -33,13 +33,13 @@ export default function LandingCTA() {
       <Reveal delay={160} className="flex flex-col sm:flex-row gap-4 justify-center">
         <Link
           href="/signup"
-          className="bg-brand-500 hover:bg-brand-400 text-ink-950 font-bold py-4 px-10 rounded-sm text-lg flex items-center justify-center gap-2 transition-transform duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
+          className="bg-brand-500 hover:bg-brand-400 text-navy-950 font-bold py-4 px-10 rounded-sm text-lg flex items-center justify-center gap-2 transition-transform duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
         >
           Jetzt registrieren <PiArrowRightBold />
         </Link>
         <Link
           href="/login"
-          className="border-2 border-ink-600 hover:border-ink-600 text-paper-50 font-bold py-4 px-10 rounded-sm text-lg flex items-center justify-center transition-transform duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
+          className="border-2 border-navy-600 hover:border-brand-500 transition-colors text-paper-50 font-bold py-4 px-10 rounded-sm text-lg flex items-center justify-center transition-transform duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
         >
           Bereits registriert? Anmelden
         </Link>

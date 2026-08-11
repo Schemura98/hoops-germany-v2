@@ -8,7 +8,7 @@ import AdminShell from "@/components/layout/AdminShell";
 import { getAdminToken } from "@/lib/clientAuth";
 
 const inputClass =
-  "w-24 rounded-sm border border-ink-600 px-3 py-2 text-center text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+  "w-24 rounded-sm border border-navy-600 px-3 py-2 text-center text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
 
 export default function AdminUpdateMatchPage({ params }) {
   const id = params["match-id"];
@@ -94,7 +94,7 @@ export default function AdminUpdateMatchPage({ params }) {
 
   return (
     <AdminShell title="Spiel bearbeiten">
-      <div className="max-w-lg bg-ink-800 rounded-md border border-ink-600 p-6">
+      <div className="max-w-lg bg-navy-800 rounded-md border border-navy-600 p-6">
         <p className="text-lg font-semibold text-paper-50">
           {match.teamA?.teamName} <span className="text-mist-400">vs</span> {match.teamB?.teamName}
         </p>
@@ -160,7 +160,7 @@ export default function AdminUpdateMatchPage({ params }) {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="w-full rounded-sm border border-ink-600 px-4 py-2.5 text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+            className="w-full rounded-sm border border-navy-600 px-4 py-2.5 text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
           >
             <option value="scheduled">Geplant (Ergebnis zurücksetzen)</option>
             <option value="completed">Beendet (Ergebnis setzen)</option>
@@ -202,13 +202,13 @@ export default function AdminUpdateMatchPage({ params }) {
           <button
             onClick={save}
             disabled={saving}
-            className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-6 py-2.5 font-medium"
+            className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-6 py-2.5 font-medium"
           >
             {saving ? "Speichern…" : "Speichern"}
           </button>
           <Link
             href="/admin/matches"
-            className="border border-ink-600 hover:border-brand-500 text-mist-300 rounded-sm px-6 py-2.5 font-medium"
+            className="border border-navy-600 hover:border-brand-500 text-mist-300 rounded-sm px-6 py-2.5 font-medium"
           >
             Abbrechen
           </Link>
@@ -216,7 +216,7 @@ export default function AdminUpdateMatchPage({ params }) {
       </div>
 
       {/* Änderungsverlauf (Audit-Log) */}
-      <div className="max-w-lg mt-6 bg-ink-800 rounded-md border border-ink-600 p-6">
+      <div className="max-w-lg mt-6 bg-navy-800 rounded-md border border-navy-600 p-6">
         <h2 className="text-sm font-semibold text-paper-50 mb-3">Änderungsverlauf</h2>
         {audit.length === 0 ? (
           <p className="text-sm text-mist-400">Noch keine protokollierten Änderungen.</p>

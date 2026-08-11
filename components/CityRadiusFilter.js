@@ -64,7 +64,7 @@ export default function CityRadiusFilter({ value, onChange }) {
           }}
           onFocus={() => setOpen(true)}
           placeholder="Stadt (Umkreis)…"
-          className="w-full sm:w-56 rounded-md border border-ink-600 pl-9 pr-8 py-3 text-sm text-paper-50 outline-none focus:border-brand-400 bg-ink-800"
+          className="w-full sm:w-56 rounded-md border border-navy-600 pl-9 pr-8 py-3 text-sm text-paper-50 outline-none focus:border-brand-400 bg-navy-800"
         />
         {value?.center && (
           <button
@@ -76,12 +76,12 @@ export default function CityRadiusFilter({ value, onChange }) {
           </button>
         )}
         {open && suggestions.length > 0 && (
-          <div className="absolute z-30 mt-1 w-full sm:w-72 bg-ink-800 rounded-md border border-ink-600 max-h-64 overflow-y-auto">
+          <div className="absolute z-30 mt-1 w-full sm:w-72 bg-navy-800 rounded-md border border-navy-600 max-h-64 overflow-y-auto">
             {suggestions.map((c, i) => (
               <button
                 key={`${c.n}-${i}`}
                 onClick={() => pick(c)}
-                className="w-full text-left px-4 py-2 text-sm hover:bg-ink-700 flex items-center justify-between"
+                className="w-full text-left px-4 py-2 text-sm hover:bg-navy-700 flex items-center justify-between"
               >
                 <span className="text-paper-50">{c.n}</span>
                 <span className="text-xs text-mist-400">{c.s}</span>
@@ -97,7 +97,7 @@ export default function CityRadiusFilter({ value, onChange }) {
           onChange({ center: value?.center || null, radiusKm: Number(e.target.value) })
         }
         disabled={!value?.center}
-        className="rounded-md border border-ink-600 px-3 py-3 text-sm text-mist-300 bg-ink-800 outline-none focus:border-brand-400 disabled:opacity-50"
+        className="rounded-md border border-navy-600 px-3 py-3 text-sm text-mist-300 bg-navy-800 outline-none focus:border-brand-400 disabled:opacity-50"
       >
         {RADII.map((r) => (
           <option key={r} value={r}>

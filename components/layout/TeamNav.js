@@ -16,7 +16,7 @@ export default function TeamNav({ team }) {
   }
 
   return (
-    <nav className="bg-ink-900 sticky top-0 z-50">
+    <nav className="bg-navy-900 sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-6 flex items-center justify-between h-16">
         <Link href="/team/admin" className="flex items-center gap-2 font-bold text-paper-50">
           {team?.logo ? (

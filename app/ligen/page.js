@@ -99,13 +99,13 @@ function LeagueCard({ l }) {
   return (
     <Link
       href={`/ligen/${l._id}`}
-      className="block min-w-0 bg-ink-800 rounded-md border border-ink-600 p-5 hover:border-brand-500/50 hover:-translate-y-0.5 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong motion-reduce:hover:translate-y-0"
+      className="block min-w-0 bg-navy-800 rounded-md border border-navy-600 p-5 hover:border-brand-500/50 hover:-translate-y-0.5 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong motion-reduce:hover:translate-y-0"
     >
       <div className="flex items-start justify-between gap-2">
         <p className="font-semibold text-paper-50 break-words min-w-0">{l.name}</p>
         <div className="flex flex-col items-end gap-1 shrink-0">
           {l.isDemo && (
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-mist-300 bg-ink-700 rounded-sm px-2 py-0.5">
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-mist-300 bg-navy-700 rounded-sm px-2 py-0.5">
               Beispieldaten
             </span>
           )}
@@ -114,7 +114,7 @@ function LeagueCard({ l }) {
               <PiTrophyBold className="text-[9px]" /> Abgeschlossen
             </span>
           ) : empty ? (
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-mist-400 bg-ink-700 rounded-sm px-2 py-0.5">
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-mist-400 bg-navy-700 rounded-sm px-2 py-0.5">
               In Vorbereitung
             </span>
           ) : null}
@@ -138,7 +138,7 @@ function LeagueCard({ l }) {
 // (Schnellzugriffe + gruppierte Liga-Karten), damit beim Laden kein Layout-Sprung entsteht.
 function LeagueCardSkeleton() {
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 p-5">
+    <div className="bg-navy-800 rounded-md border border-navy-600 p-5">
       <Skeleton className="h-4 w-2/3 mb-2" />
       <Skeleton className="h-3 w-1/2 mb-2" />
       <Skeleton className="h-3 w-1/3" />
@@ -457,7 +457,7 @@ export default function LigenPage() {
   ].filter(Boolean);
 
   const selectCls =
-    "w-full min-w-0 rounded-md border border-ink-600 px-3 py-2.5 text-sm text-mist-300 bg-ink-800 outline-none focus:border-brand-400";
+    "w-full min-w-0 rounded-md border border-navy-600 px-3 py-2.5 text-sm text-mist-300 bg-navy-800 outline-none focus:border-brand-400";
 
   // Basketballkreise fürs Dropdown: bei gewähltem Bezirk nur dessen Kreise, sonst alle 22
   // (gruppiert nach Bezirk). Kreise ohne Liga bleiben SICHTBAR, aber deaktiviert.
@@ -466,7 +466,7 @@ export default function LigenPage() {
     : BASKETBALLKREISE_NRW_GRUPPIERT;
 
   return (
-    <div className="min-h-screen bg-ink-950 flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-navy-950 flex flex-col overflow-x-hidden">
       <Navbar />
       <PageHeader eyebrow="Wettbewerb" title="Ligen" subtitle="Tabellen und Wettbewerbe." />
 
@@ -491,7 +491,7 @@ export default function LigenPage() {
                   key={q.label}
                   type="button"
                   onClick={() => applyQuick(q.apply)}
-                  className="rounded-full border border-ink-600 bg-ink-800 px-4 py-2 text-sm font-medium text-mist-300 hover:border-brand-400 hover:text-brand-400 transition-colors"
+                  className="rounded-full border border-navy-600 bg-navy-800 px-4 py-2 text-sm font-medium text-mist-300 hover:border-brand-400 hover:text-brand-400 transition-colors"
                 >
                   {q.label}
                 </button>
@@ -528,7 +528,7 @@ export default function LigenPage() {
             <button
               type="button"
               onClick={() => setBrowse(true)}
-              className="w-full rounded-md bg-ink-900 text-paper-50 py-3 text-sm font-semibold hover:bg-ink-700 transition-colors"
+              className="w-full rounded-md bg-navy-900 text-paper-50 py-3 text-sm font-semibold hover:bg-navy-700 transition-colors"
             >
               Alle {leagues.length} Ligen durchsuchen
             </button>
@@ -545,7 +545,7 @@ export default function LigenPage() {
                 <button
                   type="button"
                   onClick={() => setShowFilters((v) => !v)}
-                  className="sm:hidden inline-flex items-center gap-2 rounded-md border border-ink-600 bg-ink-800 px-3 py-2 text-sm font-medium text-mist-300"
+                  className="sm:hidden inline-flex items-center gap-2 rounded-md border border-navy-600 bg-navy-800 px-3 py-2 text-sm font-medium text-mist-300"
                 >
                   <PiFunnelBold className="text-xs" /> Filter{chips.length ? ` (${chips.length})` : ""}
                 </button>
@@ -660,7 +660,7 @@ export default function LigenPage() {
                 <button
                   type="button"
                   onClick={() => setShowFilters(false)}
-                  className="sm:hidden rounded-md bg-brand-500 text-ink-950 py-2.5 text-sm font-semibold"
+                  className="sm:hidden rounded-md bg-brand-500 text-navy-950 py-2.5 text-sm font-semibold"
                 >
                   Ergebnisse anzeigen
                 </button>
@@ -714,7 +714,7 @@ export default function LigenPage() {
                 {kreisligaNested.map((be) => (
                   <div key={be.bezirk}>
                     <h3 className="mb-3 text-sm font-bold text-paper-50">{be.bezirk}</h3>
-                    <div className="space-y-5 pl-3 border-l-2 border-ink-600">
+                    <div className="space-y-5 pl-3 border-l-2 border-navy-600">
                       {be.kreise.map((kg) => (
                         <div key={kg.kreisName}>
                           <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-mist-400">

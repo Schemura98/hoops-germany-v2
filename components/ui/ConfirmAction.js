@@ -71,7 +71,7 @@ export default function ConfirmAction({
         <div
           role="dialog"
           aria-modal="true"
-          className={`absolute z-20 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-md border border-ink-600 bg-ink-800 p-4 ${
+          className={`absolute z-20 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-md border border-navy-600 bg-navy-800 p-4 ${
             align === "right" ? "right-0" : "left-0"
           } ${panelClassName}`}
         >

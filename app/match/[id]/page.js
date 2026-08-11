@@ -70,7 +70,7 @@ function StatTable({ stats }) {
             : s.playerName || "—";
           const isTop = topPoints > 0 && (s.points ?? 0) === topPoints;
           return (
-            <tr key={s._id} className="border-t border-ink-600">
+            <tr key={s._id} className="border-t border-navy-600">
               <td className="py-2">
                 <span className="inline-flex items-center gap-1.5">
                   {s.player?.slug ? (
@@ -136,7 +136,7 @@ export default function MatchIdPage({ params }) {
 
   if (state === "notfound") {
     return (
-      <div className="min-h-screen bg-ink-950 flex flex-col">
+      <div className="min-h-screen bg-navy-950 flex flex-col">
         <Navbar />
         <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <h1 className="text-xl font-bold text-paper-50">Spiel nicht gefunden</h1>
@@ -160,11 +160,11 @@ export default function MatchIdPage({ params }) {
   );
 
   return (
-    <div className="min-h-screen bg-ink-950 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
 
       {/* Navy-Scoreboard-Hero */}
-      <div className="bg-ink-900">
+      <div className="bg-navy-900">
         <div className="max-w-2xl mx-auto px-4 py-10">
           {match.leagueId?.name && (
             <p
@@ -203,7 +203,7 @@ export default function MatchIdPage({ params }) {
                 className={`mt-3 inline-block text-xs font-medium rounded-full px-3 py-1 ${
                   completed
                     ? "bg-signal-ok/20 text-signal-ok"
-                    : "bg-ink-600/20 text-mist-300"
+                    : "bg-navy-600/20 text-mist-300"
                 }`}
               >
                 {completed ? "Beendet" : "Geplant"}
@@ -237,7 +237,7 @@ export default function MatchIdPage({ params }) {
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
         {/* MVP / Zuschauer / Spielbericht (optional) */}
         {completed && (match.mvp || match.attendance || match.report) && (
-          <div className="bg-ink-800 rounded-md border border-ink-600 p-5">
+          <div className="bg-navy-800 rounded-md border border-navy-600 p-5">
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
               {match.mvp && (
                 <span className="inline-flex items-center gap-1.5">
@@ -258,7 +258,7 @@ export default function MatchIdPage({ params }) {
               ) : null}
             </div>
             {match.report && (
-              <p className="mt-3 border-t border-ink-600 pt-3 text-sm text-mist-300 whitespace-pre-line">
+              <p className="mt-3 border-t border-navy-600 pt-3 text-sm text-mist-300 whitespace-pre-line">
                 {match.report}
               </p>
             )}
@@ -268,13 +268,13 @@ export default function MatchIdPage({ params }) {
         {/* Spieler-Stats */}
         {completed && (
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <div className="bg-ink-800 rounded-md border border-ink-600 p-5">
+            <div className="bg-navy-800 rounded-md border border-navy-600 p-5">
               <h2 className="font-semibold text-paper-50 mb-2 truncate">
                 {match.teamA?.teamName}
               </h2>
               <StatTable stats={statsA} />
             </div>
-            <div className="bg-ink-800 rounded-md border border-ink-600 p-5">
+            <div className="bg-navy-800 rounded-md border border-navy-600 p-5">
               <h2 className="font-semibold text-paper-50 mb-2 truncate">
                 {match.teamB?.teamName}
               </h2>

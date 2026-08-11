@@ -133,7 +133,7 @@ export default function AdminTeamsPage() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Suche nach Name oder E-Mail…"
-        className="mb-4 w-full sm:w-80 rounded-sm border border-ink-600 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+        className="mb-4 w-full sm:w-80 rounded-sm border border-navy-600 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
       />
 
       {!loading && pending.length > 0 && (
@@ -145,7 +145,7 @@ export default function AdminTeamsPage() {
             {pending.map((t) => (
               <li
                 key={t._id}
-                className="flex items-center justify-between gap-3 bg-ink-800 rounded-md border border-signal-wait/40 px-4 py-2.5"
+                className="flex items-center justify-between gap-3 bg-navy-800 rounded-md border border-signal-wait/40 px-4 py-2.5"
               >
                 <div className="min-w-0">
                   <p className="font-medium text-paper-50 truncate">{t.teamName}</p>
@@ -165,7 +165,7 @@ export default function AdminTeamsPage() {
                   <button
                     onClick={() => decide(t._id, t.teamName, false)}
                     disabled={busyId === t._id}
-                    className="inline-flex items-center gap-1.5 border border-ink-600 hover:border-signal-error hover:text-signal-error text-mist-400 rounded-sm px-3 py-1.5 text-sm font-medium"
+                    className="inline-flex items-center gap-1.5 border border-navy-600 hover:border-signal-error hover:text-signal-error text-mist-400 rounded-sm px-3 py-1.5 text-sm font-medium"
                   >
                     <PiXBold className="text-xs" /> Ablehnen
                   </button>
@@ -179,10 +179,10 @@ export default function AdminTeamsPage() {
       {loading ? (
         <p className="text-mist-400">Lädt…</p>
       ) : (
-        <div className="bg-ink-800 rounded-md border border-ink-600 overflow-x-auto">
+        <div className="bg-navy-800 rounded-md border border-navy-600 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-xs text-mist-400 text-left border-b border-ink-600">
+              <tr className="text-xs text-mist-400 text-left border-b border-navy-600">
                 <th className="font-medium py-3 pl-4">Team</th>
                 <th className="font-medium py-3">E-Mail</th>
                 <th className="font-medium py-3">Region</th>
@@ -191,7 +191,7 @@ export default function AdminTeamsPage() {
             </thead>
             <tbody>
               {filtered.map((t) => (
-                <tr key={t._id} className="border-b border-ink-600 last:border-0">
+                <tr key={t._id} className="border-b border-navy-600 last:border-0">
                   <td className="py-3 pl-4">
                     <Link
                       href={`/team/team-detail/${t.slug}`}
@@ -205,12 +205,12 @@ export default function AdminTeamsPage() {
                       </span>
                     )}
                     {t.isDemo && (
-                      <span className="ml-2 text-[11px] font-medium rounded-sm px-2 py-0.5 bg-ink-700 text-mist-400">
+                      <span className="ml-2 text-[11px] font-medium rounded-sm px-2 py-0.5 bg-navy-700 text-mist-400">
                         Beispieldaten
                       </span>
                     )}
                     {t.isInternal && (
-                      <span className="ml-2 text-[11px] font-medium rounded-sm px-2 py-0.5 bg-ink-700 text-mist-300">
+                      <span className="ml-2 text-[11px] font-medium rounded-sm px-2 py-0.5 bg-navy-700 text-mist-300">
                         intern
                       </span>
                     )}
@@ -267,7 +267,7 @@ export default function AdminTeamsPage() {
       {/* Team-Admin verwalten (Übertragung) */}
       {manage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setManage(null)}>
-          <div className="w-full max-w-md bg-ink-800 rounded-md p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md bg-navy-800 rounded-md p-6" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between gap-3">
               <h2 className="text-base font-bold text-paper-50">
                 Team-Admin verwalten{manage.teamName ? ` · ${manage.teamName}` : ""}
@@ -295,7 +295,7 @@ export default function AdminTeamsPage() {
                 <select
                   value={selPlayer}
                   onChange={(e) => setSelPlayer(e.target.value)}
-                  className="w-full rounded-sm border border-ink-600 px-3 py-2.5 text-sm outline-none focus:border-brand-500"
+                  className="w-full rounded-sm border border-navy-600 px-3 py-2.5 text-sm outline-none focus:border-brand-500"
                 >
                   <option value="">– Mitglied auswählen –</option>
                   {manage.members.map((m) => (
@@ -316,14 +316,14 @@ export default function AdminTeamsPage() {
                 <div className="mt-4 flex justify-end gap-2">
                   <button
                     onClick={() => setManage(null)}
-                    className="border border-ink-600 hover:border-ink-500 text-mist-300 rounded-sm px-4 py-2 text-sm font-medium"
+                    className="border border-navy-600 hover:border-navy-500 text-mist-300 rounded-sm px-4 py-2 text-sm font-medium"
                   >
                     Schließen
                   </button>
                   <button
                     onClick={transferAdmin}
                     disabled={!selPlayer || mBusy}
-                    className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-4 py-2 text-sm font-medium"
+                    className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-4 py-2 text-sm font-medium"
                   >
                     <PiUserGearBold className="text-xs" /> Als Admin übertragen
                   </button>

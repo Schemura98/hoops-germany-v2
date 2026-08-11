@@ -27,7 +27,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="de">
       <body
-        className={`${sans.variable} ${display.variable} ${mono.variable} font-sans antialiased bg-ink-950 text-paper-50`}
+        className={`${sans.variable} ${display.variable} ${mono.variable} font-sans antialiased bg-navy-950 text-paper-50`}
       >
         <AnalyticsTracker />
         <TestPhaseBanner />

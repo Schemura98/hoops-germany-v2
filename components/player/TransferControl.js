@@ -7,7 +7,7 @@ import { getPlayerToken } from "@/lib/clientAuth";
 import { LEAGUE_LEVELS } from "@/lib/constants";
 
 const inputClass =
-  "w-full rounded-sm border border-ink-600 px-3 py-2 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+  "w-full rounded-sm border border-navy-600 px-3 py-2 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
 
 // Transfer-Status & -Infos im eigenen Profil verwalten.
 export default function TransferControl({ player }) {
@@ -45,7 +45,7 @@ export default function TransferControl({ player }) {
   }
 
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 p-6">
+    <div className="bg-navy-800 rounded-md border border-navy-600 p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-paper-50 flex items-center gap-2">
           <PiArrowsLeftRightBold className="text-brand-400" /> Transfermarkt
@@ -57,11 +57,11 @@ export default function TransferControl({ player }) {
           role="switch"
           aria-checked={available}
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${
-            available ? "bg-brand-500" : "bg-ink-600"
+            available ? "bg-brand-500" : "bg-navy-600"
           }`}
         >
           <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-ink-800 transition-transform ${
+            className={`inline-block h-4 w-4 transform rounded-full bg-navy-800 transition-transform ${
               available ? "translate-x-6" : "translate-x-1"
             }`}
           />
@@ -109,7 +109,7 @@ export default function TransferControl({ player }) {
             <button
               onClick={() => save(true)}
               disabled={saving}
-              className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-5 py-2 text-sm font-medium"
+              className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-5 py-2 text-sm font-medium"
             >
               {saving ? "Speichern…" : "Speichern"}
             </button>

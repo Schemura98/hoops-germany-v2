@@ -13,7 +13,7 @@ const legal = [
 
 export default function Footer() {
   return (
-    <footer className="bg-ink-900 border-t border-ink-600 mt-16">
+    <footer className="bg-navy-900 border-t border-navy-600 mt-16">
       <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-sm text-mist-600">
           © {new Date().getFullYear()} Hoops Germany. Alle Rechte vorbehalten.

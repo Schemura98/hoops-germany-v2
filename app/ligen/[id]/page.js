@@ -15,8 +15,8 @@ import { Skeleton } from "@/components/ui/Skeleton";
 // beim Laden stehen bleiben (kein Layout-Sprung beim Wechsel auf den echten Inhalt).
 function StandingsSkeleton() {
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
-      <div className="divide-y divide-ink-600">
+    <div className="bg-navy-800 rounded-md border border-navy-600 overflow-hidden">
+      <div className="divide-y divide-navy-600">
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="flex items-center gap-3 px-4 py-3">
             <Skeleton className="h-4 w-4 rounded" />
@@ -57,7 +57,7 @@ export default function LigaDetailPage({ params }) {
 
   if (state === "loading") {
     return (
-      <div className="min-h-screen bg-ink-950 flex flex-col">
+      <div className="min-h-screen bg-navy-950 flex flex-col">
         <Navbar />
         <PageHeader eyebrow="Liga-Tabelle" title="Liga" />
         <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
@@ -70,7 +70,7 @@ export default function LigaDetailPage({ params }) {
 
   if (state === "notfound") {
     return (
-      <div className="min-h-screen bg-ink-950 flex flex-col">
+      <div className="min-h-screen bg-navy-950 flex flex-col">
         <Navbar />
         <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <h1 className="text-xl font-bold text-paper-50">Liga nicht gefunden</h1>
@@ -95,7 +95,7 @@ export default function LigaDetailPage({ params }) {
   }
 
   return (
-    <div className="min-h-screen bg-ink-950 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
 
       <PageHeader eyebrow="Liga-Tabelle" title={league.name} subtitle={league.season} />
@@ -125,12 +125,12 @@ export default function LigaDetailPage({ params }) {
           </div>
         )}
 
-        <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
+        <div className="bg-navy-800 rounded-md border border-navy-600 overflow-hidden">
           <ScrollTable label="Tabelle, seitlich scrollbar">
             <table className="w-full text-sm">
               <thead>
                 {/* Rang und Team bleiben beim seitlichen Wischen stehen (Welle 3) */}
-                <tr className="bg-ink-800 text-xs text-mist-400 text-left border-b border-ink-600">
+                <tr className="bg-navy-800 text-xs text-mist-400 text-left border-b border-navy-600">
                   <th className="sticky left-0 z-10 bg-inherit font-medium py-3 pl-4 w-12">#</th>
                   <th className="sticky left-12 z-10 bg-inherit font-medium py-3">Team</th>
                   <th className="font-medium py-3 text-center w-12">Sp</th>
@@ -143,7 +143,7 @@ export default function LigaDetailPage({ params }) {
                 {standings.map((s, i) => (
                   <tr
                     key={s.teamId}
-                    className="bg-ink-800 border-b border-ink-600 last:border-0 hover:bg-ink-700"
+                    className="bg-navy-800 border-b border-navy-600 last:border-0 hover:bg-navy-700"
                   >
                     <td className="sticky left-0 z-10 bg-inherit py-3 pl-4 w-12 font-semibold text-mist-400">
                       {championId && String(s.teamId) === championId ? (
@@ -224,7 +224,7 @@ export default function LigaDetailPage({ params }) {
                         <Link
                           key={g._id}
                           href={`/match/${g._id}`}
-                          className="block bg-ink-800 rounded-md border border-ink-600 px-4 py-3 hover:border-brand-500/50 transition-all"
+                          className="block bg-navy-800 rounded-md border border-navy-600 px-4 py-3 hover:border-brand-500/50 transition-all"
                         >
                           <div className="flex items-center justify-between gap-3 text-sm">
                             <span className={`min-w-0 truncate ${aWon ? "font-bold text-paper-50" : "text-mist-300"}`}>

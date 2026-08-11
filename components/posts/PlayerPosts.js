@@ -40,7 +40,7 @@ export default function PlayerPosts({ playerId, currentPlayerId }) {
           <PiBasketballBold className="text-brand-400 text-2xl animate-bounce" />
         </div>
       ) : posts.length === 0 ? (
-        <div className="bg-ink-800 rounded-md border border-ink-600 p-6 text-center">
+        <div className="bg-navy-800 rounded-md border border-navy-600 p-6 text-center">
           <p className="text-sm text-mist-400">Noch keine Beiträge.</p>
         </div>
       ) : (

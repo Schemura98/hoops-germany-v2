@@ -74,7 +74,7 @@ export default function AnfragenTab() {
           text="Spieler können dein Team über das öffentliche Profil anfragen."
         />
       ) : (
-        <div className="bg-ink-800 rounded-md border border-ink-600 divide-y divide-ink-600">
+        <div className="bg-navy-800 rounded-md border border-navy-600 divide-y divide-navy-600">
           {requests.map((p) => {
             const initials =
               `${p.firstName?.[0] || ""}${p.lastName?.[0] || ""}`.toUpperCase();
@@ -116,7 +116,7 @@ export default function AnfragenTab() {
                   <button
                     onClick={() => handle(p._id, "reject")}
                     disabled={isBusy}
-                    className="inline-flex items-center gap-1.5 border border-ink-600 hover:border-signal-error text-mist-400 hover:text-signal-error rounded-sm px-3 py-1.5 text-xs font-medium disabled:opacity-60"
+                    className="inline-flex items-center gap-1.5 border border-navy-600 hover:border-signal-error text-mist-400 hover:text-signal-error rounded-sm px-3 py-1.5 text-xs font-medium disabled:opacity-60"
                   >
                     <PiXBold /> Ablehnen
                   </button>

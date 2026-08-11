@@ -9,7 +9,7 @@ import { getAdminToken } from "@/lib/clientAuth";
 import { teamScores } from "@/lib/matchScore";
 
 const STATUS_BADGE = {
-  scheduled: { label: "Geplant", cls: "bg-ink-700 text-mist-300" },
+  scheduled: { label: "Geplant", cls: "bg-navy-700 text-mist-300" },
   completed: { label: "Beendet", cls: "bg-signal-ok/15 text-signal-ok" },
   cancelled: { label: "Abgesagt", cls: "bg-signal-error/15 text-signal-error" },
 };
@@ -51,10 +51,10 @@ export default function AdminMatchesPage() {
       ) : matches.length === 0 ? (
         <p className="text-mist-400">Keine Spiele vorhanden.</p>
       ) : (
-        <div className="bg-ink-800 rounded-md border border-ink-600 overflow-x-auto">
+        <div className="bg-navy-800 rounded-md border border-navy-600 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-xs text-mist-400 text-left border-b border-ink-600">
+              <tr className="text-xs text-mist-400 text-left border-b border-navy-600">
                 <th className="font-medium py-3 pl-4">Datum</th>
                 <th className="font-medium py-3">Partie</th>
                 <th className="font-medium py-3 text-center">Ergebnis</th>
@@ -67,7 +67,7 @@ export default function AdminMatchesPage() {
                 const score = teamScores(m);
                 const badge = STATUS_BADGE[m.status] || STATUS_BADGE.scheduled;
                 return (
-                  <tr key={m._id} className="border-b border-ink-600 last:border-0">
+                  <tr key={m._id} className="border-b border-navy-600 last:border-0">
                     <td className="py-3 pl-4 text-mist-400">{formatDate(m.date)}</td>
                     <td className="py-3 text-paper-50">
                       {m.teamA?.teamName || "?"} <span className="text-mist-400">vs</span>{" "}
@@ -89,7 +89,7 @@ export default function AdminMatchesPage() {
                     <td className="py-3 pr-4 text-right">
                       <Link
                         href={`/admin/update-match/${m._id}`}
-                        className="inline-flex items-center gap-1.5 text-xs border border-ink-600 hover:border-brand-500 text-mist-400 rounded-sm px-3 py-1.5"
+                        className="inline-flex items-center gap-1.5 text-xs border border-navy-600 hover:border-brand-500 text-mist-400 rounded-sm px-3 py-1.5"
                       >
                         <PiPencilSimpleBold /> Bearbeiten
                       </Link>

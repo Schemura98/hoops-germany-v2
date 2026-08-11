@@ -52,13 +52,13 @@ export default function AdminFeedbackPage() {
           {items.map((f) => (
             <div
               key={f._id}
-              className={`bg-ink-800 rounded-md border p-5 ${
-                f.status === "new" ? "border-brand-500/50" : "border-ink-600"
+              className={`bg-navy-800 rounded-md border p-5 ${
+                f.status === "new" ? "border-brand-500/50" : "border-navy-600"
               }`}
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium bg-ink-700 text-mist-300 rounded-sm px-2 py-0.5">
+                  <span className="text-xs font-medium bg-navy-700 text-mist-300 rounded-sm px-2 py-0.5">
                     {f.type}
                   </span>
                   {f.status === "new" && (
@@ -72,7 +72,7 @@ export default function AdminFeedbackPage() {
                   <button
                     onClick={() => markRead(f._id)}
                     disabled={busyId === f._id}
-                    className="inline-flex items-center gap-1.5 text-xs border border-ink-600 hover:border-brand-500 text-mist-400 rounded-sm px-3 py-1.5 disabled:opacity-60"
+                    className="inline-flex items-center gap-1.5 text-xs border border-navy-600 hover:border-brand-500 text-mist-400 rounded-sm px-3 py-1.5 disabled:opacity-60"
                   >
                     <PiCheckBold /> Als gelesen
                   </button>
@@ -85,7 +85,7 @@ export default function AdminFeedbackPage() {
                       {Array.from({ length: 5 }).map((_, i) => (
                         <PiStarFill
                           key={i}
-                          className={i < f.rating ? "text-signal-wait" : "text-ink-600"}
+                          className={i < f.rating ? "text-signal-wait" : "text-navy-600"}
                         />
                       ))}
                     </span>
@@ -93,7 +93,7 @@ export default function AdminFeedbackPage() {
                   {(f.areas || []).map((a) => (
                     <span
                       key={a}
-                      className="text-xs font-medium bg-ink-700 text-mist-400 rounded-sm px-2 py-0.5"
+                      className="text-xs font-medium bg-navy-700 text-mist-400 rounded-sm px-2 py-0.5"
                     >
                       {a}
                     </span>

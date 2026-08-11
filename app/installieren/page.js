@@ -23,7 +23,7 @@ import PageHeader from "@/components/layout/PageHeader";
 function Step({ n, children }) {
   return (
     <li className="flex gap-3">
-      <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-brand-500 text-sm font-bold text-ink-950">
+      <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-brand-500 text-sm font-bold text-navy-950">
         {n}
       </span>
       <span className="pt-0.5 text-mist-300">{children}</span>
@@ -34,11 +34,11 @@ function Step({ n, children }) {
 // Aufklappbarer Plattform-Abschnitt.
 function Section({ icon: Icon, title, badge, open, onToggle, children }) {
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
+    <div className="bg-navy-800 rounded-md border border-navy-600 overflow-hidden">
       <button
         onClick={onToggle}
         aria-expanded={open}
-        className="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-ink-700 transition-colors"
+        className="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-navy-700 transition-colors"
       >
         <Icon className="text-paper-50 text-lg flex-shrink-0" />
         <span className="font-bold text-paper-50 flex-1">{title}</span>
@@ -102,7 +102,7 @@ export default function InstallierenPage() {
   const detectedLabel = { ios: "iPhone / iPad", android: "Android", desktop: "Desktop" }[detected];
 
   return (
-    <div className="min-h-screen bg-ink-950 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
       <PageHeader
         eyebrow="Hoops Germany"
@@ -118,7 +118,7 @@ export default function InstallierenPage() {
             { icon: PiArrowsClockwiseBold, t: "Immer aktuell" },
             { icon: PiLightningBold, t: "Schneller Start" },
           ].map((b) => (
-            <div key={b.t} className="bg-ink-800 rounded-md border border-ink-600 p-4 text-center">
+            <div key={b.t} className="bg-navy-800 rounded-md border border-navy-600 p-4 text-center">
               <b.icon className="mx-auto text-brand-400 text-xl" />
               <p className="mt-2 text-xs font-medium text-mist-300">{b.t}</p>
             </div>
@@ -126,7 +126,7 @@ export default function InstallierenPage() {
         </div>
 
         {installed ? (
-          <div className="bg-ink-800 rounded-md border border-signal-ok/50 p-6 flex items-center gap-3">
+          <div className="bg-navy-800 rounded-md border border-signal-ok/50 p-6 flex items-center gap-3">
             <PiCheckCircleBold className="text-signal-ok text-2xl flex-shrink-0" />
             <div>
               <p className="font-semibold text-paper-50">Schon installiert 🎉</p>
@@ -139,13 +139,13 @@ export default function InstallierenPage() {
           <>
             {/* Direkter Install-Button, wenn der Browser ihn anbietet (Chrome/Edge/Opera, Android+Desktop) */}
             {deferred && (
-              <div className="bg-ink-800 rounded-md border border-brand-500/50 p-6 text-center">
+              <div className="bg-navy-800 rounded-md border border-brand-500/50 p-6 text-center">
                 <p className="text-sm text-mist-400 mb-3">
                   Dein Browser unterstützt die direkte Installation – ein Klick genügt:
                 </p>
                 <button
                   onClick={install}
-                  className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-ink-950 rounded-sm px-6 py-3 font-semibold"
+                  className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-navy-950 rounded-sm px-6 py-3 font-semibold"
                 >
                   <PiDownloadSimpleBold /> App installieren
                 </button>

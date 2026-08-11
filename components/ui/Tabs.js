@@ -12,7 +12,7 @@ export default function Tabs({ tabs = [], value, onChange, className = "", fluid
       // max-w-full: Bei langen Beschriftungen (z.B. Transfermarkt auf 375px)
       // ragte der Umschalter sonst um wenige Pixel über den Rand hinaus
       // und erzeugte waagerechtes Scrollen auf der ganzen Seite.
-      className={`inline-flex max-w-full gap-1 border-b border-ink-600 ${
+      className={`inline-flex max-w-full gap-1 border-b border-navy-600 ${
         fluid ? "w-full" : ""
       } ${className}`}
     >
@@ -20,10 +20,10 @@ export default function Tabs({ tabs = [], value, onChange, className = "", fluid
         <button
           key={t.key}
           onClick={() => onChange(t.key)}
-          className={`${fluid ? "flex-1" : ""} -mb-px border-b-2 px-3 sm:px-4 py-2 text-sm font-semibold tracking-tight transition-[color,border-color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950 whitespace-nowrap ${
+          className={`${fluid ? "flex-1" : ""} -mb-px border-b-2 px-3 sm:px-4 py-2 text-sm font-semibold tracking-tight transition-[color,border-color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950 whitespace-nowrap ${
             value === t.key
               ? "border-brand-500 text-paper-50"
-              : "border-transparent text-mist-400 hover:text-paper-50 hover:border-ink-500"
+              : "border-transparent text-mist-400 hover:text-paper-50 hover:border-navy-500"
           }`}
         >
           {t.label}

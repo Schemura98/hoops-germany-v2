@@ -97,7 +97,7 @@ export default function TeamAdminPage() {
   const ActiveComp = TABS.find((t) => t.key === active)?.Comp || KaderTab;
 
   return (
-    <div className="min-h-screen bg-ink-950">
+    <div className="min-h-screen bg-navy-950">
       <TeamNav team={team} />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
@@ -121,7 +121,7 @@ export default function TeamAdminPage() {
         )}
 
         {/* Tab-Navigation (einheitlicher Pill-Stil; Refs für Auto-Scroll/Deeplink bleiben) */}
-        <div ref={tabBarRef} className="relative flex gap-1 overflow-x-auto bg-ink-700 rounded-md p-1 mb-6">
+        <div ref={tabBarRef} className="relative flex gap-1 overflow-x-auto bg-navy-700 rounded-md p-1 mb-6">
           {visibleTabs.map((t) => {
             const Icon = t.icon;
             const isActive = t.key === active;
@@ -134,7 +134,7 @@ export default function TeamAdminPage() {
                 onClick={() => setActive(t.key)}
                 className={`flex items-center gap-1.5 whitespace-nowrap px-3 sm:px-4 py-1.5 rounded-sm text-sm font-medium transition ${
                   isActive
-                    ? "bg-ink-800 text-paper-50"
+                    ? "bg-navy-800 text-paper-50"
                     : "text-mist-400 hover:text-paper-50"
                 }`}
               >

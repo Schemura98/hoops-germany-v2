@@ -74,19 +74,19 @@ export default function SharesManager() {
           value={label}
           onChange={(e) => setLabel(e.target.value)}
           placeholder="Bezeichnung (z.B. Autohaus Müller)"
-          className="flex-1 rounded-sm border border-ink-600 px-3 py-2 text-sm outline-none focus:border-brand-500"
+          className="flex-1 rounded-sm border border-navy-600 px-3 py-2 text-sm outline-none focus:border-brand-500"
         />
         <input
           type="text"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Passwort (min. 4 Zeichen)"
-          className="sm:w-52 rounded-sm border border-ink-600 px-3 py-2 text-sm outline-none focus:border-brand-500"
+          className="sm:w-52 rounded-sm border border-navy-600 px-3 py-2 text-sm outline-none focus:border-brand-500"
         />
         <button
           type="submit"
           disabled={creating}
-          className="inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 font-semibold rounded-sm px-4 py-2 text-sm whitespace-nowrap"
+          className="inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 font-semibold rounded-sm px-4 py-2 text-sm whitespace-nowrap"
         >
           <PiPlusBold className="text-xs" /> Link erstellen
         </button>
@@ -98,10 +98,10 @@ export default function SharesManager() {
       {shares.length === 0 ? (
         <p className="text-sm text-mist-400">Noch keine teilbaren Links.</p>
       ) : (
-        <ul className="divide-y divide-ink-600 border border-ink-600 rounded-md">
+        <ul className="divide-y divide-navy-600 border border-navy-600 rounded-md">
           {shares.map((s) => (
             <li key={s._id} className="flex items-center gap-3 px-4 py-2.5">
-              <PiLinkBold className={`flex-shrink-0 text-sm ${s.active ? "text-brand-400" : "text-ink-500"}`} />
+              <PiLinkBold className={`flex-shrink-0 text-sm ${s.active ? "text-brand-400" : "text-navy-500"}`} />
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-paper-50 truncate">
                   {s.label || "Ohne Bezeichnung"}

@@ -44,7 +44,7 @@ export default function NewsWidget({ compact = false }) {
   // Kompakte Variante für die Feed-Seitenleiste (vertikale Liste in einer Karte).
   if (compact) {
     return (
-      <div className="bg-ink-800 rounded-md border border-ink-600 p-4">
+      <div className="bg-navy-800 rounded-md border border-navy-600 p-4">
         <h3 className="text-sm font-bold text-paper-50 flex items-center gap-2 mb-3">
           <PiNewspaperBold className="text-brand-400" /> Basketball-News
         </h3>
@@ -92,7 +92,7 @@ export default function NewsWidget({ compact = false }) {
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-ink-800 rounded-md border border-ink-600 p-5">
+            <div key={i} className="bg-navy-800 rounded-md border border-navy-600 p-5">
               <Skeleton className="h-3.5 w-full mb-2" />
               <Skeleton className="h-3.5 w-2/3 mb-4" />
               <Skeleton className="h-3 w-1/3" />
@@ -107,7 +107,7 @@ export default function NewsWidget({ compact = false }) {
               href={n.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="h-full bg-ink-800 rounded-md border border-ink-600 p-5 hover:border-brand-500/50 transition-all flex flex-col"
+              className="h-full bg-navy-800 rounded-md border border-navy-600 p-5 hover:border-brand-500/50 transition-all flex flex-col"
             >
               <p className="font-medium text-paper-50 text-sm leading-snug line-clamp-3">
                 {n.title}

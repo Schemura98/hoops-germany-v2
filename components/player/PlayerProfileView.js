@@ -54,7 +54,7 @@ function StatCell({ label, value, sub, small }) {
 function InfoRow({ label, value }) {
   if (!value) return null;
   return (
-    <div className="flex justify-between py-2 border-b border-ink-600 last:border-0">
+    <div className="flex justify-between py-2 border-b border-navy-600 last:border-0">
       <span className="text-sm text-mist-400">{label}</span>
       <span className="text-sm font-medium text-paper-50 text-right">{value}</span>
     </div>
@@ -63,8 +63,8 @@ function InfoRow({ label, value }) {
 
 function SectionCard({ title, action, children }) {
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
-      <div className="bg-ink-900 px-5 py-3 flex items-center justify-between gap-2">
+    <div className="bg-navy-800 rounded-md border border-navy-600 overflow-hidden">
+      <div className="bg-navy-900 px-5 py-3 flex items-center justify-between gap-2">
         <h2 className="text-sm font-bold text-paper-50 uppercase tracking-wide flex items-center gap-2">
           <PiBasketballBold className="text-brand-400 text-sm" /> {title}
         </h2>
@@ -209,7 +209,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
   return (
     <div>
       {/* Navy-Hero mit Stats-Leiste */}
-      <div className="bg-ink-900">
+      <div className="bg-navy-900">
         <div className="max-w-4xl mx-auto px-4 pt-8 pb-0">
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-5 text-center sm:text-left">
             <Avatar
@@ -255,7 +255,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
 
           {/* Stats-Leiste (horizontal scrollbar mit Scroll-Hinweis) */}
           <ScrollHintRow className="mt-6">
-            <div className="inline-flex min-w-full rounded-t-md bg-ink-800/5 divide-x divide-paper-50/10 border border-ink-600/10 border-b-0">
+            <div className="inline-flex min-w-full rounded-t-md bg-navy-800/5 divide-x divide-paper-50/10 border border-navy-600/10 border-b-0">
               <div className="px-4 py-3 flex flex-col items-center justify-center min-w-[110px]">
                 {team?.slug ? (
                   <Link href={`/team/team-detail/${team.slug}`} className="flex flex-col items-center group">
@@ -293,7 +293,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                   href={player.fibaLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-3 flex flex-col items-center justify-center min-w-[80px] hover:bg-ink-700/5"
+                  className="px-4 py-3 flex flex-col items-center justify-center min-w-[80px] hover:bg-navy-700/5"
                 >
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-mist-400">FIBA</span>
                   <span className="text-brand-400 text-sm font-semibold mt-1 inline-flex items-center gap-1">
@@ -306,7 +306,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                   href={`https://instagram.com/${ig}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-3 flex flex-col items-center justify-center min-w-[80px] hover:bg-ink-700/5"
+                  className="px-4 py-3 flex flex-col items-center justify-center min-w-[80px] hover:bg-navy-700/5"
                 >
                   <PiInstagramLogoBold className="text-paper-50 text-lg" />
                   <span className="text-[10px] text-mist-300 mt-1">Instagram</span>
@@ -317,7 +317,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
         </div>
 
         {/* Tabs */}
-        <div className="bg-ink-800 border-b border-ink-600">
+        <div className="bg-navy-800 border-b border-navy-600">
           <div className="max-w-4xl mx-auto px-4 py-3 overflow-x-auto">
             <Tabs
               value={tab}
@@ -345,7 +345,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                   <select
                     value={season}
                     onChange={(e) => setSeason(e.target.value)}
-                    className="text-xs bg-ink-800/10 text-paper-50 rounded-sm px-2 py-1 outline-none border border-ink-600/10"
+                    className="text-xs bg-navy-800/10 text-paper-50 rounded-sm px-2 py-1 outline-none border border-navy-600/10"
                   >
                     <option className="text-paper-50" value="">
                       Alle Saisons
@@ -377,7 +377,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                       { v: bilanz.apg, l: "APG", s: "Assists/Spiel" },
                       { v: bilanz.rpg, l: "RPG", s: "Rebounds/Spiel" },
                     ].map((x) => (
-                      <div key={x.l} className="bg-ink-950 rounded-md py-4 text-center">
+                      <div key={x.l} className="bg-navy-950 rounded-md py-4 text-center">
                         <p className="text-3xl font-black text-paper-50">
                           <CountUp value={x.v} decimals={1} />
                         </p>
@@ -417,14 +417,14 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                           <Fragment key={i}>
                             <tr
                               onClick={() => toggleStation(s)}
-                              className={`border-t border-ink-600 cursor-pointer transition-colors ${
-                                isOpen ? "bg-ink-950" : "hover:bg-ink-700"
+                              className={`border-t border-navy-600 cursor-pointer transition-colors ${
+                                isOpen ? "bg-navy-950" : "hover:bg-navy-700"
                               }`}
                             >
                               <td className="py-2.5">
                                 <div className="flex items-center gap-2.5">
                                   <PiCaretDownBold
-                                    className={`text-ink-500 text-xs flex-shrink-0 transition-transform ${
+                                    className={`text-navy-500 text-xs flex-shrink-0 transition-transform ${
                                       isOpen ? "rotate-180" : ""
                                     }`}
                                   />
@@ -464,7 +464,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                             </tr>
 
                             {isOpen && (
-                              <tr className="bg-ink-950/60">
+                              <tr className="bg-navy-950/60">
                                 <td colSpan={5} className="px-1 pb-3 pt-0">
                                   {!games ? (
                                     <div className="flex justify-center py-4">
@@ -485,7 +485,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                                           <Link
                                             key={g.matchId}
                                             href={`/match/${g.matchId}`}
-                                            className="flex items-center gap-2.5 rounded-sm px-2 py-2 hover:bg-ink-700 transition-colors"
+                                            className="flex items-center gap-2.5 rounded-sm px-2 py-2 hover:bg-navy-700 transition-colors"
                                           >
                                             <span
                                               className={`w-5 shrink-0 text-center text-xs font-extrabold ${
@@ -513,7 +513,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                                             </div>
                                             <span className="shrink-0 text-sm font-bold text-paper-50 tabular-nums">
                                               {g.own ?? "–"}
-                                              <span className="mx-0.5 text-ink-500">:</span>
+                                              <span className="mx-0.5 text-navy-500">:</span>
                                               {g.opp ?? "–"}
                                             </span>
                                             <span className="shrink-0 w-16 text-right text-[11px] tabular-nums">
@@ -571,7 +571,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                   {[...teamHistory].reverse().map((h, i) => {
                     const isCurrent = i === 0 && teamHistory.length > 1;
                     const inner = (
-                      <div className="flex items-center gap-3 rounded-md border border-ink-600 p-3 hover:bg-ink-700 transition-colors">
+                      <div className="flex items-center gap-3 rounded-md border border-navy-600 p-3 hover:bg-navy-700 transition-colors">
                         <Avatar
                           name={h.teamName}
                           src={h.teamLogo}

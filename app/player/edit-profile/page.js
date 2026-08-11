@@ -142,7 +142,7 @@ export default function PlayerEditProfilePage() {
   const computedAge = ageFromBirthdate(form.birthdate);
 
   return (
-    <div className="min-h-screen bg-ink-950">
+    <div className="min-h-screen bg-navy-950">
       <PlayerNav player={player} />
 
       <main className="max-w-2xl mx-auto px-4 py-8">
@@ -164,7 +164,7 @@ export default function PlayerEditProfilePage() {
 
         <form
           onSubmit={onSubmit}
-          className="bg-ink-800 rounded-md border border-ink-600 p-6 space-y-5"
+          className="bg-navy-800 rounded-md border border-navy-600 p-6 space-y-5"
         >
           <p className="text-xs text-mist-400">
             Mit <span className="text-brand-400">*</span> markierte Felder sind Pflichtfelder – alle
@@ -317,7 +317,7 @@ export default function PlayerEditProfilePage() {
           </Field>
 
           {player.isTeamAdmin && (
-            <div className="border-t border-ink-600 pt-4">
+            <div className="border-t border-navy-600 pt-4">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -351,7 +351,7 @@ export default function PlayerEditProfilePage() {
         </form>
 
         {/* Gefahrenzone: Konto löschen */}
-        <div className="mt-8 bg-ink-800 rounded-md border border-signal-error/50 p-6">
+        <div className="mt-8 bg-navy-800 rounded-md border border-signal-error/50 p-6">
           <h2 className="text-base font-bold text-signal-error">Konto löschen</h2>
           <p className="text-sm text-mist-400 mt-1">
             Dein Profil, deine Beiträge und Verknüpfungen werden dauerhaft entfernt. Das kann nicht

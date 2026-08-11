@@ -32,7 +32,7 @@ const TABS = [
 // Karten-Skeleton im Format der echten Spieler-/Vereinskarte (Avatar + Textzeilen).
 function TransferCardSkeleton() {
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 p-5">
+    <div className="bg-navy-800 rounded-md border border-navy-600 p-5">
       <div className="flex items-center gap-3">
         <Skeleton className="h-12 w-12 rounded-full flex-shrink-0" />
         <div className="flex-1">
@@ -204,7 +204,7 @@ export default function TransfermarktPage() {
   const selectCls = `${inputClassSm}`;
 
   return (
-    <div className="min-h-screen bg-ink-950 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
 
       <PageHeader
@@ -227,7 +227,7 @@ export default function TransfermarktPage() {
                     <Link
                       key={t._id}
                       href={`/team/team-detail/${t.slug}`}
-                      className="flex items-center gap-2 bg-ink-800 rounded-md border border-ink-600 px-3 py-2 hover:border-brand-300"
+                      className="flex items-center gap-2 bg-navy-800 rounded-md border border-navy-600 px-3 py-2 hover:border-brand-300"
                     >
                       <Avatar name={t.teamName} src={t.logo} className="h-8 w-8" textClass="text-[10px]" square />
                       <span className="min-w-0">
@@ -253,7 +253,7 @@ export default function TransfermarktPage() {
                     <Link
                       key={p._id}
                       href={`/player/view-player/${p.slug || p._id}`}
-                      className="flex items-center gap-2 bg-ink-800 rounded-md border border-ink-600 px-3 py-2 hover:border-brand-300"
+                      className="flex items-center gap-2 bg-navy-800 rounded-md border border-navy-600 px-3 py-2 hover:border-brand-300"
                     >
                       <Avatar name={`${p.firstName} ${p.lastName}`} src={p.profileImage} className="h-8 w-8" textClass="text-[10px]" />
                       <span className="min-w-0">
@@ -279,7 +279,7 @@ export default function TransfermarktPage() {
         {/* Dezenter Querverweis auf Tryouts */}
         <Link
           href="/tryouts"
-          className="mb-6 flex items-center gap-3 rounded-md border border-ink-600 bg-ink-800 px-4 py-3 text-sm text-mist-400 hover:border-brand-500/50 hover:text-brand-400 transition-colors"
+          className="mb-6 flex items-center gap-3 rounded-md border border-navy-600 bg-navy-800 px-4 py-3 text-sm text-mist-400 hover:border-brand-500/50 hover:text-brand-400 transition-colors"
         >
           <PiMegaphoneBold className="flex-shrink-0 text-brand-400" />
           <span className="flex-1">
@@ -300,7 +300,7 @@ export default function TransfermarktPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={view === "players" ? "Name, Rolle, Liga oder Stadt…" : "Team, Rolle oder Stadt…"}
-              className="w-full rounded-sm border border-ink-600 pl-9 pr-4 py-2.5 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              className="w-full rounded-sm border border-navy-600 pl-9 pr-4 py-2.5 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -379,7 +379,7 @@ export default function TransfermarktPage() {
                 <Link
                   key={p._id}
                   href={`/player/view-player/${p.slug || p._id}`}
-                  className="min-w-0 break-words bg-ink-800 rounded-md border border-ink-600 p-5 hover:border-brand-500/50 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
+                  className="min-w-0 break-words bg-navy-800 rounded-md border border-navy-600 p-5 hover:border-brand-500/50 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
                 >
                   <div className="flex items-center gap-3">
                     {p.profileImage ? (
@@ -405,7 +405,7 @@ export default function TransfermarktPage() {
                       </p>
                       {(p.hometown || p.bundesland) && (
                         <p className="text-xs text-mist-400 truncate flex items-center gap-1 mt-0.5">
-                          <PiMapPinBold className="flex-shrink-0 text-ink-500" />
+                          <PiMapPinBold className="flex-shrink-0 text-navy-500" />
                           {[p.hometown, p.bundesland].filter(Boolean).join(" · ")}
                         </p>
                       )}
@@ -413,7 +413,7 @@ export default function TransfermarktPage() {
                   </div>
 
                   {(p.preferredLeague || p.transferNote) && (
-                    <div className="mt-3 border-t border-ink-600 pt-3 space-y-1">
+                    <div className="mt-3 border-t border-navy-600 pt-3 space-y-1">
                       {p.preferredLeague && (
                         <p className="text-xs text-mist-400">
                           <span className="font-medium text-mist-300">Spielklasse:</span>{" "}
@@ -436,7 +436,7 @@ export default function TransfermarktPage() {
               return (
                 <div
                   key={t._id}
-                  className="min-w-0 break-words bg-ink-800 rounded-md border border-ink-600 p-5 hover:border-brand-500/50 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
+                  className="min-w-0 break-words bg-navy-800 rounded-md border border-navy-600 p-5 hover:border-brand-500/50 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
                 >
                   <Link
                     href={`/team/team-detail/${t.slug}`}
@@ -453,7 +453,7 @@ export default function TransfermarktPage() {
                       </p>
                       {(t.region || t.bundesland) && (
                         <p className="text-xs text-mist-400 truncate flex items-center gap-1 mt-0.5">
-                          <PiMapPinBold className="flex-shrink-0 text-ink-500" />
+                          <PiMapPinBold className="flex-shrink-0 text-navy-500" />
                           {[t.region, t.bundesland].filter(Boolean).join(" · ")}
                         </p>
                       )}
@@ -473,11 +473,11 @@ export default function TransfermarktPage() {
                     </div>
                   )}
                   {t.note && (
-                    <p className="mt-2 text-sm text-mist-400 break-words border-t border-ink-600 pt-2">{t.note}</p>
+                    <p className="mt-2 text-sm text-mist-400 break-words border-t border-navy-600 pt-2">{t.note}</p>
                   )}
 
                   {/* Direktkontakt: Beitritt anfragen */}
-                  <div className="mt-3 border-t border-ink-600 pt-3">
+                  <div className="mt-3 border-t border-navy-600 pt-3">
                     {js.msg ? (
                       <p className={`text-xs ${js.type === "ok" ? "text-signal-ok" : "text-signal-error"}`}>
                         {js.msg}

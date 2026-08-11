@@ -20,7 +20,7 @@ import { colorFor, initialsFor } from "@/components/Avatar";
 // Karten-Skeleton im Format der echten Teamkarte (Logo-Banner + Textzeilen).
 function TeamCardSkeleton() {
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
+    <div className="bg-navy-800 rounded-md border border-navy-600 overflow-hidden">
       <Skeleton className="h-40 w-full rounded-none" />
       <div className="p-4">
         <Skeleton className="h-4 w-2/3 mb-2" />
@@ -84,7 +84,7 @@ export default function TeamsPage() {
   }, [teams, query, land, geo, cityMap]);
 
   return (
-    <div className="min-h-screen bg-ink-950 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
 
       <PageHeader
@@ -113,7 +113,7 @@ export default function TeamsPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Team oder Stadt suchen…"
-              className="w-full rounded-md border border-ink-600 pl-9 pr-4 py-3 text-sm text-paper-50 outline-none focus:border-brand-400 bg-ink-800"
+              className="w-full rounded-md border border-navy-600 pl-9 pr-4 py-3 text-sm text-paper-50 outline-none focus:border-brand-400 bg-navy-800"
             />
           </div>
           <select
@@ -169,9 +169,9 @@ export default function TeamsPage() {
               <Link
                 key={t._id}
                 href={`/team/team-detail/${t.slug}`}
-                className="group bg-ink-800 rounded-md border border-ink-600 hover:border-brand-500/50 hover:-translate-y-1 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong motion-reduce:hover:translate-y-0 overflow-hidden flex flex-col"
+                className="group bg-navy-800 rounded-md border border-navy-600 hover:border-brand-500/50 hover:-translate-y-1 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong motion-reduce:hover:translate-y-0 overflow-hidden flex flex-col"
               >
-                <div className="bg-gradient-to-br from-ink-900 to-ink-800 flex items-center justify-center h-40 w-full">
+                <div className="bg-gradient-to-br from-navy-900 to-navy-800 flex items-center justify-center h-40 w-full">
                   {t.logo ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={t.logo} alt={t.teamName} className="h-28 w-28 object-contain" />

@@ -12,7 +12,7 @@ const STATUS_CLS = {
   ausstehend: "bg-signal-wait/10 text-signal-wait",
   genehmigt: "bg-signal-ok/10 text-signal-ok",
   abgelehnt: "bg-signal-error/10 text-signal-error",
-  storniert: "bg-ink-700 text-mist-400",
+  storniert: "bg-navy-700 text-mist-400",
 };
 
 function leagueLabel(l) {
@@ -85,7 +85,7 @@ export default function AdminLeagueRequestsPage() {
               {pending.map((r) => {
                 const hasWarning = r.currentLeagueMatchCount > 0 || r.requestedLeagueMatchCount > 0;
                 return (
-                  <div key={r._id} className="bg-ink-800 rounded-md border border-ink-600 p-5 space-y-3">
+                  <div key={r._id} className="bg-navy-800 rounded-md border border-navy-600 p-5 space-y-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <Link
                         href={`/team/team-detail/${r.team?.slug || ""}`}
@@ -120,7 +120,7 @@ export default function AdminLeagueRequestsPage() {
                     </div>
 
                     {r.note && (
-                      <p className="text-sm text-mist-400 bg-ink-950 rounded-sm px-3 py-2">
+                      <p className="text-sm text-mist-400 bg-navy-950 rounded-sm px-3 py-2">
                         „{r.note}“ – {r.requestedBy?.firstName} {r.requestedBy?.lastName}
                       </p>
                     )}
@@ -139,7 +139,7 @@ export default function AdminLeagueRequestsPage() {
                       value={noteDraft[r._id] || ""}
                       onChange={(e) => setNoteDraft((d) => ({ ...d, [r._id]: e.target.value }))}
                       placeholder="Notiz für den Team-Admin (optional)"
-                      className="w-full rounded-sm border border-ink-600 px-3 py-2 text-sm outline-none focus:border-brand-400"
+                      className="w-full rounded-sm border border-navy-600 px-3 py-2 text-sm outline-none focus:border-brand-400"
                     />
 
                     <div className="flex items-center gap-3">
@@ -172,7 +172,7 @@ export default function AdminLeagueRequestsPage() {
               {decided.map((r) => (
                 <div
                   key={r._id}
-                  className="flex flex-wrap items-center justify-between gap-2 bg-ink-800 rounded-md border border-ink-600 px-4 py-3 text-sm"
+                  className="flex flex-wrap items-center justify-between gap-2 bg-navy-800 rounded-md border border-navy-600 px-4 py-3 text-sm"
                 >
                   <span className="text-mist-300">
                     {r.team?.teamName} → {leagueLabel(r.requestedLeagueId)}

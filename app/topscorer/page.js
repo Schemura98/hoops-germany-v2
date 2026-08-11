@@ -18,8 +18,8 @@ import CountUp from "@/components/ui/CountUp";
 // Tabellenzeilen-Skeleton im Format der echten Topscorer-Tabelle.
 function TopscorerSkeleton() {
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
-      <div className="divide-y divide-ink-600">
+    <div className="bg-navy-800 rounded-md border border-navy-600 overflow-hidden">
+      <div className="divide-y divide-navy-600">
         {Array.from({ length: 10 }).map((_, i) => (
           <div key={i} className="flex items-center gap-3 px-4 py-3">
             <Skeleton className="h-4 w-4 rounded" />
@@ -74,7 +74,7 @@ export default function TopscorerPage() {
   }, [season]);
 
   return (
-    <div className="min-h-screen bg-ink-950 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
 
       <PageHeader
@@ -113,12 +113,12 @@ export default function TopscorerPage() {
             text="Sobald Teams Spieler-Stats eintragen, erscheint hier die Rangliste."
           />
         ) : (
-          <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
+          <div className="bg-navy-800 rounded-md border border-navy-600 overflow-hidden">
             <ScrollTable label="Topscorer-Liste, seitlich scrollbar">
             <table className="w-full text-sm">
               <thead>
                 {/* Rang und Spieler bleiben beim seitlichen Wischen stehen (Welle 3) */}
-                <tr className="bg-ink-800 text-xs text-mist-400 text-left border-b border-ink-600">
+                <tr className="bg-navy-800 text-xs text-mist-400 text-left border-b border-navy-600">
                   <th className="sticky left-0 z-10 bg-inherit font-medium py-3 pl-4 w-12">#</th>
                   <th className="sticky left-12 z-10 bg-inherit font-medium py-3">Spieler</th>
                   <th className="font-medium py-3 text-center w-12">Sp.</th>
@@ -130,7 +130,7 @@ export default function TopscorerPage() {
                 {scorers.map((s, i) => {
                   const rank = i + 1;
                   return (
-                    <tr key={s.playerId} className="bg-ink-800 border-b border-ink-600 last:border-0 hover:bg-ink-700">
+                    <tr key={s.playerId} className="bg-navy-800 border-b border-navy-600 last:border-0 hover:bg-navy-700">
                       <td
                         className={`sticky left-0 z-10 bg-inherit py-3 pl-4 w-12 font-bold ${
                           RANK_COLOR[rank] || "text-mist-400"

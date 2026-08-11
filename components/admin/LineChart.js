@@ -62,7 +62,7 @@ export default function LineChart({ data = [], height = 200 }) {
           <span className="inline-block w-3 h-0.5 bg-brand-500" /> Seitenaufrufe
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block w-3 h-0.5 bg-ink-600" style={{ borderTop: "2px dashed #475569" }} /> Besucher
+          <span className="inline-block w-3 h-0.5 bg-navy-600" style={{ borderTop: "2px dashed #475569" }} /> Besucher
         </span>
         <span className="ml-auto text-mist-400">max {max}</span>
       </div>

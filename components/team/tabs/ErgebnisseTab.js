@@ -273,7 +273,7 @@ export default function ErgebnisseTab({ team }) {
             return (
               <div
                 key={match._id}
-                className="bg-ink-800 rounded-md border border-ink-600 p-5"
+                className="bg-navy-800 rounded-md border border-navy-600 p-5"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -293,7 +293,7 @@ export default function ErgebnisseTab({ team }) {
                 </div>
 
                 {!canEnter ? (
-                  <div className="mt-3 rounded-sm bg-ink-950 border border-ink-600 px-4 py-3 text-sm text-mist-400">
+                  <div className="mt-3 rounded-sm bg-navy-950 border border-navy-600 px-4 py-3 text-sm text-mist-400">
                     ⏳ Dieses Spiel findet erst am <strong>{formatDate(match.date)}</strong> statt –
                     Ergebnis &amp; Statistiken kannst du danach eintragen.
                   </div>
@@ -329,7 +329,7 @@ export default function ErgebnisseTab({ team }) {
                       </div>
                     )}
                     {!mismatch && !ownSubmitted && otherSubmitted && (
-                      <div className="mt-3 rounded-sm bg-ink-700 border border-ink-600 px-4 py-2 text-xs text-mist-300">
+                      <div className="mt-3 rounded-sm bg-navy-700 border border-navy-600 px-4 py-2 text-xs text-mist-300">
                         Der Gegner hat bereits gemeldet. Trage jetzt euer Ergebnis ein.
                       </div>
                     )}
@@ -388,7 +388,7 @@ export default function ErgebnisseTab({ team }) {
                 )}
 
                 {/* Statistik-Editor */}
-                <div className="mt-4 border-t border-ink-600 pt-3">
+                <div className="mt-4 border-t border-navy-600 pt-3">
                   <button
                     onClick={() => toggleStats(match)}
                     aria-expanded={statsOpen}
@@ -421,7 +421,7 @@ export default function ErgebnisseTab({ team }) {
                                   const row = sForm[r.key] || {};
                                   const dnp = !!row.didNotPlay;
                                   return (
-                                    <tr key={r.key} className="border-t border-ink-600">
+                                    <tr key={r.key} className="border-t border-navy-600">
                                       <td className="py-1.5 pr-2">
                                         <span className="text-paper-50">{r.name}</span>
                                         {r.position && (
@@ -436,7 +436,7 @@ export default function ErgebnisseTab({ team }) {
                                           aria-label={`Punkte ${r.name}`}
                                           value={row.points ?? ""}
                                           onChange={(e) => setStatField(match._id, r.key, "points", e.target.value)}
-                                          className={`${statInput} disabled:bg-ink-950 disabled:text-ink-500`}
+                                          className={`${statInput} disabled:bg-navy-950 disabled:text-navy-500`}
                                         />
                                       </td>
                                       <td className="py-1.5 text-center">
@@ -447,7 +447,7 @@ export default function ErgebnisseTab({ team }) {
                                           aria-label={`Assists ${r.name}`}
                                           value={row.assists ?? ""}
                                           onChange={(e) => setStatField(match._id, r.key, "assists", e.target.value)}
-                                          className={`${statInput} disabled:bg-ink-950 disabled:text-ink-500`}
+                                          className={`${statInput} disabled:bg-navy-950 disabled:text-navy-500`}
                                         />
                                       </td>
                                       <td className="py-1.5 text-center">
@@ -458,7 +458,7 @@ export default function ErgebnisseTab({ team }) {
                                           aria-label={`Rebounds ${r.name}`}
                                           value={row.rebounds ?? ""}
                                           onChange={(e) => setStatField(match._id, r.key, "rebounds", e.target.value)}
-                                          className={`${statInput} disabled:bg-ink-950 disabled:text-ink-500`}
+                                          className={`${statInput} disabled:bg-navy-950 disabled:text-navy-500`}
                                         />
                                       </td>
                                       <td className="py-1.5 text-center">

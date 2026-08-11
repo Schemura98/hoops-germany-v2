@@ -64,7 +64,7 @@ function MockFrame({ innerRef, children }) {
   return (
     <div
       ref={innerRef}
-      className="w-full max-w-sm rounded-md border border-ink-600 bg-ink-800 p-5 transition-transform duration-300 hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      className="w-full max-w-sm rounded-md border border-navy-600 bg-navy-800 p-5 transition-transform duration-300 hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
       {children}
     </div>
@@ -77,17 +77,17 @@ export function ProfileMock() {
   return (
     <MockFrame>
       <div className="flex items-center gap-3 mb-5">
-        <span className="h-12 w-12 rounded-full bg-brand-500 text-ink-950 font-bold flex items-center justify-center text-sm flex-shrink-0">
+        <span className="h-12 w-12 rounded-full bg-brand-500 text-navy-950 font-bold flex items-center justify-center text-sm flex-shrink-0">
           MB
         </span>
         <div className="min-w-0">
           <p className="font-bold text-paper-50 text-sm truncate">Max Bauer</p>
-          <span className="inline-block text-[10px] font-bold text-mist-400 bg-ink-700 px-2 py-0.5 rounded-sm uppercase tracking-wide mt-0.5">
+          <span className="inline-block text-[10px] font-bold text-mist-400 bg-navy-700 px-2 py-0.5 rounded-sm uppercase tracking-wide mt-0.5">
             Point Guard
           </span>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-2 text-center border-t border-ink-600 pt-4">
+      <div className="grid grid-cols-3 gap-2 text-center border-t border-navy-600 pt-4">
         {[
           [18.4, "PTS"],
           [6.1, "AST"],
@@ -118,7 +118,7 @@ export function RosterMock() {
   return (
     <MockFrame innerRef={ref}>
       <div className="flex items-center gap-3 mb-4">
-        <span className="h-9 w-9 rounded-md bg-ink-800 text-paper-50 font-bold flex items-center justify-center text-xs flex-shrink-0">
+        <span className="h-9 w-9 rounded-md bg-navy-800 text-paper-50 font-bold flex items-center justify-center text-xs flex-shrink-0">
           TB
         </span>
         <div className="min-w-0">
@@ -132,7 +132,7 @@ export function RosterMock() {
         {rows.map((r, i) => (
           <div
             key={r.n}
-            className="flex items-center gap-2.5 rounded-sm bg-ink-950 px-2.5 py-1.5"
+            className="flex items-center gap-2.5 rounded-sm bg-navy-950 px-2.5 py-1.5"
             style={{
               opacity: shown ? 1 : 0,
               transform: shown ? "translateY(0)" : "translateY(8px)",
@@ -141,7 +141,7 @@ export function RosterMock() {
                 : `opacity 400ms ${EASE} ${i * 150}ms, transform 400ms ${EASE} ${i * 150}ms`,
             }}
           >
-            <span className="h-6 w-6 rounded-md bg-ink-800 border border-ink-600 text-[11px] font-bold text-mist-400 flex items-center justify-center flex-shrink-0">
+            <span className="h-6 w-6 rounded-md bg-navy-800 border border-navy-600 text-[11px] font-bold text-mist-400 flex items-center justify-center flex-shrink-0">
               {r.n}
             </span>
             <span className="text-xs font-medium text-paper-50 flex-1 truncate">{r.name}</span>
@@ -184,13 +184,13 @@ export function MatchMock() {
     <MockFrame innerRef={ref}>
       <div className="flex items-center justify-between mb-7">
         <div className="relative flex flex-col items-center gap-1.5 w-16">
-          <span className="h-10 w-10 rounded-full bg-ink-800 text-paper-50 font-bold flex items-center justify-center text-xs">
+          <span className="h-10 w-10 rounded-full bg-navy-800 text-paper-50 font-bold flex items-center justify-center text-xs">
             TB
           </span>
           <span className="text-[11px] font-semibold text-mist-400 text-center">Test Baskets</span>
           <span
             aria-hidden="true"
-            className={`${tagBase} -bottom-5 bg-ink-700 text-mist-400`}
+            className={`${tagBase} -bottom-5 bg-navy-700 text-mist-400`}
             style={fade(step >= 1)}
           >
             meldet <span className="font-black text-paper-50">78</span>
@@ -217,20 +217,20 @@ export function MatchMock() {
         </div>
 
         <div className="relative flex flex-col items-center gap-1.5 w-16">
-          <span className="h-10 w-10 rounded-full bg-brand-500 text-ink-950 font-bold flex items-center justify-center text-xs">
+          <span className="h-10 w-10 rounded-full bg-brand-500 text-navy-950 font-bold flex items-center justify-center text-xs">
             RH
           </span>
           <span className="text-[11px] font-semibold text-mist-400 text-center">Rhein Hawks</span>
           <span
             aria-hidden="true"
-            className={`${tagBase} -bottom-5 bg-ink-700 text-mist-400`}
+            className={`${tagBase} -bottom-5 bg-navy-700 text-mist-400`}
             style={fade(step >= 2)}
           >
             meldet <span className="font-black text-paper-50">65</span>
           </span>
         </div>
       </div>
-      <div className="flex items-center gap-1.5 text-[11px] text-mist-400 border-t border-ink-600 pt-3">
+      <div className="flex items-center gap-1.5 text-[11px] text-mist-400 border-t border-navy-600 pt-3">
         <PiMapPinBold className="text-brand-400 flex-shrink-0" /> Sa, 20:00 · Sporthalle Nord
       </div>
     </MockFrame>
@@ -309,12 +309,12 @@ export function ScoutingMock() {
       </span>
       <p className="text-sm font-bold text-paper-50 mb-1">Sucht: Point Guard, Flügel</p>
       <p className="text-xs text-mist-400 mb-4">Test Baskets · Bezirksliga NRW</p>
-      <div className="flex items-center justify-between border-t border-ink-600 pt-3">
+      <div className="flex items-center justify-between border-t border-navy-600 pt-3">
         <div className="flex -space-x-2">
           {["EK", "TR", "JW"].map((i, idx) => (
             <span
               key={i}
-              className="h-7 w-7 rounded-full bg-ink-600 text-paper-50 text-[10px] font-bold flex items-center justify-center ring-2 ring-ink-600"
+              className="h-7 w-7 rounded-full bg-navy-600 text-paper-50 text-[10px] font-bold flex items-center justify-center ring-2 ring-navy-600"
               style={{
                 opacity: shown ? 1 : 0,
                 transform: shown ? "scale(1)" : "scale(0.6)",
@@ -346,7 +346,7 @@ export function FeedMock() {
   return (
     <MockFrame innerRef={ref}>
       <div className="flex items-center gap-2.5 mb-3">
-        <span className="h-8 w-8 rounded-full bg-brand-500 text-ink-950 font-bold flex items-center justify-center text-[11px] flex-shrink-0">
+        <span className="h-8 w-8 rounded-full bg-brand-500 text-navy-950 font-bold flex items-center justify-center text-[11px] flex-shrink-0">
           MB
         </span>
         <div>
@@ -355,10 +355,10 @@ export function FeedMock() {
         </div>
       </div>
       <div className="space-y-1.5 mb-4">
-        <div className="h-2 rounded-full bg-ink-700 w-full" style={written(1)} />
-        <div className="h-2 rounded-full bg-ink-700 w-2/3" style={written(2)} />
+        <div className="h-2 rounded-full bg-navy-700 w-full" style={written(1)} />
+        <div className="h-2 rounded-full bg-navy-700 w-2/3" style={written(2)} />
       </div>
-      <div className="flex items-center gap-4 text-mist-400 border-t border-ink-600 pt-3">
+      <div className="flex items-center gap-4 text-mist-400 border-t border-navy-600 pt-3">
         <span className="flex items-center gap-1.5 text-xs font-semibold">
           <PiHeartFill
             className="text-brand-400"

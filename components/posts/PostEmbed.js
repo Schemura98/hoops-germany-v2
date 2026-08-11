@@ -18,7 +18,7 @@ export default function PostEmbed({ embed }) {
   if (embed.type === "youtube" && embed.videoId) {
     return (
       <div
-        className="mt-3 relative w-full overflow-hidden rounded-md bg-ink-900"
+        className="mt-3 relative w-full overflow-hidden rounded-md bg-navy-900"
         style={{ paddingBottom: "56.25%" }}
       >
         {ytLoaded ? (
@@ -35,9 +35,9 @@ export default function PostEmbed({ embed }) {
           <button
             type="button"
             onClick={() => setYtLoaded(true)}
-            className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-paper-50/90 transition-colors hover:bg-ink-700"
+            className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-paper-50/90 transition-colors hover:bg-navy-700"
           >
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-500 text-ink-950">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-500 text-navy-950">
               <PiPlayBold className="ml-1" />
             </span>
             <span className="text-sm font-medium">Video von YouTube laden</span>
@@ -54,7 +54,7 @@ export default function PostEmbed({ embed }) {
   if (embed.type === "link" && embed.url) {
     if (embed.title || embed.image) {
       return (
-        <div className="mt-3 overflow-hidden rounded-md border border-ink-600">
+        <div className="mt-3 overflow-hidden rounded-md border border-navy-600">
           {embed.image &&
             (imgLoaded ? (
               <a href={embed.url} target="_blank" rel="noopener noreferrer">
@@ -64,14 +64,14 @@ export default function PostEmbed({ embed }) {
                   alt=""
                   loading="lazy"
                   referrerPolicy="no-referrer"
-                  className="h-44 w-full bg-ink-700 object-cover"
+                  className="h-44 w-full bg-navy-700 object-cover"
                 />
               </a>
             ) : (
               <button
                 type="button"
                 onClick={() => setImgLoaded(true)}
-                className="flex h-28 w-full items-center justify-center gap-2 bg-ink-700 text-xs text-mist-400 transition-colors hover:bg-ink-700"
+                className="flex h-28 w-full items-center justify-center gap-2 bg-navy-700 text-xs text-mist-400 transition-colors hover:bg-navy-600 hover:text-paper-50"
               >
                 <PiImageBold /> Vorschaubild laden
               </button>
@@ -80,7 +80,7 @@ export default function PostEmbed({ embed }) {
             href={embed.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="block p-3 transition-colors hover:bg-ink-700"
+            className="block p-3 transition-colors hover:bg-navy-700"
           >
             <span className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-mist-400">
               <PiGlobeBold className="text-[10px]" /> {embed.domain}
@@ -106,9 +106,9 @@ export default function PostEmbed({ embed }) {
         href={embed.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-3 flex items-center gap-3 rounded-md border border-ink-600 p-3 transition-colors hover:border-brand-300 hover:bg-ink-700"
+        className="mt-3 flex items-center gap-3 rounded-md border border-navy-600 p-3 transition-colors hover:border-brand-300 hover:bg-navy-700"
       >
-        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-sm bg-ink-700 text-mist-400">
+        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-sm bg-navy-700 text-mist-400">
           <PiGlobeBold />
         </span>
         <span className="min-w-0 flex-1">

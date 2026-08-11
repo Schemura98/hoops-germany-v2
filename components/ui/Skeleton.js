@@ -2,7 +2,7 @@
 export function Skeleton({ className = "" }) {
   return (
     <div
-      className={`animate-pulse motion-reduce:animate-none rounded-sm bg-ink-700 ${className}`}
+      className={`animate-pulse motion-reduce:animate-none rounded-sm bg-navy-700 ${className}`}
     />
   );
 }
@@ -10,7 +10,7 @@ export function Skeleton({ className = "" }) {
 // Karten-Skeleton (für Listen/Grids), grob im Look der echten Karten.
 export function SkeletonCard({ className = "" }) {
   return (
-    <div className={`rounded-md border border-ink-600 bg-ink-800 p-5 ${className}`}>
+    <div className={`rounded-md border border-navy-600 bg-navy-800 p-5 ${className}`}>
       <Skeleton className="h-4 w-1/3 mb-3" />
       <Skeleton className="h-3 w-2/3 mb-2" />
       <Skeleton className="h-3 w-1/2" />
@@ -23,7 +23,7 @@ export function SkeletonList({ rows = 5, className = "" }) {
   return (
     <div className={`space-y-3 ${className}`}>
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="rounded-md border border-ink-600 bg-ink-800 p-4 flex items-center gap-3">
+        <div key={i} className="rounded-md border border-navy-600 bg-navy-800 p-4 flex items-center gap-3">
           <Skeleton className="h-9 w-9 rounded-full flex-shrink-0" />
           <div className="flex-1">
             <Skeleton className="h-3.5 w-1/3 mb-2" />

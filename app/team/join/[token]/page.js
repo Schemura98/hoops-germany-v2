@@ -17,14 +17,14 @@ function Shell({ children }) {
           <PiBasketballBold className="text-brand-400 text-xl" />
           Hoops Germany
         </Link>
-        <div className="bg-ink-800 rounded-md border border-ink-600 p-8">{children}</div>
+        <div className="bg-navy-800 rounded-md border border-navy-600 p-8">{children}</div>
       </div>
     </main>
   );
 }
 
 const inputClass =
-  "w-full rounded-sm border border-ink-600 px-3 py-2.5 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+  "w-full rounded-sm border border-navy-600 px-3 py-2.5 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
 
 export default function TeamJoinTokenPage({ params }) {
   const inviteToken = params.token;
@@ -131,7 +131,7 @@ export default function TeamJoinTokenPage({ params }) {
         </p>
         <Link
           href="/"
-          className="mt-6 block text-center bg-brand-500 hover:bg-brand-400 text-ink-950 rounded-sm px-4 py-2.5 font-medium"
+          className="mt-6 block text-center bg-brand-500 hover:bg-brand-400 text-navy-950 rounded-sm px-4 py-2.5 font-medium"
         >
           Zur Startseite
         </Link>
@@ -149,7 +149,7 @@ export default function TeamJoinTokenPage({ params }) {
         </p>
         <Link
           href="/player/edit-profile"
-          className="mt-6 block text-center bg-brand-500 hover:bg-brand-400 text-ink-950 rounded-sm px-4 py-2.5 font-medium"
+          className="mt-6 block text-center bg-brand-500 hover:bg-brand-400 text-navy-950 rounded-sm px-4 py-2.5 font-medium"
         >
           Profil jetzt vervollständigen
         </Link>
@@ -181,7 +181,7 @@ export default function TeamJoinTokenPage({ params }) {
         </div>
       </div>
 
-      <div className="mt-5 rounded-sm bg-ink-950 border border-ink-600 p-4">
+      <div className="mt-5 rounded-sm bg-navy-950 border border-navy-600 p-4">
         <p className="text-sm text-mist-300">
           Du wurdest eingeladen, <strong>{team?.teamName}</strong> beizutreten. Über diesen Link
           landest du direkt im Kader.
@@ -203,7 +203,7 @@ export default function TeamJoinTokenPage({ params }) {
             </div>
             <Link
               href={`/team/team-detail/${team.slug}`}
-              className="mt-4 block text-center bg-brand-500 hover:bg-brand-400 text-ink-950 rounded-sm px-4 py-2.5 font-medium"
+              className="mt-4 block text-center bg-brand-500 hover:bg-brand-400 text-navy-950 rounded-sm px-4 py-2.5 font-medium"
             >
               Zur Teamseite
             </Link>
@@ -218,7 +218,7 @@ export default function TeamJoinTokenPage({ params }) {
             <button
               onClick={joinTeam}
               disabled={joining}
-              className="w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
+              className="w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
             >
               {joining ? "Wechsle…" : `Zu ${team?.teamName} wechseln`}
             </button>
@@ -234,7 +234,7 @@ export default function TeamJoinTokenPage({ params }) {
           <button
             onClick={joinTeam}
             disabled={joining}
-            className="mt-6 w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
+            className="mt-6 w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
           >
             {joining ? "Trete bei…" : "Dem Team beitreten"}
           </button>
@@ -279,7 +279,7 @@ export default function TeamJoinTokenPage({ params }) {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
+            className="w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
           >
             {submitting ? "Konto wird erstellt…" : "Konto erstellen & beitreten"}
           </button>

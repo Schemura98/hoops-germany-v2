@@ -108,7 +108,7 @@ export default function ImageUpload({
       }`}
     >
       <div
-        className={`${previewBox} bg-ink-700 border border-ink-600 overflow-hidden flex items-center justify-center`}
+        className={`${previewBox} bg-navy-700 border border-navy-600 overflow-hidden flex items-center justify-center`}
       >
         {preview ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -130,7 +130,7 @@ export default function ImageUpload({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="inline-flex items-center gap-2 border border-ink-600 hover:border-brand-500 text-mist-300 rounded-sm px-4 py-2 text-sm font-medium disabled:opacity-60"
+          className="inline-flex items-center gap-2 border border-navy-600 hover:border-brand-500 text-mist-300 rounded-sm px-4 py-2 text-sm font-medium disabled:opacity-60"
         >
           {uploading ? <PiSpinnerBold className="animate-spin" /> : <PiUploadSimpleBold />}
           {uploading ? "Lädt…" : label}

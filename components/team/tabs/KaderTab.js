@@ -31,7 +31,7 @@ import TabAlert from "@/components/team/tabs/TabAlert";
 import { inputClassSm, inputClassStat } from "@/lib/ui";
 
 const STATUS_BADGE = {
-  empty: { label: "Frei", cls: "bg-ink-700 text-mist-400" },
+  empty: { label: "Frei", cls: "bg-navy-700 text-mist-400" },
   pending: { label: "Ausstehend", cls: "bg-signal-wait/15 text-signal-wait" },
   confirmed: { label: "Bestätigt", cls: "bg-signal-ok/15 text-signal-ok" },
 };
@@ -363,7 +363,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
 
       {/* 1) Bestehenden Account direkt einladen – der häufigste Fall, deshalb
           optisch führend (Welle 2b: vorher drei gleichwertige Blöcke ohne Führung). */}
-      <div className="bg-ink-800 rounded-md border-2 border-brand-500/50 p-5">
+      <div className="bg-navy-800 rounded-md border-2 border-brand-500/50 p-5">
         <div className="flex flex-wrap items-center gap-2 mb-1">
           <PiUserPlusBold className="text-brand-400" />
           <h3 className="text-base font-semibold text-paper-50">Bestehenden Spieler einladen</h3>
@@ -376,7 +376,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
           per Glocke &amp; E-Mail gefragt und ist nach seiner Zustimmung im Kader (mit Karriere-Eintrag).
         </p>
         <div className="relative">
-          <PiMagnifyingGlassBold className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-500 text-xs" />
+          <PiMagnifyingGlassBold className="absolute left-3 top-1/2 -translate-y-1/2 text-navy-500 text-xs" />
           <input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -386,7 +386,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
           />
         </div>
         {searchQuery.trim().length >= 2 && (
-          <div className="mt-2 divide-y divide-ink-600 rounded-sm border border-ink-600">
+          <div className="mt-2 divide-y divide-navy-600 rounded-sm border border-navy-600">
             {searching ? (
               <p className="px-3 py-3 text-xs text-mist-400">Suche…</p>
             ) : (
@@ -435,12 +435,12 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
       {/* Weitere Wege – eingeklappt, damit oben ein klarer Standardweg führt.
           ACHTUNG: Der allgemeine Team-Einladungslink lebt seit Welle 2a NUR hier
           (Einstellungen verlinkt hierher) – beim Umbauen nicht entfernen. */}
-      <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
+      <div className="bg-navy-800 rounded-md border border-navy-600 overflow-hidden">
         <button
           type="button"
           onClick={() => setMoreOpen((v) => !v)}
           aria-expanded={moreOpen}
-          className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-ink-700 transition-colors"
+          className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-navy-700 transition-colors"
         >
           <span className="flex-1 min-w-0">
             <span className="block text-sm font-semibold text-paper-50">Weitere Optionen</span>
@@ -456,7 +456,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
         </button>
 
         {moreOpen && (
-          <div className="border-t border-ink-600 divide-y divide-ink-600">
+          <div className="border-t border-navy-600 divide-y divide-navy-600">
       {/* 2) Neuen Spieler anlegen (Account-Platz + persönlicher Einladungslink) */}
       <div className="p-5">
         <div className="flex items-center gap-2 mb-1">
@@ -528,7 +528,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
               value={inviteLink}
               onFocus={(e) => e.target.select()}
               aria-label="Team-Einladungslink"
-              className={`${inputClassSm} flex-1 min-w-0 bg-ink-950`}
+              className={`${inputClassSm} flex-1 min-w-0 bg-navy-950`}
             />
             <Button variant="secondary" size="sm" onClick={copyInvite}>
               {inviteCopied ? <PiCheckBold className="text-signal-ok" /> : <PiCopyBold />}
@@ -547,7 +547,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                 <button
                   onClick={onClick}
                   disabled={generatingInvite}
-                  className="text-xs text-mist-400 hover:text-mist-400 underline px-1 disabled:opacity-60"
+                  className="text-xs text-mist-400 hover:text-paper-50 transition-colors underline px-1 disabled:opacity-60"
                 >
                   Neuer Link
                 </button>
@@ -571,7 +571,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
 
       {/* Mitglieder (Account-Spieler) */}
       {members.length > 0 && (
-        <div className="bg-ink-800 rounded-md border border-ink-600 divide-y divide-ink-600">
+        <div className="bg-navy-800 rounded-md border border-navy-600 divide-y divide-navy-600">
           {members.map((m) => (
             <div key={m.playerId} className="px-5 py-3">
               <div className="flex items-center justify-between gap-3">
@@ -601,7 +601,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                       <button
                         onClick={() => saveMemberNumber(m.playerId)}
                         disabled={numberBusyId === m.playerId}
-                        className="text-signal-ok hover:text-signal-ok disabled:opacity-60 p-1.5"
+                        className="text-signal-ok hover:brightness-125 transition-[filter] disabled:opacity-60 p-1.5"
                         title="Nummer speichern"
                         aria-label={`Rückennummer für ${m.name} speichern`}
                       >
@@ -722,7 +722,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
 
               {/* Teilrechte-Panel (nur Haupt-Admin) */}
               {isMainAdmin && permEditId === m.playerId && (
-                <div className="mt-3 rounded-md border border-ink-600 bg-ink-950 p-4">
+                <div className="mt-3 rounded-md border border-navy-600 bg-navy-950 p-4">
                   <p className="text-sm font-medium text-mist-300 mb-2">
                     Welche Bereiche darf <strong>{m.name}</strong> verwalten?
                   </p>
@@ -781,7 +781,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
           }
         />
       ) : (
-        <div className="bg-ink-800 rounded-md border border-ink-600 divide-y divide-ink-600">
+        <div className="bg-navy-800 rounded-md border border-navy-600 divide-y divide-navy-600">
           {slots.map((slot) => {
             const badge = STATUS_BADGE[slot.status] || STATUS_BADGE.empty;
             const isBusy = busyId === slot._id;

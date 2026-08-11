@@ -47,8 +47,8 @@ function Chip({ active, onClick, children }) {
       onClick={onClick}
       className={`px-3 py-2 rounded-md text-sm font-medium border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 ${
         active
-          ? "bg-brand-500 text-ink-950 border-brand-500"
-          : "bg-ink-800 text-mist-400 border-ink-600 hover:border-brand-300 hover:text-brand-400"
+          ? "bg-brand-500 text-navy-950 border-brand-500"
+          : "bg-navy-800 text-mist-400 border-navy-600 hover:border-brand-300 hover:text-brand-400"
       }`}
     >
       {children}
@@ -89,7 +89,7 @@ export default function FeedbackPage() {
   }
 
   return (
-    <div className="min-h-screen bg-ink-950 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
 
       <PageHeader
@@ -100,7 +100,7 @@ export default function FeedbackPage() {
 
       <main className="flex-1 max-w-xl mx-auto w-full px-4 py-8">
         {done ? (
-          <div className="bg-ink-800 rounded-md border border-ink-600 p-8 text-center">
+          <div className="bg-navy-800 rounded-md border border-navy-600 p-8 text-center">
             <PiSmileyBold className="text-brand-400 text-4xl mx-auto mb-3" />
             <p className="font-bold text-paper-50 text-lg">Danke für dein Feedback!</p>
             <p className="text-sm text-mist-400 mt-1">
@@ -123,7 +123,7 @@ export default function FeedbackPage() {
         ) : (
           <form
             onSubmit={submit}
-            className="bg-ink-800 rounded-md border border-ink-600 p-6 sm:p-8 space-y-7"
+            className="bg-navy-800 rounded-md border border-navy-600 p-6 sm:p-8 space-y-7"
           >
             {error && (
               <div className="rounded-sm bg-signal-error/10 border border-signal-error/50 px-4 py-3 text-sm text-signal-error">
@@ -144,7 +144,7 @@ export default function FeedbackPage() {
                     onClick={() => setRating(n)}
                     aria-label={`${n} von 5`}
                     className={`text-2xl transition-colors ${
-                      n <= rating ? "text-signal-wait" : "text-ink-500 hover:text-signal-wait"
+                      n <= rating ? "text-signal-wait" : "text-navy-500 hover:text-signal-wait"
                     }`}
                   >
                     <PiStarFill />

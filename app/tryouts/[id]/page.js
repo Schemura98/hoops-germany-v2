@@ -78,7 +78,7 @@ export default function TryoutDetailPage({ params }) {
 
   if (state === "notfound") {
     return (
-      <div className="min-h-screen bg-ink-950 flex flex-col">
+      <div className="min-h-screen bg-navy-950 flex flex-col">
         <Navbar />
         <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <h1 className="text-xl font-bold text-paper-50">Tryout nicht gefunden</h1>
@@ -95,13 +95,13 @@ export default function TryoutDetailPage({ params }) {
   const closed = tryout.status !== "active";
 
   return (
-    <div className="min-h-screen bg-ink-950 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
 
       <PageHeader eyebrow="Probetraining" title={`Tryout bei ${team?.teamName || "Team"}`} />
 
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
-        <div className="bg-ink-800 rounded-md border border-ink-600 p-6">
+        <div className="bg-navy-800 rounded-md border border-navy-600 p-6">
           {/* Team */}
           <Link
             href={team?.slug ? `/team/team-detail/${team.slug}` : "#"}

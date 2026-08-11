@@ -73,7 +73,7 @@ export default function LandingHowItWorks() {
     ];
 
     return (
-      <section className="bg-ink-950 py-20 px-4">
+      <section className="bg-navy-950 py-20 px-4">
         <div className="max-w-5xl mx-auto text-center">
           <h2 className="font-display uppercase tracking-tight text-3xl md:text-4xl font-black mb-4 text-paper-50">
             Deine nächsten Schritte
@@ -89,11 +89,11 @@ export default function LandingHowItWorks() {
                 <Reveal key={c.title} delay={i * 90} className="h-full">
                   <Link
                     href={c.href}
-                    className="group block h-full text-center bg-ink-950 hover:bg-brand-500/10 border border-ink-600 hover:border-brand-500/50 rounded-md p-8 transition-[transform,background-color,border-color] duration-200 ease-out-strong hover:-translate-y-1 motion-reduce:hover:translate-y-0"
+                    className="group block h-full text-center bg-navy-950 hover:bg-brand-500/10 border border-navy-600 hover:border-brand-500/50 rounded-md p-8 transition-[transform,background-color,border-color] duration-200 ease-out-strong hover:-translate-y-1 motion-reduce:hover:translate-y-0"
                   >
                     <div
                       className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 ${
-                        navy ? "bg-ink-900" : "bg-brand-500/15"
+                        navy ? "bg-navy-900" : "bg-brand-500/15"
                       }`}
                     >
                       <Icon className={`text-2xl ${navy ? "text-paper-50" : "text-brand-400"}`} />
@@ -113,7 +113,7 @@ export default function LandingHowItWorks() {
   }
 
   return (
-    <section className="bg-ink-950 py-20 px-4">
+    <section className="bg-navy-950 py-20 px-4">
       <div className="max-w-4xl mx-auto text-center">
         <h2 className="font-display uppercase tracking-tight text-3xl md:text-4xl font-black mb-4 text-paper-50">So funktionierts</h2>
         <p className="text-mist-400 mb-16">In 3 einfachen Schritten dabei</p>
@@ -122,9 +122,9 @@ export default function LandingHowItWorks() {
             <Reveal key={s.n} delay={i * 90} className="text-center">
               <div
                 // Textfarbe haengt an der Flaeche: Auf der orangen Ziffer waere
-                // paper-50 bei 2,61:1 - dort steht ink-950 (7,1:1).
+                // paper-50 bei 2,61:1 - dort steht navy-950 (7,1:1).
                 className={`w-16 h-16 font-display ${
-                  s.dark ? "bg-ink-900 text-paper-50 border border-ink-600" : "bg-brand-500 text-ink-950"
+                  s.dark ? "bg-navy-900 text-paper-50 border border-navy-600" : "bg-brand-500 text-navy-950"
                 } rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-black`}
               >
                 {s.n}

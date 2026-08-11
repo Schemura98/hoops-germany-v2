@@ -46,14 +46,14 @@ export default function LegalShell({ title, eyebrow = "Rechtliches", children })
   });
 
   return (
-    <div className="min-h-screen bg-ink-950 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
       <PageHeader eyebrow={eyebrow} title={title} />
       <main className="flex-1 max-w-xl mx-auto w-full px-4 py-10">
         {abschnitte.length > 5 && (
           <nav
             aria-label="Abschnitte dieser Seite"
-            className="mb-4 rounded-md border border-ink-600 bg-ink-800 p-4"
+            className="mb-4 rounded-md border border-navy-600 bg-navy-800 p-4"
           >
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-mist-400">
               Auf dieser Seite
@@ -65,7 +65,7 @@ export default function LegalShell({ title, eyebrow = "Rechtliches", children })
                 <li key={a.id}>
                   <a
                     href={`#${a.id}`}
-                    className="inline-block rounded-full bg-ink-950 px-3 py-1.5 text-xs font-medium text-mist-400 transition-colors hover:bg-brand-500/10 hover:text-brand-400"
+                    className="inline-block rounded-full bg-navy-950 px-3 py-1.5 text-xs font-medium text-mist-400 transition-colors hover:bg-brand-500/10 hover:text-brand-400"
                   >
                     {a.text}
                   </a>
@@ -74,7 +74,7 @@ export default function LegalShell({ title, eyebrow = "Rechtliches", children })
             </ol>
           </nav>
         )}
-        <div className="bg-ink-800 rounded-md border border-ink-600 p-8 space-y-4 text-sm text-mist-400 leading-relaxed">
+        <div className="bg-navy-800 rounded-md border border-navy-600 p-8 space-y-4 text-sm text-mist-400 leading-relaxed">
           {inhalt}
         </div>
       </main>

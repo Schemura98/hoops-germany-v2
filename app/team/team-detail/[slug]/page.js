@@ -48,14 +48,14 @@ function formatDate(d) {
 // bestehen, damit beim Nachladen kein Layout-Sprung entsteht (Navbar bleibt sichtbar).
 function TeamDetailSkeleton() {
   return (
-    <div className="min-h-screen bg-ink-950 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
-      <div className="bg-ink-900">
+      <div className="bg-navy-900">
         <div className="max-w-3xl mx-auto px-4 py-10 flex flex-col sm:flex-row items-center sm:items-end gap-5">
-          <div className="h-24 w-24 rounded-md bg-ink-800/10 animate-pulse motion-reduce:animate-none flex-shrink-0" />
+          <div className="h-24 w-24 rounded-md bg-navy-800/10 animate-pulse motion-reduce:animate-none flex-shrink-0" />
           <div className="min-w-0 flex-1 w-full text-center sm:text-left">
-            <div className="h-8 w-48 mx-auto sm:mx-0 rounded bg-ink-800/10 animate-pulse motion-reduce:animate-none mb-3" />
-            <div className="h-4 w-56 mx-auto sm:mx-0 rounded bg-ink-800/10 animate-pulse motion-reduce:animate-none" />
+            <div className="h-8 w-48 mx-auto sm:mx-0 rounded bg-navy-800/10 animate-pulse motion-reduce:animate-none mb-3" />
+            <div className="h-4 w-56 mx-auto sm:mx-0 rounded bg-navy-800/10 animate-pulse motion-reduce:animate-none" />
           </div>
         </div>
       </div>
@@ -146,7 +146,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
 
   if (state === "notfound") {
     return (
-      <div className="min-h-screen bg-ink-950 flex flex-col">
+      <div className="min-h-screen bg-navy-950 flex flex-col">
         <Navbar />
         <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <h1 className="text-xl font-bold text-paper-50">Team nicht gefunden</h1>
@@ -167,15 +167,15 @@ export default function TeamTeamDetailSlugPage({ params }) {
     : "";
 
   return (
-    <div className="min-h-screen bg-ink-950 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
 
       {/* Navy-Hero */}
       <div
-        className="bg-ink-900 relative bg-cover bg-center"
+        className="bg-navy-900 relative bg-cover bg-center"
         style={team.banner ? { backgroundImage: `url('${team.banner}')` } : undefined}
       >
-        {team.banner && <div className="absolute inset-0 bg-ink-950/70" />}
+        {team.banner && <div className="absolute inset-0 bg-navy-950/70" />}
         <div className="relative max-w-3xl mx-auto px-4 py-10 flex flex-col sm:flex-row items-center sm:items-end gap-5 text-center sm:text-left">
           <Avatar
             name={team.teamName}
@@ -204,14 +204,14 @@ export default function TeamTeamDetailSlugPage({ params }) {
               <button
                 onClick={join}
                 disabled={joining}
-                className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-5 py-2.5 text-sm font-medium transition-colors"
+                className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-5 py-2.5 text-sm font-medium transition-colors"
               >
                 {joining ? "Senden…" : "Team beitreten"}
               </button>
             ) : (
               <Link
                 href="/login"
-                className="bg-ink-800/10 hover:bg-ink-700/20 text-paper-50 rounded-sm px-5 py-2.5 text-sm font-medium transition-colors"
+                className="bg-navy-800/10 hover:bg-navy-700/20 text-paper-50 rounded-sm px-5 py-2.5 text-sm font-medium transition-colors"
               >
                 Zum Beitreten anmelden
               </Link>
@@ -237,7 +237,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
         {league && (
           <Link
             href={`/ligen/${league._id}`}
-            className="mb-6 block bg-ink-800 rounded-md border border-ink-600 p-5 hover:border-brand-500/50 transition-all"
+            className="mb-6 block bg-navy-800 rounded-md border border-navy-600 p-5 hover:border-brand-500/50 transition-all"
           >
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
@@ -276,7 +276,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
         )}
 
         {team.about && (
-          <div className="mb-6 bg-ink-800 rounded-md border border-ink-600 p-6">
+          <div className="mb-6 bg-navy-800 rounded-md border border-navy-600 p-6">
             <p className="text-sm text-mist-400 whitespace-pre-line">{team.about}</p>
           </div>
         )}
@@ -298,18 +298,18 @@ export default function TeamTeamDetailSlugPage({ params }) {
 
         {/* Kader */}
         {tab === "kader" && (
-          <div className="bg-ink-800 rounded-md border border-ink-600 p-6">
+          <div className="bg-navy-800 rounded-md border border-navy-600 p-6">
             {members.length === 0 && team.rosterSlots.length === 0 ? (
               <p className="text-sm text-mist-400">Noch keine Kaderinformationen.</p>
             ) : (
-              <div className="divide-y divide-ink-600">
+              <div className="divide-y divide-navy-600">
                 {members.map((m) => {
                   const initials = `${m.firstName?.[0] || ""}${m.lastName?.[0] || ""}`.toUpperCase();
                   return (
                     <Link
                       key={m._id}
                       href={`/player/view-player/${m.slug || m._id}`}
-                      className="flex items-center gap-3 py-3 hover:bg-ink-700 -mx-2 px-2 rounded-sm transition-colors"
+                      className="flex items-center gap-3 py-3 hover:bg-navy-700 -mx-2 px-2 rounded-sm transition-colors"
                     >
                       <Avatar
                         name={`${m.firstName} ${m.lastName}`}
@@ -341,7 +341,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
                   .filter((s) => !s.claimedBy)
                   .map((slot) => (
                     <div key={slot._id} className="flex items-center gap-3 py-3 opacity-70">
-                      <span className="h-10 w-10 rounded-full bg-ink-700 text-mist-400 text-xs font-semibold flex items-center justify-center">
+                      <span className="h-10 w-10 rounded-full bg-navy-700 text-mist-400 text-xs font-semibold flex items-center justify-center">
                         {slot.number || "–"}
                       </span>
                       <div className="min-w-0 flex-1">
@@ -390,7 +390,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
                   ]}
                 />
                 {list.length === 0 ? (
-                  <div className="bg-ink-800 rounded-md border border-ink-600 p-10 text-center text-sm text-mist-400">
+                  <div className="bg-navy-800 rounded-md border border-navy-600 p-10 text-center text-sm text-mist-400">
                     Keine Spiele in dieser Ansicht.
                   </div>
                 ) : (
@@ -405,7 +405,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
                     return (
                       <div
                         key={m._id}
-                        className="bg-ink-800 rounded-md border border-ink-600 p-4 flex items-center justify-between gap-4"
+                        className="bg-navy-800 rounded-md border border-navy-600 p-4 flex items-center justify-between gap-4"
                       >
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-paper-50 truncate">
@@ -448,16 +448,16 @@ export default function TeamTeamDetailSlugPage({ params }) {
         {tab === "saisons" && (
           <div>
             {history.length === 0 ? (
-              <div className="bg-ink-800 rounded-md border border-ink-600 p-10 text-center text-sm text-mist-400">
+              <div className="bg-navy-800 rounded-md border border-navy-600 p-10 text-center text-sm text-mist-400">
                 Noch keine abgeschlossene Saison. Die Historie (Liga, Platz, Bilanz,
                 Status) wird beim Saisonabschluss eingefroren.
               </div>
             ) : (
-              <div className="bg-ink-800 rounded-md border border-ink-600 overflow-hidden">
+              <div className="bg-navy-800 rounded-md border border-navy-600 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-xs text-mist-400 text-left border-b border-ink-600">
+                      <tr className="text-xs text-mist-400 text-left border-b border-navy-600">
                         <th className="font-medium py-3 pl-4">Saison</th>
                         <th className="font-medium py-3">Liga</th>
                         <th className="font-medium py-3 text-center">Platz</th>
@@ -468,7 +468,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
                     </thead>
                     <tbody>
                       {history.map((h) => (
-                        <tr key={h._id} className="border-b border-ink-600 last:border-0">
+                        <tr key={h._id} className="border-b border-navy-600 last:border-0">
                           <td className="py-3 pl-4 font-medium text-paper-50">{h.season || "—"}</td>
                           <td className="py-3 text-mist-300">
                             {h.leagueId ? (
@@ -500,7 +500,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
                           </td>
                           <td className="py-3 pr-4">
                             {h.status && h.status !== "aktiv" ? (
-                              <span className="text-xs rounded-sm bg-ink-700 text-mist-400 px-2 py-0.5">
+                              <span className="text-xs rounded-sm bg-navy-700 text-mist-400 px-2 py-0.5">
                                 {teamSeasonStatusLabel(h.status)}
                               </span>
                             ) : (
@@ -521,7 +521,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
         {tab === "news" && (
           <div className="space-y-4">
             {posts.length === 0 ? (
-              <div className="bg-ink-800 rounded-md border border-ink-600 p-10 text-center text-sm text-mist-400">
+              <div className="bg-navy-800 rounded-md border border-navy-600 p-10 text-center text-sm text-mist-400">
                 Noch keine Beiträge.
               </div>
             ) : (

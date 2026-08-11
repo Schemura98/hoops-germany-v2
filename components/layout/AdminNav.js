@@ -27,7 +27,7 @@ export default function AdminNav() {
   }
 
   return (
-    <nav className="bg-ink-900 text-paper-50 sticky top-0 z-50">
+    <nav className="bg-navy-900 text-paper-50 sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-6 flex items-center justify-between h-14">
         <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold">
           <PiShieldCheckBold className="text-brand-400" />
@@ -42,7 +42,7 @@ export default function AdminNav() {
                 key={l.href}
                 href={l.href}
                 className={`whitespace-nowrap px-3 py-1.5 rounded-sm text-sm transition-colors ${
-                  active ? "bg-brand-500 text-ink-950" : "text-mist-300 hover:bg-ink-700"
+                  active ? "bg-brand-500 text-navy-950" : "text-mist-300 hover:bg-navy-700"
                 }`}
               >
                 {l.label}

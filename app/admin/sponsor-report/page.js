@@ -41,14 +41,14 @@ function ReportInner() {
     return <div className="min-h-screen flex items-center justify-center p-8 text-mist-400">Report konnte nicht geladen werden.</div>;
 
   return (
-    <div className="min-h-screen bg-ink-700 print:bg-ink-800 py-8 print:py-0">
+    <div className="min-h-screen bg-navy-700 print:bg-navy-800 py-8 print:py-0">
       <div className="max-w-3xl mx-auto px-4 mb-4 flex items-center justify-between print:hidden">
         <Link href="/admin/analytics" className="inline-flex items-center gap-1.5 text-sm text-mist-400 hover:text-paper-50">
           <PiArrowLeftBold className="text-xs" /> Zurück
         </Link>
         <button
           onClick={() => window.print()}
-          className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-ink-950 font-semibold rounded-md px-4 py-2.5 text-sm"
+          className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-navy-950 font-semibold rounded-md px-4 py-2.5 text-sm"
         >
           <PiPrinterBold /> Drucken / als PDF speichern
         </button>

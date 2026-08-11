@@ -107,7 +107,7 @@ export default function WelcomeTour() {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60">
-      <div className="relative w-full max-w-md rounded-md bg-ink-800 overflow-hidden">
+      <div className="relative w-full max-w-md rounded-md bg-navy-800 overflow-hidden">
         {/* Schließen */}
         <button
           onClick={() => close(false)}
@@ -118,8 +118,8 @@ export default function WelcomeTour() {
         </button>
 
         {/* Navy-Kopf mit Icon */}
-        <div className="bg-ink-900 px-6 pt-8 pb-6 text-center">
-          <div className="mx-auto mb-3 h-14 w-14 rounded-md bg-brand-500 flex items-center justify-center text-ink-950 text-2xl">
+        <div className="bg-navy-900 px-6 pt-8 pb-6 text-center">
+          <div className="mx-auto mb-3 h-14 w-14 rounded-md bg-brand-500 flex items-center justify-center text-navy-950 text-2xl">
             <Icon />
           </div>
           <h2 className="text-paper-50 font-black text-lg">{s.title}</h2>
@@ -139,7 +139,7 @@ export default function WelcomeTour() {
                 onClick={() => setStep(i)}
                 aria-label={`Schritt ${i + 1}`}
                 className={`h-2 rounded-full transition-all ${
-                  i === step ? "w-6 bg-brand-500" : "w-2 bg-ink-600 hover:bg-ink-600"
+                  i === step ? "w-6 bg-brand-500" : "w-2 bg-navy-600 hover:bg-navy-500"
                 }`}
               />
             ))}
@@ -157,7 +157,7 @@ export default function WelcomeTour() {
             ) : (
               <button
                 onClick={() => close(false)}
-                className="text-sm font-medium text-mist-400 hover:text-mist-400"
+                className="text-sm font-medium text-mist-400 hover:text-paper-50 transition-colors"
               >
                 Überspringen
               </button>
@@ -166,14 +166,14 @@ export default function WelcomeTour() {
             {isLast ? (
               <button
                 onClick={() => close(true)}
-                className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-ink-950 font-semibold rounded-md px-5 py-2.5 text-sm"
+                className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-navy-950 font-semibold rounded-md px-5 py-2.5 text-sm"
               >
                 Los geht&apos;s
               </button>
             ) : (
               <button
                 onClick={() => setStep((n) => n + 1)}
-                className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-ink-950 font-semibold rounded-md px-5 py-2.5 text-sm"
+                className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-navy-950 font-semibold rounded-md px-5 py-2.5 text-sm"
               >
                 Weiter <PiArrowRightBold className="text-xs" />
               </button>

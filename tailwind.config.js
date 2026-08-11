@@ -11,26 +11,30 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Warmer Hallengrund – ersetzt slate/Navy. Tiefe entsteht über
-        // Flächenstufen, nicht über Schatten oder Verläufe.
-        ink: {
-          950: "#120E0B", // Seitenhintergrund
-          900: "#1B1512", // Navbar/Footer
-          800: "#241D18", // Panel-/Kartenfläche
-          700: "#2F2620", // Hover-Fläche, Eingabefelder
-          600: "#4A3C31", // Rahmen und Trenner
-          500: "#6B5B4C", // inaktive Icons, Platzhalter
+        // Nachtblauer Hallengrund. Entscheidung Patrick (12.08.2026): Navy +
+        // Orange ist die Basketball-Paarung – Ball auf Nachtblau, Hallenlicht,
+        // Anzeigetafel. Ersetzt Viviens ursprünglich warmen Braun-Grund; die
+        // Stufung bleibt exakt gleich, damit keine Klasse ihre Bedeutung ändert.
+        // Tiefe entsteht weiterhin über Flächenstufen, nicht über Schatten.
+        navy: {
+          950: "#060B16", // Seitenhintergrund
+          900: "#0C1424", // Navbar/Footer
+          800: "#141F35", // Panel-/Kartenfläche
+          700: "#1D2B47", // Hover-Fläche, Eingabefelder
+          600: "#2E3F63", // Rahmen und Trenner
+          500: "#4C5F86", // inaktive Icons, Platzhalter
         },
-        // Text auf dunklem Grund
+        // Text auf dunklem Grund – leicht kühl, damit das Orange der einzige
+        // warme Ton auf der Seite bleibt.
         paper: {
-          50: "#FAF7F2", // Primärtext – 17,97:1 auf ink-950 (AAA)
-          100: "#F1EAE0",
+          50: "#F4F7FB", // Primärtext
+          100: "#E4EAF3",
         },
-        // Gedämpfter Text
+        // Gedämpfter Text, blaustichig statt bräunlich
         mist: {
-          300: "#CFC7BC", // Labels, Zwischenüberschriften
-          400: "#B9AFA3", // Fließtext sekundär – 8,89:1
-          600: "#8A8074", // niedrigste Betonung – 4,96:1, NICHT für Absätze
+          300: "#C2CCDC", // Labels, Zwischenüberschriften
+          400: "#A5B2C7", // Fließtext sekundär
+          600: "#7A88A0", // niedrigste Betonung – NICHT für Absätze
         },
         // Verankert auf dem echten Logo-Orange (#F07A27 aus logo.svg),
         // nicht auf dem bisherigen orange-500.
@@ -48,9 +52,9 @@ module.exports = {
         },
         // Semantisch, bewusst entsättigt – Status ist keine Marke.
         signal: {
-          ok: "#6B9A5B", // 5,86:1 auf ink-950
+          ok: "#6B9A5B", // 5,86:1 auf navy-950
           wait: "#C9A227", // 7,95:1
-          error: "#E07257", // 5,04:1 auf ink-950; auf der Panel-Fläche ink-800
+          error: "#E07257", // 5,04:1 auf navy-950; auf der Panel-Fläche navy-800
           // fiel der ursprüngliche Wert #D2604A auf 4,36:1 – zu wenig für die
           // Korbdifferenz-Spalte auf der Rangliste (gemessen, nicht geschätzt).
         },

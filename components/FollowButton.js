@@ -61,7 +61,7 @@ export default function FollowButton({ type, targetId, onCountChange }) {
 
   if (!ready) {
     return (
-      <span className="inline-block h-[42px] w-28 rounded-sm bg-ink-700 animate-pulse" />
+      <span className="inline-block h-[42px] w-28 rounded-sm bg-navy-700 animate-pulse" />
     );
   }
 
@@ -69,7 +69,7 @@ export default function FollowButton({ type, targetId, onCountChange }) {
     return (
       <Link
         href="/login"
-        className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-ink-950 rounded-sm px-5 py-2.5 text-sm font-medium"
+        className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-navy-950 rounded-sm px-5 py-2.5 text-sm font-medium"
       >
         <PiPlusBold className="text-xs" /> Folgen
       </Link>
@@ -82,8 +82,8 @@ export default function FollowButton({ type, targetId, onCountChange }) {
       disabled={busy}
       className={`inline-flex items-center gap-2 rounded-sm px-5 py-2.5 text-sm font-medium transition-colors disabled:opacity-60 ${
         following
-          ? "border border-ink-600 text-mist-300 hover:border-signal-error hover:text-signal-error"
-          : "bg-brand-500 hover:bg-brand-400 text-ink-950"
+          ? "border border-navy-600 text-mist-300 hover:border-signal-error hover:text-signal-error"
+          : "bg-brand-500 hover:bg-brand-400 text-navy-950"
       }`}
     >
       {following ? (

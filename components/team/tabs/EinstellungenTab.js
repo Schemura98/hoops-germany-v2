@@ -291,7 +291,7 @@ export default function EinstellungenTab({ team, reload }) {
       {/* Sprungmarken – die Seite ist mobil sehr lang */}
       <nav
         aria-label="Bereiche"
-        className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md bg-ink-950 border border-ink-600 px-4 py-2.5 text-sm"
+        className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md bg-navy-950 border border-navy-600 px-4 py-2.5 text-sm"
       >
         {[
           { href: "#team-daten", label: "Team-Daten" },
@@ -303,7 +303,7 @@ export default function EinstellungenTab({ team, reload }) {
             <a href={l.href} className="font-medium text-mist-400 hover:text-brand-400">
               {l.label}
             </a>
-            {i < arr.length - 1 && <span className="text-ink-500">·</span>}
+            {i < arr.length - 1 && <span className="text-navy-500">·</span>}
           </span>
         ))}
       </nav>
@@ -314,7 +314,7 @@ export default function EinstellungenTab({ team, reload }) {
       <form
         id="team-daten"
         onSubmit={onSave}
-        className="scroll-mt-24 bg-ink-800 rounded-md border border-ink-600 p-6 space-y-5"
+        className="scroll-mt-24 bg-navy-800 rounded-md border border-navy-600 p-6 space-y-5"
       >
         <h2 className="text-lg font-semibold text-paper-50">Team-Daten</h2>
 
@@ -403,14 +403,14 @@ export default function EinstellungenTab({ team, reload }) {
       </form>
 
       {/* Liga */}
-      <div id="liga" className="scroll-mt-24 bg-ink-800 rounded-md border border-ink-600 p-6 space-y-4">
+      <div id="liga" className="scroll-mt-24 bg-navy-800 rounded-md border border-navy-600 p-6 space-y-4">
         <div className="flex items-center gap-2">
           <PiTrophyBold className="text-brand-400" />
           <h2 className="text-lg font-semibold text-paper-50">Liga</h2>
         </div>
 
         {/* Aktuelle Liga – SCHREIBGESCHÜTZT. Ändert sich nur nach Super-Admin-Freigabe. */}
-        <div className="rounded-md border border-ink-600 bg-ink-950 p-4">
+        <div className="rounded-md border border-navy-600 bg-navy-950 p-4">
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-mist-400">
             Aktuelle Liga
           </p>
@@ -454,7 +454,7 @@ export default function EinstellungenTab({ team, reload }) {
               type="button"
               onClick={() => onCancelRequest(pendingRequest._id)}
               disabled={cancelingId === pendingRequest._id}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-signal-error hover:text-signal-error disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-signal-error hover:brightness-125 transition-[filter] disabled:opacity-60"
             >
               <PiXBold className="text-[10px]" />
               {cancelingId === pendingRequest._id ? "Storniere…" : "Anfrage stornieren"}
@@ -590,7 +590,7 @@ export default function EinstellungenTab({ team, reload }) {
         )}
 
         {historyRequests.length > 0 && (
-          <div className="pt-2 border-t border-ink-600">
+          <div className="pt-2 border-t border-navy-600">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-mist-400">
               Letzte Anfragen
             </p>
@@ -604,7 +604,7 @@ export default function EinstellungenTab({ team, reload }) {
                         ? "bg-signal-ok/10 text-signal-ok"
                         : r.status === "abgelehnt"
                         ? "bg-signal-error/10 text-signal-error"
-                        : "bg-ink-700 text-mist-400"
+                        : "bg-navy-700 text-mist-400"
                     }`}
                   >
                     {r.status}
@@ -617,7 +617,7 @@ export default function EinstellungenTab({ team, reload }) {
       </div>
 
       {/* Verstärkung suchen (Scouting) */}
-      <div id="verstaerkung" className="scroll-mt-24 bg-ink-800 rounded-md border border-ink-600 p-6 space-y-4">
+      <div id="verstaerkung" className="scroll-mt-24 bg-navy-800 rounded-md border border-navy-600 p-6 space-y-4">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-paper-50 flex items-center gap-2">
             <PiUserPlusBold className="text-brand-400" /> Verstärkung suchen
@@ -633,11 +633,11 @@ export default function EinstellungenTab({ team, reload }) {
             role="switch"
             aria-checked={recruiting}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${
-              recruiting ? "bg-brand-500" : "bg-ink-600"
+              recruiting ? "bg-brand-500" : "bg-navy-600"
             }`}
           >
             <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-ink-800 transition-transform ${
+              className={`inline-block h-4 w-4 transform rounded-full bg-navy-800 transition-transform ${
                 recruiting ? "translate-x-6" : "translate-x-1"
               }`}
             />
@@ -667,8 +667,8 @@ export default function EinstellungenTab({ team, reload }) {
                       onClick={() => toggleRecruitPos(p)}
                       className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                         active
-                          ? "bg-brand-500 text-ink-950 border-brand-500"
-                          : "bg-ink-800 text-mist-400 border-ink-600 hover:border-brand-300"
+                          ? "bg-brand-500 text-navy-950 border-brand-500"
+                          : "bg-navy-800 text-mist-400 border-navy-600 hover:border-brand-300"
                       }`}
                     >
                       {p}
@@ -702,7 +702,7 @@ export default function EinstellungenTab({ team, reload }) {
       </div>
 
       {/* Benachrichtigungen */}
-      <div id="benachrichtigungen" className="scroll-mt-24 bg-ink-800 rounded-md border border-ink-600 p-6 space-y-3">
+      <div id="benachrichtigungen" className="scroll-mt-24 bg-navy-800 rounded-md border border-navy-600 p-6 space-y-3">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-paper-50 flex items-center gap-2">
             <PiBellBold className="text-brand-400" /> Benachrichtigungen
@@ -724,11 +724,11 @@ export default function EinstellungenTab({ team, reload }) {
               role="switch"
               aria-checked={notifyAllAdmins}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${
-                notifyAllAdmins ? "bg-brand-500" : "bg-ink-600"
+                notifyAllAdmins ? "bg-brand-500" : "bg-navy-600"
               }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-ink-800 transition-transform ${
+                className={`inline-block h-4 w-4 transform rounded-full bg-navy-800 transition-transform ${
                   notifyAllAdmins ? "translate-x-6" : "translate-x-1"
                 }`}
               />
@@ -748,7 +748,7 @@ export default function EinstellungenTab({ team, reload }) {
         Den Team-Einladungslink verwaltest du im{" "}
         <a
           href="/team/admin?tab=kader"
-          className="font-medium text-brand-400 hover:text-brand-400 underline underline-offset-2"
+          className="font-medium text-brand-400 hover:text-brand-300 transition-colors underline underline-offset-2"
         >
           Kader-Tab
         </a>

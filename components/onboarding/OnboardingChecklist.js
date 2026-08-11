@@ -129,7 +129,7 @@ export default function OnboardingChecklist({ player, onDismiss }) {
   const greetName = player.firstName ? `, ${player.firstName}` : "";
 
   return (
-    <div className="rounded-md bg-ink-900 text-paper-50 p-5 sm:p-6 mb-6">
+    <div className="rounded-md bg-navy-900 text-paper-50 p-5 sm:p-6 mb-6">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-lg sm:text-xl font-black">Willkommen{greetName}! 🏀</h2>
@@ -154,7 +154,7 @@ export default function OnboardingChecklist({ player, onDismiss }) {
           </span>
           <span>{pct}%</span>
         </div>
-        <div className="h-2 rounded-full bg-ink-800/15 overflow-hidden">
+        <div className="h-2 rounded-full bg-navy-800/15 overflow-hidden">
           <div
             className="h-full bg-brand-500 transition-all duration-500"
             style={{ width: `${pct}%` }}
@@ -169,7 +169,7 @@ export default function OnboardingChecklist({ player, onDismiss }) {
             <Link
               href={s.href}
               className={`flex items-center gap-3 rounded-md px-3 py-2.5 transition ${
-                s.done ? "bg-ink-800/5" : "bg-ink-800/10 hover:bg-ink-700/20"
+                s.done ? "bg-navy-800/5" : "bg-navy-800/10 hover:bg-navy-700/20"
               }`}
             >
               {s.done ? (

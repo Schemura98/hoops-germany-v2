@@ -8,7 +8,7 @@ export const metadata = { title: "Seite nicht gefunden – Hoops Germany" };
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-ink-950 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
 
       <PageHeader eyebrow="Fehler 404" title="Seite nicht gefunden" />

@@ -8,7 +8,7 @@ import Avatar from "@/components/Avatar";
 import { BUNDESLAENDER } from "@/lib/constants";
 
 const selectClass =
-  "rounded-sm border border-ink-600 bg-ink-800 px-2 py-1 text-xs text-mist-300 outline-none focus:border-brand-500";
+  "rounded-sm border border-navy-600 bg-navy-800 px-2 py-1 text-xs text-mist-300 outline-none focus:border-brand-500";
 
 function rankColor(i) {
   if (i === 0) return "text-signal-wait";
@@ -58,7 +58,7 @@ export default function TopTeamsWidget() {
   }, [standings, bundesland]);
 
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 p-4">
+    <div className="bg-navy-800 rounded-md border border-navy-600 p-4">
       <h3 className="text-sm font-bold text-paper-50 flex items-center gap-2">
         <PiTrophyBold className="text-brand-400" /> Top-Teams
       </h3>
@@ -110,7 +110,7 @@ export default function TopTeamsWidget() {
               <li key={t.teamId}>
                 <Link
                   href={`/team/team-detail/${t.slug}`}
-                  className="flex items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-ink-700 transition-colors"
+                  className="flex items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-navy-700 transition-colors"
                 >
                   <span className={`w-4 text-center text-sm font-bold ${rankColor(i)}`}>
                     {i + 1}
@@ -138,7 +138,7 @@ export default function TopTeamsWidget() {
       {!loading && rows.length > 0 && (
         <Link
           href="/rangliste"
-          className="mt-2 block text-center text-xs font-medium text-brand-400 hover:text-brand-400"
+          className="mt-2 block text-center text-xs font-medium text-brand-400 hover:text-brand-300 transition-colors"
         >
           Komplette Rangliste
         </Link>

@@ -93,7 +93,7 @@ export default function LandingFeatures() {
     // jedes position:sticky darin ausser Kraft - genau daran ist die Fortschritts-
     // Anzeige gescheitert (zweiter Befund Tobias, 12.08.2026). `clip` schneidet
     // identisch ab, ohne einen Scroll-Container zu erzeugen.
-    <section className="relative bg-ink-950 py-20 px-4 overflow-x-clip">
+    <section className="relative bg-navy-950 py-20 px-4 overflow-x-clip">
       <div className="max-w-6xl mx-auto">
         <Reveal
           as="h2"

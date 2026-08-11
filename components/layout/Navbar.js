@@ -31,7 +31,7 @@ import { notificationHref } from "@/lib/notifications";
 import Avatar from "@/components/Avatar";
 import Reveal from "@/components/ui/Reveal";
 
-// Öffentliche, login-bewusste Navigation auf ink-900 mit Wortmarken-Logo.
+// Öffentliche, login-bewusste Navigation auf navy-900 mit Wortmarken-Logo.
 // Der aktive Punkt wird durch die 2px-Brand-Leiste markiert – dasselbe Signal
 // wie am aktiven Tab (visuelle Richtung „Anzeigetafel", Abschnitt 4).
 // Saubere Neuimplementierung in v2-Architektur (Original-Design, ohne Altlasten).
@@ -86,14 +86,14 @@ export default function Navbar() {
   const mobClass = (href) =>
     `flex items-center gap-3 px-5 py-3.5 border-l-4 transition-colors ${
       isActive(href)
-        ? "bg-ink-800 text-paper-50 border-brand-500"
-        : "text-paper-50 hover:bg-ink-700 border-transparent"
+        ? "bg-navy-800 text-paper-50 border-brand-500"
+        : "text-paper-50 hover:bg-navy-700 border-transparent"
     }`;
   const mobAdminClass = (href) =>
     `flex items-center gap-3 px-5 py-3.5 border-l-4 transition-colors ${
       isActive(href)
-        ? "bg-ink-800 text-brand-300 border-brand-500"
-        : "text-brand-400 hover:bg-ink-700 border-transparent"
+        ? "bg-navy-800 text-brand-300 border-brand-500"
+        : "text-brand-400 hover:bg-navy-700 border-transparent"
     }`;
 
   // Eigenes Profil + Benachrichtigungen laden
@@ -208,7 +208,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 bg-ink-900 text-paper-50 border-b border-ink-600">
+      <nav className="sticky top-0 z-50 bg-navy-900 text-paper-50 border-b border-navy-600">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 h-16">
           {/* Logo */}
           <Link
@@ -268,11 +268,11 @@ export default function Navbar() {
                 </button>
 
                 {notifOpen && (
-                  <div className="fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-9 sm:w-80 bg-ink-800 border border-ink-600 rounded-md z-50 overflow-hidden">
-                    <div className="px-4 py-3 border-b border-ink-600">
+                  <div className="fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-9 sm:w-80 bg-navy-800 border border-navy-600 rounded-md z-50 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-navy-600">
                       <h3 className="font-bold text-paper-50 text-sm">Benachrichtigungen</h3>
                     </div>
-                    <div className="max-h-80 overflow-y-auto divide-y divide-ink-600">
+                    <div className="max-h-80 overflow-y-auto divide-y divide-navy-600">
                       {notifs.length === 0 ? (
                         <p className="px-4 py-8 text-center text-mist-400 text-sm">
                           Keine Benachrichtigungen
@@ -283,7 +283,7 @@ export default function Navbar() {
                           const inner = (
                             <div
                               className={`flex gap-3 px-4 py-3 ${n.read ? "" : "bg-brand-500/10"} ${
-                                href ? "hover:bg-ink-700 transition-colors" : ""
+                                href ? "hover:bg-navy-700 transition-colors" : ""
                               }`}
                             >
                               <span className="h-8 w-8 flex-shrink-0 rounded-full bg-brand-500/15 text-brand-400 flex items-center justify-center">
@@ -384,7 +384,7 @@ export default function Navbar() {
                     </Link>
                     <Link
                       href="/signup"
-                      className="bg-brand-500 hover:bg-brand-400 text-ink-950 rounded-md px-4 py-1.5 text-sm font-semibold transition-colors"
+                      className="bg-brand-500 hover:bg-brand-400 text-navy-950 rounded-md px-4 py-1.5 text-sm font-semibold transition-colors"
                     >
                       Registrieren
                     </Link>
@@ -406,7 +406,7 @@ export default function Navbar() {
 
         {/* Mobile-Menü */}
         {mobileOpen && (
-          <div className="lg:hidden bg-ink-900 border-t border-ink-600 divide-y divide-ink-600/60">
+          <div className="lg:hidden bg-navy-900 border-t border-navy-600 divide-y divide-navy-600/60">
             {PUBLIC_LINKS.map((l) => {
               const Icon = l.icon;
               return (
@@ -491,7 +491,7 @@ export default function Navbar() {
                     logout();
                     setMobileOpen(false);
                   }}
-                  className="flex items-center gap-3 px-5 py-3.5 w-full text-left text-mist-600 hover:bg-ink-700 transition-colors"
+                  className="flex items-center gap-3 px-5 py-3.5 w-full text-left text-mist-600 hover:bg-navy-700 transition-colors"
                 >
                   <PiXBold className="w-4 h-4 flex-shrink-0" />
                   <span className="text-sm font-medium">Abmelden</span>
@@ -511,7 +511,7 @@ export default function Navbar() {
                 <Link
                   href="/signup"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-5 py-3.5 text-brand-400 hover:bg-ink-700 transition-colors"
+                  className="flex items-center gap-3 px-5 py-3.5 text-brand-400 hover:bg-navy-700 transition-colors"
                 >
                   <PiBasketballBold className="w-4 h-4 flex-shrink-0" />
                   <span className="text-sm font-bold">Registrieren</span>
@@ -525,14 +525,14 @@ export default function Navbar() {
       {/* Such-Overlay */}
       {searchOpen && (
         <div className="fixed inset-0 z-[999] bg-black/60 flex items-start justify-center pt-20 px-4">
-          <div className="bg-ink-800 border border-ink-600 rounded-md w-full max-w-lg overflow-hidden">
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-ink-600">
+          <div className="bg-navy-800 border border-navy-600 rounded-md w-full max-w-lg overflow-hidden">
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-navy-600">
               <PiMagnifyingGlassBold className="text-mist-600 flex-shrink-0" />
               <input
                 ref={searchInputRef}
                 type="text"
                 placeholder="Spieler oder Team suchen…"
-                className="flex-1 outline-none text-sm text-paper-50 placeholder-ink-500"
+                className="flex-1 outline-none text-sm text-paper-50 placeholder-navy-500"
                 value={searchTerm}
                 onChange={onSearchChange}
               />
@@ -544,7 +544,7 @@ export default function Navbar() {
                 <PiXBold className="w-4 h-4" />
               </button>
             </div>
-            <div className="max-h-80 overflow-y-auto divide-y divide-ink-600">
+            <div className="max-h-80 overflow-y-auto divide-y divide-navy-600">
               {searchTerm && results.length === 0 && (
                 <div className="px-4 py-6 text-center text-mist-400 text-sm">
                   {searchData ? "Keine Ergebnisse" : "Lädt…"}
@@ -556,12 +556,12 @@ export default function Navbar() {
                     key={`t-${item._id}`}
                     href={`/team/team-detail/${item.slug}`}
                     onClick={closeSearch}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-ink-700 transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-navy-700 transition-colors"
                   >
                     <Avatar name={item.teamName} src={item.logo} className="w-9 h-9" textClass="text-xs" square />
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-paper-50 truncate">{item.teamName}</p>
-                      <span className="text-[10px] font-bold text-mist-400 bg-ink-700 px-1.5 py-0.5 rounded-sm uppercase tracking-wide">
+                      <span className="text-[10px] font-bold text-mist-400 bg-navy-700 px-1.5 py-0.5 rounded-sm uppercase tracking-wide">
                         Team
                       </span>
                     </div>
@@ -571,7 +571,7 @@ export default function Navbar() {
                     key={`p-${item._id}`}
                     href={item.slug ? `/player/view-player/${item.slug}` : "#"}
                     onClick={closeSearch}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-ink-700 transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-navy-700 transition-colors"
                   >
                     <Avatar
                       name={`${item.firstName} ${item.lastName}`}

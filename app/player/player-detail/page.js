@@ -32,7 +32,7 @@ export default function PlayerPlayerDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-ink-950">
+    <div className="min-h-screen bg-navy-950">
       <PlayerNav player={player} />
 
       <PlayerProfileView
@@ -46,7 +46,7 @@ export default function PlayerPlayerDetailPage() {
             <Button
               href="/player/update-password"
               variant="ghost"
-              className="!bg-ink-800/10 hover:!bg-ink-800/20 !text-paper-50"
+              className="!bg-navy-800/10 hover:!bg-navy-800/20 !text-paper-50"
             >
               Passwort
             </Button>

@@ -48,7 +48,7 @@ export default function PlayerViewPlayerSlugPage({ params }) {
 
   if (state === "notfound") {
     return (
-      <div className="min-h-screen bg-ink-950 flex flex-col">
+      <div className="min-h-screen bg-navy-950 flex flex-col">
         <Navbar />
         <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <h1 className="text-xl font-bold text-paper-50">Spieler nicht gefunden</h1>
@@ -62,7 +62,7 @@ export default function PlayerViewPlayerSlugPage({ params }) {
   }
 
   return (
-    <div className="min-h-screen bg-ink-950 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
       <div className="flex-1">
         <PlayerProfileView

@@ -56,8 +56,8 @@ import HeroScrollStage from "@/components/landing/HeroScrollStage";
 // damit der Button-Block farblich ruhig und konsistent wirkt.
 const HERO_BTN =
   "font-bold py-3.5 px-6 rounded-sm text-base flex items-center justify-center gap-2 transition-colors";
-const HERO_PRIMARY = `${HERO_BTN} bg-brand-500 hover:bg-brand-400 text-ink-950`;
-const HERO_GHOST = `${HERO_BTN} border border-ink-600 hover:border-brand-500 hover:bg-ink-800 text-paper-50`;
+const HERO_PRIMARY = `${HERO_BTN} bg-brand-500 hover:bg-brand-400 text-navy-950`;
+const HERO_GHOST = `${HERO_BTN} border border-navy-600 hover:border-brand-500 hover:bg-navy-800 text-paper-50`;
 const HERO_W = "w-full sm:w-52";
 
 // Vollbild-Hero auf ruhiger Fläche (seit 12.08.2026 ohne Foto, Begründung in
@@ -116,7 +116,7 @@ export default function LandingHero() {
           <>
             <div ref={textRef}>
             <Reveal as="div" delay={0} className="mb-6">
-              <span className="font-display bg-brand-500 text-ink-950 text-sm font-bold px-4 py-1.5 rounded-sm uppercase tracking-[0.2em]">
+              <span className="font-display bg-brand-500 text-navy-950 text-sm font-bold px-4 py-1.5 rounded-sm uppercase tracking-[0.2em]">
                 Willkommen zurück
               </span>
             </Reveal>
@@ -140,7 +140,7 @@ export default function LandingHero() {
               {signal ? (
                 <Link
                   href={signal.href}
-                  className="inline-flex items-center gap-2 rounded-sm border border-ink-600 bg-ink-800 px-4 py-2 text-base md:text-lg text-paper-50 hover:border-brand-500 transition-colors"
+                  className="inline-flex items-center gap-2 rounded-sm border border-navy-600 bg-navy-800 px-4 py-2 text-base md:text-lg text-paper-50 hover:border-brand-500 transition-colors"
                 >
                   <span className="h-2 w-2 flex-shrink-0 rounded-full bg-brand-400" aria-hidden="true" />
                   {signal.text}
@@ -177,12 +177,12 @@ export default function LandingHero() {
               <div className="flex flex-col sm:flex-row justify-center gap-3">
                 <Link
                   href="/feedback"
-                  className={`${HERO_BTN} ${HERO_W} group border border-signal-wait/70 bg-signal-wait/10 text-paper-50 hover:bg-signal-wait hover:text-ink-950`}
+                  className={`${HERO_BTN} ${HERO_W} group border border-signal-wait/70 bg-signal-wait/10 text-paper-50 hover:bg-signal-wait hover:text-navy-950`}
                 >
                   {/* Icon-Farbe an den Hover-Zustand koppeln: Beim Hover wird die
                       Flaeche solide amber-300 - ein fest verdrahtetes text-signal-wait
                       liesse das Icon darin verschwinden (Befund Tobias, 12.08.2026). */}
-                  <PiChatCircleDotsBold className="text-signal-wait group-hover:text-ink-950" /> Feedback
+                  <PiChatCircleDotsBold className="text-signal-wait group-hover:text-navy-950" /> Feedback
                 </Link>
                 <Link href="/spiele" className={`${HERO_GHOST} ${HERO_W}`}>
                   <PiCalendarBlankBold /> Spielplan
@@ -194,7 +194,7 @@ export default function LandingHero() {
           <>
             <div ref={textRef}>
             <Reveal as="div" delay={0} className="mb-6">
-              <span className="font-display bg-brand-500 text-ink-950 text-sm font-bold px-4 py-1.5 rounded-sm uppercase tracking-[0.2em]">
+              <span className="font-display bg-brand-500 text-navy-950 text-sm font-bold px-4 py-1.5 rounded-sm uppercase tracking-[0.2em]">
                 Amateur-Basketball in NRW
               </span>
             </Reveal>
@@ -221,19 +221,19 @@ export default function LandingHero() {
               <Link
                 ref={ctaRef}
                 href="/signup"
-                className="bg-brand-500 hover:bg-brand-400 text-ink-950 font-bold py-4 px-8 rounded-md text-lg flex items-center justify-center gap-2 transition-[transform,background-color] duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
+                className="bg-brand-500 hover:bg-brand-400 text-navy-950 font-bold py-4 px-8 rounded-md text-lg flex items-center justify-center gap-2 transition-[transform,background-color] duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
               >
                 Als Spieler registrieren <PiArrowRightBold />
               </Link>
               <Link
                 href="/team/register"
-                className="border border-ink-600 hover:border-brand-500 hover:bg-ink-800 text-paper-50 font-bold py-4 px-8 rounded-md text-lg flex items-center justify-center transition-[transform,background-color,border-color] duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
+                className="border border-navy-600 hover:border-brand-500 hover:bg-navy-800 text-paper-50 font-bold py-4 px-8 rounded-md text-lg flex items-center justify-center transition-[transform,background-color,border-color] duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
               >
                 Team gründen
               </Link>
               <Link
                 href="/teams"
-                className="border border-ink-600 hover:border-brand-500 hover:bg-ink-800 text-paper-50 font-bold py-4 px-8 rounded-md text-lg flex items-center justify-center gap-2 transition-[transform,background-color,border-color] duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
+                className="border border-navy-600 hover:border-brand-500 hover:bg-navy-800 text-paper-50 font-bold py-4 px-8 rounded-md text-lg flex items-center justify-center gap-2 transition-[transform,background-color,border-color] duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
               >
                 <PiUsersBold /> Teams entdecken
               </Link>

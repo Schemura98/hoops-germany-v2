@@ -64,7 +64,7 @@ function MatchMini({ match }) {
   return (
     <Link
       href={`/match/${match._id}`}
-      className="block rounded-md border border-ink-600 hover:border-brand-500/50 hover:bg-ink-700 px-3 py-2.5 transition-colors"
+      className="block rounded-md border border-navy-600 hover:border-brand-500/50 hover:bg-navy-700 px-3 py-2.5 transition-colors"
     >
       <div className="space-y-1.5">
         <TeamRow team={match.teamA} points={score?.a} isWinner={!!winId && winId === aId} />
@@ -151,17 +151,17 @@ export default function TeamMatchesWidget() {
   const list = tab === "upcoming" ? upcoming : results;
 
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 p-4">
+    <div className="bg-navy-800 rounded-md border border-navy-600 p-4">
       <h3 className="text-sm font-bold text-paper-50 flex items-center gap-2">
         <PiBasketballBold className="text-brand-400" /> Spiele
       </h3>
 
       {showScopeToggle && (
-        <div className="mt-3 grid grid-cols-2 gap-1 rounded-sm bg-ink-700 p-1 text-xs font-medium">
+        <div className="mt-3 grid grid-cols-2 gap-1 rounded-sm bg-navy-700 p-1 text-xs font-medium">
           <button
             onClick={() => setScope("mine")}
             className={`rounded-md px-2 py-1.5 transition-colors ${
-              scope === "mine" ? "bg-ink-800 text-paper-50" : "text-mist-400"
+              scope === "mine" ? "bg-navy-800 text-paper-50" : "text-mist-400"
             }`}
           >
             Mein Team
@@ -169,7 +169,7 @@ export default function TeamMatchesWidget() {
           <button
             onClick={() => setScope("followed")}
             className={`rounded-md px-2 py-1.5 transition-colors ${
-              scope === "followed" ? "bg-ink-800 text-paper-50" : "text-mist-400"
+              scope === "followed" ? "bg-navy-800 text-paper-50" : "text-mist-400"
             }`}
           >
             Gefolgte
@@ -212,7 +212,7 @@ export default function TeamMatchesWidget() {
             ))}
             <Link
               href="/spiele"
-              className="block text-center text-xs font-medium text-brand-400 hover:text-brand-400 pt-1"
+              className="block text-center text-xs font-medium text-brand-400 hover:text-brand-300 transition-colors pt-1"
             >
               Alle Spiele ansehen
             </Link>

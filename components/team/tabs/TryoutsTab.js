@@ -151,7 +151,7 @@ export default function TryoutsTab() {
       {showAdd && (
         <form
           onSubmit={create}
-          className="bg-ink-800 rounded-md border border-ink-600 p-4 space-y-3"
+          className="bg-navy-800 rounded-md border border-navy-600 p-4 space-y-3"
         >
           <div className="grid sm:grid-cols-2 gap-3">
             <div>
@@ -190,8 +190,8 @@ export default function TryoutsTab() {
                     onClick={() => togglePosition(p)}
                     className={`rounded-sm px-3 py-1.5 text-sm font-medium border transition-colors ${
                       active
-                        ? "bg-brand-500 border-brand-500 text-ink-950"
-                        : "border-ink-600 text-mist-400 hover:border-brand-500"
+                        ? "bg-brand-500 border-brand-500 text-navy-950"
+                        : "border-navy-600 text-mist-400 hover:border-brand-500"
                     }`}
                   >
                     {p}
@@ -247,7 +247,7 @@ export default function TryoutsTab() {
             return (
               <div
                 key={t._id}
-                className="bg-ink-800 rounded-md border border-ink-600 p-5"
+                className="bg-navy-800 rounded-md border border-navy-600 p-5"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -277,7 +277,7 @@ export default function TryoutsTab() {
                       className={`text-xs font-medium rounded-full px-3 py-1 ${
                         t.status === "active"
                           ? "bg-signal-ok/15 text-signal-ok"
-                          : "bg-ink-700 text-mist-400"
+                          : "bg-navy-700 text-mist-400"
                       }`}
                     >
                       {t.status === "active" ? "Aktiv" : "Geschlossen"}
@@ -328,7 +328,7 @@ export default function TryoutsTab() {
                 </button>
 
                 {isExpanded && applicants.length > 0 && (
-                  <ul className="mt-2 divide-y divide-ink-600 border-t border-ink-600">
+                  <ul className="mt-2 divide-y divide-navy-600 border-t border-navy-600">
                     {applicants.map((a) => (
                       <li key={a._id} className="flex items-center gap-3 py-2">
                         {a.playerId.profileImage ? (

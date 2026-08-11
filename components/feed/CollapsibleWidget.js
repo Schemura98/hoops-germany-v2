@@ -13,7 +13,7 @@ export default function CollapsibleWidget({ icon, title, defaultOpen = false, ch
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <div className="rounded-md border border-ink-600 bg-ink-800 overflow-hidden">
+    <div className="rounded-md border border-navy-600 bg-navy-800 overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -28,7 +28,7 @@ export default function CollapsibleWidget({ icon, title, defaultOpen = false, ch
         />
       </button>
       {open && (
-        <div className="border-t border-ink-600 [&>div]:border-0 [&>div]:rounded-none [&>div]:shadow-none [&>div]:bg-transparent [&>div]:pt-3 [&>div>h3]:hidden">
+        <div className="border-t border-navy-600 [&>div]:border-0 [&>div]:rounded-none [&>div]:shadow-none [&>div]:bg-transparent [&>div]:pt-3 [&>div>h3]:hidden">
           {children}
         </div>
       )}

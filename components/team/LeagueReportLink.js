@@ -61,14 +61,14 @@ export default function LeagueReportLink({ bundesland = "", className = "" }) {
         value={leagueName}
         onChange={(e) => setLeagueName(e.target.value)}
         placeholder="Name der Liga (falls bekannt)"
-        className="w-full rounded-md border border-ink-600 px-2.5 py-1.5 text-sm outline-none focus:border-brand-500"
+        className="w-full rounded-md border border-navy-600 px-2.5 py-1.5 text-sm outline-none focus:border-brand-500"
       />
       <textarea
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         rows={3}
         placeholder="Was fehlt oder stimmt nicht?"
-        className="w-full rounded-md border border-ink-600 px-2.5 py-1.5 text-sm outline-none focus:border-brand-500 resize-none"
+        className="w-full rounded-md border border-navy-600 px-2.5 py-1.5 text-sm outline-none focus:border-brand-500 resize-none"
       />
       {err && <p className="text-xs text-signal-error">{err}</p>}
       <div className="flex gap-2">
@@ -76,7 +76,7 @@ export default function LeagueReportLink({ bundesland = "", className = "" }) {
           type="button"
           onClick={submit}
           disabled={sending}
-          className="text-xs bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-md px-3 py-1.5 font-medium"
+          className="text-xs bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-md px-3 py-1.5 font-medium"
         >
           {sending ? "Senden…" : "Melden"}
         </button>

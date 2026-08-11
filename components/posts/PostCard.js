@@ -25,13 +25,13 @@ import MentionTextarea from "./MentionTextarea";
 // Darstellung der automatischen Ereignis-Beiträge (Icon + Badge je Typ).
 const AUTO = {
   match_result: { Icon: PiBasketballBold, label: "Spielergebnis", color: "bg-brand-500/15 text-brand-400" },
-  transfer: { Icon: PiArrowsLeftRightBold, label: "Transfer", color: "bg-ink-700 text-mist-300" },
+  transfer: { Icon: PiArrowsLeftRightBold, label: "Transfer", color: "bg-navy-700 text-mist-300" },
   team_founded: { Icon: PiUsersBold, label: "Neues Team", color: "bg-signal-ok/15 text-signal-ok" },
-  tryout: { Icon: PiMegaphoneBold, label: "Tryout", color: "bg-ink-700 text-mist-300" },
-  recruiting: { Icon: PiMagnifyingGlassBold, label: "Spieler gesucht", color: "bg-ink-700 text-mist-300" },
-  transfer_available: { Icon: PiUserPlusBold, label: "Auf Vereinssuche", color: "bg-ink-700 text-mist-300" },
+  tryout: { Icon: PiMegaphoneBold, label: "Tryout", color: "bg-navy-700 text-mist-300" },
+  recruiting: { Icon: PiMagnifyingGlassBold, label: "Spieler gesucht", color: "bg-navy-700 text-mist-300" },
+  transfer_available: { Icon: PiUserPlusBold, label: "Auf Vereinssuche", color: "bg-navy-700 text-mist-300" },
 };
-const AUTO_FALLBACK = { Icon: PiBasketballBold, label: "Update", color: "bg-ink-700 text-mist-400" };
+const AUTO_FALLBACK = { Icon: PiBasketballBold, label: "Update", color: "bg-navy-700 text-mist-400" };
 
 function authorLink(player) {
   return player?.slug || player?._id
@@ -93,7 +93,7 @@ function ReplyItem({ reply, postId, commentId, currentPlayerId }) {
         <Avatar player={reply.player} className="h-7 w-7" />
       </Link>
       <div className="flex-1">
-        <div className="bg-ink-950 rounded-md px-3 py-2">
+        <div className="bg-navy-950 rounded-md px-3 py-2">
           <Link
             href={authorLink(reply.player)}
             className="text-sm font-medium text-paper-50 hover:text-brand-400"
@@ -175,7 +175,7 @@ function CommentItem({ comment, postId, currentPlayerId }) {
         <Avatar player={comment.player} className="h-8 w-8" />
       </Link>
       <div className="flex-1 min-w-0">
-        <div className="bg-ink-950 rounded-md px-3 py-2">
+        <div className="bg-navy-950 rounded-md px-3 py-2">
           <Link
             href={authorLink(comment.player)}
             className="text-sm font-medium text-paper-50 hover:text-brand-400"
@@ -224,12 +224,12 @@ function CommentItem({ comment, postId, currentPlayerId }) {
               onEnter={addReply}
               placeholder="Antworten…"
               wrapperClassName="relative flex-1"
-              className="w-full rounded-full border border-ink-600 px-4 py-1.5 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              className="w-full rounded-full border border-navy-600 px-4 py-1.5 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
             <button
               onClick={addReply}
               disabled={replying || !replyText.trim()}
-              className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-full px-4 py-1.5 text-sm font-medium"
+              className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-full px-4 py-1.5 text-sm font-medium"
             >
               Senden
             </button>
@@ -309,7 +309,7 @@ export default function PostCard({ post, currentPlayerId }) {
     : "#";
 
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 p-4">
+    <div className="bg-navy-800 rounded-md border border-navy-600 p-4">
       {isAuto ? (
         <>
           {/* Kopf (Ereignis) */}
@@ -407,7 +407,7 @@ export default function PostCard({ post, currentPlayerId }) {
       )}
 
       {/* Aktionen */}
-      <div className="mt-3 flex items-center gap-5 text-sm text-mist-400 border-t border-ink-600 pt-3">
+      <div className="mt-3 flex items-center gap-5 text-sm text-mist-400 border-t border-navy-600 pt-3">
         <button
           onClick={toggleLike}
           className={`inline-flex items-center gap-1.5 ${
@@ -444,12 +444,12 @@ export default function PostCard({ post, currentPlayerId }) {
               onEnter={addComment}
               placeholder="Kommentieren…"
               wrapperClassName="relative flex-1"
-              className="w-full rounded-full border border-ink-600 px-4 py-2 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              className="w-full rounded-full border border-navy-600 px-4 py-2 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
             <button
               onClick={addComment}
               disabled={commenting || !commentText.trim()}
-              className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-full px-4 py-2 text-sm font-medium"
+              className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-full px-4 py-2 text-sm font-medium"
             >
               Senden
             </button>

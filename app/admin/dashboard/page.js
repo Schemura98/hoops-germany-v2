@@ -9,7 +9,7 @@ import { getAdminToken } from "@/lib/clientAuth";
 
 function StatCard({ icon: Icon, label, value, href }) {
   const inner = (
-    <div className="bg-ink-800 rounded-md border border-ink-600 p-5 transition-shadow">
+    <div className="bg-navy-800 rounded-md border border-navy-600 p-5 transition-shadow">
       <Icon className="text-brand-400 text-xl" />
       <p className="mt-3 text-2xl font-bold text-paper-50">{value ?? "—"}</p>
       <p className="text-sm text-mist-400">{label}</p>

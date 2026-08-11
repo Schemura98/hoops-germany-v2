@@ -16,7 +16,7 @@ import {
 } from "@/lib/constants";
 
 const inputClass =
-  "rounded-sm border border-ink-600 px-3 py-2 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+  "rounded-sm border border-navy-600 px-3 py-2 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
 
 const EMPTY_NEW = {
   name: "",
@@ -182,7 +182,7 @@ export default function AdminLeaguesPage() {
       )}
 
       {/* Neue Liga erstellen */}
-      <div className="bg-ink-800 rounded-md border border-ink-600 p-4 mb-5">
+      <div className="bg-navy-800 rounded-md border border-navy-600 p-4 mb-5">
         <h2 className="text-sm font-semibold text-paper-50 mb-3">Neue Liga erstellen</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="col-span-2">
@@ -291,7 +291,7 @@ export default function AdminLeaguesPage() {
           <button
             onClick={createLeague}
             disabled={creating || !newLeague.name.trim()}
-            className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-4 py-2 text-sm font-medium"
+            className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-4 py-2 text-sm font-medium"
           >
             <PiPlusBold className="text-xs" /> {creating ? "…" : "Liga erstellen"}
           </button>
@@ -307,7 +307,7 @@ export default function AdminLeaguesPage() {
           {leagues.map((l) => (
             <div
               key={l._id}
-              className="bg-ink-800 rounded-md border border-ink-600 p-4 space-y-3"
+              className="bg-navy-800 rounded-md border border-navy-600 p-4 space-y-3"
             >
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div className="col-span-2">
@@ -396,7 +396,7 @@ export default function AdminLeaguesPage() {
               </div>
 
               {/* Playoff-Modus */}
-              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-ink-600">
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-navy-600">
                 <label className="text-xs font-medium text-mist-400">Meister-Modus</label>
                 <select
                   value={edits[l._id]?.playoffMode || "keine"}
@@ -412,13 +412,13 @@ export default function AdminLeaguesPage() {
               </div>
 
               {/* Saison-Abschluss + Meister */}
-              <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-ink-600">
+              <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-navy-600">
                 <label className="inline-flex items-center gap-2 text-sm text-mist-300">
                   <input
                     type="checkbox"
                     checked={!!edits[l._id]?.finished}
                     onChange={(e) => setField(l._id, "finished", e.target.checked)}
-                    className="h-4 w-4 rounded border-ink-600 text-brand-400 focus:ring-brand-500"
+                    className="h-4 w-4 rounded border-navy-600 text-brand-400 focus:ring-brand-500"
                   />
                   Saison abgeschlossen
                 </label>
@@ -443,7 +443,7 @@ export default function AdminLeaguesPage() {
 
               {/* Saison-Status (eingefrorene TeamSeason-Einträge) */}
               {l.finished && (
-                <div className="pt-2 border-t border-ink-600">
+                <div className="pt-2 border-t border-navy-600">
                   <button
                     type="button"
                     onClick={() => toggleSeasons(l._id)}
@@ -488,7 +488,7 @@ export default function AdminLeaguesPage() {
                 </div>
               )}
 
-              <div className="flex items-center justify-between gap-2 pt-1 border-t border-ink-600">
+              <div className="flex items-center justify-between gap-2 pt-1 border-t border-navy-600">
                 <div className="flex items-center gap-3">
                   <Link
                     href={`/ligen/${l._id}`}
@@ -509,7 +509,7 @@ export default function AdminLeaguesPage() {
                     className={`text-xs rounded-sm px-3 py-2 font-medium disabled:opacity-60 ${
                       l.active
                         ? "bg-signal-ok/15 text-signal-ok hover:bg-signal-ok/25"
-                        : "bg-ink-700 text-mist-400 hover:bg-ink-700"
+                        : "bg-navy-700 text-mist-400 hover:bg-navy-600 hover:text-paper-50"
                     }`}
                   >
                     {l.active ? "Aktiv" : "Inaktiv"}
@@ -517,7 +517,7 @@ export default function AdminLeaguesPage() {
                   <button
                     onClick={() => save(l._id)}
                     disabled={busyId === l._id}
-                    className="text-xs bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-ink-950 rounded-sm px-4 py-2 font-medium"
+                    className="text-xs bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-4 py-2 font-medium"
                   >
                     Speichern
                   </button>

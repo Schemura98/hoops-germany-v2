@@ -14,7 +14,7 @@ import { positionLabel } from "@/lib/constants";
 // Karten-Skeleton im Format der echten Tryout-Karte (Avatar + Textzeilen + Meta).
 function TryoutCardSkeleton() {
   return (
-    <div className="bg-ink-800 rounded-md border border-ink-600 p-5">
+    <div className="bg-navy-800 rounded-md border border-navy-600 p-5">
       <div className="flex items-center gap-3">
         <Skeleton className="h-10 w-10 rounded-full flex-shrink-0" />
         <div className="flex-1">
@@ -67,7 +67,7 @@ export default function TryoutsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-ink-950 flex flex-col">
+    <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
 
       <PageHeader
@@ -94,7 +94,7 @@ export default function TryoutsPage() {
               <Link
                 key={t._id}
                 href={`/tryouts/${t._id}`}
-                className="block bg-ink-800 rounded-md border border-ink-600 p-5 hover:border-brand-500/50 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
+                className="block bg-navy-800 rounded-md border border-navy-600 p-5 hover:border-brand-500/50 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
               >
                 <div className="flex items-center gap-3">
                   {t.team?.logo ? (
