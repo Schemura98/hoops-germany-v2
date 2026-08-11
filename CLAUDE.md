@@ -27,6 +27,11 @@
 - **Projektort:** `C:\dev\hoops-germany-v2` – **NICHT zurück nach OneDrive** (OneDrive sperrt `.next`).
 - **`npm run build` NIE parallel zu laufendem `next dev`** (überschreibt dessen `.next`-CSS → ungestylte
   Seiten/CSS-404; Dev-Server danach neu starten). Nach Dev-Server-Lock ggf. `.next` löschen vor dem Build.
+  ⚠️ **Port-Prüfung sprachunabhängig machen:** Windows ist hier **deutsch**, `netstat` schreibt
+  **`ABHÖREN`** statt `LISTENING` – ein `netstat | grep LISTEN` meldet den Port fälschlich als frei
+  (am 12.08.2026 genau so passiert: Build lief in einen fremden Dev-Server hinein). Stattdessen die
+  Portspalte auswerten (`netstat -ano | awk '$2 ~ /:3000$/ && $4 !~ /:/ {print $5}'`) oder schlicht
+  `curl` gegen `http://localhost:3000` schicken.
 - **Schema-Änderungen an Modellen greifen erst nach Dev-Server-Neustart** (mongoose cached das Model).
 - **Vor Deploy immer die Production-Runtime testen** (`npm start`), nicht nur `next dev` (populate-Bug-Lehre).
 - **Bei Neu-Deploy/Server-Umzug:** `deploy/nginx-hoopsgermany.conf` nach `/etc/nginx/sites-available/default`,
