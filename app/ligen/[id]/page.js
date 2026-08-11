@@ -5,6 +5,7 @@ import Link from "next/link";
 import axios from "axios";
 import { FaUsers, FaBasketballBall, FaTrophy, FaCrown } from "react-icons/fa";
 import Navbar from "@/components/layout/Navbar";
+import ScrollTable from "@/components/ui/ScrollTable";
 import DemoBadge from "@/components/DemoBadge";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
@@ -125,12 +126,13 @@ export default function LigaDetailPage({ params }) {
         )}
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="overflow-x-auto">
+          <ScrollTable label="Tabelle, seitlich scrollbar">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-gray-500 text-left border-b border-gray-100">
-                  <th className="font-medium py-3 pl-4 w-8">#</th>
-                  <th className="font-medium py-3">Team</th>
+                {/* Rang und Team bleiben beim seitlichen Wischen stehen (Welle 3) */}
+                <tr className="bg-white text-xs text-gray-500 text-left border-b border-gray-100">
+                  <th className="sticky left-0 z-10 bg-inherit font-medium py-3 pl-4 w-12">#</th>
+                  <th className="sticky left-12 z-10 bg-inherit font-medium py-3">Team</th>
                   <th className="font-medium py-3 text-center w-12">Sp</th>
                   <th className="font-medium py-3 text-center w-10">S</th>
                   <th className="font-medium py-3 text-center w-10">N</th>
@@ -141,16 +143,16 @@ export default function LigaDetailPage({ params }) {
                 {standings.map((s, i) => (
                   <tr
                     key={s.teamId}
-                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50"
+                    className="bg-white border-b border-gray-50 last:border-0 hover:bg-gray-50"
                   >
-                    <td className="py-3 pl-4 font-semibold text-gray-500">
+                    <td className="sticky left-0 z-10 bg-inherit py-3 pl-4 w-12 font-semibold text-gray-500">
                       {championId && String(s.teamId) === championId ? (
                         <FaCrown className="text-amber-500" title="Meister" />
                       ) : (
                         i + 1
                       )}
                     </td>
-                    <td className="py-3">
+                    <td className="sticky left-12 z-10 bg-inherit py-3">
                       <Link
                         href={`/team/team-detail/${s.slug}`}
                         className="flex items-center gap-2 font-medium text-gray-900 hover:text-brand-600"
@@ -181,7 +183,7 @@ export default function LigaDetailPage({ params }) {
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollTable>
 
           {standings.length === 0 && (
             <p className="px-4 py-8 text-center text-sm text-gray-500">

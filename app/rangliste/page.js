@@ -10,6 +10,7 @@ import Avatar from "@/components/Avatar";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { BUNDESLAENDER } from "@/lib/constants";
 import { inputClassSm } from "@/lib/ui";
+import ScrollTable from "@/components/ui/ScrollTable";
 
 const selectClass = `${inputClassSm} sm:w-auto`;
 
@@ -165,12 +166,15 @@ export default function RanglistePage() {
           </p>
         ) : (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="overflow-x-auto">
+            <ScrollTable label="Rangliste, seitlich scrollbar">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs uppercase tracking-wide text-gray-500 border-b border-gray-100">
-                  <th className="text-left font-medium px-4 py-3 w-12">#</th>
-                  <th className="text-left font-medium px-2 py-3">Team</th>
+                {/* Rang und Team bleiben beim seitlichen Wischen stehen –
+                    sonst sieht man auf dem Handy entweder den Namen oder die
+                    Korbdifferenz, nie beides (Design-Review Welle 3). */}
+                <tr className="bg-white text-xs uppercase tracking-wide text-gray-500 border-b border-gray-100">
+                  <th className="sticky left-0 z-10 bg-inherit text-left font-medium px-3 py-3 w-14">#</th>
+                  <th className="sticky left-14 z-10 bg-inherit text-left font-medium px-2 py-3">Team</th>
                   <th className="text-center font-medium px-2 py-3 w-12">Sp</th>
                   <th className="text-center font-medium px-2 py-3 w-12">S</th>
                   <th className="text-center font-medium px-2 py-3 w-12">N</th>
@@ -179,11 +183,11 @@ export default function RanglistePage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {rows.map((t, i) => (
-                  <tr key={t.teamId} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3">
+                  <tr key={t.teamId} className="bg-white hover:bg-gray-50 transition-colors">
+                    <td className="sticky left-0 z-10 bg-inherit px-3 py-3 w-14">
                       <span className={rankBadge(i)}>{i + 1}</span>
                     </td>
-                    <td className="px-2 py-3">
+                    <td className="sticky left-14 z-10 bg-inherit px-2 py-3">
                       <Link
                         href={`/team/team-detail/${t.slug}`}
                         className="flex items-center gap-2.5 min-w-0 group"
@@ -231,7 +235,7 @@ export default function RanglistePage() {
                 ))}
               </tbody>
             </table>
-            </div>
+            </ScrollTable>
           </div>
         )}
       </main>

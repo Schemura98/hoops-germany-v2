@@ -28,36 +28,46 @@ import {
 const FEATURES = [
   {
     icon: FaChartBar,
+    eyebrow: "Aufstellung",
     title: "Spielerprofile & Statistiken",
     text: "Erstelle dein Profil, sammle Punkte, Assists & Rebounds und verfolge deine komplette Karrierehistorie – sichtbar für Vereine und Scouts.",
     visual: "profile",
   },
   {
     icon: FaUsers,
+    eyebrow: "Kader füllt sich",
     title: "Teams & Kaderverwaltung",
     text: "Gründe ein Team oder tritt einem bei, verwalte deinen Kader, lade Spieler ein und organisiere alles an einem Ort.",
     visual: "roster",
   },
   {
     icon: FaCalendarAlt,
+    eyebrow: "Doppelt bestätigt",
     title: "Spielplan & Ergebnisse",
-    text: "Trage Spiele und Ergebnisse ein, erfasse Box-Scores je Spieler und behalte kommende Partien immer im Blick.",
+    // Der bisherige Text erwähnte die doppelte Bestätigung nicht – genau das ist
+    // aber der Vertrauensunterschied der Plattform und die stärkste Szene daneben.
+    text: "Beide Teams tragen ihr Ergebnis unabhängig ein – erst wenn sie übereinstimmen, ist es bestätigt. Dazu Box-Scores je Spieler und der komplette Spielplan im Blick.",
     visual: "match",
   },
   {
     icon: FaTrophy,
+    eyebrow: "Tabelle sortiert sich",
     title: "Ligen & Tabellen",
-    text: "Verfolge Tabellenstände, Spielpläne und die Topscorer-Liste deiner Liga – in Echtzeit, direkt auf dem Handy.",
+    // „in Echtzeit" behauptete einen Live-Ticker, den es bewusst nicht gibt –
+    // die Tabelle aktualisiert sich, sobald ein Ergebnis bestätigt ist.
+    text: "Nach jedem bestätigten Spiel setzt sich die Tabelle neu – Topscorer und Spielplan deiner Liga direkt auf dem Handy.",
     visual: "table",
   },
   {
     icon: FaExchangeAlt,
+    eyebrow: "Der nächste Zug",
     title: "Tryouts & Transfermarkt",
     text: "Schreibe Probetrainings aus oder bewirb dich, finde transferbereite Spieler und neue Vereine in deiner Region.",
     visual: "scouting",
   },
   {
     icon: FaRegNewspaper,
+    eyebrow: "Nachspielzeit",
     title: "Community & News",
     text: "Teile Beiträge, folge Spielern und Teams, bleib per Benachrichtigung am Ball und lies aktuelle Basketball-News.",
     visual: "feed",
@@ -82,15 +92,15 @@ export default function LandingFeatures() {
     <section className="bg-gray-50 py-20 px-4 overflow-x-hidden">
       <div className="max-w-6xl mx-auto">
         <Reveal as="h2" className="text-3xl md:text-4xl font-black text-center mb-4 text-gray-900 text-balance">
-          Alles, was du brauchst
+          Eine Saison, sechs Spielzüge
         </Reveal>
         <Reveal
           as="p"
           delay={80}
           className="text-center text-gray-500 mb-16 md:mb-20 max-w-xl mx-auto"
         >
-          Von deinem Spielerprofil bis hin zu Liga-Tabellen – Hoops Germany bringt die
-          Basketball-Community in NRW zusammen.
+          Vom eigenen Profil bis zur Liga-Tabelle: So läuft eine Saison bei Hoops Germany
+          ab – Schritt für Schritt, mitten in der Basketball-Community NRW.
         </Reveal>
         <div className="space-y-16 md:space-y-24">
           {FEATURES.map((f, i) => {
@@ -111,6 +121,11 @@ export default function LandingFeatures() {
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-brand-100 mb-5">
                     <Icon className="text-brand-500 text-xl" />
                   </div>
+                  {f.eyebrow && (
+                    <p className="mb-1.5 text-xs font-bold uppercase tracking-widest text-brand-600">
+                      <span className="text-gray-400">{i + 1}/6 ·</span> {f.eyebrow}
+                    </p>
+                  )}
                   <h3 className="text-2xl font-black text-gray-900 mb-3 text-balance">{f.title}</h3>
                   <p className="text-gray-500 leading-relaxed">{f.text}</p>
                 </Reveal>

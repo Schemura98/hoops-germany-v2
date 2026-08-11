@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { positionLabel } from "@/lib/constants";
 import { inputClassSm } from "@/lib/ui";
 import DemoBadge from "@/components/DemoBadge";
+import ScrollTable from "@/components/ui/ScrollTable";
 
 // Tabellenzeilen-Skeleton im Format der echten Topscorer-Tabelle.
 function TopscorerSkeleton() {
@@ -112,12 +113,13 @@ export default function TopscorerPage() {
           />
         ) : (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="overflow-x-auto">
+            <ScrollTable label="Topscorer-Liste, seitlich scrollbar">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-gray-500 text-left border-b border-gray-100">
-                  <th className="font-medium py-3 pl-4 w-10">#</th>
-                  <th className="font-medium py-3">Spieler</th>
+                {/* Rang und Spieler bleiben beim seitlichen Wischen stehen (Welle 3) */}
+                <tr className="bg-white text-xs text-gray-500 text-left border-b border-gray-100">
+                  <th className="sticky left-0 z-10 bg-inherit font-medium py-3 pl-4 w-12">#</th>
+                  <th className="sticky left-12 z-10 bg-inherit font-medium py-3">Spieler</th>
                   <th className="font-medium py-3 text-center w-12">Sp.</th>
                   <th className="font-medium py-3 text-center w-14">Ø</th>
                   <th className="font-medium py-3 text-center w-16 pr-4">PKT</th>
@@ -127,11 +129,15 @@ export default function TopscorerPage() {
                 {scorers.map((s, i) => {
                   const rank = i + 1;
                   return (
-                    <tr key={s.playerId} className="border-b border-gray-50 last:border-0 hover:bg-gray-50">
-                      <td className={`py-3 pl-4 font-bold ${RANK_COLOR[rank] || "text-gray-300"}`}>
+                    <tr key={s.playerId} className="bg-white border-b border-gray-50 last:border-0 hover:bg-gray-50">
+                      <td
+                        className={`sticky left-0 z-10 bg-inherit py-3 pl-4 w-12 font-bold ${
+                          RANK_COLOR[rank] || "text-gray-300"
+                        }`}
+                      >
                         {rank}
                       </td>
-                      <td className="py-3">
+                      <td className="sticky left-12 z-10 bg-inherit py-3">
                         <Link
                           href={`/player/view-player/${s.slug || s.playerId}`}
                           className="font-medium text-gray-900 hover:text-brand-600"
@@ -156,7 +162,7 @@ export default function TopscorerPage() {
                 })}
               </tbody>
             </table>
-            </div>
+            </ScrollTable>
           </div>
         )}
       </main>

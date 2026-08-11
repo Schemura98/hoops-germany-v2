@@ -201,7 +201,7 @@ export default function TransfermarktPage() {
       .slice(0, 4);
   }, [players, myRecruitingTeam]);
 
-  const selectCls = `${inputClassSm} sm:w-auto shadow-sm`;
+  const selectCls = `${inputClassSm} shadow-sm`;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -291,8 +291,10 @@ export default function TransfermarktPage() {
         </Link>
 
         {/* Filter */}
-        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mb-6">
-          <div className="relative flex-1 min-w-[200px]">
+        {/* Filterleiste: Suche volle Breite, Auswahlfelder zweispaltig,
+            Umkreis eigene Zeile – gleiches Muster wie /spieler und /teams. */}
+        <div className="mb-6 space-y-3">
+          <div className="relative">
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
             <input
               value={query}
@@ -301,6 +303,7 @@ export default function TransfermarktPage() {
               className="w-full rounded-lg border border-gray-300 pl-9 pr-4 py-2.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
           </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           <select
             value={position}
             onChange={(e) => setPosition(e.target.value)}
@@ -336,6 +339,7 @@ export default function TransfermarktPage() {
               </option>
             ))}
           </select>
+          </div>
           <CityRadiusFilter value={geo} onChange={setGeo} />
         </div>
 

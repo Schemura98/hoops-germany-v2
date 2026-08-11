@@ -5,7 +5,12 @@
 export default function Tabs({ tabs = [], value, onChange, className = "", fluid = false }) {
   return (
     <div
-      className={`inline-flex gap-1 bg-gray-100 rounded-xl p-1 ${fluid ? "w-full" : ""} ${className}`}
+      // max-w-full: Bei langen Beschriftungen (z.B. Transfermarkt auf 375px)
+      // ragte der Pill-Umschalter sonst um wenige Pixel über den Rand hinaus
+      // und erzeugte waagerechtes Scrollen auf der ganzen Seite.
+      className={`inline-flex max-w-full gap-1 bg-gray-100 rounded-xl p-1 ${
+        fluid ? "w-full" : ""
+      } ${className}`}
     >
       {tabs.map((t) => (
         <button

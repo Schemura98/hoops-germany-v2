@@ -8,6 +8,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import CityRadiusFilter from "@/components/CityRadiusFilter";
+import { inputClassSm } from "@/lib/ui";
 import EmptyState from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import {
@@ -103,8 +104,10 @@ export default function SpielerPage() {
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
         {/* Filter */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <div className="relative flex-1">
+        {/* Filterleiste: auf dem Handy zweispaltig statt fünf gestapelter
+            Zeilen – gleiches Muster wie auf /spiele (Design-Review Welle 3). */}
+        <div className="mb-6 space-y-3">
+          <div className="relative">
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
             <input
               value={query}
@@ -113,10 +116,12 @@ export default function SpielerPage() {
               className="w-full border border-gray-200 rounded-xl pl-9 pr-4 py-3 text-sm text-gray-900 outline-none focus:border-brand-400 bg-white shadow-sm"
             />
           </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           <select
             value={land}
             onChange={(e) => setLand(e.target.value)}
-            className="rounded-xl border border-gray-200 px-3 py-3 text-sm text-gray-700 bg-white shadow-sm outline-none focus:border-brand-400"
+            className={inputClassSm}
+            aria-label="Bundesland"
           >
             <option value="">Alle Bundesländer</option>
             {BUNDESLAENDER.map((b) => (
@@ -125,11 +130,10 @@ export default function SpielerPage() {
               </option>
             ))}
           </select>
-          <CityRadiusFilter value={geo} onChange={setGeo} />
           <select
             value={position}
             onChange={(e) => setPosition(e.target.value)}
-            className="rounded-xl border border-gray-200 px-3 py-3 text-sm text-gray-700 bg-white shadow-sm outline-none focus:border-brand-400"
+            className={inputClassSm}
             aria-label="Position oder Rolle"
           >
             <option value="">Alle Positionen &amp; Rollen</option>
@@ -148,6 +152,8 @@ export default function SpielerPage() {
               ))}
             </optgroup>
           </select>
+          </div>
+          <CityRadiusFilter value={geo} onChange={setGeo} />
         </div>
 
         {loading ? (

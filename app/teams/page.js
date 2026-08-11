@@ -9,6 +9,7 @@ import DemoBadge from "@/components/DemoBadge";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import CityRadiusFilter from "@/components/CityRadiusFilter";
+import { inputClassSm } from "@/lib/ui";
 import Button from "@/components/ui/Button";
 import EmptyState from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -104,8 +105,9 @@ export default function TeamsPage() {
       </PageHeader>
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <div className="relative flex-1 max-w-md">
+        {/* Filterleiste: siehe /spieler – ein Muster für alle Listenseiten. */}
+        <div className="mb-6 space-y-3">
+          <div className="relative">
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
             <input
               value={query}
@@ -117,7 +119,8 @@ export default function TeamsPage() {
           <select
             value={land}
             onChange={(e) => setLand(e.target.value)}
-            className="rounded-xl border border-gray-200 px-3 py-3 text-sm text-gray-700 bg-white shadow-sm outline-none focus:border-brand-400"
+            className={inputClassSm}
+            aria-label="Bundesland"
           >
             <option value="">Alle Bundesländer</option>
             {BUNDESLAENDER.map((b) => (
