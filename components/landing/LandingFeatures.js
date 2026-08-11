@@ -273,7 +273,7 @@ export default function LandingFeatures() {
           className="text-center text-gray-500 mb-16 md:mb-20 max-w-xl mx-auto"
         >
           Von deinem Spielerprofil bis hin zu Liga-Tabellen – Hoops Germany bringt die
-          deutsche Basketball-Community zusammen.
+          Basketball-Community in NRW zusammen.
         </Reveal>
         <div className="space-y-16 md:space-y-24">
           {FEATURES.map((f, i) => {

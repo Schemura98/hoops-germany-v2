@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
 import {
@@ -13,7 +13,7 @@ import {
 } from "react-icons/fa";
 import { getPlayerToken } from "@/lib/clientAuth";
 import Reveal from "@/components/ui/Reveal";
-import HeroBallArc from "@/components/landing/HeroBallArc";
+import HeroScrollStage from "@/components/landing/HeroScrollStage";
 
 // Einheitliche Hero-Buttons: ein primärer (orange) + gleichartige „Ghost"-Buttons,
 // damit der Button-Block farblich ruhig und konsistent wirkt.
@@ -26,9 +26,15 @@ const HERO_W = "w-full sm:w-52";
 // Vollbild-Hero mit Hintergrundbild + dunklem Overlay.
 // Zeigt einen personalisierten Bereich für eingeloggte Spieler, sonst die
 // öffentliche Call-to-Action. Original-Design, v2-Architektur.
+//
+// Die Fläche selbst liefert `HeroScrollStage` (scroll-gesteuerte Bewegung,
+// Konzept docs/HERO-KONZEPT-2026-08-11.md). Der Inhalt hier bleibt unverändert –
+// bis auf `ctaRef` an der primären Schaltfläche: Dort landet der Ball, und der
+// Zielpunkt wird zur Laufzeit an genau diesem Element gemessen.
 export default function LandingHero() {
   const [player, setPlayer] = useState(null); // null = lädt / ausgeloggt
   const [checked, setChecked] = useState(false);
+  const ctaRef = useRef(null);
 
   useEffect(() => {
     const token = getPlayerToken();
@@ -52,20 +58,8 @@ export default function LandingHero() {
   const teamSlug = player?.team?.slug || null;
 
   return (
-    <div
-      className="relative flex items-center justify-center text-white"
-      style={{
-        backgroundImage: "url('/images/login image.jpg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        minHeight: "calc(100vh - 4rem)",
-      }}
-    >
-      <div className="absolute inset-0 bg-black/65" />
-
-      <HeroBallArc />
-
-      <div className="relative z-10 text-center px-6 max-w-4xl mx-auto py-24">
+    <HeroScrollStage ctaRef={ctaRef} backgroundImage="/images/login image.jpg">
+      <>
         {checked && player ? (
           <>
             <Reveal as="div" delay={0} className="mb-6">
@@ -91,7 +85,7 @@ export default function LandingHero() {
                 <Link href="/player/player-detail" className={`${HERO_GHOST} ${HERO_W}`}>
                   <FaUser /> Mein Profil
                 </Link>
-                <Link href="/home" className={`${HERO_PRIMARY} ${HERO_W}`}>
+                <Link ref={ctaRef} href="/home" className={`${HERO_PRIMARY} ${HERO_W}`}>
                   <FaNewspaper /> Zum Feed
                 </Link>
                 <Link
@@ -135,6 +129,7 @@ export default function LandingHero() {
             </Reveal>
             <Reveal as="div" delay={270} className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
+                ref={ctaRef}
                 href="/signup"
                 className="bg-brand-500 hover:bg-brand-600 text-white font-bold py-4 px-8 rounded-lg text-lg flex items-center justify-center gap-2 transition-transform duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
               >
@@ -155,7 +150,7 @@ export default function LandingHero() {
             </Reveal>
           </>
         )}
-      </div>
-    </div>
+      </>
+    </HeroScrollStage>
   );
 }
