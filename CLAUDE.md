@@ -11,7 +11,9 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> **Zuletzt deployt: `c2fcf1a` (11.08.2026)** – Hero-Bühne Stufe 1, NRW-Claim, Auth-Bildoptimierung.
+> **Zuletzt deployt: `7cd097e` (12.08.2026)** – Feature-Strecke „Ein Spielzug in sechs Szenen“
+> (Stufen 1–3), Fortschritts-Anzeige, Design-Review-Wellen 3 und 4.
+> **Rollback-Punkt davor: `c2fcf1a`** (auf dem VPS auschecken, `npm run build`, `pm2 restart hoops-v2`).
 >
 > 📜 **Vollständige Meilenstein-Chronik mit Commit-Hashes: `docs/CHRONIK.md`** (am 08.08.2026 wörtlich und
 > verlustfrei aus diesem Abschnitt ausgelagert – dort stehen ALLE datierten Protokolle seit dem Go-Live).
