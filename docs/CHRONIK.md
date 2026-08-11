@@ -1770,3 +1770,30 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > Schaltflächen an identischer Position bei 375 px und 1280 px).
 > **Offen (Tobias' Übergabe an Kai):** `pending_result` und `match_result` sind nur an abgefangenen
 > Antworten geprüft, nicht mit echten Daten – Kandidat für einen künftigen E2E-Test.
+>
+> **Nachtrag (12.08.2026): Kennzeichnung interner Testkonten** (`939e73a` + `572e581`, live).
+> Neles Voraussetzung für eine spätere öffentliche Beteiligungszahl
+> (`docs/LANDING-COPY-2026-08-11.md` §7): Ohne diese Kennzeichnung zählt sich das Projekt selbst mit –
+> von den sechs Teams ohne Demo-Kennzeichnung ist mindestens eines der dokumentierte Dev-Testaccount.
+> - **Bewusst ein zweites Feld statt `isDemo`:** `isDemo` sind erfundene Seed-Fixtures, `isInternal`
+>   sind **real angelegte** Konten, die uns selbst gehören. Beides darf nicht in Beteiligungszahlen,
+>   aber es sind zwei verschiedene Sachverhalte.
+> - `models/Team.js`, `models/Player.js`: additives `isInternal` (Default false, keine Migration –
+>   Bestandsdaten haben das Feld nicht, die Filter arbeiten mit `$ne: true`).
+> - **`lib/echteZahlen.js` (neu):** zentrale Filter `NUR_ECHT` / `NUR_ECHTE_TEAMS`, damit jede künftige
+>   Zählstelle denselben Maßstab benutzt.
+> - **`/api/admin/set-internal` (neu):** Super-Admin-Endpunkt, setzt ausschließlich dieses eine Feld.
+> - Schalter samt Kennzeichnung („Beispieldaten" / „intern") in **Team- und Spielerliste** des
+>   Admin-Bereichs; Analytics-Dashboard bekam die Karte **„Echte Beteiligung"** (externe Teams/Nutzer,
+>   Differenz zum Gesamtbestand, Neles Schwelle 20–25 als Zielmarke), CSV-Export zieht mit.
+> **Kais Gate:** kein Blocker, mit drei Befunden – alle vor dem Deploy behoben: (1) strukturell
+> ungültige ID ergab 500 statt 400 (jetzt `mongoose.isValidObjectId` → 400), (2) der Endpunkt kannte
+> `art:"spieler"`, aber keine Oberfläche rief den Pfad auf (Schalter ergänzt), (3) `zaehlgrund()` war
+> toter Code (entfernt). Er hat außerdem **`tests/e2e/set-internal.spec.mjs`** geschrieben (10 Tests:
+> Auth inkl. selbst geschmiedetem Team-Token, Validierung, Mass-Assignment-Angriffe auf beide Pfade) –
+> Suite jetzt **18/18**. Sein Mass-Assignment-Test belegt: Zusatzfelder wie `teamName`, `approved`
+> oder `isSuperAdmin` im Body werden ignoriert.
+> **Live geprüft:** öffentliche Seiten unverändert 200, neuer Endpunkt ohne Token 401.
+> ⚠️ **Bewusst offen:** Auf der Produktivseite ist **kein einziges Konto markiert** – welche Konten
+> intern sind, entscheiden Patrick und Jonatan, nicht die Sitzung. Erst danach ist die Zahl „externe
+> Teams" im Dashboard aussagekräftig.
