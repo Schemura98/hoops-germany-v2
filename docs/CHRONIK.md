@@ -1722,3 +1722,30 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > **Offen (Ronjas Validierungsvorschlag):** Johnny stellt bei den Turnier-Gesprächen (~17.08.) die
 > Zusatzfrage „Wer trägt bei Hoops das Ergebnis ein, wenn ein Spiel vorbei ist?" – Antworten mit
 > „beide Teams" ohne Nachlesen wären der Beleg, dass die Bewegung jetzt trägt.
+>
+> **Nachtrag (12.08.2026, abends): Ronjas beide Nebenbefunde umgesetzt** (`a7354a7` + `7e9e254`, live).
+> - **Feedback-Schaltfläche** stand im eingeloggten Hero an letzter von fünf Stellen, obwohl
+>   „Feedback-gebende Tester" die selbstdefinierte Kampagnen-Kennzahl ist (Befund Nele 11.08.,
+>   unabhängig bestätigt von Ronja 12.08.). Jetzt vorne in der zweiten Reihe mit dem Bernstein-Akzent
+>   des Testphase-Bands; der Primärplatz bleibt bei „Zum Feed". Tobias hat den Kontrast per
+>   Pixel-Sampling des echten Hero-Fotos gemessen: **16,7 : 1 bis 18,2 : 1** (WCAG AAA ist 7:1) – und
+>   dabei einen zweiten Fehler gefunden: Beim Hover wird die Fläche solide `amber-300`, das fest
+>   verdrahtete `text-amber-300` am Icon war dann exakt dieselbe Farbe und das Icon unsichtbar.
+>   Vor dem Deploy behoben (`7e9e254`), Icon-Farbe an den Hover-Zustand gekoppelt.
+> - **Wachstums-Signal für ausgeloggte Wiederkehrer: bewusst KEINE Zahl.** Gemessen über die
+>   öffentlichen Endpunkte: 70 Teams in der DB, davon 6 ohne Demo-Kennzeichnung – und davon ist eines
+>   der in `CLAUDE.md` dokumentierte Dev-Testaccount. Neles Entscheidung
+>   (`docs/LANDING-COPY-2026-08-11.md` §7): Eine Beteiligungszahl wäre entweder unehrlich („70 Teams")
+>   oder entmutigend, und sie stünde in der Testphase wochenlang still – das würde Ronjas Befund
+>   belegen statt beheben. Stattdessen **Sichtbarkeit statt Behauptung**: Der News-Block (echte,
+>   datierte Meldungen) rückt von ganz unten zwischen Feature-Strecke und „So funktionierts".
+>   `LandingHowItWorks` wechselt dafür auf `bg-gray-50`, damit der Schachbrett-Rhythmus erhalten
+>   bleibt. **Schwelle für eine spätere Zahl (Nele):** ab 20–25 verifizierten externen Teams, und nur
+>   wenn sie sich über Wochen sichtbar bewegt; vorher braucht es eine Kennzeichnung interner
+>   Testaccounts (offen für Ben).
+> **Live verifiziert:** Sektionsabfolge navy → grau → weiß → grau → navy, sechs News-Karten mit echter
+> Tagesmeldung, 0 px waagerechter Überlauf, keine Konsolenfehler.
+> ⚠️ **Zweite Werkzeug-Lehre zum Port-Check:** Es reicht nicht, den lokalisierten Zustandstext zu
+> meiden – WARTEND/FIN_WARTEN_2-Reste sehen sonst wie ein Listener aus. Erkennungsmerkmal ist die
+> Gegenstelle `0.0.0.0:0` bzw. `[::]:0`; das Prüfskript `tmp/port3000.sh` endet jetzt mit Exit-Code 1,
+> damit ein `&&`-verketteter Build gar nicht erst startet.
