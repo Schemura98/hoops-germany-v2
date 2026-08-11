@@ -1692,3 +1692,33 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > dadurch lief einmal ein `npm run build` in Tobias' Dev-Server hinein und erzeugte eine 404-Kaskade
 > in einer seiner Testchargen; er hat sie erkannt, verworfen und wiederholt. Prüfskript liegt als
 > `tmp/port3000.sh` bei, Warnung steht in CLAUDE.md.
+>
+> **Nachtrag (12.08.2026, nachmittags): Ronjas Verständnisprüfung und ihre Folgen** (`ec423a2`, live).
+> Patrick ließ nach dem Deploy prüfen, ob sein eigentliches Ziel erreicht ist – „spielerisch die
+> Funktionen kennenlernen". Ronja hat am **Live-Stand** gemessen (DOM-Opacity im 100-ms-Raster,
+> `docs/RONJA-LANDING-2026-08-12.md`) und den zentralen Befund geliefert: **Nein, nicht aus der
+> Bewegung.** Beide „eingereicht"-Marken der Ergebnis-Szene waren nur ~200 ms gleichzeitig sichtbar,
+> bei 9 px Schriftgröße; ohne den Fließtext daneben liest sich die Choreografie als „ein Ergebnis wird
+> bestätigt", nicht als „zwei unabhängige Meldungen". Kontrollprobe: Bei `prefers-reduced-motion`
+> entfielen die Marken ganz – das Vertrauensmerkmal lebte strukturell nur im Text.
+> **Viviens Entscheidung (§17 des Landing-Konzepts) ging über den Vorschlag hinaus:** nicht das
+> Zeitfenster strecken, sondern die Meldungen **gar nicht mehr ausblenden**. Aus dem Zustand
+> „eingereicht" wurde der Inhalt „meldet 78" / „meldet 65" (Zahl fett, 9 → 11 px – die Mikro-Größe,
+> die die Karte für die Team-Namen ohnehin nutzt); vier statt fünf Schritte (`[0, 650, 1550, 1750]`),
+> der Endstand erscheint **neben** den weiterhin sichtbaren Team-Zahlen. Ab ≈2 s stehen alle drei
+> Werte dauerhaft nebeneinander – der Mechanismus ist ein Dauerzustand statt eines Zeitfensters, das
+> man treffen muss. `prefers-reduced-motion` zeigt jetzt denselben vollständigen Endzustand **sofort**
+> (vorher fehlten die Marken dort) – mehr Information, nicht weniger.
+> Dazu Ronjas zweiter Fund: Der Hero-Ball war auf 375 px praktisch unsichtbar, weil die Ausblendung
+> über dem Textblock (Fix gegen die 430-px-Kollision) mobil fast die ganze Fallstrecke abdeckt –
+> jetzt Bodenwert **0.2** statt hartem 0.
+> **Gates:** Tobias hat beide von Vivien namentlich erbetenen Punkte unabhängig gegengeprüft – keine
+> Kollision der dauerhaften Marken mit der Fußzeile (8 px Abstand, bei 200 % Textgröße sogar ~50 px,
+> auch auf 430 px), korrekter Reduced-Motion-Endzustand, Ball auf 375 px durchgehend erkennbar und
+> auf 430 px bei 20 % nach seiner Einschätzung nicht störend. Urteil: freigabefähig.
+> **Live verifiziert nach dem Deploy:** ab 2,1 s stehen alle vier Elemente dauerhaft auf Opacity 1,
+> in bewegter **und** reduzierter Fassung; Ball 0.95 → 0.20 über dem Text → Ankunft, auf beiden
+> Breiten identisch; keine Konsolenfehler.
+> **Offen (Ronjas Validierungsvorschlag):** Johnny stellt bei den Turnier-Gesprächen (~17.08.) die
+> Zusatzfrage „Wer trägt bei Hoops das Ergebnis ein, wenn ein Spiel vorbei ist?" – Antworten mit
+> „beide Teams" ohne Nachlesen wären der Beleg, dass die Bewegung jetzt trägt.
