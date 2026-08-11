@@ -189,13 +189,15 @@
     optional `CountUp`/`Reveal` auf den öffentlichen Seiten) und **Welle 4** (LegalShell-Zeilenlänge,
     Sprungnavigation Datenschutz – nur Gestaltung, Text gehört Nora –, oauth-landing-Fehlerzustand,
     FeedbackButton-Position auf Formularseiten).
-11. **Hero „Sprungball" Stufe 2 (Desktop-Ausbaustufe):** Konzept liegt fertig vor
-    (`docs/HERO-KONZEPT-2026-08-11.md`: gepinnte Bühne, 140vh, drei Szenen, dasselbe Korb-Emblem als
-    Finale). Stufe 1 (mobile Grundfassung) ist live. Zusätzlich offen: Viviens Entscheidung zur
-    Ballspur bei 430 px (Ball kreuzt dort kurz den Fließtext – liegt hinter dem Text, reine
-    Gestaltungsfrage), Test auf echtem Low-End-Android, und ein **vorbestehender** 8-px-Horizontal-
-    überlauf auf Mobile aus dem `-translate-x-6`-Startversatz in `components/ui/Reveal.js`
-    (Feature-Karten der Startseite) – nicht durch die Hero-Bühne verursacht.
+11. **Startseite als Scroll-Erlebnis – was noch offen ist:** Konzepte liegen vollständig vor
+    (`docs/LANDING-KONZEPT-2026-08-11.md` inkl. Nachtrag, `docs/HERO-KONZEPT-2026-08-11.md`,
+    `docs/LANDING-COPY-2026-08-11.md`). Gebaut sind Hero-Stufe 1, Feature-Choreografie (Stufe 1),
+    Fortschritts-Anzeige (Stufe 2), Neles Texte (Stufe 3) und Viviens Feinschliff. **Offen:**
+    Hero-**Desktop**-Ausbaustufe (gepinnte Bühne, 140vh, drei Szenen – Konzept steht, bewusst
+    zurückgestellt, weil mobil der Hauptfall ist); Stufe 4 der Feature-Strecke (kurzer Pin nur für
+    die Ergebnis-Szene) **nur**, falls Ronjas Nutzungsprüfung zeigt, dass die Doppel-Bestätigung
+    nicht verstanden wird; Test auf echtem Low-End-Android (bisher nur 4×-CPU-Drosselung);
+    Neles „nice to have"-Textvorschläge für die Karten 2/5/6.
 12. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
 13. **Optional / bewusst offen:** Best-of-Serien + echte Playoff-Bracket-Grafik; Status-basierte
     Tabellen-Exklusion; Stat-Filter Hauptrunde/Playoffs/Gesamt; stabiler `leagueKey`; Benachrichtigung bei
