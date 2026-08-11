@@ -379,7 +379,7 @@ export default function TransfermarktPage() {
                 <Link
                   key={p._id}
                   href={`/player/view-player/${p.slug || p._id}`}
-                  className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
+                  className="min-w-0 break-words bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
                 >
                   <div className="flex items-center gap-3">
                     {p.profileImage ? (
@@ -387,10 +387,10 @@ export default function TransfermarktPage() {
                       <img
                         src={p.profileImage}
                         alt={initials}
-                        className="h-12 w-12 rounded-full object-cover"
+                        className="h-12 w-12 flex-shrink-0 rounded-full object-cover"
                       />
                     ) : (
-                      <span className="h-12 w-12 rounded-full bg-brand-100 text-brand-700 font-semibold flex items-center justify-center">
+                      <span className="h-12 w-12 flex-shrink-0 rounded-full bg-brand-100 text-brand-700 font-semibold flex items-center justify-center">
                         {initials || "?"}
                       </span>
                     )}
@@ -421,7 +421,7 @@ export default function TransfermarktPage() {
                         </p>
                       )}
                       {p.transferNote && (
-                        <p className="text-sm text-gray-600">{p.transferNote}</p>
+                        <p className="text-sm text-gray-600 break-words">{p.transferNote}</p>
                       )}
                     </div>
                   )}
@@ -436,7 +436,7 @@ export default function TransfermarktPage() {
               return (
                 <div
                   key={t._id}
-                  className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:border-brand-200 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
+                  className="min-w-0 break-words bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:border-brand-200 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0"
                 >
                   <Link
                     href={`/team/team-detail/${t.slug}`}
@@ -473,7 +473,7 @@ export default function TransfermarktPage() {
                     </div>
                   )}
                   {t.note && (
-                    <p className="mt-2 text-sm text-gray-600 border-t border-gray-100 pt-2">{t.note}</p>
+                    <p className="mt-2 text-sm text-gray-600 break-words border-t border-gray-100 pt-2">{t.note}</p>
                   )}
 
                   {/* Direktkontakt: Beitritt anfragen */}
