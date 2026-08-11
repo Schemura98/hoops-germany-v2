@@ -1749,3 +1749,24 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > meiden – WARTEND/FIN_WARTEN_2-Reste sehen sonst wie ein Listener aus. Erkennungsmerkmal ist die
 > Gegenstelle `0.0.0.0:0` bzw. `[::]:0`; das Prüfskript `tmp/port3000.sh` endet jetzt mit Exit-Code 1,
 > damit ein `&&`-verketteter Build gar nicht erst startet.
+>
+> **Nachtrag (12.08.2026, spät): Rückkehr-Signal im eingeloggten Hero** (`dd95a3b` + `0600d3b`, live).
+> Ronjas Befund **O3** (kein persönlicher Grund zurückzukommen) – übergeben an **Lina**. Klarstellung
+> fürs Roster-Verständnis: Lina ist **kein Agent**, sondern eine der vier Skill-Personen
+> (`agentSourceId: src-onboarding`, `entityType: "skill"`); ihre Rolle ist der Skill
+> `update-onboarding-surfaces`, entsprechend angewendet statt beauftragt.
+> Der eingeloggte Hero zeigt statt „Was möchtest du heute machen?" die wichtigste **tatsächlich offene**
+> Sache als anklickbare Pille, nach Dringlichkeit: Beitrittsanfragen → `/team/admin?tab=anfragen`,
+> offene Ergebnisse → `…?tab=ergebnisse`, neue Ergebnisse → `/spiele`, sonst ungelesene
+> Benachrichtigungen → `/home`. **Gibt es nichts Offenes, bleibt die alte Zeile** – kein erfundener
+> Betrieb, keine künstliche Dringlichkeit (Ronjas eigene Grenze: keine Dark Patterns). Datenquelle ist
+> der vorhandene Benachrichtigungs-Endpunkt (Beitrittsanfragen liegen dort ohnehin), der Aufruf läuft
+> unabhängig vom Profil-Abruf – schlägt er fehl, ist der Hero exakt wie vorher.
+> **Gate:** Tobias hat zwei Fälle mit **echten** Daten verifiziert (`max@test.de`: 0 ungelesen →
+> generische Zeile; `demo.coach@nrw-demo.de`: reale offene Anfragen → „3 Beitrittsanfragen warten auf
+> dich"), Tastaturzugang und sichtbaren Fokus bestätigt, ausgeloggten Hero als unverändert bestätigt.
+> Sein Befund: Die Pille war 13 px höher als die Textzeile und verschob die Schaltflächen je nach
+> Nutzerzustand – vor dem Deploy mit fester Mindesthöhe behoben (gemessen 46 px in beiden Zuständen,
+> Schaltflächen an identischer Position bei 375 px und 1280 px).
+> **Offen (Tobias' Übergabe an Kai):** `pending_result` und `match_result` sind nur an abgefangenen
+> Antworten geprüft, nicht mit echten Daten – Kandidat für einen künftigen E2E-Test.
