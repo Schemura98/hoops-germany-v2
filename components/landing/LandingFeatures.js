@@ -7,6 +7,7 @@ import {
   FaRegNewspaper,
 } from "react-icons/fa";
 import Reveal from "@/components/ui/Reveal";
+import FeatureProgressRail from "@/components/landing/FeatureProgressRail";
 import {
   ProfileMock,
   RosterMock,
@@ -89,7 +90,7 @@ export default function LandingFeatures() {
     // ist breiter als das Section-Padding (px-4 = 16px) und erzeugte sonst 8px
     // horizontalen Ueberlauf auf Mobile, solange die Karten noch nicht eingeblendet sind
     // (Befund Tobias 11.08.2026, Entscheid Vivien).
-    <section className="bg-gray-50 py-20 px-4 overflow-x-hidden">
+    <section className="relative bg-gray-50 py-20 px-4 overflow-x-hidden">
       <div className="max-w-6xl mx-auto">
         <Reveal as="h2" className="text-3xl md:text-4xl font-black text-center mb-4 text-gray-900 text-balance">
           Eine Saison, sechs Spielzüge
@@ -102,6 +103,8 @@ export default function LandingFeatures() {
           Vom eigenen Profil bis zur Liga-Tabelle: So läuft eine Saison bei Hoops Germany
           ab – Schritt für Schritt, mitten in der Basketball-Community NRW.
         </Reveal>
+        <FeatureProgressRail labels={FEATURES.map((f) => f.eyebrow)} />
+
         <div className="space-y-16 md:space-y-24">
           {FEATURES.map((f, i) => {
             const Icon = f.icon;
