@@ -50,6 +50,7 @@ function rueckkehrSignal(notifications) {
   return null;
 }
 import Reveal from "@/components/ui/Reveal";
+import SplitFlap from "@/components/ui/SplitFlap";
 import HeroScrollStage from "@/components/landing/HeroScrollStage";
 
 // Einheitliche Hero-Buttons: ein primärer (orange) + gleichartige „Ghost"-Buttons,
@@ -127,7 +128,9 @@ export default function LandingHero() {
             >
               Hey {player.firstName},
               <br />
-              <span className="text-brand-400">schön, dass du da bist!</span>
+              <SplitFlap delay={420} className="text-brand-400">
+                schön, dass du da bist!
+              </SplitFlap>
             </Reveal>
             {/* Feste Mindesthoehe: Pille (42px) und Fliesstext (29px) wuerden die
                 Schaltflaechen sonst je nach Nutzerzustand unterschiedlich weit
@@ -204,7 +207,8 @@ export default function LandingHero() {
               className="font-display text-5xl sm:text-6xl md:text-8xl font-black uppercase tracking-tight mb-6 leading-[0.9]"
             >
               Deine Basketball-
-              <span className="text-brand-400"> Community</span>
+              {/* Genau EIN Wort klappt um – siehe Begründung in SplitFlap.js. */}
+              <SplitFlap delay={420} className="text-brand-400"> Community</SplitFlap>
               <br />
               in NRW
             </Reveal>

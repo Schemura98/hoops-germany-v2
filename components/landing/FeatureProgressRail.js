@@ -24,7 +24,7 @@ const NAVBAR_HEIGHT = 64;
 // Redesign am 12.08.2026 waren die alten Werte (#f97316/#e5e7eb) die einzige
 // Stelle, die das Farbschema nicht mitbekommen hat.
 const FARBE_AKTIV = "#F07A27"; // brand-500
-const FARBE_RUHE = "#2E3F63"; // navy-600
+const FARBE_RUHE = "#3D5080"; // navy-600
 
 export default function FeatureProgressRail({ labels = [] }) {
   const wrapRef = useRef(null);

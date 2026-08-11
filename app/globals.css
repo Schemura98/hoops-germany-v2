@@ -7,8 +7,8 @@
    Basketball-Paarung), Text paper-50, ein Akzent – das Logo-Orange #F07A27. */
 
 :root {
-  --background: #060b16; /* navy-950 */
-  --foreground: #f4f7fb; /* paper-50 */
+  --background: #0b1220; /* navy-950 */
+  --foreground: #f5f7fa; /* paper-50 */
 
   /* Sagt dem Browser, dass die Seite dunkel ist. Ohne diese Zeile rendert er
      alle Elemente, die er selbst zeichnet, weiterhin hell: Datums-/Zeit-Picker,

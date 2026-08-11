@@ -16,25 +16,31 @@ module.exports = {
         // Anzeigetafel. Ersetzt Viviens ursprünglich warmen Braun-Grund; die
         // Stufung bleibt exakt gleich, damit keine Klasse ihre Bedeutung ändert.
         // Tiefe entsteht weiterhin über Flächenstufen, nicht über Schatten.
+        // Werte von Vivien gerechnet (docs/WOW-KONZEPT-2026-08-12.md), nicht
+        // geschätzt. Bewusst ohne Cyan-/Violett-Stich, sonst kippt es in die
+        // verworfene Neon-/E-Sport-Ecke.
         navy: {
-          950: "#060B16", // Seitenhintergrund
-          900: "#0C1424", // Navbar/Footer
-          800: "#141F35", // Panel-/Kartenfläche
-          700: "#1D2B47", // Hover-Fläche, Eingabefelder
-          600: "#2E3F63", // Rahmen und Trenner
-          500: "#4C5F86", // inaktive Icons, Platzhalter
+          950: "#0B1220", // Seitenhintergrund – paper-50 darauf: 17,45:1
+          900: "#111A2E", // Navbar/Footer – 16,16:1
+          800: "#182543", // Panel-/Kartenfläche – mist-400 darauf: 7,27:1
+          700: "#223058", // Hover-Fläche, Eingabefelder
+          // Die Haarlinie ist bewusst kräftiger als im braunen Entwurf
+          // (1,92:1 zu navy-800 statt 1,57:1): Blau auf Blau ist schwerer
+          // auseinanderzuhalten als Braun auf Braun.
+          600: "#3D5080", // Rahmen und Trenner
+          500: "#56699B", // inaktive Icons, Platzhalter
         },
         // Text auf dunklem Grund – leicht kühl, damit das Orange der einzige
         // warme Ton auf der Seite bleibt.
         paper: {
-          50: "#F4F7FB", // Primärtext
-          100: "#E4EAF3",
+          50: "#F5F7FA", // Primärtext
+          100: "#E6EAF2",
         },
         // Gedämpfter Text, blaustichig statt bräunlich
         mist: {
-          300: "#C2CCDC", // Labels, Zwischenüberschriften
-          400: "#A5B2C7", // Fließtext sekundär
-          600: "#7A88A0", // niedrigste Betonung – NICHT für Absätze
+          300: "#C5CEDE", // Labels, Zwischenüberschriften
+          400: "#A9B4C9", // Fließtext sekundär – 8,97:1 auf navy-950
+          600: "#78839C", // niedrigste Betonung – 4,93:1, NICHT für Absätze
         },
         // Verankert auf dem echten Logo-Orange (#F07A27 aus logo.svg),
         // nicht auf dem bisherigen orange-500.
@@ -78,9 +84,19 @@ module.exports = {
           "0%": { opacity: "0", transform: "translateY(8px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        // Splitflap: Die Klappe fällt von oben, schießt einen Hauch über die
+        // Waagerechte hinaus und pendelt sich ein – die mechanische Anzeigetafel
+        // stoppt auch nicht sanft, sie schlägt an.
+        flap: {
+          "0%": { opacity: "0", transform: "rotateX(-92deg)" },
+          "55%": { opacity: "1", transform: "rotateX(12deg)" },
+          "78%": { transform: "rotateX(-5deg)" },
+          "100%": { opacity: "1", transform: "rotateX(0deg)" },
+        },
       },
       animation: {
         "page-in": "page-in 420ms cubic-bezier(0.23, 1, 0.32, 1) both",
+        flap: "flap 620ms cubic-bezier(0.34, 1.4, 0.64, 1) both",
       },
     },
   },

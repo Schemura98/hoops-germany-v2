@@ -8,6 +8,7 @@ import {
 } from "react-icons/pi";
 import Reveal from "@/components/ui/Reveal";
 import FeatureProgressRail from "@/components/landing/FeatureProgressRail";
+import FeatureFocus from "@/components/landing/FeatureFocus";
 import {
   ProfileMock,
   RosterMock,
@@ -111,7 +112,7 @@ export default function LandingFeatures() {
         </Reveal>
         <FeatureProgressRail labels={FEATURES.map((f) => f.eyebrow)} />
 
-        <div className="space-y-16 md:space-y-24">
+        <FeatureFocus className="space-y-16 md:space-y-24">
           {FEATURES.map((f, i) => {
             const Icon = f.icon;
             const Visual = VISUALS[f.visual];
@@ -148,7 +149,7 @@ export default function LandingFeatures() {
               </div>
             );
           })}
-        </div>
+        </FeatureFocus>
       </div>
     </section>
   );

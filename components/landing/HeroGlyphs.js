@@ -79,7 +79,7 @@ export const HoopEmblem = forwardRef(function HoopEmblem(props, ref) {
       {...props}
     >
       <ellipse cx="10" cy="3" rx="8.5" ry="2.4" stroke="#F68C3E" strokeWidth="1.6" />
-      <g stroke="#F4F7FB" strokeOpacity=".55" strokeWidth="0.9" strokeLinecap="round">
+      <g stroke="#F5F7FA" strokeOpacity=".55" strokeWidth="0.9" strokeLinecap="round">
         <path d="M2.2 3.6Q3.4 9 6.6 12.4M17.8 3.6Q16.6 9 13.4 12.4M10 5.4V12.8" />
         <path d="M4 6.6Q10 8.9 16 6.6M5.8 9.8Q10 11.6 14.2 9.8" />
       </g>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BallGlyph, CourtArc, HoopEmblem } from "@/components/landing/HeroGlyphs";
+import { BallGlyph, HoopEmblem } from "@/components/landing/HeroGlyphs";
+import PlayDiagram from "@/components/landing/PlayDiagram";
 
 // Scroll-gesteuerte Hero-Bühne „Sprungball" – Stufe 1 (mobil zuerst).
 // Spezifikation: docs/HERO-KONZEPT-2026-08-11.md (Vivien, v2 vom 11.08.2026).
@@ -43,7 +44,15 @@ const BALL_SPAN = 0.75;
 // 0.14 gedrosselt werden, um im Bildrauschen nicht zu zerfasern. Auf der ruhigen
 // Fläche ist er die einzige Zeichnung im Hintergrund und trägt bei 0.55 die
 // Tiefe, die vorher das Overlay liefern musste.
-const ARC_MAX = 0.55; // Deckkraft des Spielfeld-Bogens
+// Deckkraft der Taktiktafel als Ganzes. Sie liegt jetzt hinter dem Text (statt
+// als schmaler Bogen am unteren Rand), deshalb bewusst niedriger: Sie soll den
+// Raum grundieren, nicht mit der Headline um Aufmerksamkeit streiten.
+const ARC_MAX = 0.38;
+
+// Die Taktiktafel zeichnet sich über eine eigene, kürzere Strecke als die
+// Flächen-Bewegung: Ein Spielzug, der erst fertig ist, wenn der Hero schon halb
+// aus dem Bild ist, wird nie zu Ende gesehen.
+const PLAY_SPAN = 0.6;
 
 const EMBLEM_FROM = 0.85; // ab hier blendet das Korb-Emblem auf
 const SWISH_FROM = 0.9; // ab hier fällt der Ball durchs Netz und blendet aus
@@ -88,6 +97,10 @@ function ballOpacityNearText(ballCenterY, textRect) {
 export default function HeroScrollStage({ ctaRef, textRef, className = "", children }) {
   const stageRef = useRef(null);
   const arcRef = useRef(null);
+  // Einmal beim Aufsetzen eingesammelt statt pro Frame abgefragt: querySelectorAll
+  // in der rAF-Schleife wäre ein Layout-/Baum-Zugriff pro Bild.
+  const linienRef = useRef([]);
+  const punkteRef = useRef([]);
   const ballRef = useRef(null);
   const emblemRef = useRef(null);
   const tickingRef = useRef(false);
@@ -109,6 +122,21 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", child
     const stage = stageRef.current;
     if (!stage) return;
 
+    const svg = arcRef.current;
+    linienRef.current = svg
+      ? Array.from(svg.querySelectorAll("[data-play-line]")).map((el) => ({
+          el,
+          von: parseFloat(el.dataset.from),
+          bis: parseFloat(el.dataset.to),
+        }))
+      : [];
+    punkteRef.current = svg
+      ? Array.from(svg.querySelectorAll("[data-play-dot]")).map((el) => ({
+          el,
+          ab: parseFloat(el.dataset.at),
+        }))
+      : [];
+
     const apply = () => {
       tickingRef.current = false;
       const rect = stage.getBoundingClientRect();
@@ -117,6 +145,18 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", child
       const t = clamp((NAVBAR_HEIGHT - rect.top) / (rect.height * PROGRESS_SPAN), 0, 1);
 
       if (arcRef.current) arcRef.current.style.opacity = (t * ARC_MAX).toFixed(3);
+
+      // Spielzug zeichnen: jede Linie hat ihr eigenes Zeitfenster, damit der Zug
+      // eine Reihenfolge hat (erst das Feld, dann der Laufweg, dann der Pass)
+      // statt gleichzeitig aufzutauchen.
+      const tp = clamp(t / PLAY_SPAN, 0, 1);
+      for (const { el, von, bis } of linienRef.current) {
+        const anteil = clamp((tp - von) / (bis - von), 0, 1);
+        el.style.strokeDashoffset = (1 - anteil).toFixed(4);
+      }
+      for (const { el, ab } of punkteRef.current) {
+        el.style.opacity = tp >= ab ? "1" : "0";
+      }
 
       const cta = ctaRef?.current;
       const ball = ballRef.current;
@@ -200,7 +240,11 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", child
       className={`relative flex items-center justify-center overflow-hidden bg-navy-950 text-paper-50 ${className}`}
       style={{ minHeight: "calc(100vh - 4rem)" }}
     >
-      <CourtArc ref={arcRef} style={animated ? undefined : { opacity: ARC_MAX }} />
+      <PlayDiagram
+        ref={arcRef}
+        gezeichnet={!animated}
+        style={animated ? undefined : { opacity: ARC_MAX }}
+      />
 
       {/* Ball und Korb-Emblem nur bei erlaubter Bewegung */}
       {animated && (
