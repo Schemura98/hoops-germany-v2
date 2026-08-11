@@ -1668,3 +1668,27 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > Überlauf, keine Konsolenfehler, keine 4xx/5xx. Choreografie, Fortschritts-Anzeige und Sprungmenü je
 > einzeln vermessen (Werte in den Commit-Nachrichten). Playwright 8/8 nach jedem Schritt.
 > Kais Code-/Security-Gate für Stufe 1: freigabefähig ohne Befund.
+>
+> **Nachtrag (12.08.2026): Deploy + zwei Gate-Befunde behoben** (`a86a95e`, `7cd097e`, live).
+> Tobias' Browser-Gate lieferte zwei echte Funde, beide vor dem Deploy behoben:
+> - **Die Fortschritts-Anzeige klebte nicht.** Zwei Ursachen: `overflow-x-hidden` auf der
+>   Feature-Section macht diese zum Scroll-Container und setzt damit **jedes** `position: sticky`
+>   darin außer Kraft (jetzt `overflow-x-clip` – schneidet identisch ab, ohne Scroll-Container);
+>   und der Wrapper der Anzeige war exakt so hoch wie der Balken selbst, weil sein zweites Kind
+>   absolut positioniert ist – ein Sticky-Kind ohne Spielraum im Containing Block kann nie kleben
+>   (jetzt `display: contents`). Nachgemessen: `rect.top` konstant 64px über fünf Scroll-Stufen.
+> - **Zeilenversatz der Tabellen-Karte war in px kodiert**, die Zeilenhöhe wächst aber rem-basiert
+>   mit der Schriftgröße – ab 150 % überlappten die vertauschten Zeilen. Jetzt `2.25rem`; gemessen
+>   36/54/72 px bei 100/150/200 %, exakt gleich dem Zeilenraster.
+> **Nach dem Deploy live gefunden und sofort nachgezogen:** `/transfermarkt` hatte mit **echten**
+> Nutzerdaten 36 px waagerechten Überlauf (lokal nicht reproduzierbar – die Dev-Daten enthalten nur
+> kurze Namen). Ursache: Karten sind Raster-Elemente mit `min-width: auto`, ein langes Wort ohne
+> Trennstelle zwingt die Spalte breiter als den Viewport. Fix: `min-w-0` + `break-words` auf beide
+> Kartentypen. Danach live 0 px auf allen 17 geprüften Seiten.
+> **Live-Verifikation nach dem Deploy:** Fortschritts-Anzeige klebt bei 64 px und zählt korrekt
+> (1/6 → 3/6 → 5/6), Ergebnis-Szene läuft vollständig durch, Rangliste behält beim Wischen die
+> Namensspalte (82 px Überlauf, letzte Spalte erreichbar), keine Konsolen- oder Seitenfehler.
+> ⚠️ **Werkzeug-Lehre:** `netstat | grep LISTEN` scheitert auf diesem deutschen Windows (`ABHÖREN`) –
+> dadurch lief einmal ein `npm run build` in Tobias' Dev-Server hinein und erzeugte eine 404-Kaskade
+> in einer seiner Testchargen; er hat sie erkannt, verworfen und wiederholt. Prüfskript liegt als
+> `tmp/port3000.sh` bei, Warnung steht in CLAUDE.md.
