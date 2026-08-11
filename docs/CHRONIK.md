@@ -1815,5 +1815,13 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 >   selbst spielen und sich sonst kleinrechnen würden.
 > **Ergebnis der Zählung:** externe Teams **6 → 1**, externe Nutzer **31 → 10**. Das ist die ehrliche
 > Ausgangslage für Neles Schwelle (20–25 externe Teams, bevor eine öffentliche Beteiligungszahl
-> sinnvoll wird). Offen geblieben: ob `Jonny Vo` (Kampagnenhelfer?) extern zählt – Patrick hat dazu
-> nichts entschieden, das Profil zählt weiterhin mit.
+> sinnvoll wird). `Jonny Vo` hat Patrick anschließend ebenfalls als intern eingestuft.
+>
+> **Endstand der Zählung (12.08.2026):** extern gezählt werden **1 Team**
+> (`Mönchengladbach Scorpions e.V.`) und **9 Nutzer** – darunter die vier Hauptprofile von Patrick und
+> Jonatan, die auf seine ausdrückliche Entscheidung mitzählen, weil sie selbst spielen. Faktisch
+> stammen also **fünf** der neun aus der Community. Vorher standen dort 6 Teams und 31 Nutzer.
+> ⚠️ **Nebenbefund, noch offen:** Die vier Seed-Teams stehen für Besucher weiterhin **ohne**
+> „BEISPIELDATEN"-Kennzeichnung auf der Live-Seite – `isInternal` wirkt nur auf die Zählung, das
+> öffentliche Abzeichen hängt an `isDemo`. Ob sie zusätzlich so gekennzeichnet oder beim Cutover
+> gelöscht werden, ist eine Produktentscheidung von Patrick.
