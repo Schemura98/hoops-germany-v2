@@ -125,10 +125,13 @@ export default function LandingHero() {
               <br />
               <span className="text-brand-400">schön, dass du da bist!</span>
             </Reveal>
+            {/* Feste Mindesthoehe: Pille (42px) und Fliesstext (29px) wuerden die
+                Schaltflaechen sonst je nach Nutzerzustand unterschiedlich weit
+                nach unten schieben (Befund Tobias, 12.08.2026). */}
             <Reveal
               as="div"
               delay={180}
-              className="mb-10 max-w-2xl mx-auto"
+              className="mb-10 max-w-2xl mx-auto flex min-h-[46px] items-center justify-center"
             >
               {signal ? (
                 <Link
