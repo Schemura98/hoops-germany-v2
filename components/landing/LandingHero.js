@@ -101,13 +101,21 @@ export default function LandingHero() {
                   <FaUsers /> {teamSlug ? "Mein Team" : "Teams"}
                 </Link>
               </div>
-              {/* Untere Reihe: 2 Buttons */}
+              {/* Untere Reihe: Feedback steht bewusst vorn und traegt den
+                  Testphasen-Akzent. Waehrend der Testphase ist "Feedback-gebende
+                  Tester" die selbstdefinierte Kennzahl der Kampagne - der Button
+                  stand aber an letzter von fuenf Stellen (Befund Nele 11.08.,
+                  unabhaengig bestaetigt von Ronja 12.08.). Kein Primaer-Platz:
+                  der bleibt bei "Zum Feed". */}
               <div className="flex flex-col sm:flex-row justify-center gap-3">
+                <Link
+                  href="/feedback"
+                  className={`${HERO_BTN} ${HERO_W} border-2 border-amber-300/70 bg-amber-300/10 text-white hover:bg-amber-300 hover:text-gray-900`}
+                >
+                  <FaCommentDots className="text-amber-300" /> Feedback
+                </Link>
                 <Link href="/spiele" className={`${HERO_GHOST} ${HERO_W}`}>
                   <FaCalendarAlt /> Spielplan
-                </Link>
-                <Link href="/feedback" className={`${HERO_GHOST} ${HERO_W}`}>
-                  <FaCommentDots /> Feedback
                 </Link>
               </div>
             </Reveal>

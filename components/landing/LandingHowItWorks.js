@@ -73,7 +73,7 @@ export default function LandingHowItWorks() {
     ];
 
     return (
-      <section className="bg-white py-20 px-4">
+      <section className="bg-gray-50 py-20 px-4">
         <div className="max-w-5xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-black mb-4 text-gray-900">
             Deine nächsten Schritte
@@ -113,7 +113,7 @@ export default function LandingHowItWorks() {
   }
 
   return (
-    <section className="bg-white py-20 px-4">
+    <section className="bg-gray-50 py-20 px-4">
       <div className="max-w-4xl mx-auto text-center">
         <h2 className="text-3xl md:text-4xl font-black mb-4 text-gray-900">So funktionierts</h2>
         <p className="text-gray-500 mb-16">In 3 einfachen Schritten dabei</p>

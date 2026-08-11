@@ -21,15 +21,21 @@ export default function LandingPage() {
       {/* Features */}
       <LandingFeatures />
 
-      {/* So funktionierts / Nächste Schritte – je nach Login-Status */}
-      <LandingHowItWorks />
-
-      {/* Basketball-News */}
-      <section className="bg-gray-50 py-20 px-4">
+      {/* Basketball-News – steht bewusst VOR "So funktionierts": Für
+          Wiederkehrer ist der News-Block der einzige Teil der Seite, der sich
+          zwischen zwei Besuchen tatsächlich ändert (echte, datierte Meldungen).
+          Ganz unten hat ihn ein scrollmüder Wiederkehrer vermutlich nie
+          erreicht (Befund Ronja O4, Entscheid Nele: Sichtbarkeit statt
+          Zahlensignal – eine Beteiligungszahl waere in der Testphase entweder
+          unehrlich oder entmutigend). */}
+      <section className="bg-white py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <NewsWidget />
         </div>
       </section>
+
+      {/* So funktionierts / Nächste Schritte – je nach Login-Status */}
+      <LandingHowItWorks />
 
       {/* CTA – nur für ausgeloggte Besucher */}
       <LandingCTA />
