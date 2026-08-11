@@ -43,8 +43,11 @@ function Bars({ items, empty = "Noch keine Daten." }) {
   if (!items.length) return <p className="text-sm text-gray-500">{empty}</p>;
   return (
     <div className="space-y-2.5">
-      {items.map((it) => (
-        <div key={it.label} className="flex items-center gap-3">
+      {/* Schluessel mit Index: Beschriftungen sind nicht eindeutig (zwei Ligen
+          koennen "Oberliga 1" heissen) - React warnte hier ueber doppelte
+          Schluessel. Vorbestehend, beim Pruefen aufgefallen. */}
+      {items.map((it, i) => (
+        <div key={`${it.label}-${i}`} className="flex items-center gap-3">
           <span className="w-36 sm:w-44 text-xs text-gray-600 truncate">{it.label}</span>
           <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
             <div className="bg-brand-500 h-full rounded-full" style={{ width: `${(it.value / max) * 100}%` }} />
@@ -185,6 +188,8 @@ export default function AdminAnalyticsPage() {
       ["Plattform", "Gesamt", "Neu (30T)", "Wachstum %"],
       ["Registrierte Nutzer", s.platform.users.total, s.platform.users.newLast30, s.platform.users.growth],
       ["Teams / Vereine", s.platform.teams.total, s.platform.teams.newLast30, s.platform.teams.growth],
+      ["davon extern (ohne Beispieldaten/intern)", s.platform.externeTeams.total, s.platform.externeTeams.newLast30, s.platform.externeTeams.growth],
+      ["Nutzer extern (ohne Beispieldaten/intern)", s.platform.externeUsers.total, s.platform.externeUsers.newLast30, s.platform.externeUsers.growth],
       ["Spiele", s.platform.matches.total, s.platform.matches.newLast30, s.platform.matches.growth],
       ["Offizielle Ligen", s.platform.leagues.total, "", ""],
       ["Transferbereite Spieler", s.platform.transferAvailable, "", ""],
@@ -292,6 +297,40 @@ export default function AdminAnalyticsPage() {
               <StatCard icon={FaUserPlus} label="Suchende Vereine" value={summary.platform.recruitingTeams} />
               <StatCard icon={FaUserClock} label="Aktive Nutzer (7T)" value={summary.activeUsers.d7} hint="Eingeloggte Nutzer mit Aktivität" />
               <StatCard icon={FaUserClock} label="Aktive Nutzer (30T)" value={summary.activeUsers.d30} hint="Eingeloggte Nutzer mit Aktivität" />
+            </div>
+          </Card>
+
+          <Card
+            title="Echte Beteiligung (ohne Beispieldaten und interne Testkonten)"
+            hint="Nur diese Zahlen dürfen nach außen – Demo-Fixtures und eigene Testkonten sind herausgerechnet"
+          >
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <StatCard
+                icon={FaShieldAlt}
+                label="Externe Teams"
+                value={summary.platform.externeTeams.total}
+                growth={summary.platform.externeTeams.growth}
+                sub={`+${summary.platform.externeTeams.newThisMonth} diesen Monat`}
+              />
+              <StatCard
+                icon={FaUsers}
+                label="Externe Nutzer"
+                value={summary.platform.externeUsers.total}
+                growth={summary.platform.externeUsers.growth}
+                sub={`+${summary.platform.externeUsers.newThisMonth} diesen Monat`}
+              />
+              <StatCard
+                icon={FaShieldAlt}
+                label="davon nicht gezählt: Beispiel/intern"
+                value={summary.platform.teams.total - summary.platform.externeTeams.total}
+                hint="Teams mit Kennzeichnung Beispieldaten oder intern, plus noch nicht freigegebene"
+              />
+              <StatCard
+                icon={FaUsers}
+                label="Schwelle für eine öffentliche Zahl"
+                value={20}
+                hint="Nele: ab 20–25 verifizierten externen Teams, und nur wenn die Zahl sich über Wochen bewegt"
+              />
             </div>
           </Card>
 

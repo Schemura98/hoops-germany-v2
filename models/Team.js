@@ -40,6 +40,12 @@ const teamSchema = new mongoose.Schema(
     // Maschinenlesbare Demo-Kennzeichnung (additiv, analog League.isDemo). true = fiktives
     // Test-Team einer Demo-Fixture (z. B. Kreisliga-Showcase) – NIE als echter Verein behandeln.
     isDemo: { type: Boolean, default: false },
+    // Interner Testaccount: ECHT angelegt (kein Seed), aber von uns selbst zum
+    // Testen – z. B. „Test Baskets". Unterschied zu isDemo: Demo-Daten sind
+    // erfundene Fixtures, interne Konten sind reale Konten ohne echten Verein
+    // dahinter. Beides muss aus Beteiligungszahlen heraus, sonst zaehlen wir uns
+    // selbst mit (Voraussetzung fuer Neles Schwelle, docs/LANDING-COPY-2026-08-11.md §7).
+    isInternal: { type: Boolean, default: false },
     inviteToken: String,
     rosterSlots: [rosterSlotSchema],
     // Scouting / Transfermarkt (Team-Seite): Verein sucht Verstärkung.

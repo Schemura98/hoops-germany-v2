@@ -13,7 +13,7 @@ async function handler(req) {
   await connectDB();
   const players = await Player.find({})
     .select(
-      "firstName lastName email slug status isTeamAdmin isSuperAdmin teamId teamAdminOf createdAt"
+      "firstName lastName email slug status isTeamAdmin isSuperAdmin teamId teamAdminOf createdAt isDemo isInternal"
     )
     .populate("teamId", "teamName slug")
     .populate("teamAdminOf", "teamName slug")

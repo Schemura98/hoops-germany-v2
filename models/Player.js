@@ -76,6 +76,8 @@ const playerSchema = new mongoose.Schema(
     // Maschinenlesbare Demo-Kennzeichnung (additiv, analog Team.isDemo/League.isDemo).
     // true = fiktives Seed-Profil der Testphase – NIE als echter Spieler behandeln.
     isDemo: { type: Boolean, default: false },
+    // Interner Testaccount (real angelegt, aber von uns selbst) – s. Team.isInternal.
+    isInternal: { type: Boolean, default: false },
 
     transferStatus: {
       type: String,

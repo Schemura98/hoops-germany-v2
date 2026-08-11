@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { FaTrash, FaCheck, FaTimes, FaUserShield } from "react-icons/fa";
+import { FaTrash, FaCheck, FaTimes, FaUserShield, FaFlask } from "react-icons/fa";
 import AdminShell from "@/components/layout/AdminShell";
 import { getAdminToken } from "@/lib/clientAuth";
 
@@ -28,6 +28,28 @@ export default function AdminTeamsPage() {
       }
     })();
   }, [load]);
+
+  // Interner Testaccount: real angelegt, aber von uns selbst – zaehlt nicht in
+  // Beteiligungszahlen (siehe lib/echteZahlen.js).
+  async function toggleIntern(t) {
+    setBusyId(t._id);
+    try {
+      const token = getAdminToken();
+      const { data } = await axios.post("/api/admin/set-internal", {
+        token,
+        art: "team",
+        id: t._id,
+        isInternal: !t.isInternal,
+      });
+      setTeams((list) =>
+        list.map((x) => (x._id === t._id ? { ...x, isInternal: data.isInternal } : x))
+      );
+    } catch {
+      /* Fehler bleibt sichtbar durch unveraenderten Zustand */
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   async function remove(id, name) {
     if (!window.confirm(`Team „${name}" wirklich löschen?`)) return;
@@ -182,10 +204,40 @@ export default function AdminTeamsPage() {
                         in Prüfung
                       </span>
                     )}
+                    {t.isDemo && (
+                      <span className="ml-2 text-[11px] font-medium rounded-full px-2 py-0.5 bg-slate-100 text-slate-600">
+                        Beispieldaten
+                      </span>
+                    )}
+                    {t.isInternal && (
+                      <span className="ml-2 text-[11px] font-medium rounded-full px-2 py-0.5 bg-sky-100 text-sky-700">
+                        intern
+                      </span>
+                    )}
                   </td>
                   <td className="py-3 text-gray-600">{t.email}</td>
                   <td className="py-3 text-gray-600">{t.region || "—"}</td>
                   <td className="py-3 pr-4 text-right whitespace-nowrap">
+                    <button
+                      onClick={() => toggleIntern(t)}
+                      disabled={busyId === t._id}
+                      className={`p-1.5 disabled:opacity-60 ${
+                        t.isInternal ? "text-sky-600" : "text-gray-500 hover:text-sky-600"
+                      }`}
+                      title={
+                        t.isInternal
+                          ? "Interner Testaccount – aus Beteiligungszahlen ausgenommen. Klicken, um die Markierung aufzuheben."
+                          : "Als internen Testaccount markieren (zählt dann nicht in Beteiligungszahlen)"
+                      }
+                      aria-label={
+                        t.isInternal
+                          ? `${t.teamName}: Markierung als interner Testaccount aufheben`
+                          : `${t.teamName} als internen Testaccount markieren`
+                      }
+                      aria-pressed={!!t.isInternal}
+                    >
+                      <FaFlask />
+                    </button>
                     <button
                       onClick={() => openManage(t._id)}
                       className="text-gray-500 hover:text-brand-600 p-1.5"
