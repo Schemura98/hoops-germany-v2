@@ -86,11 +86,14 @@ const VISUALS = {
 
 export default function LandingFeatures() {
   return (
-    // overflow-x-hidden: Der Einblend-Versatz der Reveal-Spalten (-translate-x-6 = 24px)
-    // ist breiter als das Section-Padding (px-4 = 16px) und erzeugte sonst 8px
-    // horizontalen Ueberlauf auf Mobile, solange die Karten noch nicht eingeblendet sind
-    // (Befund Tobias 11.08.2026, Entscheid Vivien).
-    <section className="relative bg-gray-50 py-20 px-4 overflow-x-hidden">
+    // overflow-x-clip statt -hidden: Der Einblend-Versatz der Reveal-Spalten
+    // (-translate-x-6 = 24px) ist breiter als das Section-Padding (px-4 = 16px) und
+    // erzeugte sonst 8px horizontalen Ueberlauf (Befund Tobias, Entscheid Vivien).
+    // ABER: overflow-hidden macht die Section zum Scroll-Container und setzt damit
+    // jedes position:sticky darin ausser Kraft - genau daran ist die Fortschritts-
+    // Anzeige gescheitert (zweiter Befund Tobias, 12.08.2026). `clip` schneidet
+    // identisch ab, ohne einen Scroll-Container zu erzeugen.
+    <section className="relative bg-gray-50 py-20 px-4 overflow-x-clip">
       <div className="max-w-6xl mx-auto">
         <Reveal as="h2" className="text-3xl md:text-4xl font-black text-center mb-4 text-gray-900 text-balance">
           Eine Saison, sechs Spielzüge

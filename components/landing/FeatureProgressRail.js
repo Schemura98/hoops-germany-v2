@@ -84,7 +84,11 @@ export default function FeatureProgressRail({ labels = [] }) {
   }, [labels]);
 
   return (
-    <div ref={wrapRef} aria-hidden="true">
+    // display:contents - der Wrapper darf keine eigene Box bilden: Sonst ist er
+    // genauso hoch wie der Balken (das Desktop-Element daneben ist absolut
+    // positioniert), und ein sticky-Kind hat in einem Containing Block ohne
+    // Spielraum keine Strecke zum Kleben (Befund Tobias, 12.08.2026).
+    <div ref={wrapRef} aria-hidden="true" style={{ display: "contents" }}>
       {/* Mobil/Tablet: dünner Balken unter der Navbar + Kurz-Beschriftung */}
       <div className="sticky top-16 z-20 -mx-4 mb-10 bg-gray-50/90 px-4 pb-2 pt-2 backdrop-blur-sm xl:hidden">
         <p

@@ -231,7 +231,10 @@ export function MatchMock() {
 
 // Szene 4 – „Tabelle sortiert sich": Platz 1 und 2 starten vertauscht und
 // tauschen per transform die Plätze – kein DOM-Umbau, also kein Layout-Sprung.
-const TABLE_ROW_SHIFT = 36; // Zeilenhöhe (h-8 = 32px) + space-y-1 (4px)
+// In rem statt px: h-8 (2rem) + space-y-1 (0.25rem). Hart kodierte 36px sind bei
+// vergrößerter Schrift falsch - ab 150% überlappten die vertauschten Zeilen sichtbar
+// (Befund Tobias, 12.08.2026). rem wächst mit der Zeilenhöhe mit.
+const TABLE_ROW_SHIFT = "2.25rem";
 
 export function TableMock() {
   const [ref, animate, reduced] = useChoreography();
@@ -242,10 +245,10 @@ export function TableMock() {
   ];
   const sorted = animate || reduced;
   const offset = (pos) => {
-    if (sorted) return 0;
+    if (sorted) return "0px";
     if (pos === 1) return TABLE_ROW_SHIFT;
-    if (pos === 2) return -TABLE_ROW_SHIFT;
-    return 0;
+    if (pos === 2) return `-${TABLE_ROW_SHIFT}`;
+    return "0px";
   };
 
   return (
@@ -264,7 +267,7 @@ export function TableMock() {
               r.pos === 1 && sorted ? "bg-brand-50" : ""
             }`}
             style={{
-              transform: `translateY(${offset(r.pos)}px)`,
+              transform: `translateY(${offset(r.pos)})`,
               transition: reduced
                 ? "none"
                 : `transform 550ms ${EASE}, background-color 300ms ease-out 550ms`,
