@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaNewspaper, FaExternalLinkAlt } from "react-icons/fa";
 import { Skeleton } from "@/components/ui/Skeleton";
+import Reveal from "@/components/ui/Reveal";
 
 function formatDate(d) {
   try {
@@ -101,12 +102,12 @@ export default function NewsWidget({ compact = false }) {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {news.map((n, i) => (
+            <Reveal key={i} delay={i * 60} className="h-full">
             <a
-              key={i}
               href={n.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 transition-all flex flex-col"
+              className="h-full bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 transition-all flex flex-col"
             >
               <p className="font-medium text-gray-900 text-sm leading-snug line-clamp-3">
                 {n.title}
@@ -118,6 +119,7 @@ export default function NewsWidget({ compact = false }) {
                 </span>
               </div>
             </a>
+            </Reveal>
           ))}
         </div>
       )}

@@ -82,14 +82,21 @@ export default function LandingHowItWorks() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {cards.map((c, i) => {
               const Icon = c.icon;
+              // Mittlere Karte auf Navy – dieselbe Dunkel/Orange-Alternation,
+              // die die ausgeloggte Variante schon vorlebt (Entscheid Vivien).
+              const navy = i === 1;
               return (
                 <Reveal key={c.title} delay={i * 90} className="h-full">
                   <Link
                     href={c.href}
                     className="group block h-full text-center bg-gray-50 hover:bg-brand-50 border border-gray-100 hover:border-brand-200 rounded-xl p-8 transition-[transform,background-color,border-color] duration-200 ease-out-strong hover:-translate-y-1 motion-reduce:hover:translate-y-0"
                   >
-                    <div className="bg-brand-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <Icon className="text-brand-500 text-2xl" />
+                    <div
+                      className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 ${
+                        navy ? "bg-gradient-to-r from-slate-950 to-slate-800" : "bg-brand-100"
+                      }`}
+                    >
+                      <Icon className={`text-2xl ${navy ? "text-white" : "text-brand-500"}`} />
                     </div>
                     <h3 className="font-bold text-lg mb-2 text-gray-900 group-hover:text-brand-600">
                       {c.title}

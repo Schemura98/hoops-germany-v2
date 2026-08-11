@@ -345,3 +345,106 @@ zeigen und weil der eigentliche Auftrag lautet, Funktionen **verständlich** zu 
 Seite spektakulärer aussehen zu lassen. Das ist die ehrlichere, nicht die bequemere Antwort auf
 „Apple-artig" — und genau das sollte ein gutes Studio auch so vertreten, statt dem lauteren Wunsch
 kosmetisch zu folgen.
+
+---
+
+## 16. Nachtrag 11.08.2026 (nachts): Entscheidungen zum Rest der Startseite
+
+Stufen 1–3 sind gebaut und verifiziert. Auftrag war, über die **restlichen** Abschnitte hinter der
+Feature-Strecke zu entscheiden: „So funktionierts", News-Widget, CTA, plus die offene Zahlen-
+Animation (Befund 11, `docs/DESIGN-REVIEW-2026-08-10.md`) und ein Gesamtblick auf die Strecke.
+Geprüfte Dateien: `components/landing/LandingHowItWorks.js`, `components/NewsWidget.js`,
+`components/landing/LandingCTA.js`, `components/ui/CountUp.js`, `app/topscorer/page.js`,
+`app/ligen/[id]/page.js`, `app/page.js`.
+
+### 16.1 „So funktionierts" — Patricks Verbindungslinie: NEIN, mit Begründung
+
+Keine Verbindungslinie zwischen den drei Kreisen. Angewendet auf den „Restraint Test" aus der
+eigenen Recherche (Abschnitt 3): Die drei Kreise sind bereits durch Nummerierung (1-2-3) und Position
+(nebeneinander) eindeutig als Abfolge lesbar — eine sich aufziehende Linie würde keine neue
+Information liefern, nur eine bereits verstandene Reihenfolge nachträglich bebildern. Schwerer wiegt:
+Es wäre die **dritte** scroll-getriggerte Bewegung in Folge, direkt im Anschluss an sechs bereits
+elaborierte Szenen — genau die „Wiederholung derselben Geste", vor der Patrick in seiner eigenen
+vierten Frage warnt. Der Signature-Moment der Seite ist die Feature-Strecke; dieser Abschnitt darf
+ruhig sein.
+
+**Aber:** Beim Durchsehen fällt eine echte, unbeabsichtigte Wiederholung auf, die ich beheben würde
+— keine neue Bewegung, eine Farb-Korrektur:
+
+- Die **ausgeloggte** Variante (`STEPS`) alternierte schon immer bewusst dunkel/orange
+  (`s.dark ? navy-Verlauf : bg-brand-500`) — das ist bereits die richtige Zurückhaltung.
+- Die **eingeloggte** Variante (`cards`, drei personalisierte Karten) nutzt für **alle drei**
+  Icon-Kreise identisch `bg-brand-100`/`text-brand-500` — exakt dieselbe Farb- und Formgeste wie die
+  sechs Icon-Kreise der Feature-Strecke direkt darüber, ohne die Alternation der Nachbar-Variante.
+  Das ist keine Entscheidung, sondern ein Versehen (beide Varianten sollten denselben Zurückhaltungs-
+  Grad haben).
+
+  **Konkrete Korrektur:** Karte 2 (Team-Karte, mittig) bekommt den Navy-Kreis
+  (`bg-gradient-to-r from-slate-950 to-slate-800`, `text-white`) statt `bg-brand-100`/
+  `text-brand-500`; Karte 1 und 3 behalten Orange. Das spiegelt exakt das Muster, das die
+  ausgeloggte Variante schon vorlebt, und bricht die Orange-Wiederholung aus 16.4.
+
+### 16.2 News-Widget und CTA
+
+- **CTA (`LandingCTA.js`): unverändert lassen.** Sie bildet zusammen mit dem Hero den einzigen
+  Navy-Rahmen der Seite (Hero → … → CTA) — ein bereits bestehender, guter Bogen, den ich nicht
+  anfassen würde. Reveal-Stagger und Button-Microinteractions sind schon vorhanden. Nach einer
+  ereignisreichen Strecke ist ein ruhiger Schlusspunkt richtig — das ist die Ausatem-Stelle der
+  Seite, kein Ort für mehr.
+- **News-Widget (`NewsWidget.js`, volle Variante in `app/page.js`): eine kleine Konsistenz-Korrektur,
+  kein neues Muster.** Es ist aktuell der **einzige** Karten-Grid-Abschnitt der ganzen Startseite
+  ohne jedes `Reveal` — das ist keine bewusste Zurückhaltung, sondern eine Lücke (jeder andere
+  Karten-Grid hat sie: Feature-Strecke, „So funktionierts"). Korrektur: jede Karte im
+  `news.map(...)`-Grid mit `Reveal` umschließen, `delay={i * 60}` (6 Karten × 60 ms = max. 300 ms
+  Gesamt-Stagger, spürbar schneller als die 90 ms bei „So funktionierts", weil hier sechs statt drei
+  Elemente warten), `direction="up"`, exakt das Muster aus `LandingHowItWorks.js` Zeile 86.
+  Kompakte Sidebar-Variante (`compact=true`) bleibt unverändert — die sitzt im Feed, nicht auf der
+  Landingpage-Strecke.
+
+### 16.3 Zahlen-Animation (Befund 11): Podium-Grenze, mit Zahlen
+
+Ja zu `CountUp`, aber begrenzt — genau der Mittelweg, den ich beim Bauen prüfen sollte:
+
+- **Begrenzung: nur Rang 1–3 (Podium).** Ab Rang 4 steht die Zahl sofort statisch da, keine
+  `CountUp`-Instanz, kein `useInView`, kein zusätzlicher Observer.
+- **Topscorer (`app/topscorer/page.js`):** `CountUp` für `Ø` und `PKT` je Zeile, aber nur für
+  `rank <= 3` → **maximal 6 Instanzen** pro Tabelle (statt 62 bei 31 Zeilen × 2 Zahlen). `Ø` mit
+  `decimals={1}`, `PKT` mit `decimals={0}`, beide mit dem bestehenden Default (`duration=900`,
+  `threshold:0.4`) — keine neuen Parameter nötig.
+- **Rangliste/Tabelle (`app/ligen/[id]/page.js`, `standings`):** `CountUp` für S/N/Diff je Zeile,
+  gleiche Grenze `rank <= 3` → **maximal 9 Instanzen** pro Tabelle.
+- **Warum genau Podium und nicht z. B. „erste 10":** Die Rang-Einfärbung (`RANK_COLOR`) hebt heute
+  schon nur Rang 1–3 farblich hervor — die Grenze existiert im Design bereits, `CountUp` verstärkt
+  eine vorhandene Hierarchie, statt eine neue zu erfinden. Das hält die Zahl der Observer klein
+  *und* liefert eine inhaltliche Begründung, keine willkürliche Zahl.
+- Reduzierte Bewegung: identisch zum bestehenden `CountUp`-Verhalten (Endwert sofort, kein Zählen).
+
+### 16.4 Gesamtblick
+
+- **Was schon stimmt, unverändert lassen:** Der Navy-Rahmen Hero↔CTA trägt die ganze Seite als
+  einen Bogen. Die Sektions-Hintergründe alternieren bereits sauber (navy → gray-50 → white →
+  gray-50 → navy) — ein Schachbrett-Rhythmus, den ich nicht antasten würde.
+  Die Reihenfolge Reveal-Stagger-Werte (90 ms bei Karten-Trios, 150 ms bei Choreografie-Zeilen) ist
+  bereits konsistent genug, um nicht wie Zufall zu wirken.
+- **Ein echter Fund, behoben in 16.1:** die identische Orange-Kreis-Geste zwischen Feature-Strecke
+  und „So funktionierts" (eingeloggt) — direkt hintereinander, ohne Variation. Das war die
+  „Wiederholung derselben Geste", nach der gefragt wurde.
+- **Kleine Rhythmus-Abweichung:** `app/page.js` Zeile 28 setzt den News-Wrapper auf `py-16`, während
+  Features, „So funktionierts" und CTA alle `py-20` nutzen. Auf `py-20` vereinheitlichen — reine
+  Abstands-Korrektur, kein neues Element.
+- **Kein weiterer Befund.** Die Orange-Dichte durch die ganze Strecke (Feature-Icons, Progress-Rail,
+  News-Akzent, CTA-Button) bleibt nach der Korrektur in 16.1 im Rahmen, weil sie sich jetzt mit
+  Navy abwechselt statt sich zu wiederholen — kein zusätzlicher Eingriff nötig.
+
+### 16.5 Kollegen einbezogen
+
+- **Niemand neu.** Reine Layout-/Farb-/Grenzwert-Entscheidungen ohne neuen Text, keine neue Route,
+  keine neue Zielgruppen-Frage — Neles Kampagnen-Check aus Abschnitt 14 deckt das weiterhin ab.
+  Nach Umsetzung bleibt Ronjas Prüfung (Abschnitt 14, Eskalationsgrenze Szene 3) unverändert
+  zuständig für die Gesamtstrecke inkl. dieser Ergänzungen.
+
+### 16.6 Selbsttest
+
+„Würde ein gutes Designstudio das mit seinem Namen unterschreiben?" — Ja. Die auffälligste
+Entscheidung hier ist ein Nein (keine Verbindungslinie) und eine Grenze (Podium statt aller Zeilen)
+— beides bewusster Verzicht zugunsten des einen Moments, der schon trägt, statt ihn zu verwässern.

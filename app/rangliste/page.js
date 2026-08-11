@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { BUNDESLAENDER } from "@/lib/constants";
 import { inputClassSm } from "@/lib/ui";
 import ScrollTable from "@/components/ui/ScrollTable";
+import CountUp from "@/components/ui/CountUp";
 
 const selectClass = `${inputClassSm} sm:w-auto`;
 
@@ -214,11 +215,12 @@ export default function RanglistePage() {
                     <td className="text-center px-2 py-3 text-gray-600 tabular-nums">
                       {t.games}
                     </td>
+                    {/* Podium zaehlt hoch, der Rest steht sofort (Entscheid Vivien) */}
                     <td className="text-center px-2 py-3 font-semibold text-gray-900 tabular-nums">
-                      {t.wins}
+                      {i < 3 ? <CountUp value={t.wins} /> : t.wins}
                     </td>
                     <td className="text-center px-2 py-3 text-gray-500 tabular-nums">
-                      {t.losses}
+                      {i < 3 ? <CountUp value={t.losses} /> : t.losses}
                     </td>
                     <td
                       className={`text-center px-3 py-3 font-medium tabular-nums ${
@@ -229,7 +231,16 @@ export default function RanglistePage() {
                           : "text-gray-500"
                       }`}
                     >
-                      {t.diff > 0 ? `+${t.diff}` : t.diff}
+                      {i < 3 ? (
+                        <>
+                          {t.diff > 0 ? "+" : ""}
+                          <CountUp value={t.diff} />
+                        </>
+                      ) : t.diff > 0 ? (
+                        `+${t.diff}`
+                      ) : (
+                        t.diff
+                      )}
                     </td>
                   </tr>
                 ))}

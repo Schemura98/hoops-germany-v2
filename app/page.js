@@ -25,7 +25,7 @@ export default function LandingPage() {
       <LandingHowItWorks />
 
       {/* Basketball-News */}
-      <section className="bg-gray-50 py-16 px-4">
+      <section className="bg-gray-50 py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <NewsWidget />
         </div>

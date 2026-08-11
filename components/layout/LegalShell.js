@@ -65,7 +65,7 @@ export default function LegalShell({ title, eyebrow = "Rechtliches", children })
                 <li key={a.id}>
                   <a
                     href={`#${a.id}`}
-                    className="inline-block rounded-full bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-brand-50 hover:text-brand-700"
+                    className="inline-block rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-brand-50 hover:text-brand-700"
                   >
                     {a.text}
                   </a>

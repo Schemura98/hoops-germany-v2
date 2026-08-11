@@ -13,6 +13,7 @@ import { positionLabel } from "@/lib/constants";
 import { inputClassSm } from "@/lib/ui";
 import DemoBadge from "@/components/DemoBadge";
 import ScrollTable from "@/components/ui/ScrollTable";
+import CountUp from "@/components/ui/CountUp";
 
 // Tabellenzeilen-Skeleton im Format der echten Topscorer-Tabelle.
 function TopscorerSkeleton() {
@@ -151,11 +152,15 @@ export default function TopscorerPage() {
                         </div>
                       </td>
                       <td className="py-3 text-center text-gray-600">{s.games}</td>
+                      {/* Nur das Podium zaehlt hoch: verstaerkt die vorhandene
+                          Hierarchie (Rang 1-3 sind schon farblich hervorgehoben),
+                          statt 60+ Beobachter fuer die ganze Liste anzulegen
+                          (Entscheid Vivien, Design-Review Befund 11). */}
                       <td className="py-3 text-center text-gray-600">
-                        {s.ppg.toFixed(1)}
+                        {rank <= 3 ? <CountUp value={s.ppg} decimals={1} /> : s.ppg.toFixed(1)}
                       </td>
                       <td className="py-3 text-center font-semibold text-gray-900 pr-4">
-                        {s.points}
+                        {rank <= 3 ? <CountUp value={s.points} /> : s.points}
                       </td>
                     </tr>
                   );
