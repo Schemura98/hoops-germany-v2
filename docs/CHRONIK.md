@@ -1533,3 +1533,91 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > Team-Admin-Panel live durchgeklickt (alle sechs Tabs, Desktop 1400px + 375px) – alle API-Aufrufe
 > 200, keine neuen Konsolenfehler; Hero-Bogen im Browser vermessen (kreuzt den Content-Block in
 > keiner Scroll-Position). Offen aus dem Review bleiben Welle 3 und 4.
+
+---
+
+#### 📝 Nachtrag (Frieda, 11.08.2026): Zeile 373 dieses Archivs veraltet
+
+> Diese Chronik-Datei bewahrt `CLAUDE.md` Abschnitt 0 **wörtlich** zum
+> Stand 08.08.2026 (s. Kopfnotiz oben) – bestehende Einträge werden
+> bewusst nicht umgeschrieben. Daher hier ein Nachtrag statt einer
+> stillen Korrektur: Die Design-Sprache-Zeile weiter oben (Zeile 373:
+> "`login image.jpg`/`signupImage.jpg`/`registerimage.jpg` = Hero-Motive")
+> war zum Zeitpunkt der Auslagerung bereits nicht mehr korrekt.
+> `registerimage.jpg` war nur kurz im Code (Commit `0fd42d2`, 23.06.2026,
+> entfernt 38 Minuten später mit `a6ab9a5` im selben Umbau auf
+> spieler-geführte Teams) – zum 08.08.2026 längst kein aktives Hero-Motiv
+> mehr. `playerimage.jpg` war zu keinem Zeitpunkt der Git-Historie im
+> Code referenziert. Beide Dateien liegen seit 11.08.2026 archiviert in
+> `docs/asset-archive/` (Befund: `docs/ABLAGE-AUDIT-BILDER-2026-08-11.md`).
+> Die entsprechende Zeile in `CLAUDE.md` und `AGENTS.md` (dort jeweils
+> aktuell gepflegt, kein Archiv) wurde direkt korrigiert. Diese
+> Chronik-Zeile bleibt wörtlich stehen, wie es die Kopfnotiz vorsieht.
+
+---
+
+#### 🏀 Hero „Sprungball" Stufe 1, NRW-Claim, Auth-Bildoptimierung — **deployt** (11.08.2026, `0c978e0` + `9f5b04f` + `c2fcf1a`)
+> Auslöser: Patricks Auftrag, den Hero der Startseite Richtung „innovatives, Apple-artiges,
+> scroll-gesteuertes Design" zu heben — mit ausdrücklicher Korrektur der Arbeitsreihenfolge durch
+> ihn selbst („die App wird eher mobil eingesetzt und getestet, deshalb muss es mobil optimiert
+> sein"). Fünf Zuarbeiten, alle als Dokument im Repo:
+> `docs/HERO-KONZEPT-2026-08-11.md` (Vivien, v2 mobil-first, v1-Rahmen als Anhang A erhalten),
+> `docs/HERO-KAMPAGNEN-CHECK-2026-08-11.md` (Nele), `docs/HERO-ASSETS-2026-08-11.md` (Milo),
+> `docs/RECHT-HERO-CLAIM-2026-08-11.md` (Nora), `docs/EINSATZPLAN-HERO-2026-08-11.md` (Ole).
+>
+> - **Hero-Bühne (`c2fcf1a`):** neue `components/landing/HeroScrollStage.js` (ein zentraler
+>   rAF-Controller, ein `scroll`-Listener, direkte Style-Mutation) + `HeroGlyphs.js` (Ball,
+>   Korb-Emblem, Spielfeld-Bogen als reine Vektoren). Beim normalen Scrollen vertieft sich die
+>   Fläche (Navy-Tint 0→0.5, Overlay 0.65→0.72, Bogen 0→0.14) und ein Ball fällt vertikal in ein
+>   Korb-Emblem an der oberen Ecke der **primären Schaltfläche** – Zielpunkt wird zur Laufzeit am
+>   CTA-Rechteck gemessen, stimmt deshalb bei 3 (ausgeloggt) wie bei 5 (eingeloggt) Schaltflächen.
+>   **Kein Pinning, keine zusätzliche Scrollstrecke** (Hero-Höhe bleibt `calc(100vh - 4rem)`),
+>   **kein Foto-Zoom** (Vivien gestrichen: das Motiv ist 1000×652 px und wird formatfüllend ohnehin
+>   bis ~5× hochskaliert). `HeroBallArc.js` ist entfallen – der alte Gutter-Bogen geht in der neuen
+>   Ankunft auf, statt als zweite Ball-Animation danebenzulaufen. `prefers-reduced-motion`: Ball und
+>   Emblem werden gar nicht gerendert.
+>   ⚠️ Beim Bauen zweimal nachjustiert (beide Male erst durch Messung sichtbar): Der Ball kam
+>   ursprünglich erst an, **nachdem** die Schaltfläche oben aus dem Bild gescrollt war (Fix:
+>   eigener, schnellerer Ball-Fortschritt `BALL_SPAN`), und Tint/Bogen erreichten ihren Endwert erst,
+>   als der Hero fast draußen war (Fix: `PROGRESS_SPAN` 0.7 → 0.45).
+> - **Geo-Claim (`9f5b04f`):** „Deutschland" → „NRW" an 7 Stellen (Hero-Badge + Headline,
+>   `app/layout.js` Meta-/OG-Description, `/about`, `WelcomeTour.js`, Willkommensmail in
+>   `lib/emailTemplates.js`, `SponsorReportView.js`) auf Patricks Freigabe nach Noras Vorprüfung;
+>   Ausgangsbefund von Nele. Achter Fund beim Bauen: „die **deutsche** Basketball-Community" in
+>   `LandingFeatures.js` – von Noras Volltextsuche nach „Deutschland" nicht erfasst, mit korrigiert.
+>   Bewusst unverändert: Adressangaben in Impressum/Datenschutz, RSS-Suchbegriff,
+>   Nationalitäts-Platzhalter, „deutscher Breitensport" in `/about` (Nora: keine quantifizierbare
+>   Abdeckungsbehauptung).
+> - **Auth-Bilder (`0c978e0`):** `AuthShell.js` liefert das Split-Screen-Motiv als
+>   `<picture>` (AVIF → WebP → JPEG). Alle `<source>` tragen `media="(min-width:1024px)"`, der
+>   `<img>`-Fallback ist ein 1×1-Data-URI → **unter 1024 px wird gar kein Motiv geladen**
+>   (`/signup`, der QR-Landepunkt: 277 KB → 0 KB; Desktop 277 → 135 KB, `/login` 74 → 25 KB).
+>   Bewusst **ohne** `loading="lazy"`, damit der Bildaufbau am Desktop nicht verzögert wird.
+>   Varianten von Milo erzeugt, native Auflösung, Originale unverändert.
+>
+> **Deploy-Gate (erstmals in der neuen Besetzung):** Kai (`test-automatisierung`) – Security-Review
+> ohne Befund, Code-Review aller sechs Risikopunkte sauber (Listener-/rAF-Cleanup, zwei Layout-Reads
+> vor allen Writes, kein Hydration-Mismatch, `ctaRef`-Nullfall defensiv), Suite 8/8. Tobias
+> (`qa-reviewer`, seit heute global verfügbar) – unabhängiges Browser-Gate mobil zuerst: Ankunft
+> sichtbar, Emblem nie über einer Beschriftung (0 Treffer im automatischen Overlap-Check), Button
+> während der Animation klickbar, Rückwärts-Scroll bitidentisch, Fling/Rotation/Reload sauber,
+> reduced-motion korrekt, 4×-CPU-Drosselung ohne Frame über 32 ms, `/signup` mobil ohne jede
+> Bildanfrage, keine Konsolen-/Netzwerkfehler.
+>
+> **Verifikation vor und nach dem Deploy:** `npm run build` grün, Playwright 8/8, Production-Runtime
+> (`npm start`) gegengeprüft – identische Werte wie im Dev-Modus. Nach `pm2 restart hoops-v2`:
+> `https://hoopsgermany.de` → 200, „Amateur-Basketball in NRW" 3× im ausgelieferten HTML,
+> Meta-Description korrekt, Ball/Emblem am Live-System vermessen (Ankunft bei Scroll 300, Schaltfläche
+> dabei bei y 269 im Bild), `/signup` mobil ohne Bildanfrage / Desktop genau `signup-image-1000.avif`,
+> keine Konsolenfehler.
+>
+> ⚠️ **Messfalle dokumentiert:** Ist die Browser-Vorschaufläche ausgeblendet, meldet das Dokument
+> `hidden`, es laufen **keine** rAF-Frames und Screenshots schlagen fehl – Scroll-Messungen liefern
+> dort eingefrorene Werte und täuschen einen Fehler vor. Ausweg: Playwright gegen echtes Chromium
+> (`tmp/hero-preview.mjs` als Muster, aus `tmp/` heraus, nicht in `tests/`).
+>
+> **Offen:** Stufe 2 (Desktop-Ausbaustufe mit Pin/140vh/drei Szenen, Konzept liegt vor),
+> Viviens Entscheidung zur Ballspur bei 430 px (Ball kreuzt dort kurz den Fließtext – er liegt
+> hinter dem Text, reine Gestaltungsfrage, Tobias: kein Blocker), Test auf echtem Low-End-Android,
+> sowie ein **vorbestehender** 8-px-Horizontalüberlauf auf Mobile aus dem `-translate-x-6`-Startversatz
+> in `components/ui/Reveal.js` (Feature-Karten) – nachweislich nicht Teil dieses Diffs.

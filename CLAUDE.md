@@ -3,7 +3,7 @@
 
 ---
 
-## 0. AKTUELLER STAND (Überblick · Stand 08.08.2026)
+## 0. AKTUELLER STAND (Überblick · Stand 11.08.2026)
 
 > 🟢 **v2 IST LIVE auf https://hoopsgermany.de** (seit 24.06.2026). Hostinger-VPS `92.113.25.249`
 > (Ubuntu 24.04), Code in `/root/hoops-v2` (Branch **`redesign`**), PM2-Prozess **`hoops-v2` auf Port 3001**,
@@ -11,6 +11,7 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
+> **Zuletzt deployt: `c2fcf1a` (11.08.2026)** – Hero-Bühne Stufe 1, NRW-Claim, Auth-Bildoptimierung.
 >
 > 📜 **Vollständige Meilenstein-Chronik mit Commit-Hashes: `docs/CHRONIK.md`** (am 08.08.2026 wörtlich und
 > verlustfrei aus diesem Abschnitt ausgelagert – dort stehen ALLE datierten Protokolle seit dem Go-Live).
@@ -83,6 +84,16 @@
 > (`~/.claude/agents/retention-analystin.md`) die Hypothesen H1–H7 der Analyse am Live-Produkt
 > (Nutzerbrille, ehrliche Retention-Hebel, keine Dark Patterns); ihre Befunde gehen an Mats zurück.
 > Beide sind Vorschlags-Instanzen — kein Gate, Priorisierung entscheiden Patrick & Jonatan.
+>
+> 📌 **KONVENTION (verbindlich): Vor jedem Deploy zwei Gates.** `npm run build` + Playwright
+> (`npx playwright test -c tests/e2e/playwright.config.mjs`) und die Production-Runtime (`npm start`,
+> nicht nur `next dev`) — danach **Kai** (`test-automatisierung`, Skills `security-review` + `review`
+> auf `git diff origin/redesign..HEAD`) und für nutzersichtbare Änderungen **Tobias**
+> (`qa-reviewer`, global unter `~/.claude/agents/`) als unabhängiges Browser-Gate, **mobil zuerst**.
+> ⚠️ Vor Testläufen prüfen, ob ein fremder Dev-Server auf Port 3000 hängt; `npm run build` nie
+> parallel dazu. ⚠️ Ist die Browser-Vorschaufläche ausgeblendet, laufen **keine** rAF-Frames
+> (`document.hidden`) — Scroll-/Animationsmessungen dort sind eingefroren und täuschen Fehler vor;
+> dann Playwright gegen echtes Chromium nutzen (Muster: `tmp/hero-preview.mjs`).
 
 ### Architektur-Konventionen (etabliert, bitte beibehalten)
 - **lib/**: `db.js`, `auth.js`, `serverAuth.js` (`getPlayerFromToken`, `getTeamFromToken`=Dual-Auth, `getAdminFromToken`), `clientAuth.js`, `apiResponse.js` (`ok`/`fail`/`withErrorHandling`), `slug.js`, `matchScore.js`, `timeAgo.js`, `constants.js`, `useCurrentPlayer/Team/Admin.js`.
@@ -92,13 +103,16 @@
   `/team/create` → wird Admin (`adminPlayerId`, `isTeamAdmin`, `teamAdminOf`, eigenes `teamId`).
   Verwaltung von `/team/admin` läuft über den **Spieler-Token** (Dual-Auth). `/team/login` &
   `/team/register` sind nur noch Redirects. `Team.email` ist optional (sparse).
-- **Design-Sprache (Redesign):** helle Seiten (`gray-50`) + **Navy-Flächen** (`bg-gradient-to-r from-slate-950 to-slate-800`) + Orange-Akzente (`brand-*`, `brand-500=#f97316`) + `font-black`-Headlines + Inter. Echte Assets in `public/images/` (`logo.svg` = weiße Wortmarke für Navy-Navbar; `logo-hoops.svg` = dunkel für helle Auth-Seiten; `login image.jpg`/`signupImage.jpg`/`registerimage.jpg` = Hero-Motive).
+- **Design-Sprache (Redesign):** helle Seiten (`gray-50`) + **Navy-Flächen** (`bg-gradient-to-r from-slate-950 to-slate-800`) + Orange-Akzente (`brand-*`, `brand-500=#f97316`) + `font-black`-Headlines + Inter. Echte Assets in `public/images/` (`logo.svg` = weiße Wortmarke für Navy-Navbar; `logo-hoops.svg` = dunkel für helle Auth-Seiten; `login image.jpg`/`signupImage.jpg` = Hero-Motive, jeweils mit AVIF/WebP-Varianten `login-image-1000.*`/`signup-image-1000.*` über `AuthShell.js`). `registerimage.jpg`/`playerimage.jpg` waren nie bzw. nicht mehr im Einsatz (`/team/register` ist nur Redirect) und liegen seit 11.08.2026 archiviert in `docs/asset-archive/` (Befund: `docs/ABLAGE-AUDIT-BILDER-2026-08-11.md`). Namenskonvention für neue Bild-Varianten: `docs/NAMENSKONVENTION-BILDER.md` (Kebab-Case, `<basis>-<lange-Kante>.<format>`).
 - **Wiederverwendbare Redesign-Bausteine:** `components/layout/AuthShell.js` (Split-Screen Auth),
   `components/layout/PageHeader.js` (Navy-Banner für Listen), `components/Avatar.js`
   (generiertes Initialen-Logo mit deterministischer Namensfarbe – Fallback für Spieler & Teams, überall),
   `components/player/PlayerProfileView.js` (komplettes Spieler-Profil), `components/CityInput.js`
   (Stadt-Typeahead), `components/CityRadiusFilter.js` (Umkreis-Filter), `components/layout/Navbar.js`
-  (öffentlich, login-bewusst).
+  (öffentlich, login-bewusst), `components/landing/HeroScrollStage.js` (scroll-gesteuerte Hero-Bühne
+  „Sprungball": ein rAF-Controller für alle Deko-Ebenen, Ziel wird zur Laufzeit am CTA-Rechteck
+  gemessen, kein Pinning, `prefers-reduced-motion` rendert Ball/Emblem gar nicht) mit
+  `components/landing/HeroGlyphs.js` (Ball, Korb-Emblem, Spielfeld-Bogen als reine Vektoren).
 - **Designsystem-Primitive (`components/ui/`):** `Button` (Varianten primary/secondary/ghost/danger/
   dangerGhost + Größen sm/md/lg, `href`→Link), `Tabs` (einheitlicher Pill-Umschalter), `Card`, `EmptyState`,
   `Loading` (Basketball-Spinner), `Skeleton`/`SkeletonCard`/`SkeletonList`, `FormAlert`
@@ -175,8 +189,15 @@
     optional `CountUp`/`Reveal` auf den öffentlichen Seiten) und **Welle 4** (LegalShell-Zeilenlänge,
     Sprungnavigation Datenschutz – nur Gestaltung, Text gehört Nora –, oauth-landing-Fehlerzustand,
     FeedbackButton-Position auf Formularseiten).
-11. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
-12. **Optional / bewusst offen:** Best-of-Serien + echte Playoff-Bracket-Grafik; Status-basierte
+11. **Hero „Sprungball" Stufe 2 (Desktop-Ausbaustufe):** Konzept liegt fertig vor
+    (`docs/HERO-KONZEPT-2026-08-11.md`: gepinnte Bühne, 140vh, drei Szenen, dasselbe Korb-Emblem als
+    Finale). Stufe 1 (mobile Grundfassung) ist live. Zusätzlich offen: Viviens Entscheidung zur
+    Ballspur bei 430 px (Ball kreuzt dort kurz den Fließtext – liegt hinter dem Text, reine
+    Gestaltungsfrage), Test auf echtem Low-End-Android, und ein **vorbestehender** 8-px-Horizontal-
+    überlauf auf Mobile aus dem `-translate-x-6`-Startversatz in `components/ui/Reveal.js`
+    (Feature-Karten der Startseite) – nicht durch die Hero-Bühne verursacht.
+12. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
+13. **Optional / bewusst offen:** Best-of-Serien + echte Playoff-Bracket-Grafik; Status-basierte
     Tabellen-Exklusion; Stat-Filter Hauptrunde/Playoffs/Gesamt; stabiler `leagueKey`; Benachrichtigung bei
     Team-Follow; sharp-Resize für gespeicherte Upload-JPEGs; Super-Admin-Tabellen auf `<Loading>`/`EmptyState`;
     Folge-Vorschläge nur für neue User; TransferEvents bleiben nach Team-Löschung als Historie (Design);
