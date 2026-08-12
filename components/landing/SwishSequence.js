@@ -125,8 +125,31 @@ export default function SwishSequence({ className = "" }) {
       tickingRef.current = false;
       const r = wrap.getBoundingClientRect();
       const hoehe = window.innerHeight;
-      // 0 = Abschnitt betritt das Bild von unten, 1 = er verlässt es oben.
-      const t = Math.min(1, Math.max(0, (hoehe - r.top) / (hoehe + r.height)));
+      const scrollY = window.scrollY;
+
+      // Die erste Fassung rechnete 0 = Abschnitt betritt das Bild von unten,
+      // 1 = er verlaesst es oben. Das setzt voraus, dass der Abschnitt auch
+      // wirklich oben hinausgescrollt werden KANN – hier sitzt er aber ganz am
+      // Seitenende. Beim maximal moeglichen Scrollstand kam die Formel nur auf
+      // t ≈ 0,55, also Bild 24 von 45: Der Ball ging nie in den Korb.
+      // Der beworbene Moment war fuer niemanden erreichbar (Befund Tobias,
+      // 12.08.2026) – ein Effekt, der seinen Zweck nie einloest.
+      //
+      // Jetzt wird das Ende auf das gedeckelt, was die Seite ueberhaupt
+      // hergibt: Ist der natuerliche Endpunkt nicht erreichbar, endet die
+      // Strecke am letzten moeglichen Scrollstand. Damit ist Bild 45 immer
+      // genau dann erreicht, wenn man unten angekommen ist.
+      const obenAbsolut = r.top + scrollY;
+      const start = obenAbsolut - hoehe;
+      const natuerlichesEnde = obenAbsolut + r.height;
+      const maxScroll = Math.max(
+        0,
+        document.documentElement.scrollHeight - hoehe
+      );
+      const ende = Math.min(natuerlichesEnde, maxScroll);
+      const spanne = Math.max(1, ende - start);
+
+      const t = Math.min(1, Math.max(0, (scrollY - start) / spanne));
       const index = Math.min(ANZAHL - 1, Math.floor(t * ANZAHL));
       if (index !== letztesRef.current) zeichne(index);
     };

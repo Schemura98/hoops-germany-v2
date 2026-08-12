@@ -15,9 +15,11 @@ import { RailBallGlyph, HoopEmblem } from "@/components/landing/HeroGlyphs";
 // den Ball, der im Hero zur Ruhe gekommen ist: Er reitet den Fortschritt mit
 // (Mobil: Balkenspitze, Desktop: zwischen den Punkten interpoliert) und landet
 // einmalig am Ende – ein Korb-Emblem (`HoopEmblem`, bisher an der Hero-CTA)
-// wartet dort. "Einmalig" ist wörtlich gemeint: Nach der Ankunft frieren Ball
-// und Ziel ein (`arrivedRef`) und reagieren nicht mehr auf weiteres Scrollen –
-// kein Zurückspringen, kein zweites Abspielen beim Zurückscrollen.
+// wartet dort. "Einmalig" bezieht sich auf die LANDE-ANIMATION samt Farbblitz,
+// nicht auf die Position: Beim Zurückscrollen folgt der Ball wieder dem
+// Fortschritt. Die erste Fassung fror ihn dauerhaft ein, während Balken und
+// Beschriftung weiterliefen – der Balken stand dann bei 32 %, der Ball klebte
+// ganz rechts (Befund Tobias, 12.08.2026).
 //
 // Technik wie in HeroScrollStage.js: EIN Scroll-Listener für die ganze Sektion
 // (nicht pro Karte), ein rAF-Tick, direkte Style-Mutation ohne Re-Render. Der
@@ -142,7 +144,15 @@ export default function FeatureProgressRail({ labels = [] }) {
       // Läuft bewusst NICHT hinter dem obigen "index geändert?"-Guard, weil die
       // Ball-Position stetig ist (jeder Frame zählt), waehrend Label/Punkte nur
       // bei einem Szenenwechsel neu geschrieben werden muessen.
-      if (reduced || arrivedRef.current) return;
+      // Beim Zurueckscrollen folgt der Ball wieder dem Fortschritt. Die erste
+      // Fassung fror ihn nach der Ankunft dauerhaft ein ("kein Zurueckspringen")
+      // – Balken und Beschriftung liefen aber weiter mit. Ergebnis: Der Balken
+      // stand bei 32 %, der Ball klebte ganz rechts. Fuer den Nutzer sieht das
+      // aus wie ein Darstellungsfehler, und es beschaedigt genau das Vertrauen
+      // in die Anzeige, die es aufbauen soll (Befund Tobias, 12.08.2026).
+      // Einmalig bleibt jetzt nur noch, was einmalig sein soll: die
+      // Lande-Animation samt Farbblitz.
+      if (reduced) return;
 
       // Mobil: Spitze des sich fuellenden Balkens – dieselbe Zahl t, die auch
       // den Balken fuellt, damit beide immer exakt uebereinstimmen.
@@ -184,8 +194,11 @@ export default function FeatureProgressRail({ labels = [] }) {
       // friert danach ein – kein Zurueckspringen, kein zweites Abspielen beim
       // Zurueckscrollen (Konzept Abschnitt 3, "kein Deko-Loop").
       if (t >= ARRIVE_T) {
+        // `arrivedRef` steuert nur noch, ob die Lande-Animation schon lief –
+        // nicht mehr, ob der Ball dem Fortschritt folgt.
+        const erstmalig = !arrivedRef.current;
         arrivedRef.current = true;
-        ballZielSetzen(true);
+        ballZielSetzen(erstmalig);
       }
     };
 
@@ -196,15 +209,14 @@ export default function FeatureProgressRail({ labels = [] }) {
       raf = requestAnimationFrame(apply);
     };
 
-    // Nach der Ankunft ueberspringt `apply` den ganzen Positions-Block – sonst
-    // wuerde der Ball weiterwandern. Bei einer Groessenaenderung ist genau das
-    // aber falsch: Das Korb-Emblem ist ein normales Flex-Kind und rueckt mit,
-    // der Ball steht dagegen auf einem transform, das an den Rechtecken von
-    // damals berechnet wurde – er stuende dann sichtbar NEBEN dem Ziel
-    // (Befund Kai, 12.08.2026). Deshalb hier neu einrasten, ohne Animation und
-    // ohne die Ankunft zurueckzunehmen.
+    // Bei reduzierter Bewegung rechnet `apply` gar nicht erst – der Ball steht
+    // fest am Ziel. Aendert sich die Fensterbreite, wandert das Korb-Emblem als
+    // normales Flex-Kind mit, der Ball bliebe aber auf seinem alten transform
+    // stehen und stuende sichtbar DANEBEN (Befund Kai, 12.08.2026). Deshalb
+    // dort neu einrasten. Im bewegten Fall erledigt das `apply` selbst, seit
+    // der Ball dem Fortschritt wieder folgt.
     const beiGroessenaenderung = () => {
-      if (arrivedRef.current) ballZielSetzen(false);
+      if (reduced) ballZielSetzen(false);
       onScrollOrResize();
     };
 
