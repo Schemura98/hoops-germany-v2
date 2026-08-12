@@ -3,11 +3,18 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { PiBasketballBold, PiMapPinBold, PiStarFill, PiUsersBold } from "react-icons/pi";
+import {
+  PiBasketballBold,
+  PiCheckCircleBold,
+  PiMapPinBold,
+  PiStarFill,
+  PiUsersBold,
+} from "react-icons/pi";
 import Navbar from "@/components/layout/Navbar";
 import Loading from "@/components/ui/Loading";
 import Footer from "@/components/layout/Footer";
 import Avatar from "@/components/Avatar";
+import SplitFlap from "@/components/ui/SplitFlap";
 import { teamScores, matchVerification } from "@/lib/matchScore";
 
 function formatDate(d) {
@@ -151,6 +158,11 @@ export default function MatchIdPage({ params }) {
 
   const score = teamScores(match);
   const completed = match.status === "completed";
+  // Die Doppelbestätigung ist der Vertrauensunterschied der Plattform: Beide
+  // Teams haben unabhängig gemeldet und es stimmte überein. Genau dieser
+  // Zustandswechsel bekommt den Anzeigetafel-Moment – nicht jedes beliebige
+  // eingetragene Ergebnis.
+  const bestaetigt = match.resultStatus === "confirmed";
   const verify = matchVerification(match);
   const statsA = (match.playerStats || []).filter(
     (s) => String(s.team) === String(match.teamA?._id)
@@ -187,14 +199,24 @@ export default function MatchIdPage({ params }) {
             <TeamBadge team={match.teamA} />
             <div className="text-center px-2 pt-3">
               {score ? (
-                <div className="text-4xl font-black whitespace-nowrap">
-                  <span className={score.a >= score.b ? "text-paper-50" : "text-mist-400"}>
-                    {score.a}
-                  </span>
-                  <span className="text-mist-400 mx-1">:</span>
-                  <span className={score.b >= score.a ? "text-paper-50" : "text-mist-400"}>
-                    {score.b}
-                  </span>
+                // Anzeigetafel: Monospace mit Tabellenziffern, damit der Doppelpunkt
+                // nicht wandert, und die 2px-Markenleiste als Unterkante – die
+                // dritte und letzte Stelle, an der dieses Signaturelement steht.
+                // Der aeussere Block erzwingt den Zeilenumbruch: Ohne ihn stand
+                // die inline-block-Anzeigetafel auf 390px in derselben Zeile wie
+                // das Status-Etikett und quetschte die Teamnamen auf "Esse…".
+                <div>
+                <div className="inline-block border-b-2 border-brand-500 pb-1">
+                  <div className="font-mono tabular-nums text-4xl sm:text-5xl font-bold whitespace-nowrap">
+                    <SplitFlap delay={0} className={score.a >= score.b ? "text-paper-50" : "text-mist-400"}>
+                      {score.a}
+                    </SplitFlap>
+                    <span className="text-mist-600 mx-1.5">:</span>
+                    <SplitFlap delay={140} className={score.b >= score.a ? "text-paper-50" : "text-mist-400"}>
+                      {score.b}
+                    </SplitFlap>
+                  </div>
+                </div>
                 </div>
               ) : (
                 <div className="text-xl font-semibold text-mist-400 pt-3">vs</div>
@@ -208,6 +230,12 @@ export default function MatchIdPage({ params }) {
               >
                 {completed ? "Beendet" : "Geplant"}
               </span>
+              {bestaetigt && (
+                <p className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-mist-400">
+                  <PiCheckCircleBold className="text-signal-ok" />
+                  Von beiden Teams bestätigt
+                </p>
+              )}
             </div>
             <TeamBadge team={match.teamB} />
           </div>

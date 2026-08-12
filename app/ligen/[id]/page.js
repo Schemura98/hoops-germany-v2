@@ -10,6 +10,7 @@ import DemoBadge from "@/components/DemoBadge";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { getStoredPlayer } from "@/lib/clientAuth";
 
 // Tabellen-Skeleton im Format der echten Standings-Tabelle, damit Navbar/PageHeader
 // beim Laden stehen bleiben (kein Layout-Sprung beim Wechsel auf den echten Inhalt).
@@ -36,6 +37,17 @@ export default function LigaDetailPage({ params }) {
   const id = params.id;
   const [data, setData] = useState(null);
   const [state, setState] = useState("loading"); // loading | ready | notfound
+  // Eigenes Team, um die eigene Zeile hervorzuheben. Bewusst aus dem
+  // localStorage statt per API: Die Seite ist öffentlich und soll für
+  // Ausgeloggte keine zusätzliche Anfrage auslösen. Ist nichts gespeichert,
+  // sieht die Tabelle exakt aus wie bisher.
+  const [eigenesTeam, setEigenesTeam] = useState(null);
+
+  useEffect(() => {
+    const p = getStoredPlayer();
+    const t = p?.teamId?._id || p?.teamId || p?.team?._id || null;
+    if (t) setEigenesTeam(String(t));
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -140,10 +152,19 @@ export default function LigaDetailPage({ params }) {
                 </tr>
               </thead>
               <tbody>
-                {standings.map((s, i) => (
+                {standings.map((s, i) => {
+                  // Die zweite der drei Stellen, an denen die Anzeigetafel-Leiste
+                  // steht: die EINE hervorgehobene Zeile einer Liste. „Mein Team
+                  // in der Tabelle" ist der wiederkehrende Moment, den Ronja als
+                  // stärkeren Hebel als die Startseite benannt hat – und es ist
+                  // kein Dark Pattern, weil es nur eine Tatsache sichtbar macht.
+                  const eigene = eigenesTeam && String(s.teamId) === eigenesTeam;
+                  return (
                   <tr
                     key={s.teamId}
-                    className="bg-navy-800 border-b border-navy-600 last:border-0 hover:bg-navy-700"
+                    className={`border-b border-navy-600 last:border-0 hover:bg-navy-700 ${
+                      eigene ? "bg-navy-700 shadow-[inset_0_2px_0_0_#F07A27]" : "bg-navy-800"
+                    }`}
                   >
                     <td className="sticky left-0 z-10 bg-inherit py-3 pl-4 w-12 font-semibold text-mist-400">
                       {championId && String(s.teamId) === championId ? (
@@ -180,7 +201,8 @@ export default function LigaDetailPage({ params }) {
                       {s.diff > 0 ? `+${s.diff}` : s.diff}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </ScrollTable>

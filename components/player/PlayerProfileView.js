@@ -365,12 +365,28 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                 </p>
               ) : (
                 <>
-                  <p className="text-sm text-mist-400 mb-4">
-                    <strong className="text-paper-50">{bilanz.games}</strong> Spiele ·{" "}
-                    <strong className="text-paper-50">{bilanz.points}</strong> Punkte ·{" "}
-                    <strong className="text-paper-50">{bilanz.assists}</strong> Assists ·{" "}
-                    <strong className="text-paper-50">{bilanz.rebounds}</strong> Rebounds
-                  </p>
+                  {/* Karriere-Summen als Anzeigetafel statt als Fließtext-Zeile:
+                      Das sind die Zahlen, für die ein Spieler wiederkommt
+                      (Bedarf 1 der Bedarfsanalyse, von Ronja am gebauten Produkt
+                      bestätigt). Sie zählen hoch, sobald sie ins Bild kommen –
+                      und zwar mit echten Werten, nicht mit Platzhaltern. */}
+                  <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {[
+                      { v: bilanz.games, l: "Spiele" },
+                      { v: bilanz.points, l: "Punkte" },
+                      { v: bilanz.assists, l: "Assists" },
+                      { v: bilanz.rebounds, l: "Rebounds" },
+                    ].map((x) => (
+                      <div key={x.l} className="border-b-2 border-navy-600 pb-1.5">
+                        <p className="font-mono text-2xl font-bold tabular-nums text-paper-50">
+                          <CountUp value={x.v} />
+                        </p>
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-mist-600">
+                          {x.l}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                   <div className="grid grid-cols-3 gap-3">
                     {[
                       { v: bilanz.ppg, l: "PPG", s: "Punkte/Spiel" },
@@ -378,7 +394,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                       { v: bilanz.rpg, l: "RPG", s: "Rebounds/Spiel" },
                     ].map((x) => (
                       <div key={x.l} className="bg-navy-950 rounded-md py-4 text-center">
-                        <p className="text-3xl font-black text-paper-50">
+                        <p className="font-mono text-3xl font-bold tabular-nums text-paper-50">
                           <CountUp value={x.v} decimals={1} />
                         </p>
                         <p className="text-xs font-bold text-brand-400 mt-1">{x.l}</p>
