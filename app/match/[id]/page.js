@@ -159,10 +159,23 @@ export default function MatchIdPage({ params }) {
   const score = teamScores(match);
   const completed = match.status === "completed";
   // Die Doppelbestätigung ist der Vertrauensunterschied der Plattform: Beide
-  // Teams haben unabhängig gemeldet und es stimmte überein. Genau dieser
-  // Zustandswechsel bekommt den Anzeigetafel-Moment – nicht jedes beliebige
-  // eingetragene Ergebnis.
-  const bestaetigt = match.resultStatus === "confirmed";
+  // Teams haben unabhängig gemeldet und es stimmte überein.
+  //
+  // `resultStatus === "confirmed"` allein reicht dafür NICHT als Beleg: Trägt
+  // ein Super-Admin ein Ergebnis über /admin/update-match ein (Standardfall bei
+  // Mismatch-Auflösung oder fehlender Rückmeldung), setzt die API beide
+  // teamXResult-Objekte aus derselben Eingabe und `confirmed` obendrauf –
+  // gemeldet hat dann aber nur eine Partei. Der Satz "Von beiden Teams
+  // bestätigt" wäre in dem Fall schlicht falsch, und eine falsche
+  // Vertrauensaussage ist an dieser Stelle der teuerste denkbare Fehler
+  // (Befund Kai, 12.08.2026).
+  //
+  // `submittedBy` ist das belastbare Merkmal: Es wird ausschließlich im echten
+  // Meldeweg gesetzt (app/api/team/submit-match-result), nie im Admin-Pfad.
+  const bestaetigt =
+    match.resultStatus === "confirmed" &&
+    !!match.teamAResult?.submittedBy &&
+    !!match.teamBResult?.submittedBy;
   const verify = matchVerification(match);
   const statsA = (match.playerStats || []).filter(
     (s) => String(s.team) === String(match.teamA?._id)
@@ -230,15 +243,19 @@ export default function MatchIdPage({ params }) {
               >
                 {completed ? "Beendet" : "Geplant"}
               </span>
-              {bestaetigt && (
-                <p className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-mist-400">
-                  <PiCheckCircleBold className="text-signal-ok" />
-                  Von beiden Teams bestätigt
-                </p>
-              )}
             </div>
             <TeamBadge team={match.teamB} />
           </div>
+
+          {/* Bewusst UNTER der Teamzeile, nicht in der Mittelspalte: Dort machte
+              der Satz die Spalte so breit, dass die Teamnamen auf 390px zu
+              "Essen En…" abgeschnitten wurden. */}
+          {bestaetigt && (
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-mist-400">
+              <PiCheckCircleBold className="text-signal-ok" />
+              Von beiden Teams bestätigt
+            </p>
+          )}
 
           <div className="mt-6 flex flex-col items-center gap-1 text-sm text-mist-400">
             <span>{formatDate(match.date)}</span>

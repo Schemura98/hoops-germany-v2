@@ -9,6 +9,17 @@ keine neuen npm-Abhängigkeiten, `prefers-reduced-motion`, mobil zuerst).
 
 ---
 
+> ⚠️ **ÜBERHOLT IN EINEM PUNKT (Nachtrag 12.08.2026): Der Grundton ist Navy, nicht warmes Braun.**
+> Patrick hat nach dem Bau entschieden: „meiner Meinung nach war Navy Blau und Orange auch passend
+> dafür." Damit gilt die `ink`-Palette in diesem Dokument **nicht mehr**. Sie heißt im Code `navy-*`
+> und trägt nachtblaue Werte (950 `#0B1220`, 900 `#111A2E`, 800 `#182543`, 700 `#223058`,
+> 600 `#3D5080`, 500 `#56699B`); `paper-50` ist `#F5F7FA`, `mist-400` `#A9B4C9`, `mist-600` `#78839C`.
+> Gerechnete Kontraste und Begründung stehen in `docs/WOW-KONZEPT-2026-08-12.md` Abschnitt 0.
+> **Alles Übrige dieses Dokuments gilt unverändert** – Stufung der Flächen, 1px-Haarlinie statt
+> Schatten, Radien 6/10/16, die 2px-Markenleiste an genau drei Stellen, Schriften, Icon-Wechsel,
+> Primärbutton mit dunklem Text auf Orange. Viviens fachliche Gegenrede zu Navy (naheliegend, und
+> naheliegend kippe leicht ins Generische) steht im Wow-Konzept und wurde bewusst überstimmt.
+
 ## 0. Kurzfassung
 
 Was heute da ist, ist technisch sauber und inhaltlich ehrlich – aber visuell

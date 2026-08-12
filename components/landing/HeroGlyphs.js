@@ -8,30 +8,6 @@ import { forwardRef } from "react";
 // HeroScrollStage.js über die weitergereichte ref. Ball- und Korb-Motiv sind aus
 // dem bisherigen HeroBallArc.js übernommen (gleiche Nähte, gleiches Netz-Raster).
 
-// Drei-Punkte-Linie als Hintergrund-Motiv. Liegt am unteren Rand der Bühne und
-// ist bewusst breiter als der Viewport, damit die Bögen an den Seiten auslaufen.
-export const CourtArc = forwardRef(function CourtArc(props, ref) {
-  return (
-    <svg
-      ref={ref}
-      aria-hidden="true"
-      viewBox="0 0 400 200"
-      fill="none"
-      preserveAspectRatio="xMidYMax meet"
-      className="pointer-events-none absolute bottom-0 left-1/2 w-[150%] max-w-none -translate-x-1/2 opacity-0"
-      {...props}
-    >
-      <path
-        d="M24 200 L24 132 A176 176 0 0 0 376 132 L376 200"
-        stroke="#F07A27"
-        strokeWidth="2"
-        strokeLinecap="round"
-        vectorEffect="non-scaling-stroke"
-      />
-    </svg>
-  );
-});
-
 // Ball – fällt scroll-synchron zur Registrieren-Schaltfläche.
 export const BallGlyph = forwardRef(function BallGlyph(props, ref) {
   return (

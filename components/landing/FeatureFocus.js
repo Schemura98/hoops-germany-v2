@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Maßstabssprung auf der Feature-Strecke (Konzept
 // docs/WOW-KONZEPT-2026-08-12.md, Stufe A.3).
@@ -28,6 +28,19 @@ const REICHWEITE = 0.55;
 export default function FeatureFocus({ className = "", children }) {
   const wrapRef = useRef(null);
   const tickingRef = useRef(false);
+  // Nicht nur einmal beim Aufsetzen abfragen: Wer die Systemeinstellung
+  // während des Besuchs umstellt, soll den Effekt sofort los sein. Der Zustand
+  // hängt am Effekt, damit dieser sauber neu aufgesetzt wird (Befund Kai;
+  // HeroScrollStage macht es bereits so, FeatureFocus war die Ausnahme).
+  const [ruhig, setRuhig] = useState(false);
+
+  useEffect(() => {
+    const abfrage = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setRuhig(abfrage.matches);
+    update();
+    abfrage.addEventListener("change", update);
+    return () => abfrage.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -35,8 +48,10 @@ export default function FeatureFocus({ className = "", children }) {
 
     // Reduzierte Bewegung: alles bleibt gleichwertig und voll sichtbar. Ein
     // gedämpfter Nachbar wäre hier kein „ruhiger Zustand", sondern ein
-    // dauerhaft schlechter lesbarer Text.
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // dauerhaft schlechter lesbarer Text. Beim Umschalten von „an" auf „aus"
+    // hat die Aufräumung des vorigen Durchlaufs die Stile bereits
+    // zurückgegeben – deshalb genügt hier der frühe Ausstieg.
+    if (ruhig) return;
 
     const zeilen = Array.from(wrap.children);
     zeilen.forEach((el) => {
@@ -82,7 +97,7 @@ export default function FeatureFocus({ className = "", children }) {
         el.style.transition = "";
       });
     };
-  }, []);
+  }, [ruhig]);
 
   return (
     <div ref={wrapRef} className={className}>

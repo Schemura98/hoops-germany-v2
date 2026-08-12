@@ -1,5 +1,5 @@
 // Einheitliche Karte („Panel" der Richtung Anzeigetafel): navy-800-Fläche auf
-// ink-950-Grund, 1px Rahmen in navy-600, kein Schatten. Tiefe entsteht durch die
+// navy-950-Grund, 1px Rahmen in navy-600, kein Schatten. Tiefe entsteht durch die
 // Flächenstufe, nicht durch Weichzeichnung – Schatten auf dunklem Grund sind
 // ohnehin unsichtbar und kosten nur Rendering.
 // padding: Tailwind-Padding-Klasse (Default p-5).
