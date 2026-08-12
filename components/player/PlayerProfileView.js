@@ -360,9 +360,21 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
               }
             >
               {bilanz.games === 0 ? (
-                <p className="text-sm text-mist-400">
-                  {season ? "Keine Spiele in dieser Saison." : "Noch keine Spiele erfasst."}
-                </p>
+                // Die Herkunftsangabe gehoert AUCH hierher, nicht nur zu
+                // gefuellten Zahlen: Wer noch nichts hat, ist genau der, der
+                // wissen muss, wofuer sich das Eintragen lohnt. Sie stand
+                // zuerst nur im gefuellten Zweig - auf der Live-Seite war sie
+                // dadurch fuer ein frisches Konto unsichtbar (nachgemessen,
+                // nicht vermutet: tmp/profil-live-check.mjs).
+                <>
+                  <p className="text-sm text-mist-400">
+                    {season ? "Keine Spiele in dieser Saison." : "Noch keine Spiele erfasst."}
+                  </p>
+                  <p className="mt-2 text-xs text-mist-400">
+                    Zählt erst, wenn beide Teams das Ergebnis eintragen und es
+                    übereinstimmt.
+                  </p>
+                </>
               ) : (
                 <>
                   {/* Karriere-Summen als Anzeigetafel statt als Fließtext-Zeile:
