@@ -169,6 +169,16 @@
   Klick-zum-Laden (Datenschutz) + Open-Graph-Vorschau, Folge-Vorschläge, Permalinks.
 - **Scouting/Transfermarkt (Phasen A+B+C):** strukturierte Filter, „Vereine suchen Spieler",
   Direktanfrage, Matching, bevorzugte Spielklasse.
+  ⭐ **Kernpositionierung (Patrick & Jonatan seit Projektstart, am 12.08.2026 bekräftigt):**
+  Die Plattform ist als **Scouting-Plattform mit belegbaren Fakten** gedacht – „wie LinkedIn,
+  nur nachweisbar". Der Unterschied ist nicht das Profil, sondern die **Belegbarkeit**: Die
+  Zahlen stammen aus Spielen, die **beide Teams unabhängig gemeldet und bestätigt** haben
+  (`resultStatus: confirmed` mit beidseitigem `submittedBy`). Ein Verein muss dem Spieler also
+  nicht glauben. Bei Feature-, Text- und Gestaltungsentscheidungen mitdenken.
+  ⚠️ **Lücke (Stand 12.08.2026):** Dieses Argument steht **nirgends im nutzersichtbaren Text**
+  – Landing und „So funktioniert's" sagen nur „sichtbar für Vereine und Scouts", was jede
+  Plattform sagt. Formulierung gehört Nele; vergleichende Aussagen („einzige Plattform,
+  die…") wegen §6 UWG an Nora.
 - **Spielbetrieb:** Ergebnis-Verifikation + Mismatch-Eskalation an beide Admins + Super-Admins,
   Box-Scores, Topscorer/Rangliste saison-fähig, Spielerhistorie mit Einzelspielen, Karriere-Timeline.
 - **Onboarding & Wachstum:** Willkommens-Tour, Onboarding-Checklist (Feed + Startseite), PWA
