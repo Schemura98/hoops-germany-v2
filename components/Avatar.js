@@ -49,7 +49,14 @@ export default function Avatar({
       <img
         src={src}
         alt={name || ""}
-        className={`${className} ${shape} object-cover flex-shrink-0 bg-navy-800 ${ring}`}
+        // Haarlinie nach innen, wenn die aufrufende Stelle keinen eigenen Ring
+        // setzt: Vereinslogos kommen häufig als freigestelltes PNG mit weißem
+        // Grund. Auf dem dunklen Panel schwebt so ein Bild sonst als heller
+        // Block ohne Kante. Der Ring rahmt es, statt das Logo selbst
+        // anzufassen – an fremden Vereinswappen wird nichts verändert.
+        className={`${className} ${shape} object-cover flex-shrink-0 bg-navy-800 ${
+          ring || "ring-1 ring-inset ring-navy-600"
+        }`}
       />
     );
   }
