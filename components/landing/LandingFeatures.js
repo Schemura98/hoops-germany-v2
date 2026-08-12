@@ -132,9 +132,37 @@ export default function LandingFeatures() {
                     <Icon className="text-brand-400 text-xl" />
                   </div>
                   {f.eyebrow && (
-                    <p className="mb-1.5 text-xs font-bold uppercase tracking-widest text-brand-400">
-                      <span className="text-mist-600">{i + 1}/6 ·</span> {f.eyebrow}
-                    </p>
+                    // Kapitelmarke (Mechanik A5, Video-Sweep 12.08.2026): grosse
+                    // Konturziffer + gepunktete Linie + Etikett. Ersetzt die
+                    // fruehere Miniaturzeile "1/6 · Aufstellung", die die
+                    // Gliederung zwar benannte, aber nicht sichtbar machte.
+                    //
+                    // Drei bewusste Entscheidungen:
+                    // 1. Die Ziffer ist DEKORATION (aria-hidden) - die Zaehlung
+                    //    "Schritt x von 6" steht als sr-only-Text daneben, sonst
+                    //    ginge sie fuer Screenreader verloren.
+                    // 2. Kontur statt Flaeche: Big Shoulders traegt laut
+                    //    VISUELLE-RICHTUNG ausdruecklich "grosse Zahlen"; eine
+                    //    gefuellte Ziffer dieser Groesse wuerde die Ueberschrift
+                    //    daneben erschlagen.
+                    // 3. Die Linie waechst nur bis 3rem - sie soll gliedern,
+                    //    nicht die Textspalte teilen.
+                    <div className="mb-4 flex items-center gap-3 justify-center md:justify-start">
+                      <span className="sr-only">Schritt {i + 1} von {FEATURES.length}: </span>
+                      <span
+                        aria-hidden="true"
+                        className="font-display font-black leading-none select-none text-[3.25rem] md:text-[4rem] text-transparent [-webkit-text-stroke:1.5px_#F68C3E]"
+                      >
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span
+                        aria-hidden="true"
+                        className="hidden sm:block w-12 border-t border-dashed border-navy-600"
+                      />
+                      <span className="font-display rounded-sm border border-navy-600 px-2.5 py-1 text-xs font-bold uppercase tracking-[0.18em] text-brand-400">
+                        {f.eyebrow}
+                      </span>
+                    </div>
                   )}
                   <h3 className="text-2xl font-black text-paper-50 mb-3 text-balance">{f.title}</h3>
                   <p className="text-mist-400 leading-relaxed">{f.text}</p>
