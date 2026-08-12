@@ -1825,3 +1825,87 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > „BEISPIELDATEN"-Kennzeichnung auf der Live-Seite – `isInternal` wirkt nur auf die Zählung, das
 > öffentliche Abzeichen hängt an `isDemo`. Ob sie zusätzlich so gekennzeichnet oder beim Cutover
 > gelöscht werden, ist eine Produktentscheidung von Patrick.
+
+---
+
+## 12.08.2026 – Visuelles Redesign „Anzeigetafel" auf Navy + Wow-Ebene (Stufen A und B)
+
+**Auslöser:** Patrick auf den Stand nach den Design-Review-Wellen: „ich sehe noch keine großen
+Veränderungen." Auf Nachfrage Freigabe **„Volle Freiheit inklusive Farben"** – nur das Logo bleibt.
+Danach zweimal nachgeschärft: „Verbinde die Innovation einer Apple Website mit dem Thema Basketball"
+und „meiner Meinung nach war Navy Blau und Orange auch passend dafür."
+
+**Spezifikationen:** `docs/VISUELLE-RICHTUNG-2026-08-12.md` (Vivien) und
+`docs/WOW-KONZEPT-2026-08-12.md` (Vivien), `docs/WOW-MATERIAL-2026-08-12.md` (Milo).
+
+### Commits
+- `d28e800` Richtung „Anzeigetafel" plattformweit (121 Dateien)
+- `8339301` Grundfarbe auf Navy + Kais neun Hover-Befunde
+- `e098941` Wow-Ebene Stufe A: Taktiktafel, Splitflap, Fokus-Sprung
+- `f57eb01` Bildrate gemessen, Haarlinie an Bild-Avataren
+- `61ece6b` Wow-Ebene Stufe B: die drei wiederkehrenden Momente
+- `5632996` Kais kritischer Befund: falsche Vertrauensaussage behoben
+- `1c42810` Tobias' Befund: eigene Zeile fehlte beim ersten Aufruf
+
+### Was sich geändert hat
+- **Farbe:** neue Skalen `navy` (Grund), `paper`/`mist` (Text), `signal` (Status); `brand` neu
+  verankert auf dem echten Logo-Orange `#F07A27` statt `#f97316`. Keine Verläufe, keine Schatten –
+  Tiefe entsteht aus Flächenstufe plus 1px-Haarlinie. Werte von Vivien gerechnet.
+- **Schrift:** Big Shoulders Display (Headlines ab `text-2xl`), Geist (Text/UI), Geist Mono
+  (Zahlen in Tabellen, `tabular-nums`). Geist fehlt im Font-Katalog von Next 14.2.35 – geprüft,
+  deshalb selbst gehostet aus `public/fonts/` über `next/font/local`, keine neue Abhängigkeit.
+- **Icons:** `react-icons/fa` → `react-icons/pi` (Phosphor), 93 Zuordnungen vorab gegen das Paket
+  geprüft. Kai hat sie zusätzlich auf semantische Kollisionen geprüft.
+- **Hero ohne Foto.** Das Motiv war 1000×652 px, wurde bis ~5× hochskaliert und brauchte 65 %
+  Schwarz darüber – am Ende wirkte es fast nur als graue Fläche.
+- **Neue Bausteine:** `components/landing/PlayDiagram.js` (Taktiktafel, zeichnet sich scroll-gesteuert
+  über `strokeDashoffset` bei `pathLength="1"`), `components/ui/SplitFlap.js`,
+  `components/landing/FeatureFocus.js`.
+- **Stufe B – die wiederkehrenden Momente:** Anzeigetafel-Punktestand auf `/match/[id]` inkl. „Von
+  beiden Teams bestätigt"; Karriere-Summen im Spielerprofil als hochzählende Monospace-Zahlen;
+  eigene Zeile in der Liga-Tabelle mit der Markenleiste. Damit steht die 2px-Markenleiste an genau
+  den drei Stellen, die die Spezifikation vorsieht.
+
+### Bewusst NICHT gebaut
+- **Viviens „Tabelle sortiert sich" als Animation.** Die Liga-Tabelle kommt beim Seitenaufruf bereits
+  in der Endsortierung vom Server – es gibt in der Sitzung keine alte Reihenfolge, gegen die animiert
+  werden könnte. Eine nachgestellte Sortierung wäre eine Behauptung, keine Funktion.
+- **Der Desktop-Pin** aus Stufe A.1 (höchstes Risiko, läuft gegen Ronjas Leitplanke).
+- **Milos 90-Bilder-Sequenz** (450,7 KB) liegt produziert im Zwischenspeicher, aber nicht im Repo –
+  sie überschreitet Ronjas 200-KB-Grenze, das ist eine Entscheidung für Patrick.
+
+### Gates
+- **Kai (statisch):** keine Sicherheitsbefunde. Ein **kritischer** Fund: „Von beiden Teams bestätigt"
+  hing allein an `resultStatus === "confirmed"` – das setzt aber auch der Admin-Pfad
+  `/admin/update-match`, wo nur eine Partei tippt. Die Anzeige verlangt jetzt zusätzlich beidseitiges
+  `submittedBy`. Dazu neun (plus drei selbst gefundene) unsichtbar gewordene Hover-Zustände.
+- **Tobias (Browser):** freigabefähig. Sein Fund: Die eigene Zeile blieb unhervorgehoben, wenn
+  `/ligen/[id]` die erste Seite nach dem Anmelden war – die Anmelde-Antwort enthält kein `teamId`,
+  und nur `useCurrentPlayer` reicherte den localStorage an. Behoben an der Wurzel (Navbar schreibt
+  zurück) plus Absicherung auf der Seite selbst.
+- **Ronja (vorab):** hat der Apple-Vorgabe fachlich widersprochen – der Vertrauensschmerz der
+  Zielgruppe liege bei Preis und Zuverlässigkeit, nicht bei fehlendem Glanz; der Hebel liege in den
+  wiederkehrenden Momenten, nicht auf der Startseite. Ihre vier Leitplanken wurden übernommen:
+  CTA ohne Scrollen sichtbar, kein Pinning über 100vh, ≤200 KB Zusatzgewicht, ≥50 fps bei
+  4×-CPU-Drosselung. Ihr inhaltlicher Einwand blieb bewusst überstimmt – Priorisierung entscheidet
+  Patrick.
+
+### Messwerte (alle nachgemessen, nicht geschätzt)
+- Kontrast-Durchlauf über 17 öffentliche Seiten (`tmp/kontrast-check.mjs`, misst jeden Textknoten
+  gegen den tatsächlich dahinterliegenden Grund inkl. halbtransparenter Schichten): **0 Befunde.**
+  Er hat vorher 13 echte Verstöße gefunden, darunter die Altlast weißer Text auf `brand-500`
+  (2,61:1) – Primärflächen tragen jetzt dunklen Text (6,88:1).
+- Bildrate (`tmp/fps-check.mjs`): **60 fps** mobil und Desktop, schlechtestes Einzelbild 16,8 ms,
+  null Hakler – bei nachgewiesener 4×-CPU-Drosselung (Gegenprobe Faktor 4,0; ohne sie wäre ein
+  fehlgeschlagener CDP-Aufruf als „läuft flüssig" durchgegangen).
+- Build grün, Playwright 18/18 grün.
+
+### Fallstricke für die nächste Session
+- **Nicht rechnen, nachmessen.** Der Maßstab der Taktiktafel hat drei Anläufe gekostet, weil ich die
+  SVG-Skalierung jedes Mal falsch hergeleitet habe. `tmp/play-messen.mjs` liest die tatsächlichen
+  Rechtecke aus – das war in einer Minute geklärt.
+- **Zwei Browser-Agenten gleichzeitig zerstören sich die Sitzung.** Tobias' erster Durchlauf war
+  unbrauchbar, weil Milos Demo parallel dieselbe Sitzung nutzte und seine Klicks abfing.
+- **Ein Zweig, den niemand je gerendert hat, ist kein geprüftes Feature.** In der Dev-DB hat keines
+  der 23 „bestätigten" Spiele eine echte beidseitige Meldung (der Seed schreibt Ergebnisse direkt) –
+  die Bestätigungs-Anzeige wäre nie zu sehen gewesen. Belegt mit `tmp/pruef-bestaetigt.mjs`.
