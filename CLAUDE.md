@@ -132,7 +132,14 @@
   zusätzlich `components/team/tabs/TabAlert.js` (FormAlert-Wrapper für ihr `{type,text}`-Format).
   **Konvention:** neue/überarbeitete Seiten IMMER diese Primitive nutzen (keine Ad-hoc-Buttons/Tabs/
   Spinner, kein `window.confirm`). **Rollout abgeschlossen (Wellen 1–5 + Welle 2b für das
-  Team-Admin-Panel, Commits in der Chronik).** Bewusst belassen (custom/kompakt): lokale `inputClass` in
+  Team-Admin-Panel, Commits in der Chronik)** – **mit einer Ausnahme, gemessen am 12.08.2026:**
+  `Card` hat **0 Importe** und `cardClass` **0 Verwendungen**; stattdessen bauen **126 Stellen** die
+  Panel-Fläche von Hand (`bg-navy-800` + `border-navy-600`). Alle übrigen Primitive sind echt im
+  Einsatz (Button 23, Loading 18, EmptyState 15, Skeleton 11, Reveal 7, Tabs/FormAlert je 6,
+  CountUp 4, ConfirmAction/ScrollTable je 3). Folge: Eine Änderung an der Kartensprache wirkt
+  **nicht** zentral – sie muss an 126 Stellen nachgezogen werden. Das ist der größte offene
+  Konsistenz-Posten des Designsystems (Umbau bewusst zurückgestellt: hohes Regressionsrisiko,
+  kein sichtbarer Gewinn). Bewusst belassen (custom/kompakt): lokale `inputClass` in
   `team/claim`, `admin/leagues`, `admin/update-match`. Optionaler Restschliff: Super-Admin-Tabellen/
   „Lädt…"-Texte auf `<Loading>`/`EmptyState`.
 - **Geo-Suche:** Feld `bundesland` an Player/Team/League; `lib/geo.js` + `public/data/de-cities.json`

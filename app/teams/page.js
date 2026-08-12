@@ -169,8 +169,13 @@ export default function TeamsPage() {
               <Link
                 key={t._id}
                 href={`/team/team-detail/${t.slug}`}
-                // data-vt: Diese Karte bekommt den weichen Seitenwechsel
-                // (siehe components/layout/PageTransition.js).
+                // data-vt: Diese Karte bekommt den weichen Seitenwechsel.
+                // ⚠️ Kopplung, die man hier nicht sieht: PageTransition.js fängt
+                // den Klick in der Capture-Phase ab und ruft stopPropagation().
+                // Ein eigener onClick an dieser Karte – oder eine Messung per
+                // Event-Delegation weiter oben – würde deshalb NICHT mehr
+                // ausgelöst. Wer hier etwas ergänzt, muss das Attribut
+                // entfernen oder PageTransition.js anpassen (Hinweis Kai).
                 data-vt
                 className="group bg-navy-800 rounded-md border border-navy-600 hover:border-brand-500 hover:bg-navy-700 transition-[background-color,border-color] duration-200 ease-out-strong overflow-hidden flex flex-col"
               >

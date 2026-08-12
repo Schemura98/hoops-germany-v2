@@ -186,6 +186,9 @@ export default function SpielerPage() {
               <Link
                 key={p._id}
                 href={`/player/view-player/${p.slug || p._id}`}
+                // data-vt: weicher Seitenwechsel. Gleiche Kopplung wie bei der
+                // Team-Karte – PageTransition.js stoppt hier die Weitergabe des
+                // Klicks, ein eigener onClick würde nicht mehr feuern.
                 data-vt
                 className="bg-navy-800 rounded-md border border-navy-600 hover:border-brand-500 hover:bg-navy-700 transition-[background-color,border-color] duration-200 ease-out-strong group overflow-hidden"
               >

@@ -68,6 +68,9 @@ export default function PageTransition({ children }) {
     const onClick = (e) => {
       const ziel = darfUebergehen(e);
       if (!ziel) return;
+      // Im bereits versteckten Tab gibt es nichts zu überblenden – dann gar
+      // nicht erst anfangen und normal navigieren lassen.
+      if (document.hidden) return;
       e.preventDefault();
       // In der Capture-Phase abgefangen: Ohne das Stoppen würde Next.js'
       // eigener Handler zusätzlich navigieren und einen doppelten
@@ -81,16 +84,34 @@ export default function PageTransition({ children }) {
         const vt = document.startViewTransition(() => {
           router.push(ziel);
           // Auflösen, sobald der Pfad gewechselt hat – spätestens aber nach
-          // MAX_MS. `finally` gibt es hier nicht: Die Zusage darf unter keinen
-          // Umständen offen bleiben, sonst hält der Browser das alte Bild fest.
+          // MAX_MS. Die Zusage darf unter keinen Umständen offen bleiben, sonst
+          // hält der Browser das alte Bild fest.
+          //
+          // Die Zeitgrenze hängt bewusst an `setTimeout` und NICHT an der
+          // rAF-Schleife: In einem versteckten Tab pausiert requestAnimationFrame
+          // vollständig – die Schleife hätte den Deckel dort also gar nicht mehr
+          // ausgewertet. Genau die Falle steht in CLAUDE.md, und der erste
+          // Entwurf ist voll hineingelaufen (Befund Kai, 12.08.2026). Wer
+          // während des Wechsels den Tab verlässt, wäre bei der Rückkehr auf
+          // ein eingefrorenes Bild gestoßen. Timer werden im Hintergrund nur
+          // gedrosselt, nicht angehalten.
+          //
+          // `router.push` stellt den Pfad ausserdem nicht sofort um: Next
+          // schreibt den Verlauf erst, wenn die Antwort des Servers da ist.
+          // Das Zeitfenster ist also real eine Netzwerkrunde gross.
           return new Promise((fertig) => {
-            const start = performance.now();
+            let erledigt = false;
+            const schliessen = () => {
+              if (erledigt) return;
+              erledigt = true;
+              clearTimeout(uhr);
+              fertig();
+            };
+            const uhr = setTimeout(schliessen, MAX_MS);
             const pruefen = () => {
-              if (
-                window.location.pathname + window.location.search === ziel ||
-                performance.now() - start > MAX_MS
-              ) {
-                fertig();
+              if (erledigt) return;
+              if (window.location.pathname + window.location.search === ziel) {
+                schliessen();
                 return;
               }
               requestAnimationFrame(pruefen);
