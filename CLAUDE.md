@@ -20,6 +20,11 @@
 > Zeile in der Liga-Tabelle). Protokoll: `docs/CHRONIK.md`, Eintrag 12.08.2026.
 > **Rollback-Punkt davor: `562c629`** (Stand VOR dem gesamten Redesign) (auf dem VPS auschecken, `npm run build`, `pm2 restart hoops-v2`).
 >
+> ⏸️ **PAUSIERT am 12.08.2026** (Patrick programmiert parallel die Agenten im General Backoffice um).
+> **Einstiegspunkt für die nächste Sitzung: `docs/WIEDERAUFNAHME-2026-08-12.md`** – dort steht, was
+> live ist, was lokal fertig aber ungeprüft wartet (Bildsequenz „Sprungball"), und welche
+> Entscheidung Vivien von Patrick braucht.
+>
 > 📜 **Vollständige Meilenstein-Chronik mit Commit-Hashes: `docs/CHRONIK.md`** (am 08.08.2026 wörtlich und
 > verlustfrei aus diesem Abschnitt ausgelagert – dort stehen ALLE datierten Protokolle seit dem Go-Live).
 

@@ -377,3 +377,185 @@ Rechte-Freigabe, nicht ein weiteres Werkzeug.
 6. Die produzierte Sprungball-Sequenz liegt bewusst nur im Scratchpad/
    als privates Artifact — Übernahme ins Repo (`public/images/` o. Ä.)
    erst nach Viviens/Patricks Freigabe, nicht eigenmächtig von mir.
+
+---
+
+## 8. Beschaffungsfrage: Videogenerator-Abo als Ersatz für den Dreh-Termin (Patricks Auftrag, 12.08.2026)
+
+**Frage wörtlich:** „falls es etwas gibt (ein Abo eines Videogenerators
+oder sonstiges) um den Dreh-Termin zu umgehen, dann sag Bescheid und ich
+organisiere das." Geprüft über `team-ausstattung`-Methodik (Malik) —
+Bestand vor Suche, Quellen bewerten, Kostenvorbehalt statt „einfach
+freischalten".
+
+### 8.0 Wichtigster Befund zuerst: die Prämisse hat sich verschoben
+
+Bevor ich zu Preisen komme, der ehrlichere Punkt: Der „Dreh-Termin", den
+ein Videogenerator umgehen soll, war ursprünglich für **echtes
+Hallenmaterial** gedacht (Abschnitt 4 oben). Der ist abgelehnt, richtig.
+Aber `docs/INSPIRATION-SCROLL-2026-08-12.md` (heute, selbes Datum) hat die
+Zielrichtung selbst verschoben: Vivien geht jetzt auf „das Spielfeld als
+bereiste Strecke" — eine **durchgehende SVG-Welt**, „kein Foto" steht dort
+explizit als bewusste Design-Entscheidung, nicht als Verlegenheitslösung
+(„Wir haben kein solches Material und werden keins bekommen … Der
+Versuch, das mit unseren Mitteln nachzustellen, würde billig aussehen –
+der Ball bleibt Vektor."). Das heißt: **der Bedarf, den ein
+Videogenerator füllen würde, existiert im aktuell dokumentierten
+Design-Konzept nicht mehr.** Ich prüfe die Frage trotzdem vollständig,
+weil Patrick ausdrücklich danach gefragt hat und weil sich das jederzeit
+wieder ändern kann — aber das gehört an den Anfang, nicht als Fußnote.
+
+### 8.1 Bestand vor Suche
+
+Bereits am 10.08.2026 hat Malik genau diese Werkzeugklasse geprüft
+(`befund-register.md`, Durchlauf „Milos Werkzeuggrenze: Stock-Video/Foto +
+KI-Videogenerierung"). Ergebnis damals: Runway (bündelt Gen-4.5/Kling/Veo/
+Seedance) → „wiedervorlage → Decision für Patrick, **mit
+Ablehnungs-Empfehlung** für den Einzelfall", Begründung wörtlich:
+laufende Kosten pro Versuch, Sportphysik als bekanntes Schwachpunkt-Feld,
+„ein synthetisch wirkendes Ergebnis würde gegen Viviens Mandat 'kein
+generisches KI-Design' laufen." Google Veo/Kling (Drittanbieter)/Luma
+wurden separat als „nicht weiterverfolgt" eingestuft (gleiche Modellklasse,
+kein Zusatzaufwand gerechtfertigt). Meine heutige Recherche (unten) prüft
+das mit frischen Zahlen nach, statt den alten Befund blind zu übernehmen
+— das Ergebnis deckt sich.
+
+### 8.2 Was ein Abo real leisten würde — gegen unseren Bedarf geprüft
+
+Bedarf: 60–120 Einzelbilder für scroll-gebundenes Scrubbing, im flachen
+Vektor-„Anzeigetafel"-Stil (Navy `#0B1220`/Orange `#F07A27`, keine
+Fotorealistik), mit Alphakanal für Kompositing über weiteren Ebenen,
+kommerziell nutzbar auf einer öffentlichen Seite mit künftigen Sponsoren.
+
+- **Konsistenz („bleibt der Ball derselbe Ball?"):** Innerhalb **eines**
+  durchgehenden Klips ist die Konsistenz bei einem einzelnen Objekt vor
+  ruhigem Hintergrund meist brauchbar — das bestätigt die Fachliteratur
+  ausdrücklich für „single subject with a clean background". Aber:
+  Sportphysik (Ballaufprall, Netz-Dynamik, Rand-Kontakt) ist ein
+  **dokumentiertes Schwachfeld** aktueller Modelle — das war schon am
+  10.08. der Ablehnungsgrund und wird durch keine der heute geprüften
+  Quellen widerlegt. Über **mehrere getrennte Generierungen** hinweg
+  (z. B. für verschiedene Szenen: Sprungball, Dribbling, Korbleger) ist
+  visuelle Identität nur **annähernd** herstellbar, über
+  Referenzbild-Konditionierung („Character Lineup", IC-LoRA-Stiltransfer)
+  — keine pixelgenaue Wiederholung eines gestalteten Assets, und für
+  belastbare Stiltreue braucht es laut Runway eigenes
+  **Custom-Model-Training**, das nur im Enterprise-Tarif verfügbar ist.
+- **Stil-Passung (der eigentliche K.-o.-Punkt):** Diese Modelle sind auf
+  Fotorealistik/Halbrealismus trainiert, nicht auf flaches
+  Vektor-Design. Ein „flat vector illustration"-Ergebnis ist laut
+  Fachquellen nur über Prompt-Vokabular + Stil-Referenzbilder
+  **annäherbar**, nicht garantiert — und selbst dann liefert jedes
+  Tool **Raster-Video**, niemals SVG/Vektor. Das widerspricht direkt
+  Viviens dokumentiertem Mandat „kein generisches KI-Design" und dem
+  bereits gewählten Scoreboard-Vektorstil der Seite. Das ist kein
+  Kosten- oder Lizenzproblem, sondern ein Stilproblem, das kein Abo löst.
+- **Alphakanal:** **Kein geprüftes Tool liefert das nativ.**
+  Transparenz wird bei allen vier Anbietern über einen **zusätzlichen
+  Dritt-Dienst** (Hintergrund-Entfernung/Rotoscoping, z. B.
+  „videobgremover.com") nachträglich erzeugt — ein weiterer
+  Werkzeug-/Kosten-/Qualitätsschritt oben drauf, mit dem üblichen Risiko
+  unsauberer Kanten bei automatischer Freistellung. Das ist keine
+  Abo-Eigenschaft, sondern eine zusätzliche Baustelle.
+- **Lizenz für kommerzielle Nutzung:** Hier ist der Befund tatsächlich
+  unkritisch — alle vier Anbieter räumen auf bezahlten/verifizierten
+  Tarifen kommerzielle Nutzungsrechte ein (Runway: alle Stufen inkl.
+  Free, aber mit Wasserzeichen; Kling: ab „Standard" 6,99 $/Monat;
+  Google Veo: bezahlte Stufen; OpenAI Sora: mit gültigem
+  Pro/Team/Enterprise-Abo). Das wäre kein Hinderungsgrund — wenn Stil
+  und Alphakanal nicht schon dagegen sprächen.
+- **Sora 2 zusätzlich: akut kein Kaufzeitpunkt.** OpenAI hat die
+  Videos-API inkl. Sora-2/Sora-2-Pro offiziell zur Abschaltung am
+  **24.09.2026** angekündigt (App bereits seit 26.04.2026 eingestellt) —
+  ein Abo jetzt hätte real nur noch rund sechs Wochen Laufzeit.
+
+### 8.3 Alternativen, ehrlich bewertet
+
+| Option | Eignung Scroll-Sequenz | Gewicht/Ladezeit mobil | Lizenz | laufende Kosten | Kann ICH das selbst bedienen? |
+|---|---|---|---|---|---|
+| **KI-Videogenerator-Abo** (Runway/Kling/Veo/Luma) | Schlecht — Raster, kein natives Alpha, Stil passt nicht, Physik-Schwäche | Unklar/eher schwer (fotoreal-lastig, s. Abschn. 3) | i. O. auf bezahlten Tarifen | 7–250 $/Monat je Anbieter/Tarif + ggf. Sekundenpreise; Sora zusätzlich in ~6 Wochen tot | Nein — keines meiner autorisierten Werkzeuge, bräuchte neuen Connector/OAuth |
+| **3D-Render (Blender)** | Gut, wenn sauber gerigged (echte Physik, exakte Wiederholbarkeit möglich) | Gut, wenn als Vektor-ähnliches Cel-Shading gerendert und über `sharp` komprimiert | Blender selbst kostenlos (GPL); eigenes Render = eigenes Recht | 0 € Software | **Nein** — kein Blender-Zugriff, keine 3D-Kompetenz in meinem Werkzeugstack; das wäre eine neue Fähigkeit, kein Kauf, den Patrick einfach freigeben kann |
+| **Stock-Video/-Foto** (Pexels/Pixabay) | Für „Basketball fliegt in Korb, Navy/Orange, Scoreboard-Stil" praktisch nicht zu finden — Lückenfüller-Rolle, nicht Sequenz-Ersatz | Real getestet gut (`ffmpeg`/`sharp`) | Klar bei Nutzung der jeweiligen Lizenz | 0 € (nur Kontoanlage) | Ja, sobald Konten existieren (`task-milo-stock-api`, bereits vorgemerkt, unverändert) |
+| **Eigene prozedurale Erzeugung ausbauen** | Bereits belegt funktionsfähig — 90 Frames/450,7 KB real gemessen | Sehr gut, real gemessen | Volles eigenes Recht, keine Fremd-ToS | 0 € — evtl. eine freie JS-Physik-Bibliothek (z. B. matter.js, MIT-Lizenz) für glaubwürdigere Netz-/Ball-Dynamik statt handparametrisierter Kurven | **Ja**, das ist genau meine bediente Werkzeugkette |
+| **Nichts kaufen — Vektor ist für diese Marke richtig** | Deckt sich mit Viviens neuer Richtung (Abschn. 8.0) | — | — | 0 € | Ja |
+
+### 8.4 Empfehlung
+
+**Nichts kaufen.** Aus drei voneinander unabhängigen Gründen, jeder für
+sich ausreichend:
+
+1. Der Bedarf, den das Abo füllen sollte, ist mit Viviens heutigem
+   „Spielfeld als bereiste Strecke"-Konzept (reines SVG, „kein Foto" als
+   bewusste Entscheidung) bereits anders gelöst.
+2. Selbst wenn der Bedarf bestünde: kein geprüftes Tool trifft unseren
+   flachen Vektorstil, keines liefert nativen Alphakanal, und die
+   dokumentierte Sportphysik-Schwäche bleibt unverändert seit dem
+   10.08.-Befund. Das ist keine Geschmacksfrage, sondern ein technischer
+   Mismatch zwischen Werkzeugklasse und Bedarf.
+3. Sora 2 wäre ohnehin kein Kauf mit sinnvoller Laufzeit mehr
+   (Abschaltung 24.09.2026); Runway/Kling/Veo lösen das Stil-/
+   Alpha-Problem so oder so nicht.
+
+**Falls Patrick trotzdem experimentieren will** (z. B. um selbst zu
+sehen, woran es hakt): Kling „Standard" für 6,99 $/Monat ist die
+günstigste Möglichkeit, das an einem Einzelfall zu prüfen, ohne eine
+Jahresbindung einzugehen — aber das wäre eine bewusste Lern-Ausgabe,
+keine Produktionsentscheidung, und ich würde das Ergebnis vermutlich
+wieder als „nicht einsetzbar" zurückmelden.
+
+**Was ich stattdessen vorschlage, falls die Vektor-Sequenz doch noch
+gebraucht wird** (unverändert zu Abschnitt 8.3): eine freie
+JS-Physik-Bibliothek für die Netz-/Ball-Dynamik in meiner bestehenden
+Pipeline — 0 € Lizenzkosten, keine neue Freischaltung nötig, nur
+Arbeitszeit. Das melde ich als Vorschlag, nicht als Zusage, da ich damit
+noch nicht getestet habe.
+
+### 8.5 Quellen (Preise/Lizenzbedingungen, Abruf 12.08.2026)
+
+- [Runway ML Review 2026: Pricing, Limits & Commercial Use](https://toolhatch.ai/tool/runway-ml-review/) — Drittquelle, nicht vendor-offiziell, als Indiz gewertet
+- [Runway Pricing August 2026](https://aumiqx.com/ai-tools/runway-pricing-gen4-plans-credits-explained/) — Drittquelle
+- [Sora 2 API Pricing & Quotas: Complete 2026 Guide](https://www.aifreeapi.com/en/posts/sora-2-api-pricing-quotas) — Drittquelle
+- [What to know about the Sora discontinuation | OpenAI Help Center](https://help.openai.com/en/articles/20001152-what-to-know-about-the-sora-discontinuation) — **vendor-offiziell**, Abschaltungsdatum bestätigt
+- [Sora-2 API shutdown date announced](https://help.apiyi.com/en/sora-2-api-shutdown-alternatives-2026-en.html) — Drittquelle, deckt sich mit OpenAI-Quelle
+- [Kling AI Pricing & Subscription Plans | Kling AI](https://kling.ai/app/membership/membership-plan) — **vendor-offiziell**
+- [Kling AI pricing (2026): A complete guide](https://www.eesel.ai/blog/kling-ai-pricing) — Drittquelle
+- [Google Veo API Pricing 2026 | Renderful](https://renderful.ai/blog/veo-api-pricing) — Drittquelle
+- [Veo 3 Pricing 2026: Free vs $249/mo](https://www.veo3ai.io/blog/veo-3-pricing-2026) — Drittquelle
+- [Luma Dream Machine Pricing 2026 | Flowith](https://flowith.io/blog/luma-ai-pricing-2026-free-vs-standard-vs-pro/) — Drittquelle
+- [Kling Background Remover – AI Video Transparent Export](https://videobgremover.com/ai-video/kling) — Drittquelle, belegt „Alphakanal nur über Zusatzdienst"
+- [Runway Background Remover – Gen-3 & Gen-4 Transparent Video](https://videobgremover.com/ai-video/runway) — Drittquelle, gleicher Befund
+- [The Character Consistency Problem](https://dev.to/weizhang_dev/the-character-consistency-problem-why-every-ai-video-tool-still-fails-at-the-one-thing-that-3386) — Fachartikel zu Konsistenz-Grenzen
+- [How to Fix AI Video Consistency & Visual Drift | Kling](https://kling.ai/blog/fix-ai-video-drift-consistency-guide) — vendor-offiziell, bestätigt „single subject/clean background" als Best Case
+- [How To Generate 2D Animation With AI Video Models | LTX Blog](https://ltx.io/blog/how-to-generate-2d-animation-with-ai-video-models) — Fachartikel zu Stil-Annäherung via Prompting/IC-LoRA, bestätigt „Raster, kein Vektor"
+
+**Ungeprüft/nicht belegt, ausdrücklich gekennzeichnet:** exakte
+Sekundenpreise und Tarifdetails stammen überwiegend aus
+Preisvergleichs-Blogs (Drittquellen), nicht aus den Originaldokumenten
+der Anbieter selbst — für eine tatsächliche Kaufentscheidung sollte
+Patrick die aktuelle Preisseite des jeweiligen Anbieters direkt
+gegenprüfen, bevor er etwas abschließt. Ich habe nichts abgeschlossen
+und keine Konten angelegt.
+
+### 8.6 Kollegen einbezogen
+
+- **Malik (team-coach):** methodische Grundlage (`team-ausstattung`-Skill)
+  und Vorbefund vom 10.08.2026 (`befund-register.md`) — mein heutiger
+  Check bestätigt seine damalige Ablehnungsempfehlung mit frischen
+  Zahlen, statt sie stillschweigend zu wiederholen.
+- **Vivien (design-spezialistin):** Abschnitt 8.0 ist in erster Linie an
+  sie gerichtet — ihr „Spielfeld als bereiste Strecke"-Konzept
+  beantwortet die Materialfrage bereits anders, das sollte sie wissen,
+  bevor sie oder Patrick über ein Abo entscheiden.
+- **Nora (recht-vorpruefung) — nicht eingebunden, aber vorgemerkt:**
+  Falls Patrick trotzdem ein Abo testet und Ergebnisse später öffentlich
+  einsetzen will, gehört die konkrete Lizenzklausel (insbesondere im
+  Zusammenspiel mit künftigen Sponsoren-Flächen) noch einmal vor
+  Veröffentlichung vor sie — das ist hier nur Recherche, keine
+  Rechtsprüfung.
+- **Ines (Budget) — nicht aktiv eingebunden:** Empfehlung lautet „nichts
+  kaufen", daher keine Kostenfreigabe zu prüfen; falls Patrick den
+  Kling-Test (Abschnitt 8.4) doch will, wäre das ihr übliches Prüffeld.
+- **Nele (marketing-manager):** nicht eingebunden — reine
+  Werkzeug-/Beschaffungsfrage, keine Kampagnen-Entscheidung.
+- **Frieda (dokumenten-logistik):** nicht eingebunden — keine neuen
+  Assets, nur ein Dokument-Nachtrag.
