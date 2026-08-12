@@ -105,6 +105,21 @@ let gesamt = 0;
 for (const pfad of SEITEN) {
   await page.goto(BASE + pfad, { waitUntil: "networkidle" });
   await page.waitForTimeout(300);
+
+  // Schutz gegen Fehlalarm: Ist das Stylesheet (noch) nicht angewendet, steht
+  // schwarzer Text auf weissem Grund und JEDE Zeile faellt durch – einmal
+  // beobachtet direkt nach einem Neustart des Servers, 152 Befunde aus dem
+  // Nichts. Ein Durchlauf, der so etwas meldet, ist wertlos; schlimmer waere
+  // nur der umgekehrte Fall, in dem man ihm glaubt. Deshalb vorher pruefen,
+  // ob der Grund ueberhaupt der erwartete dunkle ist.
+  const grund = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  if (grund !== "rgb(11, 18, 32)") {
+    console.error(`ABBRUCH bei ${pfad}: Grundfarbe ist ${grund}, erwartet rgb(11, 18, 32).`);
+    console.error("Vermutlich sind die Stile nicht geladen (Server frisch gestartet?). Erneut ausfuehren.");
+    await browser.close();
+    process.exit(2);
+  }
+
   const treffer = await page.evaluate(MESSUNG);
   if (treffer.length) {
     gesamt += treffer.length;
