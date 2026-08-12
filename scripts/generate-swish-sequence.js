@@ -10,8 +10,33 @@
 
 // sharp liegt bewusst NICHT im Projekt: Dieses Skript laeuft nur bei der
 // Erzeugung der Bilder auf dem Entwicklungsrechner, nie im Browser und nie im
-// Build. Es gehoert damit zu keiner Abhaengigkeit der Seite.
-const sharp = require("C:/Users/schem/OneDrive/Desktop/Hoops-Marketing/_werkzeuge/node_modules/sharp");
+// Build. Es taucht deshalb in keiner package.json auf.
+//
+// Preis dafuer (Befund Kai, 12.08.2026): Auf jedem anderen Rechner bricht der
+// Aufruf mit "Cannot find module" ab, ohne zu sagen, woher sharp kommen soll.
+// Deshalb hier ein klarer Hinweis statt eines nackten Absturzes.
+const SHARP_PFAD =
+  "C:/Users/schem/OneDrive/Desktop/Hoops-Marketing/_werkzeuge/node_modules/sharp";
+let sharp;
+try {
+  sharp = require(SHARP_PFAD);
+} catch {
+  try {
+    sharp = require("sharp"); // falls es doch einmal im Projekt liegt
+  } catch {
+    console.error(
+      [
+        "sharp nicht gefunden.",
+        `Erwartet unter: ${SHARP_PFAD}`,
+        "Alternativ im Projekt installieren: npm i -D sharp",
+        "",
+        "Die 45 ausgelieferten Bilder in public/images/swish/ wurden mit sharp",
+        "aus dem oben genannten Werkzeug-Ordner erzeugt (Stand 12.08.2026).",
+      ].join(String.fromCharCode(10))
+    );
+    process.exit(1);
+  }
+}
 const fs = require("fs");
 const path = require("path");
 

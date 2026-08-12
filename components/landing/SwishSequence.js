@@ -58,6 +58,9 @@ export default function SwishSequence({ className = "" }) {
     const ruhig = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const ctx = canvas.getContext("2d");
     let abgebrochen = false;
+    // Nur einmal melden – 45 gleichlautende Warnungen wären kein Hinweis mehr,
+    // sondern Rauschen.
+    let fehlerGemeldet = false;
 
     const zeichne = (index) => {
       const bild = bilderRef.current[index];
@@ -82,6 +85,11 @@ export default function SwishSequence({ className = "" }) {
         bilderRef.current[ANZAHL - 1] = einzeln;
         zeichne(ANZAHL - 1);
       };
+      einzeln.onerror = () => {
+        if (abgebrochen) return;
+        // eslint-disable-next-line no-console
+        console.warn(`[SwishSequence] Standbild ${PFAD(ANZAHL - 1)} fehlt.`);
+      };
       einzeln.src = PFAD(ANZAHL - 1);
       return () => {
         abgebrochen = true;
@@ -96,6 +104,19 @@ export default function SwishSequence({ className = "" }) {
       // bleibt, bis alle da sind.
       bild.onload = () => {
         if (!abgebrochen && letztesRef.current === -1) zeichne(i);
+      };
+      // Ohne diesen Zweig scheitert ein fehlender Bilder-Ordner lautlos: Die
+      // Fläche bliebe einfach leer, ohne Konsolenmeldung – genau die Sorte
+      // stiller Fehler, die beim letzten Server-Umzug schon einmal an den
+      // Upload-Verzeichnissen Zeit gekostet hat (Befund Kai, 12.08.2026).
+      bild.onerror = () => {
+        if (abgebrochen || fehlerGemeldet) return;
+        fehlerGemeldet = true;
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[SwishSequence] Bild ${PFAD(i)} konnte nicht geladen werden – ` +
+            "liegt public/images/swish/ auf dem Server?"
+        );
       };
       bilderRef.current[i] = bild;
     }

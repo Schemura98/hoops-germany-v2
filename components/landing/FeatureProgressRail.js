@@ -196,6 +196,18 @@ export default function FeatureProgressRail({ labels = [] }) {
       raf = requestAnimationFrame(apply);
     };
 
+    // Nach der Ankunft ueberspringt `apply` den ganzen Positions-Block – sonst
+    // wuerde der Ball weiterwandern. Bei einer Groessenaenderung ist genau das
+    // aber falsch: Das Korb-Emblem ist ein normales Flex-Kind und rueckt mit,
+    // der Ball steht dagegen auf einem transform, das an den Rechtecken von
+    // damals berechnet wurde – er stuende dann sichtbar NEBEN dem Ziel
+    // (Befund Kai, 12.08.2026). Deshalb hier neu einrasten, ohne Animation und
+    // ohne die Ankunft zurueckzunehmen.
+    const beiGroessenaenderung = () => {
+      if (arrivedRef.current) ballZielSetzen(false);
+      onScrollOrResize();
+    };
+
     apply();
     // Reduzierte Bewegung: der Ball steht von Anfang an regungslos am Ziel –
     // ohne Animation, ohne dass jemals ein Scroll-Frame die A10-Logik oben
@@ -205,12 +217,12 @@ export default function FeatureProgressRail({ labels = [] }) {
       ballZielSetzen(false);
     }
     window.addEventListener("scroll", onScrollOrResize, { passive: true });
-    window.addEventListener("resize", onScrollOrResize);
+    window.addEventListener("resize", beiGroessenaenderung);
     return () => {
       if (raf) cancelAnimationFrame(raf);
       tickingRef.current = false;
       window.removeEventListener("scroll", onScrollOrResize);
-      window.removeEventListener("resize", onScrollOrResize);
+      window.removeEventListener("resize", beiGroessenaenderung);
     };
   }, [labels]);
 

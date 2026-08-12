@@ -56,20 +56,26 @@ const MESSUNG = () => {
     if (!text) continue;
     const el = node.parentElement;
     if (!el || el.closest("script,style,noscript")) continue;
-    // Rein dekorative Schrift ueberspringen. Die Kapitelziffern (A5) sind
-    // Konturschrift: Fuellfarbe transparent, sichtbar nur ueber den Umriss.
-    // Der Messwert waere hier immer 1:1 - und waere trotzdem kein Verstoss,
-    // weil die Ziffer `aria-hidden` ist und die Zaehlung als sr-only-Text
-    // daneben steht. WCAG nimmt genau das aus (dekorativ + zugaengliches
-    // Aequivalent). Ohne diese Ausnahme meldet der Durchlauf sechs
-    // Falschbefunde und wird als Werkzeug unbrauchbar.
-    if (el.closest('[aria-hidden="true"]')) continue;
+    // Konturschrift ueberspringen - und NUR die. Die Kapitelziffern (A5) haben
+    // transparente Fuellung und sind allein ueber den Umriss sichtbar; ein
+    // Fuellfarben-Messwert waere dort immer 1:1 und trotzdem kein Verstoss
+    // (dekorativ, `aria-hidden`, Zaehlung steht als sr-only-Text daneben).
+    //
+    // Die erste Fassung nahm dafuer JEDEN aria-hidden-Teilbaum aus. Das war zu
+    // weit: aria-hidden entfernt Inhalt nur aus dem Screenreader-Baum, nicht
+    // aus dem Bild - sehende Nutzer lesen ihn weiter, WCAG 1.4.3 gilt also.
+    // Kai hat im selben Diff zwei Stellen gefunden, die dadurch blind wurden
+    // (die "meldet 78/65"-Etiketten und die komplette mobile
+    // Fortschritts-Beschriftung). Sie bestehen heute nur zufaellig.
+    // Deshalb jetzt an der Signatur statt an der Rolle.
     const cs = getComputedStyle(el);
     if (cs.visibility === "hidden" || cs.display === "none" || parseFloat(cs.opacity) < 0.15) continue;
     const r = el.getBoundingClientRect();
     if (r.width < 2 || r.height < 2) continue;
     const fg = parse(cs.color);
     if (!fg) continue;
+    const strich = parseFloat(cs.webkitTextStrokeWidth || "0");
+    if (fg.a === 0 && strich > 0) continue;
     const bg = hinter(el);
     const farbe = fg.a >= 0.999 ? fg.rgb : mix(fg.rgb, bg, fg.a);
     const l1 = lum(farbe), l2 = lum(bg);
