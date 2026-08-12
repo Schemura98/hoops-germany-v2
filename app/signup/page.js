@@ -87,7 +87,11 @@ function SignupForm() {
 
   return (
     <AuthShell
-      image="/images/signupImage.jpg"
+      image="/images/signup-halle-1880.jpg"
+      imageAlt="Wurf in einer Vereinshalle mit Sprossenwänden"
+      // Der Werfer steht links der Bildmitte; ein mittiger Beschnitt im hohen
+      // Halbbild würde ihn abschneiden.
+      imagePosition="35% center"
       title="Registrieren"
       subtitle="Erstelle dein kostenloses Spielerprofil."
       footer={

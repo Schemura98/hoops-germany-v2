@@ -13,9 +13,17 @@ const MODERN_SOURCES = {
     avif: "/images/login-image-1000.avif",
     webp: "/images/login-image-1000.webp",
   },
-  "/images/signupImage.jpg": {
-    avif: "/images/signup-image-1000.avif",
-    webp: "/images/signup-image-1000.webp",
+  // Ersetzt am 13.08.2026 das alte Arena-Motiv (`signupImage.jpg`): Das zeigte
+  // eine ausverkaufte Profi-Arena mit sichtbarer Nike-Bandenwerbung — auf der
+  // Registrierungsseite eines Portals fuer Bezirks- und Kreisliga in NRW das
+  // Versprechen einer Welt, die es hier nicht gibt. Das neue Motiv ist eine
+  // europaeische Vereinshalle mit Sprossenwaenden; die orangen Leibchen im
+  // Hintergrund treffen zufaellig die Markenfarbe.
+  // Herkunft: Pexels, Drago Rapovac — Nachweis in
+  // Hoops-Marketing\_werkzeuge\stock-kandidaten\auswahl\HERKUNFT-AUSWAHL.json
+  "/images/signup-halle-1880.jpg": {
+    avif: "/images/signup-halle-1880.avif",
+    webp: "/images/signup-halle-1880.webp",
   },
 };
 
@@ -28,6 +36,11 @@ const BLANK_PIXEL =
 export default function AuthShell({
   image = "/images/login image.jpg",
   imageAlt = "Basketball",
+  // Das Motiv steht in einem hohen, schmalen Halbbild; `object-cover` schneidet
+  // deshalb links und rechts weg. Bei einem Querformat mit auszerhalb der Mitte
+  // liegendem Motiv faellt genau das Wesentliche heraus. Deshalb je Seite
+  // ausrichtbar statt fest mittig.
+  imagePosition = "center",
   title,
   subtitle,
   children,
@@ -80,6 +93,7 @@ export default function AuthShell({
             alt={imageAlt}
             decoding="async"
             className="absolute inset-0 w-full h-full object-cover"
+            style={{ objectPosition: imagePosition }}
           />
         </picture>
       </div>
