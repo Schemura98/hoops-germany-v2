@@ -1909,3 +1909,36 @@ und „meiner Meinung nach war Navy Blau und Orange auch passend dafür."
 - **Ein Zweig, den niemand je gerendert hat, ist kein geprüftes Feature.** In der Dev-DB hat keines
   der 23 „bestätigten" Spiele eine echte beidseitige Meldung (der Seed schreibt Ergebnisse direkt) –
   die Bestätigungs-Anzeige wäre nie zu sehen gewesen. Belegt mit `tmp/pruef-bestaetigt.mjs`.
+
+### Nachtrag 12.08.2026 – Wow-Ebene Stufe C deployt (`07a1a0e`)
+
+Politur: Staffelung als benannte Regel (`staffel()` in `lib/ui.js`, 70 ms, gedeckelt bei sechs
+Elementen), Mikro-Detail beim Karten-Hover (Zahlen springen auf die Markenfarbe), weicher
+Seitenwechsel über die **native** `document.startViewTransition()` an Team- und Spielerkarten.
+
+**Zwei Fallstricke, die Zeit gekostet haben und die man wiedersehen wird:**
+
+1. **Der Seitenwechsel feuerte nie.** Der erste Entwurf hing an jedem Klick auf `document` –
+   Next.js' `<Link>` ruft aber `preventDefault()` in seinem eigenen React-Handler, der vorher läuft.
+   Die Capture-Phase löst das, dort hätte `stopPropagation()` aber die eigenen onClick-Handler
+   verschluckt (mobiles Menü). Auflösung: nur ausgezeichnete Verweise (`data-vt`) an genau den
+   Karten, die keine eigenen Handler tragen.
+2. **Kais Befund: Die Zeitgrenze hing an `requestAnimationFrame`.** In einem versteckten Tab
+   pausiert rAF vollständig – der Deckel hätte dort nie gegriffen, die Zusage wäre offen geblieben
+   und der Browser hätte das alte Bild festgehalten. Exakt die Falle, die oben in CLAUDE.md steht.
+   Jetzt an `setTimeout`. **Mit Gegenprobe:** `tmp/versteckter-tab-check.mjs` fällt auf dem alten
+   Stand durch und läuft auf dem neuen – ein Test, der auf beiden grün ist, beweist nichts.
+
+**Gates:** Kai (statisch) – ein Befund mittel/hoch (Nr. 2 oben), drei niedrige, alle erledigt.
+Tobias (Browser) – freigabefähig mit Auflagen; sein Klick-Werkzeug fiel erneut aus, mobil, Enter
+und Strg-Klick blieben ungeprüft. Diese drei Lücken sind mit `tmp/mobil-tastatur-check.mjs`
+selbst geschlossen (10/10, inkl. „Menüpunkt navigiert UND Menü schließt" – genau der Fall, den
+`stopPropagation()` hätte zerstören können).
+
+**Live-Abnahme nach dem Deploy** gegen hoopsgermany.de: Navigation 10/10, Übergang feuert genau
+einmal und schließt sauber, bei reduzierter Bewegung gar nicht, keine Konsolenfehler.
+
+**Nebenbefund, dokumentiert:** `components/ui/Card.js` hat 0 Importe und `cardClass` 0
+Verwendungen – 126 Stellen bauen die Panel-Fläche von Hand. Eine Änderung an der Kartensprache
+wirkt also nicht zentral. Größter offener Konsistenz-Posten des Designsystems, Umbau bewusst
+zurückgestellt.
