@@ -14,6 +14,7 @@ import {
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
+import WasDarausWurde from "@/components/feedback/WasDarausWurde";
 import Button from "@/components/ui/Button";
 import { inputClass } from "@/lib/ui";
 
@@ -239,6 +240,11 @@ export default function FeedbackPage() {
             )}
           </form>
         )}
+
+        {/* Bewusst UNTER dem Formular und in beiden Zustaenden sichtbar (auch
+            nach dem Absenden): Wer gerade etwas geschrieben hat, soll sehen,
+            dass das nicht ins Leere geht. */}
+        <WasDarausWurde />
       </main>
 
       <Footer />
