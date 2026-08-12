@@ -1942,3 +1942,42 @@ einmal und schließt sauber, bei reduzierter Bewegung gar nicht, keine Konsolenf
 Verwendungen – 126 Stellen bauen die Panel-Fläche von Hand. Eine Änderung an der Kartensprache
 wirkt also nicht zentral. Größter offener Konsistenz-Posten des Designsystems, Umbau bewusst
 zurückgestellt.
+
+### Nachtrag 12.08.2026 – Ballreise, überbreite Überschrift und Bildsequenz deployt (`78d833a`)
+
+**Gebaut:** A10 (der Ball reist durch die ganze Seite statt im Hero zu landen), A1 (Überschrift läuft
+über beide Bildränder), A5 (Kapitelmarke, aus der Backoffice-Session), plus die scroll-gebundene
+Bildsequenz „Sprungball" (45 Bilder, 191 KB, 0 Anfragen beim Seitenaufruf).
+Grundlage: Patricks Freigabe `dec-hoops-ball-landung` (Option 1) – die Ball-Landung an der
+Hero-Schaltfläche durfte entfallen. Damit war der Engpass gelöst, an dem A2, A9 und A10 hingen.
+
+**Die zwei Fehler, die die Gates gefunden haben – beide mit Lehrwert:**
+
+1. **Die Bildsequenz erreichte ihr Ziel nie** (Befund Tobias, hoch). Die Fortschrittsformel setzte
+   voraus, dass der Abschnitt oben aus dem Bild gescrollt werden *kann*. Er sitzt aber am Seitenende –
+   beim untersten möglichen Scrollstand kam sie auf **Bild 24 von 45**. Der beworbene Moment war für
+   niemanden erreichbar. Lehre: Bei scroll-gebundenen Effekten am Seitenende muss das Ende auf den
+   **tatsächlich erreichbaren** Scrollstand gedeckelt werden, nicht auf den geometrischen.
+2. **„Von beiden Teams bestätigt" hätte gelogen** (Befund Kai, kritisch). Die Aussage hing allein an
+   `resultStatus === "confirmed"` – das setzt aber auch der Admin-Pfad `/admin/update-match`, wo nur
+   eine Partei tippt. Belastbar ist erst beidseitiges `submittedBy`. Lehre: Ein Statusfeld ist kein
+   Beleg, solange nicht geprüft ist, **wer** es setzen kann.
+
+**Weitere Gate-Befunde, alle behoben:** Ball klebte nach der Ankunft rechts, während der Balken
+zurückging (Tobias, mittel); Ball rastete nach einer Größenänderung nicht neu ein (Kai); fehlender
+Fehlerzweig in `SwishSequence` (ein fehlender Bilder-Ordner wäre lautlos gescheitert); Generator-Skript
+brach auf fremden Rechnern ohne Hinweis ab.
+
+**Werkzeug-Korrektur, die Kai angestoßen hat:** Mein Kontrast-Durchlauf nahm zwischenzeitlich *jeden*
+`aria-hidden`-Teilbaum aus. Das ist zu weit – `aria-hidden` entfernt Inhalt nur aus dem
+Screenreader-Baum, sehende Nutzer lesen ihn weiter. Zwei Stellen waren dadurch blind geworden und
+bestanden nur zufällig. Die Ausnahme hängt jetzt an der Signatur der Konturschrift.
+
+**Live-Abnahme gegen hoopsgermany.de:** Navigation 10/10, Sequenz erreicht Bild 44/44 am Seitenende,
+Ball folgt beim Zurückscrollen dem Balken (70px/70px), Navbar-Knöpfe reagieren auf echte Klicks,
+0 Anfragen für die Sequenz beim Seitenaufruf, keine Konsolenfehler – mobil und Desktop.
+
+**Prozess-Lehre, dreimal in Folge bestätigt:** Tobias' Klick-Werkzeug fällt regelmäßig aus. Er meldet
+das inzwischen sauber als „ungeklärt" statt als Entwarnung – und genau diese Ehrlichkeit ist der Grund,
+warum seine Berichte etwas wert sind. Die offenen Punkte lassen sich mit Playwright nachziehen
+(`tmp/tobias-befunde-check.mjs`, `tmp/mobil-tastatur-check.mjs`).

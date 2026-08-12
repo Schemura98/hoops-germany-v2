@@ -11,13 +11,12 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> **Zuletzt deployt: `07a1a0e` (12.08.2026)** – zusätzlich Wow-Ebene **Stufe C** (Staffelung als
-> Regel, Mikro-Detail beim Karten-Hover, weicher Seitenwechsel über die native View-Transitions-API
-> an Team-/Spielerkarten). Davor: `1c42810` – **visuelles Redesign „Anzeigetafel" auf Navy**
-> (neue Farb-, Schrift- und Formsprache plattformweit, Icons auf Phosphor) plus Wow-Ebene Stufe A
-> (Taktiktafel im Hero, Splitflap-Wort, Fokus-Sprung auf der Feature-Strecke) und Stufe B
-> (Anzeigetafel-Punktestand mit „Von beiden Teams bestätigt", hochzählende Karrierewerte, eigene
-> Zeile in der Liga-Tabelle). Protokoll: `docs/CHRONIK.md`, Eintrag 12.08.2026.
+> **Zuletzt deployt: `78d833a` (12.08.2026)** – Wow-Ebene komplett: **Ballreise (A10)** – der Ball
+> setzt an der Hero-Schaltfläche auf und reitet danach die Fortschrittsleiste der Feature-Strecke
+> mit, bis er am Ende im Korb landet –, **überbreite Überschrift (A1)**, **Kapitelmarke (A5)** und
+> die scroll-gebundene **Bildsequenz „Sprungball“** (45 Bilder, 191 KB, lädt erst beim Scrollen).
+> Davor: `07a1a0e` (Stufen A–C), `1c42810` (Redesign „Anzeigetafel“ auf Navy).
+> Protokoll: `docs/CHRONIK.md`, Einträge 12.08.2026.
 > **Rollback-Punkt davor: `562c629`** (Stand VOR dem gesamten Redesign) (auf dem VPS auschecken, `npm run build`, `pm2 restart hoops-v2`).
 >
 > ⏸️ **PAUSIERT am 12.08.2026** (Patrick programmiert parallel die Agenten im General Backoffice um).
@@ -101,6 +100,13 @@
 > (`~/.claude/agents/retention-analystin.md`) die Hypothesen H1–H7 der Analyse am Live-Produkt
 > (Nutzerbrille, ehrliche Retention-Hebel, keine Dark Patterns); ihre Befunde gehen an Mats zurück.
 > Beide sind Vorschlags-Instanzen — kein Gate, Priorisierung entscheiden Patrick & Jonatan.
+> **Zielgruppen-Seite dazu: `docs/ZIELGRUPPEN.md`** (Marketing-Managerin **Nele**,
+> `~/.claude/agents/marketing-manager.md`, angelegt 12.08.2026) — kanonische, session-übergreifende
+> Definition der fünf Zielgruppen (Liga-Spieler NRW · Team-Admins/Ehrenamt · Vereinslose ·
+> Vereinsverantwortliche · lokale Sponsoren) mit „wo erreichbar / was motiviert / was schreckt ab /
+> welche Ansprache", der „ist NICHT Zielgruppe"-Liste und durchgängiger Kennzeichnung
+> **[BELEGT] / [INDIZ] / [HYPOTHESE]**. Pflicht-Startpunkt für Kampagnen, Werbematerial und Copy;
+> **Änderungen an den Zielgruppen nur mit Patrick.**
 >
 > 📌 **KONVENTION (verbindlich): Vor jedem Deploy zwei Gates.** `npm run build` + Playwright
 > (`npx playwright test -c tests/e2e/playwright.config.mjs`) und die Production-Runtime (`npm start`,
