@@ -10,7 +10,7 @@ import DemoBadge from "@/components/DemoBadge";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { getStoredPlayer } from "@/lib/clientAuth";
+import { getPlayerToken, getStoredPlayer, setStoredPlayer } from "@/lib/clientAuth";
 
 // Tabellen-Skeleton im Format der echten Standings-Tabelle, damit Navbar/PageHeader
 // beim Laden stehen bleiben (kein Layout-Sprung beim Wechsel auf den echten Inhalt).
@@ -44,9 +44,33 @@ export default function LigaDetailPage({ params }) {
   const [eigenesTeam, setEigenesTeam] = useState(null);
 
   useEffect(() => {
+    let aktiv = true;
     const p = getStoredPlayer();
     const t = p?.teamId?._id || p?.teamId || p?.team?._id || null;
-    if (t) setEigenesTeam(String(t));
+    if (t) {
+      setEigenesTeam(String(t));
+      return;
+    }
+    // Zwischenspeicher kalt (typisch, wenn diese Seite die erste nach dem
+    // Anmelden ist): einmal nachfragen – aber nur, wenn ueberhaupt jemand
+    // angemeldet ist. Ausgeloggte Besucher loesen weiterhin keine zusaetzliche
+    // Anfrage aus.
+    const token = getPlayerToken();
+    if (!token) return;
+    axios
+      .post("/api/player/getmyinfo", { token })
+      .then(({ data }) => {
+        if (!aktiv || !data?.player) return;
+        setStoredPlayer(data.player);
+        const id = data.player.teamId?._id || data.player.teamId || null;
+        if (id) setEigenesTeam(String(id));
+      })
+      .catch(() => {
+        /* ohne Hervorhebung sieht die Tabelle aus wie fuer Ausgeloggte */
+      });
+    return () => {
+      aktiv = false;
+    };
   }, []);
 
   useEffect(() => {

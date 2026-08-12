@@ -25,6 +25,7 @@ import {
   clearPlayerToken,
   clearTeamToken,
   clearAdminToken,
+  setStoredPlayer,
 } from "@/lib/clientAuth";
 import { timeAgo } from "@/lib/timeAgo";
 import { notificationHref } from "@/lib/notifications";
@@ -108,6 +109,13 @@ export default function Navbar() {
       try {
         const { data } = await axios.post("/api/player/getmyinfo", { token });
         if (active) setMe(data.player || null);
+        // Den vollstaendigen Spieler auch zurueckschreiben: Die Anmelde-Antwort
+        // enthaelt kein `teamId`, und bislang reicherte nur `useCurrentPlayer`
+        // den Zwischenspeicher an. Seiten, die ihn nur lesen (z.B. die
+        // Liga-Tabelle fuer die eigene Zeile), standen deshalb ohne Team da,
+        // wenn sie die erste Seite nach dem Anmelden waren (Befund Tobias,
+        // 12.08.2026). Die Navbar laeuft auf jeder Seite - hier gehoert es hin.
+        if (active && data.player) setStoredPlayer(data.player);
       } catch {
         if (active) setMe(null);
       } finally {
