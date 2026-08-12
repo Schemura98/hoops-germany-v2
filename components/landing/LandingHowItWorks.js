@@ -62,7 +62,11 @@ export default function LandingHowItWorks() {
         icon: PiUserBold,
         href: "/player/edit-profile",
         title: "Profil vervollständigen",
-        text: "Ergänze Stats, Position und ein Foto – so finden dich Vereine und Scouts leichter.",
+        // Vorher: "…so finden dich Vereine und Scouts leichter." Das war die
+        // Stelle mit der stärksten Vereins-Färbung im ganzen Produkt – und sie
+        // behauptete, dass Vereine suchen. Der Anreiz, das Profil zu füllen,
+        // bleibt; der Nutzen liegt jetzt beim Spieler selbst.
+        text: "Ergänze Stats, Position und ein Foto – deine Werte, bestätigt statt behauptet.",
       },
       { icon: PiUsersBold, ...teamCard },
       {

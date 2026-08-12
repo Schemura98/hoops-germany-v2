@@ -32,7 +32,14 @@ const FEATURES = [
     icon: PiChartBarBold,
     eyebrow: "Aufstellung",
     title: "Spielerprofile & Statistiken",
-    text: "Erstelle dein Profil, sammle Punkte, Assists & Rebounds und verfolge deine komplette Karrierehistorie – sichtbar für Vereine und Scouts.",
+    // "sichtbar für Vereine und Scouts" ist raus – gleich aus zwei Gründen:
+    // Es sagt, was jede Plattform sagt, UND es unterstellt, dass Vereine bereits
+    // suchen. Tun sie nicht (Stand: 1 externes Team). Der neue Satz nennt
+    // stattdessen das, was die Plattform strukturell kann und sonst niemand:
+    // Die Zahlen sind nicht die eigene Behauptung des Spielers.
+    // Bewusst als Systemregel formuliert, nicht als Gütesiegel für die konkret
+    // angezeigten Werte – siehe Kommentar in PlayerProfileView.js.
+    text: "Erstelle dein Profil, sammle Punkte, Assists & Rebounds und verfolge deine komplette Karrierehistorie – bestätigt vom Gegner, nicht nur von dir eingetragen.",
     visual: "profile",
   },
   {

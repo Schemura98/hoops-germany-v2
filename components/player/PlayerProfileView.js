@@ -370,6 +370,21 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                       (Bedarf 1 der Bedarfsanalyse, von Ronja am gebauten Produkt
                       bestätigt). Sie zählen hoch, sobald sie ins Bild kommen –
                       und zwar mit echten Werten, nicht mit Platzhaltern. */}
+                  {/* Woher die Zahlen kommen. Bewusst als SYSTEMREGEL formuliert
+                      und nicht als Guetesiegel fuer die konkret angezeigten
+                      Werte: `careerstats` filtert auf `status: "completed"` und
+                      prueft NICHT auf beidseitiges `submittedBy` – ein vom
+                      Admin aufgeloestes Ergebnis zaehlt also mit. "Jede Zahl
+                      hier ist von beiden Teams bestaetigt" waere damit
+                      schlicht falsch (Befund Nele, 12.08.2026).
+                      Die Zahlen bleiben absichtlich vollstaendig: Ein Spiel,
+                      dessen Ergebnis nach einem Streitfall ein Admin eintraegt,
+                      hat trotzdem stattgefunden – dem Spieler dafuer Statistik
+                      wegzunehmen waere die schlechtere Loesung. */}
+                  <p className="mb-4 text-xs text-mist-400">
+                    Zählt erst, wenn beide Teams das Ergebnis eintragen und es
+                    übereinstimmt.
+                  </p>
                   <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {[
                       { v: bilanz.games, l: "Spiele" },
