@@ -87,9 +87,21 @@ Kennzeichnung in diesem Dokument, durchgängig:
 
 ## Z3 — Vereinslose, Wiedereinsteiger, Hobby-Spieler
 
-> ⚠️ **Neu aufgenommen gegenüber Neles Agenten-Definition** (die nennt Z1, Z2, Z4, Z5).
-> Grund: Mats' Gruppe 1c ist belegt und wird von gebauten Funktionen (Transfermarkt,
-> Tryouts, Umkreissuche) direkt adressiert. **Bestätigung durch Patrick steht aus.**
+> ✅ **Entschieden 12.08.2026** — Patrick hat die Entscheidung an Nele delegiert.
+> Z3 **bleibt eigene Zielgruppe, aber ohne eigenen Kanal und ohne eigenes Werbematerial.**
+>
+> *Warum überhaupt aufnehmen* (sie fehlt in Neles Agenten-Definition, die Z1/Z2/Z4/Z5 nennt):
+> Sie ist die einzige belegte Gruppe, die keine andere abdeckt; **drei gebaute Funktionen
+> adressieren ausschließlich sie** (Transfermarkt, Tryouts, Umkreissuche) — eine Gruppe nicht
+> zu führen, für die Code existiert, ist die schlechtere Fehlerrichtung; und sie braucht eine
+> **andere Botschaft** als Z1 (konkretes Angebot in der Nähe statt „deine Stats"), was genau
+> der Zweck einer eigenen Zielgruppen-Zeile ist.
+>
+> *Warum trotzdem kein eigener Kanal:* Ihr Engpass ist Inventar, nicht Bekanntheit (H4).
+> Wer über eine eigene Kampagne kommt und zweimal nichts findet, ist verbrannt. Sie wird
+> deshalb über **denselben Hallen-Kanal wie Z1** mitgenommen und **im Produkt** bedient
+> (Texte auf `/transfermarkt`, `/tryouts`, Signup — Onboarding-Fläche, Lina).
+> **Neu bewerten, sobald H4 Bewegung zeigt.**
 
 - **Wer:** Spieler ohne Verein, Wiedereinsteiger nach Pause, Hobby-Spieler. Ronjas Persona
   „Sven" (Dev-Test-Account `sven.adler@test.de`).
@@ -137,9 +149,14 @@ Kennzeichnung in diesem Dokument, durchgängig:
 ## Priorisierung
 
 **Z1 → Z2 → Z3.** Z1 ist der Motor (Spieler bringen Team-Admins mit, nicht umgekehrt);
-Z2 entscheidet, ob Daten gepflegt werden; Z3 profitiert erst bei Liquidität.
-**Z4 später** (nicht bewerben, s. o.). **Z5 läuft parallel, aber separat** — ein Gespräch,
-kein Kanal, andere Sperren.
+Z2 entscheidet, ob Daten gepflegt werden; Z3 profitiert erst bei Liquidität und bekommt
+deshalb **kein eigenes Material** (Entscheid s. o.). **Z4 später** (nicht bewerben).
+**Z5 läuft parallel, aber separat** — ein Gespräch, kein Kanal, andere Sperren.
+
+**Praktische Konsequenz für Material:** Genau **eine** Zielgruppe wird aktiv beworben (Z1),
+über genau **einen** Kanal (persönliche Übergabe in der Halle). Alles andere läuft über das
+Produkt oder über Z1. Wer ein zweites Werbestück für eine zweite Gruppe vorschlägt, muss
+gegen diesen Satz argumentieren.
 
 ## Was ausdrücklich NICHT Zielgruppe ist
 
@@ -177,3 +194,11 @@ dadurch entschieden wird:
   (Bestätigung Patrick offen), Z4 auf „nicht bewerben" gesetzt, Beleglage-Kennzeichnung
   eingeführt. **Keine neuen Aufträge an Kollegen** — dies ist eine Dokumentations-Konsolidierung;
   Mats' Bedarfsanalyse und Ronjas Persona-Test sind referenziert, nicht ersetzt.
+- **12.08.2026 — Doppelpflege aufgelöst (Freigabe Patrick).** `MARKE.md` verweist im Kopf und in
+  §8 hierher (Zielgruppen dort entfernt, Farbe/Typo/Ton/Print bleiben ihr Feld);
+  `Tester-Akquise\EMPFEHLUNG.md` §1 bleibt als Protokoll des damaligen Perspektiv-Checks stehen,
+  mit Nachtrag-Hinweis, dass für neue Materialien dieses Dokument der Startpunkt ist.
+  Referenz in `CLAUDE.md` Abschnitt 0 beim Bedarfsanalyse-Konventionsblock.
+- **12.08.2026 — Z3 entschieden** (Entscheidung von Patrick an Nele delegiert): bleibt eigene
+  Zielgruppe, aber ohne eigenen Kanal und ohne eigenes Werbematerial; Bedienung im Produkt.
+  Damit ist keine Zielgruppe dieses Dokuments mehr „Bestätigung offen".
