@@ -44,3 +44,27 @@ body {
 :root[data-vt-running] .animate-page-in {
   animation: none;
 }
+
+/* A10 "ein Motiv trägt alle Szenen" (docs/SPIELFELD-STRECKE-2026-08-12.md):
+   kurzer Farbblitz am Ring des Korb-Emblems, wenn der Ball am Ende der
+   Fortschritts-Leiste ankommt – derselbe Signalton, den die "Bestätigt"-Badge
+   in Szene 3 schon trägt (signal-ok, #6B9A5B), kein neuer Bedeutungston.
+   Bewusst eine Stroke-Animation statt Glow/Schatten – die Vorgabe "keine
+   Verläufe, keine Schatten, kein Glow" gilt auch für neue Mikro-Details. */
+@keyframes rail-goal-flash {
+  0%,
+  100% {
+    stroke: #f68c3e; /* brand-400, Ruhezustand des Rings */
+  }
+  40% {
+    stroke: #6b9a5b; /* signal-ok */
+  }
+}
+.rail-goal-flash-ring {
+  animation: rail-goal-flash 640ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rail-goal-flash-ring {
+    animation: none;
+  }
+}

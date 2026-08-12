@@ -1,16 +1,24 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BallGlyph, HoopEmblem } from "@/components/landing/HeroGlyphs";
+import { BallGlyph } from "@/components/landing/HeroGlyphs";
 import PlayDiagram from "@/components/landing/PlayDiagram";
 
 // Scroll-gesteuerte Hero-Bühne „Sprungball" – Stufe 1 (mobil zuerst).
 // Spezifikation: docs/HERO-KONZEPT-2026-08-11.md (Vivien, v2 vom 11.08.2026).
 //
 // Erzählung: Während der Hero beim normalen Scrollen vorbeizieht, blendet ein
-// Spielfeld-Bogen auf und ein Ball fällt von oben durch die Szene – er landet in
-// einem kleinen Korb-Emblem an der oberen Ecke der primären Schaltfläche und
-// fällt mit einem kurzen Swish durchs Netz.
+// Spielfeld-Bogen auf und ein Ball fällt von oben durch die Szene.
+//
+// Seit A10 (docs/SPIELFELD-STRECKE-2026-08-12.md, Patricks Freigabe
+// "Ball-Landung darf entfallen" vom 12.08.2026) landet er NICHT mehr hier: Er
+// kommt an der oberen Ecke der primären Schaltfläche nur noch zur Ruhe (ein
+// weicher Aufsetzer, kein Netz-Swish, kein Ausblenden) und bleibt sichtbar im
+// Spiel – die eigentliche Landung mit Korb-Emblem und Swish findet jetzt am
+// Ende der Fortschritts-Leiste statt (FeatureProgressRail.js), wenn Szene 6
+// "Nachspielzeit" erreicht ist. Ein Motiv, eine Reise durch die ganze Seite,
+// eine einzige Landung – statt einer Zwischen-Pointe, die schon im Hero
+// vorwegnimmt, was eigentlich das Ziel der ganzen Strecke ist.
 //
 // Seit dem Redesign (12.08.2026) trägt die Bühne KEIN Foto mehr. Der Grund ist
 // nicht Geschmack: Das Motiv war 1000x652px, wurde formatfüllend bis ~5x
@@ -54,13 +62,11 @@ const ARC_MAX = 0.38;
 // aus dem Bild ist, wird nie zu Ende gesehen.
 const PLAY_SPAN = 0.6;
 
-const EMBLEM_FROM = 0.85; // ab hier blendet das Korb-Emblem auf
-const SWISH_FROM = 0.9; // ab hier fällt der Ball durchs Netz und blendet aus
-const SWISH_DROP = 16; // px, die er dabei zusätzlich sinkt
+// Ab hier klingt das Wackeln/die Drehung aus und der Ball setzt sanft auf,
+// statt weiter durchzufallen und im Netz zu verschwinden (A10-Anpassung).
+const SETTLE_FROM = 0.82;
 
 const BALL_R = 14; // halbe Kantenlänge des Ball-SVG (28px)
-const EMBLEM_W = 20;
-const EMBLEM_H = 14;
 
 // Weicher Puffer, über den der Ball vor und nach dem Textblock abdunkelt.
 const TEXT_FADE_MARGIN = 24;
@@ -102,7 +108,6 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", child
   const linienRef = useRef([]);
   const punkteRef = useRef([]);
   const ballRef = useRef(null);
-  const emblemRef = useRef(null);
   const tickingRef = useRef(false);
 
   // null = noch nicht geprüft (erster Render, auch serverseitig): dann wird der
@@ -160,17 +165,14 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", child
 
       const cta = ctaRef?.current;
       const ball = ballRef.current;
-      const emblem = emblemRef.current;
-      if (!cta || !ball || !emblem) return;
+      if (!cta || !ball) return;
 
       // Zielpunkt: obere Ecke der primären Schaltfläche, halb über deren Kante –
-      // wie ein Abzeichen, nie über der Beschriftung.
+      // wie ein Abzeichen, nie über der Beschriftung. Hier setzt der Ball jetzt
+      // nur noch AUF, statt zu landen (s. Kommentar oben).
       const cta_ = cta.getBoundingClientRect();
       const targetX = cta_.right - rect.left;
       const targetY = cta_.top - rect.top;
-
-      const emblemX = targetX - EMBLEM_W / 2;
-      const emblemY = targetY - EMBLEM_H / 2;
 
       // Ball: reine Fallbewegung mit leichtem Wackeln – läuft mit der
       // Scrollrichtung statt gegen sie und braucht keine seitliche Fläche.
@@ -178,36 +180,39 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", child
       const y0 = -BALL_R * 2;
       const y1 = targetY - 2;
       let y = y0 + (y1 - y0) * tb;
-      const x = targetX + Math.sin(tb * Math.PI * 2.2) * 6;
 
-      let ballOpacity = 1;
-      let swish = 0;
-      if (tb < 0.06) {
-        ballOpacity = tb / 0.06;
-      } else if (tb > SWISH_FROM) {
-        const through = (tb - SWISH_FROM) / (1 - SWISH_FROM);
-        y += through * SWISH_DROP;
-        ballOpacity = Math.max(0, 1 - through);
-        swish = Math.sin(through * Math.PI);
+      // Wackeln/Drehung klingen zum Aufsetzer hin aus, statt bis zum letzten
+      // Frame mit voller Amplitude weiterzulaufen – ein Ball, der zur Ruhe
+      // kommt, hört vorher auf zu tänzeln.
+      let wobbleAmp = 6;
+      let angle = tb * 280;
+      if (tb > SETTLE_FROM) {
+        const settle = (tb - SETTLE_FROM) / (1 - SETTLE_FROM);
+        wobbleAmp = 6 * (1 - settle);
+        // Ein sanftes Überschwingen kurz vor dem Aufsetzen – ein realer Ball
+        // bremst nicht linear ab, er hüpft ein letztes Mal ganz leicht.
+        y -= Math.sin(settle * Math.PI) * 4 * (1 - settle);
+        // Die Drehung läuft nicht bis zum letzten Frame linear weiter, sondern
+        // klingt zum Stillstand hin aus (Rest-Drehung statt abruptem Stopp).
+        angle = SETTLE_FROM * 280 + settle * 40;
       }
+      const x = targetX + Math.sin(tb * Math.PI * 2.2) * wobbleAmp;
+
+      // Kein Ausblenden mehr am Ziel: Der Ball bleibt sichtbar am Ruhepunkt
+      // stehen (die eigentliche Landung findet jetzt auf der Fortschritts-
+      // Leiste statt, s. Kommentar oben) – nur der Einblend- und der
+      // Textblock-Fade bleiben.
+      let ballOpacity = tb < 0.06 ? tb / 0.06 : 1;
 
       // Textblock-Ausblendung mit der Bahn-Deckkraft verrechnen (beide Ursachen
-      // multiplizieren sich, damit weder Einblenden noch Swish überschrieben wird).
+      // multiplizieren sich, damit das Einblenden nicht überschrieben wird).
       const textRect = textRef?.current?.getBoundingClientRect();
       ballOpacity *= ballOpacityNearText(rect.top + y, textRect);
 
       ball.style.transform = `translate3d(${(x - BALL_R).toFixed(1)}px, ${(y - BALL_R).toFixed(
         1
-      )}px, 0) rotate(${(tb * 280).toFixed(1)}deg)`;
+      )}px, 0) rotate(${angle.toFixed(1)}deg)`;
       ball.style.opacity = clamp(ballOpacity, 0, 1).toFixed(3);
-
-      // Swish als Teil des transform-Strings (nicht als eigene `scale`-Property –
-      // die kennt älteres Safari nicht).
-      emblem.style.transform = `translate3d(${emblemX.toFixed(1)}px, ${emblemY.toFixed(
-        1
-      )}px, 0) scale(${(1 + swish * 0.12).toFixed(3)})`;
-      emblem.style.opacity =
-        tb > EMBLEM_FROM ? clamp((tb - EMBLEM_FROM) / (1 - EMBLEM_FROM), 0, 1).toFixed(3) : "0";
     };
 
     // Geplanten Frame merken, damit er beim Abmelden nicht mehr gegen bereits
@@ -246,13 +251,9 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", child
         style={animated ? undefined : { opacity: ARC_MAX }}
       />
 
-      {/* Ball und Korb-Emblem nur bei erlaubter Bewegung */}
-      {animated && (
-        <>
-          <BallGlyph ref={ballRef} />
-          <HoopEmblem ref={emblemRef} />
-        </>
-      )}
+      {/* Ball nur bei erlaubter Bewegung – das Korb-Emblem sitzt seit A10 nicht
+          mehr hier, sondern am Ende der Fortschritts-Leiste. */}
+      {animated && <BallGlyph ref={ballRef} />}
 
       <div className="relative z-10 mx-auto max-w-4xl px-6 py-24 text-center">{children}</div>
     </div>

@@ -95,13 +95,51 @@ export default function LandingFeatures() {
     // Anzeige gescheitert (zweiter Befund Tobias, 12.08.2026). `clip` schneidet
     // identisch ab, ohne einen Scroll-Container zu erzeugen.
     <section className="relative bg-navy-950 py-20 px-4 overflow-x-clip">
+      {/* A1 (Mechanik-Katalog, docs/SPIELFELD-STRECKE-2026-08-12.md-Umfeld):
+          Die Überschrift läuft ohne Zeilenumbruch über beide Bildränder hinaus.
+          Bewusst AUSSERHALB von `max-w-6xl mx-auto` platziert: Der Full-Bleed-
+          Trick (`left-1/2 w-screen -translate-x-1/2`) bezieht `left:50%` auf die
+          Containing-Box des Elternelements – innerhalb des schmalen
+          max-w-Containers wären das 50 % von dessen Breite, nicht der
+          Viewport-Breite. Direkt im `<section>` (das selbst kein max-w hat)
+          stimmt die Rechnung.
+          Nachtrag Patrick (12.08.2026, deutschlandweite Perspektive): Der
+          Überstand darf nicht auf DIESEN Wortlaut hin ausgemessen sein, sonst
+          ist er eine Falle für jeden künftigen Text. Deshalb kein fixer
+          Pixel-/Transform-Wert, sondern `clamp(min, Nvw, max)` + `nowrap` +
+          `overflow-x-clip` (schon am `<section>` vorhanden) – das funktioniert
+          für jede Zeichenlänge gleich: laengerer Text ueberlaeuft automatisch
+          mehr, kuerzerer weniger, nichts davon ist von Hand fuer "Eine Saison,
+          sechs Spielzüge" nachjustiert. Verifiziert mit `tmp/a1-check.mjs`
+          (Original-Text UND eine doppelt so lange Test-Ueberschrift). */}
+      <div className="relative left-1/2 w-screen -translate-x-1/2 mb-6">
+        {/* Zweite, von Reveal UNBERÜHRTE Zentrierungs-Ebene: `inline-block` +
+            `left-1/2` + `-translate-x-1/2` schrumpft die Box auf die
+            tatsächliche Textbreite (Voraussetzung für symmetrischen Überstand)
+            und zentriert sie exakt. Zentriert wird NICHT über
+            `text-align:center` (per tmp/a1-check.mjs gemessen: bei einem
+            Inline-Block, der breiter als sein Container ist, hing das Ergebnis
+            vom Browser ab und lief einseitig statt symmetrisch über).
+            Diese Ebene ist bewusst ein einfaches `<div>`, NICHT das `<Reveal>`
+            selbst: Reveal schreibt beim Sichtbarwerden selbst `translate-x-0`
+            in dieselbe Klassenkaskade – in Tailwinds generiertem CSS kann das
+            je nach Regel-Reihenfolge die eigene `-translate-x-1/2` wieder
+            überschreiben (genau das ist beim ersten Versuch passiert, per
+            tmp/a1-verify2.mjs nach echtem Sichtbarwerden nachgemessen: die
+            Überschrift stand plötzlich einseitig am Bildschirmrand statt
+            symmetrisch). Reveal bekommt die Zentrierung deshalb schon fertig
+            und muss selbst nur noch senkrecht einblenden. */}
+        <div className="relative left-1/2 inline-block -translate-x-1/2">
+          <Reveal
+            as="h2"
+            className="block whitespace-nowrap font-display uppercase tracking-tight font-black text-paper-50"
+            style={{ fontSize: "clamp(3rem, 9vw, 7rem)" }}
+          >
+            Eine Saison, sechs Spielzüge
+          </Reveal>
+        </div>
+      </div>
       <div className="max-w-6xl mx-auto">
-        <Reveal
-          as="h2"
-          className="font-display uppercase tracking-tight text-4xl md:text-6xl font-black text-center mb-4 text-paper-50 text-balance"
-        >
-          Eine Saison, sechs Spielzüge
-        </Reveal>
         <Reveal
           as="p"
           delay={80}

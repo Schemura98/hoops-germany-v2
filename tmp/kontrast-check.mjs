@@ -56,6 +56,14 @@ const MESSUNG = () => {
     if (!text) continue;
     const el = node.parentElement;
     if (!el || el.closest("script,style,noscript")) continue;
+    // Rein dekorative Schrift ueberspringen. Die Kapitelziffern (A5) sind
+    // Konturschrift: Fuellfarbe transparent, sichtbar nur ueber den Umriss.
+    // Der Messwert waere hier immer 1:1 - und waere trotzdem kein Verstoss,
+    // weil die Ziffer `aria-hidden` ist und die Zaehlung als sr-only-Text
+    // daneben steht. WCAG nimmt genau das aus (dekorativ + zugaengliches
+    // Aequivalent). Ohne diese Ausnahme meldet der Durchlauf sechs
+    // Falschbefunde und wird als Werkzeug unbrauchbar.
+    if (el.closest('[aria-hidden="true"]')) continue;
     const cs = getComputedStyle(el);
     if (cs.visibility === "hidden" || cs.display === "none" || parseFloat(cs.opacity) < 0.15) continue;
     const r = el.getBoundingClientRect();
