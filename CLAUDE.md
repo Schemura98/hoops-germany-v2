@@ -226,9 +226,10 @@
 10. **Design-Review-Restwellen:** `docs/DESIGN-REVIEW-2026-08-10.md` – **Welle 1, 2a und 2b sind
     erledigt** (Team-Admin-Panel + Hero-Animation, Commit `a0dbe20`). Offen: **Welle 3** (Mobile-Tabellen
     mit Sticky-Spalte auf Rangliste/Topscorer/Liga-Tabelle, einheitliche mobile Filterleisten,
-    optional `CountUp`/`Reveal` auf den öffentlichen Seiten) und **Welle 4** (LegalShell-Zeilenlänge,
-    Sprungnavigation Datenschutz – nur Gestaltung, Text gehört Nora –, oauth-landing-Fehlerzustand,
-    FeedbackButton-Position auf Formularseiten).
+    optional `CountUp`/`Reveal` auf den öffentlichen Seiten). **Welle 4 ist erledigt** (12.08.2026):
+    LegalShell-Zeilenlänge (`max-w-xl`) und Sprungnavigation stehen, der oauth-landing-Fehlerzustand
+    hat Logo und Ausweg, und der FeedbackButton ist auf der Einstiegs-/Formularstrecke ausgeblendet –
+    er lag auf 390×640 gemessen über den letzten 36 px von „Konto erstellen".
 11. **Startseite als Scroll-Erlebnis – was noch offen ist:** Konzepte liegen vollständig vor
     (`docs/LANDING-KONZEPT-2026-08-11.md` inkl. Nachtrag, `docs/HERO-KONZEPT-2026-08-11.md`,
     `docs/LANDING-COPY-2026-08-11.md`). Gebaut sind Hero-Stufe 1, Feature-Choreografie (Stufe 1),

@@ -99,10 +99,16 @@ const MESSUNG = () => {
 };
 
 const browser = await chromium.launch();
-const ctx = await browser.newContext({ viewport: { width: 390, height: 900 } });
-const page = await ctx.newPage();
+// Zwei Breiten, nicht eine. Der Durchlauf lief lange nur auf 390px - Text, der
+// erst ab `sm` eingeblendet wird, war fuer die Messung damit unsichtbar. Genau
+// so blieb die Beschriftung des schwebenden Feedback-Knopfs unentdeckt
+// (weiss auf brand-500 = 2,61:1, eingeblendet erst ab 640px).
 let gesamt = 0;
-for (const pfad of SEITEN) {
+for (const [breite, tag] of [[390, "mobil"], [1280, "desktop"]]) {
+  const ctx = await browser.newContext({ viewport: { width: breite, height: 900 } });
+  const page = await ctx.newPage();
+  console.log(`--- Breite ${breite}px (${tag})`);
+  for (const pfad of SEITEN) {
   await page.goto(BASE + pfad, { waitUntil: "networkidle" });
   await page.waitForTimeout(300);
 
@@ -123,7 +129,7 @@ for (const pfad of SEITEN) {
   const treffer = await page.evaluate(MESSUNG);
   if (treffer.length) {
     gesamt += treffer.length;
-    console.log(`\n=== ${pfad} (${treffer.length})`);
+    console.log(`\n=== [${tag}] ${pfad} (${treffer.length})`);
     const gesehen = new Set();
     for (const t of treffer) {
       const key = t.farbe + t.grund + t.pfad;
@@ -132,6 +138,8 @@ for (const pfad of SEITEN) {
       console.log(`  ${t.ratio} / ${t.grenze}  ${t.px}px  ${t.farbe} auf ${t.grund}  "${t.text}"  [${t.pfad}]`);
     }
   }
+}
+  await ctx.close();
 }
 console.log("\nBefunde gesamt:", gesamt);
 await browser.close();

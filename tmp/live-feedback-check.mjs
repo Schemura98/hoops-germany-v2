@@ -1,0 +1,11 @@
+import { chromium } from "playwright";
+const b = await chromium.launch();
+const p = await (await b.newContext({ viewport: { width: 390, height: 900 } })).newPage();
+const fehler = [];
+p.on("console", (m) => m.type() === "error" && fehler.push(m.text().slice(0, 80)));
+await p.goto("https://hoopsgermany.de/feedback", { waitUntil: "networkidle" });
+await p.waitForTimeout(900);
+const t = await p.evaluate(() => document.body.innerText);
+console.log("Abschnitt live:", /was aus feedback schon wurde/i.test(t), "· Beispiele:", (t.match(/→/g) || []).length);
+console.log("Konsolenfehler:", fehler.length ? fehler.join(" | ") : "keine");
+await b.close();
