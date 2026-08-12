@@ -156,13 +156,33 @@ export default function SponsorReportView({ summary, period, generatedAt, label 
         </div>
       </Section>
 
+      {/* KORREKTUR 13.08.2026 — vorher standen hier `p.users.total` und
+          `p.teams.total`. Das sind `countDocuments({})` OHNE Basisfilter
+          (`lib/analyticsSummary.js` Z. 134/135), also inklusive Demo-Fixtures
+          und interner Testkonten. In einem Dokument, das das Haus verlaesst,
+          war das eine Falschaussage um etwa den Faktor 70 (Teams) bzw. 45
+          (Nutzer). `lib/analyticsSummary.js` Z. 137 sagt ueber die gefilterten
+          Zahlen woertlich, sie seien "die einzige Zahl, die man nach aussen
+          zeigen duerfte" — der Report benutzte die anderen.
+
+          ACHTUNG, noch nicht sauber: Fuer Spiele gibt es keine gefilterte
+          Entsprechung, `p.matches` enthaelt sehr wahrscheinlich Demo-Spiele.
+          "Offizielle Ligen" ist der Katalog (57), nicht die Zahl der Ligen mit
+          echten Teams. Beide sind unten deshalb als das benannt, was sie sind,
+          statt als Beteiligung ausgegeben zu werden. Endgueltige Fassung
+          braucht Nele (Aussage) und einen `NUR_ECHT`-Filter fuer Matches.
+          Vollstaendiger Befund: docs/RETENTION-BEFUND-2026-08-13.md */}
       <Section title="Plattform-Stärke">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Kpi label="Registrierte Nutzer" value={p.users.total} growth={p.users.growth} />
-          <Kpi label="Teams / Vereine" value={p.teams.total} growth={p.teams.growth} />
-          <Kpi label="Offizielle Ligen" value={p.leagues.total} />
-          <Kpi label="Spiele" value={p.matches.total} growth={p.matches.growth} />
+          <Kpi label="Registrierte Nutzer" value={p.externeUsers.total} growth={p.externeUsers.growth} />
+          <Kpi label="Teams / Vereine" value={p.externeTeams.total} growth={p.externeTeams.growth} />
+          <Kpi label="Ligen im Katalog" value={p.leagues.total} />
+          <Kpi label="Spiele inkl. Beispieldaten" value={p.matches.total} growth={p.matches.growth} />
         </div>
+        <p className="mt-3 text-xs text-mist-400">
+          Nutzer und Teams zählen ausschließlich externe Konten — Beispieldaten und
+          interne Testkonten sind herausgerechnet.
+        </p>
       </Section>
 
       <Section title="Beliebteste Seiten">
