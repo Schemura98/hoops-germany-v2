@@ -5,6 +5,7 @@ import axios from "axios";
 import { PiNewspaperBold, PiArrowSquareOutBold } from "react-icons/pi";
 import { Skeleton } from "@/components/ui/Skeleton";
 import Reveal from "@/components/ui/Reveal";
+import { staffel } from "@/lib/ui";
 
 function formatDate(d) {
   try {
@@ -102,7 +103,7 @@ export default function NewsWidget({ compact = false }) {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {news.map((n, i) => (
-            <Reveal key={i} delay={i * 60} className="h-full">
+            <Reveal key={i} delay={staffel(i)} className="h-full">
             <a
               href={n.link}
               target="_blank"

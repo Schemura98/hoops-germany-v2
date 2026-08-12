@@ -12,7 +12,14 @@ export default function Card({ className = "", padding = "p-5", hover = false, c
           ? // Kein Anheben mehr: Das war die Material-Design-Standardgeste. Auf
             // dem dunklen Panel-Grund liest sich „heller werden" wie ein
             // angehendes Licht – näher am Bild der Anzeigetafel.
-            "transition-[background-color,border-color] duration-200 ease-out-strong hover:border-brand-500 hover:bg-navy-700"
+            //
+            // Dazu ein Mikro-Detail (Wow-Konzept Stufe C.2): Zahlen im Panel
+            // springen beim Zeigen kurz auf die Markenfarbe. Es hängt an
+            // `font-mono`, also genau an den Werten, die ohnehin als Daten
+            // gesetzt sind – kein zusätzliches Markup, keine Ausnahme pro Seite.
+            // Einzeln bemerkt das niemand; in der Summe ist es der Unterschied
+            // zwischen „ordentlich" und „aus einem Guss".
+            "transition-[background-color,border-color] duration-200 ease-out-strong hover:border-brand-500 hover:bg-navy-700 [&_.font-mono]:transition-colors [&_.font-mono]:duration-200 hover:[&_.font-mono]:text-brand-400"
           : ""
       } ${className}`}
       {...props}

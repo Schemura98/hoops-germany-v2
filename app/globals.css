@@ -27,3 +27,20 @@ body {
     text-wrap: balance;
   }
 }
+
+/* Seitenwechsel über die native View-Transitions-API (Wow-Konzept C.3).
+   Nur die Blende wird gesetzt – kein Verschieben, kein Zoom: Ein Seitenwechsel
+   soll ruhig wirken, nicht wie ein Effekt. Browser ohne Unterstützung ignorieren
+   diesen Block vollständig. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 260ms;
+    animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+  }
+}
+
+/* Solange die Blende läuft, übernimmt sie den Auftritt allein. */
+:root[data-vt-running] .animate-page-in {
+  animation: none;
+}

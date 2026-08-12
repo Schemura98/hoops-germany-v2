@@ -48,7 +48,7 @@ function MatchCard({ match }) {
   return (
     <Link
       href={`/match/${match._id}`}
-      className="block bg-navy-800 rounded-md border border-navy-600 p-4 hover:border-brand-500/50 hover:-translate-y-0.5 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong motion-reduce:hover:translate-y-0"
+      className="block bg-navy-800 rounded-md border border-navy-600 p-4 hover:border-brand-500 hover:bg-navy-700 transition-[background-color,border-color] duration-200 ease-out-strong [&_.font-mono]:transition-colors [&_.font-mono]:duration-200 hover:[&_.font-mono]:text-brand-400"
     >
       {(match.leagueId?.name || isPlayoff) && (
         <div className="mb-2 flex items-center justify-center gap-2">
@@ -70,7 +70,7 @@ function MatchCard({ match }) {
         <TeamSide team={match.teamA} />
         <div className="text-center">
           {score ? (
-            <span className="text-lg font-bold text-paper-50 whitespace-nowrap">
+            <span className="font-mono tabular-nums text-lg font-bold text-paper-50 whitespace-nowrap">
               {score.a} : {score.b}
             </span>
           ) : (

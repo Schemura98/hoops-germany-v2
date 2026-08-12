@@ -186,7 +186,8 @@ export default function SpielerPage() {
               <Link
                 key={p._id}
                 href={`/player/view-player/${p.slug || p._id}`}
-                className="bg-navy-800 rounded-md border border-navy-600 hover:border-brand-500/50 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 group overflow-hidden"
+                data-vt
+                className="bg-navy-800 rounded-md border border-navy-600 hover:border-brand-500 hover:bg-navy-700 transition-[background-color,border-color] duration-200 ease-out-strong group overflow-hidden"
               >
                 <div className="aspect-square flex items-center justify-center overflow-hidden">
                   {p.profileImage ? (

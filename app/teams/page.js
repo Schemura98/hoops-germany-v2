@@ -169,7 +169,10 @@ export default function TeamsPage() {
               <Link
                 key={t._id}
                 href={`/team/team-detail/${t.slug}`}
-                className="group bg-navy-800 rounded-md border border-navy-600 hover:border-brand-500/50 hover:-translate-y-1 transition-[transform,box-shadow,border-color] duration-200 ease-out-strong motion-reduce:hover:translate-y-0 overflow-hidden flex flex-col"
+                // data-vt: Diese Karte bekommt den weichen Seitenwechsel
+                // (siehe components/layout/PageTransition.js).
+                data-vt
+                className="group bg-navy-800 rounded-md border border-navy-600 hover:border-brand-500 hover:bg-navy-700 transition-[background-color,border-color] duration-200 ease-out-strong overflow-hidden flex flex-col"
               >
                 <div className="bg-gradient-to-br from-navy-900 to-navy-800 flex items-center justify-center h-40 w-full">
                   {t.logo ? (

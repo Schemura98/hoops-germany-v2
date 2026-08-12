@@ -6,6 +6,7 @@ import axios from "axios";
 import { PiUserBold, PiUsersBold, PiTrophyBold } from "react-icons/pi";
 import { getPlayerToken } from "@/lib/clientAuth";
 import Reveal from "@/components/ui/Reveal";
+import { staffel } from "@/lib/ui";
 
 // Ausgeloggt: klassische Onboarding-Schritte (Registrieren → Profil → Community).
 const STEPS = [
@@ -86,7 +87,7 @@ export default function LandingHowItWorks() {
               // die die ausgeloggte Variante schon vorlebt (Entscheid Vivien).
               const navy = i === 1;
               return (
-                <Reveal key={c.title} delay={i * 90} className="h-full">
+                <Reveal key={c.title} delay={staffel(i)} className="h-full">
                   <Link
                     href={c.href}
                     className="group block h-full text-center bg-navy-950 hover:bg-brand-500/10 border border-navy-600 hover:border-brand-500/50 rounded-md p-8 transition-[transform,background-color,border-color] duration-200 ease-out-strong hover:-translate-y-1 motion-reduce:hover:translate-y-0"
@@ -119,7 +120,7 @@ export default function LandingHowItWorks() {
         <p className="text-mist-400 mb-16">In 3 einfachen Schritten dabei</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {STEPS.map((s, i) => (
-            <Reveal key={s.n} delay={i * 90} className="text-center">
+            <Reveal key={s.n} delay={staffel(i)} className="text-center">
               <div
                 // Textfarbe haengt an der Flaeche: Auf der orangen Ziffer waere
                 // paper-50 bei 2,61:1 - dort steht navy-950 (7,1:1).
