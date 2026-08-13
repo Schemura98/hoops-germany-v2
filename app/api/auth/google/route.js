@@ -52,5 +52,19 @@ export async function GET(req) {
       maxAge: 600,
     });
   }
+  // Mindestalter-Selbstauskunft mitnehmen (13.08.2026). /signup hängt
+  // `?minAge=1` an, sobald der Nutzer bestätigt hat. Der Callback legt NEUE
+  // Konten nur an, wenn dieses Cookie da ist – sonst wäre die Altersabfrage
+  // über „Mit Google registrieren" mit einem Klick umgangen.
+  // Anmeldungen BESTEHENDER Konten sind davon unberührt.
+  if (new URL(req.url).searchParams.get("minAge") === "1") {
+    res.cookies.set("g_oauth_minage", "1", {
+      httpOnly: true,
+      secure: base.startsWith("https"),
+      sameSite: "lax",
+      path: "/",
+      maxAge: 600,
+    });
+  }
   return res;
 }

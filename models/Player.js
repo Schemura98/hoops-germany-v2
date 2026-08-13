@@ -101,6 +101,21 @@ const playerSchema = new mongoose.Schema(
     // gesäubert auf [a-z0-9-_], max. 40 Zeichen. Optional – nur gesetzt, wenn beim
     // Registrieren ein src-Parameter mitkam.
     signupSource: String,
+
+    // Selbstauskunft „mindestens 16 Jahre alt", bestätigt bei der Registrierung
+    // (13.08.2026, Entscheidung Patrick: die Plattform ist erst ab 16 gedacht).
+    //
+    // Bewusst KEIN Geburtsdatum als Pflichtfeld: `birthdate` und `age` sind über
+    // die öffentliche Profil-API einsehbar. Ein Pflicht-Geburtsdatum würde also
+    // ausgerechnet die Datenmenge vergrößern, die anderswo als Risiko benannt
+    // ist (docs/RECHT-LEISTUNGSKARTE-2026-08-13.md). Die Selbstauskunft ist das
+    // mildere Mittel und erfüllt Noras Bedingung, dass die Regel an mindestens
+    // einer Stelle im Produkt wirkt.
+    //
+    // Datum statt Boolean, weil nur ein Zeitpunkt belegt, WANN bestätigt wurde.
+    // Bestandskonten von vor dem 13.08.2026 haben das Feld nicht — das ist
+    // korrekt und darf nicht nachträglich gesetzt werden.
+    minAgeConfirmedAt: Date,
     // Onboarding-Checklist im Newsfeed dauerhaft ausgeblendet (Server-Flag, geräteübergreifend).
     onboardingDismissed: { type: Boolean, default: false },
     // Willkommens-Tour nach der Registrierung gesehen (Auto-Start nur einmal).

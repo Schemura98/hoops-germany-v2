@@ -34,12 +34,21 @@ function SignupForm() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  // Selbstauskunft Mindestalter (13.08.2026). Voreinstellung bewusst NICHT
+  // angehakt: Eine vorausgefuellte Bestaetigung ist keine Bestaetigung.
+  const [abTZ, setAbTZ] = useState(false);
   const [googleHref, setGoogleHref] = useState("/api/auth/google");
 
+  // Die Bestaetigung muss den Google-Weg mitgehen, sonst waere sie in zehn
+  // Sekunden umgangen: Der Callback legt Konten ohne Formular an.
   useEffect(() => {
     const next = new URLSearchParams(window.location.search).get("next");
-    if (next) setGoogleHref(`/api/auth/google?next=${encodeURIComponent(next)}`);
-  }, []);
+    const p = new URLSearchParams();
+    if (next) p.set("next", next);
+    if (abTZ) p.set("minAge", "1");
+    const q = p.toString();
+    setGoogleHref(q ? `/api/auth/google?${q}` : "/api/auth/google");
+  }, [abTZ]);
 
   // ?src= puffern, damit die Quelle einen Wechsel Login↔Signup überlebt (z.B.
   // Flyer-Link landet auf /signup?src=flyer-koeln, Nutzer wechselt kurz zu /login
@@ -48,6 +57,17 @@ function SignupForm() {
     const src = searchParams.get("src")?.toLowerCase().trim();
     if (src && SRC_RE.test(src)) {
       window.sessionStorage.setItem(SIGNUP_SOURCE_KEY, src);
+    }
+  }, [searchParams]);
+
+  // Rückmeldung vom Google-Weg: Der Callback schickt hierher zurück, wenn die
+  // Mindestalter-Bestätigung fehlte. Ohne diese Auswertung wäre der Abbruch
+  // stumm und der Nutzer stünde ohne Erklärung wieder am Anfang.
+  useEffect(() => {
+    if (searchParams.get("error") === "min_age_required") {
+      setError(
+        "Bitte bestätige zuerst, dass du mindestens 16 Jahre alt bist – dann klappt auch die Anmeldung mit Google.",
+      );
     }
   }, [searchParams]);
 
@@ -65,6 +85,10 @@ function SignupForm() {
       setError("Die Passwörter stimmen nicht überein.");
       return;
     }
+    if (!abTZ) {
+      setError("Bitte bestätige, dass du mindestens 16 Jahre alt bist.");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -77,6 +101,7 @@ function SignupForm() {
         password: form.password,
         signupSource,
         sessionId,
+        minAgeConfirmed: abTZ,
       });
       setPlayerToken(data.token);
       setStoredPlayer(data.player);
@@ -183,6 +208,22 @@ function SignupForm() {
           />
         </div>
 
+        {/* Mindestalter-Selbstauskunft. Bewusst KEIN Geburtsdatum: `age` und
+            `birthdate` sind über die öffentliche Profil-API einsehbar – ein
+            Pflichtfeld dafür würde die Datenmenge vergrößern, statt sie zu
+            begrenzen. Serverseitig erzwungen in playerregister. */}
+        <label className="flex items-start gap-2.5 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={abTZ}
+            onChange={(e) => setAbTZ(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 accent-brand-500"
+          />
+          <span className="text-sm text-mist-300">
+            Ich bin mindestens 16 Jahre alt.
+          </span>
+        </label>
+
         <Button type="submit" disabled={loading} className="w-full">
           {loading ? "Konto wird erstellt…" : "Konto erstellen"}
         </Button>
@@ -194,9 +235,24 @@ function SignupForm() {
         <div className="h-px flex-1 bg-navy-700" />
       </div>
 
+      {/* Ohne Bestätigung führt der Google-Weg nicht weiter – sonst wäre die
+          Altersabfrage mit einem Klick daneben umgangen. Bewusst kein
+          ausgegrauter Knopf ohne Erklärung: Der Fehlertext sagt, was fehlt. */}
       <a
-        href={googleHref}
-        className="w-full flex items-center justify-center gap-2 border border-navy-600 hover:border-brand-500 text-mist-300 rounded-sm px-4 py-2.5 font-medium transition-colors"
+        href={abTZ ? googleHref : undefined}
+        role={abTZ ? undefined : "button"}
+        aria-disabled={abTZ ? undefined : "true"}
+        tabIndex={0}
+        onClick={(e) => {
+          if (abTZ) return;
+          e.preventDefault();
+          setError("Bitte bestätige zuerst, dass du mindestens 16 Jahre alt bist.");
+        }}
+        className={`w-full flex items-center justify-center gap-2 border rounded-sm px-4 py-2.5 font-medium transition-colors ${
+          abTZ
+            ? "border-navy-600 hover:border-brand-500 text-mist-300 cursor-pointer"
+            : "border-navy-700 text-mist-600 cursor-not-allowed"
+        }`}
       >
         <PiGoogleLogoBold className="text-brand-400" />
         Mit Google registrieren

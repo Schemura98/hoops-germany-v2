@@ -29,6 +29,12 @@ async function handler(req) {
   if (password.length < 6) {
     return fail("Das Passwort muss mindestens 6 Zeichen lang sein", 400);
   }
+  // Mindestalter serverseitig erzwingen (13.08.2026). Ein Häkchen, das nur im
+  // Formular geprüft wird, ist keine Regel – es ist eine Bitte, die jeder mit
+  // einem direkten Aufruf dieser Route übergeht.
+  if (body.minAgeConfirmed !== true) {
+    return fail("Bitte bestätige, dass du mindestens 16 Jahre alt bist", 400);
+  }
 
   await connectDB();
 
@@ -52,6 +58,7 @@ async function handler(req) {
     slug,
     password: hashed,
     status: "active",
+    minAgeConfirmedAt: new Date(),
     ...(signupSource ? { signupSource } : {}),
   });
 

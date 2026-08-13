@@ -44,6 +44,17 @@ async function handler(req) {
   // abgeleitet (Snapshot für Altcode/APIs; die Anzeige berechnet live).
   if (updates.birthdate !== undefined) {
     const derived = ageFromBirthdate(updates.birthdate);
+    // Mindestalter auch hier durchsetzen (13.08.2026). Ohne diese Prüfung
+    // bestätigt jemand bei der Registrierung „mindestens 16" und trägt danach
+    // ein Geburtsdatum ein, das 14 ergibt – die Regel wäre eine Formalie, und
+    // im Profil stünde offen ein Widerspruch zur eigenen Angabe.
+    // `null` (kein/ungültiges Datum) bleibt erlaubt: Das Feld ist optional.
+    if (derived != null && derived < 16) {
+      return fail(
+        "Hoops Germany ist erst ab 16 Jahren. Bitte prüfe dein Geburtsdatum.",
+        400
+      );
+    }
     updates.age = derived == null ? undefined : derived;
   }
   // Mail-Einstellung (Team-Admin): „Ergebnis eintragen"-Erinnerung an/aus.

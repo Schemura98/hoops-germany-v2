@@ -88,11 +88,22 @@ export async function GET(req) {
         await player.save();
       }
     } else {
+      // NEUES Konto über Google: Ohne die Mindestalter-Selbstauskunft von
+      // /signup wird hier nichts angelegt (13.08.2026). Sonst wäre die
+      // Altersabfrage im Formular wirkungslos – dieser Pfad braucht kein
+      // Formular. Bestehende Konten melden sich weiterhin ohne Hürde an.
+      if (req.cookies.get("g_oauth_minage")?.value !== "1") {
+        // Zurück auf /signup, nicht auf /login: Wer hier landet, wollte sich
+        // registrieren. `fail()` würde auf /login schicken, wo der Fehlercode
+        // nicht ausgewertet wird – der Abbruch wäre stumm.
+        return NextResponse.redirect(`${base}/signup?error=min_age_required`);
+      }
       const slug = await uniqueSlug(
         Player,
         `${profile.given_name || ""}-${profile.family_name || "spieler"}`
       );
       player = await Player.create({
+        minAgeConfirmedAt: new Date(),
         firstName: profile.given_name || "",
         lastName: profile.family_name || "",
         email,
@@ -125,6 +136,7 @@ export async function GET(req) {
     const res = NextResponse.redirect(landing);
     res.cookies.delete("g_oauth_state");
     res.cookies.delete("g_oauth_next");
+    res.cookies.delete("g_oauth_minage");
     return res;
   } catch (err) {
     console.error("[GOOGLE OAUTH CALLBACK ERROR]", err);
