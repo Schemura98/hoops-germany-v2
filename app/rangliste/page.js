@@ -6,6 +6,7 @@ import axios from "axios";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
+import BestenlistenWechsel from "@/components/layout/BestenlistenWechsel";
 import Avatar from "@/components/Avatar";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { BUNDESLAENDER } from "@/lib/constants";
@@ -102,12 +103,14 @@ export default function RanglistePage() {
       <Navbar />
 
       <PageHeader
-        eyebrow="Wettbewerb"
+        eyebrow="Bestenliste"
         title="Rangliste"
         subtitle="Teams nach Siegen und Korbdifferenz – über alle Ligen oder gefiltert."
       />
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+        <BestenlistenWechsel className="mb-5" />
+
         {/* Filter */}
         <div className="flex flex-wrap gap-3 mb-5">
           {seasons.length > 0 && (

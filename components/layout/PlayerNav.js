@@ -9,19 +9,45 @@ import {
   PiXBold,
   PiShieldCheckBold,
   PiTrophyBold,
+  PiDeviceMobileBold,
 } from "react-icons/pi";
 import { clearPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
 import NotificationBell from "@/components/layout/NotificationBell";
 
-const links = [
-  { href: "/player/newsfeed", label: "Newsfeed" },
-  { href: "/spieler", label: "Spieler" },
-  { href: "/teams", label: "Teams" },
-  { href: "/spiele", label: "Spiele" },
-  { href: "/ligen", label: "Ligen" },
-  { href: "/topscorer", label: "Topscorer" },
-  { href: "/player/player-detail", label: "Mein Profil" },
+// Gleiche Ordnung wie in der öffentlichen Navbar (Befund R7/K8, 13.08.2026):
+// „Bestenlisten" trägt Topscorer UND Rangliste – die Rangliste war aus keiner
+// Navigationsliste des Projekts erreichbar. Im Mobil-Menü tragen die Punkte
+// Gruppentitel; die senkrechte Liste kann sich das leisten.
+const NAV_GRUPPEN = [
+  {
+    titel: "Wettbewerb",
+    links: [
+      { href: "/ligen", label: "Ligen" },
+      { href: "/spiele", label: "Spiele" },
+      { href: "/topscorer", label: "Bestenlisten", auchAktivAuf: ["/rangliste"] },
+    ],
+  },
+  {
+    titel: "Wer spielt",
+    links: [
+      { href: "/teams", label: "Teams" },
+      { href: "/spieler", label: "Spieler" },
+    ],
+  },
 ];
+
+const START = { href: "/player/newsfeed", label: "Newsfeed" };
+const PROFIL = { href: "/player/player-detail", label: "Mein Profil" };
+
+const links = [START, ...NAV_GRUPPEN.flatMap((g) => g.links), PROFIL];
+
+// Eine Zeile im Mobil-Menü (aktiv = Markenkante links, wie am aktiven Tab).
+const zeileClass = (aktiv) =>
+  `block px-5 py-3.5 text-sm font-medium border-l-4 transition-colors ${
+    aktiv
+      ? "bg-navy-800 text-paper-50 border-brand-500"
+      : "text-mist-300 hover:bg-navy-700 hover:text-paper-50 border-transparent"
+  }`;
 
 export default function PlayerNav({ player }) {
   const router = useRouter();
@@ -31,6 +57,9 @@ export default function PlayerNav({ player }) {
   // Aktive Seite markieren (exakt oder als Unterpfad).
   const isActive = (href) =>
     pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
+  // Ein Punkt kann für mehrere Seiten stehen („Bestenlisten" = Topscorer + Rangliste).
+  const linkAktiv = (l) =>
+    isActive(l.href) || (l.auchAktivAuf || []).some((h) => isActive(h));
 
   function logout() {
     clearPlayerToken();
@@ -63,9 +92,9 @@ export default function PlayerNav({ player }) {
             <Link
               key={l.href}
               href={l.href}
-              aria-current={isActive(l.href) ? "page" : undefined}
+              aria-current={linkAktiv(l) ? "page" : undefined}
               className={`text-sm transition-colors border-b-2 pb-0.5 ${
-                isActive(l.href)
+                linkAktiv(l)
                   ? "text-paper-50 font-semibold border-brand-500"
                   : "text-mist-300 hover:text-paper-50 border-transparent"
               }`}
@@ -132,21 +161,62 @@ export default function PlayerNav({ player }) {
       {/* Mobile-Menü */}
       {mobileOpen && (
         <div className="lg:hidden bg-navy-900 border-t border-navy-600 divide-y divide-navy-600/60">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              onClick={() => setMobileOpen(false)}
-              aria-current={isActive(l.href) ? "page" : undefined}
-              className={`block px-5 py-3.5 text-sm font-medium border-l-4 transition-colors ${
-                isActive(l.href)
-                  ? "bg-navy-800 text-paper-50 border-brand-500"
-                  : "text-mist-300 hover:bg-navy-700 hover:text-paper-50 border-transparent"
-              }`}
-            >
-              {l.label}
-            </Link>
+          <Link
+            href={START.href}
+            onClick={() => setMobileOpen(false)}
+            aria-current={isActive(START.href) ? "page" : undefined}
+            className={zeileClass(isActive(START.href))}
+          >
+            {START.label}
+          </Link>
+          {NAV_GRUPPEN.map((g) => (
+            <div key={g.titel}>
+              <p className="bg-navy-950 px-5 py-2 font-display text-[11px] font-bold uppercase tracking-[0.2em] text-mist-600">
+                {g.titel}
+              </p>
+              <div className="divide-y divide-navy-600/60">
+                {g.links.map((l) => (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    onClick={() => setMobileOpen(false)}
+                    aria-current={linkAktiv(l) ? "page" : undefined}
+                    className={zeileClass(linkAktiv(l))}
+                  >
+                    {l.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
           ))}
+          <p className="bg-navy-950 px-5 py-2 font-display text-[11px] font-bold uppercase tracking-[0.2em] text-mist-600">
+            Mein Bereich
+          </p>
+          <Link
+            href={PROFIL.href}
+            onClick={() => setMobileOpen(false)}
+            aria-current={isActive(PROFIL.href) ? "page" : undefined}
+            className={zeileClass(isActive(PROFIL.href))}
+          >
+            {PROFIL.label}
+          </Link>
+          {/* Die PWA-Seite stand bisher nur im Footer – ausgerechnet die Seite,
+              die am direktesten auf Wiederkehr einzahlt (Symbol auf dem
+              Startbildschirm). Sie gehört zum Konto, nicht zu den Inhalten,
+              deshalb steht sie hier und nicht in der Hauptleiste. */}
+          <Link
+            href="/installieren"
+            onClick={() => setMobileOpen(false)}
+            aria-current={isActive("/installieren") ? "page" : undefined}
+            className={`flex items-center gap-3 px-5 py-3.5 border-l-4 transition-colors ${
+              isActive("/installieren")
+                ? "bg-navy-800 text-paper-50 border-brand-500"
+                : "text-mist-300 hover:bg-navy-700 hover:text-paper-50 border-transparent"
+            }`}
+          >
+            <PiDeviceMobileBold className="w-4 h-4 flex-shrink-0 text-brand-400" />
+            <span className="text-sm font-medium">App installieren</span>
+          </Link>
           {adminLink && (
             <Link
               href={adminLink.href}

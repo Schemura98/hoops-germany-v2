@@ -19,6 +19,7 @@ import {
   PiNewspaperClippingBold,
   PiArrowsLeftRightBold,
   PiMegaphoneBold,
+  PiRankingBold,
 } from "react-icons/pi";
 import {
   getPlayerToken,
@@ -37,15 +38,49 @@ import Reveal from "@/components/ui/Reveal";
 // Der aktive Punkt wird durch die 2px-Brand-Leiste markiert – dasselbe Signal
 // wie am aktiven Tab (visuelle Richtung „Anzeigetafel", Abschnitt 4).
 // Saubere Neuimplementierung in v2-Architektur (Original-Design, ohne Altlasten).
-const PUBLIC_LINKS = [
-  { href: "/ligen", label: "Ligen", icon: PiTrophyBold },
-  { href: "/spiele", label: "Spiele", icon: PiCalendarBlankBold },
-  { href: "/teams", label: "Teams", icon: PiUsersBold },
-  { href: "/spieler", label: "Spieler", icon: PiUserBold },
-  { href: "/transfermarkt", label: "Transfermarkt", icon: PiArrowsLeftRightBold },
-  { href: "/tryouts", label: "Tryouts", icon: PiMegaphoneBold },
-  { href: "/topscorer", label: "Topscorer", icon: PiBasketballBold },
+//
+// Struktur statt Länge (13.08.2026, Ronjas Befund R7/K8):
+// Die Leiste hatte sieben gleichrangige Punkte – und /rangliste kam trotzdem
+// nicht vor. Ein achter Punkt wäre die billige Antwort gewesen. Stattdessen:
+//   • Topscorer (Spieler) und Rangliste (Teams) sind EIN Gedanke – sie heißen
+//     jetzt gemeinsam „Bestenlisten" und teilen sich einen Navigationspunkt.
+//     Der Umschalter auf beiden Seiten (components/ui/Tabs) macht die jeweils
+//     andere Liste sichtbar; deshalb ist der Punkt auch auf /rangliste aktiv.
+//   • Im Mobil-Menü tragen die Punkte Gruppentitel. Eine senkrechte Liste kann
+//     sich das leisten, und aus einer Wand aus sieben Zeilen werden drei kurze.
+// Ergebnis: gleich viele Punkte wie vorher, eine erreichbare Seite mehr.
+//
+const NAV_GRUPPEN = [
+  {
+    titel: "Wettbewerb",
+    links: [
+      { href: "/ligen", label: "Ligen", icon: PiTrophyBold },
+      { href: "/spiele", label: "Spiele", icon: PiCalendarBlankBold },
+      {
+        href: "/topscorer",
+        label: "Bestenlisten",
+        icon: PiRankingBold,
+        auchAktivAuf: ["/rangliste"],
+      },
+    ],
+  },
+  {
+    titel: "Wer spielt",
+    links: [
+      { href: "/teams", label: "Teams", icon: PiUsersBold },
+      { href: "/spieler", label: "Spieler", icon: PiUserBold },
+    ],
+  },
+  {
+    titel: "Wechseln",
+    links: [
+      { href: "/transfermarkt", label: "Transfermarkt", icon: PiArrowsLeftRightBold },
+      { href: "/tryouts", label: "Tryouts", icon: PiMegaphoneBold },
+    ],
+  },
 ];
+
+const PUBLIC_LINKS = NAV_GRUPPEN.flatMap((g) => g.links);
 
 export default function Navbar() {
   const [me, setMe] = useState(null); // null = unbekannt/ausgeloggt
@@ -72,25 +107,30 @@ export default function Navbar() {
   // Aktive Seite markieren (exakt oder als Unterpfad).
   const isActive = (href) =>
     pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
+  // Ein Punkt kann für mehrere Seiten stehen („Bestenlisten" = Topscorer + Rangliste).
+  const linkAktiv = (l) =>
+    isActive(l.href) || (l.auchAktivAuf || []).some((h) => isActive(h));
   // Klassen-Helfer (konsistente Borders → kein Layout-Shift zwischen aktiv/inaktiv).
-  const deskClass = (href) =>
+  const deskClassAktiv = (aktiv) =>
     `text-sm transition-colors border-b-2 pb-0.5 ${
-      isActive(href)
+      aktiv
         ? "text-paper-50 font-semibold border-brand-500"
         : "text-mist-300 hover:text-paper-50 border-transparent"
     }`;
+  const deskClass = (href) => deskClassAktiv(isActive(href));
   const deskAdminClass = (href) =>
     `flex items-center gap-1.5 text-sm font-medium border-b-2 pb-0.5 ${
       isActive(href)
         ? "text-brand-300 border-brand-500"
         : "text-brand-400 hover:text-brand-300 border-transparent"
     }`;
-  const mobClass = (href) =>
+  const mobClassAktiv = (aktiv) =>
     `flex items-center gap-3 px-5 py-3.5 border-l-4 transition-colors ${
-      isActive(href)
+      aktiv
         ? "bg-navy-800 text-paper-50 border-brand-500"
         : "text-paper-50 hover:bg-navy-700 border-transparent"
     }`;
+  const mobClass = (href) => mobClassAktiv(isActive(href));
   const mobAdminClass = (href) =>
     `flex items-center gap-3 px-5 py-3.5 border-l-4 transition-colors ${
       isActive(href)
@@ -237,8 +277,8 @@ export default function Navbar() {
               <Link
                 key={l.href}
                 href={l.href}
-                aria-current={isActive(l.href) ? "page" : undefined}
-                className={deskClass(l.href)}
+                aria-current={linkAktiv(l) ? "page" : undefined}
+                className={deskClassAktiv(linkAktiv(l))}
               >
                 {l.label}
               </Link>
@@ -427,21 +467,34 @@ export default function Navbar() {
         {/* Mobile-Menü */}
         {mobileOpen && (
           <div className="lg:hidden bg-navy-900 border-t border-navy-600 divide-y divide-navy-600/60">
-            {PUBLIC_LINKS.map((l) => {
-              const Icon = l.icon;
-              return (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  onClick={() => setMobileOpen(false)}
-                  aria-current={isActive(l.href) ? "page" : undefined}
-                  className={mobClass(l.href)}
-                >
-                  <Icon className="text-brand-400 w-4 h-4 flex-shrink-0" />
-                  <span className="text-sm font-medium">{l.label}</span>
-                </Link>
-              );
-            })}
+            {NAV_GRUPPEN.map((g) => (
+              <div key={g.titel}>
+                <p className="bg-navy-950 px-5 py-2 font-display text-[11px] font-bold uppercase tracking-[0.2em] text-mist-600">
+                  {g.titel}
+                </p>
+                <div className="divide-y divide-navy-600/60">
+                  {g.links.map((l) => {
+                    const Icon = l.icon;
+                    const aktiv = linkAktiv(l);
+                    return (
+                      <Link
+                        key={l.href}
+                        href={l.href}
+                        onClick={() => setMobileOpen(false)}
+                        aria-current={aktiv ? "page" : undefined}
+                        className={mobClassAktiv(aktiv)}
+                      >
+                        <Icon className="text-brand-400 w-4 h-4 flex-shrink-0" />
+                        <span className="text-sm font-medium">{l.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+            <p className="bg-navy-950 px-5 py-2 font-display text-[11px] font-bold uppercase tracking-[0.2em] text-mist-600">
+              {isLoggedIn ? "Mein Bereich" : "Konto"}
+            </p>
             {isLoggedIn ? (
               <>
                 {teamSlug && (

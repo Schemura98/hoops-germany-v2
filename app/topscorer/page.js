@@ -8,6 +8,7 @@ import { PiBasketballBold, PiTableBold, PiCalendarBlankBold } from "react-icons/
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
+import BestenlistenWechsel from "@/components/layout/BestenlistenWechsel";
 import EmptyState from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { positionLabel } from "@/lib/constants";
@@ -205,6 +206,8 @@ function TopscorerInhalt() {
       />
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+        <BestenlistenWechsel className="mb-5" />
+
         {(leagues.length > 0 || seasons.length > 0) && (
           <div className="mb-5 grid grid-cols-1 sm:flex sm:flex-wrap gap-2">
             {leagues.length > 0 && (
@@ -398,6 +401,7 @@ export default function TopscorerPage() {
             subtitle="Rangliste nach erzielten Punkten (bestätigte Spiele)."
           />
           <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+            <BestenlistenWechsel className="mb-5" />
             <TopscorerSkeleton />
           </main>
           <Footer />
