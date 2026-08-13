@@ -91,8 +91,25 @@ function buildSponsorView(s) {
       usersByState: beschriftet(s.region?.usersByState, 8),
       teamsByCity: beschriftet(s.region?.teamsByCity, 8),
     },
+    // topPlayers bleibt DRAUSSEN (13.08.2026, Fund von Nora).
+    //
+    // lib/analyticsSummary.js baut die Liste aus `firstName lastName` echter
+    // Personen. Über diesen Endpunkt wären das personenbezogene Daten an einen
+    // Dritten — die Datenschutzerklärung nennt in Abschnitt 9 aber nur
+    // Auftragsverarbeiter, und ein Sponsor ist keiner. Verschärfend: Der
+    // Liga-Katalog enthält U18 und U16; unter den meistbesuchten Profilen kann
+    // ein Minderjähriger stehen, dessen Name dann in einem Sponsorendokument
+    // steht.
+    //
+    // Teams und Ligen bleiben drin: das sind Organisationen, keine Personen —
+    // und für einen Sponsor ist ohnehin interessant, welche VEREINE Verkehr
+    // ziehen, nicht welche einzelne Person.
+    //
+    // Die interne Ansicht (/admin/sponsor-report) bekommt das volle Summary und
+    // zeigt die Spalte weiterhin; SponsorReportView blendet sie aus, wenn die
+    // Daten fehlen.
+    // Einordnung: docs/RECHT-LEISTUNGSKARTE-2026-08-13.md
     content: {
-      topPlayers: gezaehlt(s.content?.topPlayers, 5),
       topTeams: gezaehlt(s.content?.topTeams, 5),
       topLeagues: gezaehlt(s.content?.topLeagues, 5),
     },

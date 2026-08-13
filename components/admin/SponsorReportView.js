@@ -143,11 +143,19 @@ export default function SponsorReportView({ summary, period, generatedAt, label 
 
       <Section title="Beliebteste Inhalte">
         <div className="grid sm:grid-cols-3 gap-x-6 gap-y-4">
+          {/* „Spielerprofile" nur, wenn die Daten überhaupt mitkommen. Der
+              öffentliche Endpunkt liefert sie seit dem 13.08.2026 nicht mehr —
+              es sind Klarnamen echter Personen, und ein Sponsor ist kein
+              Auftragsverarbeiter. Intern (/admin/sponsor-report) kommt das volle
+              Summary an, dort bleibt die Spalte sichtbar. */}
           {[
-            { t: "Spielerprofile", items: summary.content.topPlayers },
+            summary.content.topPlayers && {
+              t: "Spielerprofile",
+              items: summary.content.topPlayers,
+            },
             { t: "Teams", items: summary.content.topTeams },
             { t: "Ligen", items: summary.content.topLeagues },
-          ].map((c) => (
+          ].filter(Boolean).map((c) => (
             <div key={c.t}>
               <p className="text-xs font-semibold text-mist-300 mb-2">{c.t}</p>
               <Bars items={c.items.slice(0, 5).map((i) => ({ label: i.label, value: i.count }))} />

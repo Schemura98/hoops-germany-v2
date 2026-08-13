@@ -75,6 +75,29 @@ export default function AuthShell({
           {children}
 
           {footer && <div className="mt-6 text-center text-sm text-mist-400">{footer}</div>}
+
+          {/* Hinweis auf die Datenschutzerklärung, 13.08.2026 (Fund von Nora,
+              docs/RECHT-LEISTUNGSKARTE-2026-08-13.md): Auf /signup wurde sie
+              bisher NIRGENDS verlinkt — weder auf der Seite noch hier. Das
+              betrifft Art. 13 DSGVO und ist unabhängig von allem anderen die
+              billigste Verbesserung.
+
+              Bewusst ein reiner VERWEIS, keine Einwilligungserklärung. Der
+              Wortlaut einer Zustimmung („mit der Registrierung willigst du
+              ein…") ist ein Rechtstext und gehört zu Nora bzw. einem Anwalt,
+              nicht zu einem Bauteil. Hier steht nur, wo die Information liegt.
+
+              In AuthShell statt in /signup, damit Login, Registrierung und
+              Passwort-Zurücksetzen ihn gemeinsam tragen. */}
+          <p className="mt-6 text-center text-xs text-mist-600">
+            <Link href="/datenschutz" className="hover:text-mist-400 underline underline-offset-2">
+              Datenschutz
+            </Link>
+            <span className="mx-2" aria-hidden="true">·</span>
+            <Link href="/impressum" className="hover:text-mist-400 underline underline-offset-2">
+              Impressum
+            </Link>
+          </p>
         </div>
       </div>
 
