@@ -11,6 +11,7 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
+> **Zuletzt deployt: `275f124` (13.08.2026, ~06:30)** – die Nachtschicht, nach beiden Gates.
 > **Rollback-Punkt: `a8e4fd4`** – der Live-Stand VOR der Nachtschicht 13.08.2026, auf dem VPS
 > per `git checkout a8e4fd4 && npm run build && pm2 restart hoops-v2` wiederherstellbar.
 > ⚠️ Diese Zeile führte bis 13.08. `78d833a` als zuletzt deployt – auf dem Server lief
