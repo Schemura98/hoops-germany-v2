@@ -36,6 +36,7 @@ const AREAS = [
   "Tryouts",
   "Suche & Filter",
   "Newsfeed & Community",
+  "Benachrichtigungen",
   "Mobile / Handy",
   "Performance / Ladezeit",
   "Sonstiges",

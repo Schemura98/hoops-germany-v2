@@ -17,6 +17,7 @@ import {
   PiFileCsvBold,
   PiFilePdfBold,
   PiArrowClockwiseBold,
+  PiChartLineUpBold,
 } from "react-icons/pi";
 import AdminShell from "@/components/layout/AdminShell";
 import StatCard from "@/components/admin/StatCard";
@@ -69,6 +70,38 @@ function Card({ title, hint, children, right }) {
       {hint && <p className="text-xs text-mist-400 mb-4">{hint}</p>}
       {children}
     </div>
+  );
+}
+
+// „Deine Zahlen stehen" – trägt der Wiederaufrufgrund aus Ronjas Befund R1?
+// Versendet vs. geöffnet. Bewusst nur diese zwei Zahlen: eine Öffnungsquote ohne
+// Versand wäre erfunden, deshalb wird sie bei 0 gar nicht gezeigt.
+function OwnStatsCard({ os, period }) {
+  if (!os) return null;
+  return (
+    <Card
+      title="Benachrichtigung „Deine Zahlen stehen“"
+      hint={`Spieler über ihre eigenen Werte im Box-Score informiert · ${period}`}
+      right={
+        os.openRate !== null && (
+          <span className="font-mono text-xs tabular-nums text-brand-400">
+            {os.openRate}% geöffnet
+          </span>
+        )
+      }
+    >
+      {os.notified === 0 ? (
+        <p className="text-sm text-mist-400">
+          Im gewählten Zeitraum wurde noch keine solche Benachrichtigung versendet.
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <StatCard icon={PiChartLineUpBold} label="Versendet" value={os.notified} />
+          <StatCard icon={PiUsersBold} label="Erreichte Spieler" value={os.notifiedPlayers} />
+          <StatCard icon={PiEyeBold} label="Geöffnet" value={os.opened} />
+        </div>
+      )}
+    </Card>
   );
 }
 
@@ -352,6 +385,8 @@ export default function AdminAnalyticsPage() {
           <EngagementCards eng={summary.engagement} period={periodLabel} />
           <RegionCard region={summary.region} />
           <ContentCard content={summary.content} period={periodLabel} />
+          <OwnStatsCard os={summary.ownStats} period={periodLabel} />
+
           {summary.signupSources?.length > 0 && (
             <Card title="Registrierungen nach Quelle" hint="Aus ?src= beim Registrieren (z.B. Flyer-QR-Codes) · allzeit, nur echte Accounts">
               <Bars items={summary.signupSources.map((s) => ({ label: s.src, value: s.count }))} />
