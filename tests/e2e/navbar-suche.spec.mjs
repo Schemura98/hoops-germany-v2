@@ -1,0 +1,129 @@
+// Deploy-Gate 14.08.2026: Such-Overlay der öffentlichen Navbar.
+//
+// Deckt die drei Gate-Kleinigkeiten vom 13.08. ab, die hier nachgezogen wurden:
+//   1. Escape schließt die Suche (vorher führte genau EIN Weg heraus: das ×).
+//   2. Klick auf den abgedunkelten Grund schließt – aber ein Klick INS Feld
+//      darf es nicht. Das ist die eigentliche Falle: Ohne die Prüfung
+//      `e.target === e.currentTarget` blubbert jeder Klick ins Suchfeld nach
+//      oben durch und schließt den Dialog mitten im Tippen. Ein Test, der nur
+//      „Hintergrundklick schließt" prüft, wäre bei genau dieser Regression grün.
+//   3. Trefferflächen der Chrome-Symbole ≥ 24 px (WCAG 2.5.8).
+// Dazu die Regression zu Ronjas R8: Ligen sind mitdurchsucht UND der
+// Platzhalter sagt es auch – der Text nannte sie einen Tag lang nicht.
+//
+// Läuft AUSSCHLIESSLICH gegen die Dev-DB `hoopsgermany` (Guard in global-setup).
+// Voraussetzung: Seed-Daten via `node scripts/seed-demo.mjs`.
+import { test, expect } from "@playwright/test";
+
+// Öffentliche Seite mit Navbar – bewusst nicht „/", damit die Scroll-Bühne der
+// Startseite (HeroScrollStage) nicht mitspielt.
+const SEITE = "/spieler";
+
+// ⚠️ Das Suchfeld IMMER über den Dialog greifen, nie über die Seite. `/spieler`
+// hat ein eigenes Filterfeld („Name, Team oder Stadt suchen…"), ein
+// seitenweiter Platzhalter-Locator trifft also zwei Felder und bricht mit
+// „strict mode violation" – beim ersten Lauf genau so passiert.
+function suchfeld(dialog) {
+  return dialog.getByPlaceholder(/suchen/i);
+}
+
+async function sucheOeffnen(page) {
+  await page.goto(SEITE);
+  await page.getByLabel("Suche öffnen").click();
+  const dialog = page.getByRole("dialog", { name: "Suche" });
+  await expect(dialog).toBeVisible();
+  return dialog;
+}
+
+test.describe("Such-Overlay – Auswege", () => {
+  test("Escape schließt die Suche", async ({ page }) => {
+    const dialog = await sucheOeffnen(page);
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+  });
+
+  test("Escape verwirft auch den eingetippten Suchbegriff", async ({ page }) => {
+    const dialog = await sucheOeffnen(page);
+    await suchfeld(dialog).fill("Max");
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    await page.getByLabel("Suche öffnen").click();
+    // Beim erneuten Öffnen darf der alte Begriff nicht wieder dastehen.
+    await expect(suchfeld(dialog)).toHaveValue("");
+  });
+
+  test("Klick auf den abgedunkelten Grund schließt", async ({ page }) => {
+    const dialog = await sucheOeffnen(page);
+    // UNTERHALB des Dialogs klicken, nicht oben: Die sticky Navbar liegt in
+    // der oberen Leiste über dem Grund, ein Klick auf (12,12) landet auf ihr
+    // und schließt nichts – beim ersten Lauf genau so danebengegriffen.
+    const box = await dialog.boundingBox();
+    const viewport = page.viewportSize();
+    await page.mouse.click(viewport.width / 2, box.y + box.height + 60);
+    await expect(dialog).toBeHidden();
+  });
+
+  test("Klick INS Suchfeld schließt NICHT", async ({ page }) => {
+    const dialog = await sucheOeffnen(page);
+    const feld = suchfeld(dialog);
+    await feld.click();
+    await feld.pressSequentially("Ma");
+    await expect(dialog).toBeVisible();
+    await expect(feld).toHaveValue("Ma");
+  });
+
+  test("das × schließt weiterhin", async ({ page }) => {
+    const dialog = await sucheOeffnen(page);
+    await page.getByLabel("Suche schließen").click();
+    await expect(dialog).toBeHidden();
+  });
+});
+
+test.describe("Such-Overlay – Ligen (Ronjas R8)", () => {
+  test("der Platzhalter nennt Ligen, nicht nur Spieler und Team", async ({ page }) => {
+    const dialog = await sucheOeffnen(page);
+    const text = await suchfeld(dialog).getAttribute("placeholder");
+    expect(text.toLowerCase()).toContain("liga");
+  });
+
+  test("eine echte Liga ist über die Suche auffindbar", async ({ page, request }) => {
+    // Ligennamen nicht hart verdrahten: Die Seed-Daten dürfen sich ändern,
+    // ohne dass dieser Test dabei falsch grün oder falsch rot wird.
+    const res = await request.get("/api/leagues");
+    const body = await res.json();
+    const ligen = body.leagues || body || [];
+    test.skip(ligen.length === 0, "Keine Ligen in der Dev-DB – seed-demo.mjs läuft?");
+
+    const liga = ligen[0];
+    const dialog = await sucheOeffnen(page);
+    await suchfeld(dialog).fill(liga.name.slice(0, 6));
+
+    // Der Treffer muss auf die Liga-Seite zeigen – dass irgendein Eintrag
+    // erscheint, genügt nicht: Spieler und Teams landen in derselben Liste.
+    const treffer = dialog.locator(`a[href="/ligen/${liga._id}"]`);
+    await expect(treffer.first()).toBeVisible();
+  });
+});
+
+test.describe("Trefferflächen der Chrome-Symbole (WCAG 2.5.8)", () => {
+  // 24 px ist das Mindestmaß der Richtlinie. Gemeldet wurden 20×20 px.
+  const MINDEST = 24;
+
+  for (const label of ["Suche öffnen", "Feedback geben"]) {
+    test(`„${label}" misst mindestens ${MINDEST}×${MINDEST} px`, async ({ page }) => {
+      await page.goto(SEITE);
+      const box = await page.getByLabel(label).first().boundingBox();
+      expect(box, `${label} nicht gefunden`).not.toBeNull();
+      expect.soft(Math.round(box.width)).toBeGreaterThanOrEqual(MINDEST);
+      expect(Math.round(box.height)).toBeGreaterThanOrEqual(MINDEST);
+    });
+  }
+
+  test("das × im offenen Overlay misst mindestens 24×24 px", async ({ page }) => {
+    await sucheOeffnen(page);
+    const box = await page.getByLabel("Suche schließen").boundingBox();
+    expect(box).not.toBeNull();
+    expect.soft(Math.round(box.width)).toBeGreaterThanOrEqual(MINDEST);
+    expect(Math.round(box.height)).toBeGreaterThanOrEqual(MINDEST);
+  });
+});

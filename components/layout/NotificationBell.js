@@ -21,7 +21,7 @@ import {
   PiChartLineUpBold,
 } from "react-icons/pi";
 import { getPlayerToken, getStoredPlayer } from "@/lib/clientAuth";
-import { notificationHref } from "@/lib/notifications";
+import { notificationHref, GLOCKE_LEER } from "@/lib/notifications";
 import { trackEvent } from "@/lib/trackEvent";
 import { timeAgo } from "@/lib/timeAgo";
 import Reveal from "@/components/ui/Reveal";
@@ -143,7 +143,7 @@ export default function NotificationBell() {
 
             {items.length === 0 ? (
               <p className="px-4 py-8 text-center text-sm text-mist-400">
-                Keine Benachrichtigungen.
+                {GLOCKE_LEER}
               </p>
             ) : (
               <ul className="divide-y divide-navy-600">

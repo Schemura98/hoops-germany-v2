@@ -62,9 +62,19 @@ function EigenePlatzierung({ viewer, ligaName, onSpringen, sichtbareAnzahl = 0 }
         <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-mist-600">
           Deine Platzierung
         </p>
+        {/* Zweiter Satz ergänzt am 14.08.2026 (Befund Lina, Wortlaut Nele):
+            Der Leerzustand nannte nur das Fehlen und ließ offen, ob man selbst
+            nachsehen muss. Bewusst „sobald deine Zahlen aus einem Spiel
+            eingetragen sind" – NICHT „sobald dein Team ein Ergebnis einträgt":
+            `notifyOwnStats` verlangt zusätzlich mindestens einen erfassten Wert
+            für genau diesen Spieler, ein Ergebnis ohne Box-Score löst nichts
+            aus. Und bewusst nicht „…dann stehst du hier": „hier" ist eine
+            gefilterte Liga-Auswahl, in der er auch dann nicht auftaucht, wenn
+            er woanders spielt. */}
         <p className="mt-1 text-sm text-mist-300">
           Für diese Auswahl ist noch kein gewertetes Spiel mit deinen Zahlen
-          erfasst.
+          erfasst. Sobald deine Zahlen aus einem Spiel eingetragen sind,
+          bekommst du eine Benachrichtigung.
         </p>
       </div>
     );

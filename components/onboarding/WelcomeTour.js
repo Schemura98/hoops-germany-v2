@@ -8,6 +8,7 @@ import Button from "@/components/ui/Button";
 import SplitFlap from "@/components/ui/SplitFlap";
 import TourProofBoard from "@/components/onboarding/TourProofBoard";
 import { StepWeg, StepPosition, StepStadt, StepUebergabe } from "@/components/onboarding/TourSteps";
+import { computeSteps } from "@/components/onboarding/OnboardingChecklist";
 import { getPlayerToken } from "@/lib/clientAuth";
 import { trackEvent } from "@/lib/trackEvent";
 
@@ -49,8 +50,20 @@ const SCHRITTE = [
     // unabhängig", nicht „es gibt keinen Streit". Eine Behauptung, die das
     // eigene Produkt widerlegt, ist genau dort tödlich, wo Belegbarkeit das
     // einzige Argument ist.
-    titel: "Zahlen, die beide Seiten bestätigen",
-    text: "Auf Hoops trägt nicht einer die Zahlen ein. Beide Teams melden das Ergebnis unabhängig voneinander – erst wenn beide dasselbe sagen, zählt es. Deshalb muss ein Verein deinen Statistiken nicht glauben.",
+    // Zweite Korrektur Nele, 14.08.2026 – derselbe Fehlertyp eine Ebene tiefer,
+    // und diesmal der teuerste: Titel und Schlusssatz bezogen die Doppel-
+    // bestätigung auf die ZAHLEN („Zahlen, die beide Seiten bestätigen" /
+    // „Deshalb muss ein Verein deinen Statistiken nicht glauben"). Doppelt
+    // bestätigt ist aber das ERGEBNIS – `teamAResult`/`teamBResult` tragen
+    // Punktzahlen, der Box-Score kommt von EINEM Team-Admin. `lib/statsNotify.js`
+    // formuliert das korrekt („beide Teams haben das Ergebnis unabhängig
+    // gemeldet"), die Tour tat es nicht. Ein Muster-Fall aus
+    // docs/MUSTER-ZAHLEN-DIE-LUEGEN: im Sinne des Codes fast richtig, im Sinne
+    // des Lesers ein Prüfversprechen für seine 24 Punkte, das es nicht gibt.
+    // Der neue Titel ist wörtlich die Choreografie, die TourProofBoard darunter
+    // vorführt; der Schlusssatz behauptet nur noch, was `beidseitigBelegt` prüft.
+    titel: "Beide melden. Dann zählt es.",
+    text: "Beide Teams melden das Ergebnis unabhängig voneinander – erst wenn beide dasselbe sagen, zählt es. Deshalb steht hinter deinen Zahlen ein Spiel, das beide Seiten so gemeldet haben.",
   },
   {
     key: "weg",
@@ -63,24 +76,65 @@ const SCHRITTE = [
     marke: "Dein Profil",
     titel: "Wo stehst du auf dem Feld?",
     titelAdmin: "Was machst du im Team?",
-    text: "Ein Tipp genügt – es steht sofort in deinem Profil, kein Formular.",
+    // „Ein Tipp genügt" liest sich auf Deutsch zuerst als Ratschlag, nicht als
+    // Antippen – ein Stolperer ausgerechnet in dem Satz, der Einfachheit
+    // verspricht (Nele, 14.08.2026).
+    text: "Einmal antippen genügt – es steht sofort in deinem Profil, kein Formular.",
   },
   {
     key: "stadt",
     marke: "Dein Profil",
-    titel: "Wo spielst du?",
+    // „Wo spielst du?" stand direkt hinter „Wo stehst du auf dem Feld?" und
+    // konnte als zweite Positionsfrage gelesen werden (Nele, 14.08.2026).
+    titel: "In welcher Stadt spielst du?",
     // Nele, 13.08.2026: Vorher stand hier der Funktionsname „Umkreissuche".
     // Der Nutzen ist „Leute aus deiner Nähe finden dich", nicht der Name des
     // Filters, der das erledigt.
-    text: "Setzt Ort und Bundesland auf einmal – damit dich Teams und Tryouts aus deiner Nähe finden.",
+    // Nachtrag 14.08.2026: „damit dich Teams und Tryouts finden" drehte die
+    // Richtung um und versprach eine Nachfrage-Seite, die es heute nicht gibt –
+    // dieselbe Übertreibung, die eine Folie weiter schon zu „im Aufbau"
+    // korrigiert wurde. Ein Tryout findet ohnehin niemanden; man findet es.
+    text: "Eine Stadt genügt, das Bundesland kommt mit – damit du Teams und Tryouts in deiner Nähe findest.",
   },
   {
     key: "start",
     marke: "Los geht's",
+    // Titel und Text sind hier nur der Normalfall (1–3 von 4). Die beiden
+    // Ränder liefert `schlussfolie()` – s. dort, warum.
     titel: "Du hast schon angefangen",
     text: "Der Rest wartet als Checkliste in deinem Feed. Du kannst jederzeit dort weitermachen.",
   },
 ];
+
+// Schlussfolie nach Stand. Bis zum 14.08.2026 stand „Du hast schon angefangen"
+// auch über „0 von 4 · 0 %" – ein Muster-Fall in Reinform (Befund Lina,
+// Fassungen Nele): Die Überschrift behauptet einen Anfang, den die Zahl
+// darunter im selben Blickfeld bestreitet. Der Text trug denselben Defekt,
+// „DER REST wartet" setzt voraus, dass etwas davor war.
+// Der 4-von-4-Fall ist selten (setzt Foto, Profil, Team und einen Follow VOR
+// der Tour voraus), kostet aber nichts und verhindert die Umkehrung des alten
+// Fehlers – „du hast angefangen" über 100 %.
+function schlussfolie({ angemeldet, erledigt, gesamt }) {
+  if (!angemeldet) {
+    return {
+      titel: "Jetzt fehlt nur dein Konto",
+      text: "Kostenlos, in einer Minute angelegt – und du bist früh genug dabei, um dein Team als Erstes einzutragen.",
+    };
+  }
+  if (erledigt === 0) {
+    return {
+      titel: "Fang mit einem an",
+      text: "Vier Startschritte warten als Checkliste in deinem Feed. Einer reicht für heute.",
+    };
+  }
+  if (erledigt >= gesamt) {
+    return {
+      titel: "Du bist startklar",
+      text: "Alle Startschritte stehen. Deinen Feed findest du ab jetzt unter Newsfeed.",
+    };
+  }
+  return null; // Normalfall: die Werte aus SCHRITTE gelten
+}
 
 // Der eine konkrete nächste Schritt je Weg. Gründung und Beitritt sind eigene
 // Seiten mit eigenem Freigabeprozess – die gehören nicht in ein Dialogfenster,
@@ -91,12 +145,28 @@ const ZIELE = {
   suche: { label: "Tryouts ansehen", href: "/tryouts" },
 };
 
+// Ausgeloggter Zweitausgang. ⚠️ `ZIELE.admin` zeigt auf /team/create, und das
+// verlangt einen Login – ohne diese Ausnahme endete der „Erst mal umsehen"-Weg
+// wieder in der Anmeldemaske, also genau dort, wovor dieser Umbau schützt
+// (Hinweis Nele, 14.08.2026).
+function zielOhneKonto(weg) {
+  const ziel = ZIELE[weg] || ZIELE.verein;
+  return weg === "admin" ? ZIELE.verein : ziel;
+}
+
 export default function WelcomeTour() {
   const [open, setOpen] = useState(false);
   const [sichtbar, setSichtbar] = useState(false); // treibt die Ein-/Ausblende-Kurve
   const [index, setIndex] = useState(0);
   const [richtung, setRichtung] = useState(1);
   const [player, setPlayer] = useState(null);
+  // Ob die Tour gerade FÜR EIN KONTO läuft. Beim Auto-Start ist das immer wahr;
+  // über den Footer-Link kann sie auch ohne Konto geöffnet werden, und dann
+  // muss sie sich anders verhalten (nichts speichern, keine Fortschrittszahl,
+  // Ausgang zur Registrierung statt in die Anmeldemaske). Als State und nicht
+  // als direkter `getPlayerToken()`-Aufruf im Rendern, weil ein Login während
+  // der offenen Tour sonst kein Neuzeichnen auslöst.
+  const [angemeldet, setAngemeldet] = useState(true);
 
   // Antworten der Tour. Werden aus dem Profil vorbelegt, damit ein bereits
   // gepflegtes Feld nicht als leer erscheint (und nicht überschrieben wird).
@@ -132,6 +202,7 @@ export default function WelcomeTour() {
         const { data } = await axios.post("/api/player/getmyinfo", { token });
         if (data?.player && !data.player.welcomeSeen) {
           profilUebernehmen(data.player);
+          setAngemeldet(true);
           setIndex(0);
           setRichtung(1);
           setOpen(true);
@@ -150,6 +221,7 @@ export default function WelcomeTour() {
       setRichtung(1);
       setOpen(true);
       const token = getPlayerToken();
+      setAngemeldet(!!token);
       if (!token) return;
       axios
         .post("/api/player/getmyinfo", { token })
@@ -199,10 +271,15 @@ export default function WelcomeTour() {
     async (completed = false) => {
       if (schliessendRef.current) return;
       schliessendRef.current = true;
+      // Ausgeloggte Durchläufe tragen „ohne_konto" statt des Wegs (Hinweis
+      // Nele/Ben, 14.08.2026): Sonst mischt sich der Erstbesucher, der die Tour
+      // über den Footer geöffnet hat, in dieselbe Abschlussquote wie ein frisch
+      // registrierter Nutzer – zwei Gruppen mit völlig verschiedener Bedeutung
+      // in einer Zahl.
       trackEvent(
         completed ? "tour_completed" : "tour_skipped",
         pathname,
-        completed ? weg || "ohne_weg" : SCHRITTE[index].key
+        completed ? (angemeldet ? weg || "ohne_weg" : "ohne_konto") : SCHRITTE[index].key
       );
       setSichtbar(false);
       setTimeout(() => setOpen(false), 200);
@@ -219,7 +296,7 @@ export default function WelcomeTour() {
         }
       }
     },
-    [pathname, index, weg]
+    [pathname, index, weg, angemeldet]
   );
 
   // Escape schließt, Tab bleibt im Dialog. Beides fehlte der Vorgängerfassung –
@@ -293,8 +370,25 @@ export default function WelcomeTour() {
     [player, position, ort]
   );
 
-  const ziel = ZIELE[weg] || ZIELE.verein;
-  const titel = weg === "admin" && schritt.titelAdmin ? schritt.titelAdmin : schritt.titel;
+  const ziel = angemeldet ? ZIELE[weg] || ZIELE.verein : zielOhneKonto(weg);
+
+  // Stand für die Schlussfolie – dieselbe Quelle wie die Liste darin, damit
+  // Überschrift und Zahl nicht auseinanderlaufen können. Das war der Fehler:
+  // Die Überschrift war fest, die Zahl gerechnet.
+  const startSchritte = computeSteps(spielerStand);
+  const abweichung =
+    schritt.key === "start"
+      ? schlussfolie({
+          angemeldet,
+          erledigt: startSchritte.filter((s) => s.done).length,
+          gesamt: startSchritte.length,
+        })
+      : null;
+
+  const titel =
+    abweichung?.titel ??
+    (weg === "admin" && schritt.titelAdmin ? schritt.titelAdmin : schritt.titel);
+  const text = abweichung?.text ?? schritt.text;
 
   if (!open) return null;
 
@@ -424,7 +518,7 @@ export default function WelcomeTour() {
               {titel}
             </h2>
             <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-mist-400">
-              {schritt.text}
+              {text}
             </p>
 
             <div className="mt-4">
@@ -436,6 +530,10 @@ export default function WelcomeTour() {
                   wert={position}
                   onWert={setPosition}
                   onGespeichert={aktionGemeldet}
+                  // Für das Avatar-Zitat in der Quittung: Es soll genau die
+                  // Form zeigen, die gleich oben rechts in der Leiste steht –
+                  // also mit demselben Bild bzw. denselben Initialen.
+                  player={spielerStand}
                 />
               )}
               {schritt.key === "stadt" && (
@@ -453,6 +551,7 @@ export default function WelcomeTour() {
                   verfuegbar={verfuegbar}
                   onVerfuegbar={setVerfuegbar}
                   onGespeichert={aktionGemeldet}
+                  angemeldet={angemeldet}
                 />
               )}
             </div>
@@ -473,16 +572,28 @@ export default function WelcomeTour() {
 
           {letzter ? (
             <div className="flex items-center gap-2">
+              {/* Ohne Konto führte der Zweitausgang „Zum Feed" direkt in die
+                  Anmeldemaske – die Tour ist über den Footer ausgeloggt
+                  erreichbar und ist dort die EINZIGE Fläche, die vor der
+                  Registrierung erklärt (Befund Lina, 14.08.2026). Sie mit einem
+                  Login-Zwang zu beenden, verschenkt genau den Menschen, für den
+                  sie gebaut ist. Beschriftung „Konto erstellen" ist wörtlich die
+                  auf /signup – Knopf und Ziel sagen dasselbe Wort. */}
               <Button
                 variant="ghost"
                 size="sm"
-                href="/player/newsfeed"
+                href={angemeldet ? "/player/newsfeed" : ziel.href}
                 onClick={() => close(true)}
               >
-                Zum Feed
+                {angemeldet ? "Zum Feed" : "Erst mal umsehen"}
               </Button>
-              <Button size="md" href={ziel.href} onClick={() => close(true)}>
-                {ziel.label} <PiArrowRightBold className="text-xs" aria-hidden="true" />
+              <Button
+                size="md"
+                href={angemeldet ? ziel.href : "/signup"}
+                onClick={() => close(true)}
+              >
+                {angemeldet ? ziel.label : "Konto erstellen"}{" "}
+                <PiArrowRightBold className="text-xs" aria-hidden="true" />
               </Button>
             </div>
           ) : schritt.key === "weg" ? (

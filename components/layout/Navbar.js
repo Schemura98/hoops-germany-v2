@@ -30,7 +30,7 @@ import {
 } from "@/lib/clientAuth";
 import useMenuHoehe from "@/lib/useMenuHoehe";
 import { timeAgo } from "@/lib/timeAgo";
-import { notificationHref } from "@/lib/notifications";
+import { notificationHref, GLOCKE_LEER } from "@/lib/notifications";
 import { trackEvent } from "@/lib/trackEvent";
 import Avatar from "@/components/Avatar";
 import DemoBadge from "@/components/DemoBadge";
@@ -233,25 +233,22 @@ export default function Navbar() {
     }
   }, [searchData]);
 
-  function onSearchChange(e) {
-    const term = e.target.value;
-    setSearchTerm(term);
-    if (!term || !searchData) {
-      setResults([]);
-      return;
-    }
+  // Filterung als reine Funktion, damit sie aus zwei Richtungen aufrufbar ist:
+  // beim Tippen UND sobald die Daten nachträglich eintreffen (s. Effekt unten).
+  function trefferBerechnen(term, daten) {
+    if (!term || !daten) return [];
     const q = term.toLowerCase();
-    const players = (searchData.players || [])
+    const players = (daten.players || [])
       .filter((p) => `${p.firstName} ${p.lastName}`.toLowerCase().includes(q))
       .slice(0, 5)
       .map((p) => ({ ...p, _type: "player" }));
-    const teams = (searchData.teams || [])
+    const teams = (daten.teams || [])
       .filter((t) => t.teamName?.toLowerCase().includes(q))
       .slice(0, 3)
       .map((t) => ({ ...t, _type: "team" }));
     // Auch Region und Spielklasse durchsuchen: Wer „Niers" oder „Bezirksliga"
     // eintippt, meint eine Liga, kennt aber selten ihren vollen Namen.
-    const leagues = (searchData.leagues || [])
+    const leagues = (daten.leagues || [])
       .filter((l) =>
         [l.name, l.region, l.bundesland, l.level, l.season]
           .filter(Boolean)
@@ -259,14 +256,56 @@ export default function Navbar() {
       )
       .slice(0, 3)
       .map((l) => ({ ...l, _type: "league" }));
-    setResults([...players, ...teams, ...leagues]);
+    return [...players, ...teams, ...leagues];
   }
+
+  function onSearchChange(e) {
+    const term = e.target.value;
+    setSearchTerm(term);
+    setResults(trefferBerechnen(term, searchData));
+  }
+
+  // Nachfiltern, sobald die Daten da sind (Fund beim Schreiben des E2E-Tests
+  // am 14.08.2026). Die Suche lädt Spieler, Teams und Ligen erst beim Öffnen –
+  // wer sofort lostippt, tat das gegen ein leeres `searchData`. Der alte
+  // Zweig `if (!searchData) { setResults([]); return; }` verwarf die Eingabe
+  // dann stillschweigend, und da danach nichts mehr neu filterte, blieb es bei
+  // „Keine Ergebnisse", bis man ein weiteres Zeichen tippte. Genau der
+  // schnelle Tipper – jemand, der weiß, wonach er sucht – bekam also die
+  // Antwort „gibt es nicht" auf etwas, das es gibt.
+  useEffect(() => {
+    if (!searchOpen || !searchData || !searchTerm) return;
+    setResults(trefferBerechnen(searchTerm, searchData));
+    // Absichtlich nur an `searchData`/`searchTerm`: Beim Tippen erledigt das
+    // schon `onSearchChange`, dieser Effekt fängt nur das Nachladen ab.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchData, searchTerm, searchOpen]);
 
   function closeSearch() {
     setSearchOpen(false);
     setSearchTerm("");
     setResults([]);
   }
+
+  // Escape schließt die Suche (Gate-Befund 13.08.2026, nachgezogen am 14.08.).
+  // Vorher führte aus dem Overlay genau ein Weg heraus: das kleine ×. Wer
+  // reflexhaft Escape drückt – und das tut jeder, der einmal eine Suche in
+  // einem Browser oder Editor benutzt hat – blieb im Dialog stehen und hielt
+  // ihn für hängend. Für Tastaturnutzer war das ein echter Ausweg-Mangel, kein
+  // Komfortthema. Der Effekt hängt nur an `searchOpen`, der Listener existiert
+  // also ausschließlich, solange das Overlay offen ist.
+  useEffect(() => {
+    if (!searchOpen) return;
+    function onKeyDown(e) {
+      if (e.key === "Escape") {
+        setSearchOpen(false);
+        setSearchTerm("");
+        setResults([]);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [searchOpen]);
 
   async function toggleNotif() {
     const next = !notifOpen;
@@ -327,7 +366,7 @@ export default function Navbar() {
             <FeedbackLink />
             <button
               onClick={openSearch}
-              className="text-paper-50 hover:text-brand-400 transition-colors"
+              className="p-2 -m-1 text-paper-50 hover:text-brand-400 transition-colors"
               aria-label="Suche öffnen"
             >
               <PiMagnifyingGlassBold className="w-5 h-5" />
@@ -337,21 +376,29 @@ export default function Navbar() {
               <div className="relative" ref={notifRef}>
                 <button
                   onClick={toggleNotif}
-                  className="relative text-paper-50 hover:text-brand-400 transition-colors"
+                  className="p-2 -m-1 text-paper-50 hover:text-brand-400 transition-colors"
                   aria-label="Benachrichtigungen"
                 >
-                  <PiBellBold className="w-5 h-5" />
-                  {unread > 0 && (
-                    <Reveal
-                      key={unread}
-                      as="span"
-                      direction="pop"
-                      duration={200}
-                      className="absolute -top-1.5 -right-1.5 bg-signal-error text-paper-50 text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center leading-none"
-                    >
-                      {unread > 9 ? "9+" : unread}
-                    </Reveal>
-                  )}
+                  {/* Das innere `relative span` trägt jetzt den Bezugsrahmen des
+                      Zählers, nicht mehr der Button: Sobald der Button Padding
+                      für die Trefferfläche bekommt, säße ein am Button
+                      verankertes Badge 8 px zu weit außen. So bleibt es am
+                      Symbol kleben, wo es hingehört – dasselbe Muster wie in
+                      components/layout/NotificationBell.js. */}
+                  <span className="relative block">
+                    <PiBellBold className="w-5 h-5" />
+                    {unread > 0 && (
+                      <Reveal
+                        key={unread}
+                        as="span"
+                        direction="pop"
+                        duration={200}
+                        className="absolute -top-1.5 -right-1.5 bg-signal-error text-paper-50 text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center leading-none"
+                      >
+                        {unread > 9 ? "9+" : unread}
+                      </Reveal>
+                    )}
+                  </span>
                 </button>
 
                 {notifOpen && (
@@ -362,7 +409,7 @@ export default function Navbar() {
                     <div className="max-h-80 overflow-y-auto divide-y divide-navy-600">
                       {notifs.length === 0 ? (
                         <p className="px-4 py-8 text-center text-mist-400 text-sm">
-                          Keine Benachrichtigungen
+                          {GLOCKE_LEER}
                         </p>
                       ) : (
                         notifs.map((n, i) => {
@@ -654,21 +701,40 @@ export default function Navbar() {
 
       {/* Such-Overlay */}
       {searchOpen && (
-        <div className="fixed inset-0 z-[999] bg-black/60 flex items-start justify-center pt-20 px-4">
-          <div className="bg-navy-800 border border-navy-600 rounded-md w-full max-w-lg overflow-hidden">
+        <div
+          className="fixed inset-0 z-[999] bg-black/60 flex items-start justify-center pt-20 px-4"
+          // Klick auf den abgedunkelten Grund schließt – der zweite Ausweg
+          // neben Escape und ×. `e.target === e.currentTarget` stellt sicher,
+          // dass nur der Grund selbst zählt: Ohne diese Prüfung würde jeder
+          // Klick ins Suchfeld nach oben durchblubbern und den Dialog beim
+          // Tippen schließen.
+          onClick={(e) => {
+            if (e.target === e.currentTarget) closeSearch();
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Suche"
+            className="bg-navy-800 border border-navy-600 rounded-md w-full max-w-lg overflow-hidden"
+          >
             <div className="flex items-center gap-3 px-4 py-3 border-b border-navy-600">
               <PiMagnifyingGlassBold className="text-mist-600 flex-shrink-0" />
               <input
                 ref={searchInputRef}
                 type="text"
-                placeholder="Spieler oder Team suchen…"
+                // Ligen sind seit dem 13.08.2026 mitdurchsucht (Ronjas R8), der
+                // Platzhalter nannte sie aber weiter nicht. Damit versteckte
+                // ausgerechnet die Beschriftung die Neuerung: Wer „Bezirksliga"
+                // sucht, tippt es nicht ein, wenn dort „Spieler oder Team" steht.
+                placeholder="Spieler, Team oder Liga suchen…"
                 className="flex-1 outline-none text-sm text-paper-50 placeholder-navy-500"
                 value={searchTerm}
                 onChange={onSearchChange}
               />
               <button
                 onClick={closeSearch}
-                className="text-mist-400 hover:text-mist-300 transition-colors"
+                className="p-2 -m-1 text-mist-400 hover:text-mist-300 transition-colors"
                 aria-label="Suche schließen"
               >
                 <PiXBold className="w-4 h-4" />

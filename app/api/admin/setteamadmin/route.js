@@ -5,6 +5,7 @@ import Team from "@/models/Team";
 import { getAdminFromToken } from "@/lib/serverAuth";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 import { slotsFreigeben } from "@/lib/rosterSlots";
+import { recordTransfer } from "@/lib/recordTransfer";
 
 // POST /api/admin/setteamadmin – Spieler als Team-Admin setzen/entfernen (Admin).
 async function handler(req) {
@@ -53,12 +54,25 @@ async function handler(req) {
   await player.save();
 
   // Kaderplatz beim alten Verein freigeben (Liste aller Wechselwege in
-  // lib/rosterSlots.js). ⚠️ Dieser Pfad protokolliert weiterhin KEINEN
-  // Transfer – vorbestehend, hier bewusst nicht mitgeändert.
+  // lib/rosterSlots.js).
   if (vorherigesTeam && String(vorherigesTeam) !== String(team._id)) {
     await slotsFreigeben(player._id, vorherigesTeam);
   }
   await Team.findByIdAndUpdate(team._id, { adminPlayerId: player._id });
+
+  // Transfer protokollieren (Gate-Befund 13.08.2026, nachgezogen am 14.08.).
+  // Dieser Pfad setzt `player.teamId` oben mit – ohne Eintrag fehlte dem
+  // Spieler ausgerechnet die Station, die ein Super-Admin vergeben hat: Der
+  // Karriere-Verlauf zeigte den Verein, aber keinen Wechsel dorthin, und beim
+  // nächsten echten Wechsel stand im Lebenslauf ein Sprung ohne Herkunft.
+  // `recordTransfer` leitet den Typ selbst ab (kein vorheriges Team = "join",
+  // sonst "move") und ist fehlertolerant – ein Problem beim Loggen darf das
+  // Setzen der Admin-Rechte nicht scheitern lassen.
+  await recordTransfer({
+    player: player._id,
+    fromTeam: vorherigesTeam,
+    toTeam: team._id,
+  });
 
   return ok({ message: `${player.firstName} ist jetzt Admin von ${team.teamName}` });
 }

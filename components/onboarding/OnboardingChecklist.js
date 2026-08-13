@@ -39,7 +39,16 @@ export function computeSteps(player) {
     {
       key: "team",
       label: "Team beitreten oder gründen",
-      desc: "Finde dein Team – oder gründe ein neues.",
+      // Ertrag statt Aufforderung (Befund Lina, Wortlaut Nele, 14.08.2026):
+      // Die Zeile wiederholte nur das Label darüber und nannte nicht, was man
+      // danach bekommt. „Nächstes Spiel" und „Letztes Ergebnis" stehen wörtlich
+      // als Beschriftungen in components/feed/SpieltagStrip.js – der Nutzer
+      // erkennt sie wieder.
+      // ⚠️ Bewusst „Erst mit Team …", nicht „danach steht …": Die Leiste hängt
+      // an ZWEI Bedingungen (Team UND ein angesetztes/abgeschlossenes Spiel).
+      // Ein Versprechen „danach steht dein nächstes Spiel oben" widerlegt ein
+      // frisch gegründetes Team ohne Spielplan sofort selbst.
+      desc: "Erst mit Team stehen Nächstes Spiel und Letztes Ergebnis oben in deinem Feed.",
       href: "/teams",
       done: !!(player?.teamId || player?.teamAdminOf || player?.isTeamAdmin),
     },

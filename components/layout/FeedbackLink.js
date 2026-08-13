@@ -67,13 +67,21 @@ export default function FeedbackLink({ variant = "icon", onNavigate }) {
 
   // Symbol für die Aktionsleiste (neben Suche/Glocke) – gleiche Größe und
   // Rhythmus wie die Nachbarn, aber in brand-400 als einziges Farbsignal.
+  //
+  // `p-2 -m-1`: Das Symbol misst 20×20 px, die Klickfläche lag damit unter dem
+  // 24er-Mindestmaß (WCAG 2.5.8, Gate-Befund 13.08.2026) – auf einem Handy
+  // trifft man das nur mit Zielen. Das Padding hebt die Trefferfläche auf 36 px,
+  // das negative Margin nimmt den Zuwachs aus dem Layout wieder heraus, sodass
+  // der Abstand zu Suche und Glocke unverändert bleibt. Dasselbe Muster nutzt
+  // NotificationBell bereits – hier und beim Suchknopf war es nur nicht
+  // nachgezogen.
   return (
     <Link
       href="/feedback"
       aria-label="Feedback geben"
       title="Feedback geben"
       aria-current={aktiv ? "page" : undefined}
-      className={`transition-colors ${
+      className={`p-2 -m-1 transition-colors ${
         aktiv ? "text-brand-300" : "text-brand-400 hover:text-brand-300"
       }`}
     >

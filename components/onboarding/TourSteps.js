@@ -28,7 +28,12 @@ export const WEGE = {
   verein: {
     key: "verein",
     label: "Ich spiele in einem Verein",
-    hint: "Liga, Kader, Ergebnisse",
+    // Die Hinweise von „verein" und „admin" waren fast wortgleich („Liga,
+    // Kader, Ergebnisse" / „Kader, Spielplan, Ergebnisse"). Wer zwischen „ich
+    // spiele" und „ich organisiere" schwankt, bekam damit keine Entscheidungs-
+    // hilfe, sondern zweimal dieselbe Liste (Nele, 14.08.2026). Jetzt trennt
+    // sie, was der Nutzer TUT: mitspielen gegen eintragen.
+    hint: "Deine Liga, dein Kader, deine Zahlen",
     Icon: PiBasketballBold,
   },
   suche: {
@@ -40,7 +45,7 @@ export const WEGE = {
   admin: {
     key: "admin",
     label: "Ich organisiere ein Team",
-    hint: "Kader, Spielplan, Ergebnisse",
+    hint: "Du trägst Kader und Ergebnisse ein",
     Icon: PiClipboardTextBold,
   },
 };
@@ -52,18 +57,28 @@ export function rollenFuerWeg(weg) {
   return weg === "admin" ? [...POSITIONS, "Coach", "Manager"] : POSITIONS;
 }
 
-// Einheitlicher Speicher-Aufruf. Gibt true/false zurück; die Tour bricht bei
-// einem Fehler NIE ab – ein Netzwerkfehler darf niemanden aus dem Einstieg
-// werfen, der Schritt bleibt dann einfach offen und steht später in der
-// Checkliste im Feed.
+// Einheitlicher Speicher-Aufruf. Die Tour bricht bei einem Fehler NIE ab – ein
+// Netzwerkfehler darf niemanden aus dem Einstieg werfen, der Schritt bleibt
+// dann einfach offen und steht später in der Checkliste im Feed.
+//
+// Drei Ausgänge statt zwei (Befund Lina, 14.08.2026). Vorher gab der fehlende
+// Token dasselbe `false` zurück wie ein echter Fehler – und weil die Tour über
+// den Footer AUCH OHNE KONTO erreichbar ist, las ein Erstbesucher dort
+// „Konnte gerade nicht gespeichert werden": eine Fehlermeldung über einen
+// Versuch, den es nie gab. Genau die Fläche, die vor der Registrierung
+// erklären soll, meldete sich als defekt.
+export const SPEICHERN_OK = "ok";
+export const SPEICHERN_FEHLER = "fehler";
+export const SPEICHERN_ANONYM = "anonym"; // kein Konto – kein Fehler, nur (noch) kein Ziel
+
 async function speichern(pfad, daten) {
   const token = getPlayerToken();
-  if (!token) return false;
+  if (!token) return SPEICHERN_ANONYM;
   try {
     await axios.post(pfad, { token, ...daten });
-    return true;
+    return SPEICHERN_OK;
   } catch {
-    return false;
+    return SPEICHERN_FEHLER;
   }
 }
 
@@ -73,6 +88,18 @@ function Gespeichert({ children }) {
   return (
     <p className="mt-3 flex items-center gap-1.5 text-xs text-signal-ok" aria-live="polite">
       <PiCheckBold className="flex-shrink-0" aria-hidden="true" />
+      {children}
+    </p>
+  );
+}
+
+// Gegenstück für den ausgeloggten Fall: gleiche Zeile, aber ohne grünen Haken
+// und in gedämpfter Farbe. Es ist keine Bestätigung (nichts wurde gespeichert)
+// und kein Fehler (nichts ist schiefgegangen) – deshalb weder `Gespeichert`
+// noch `FormAlert`.
+function Hinweis({ children }) {
+  return (
+    <p className="mt-3 text-xs text-mist-400" aria-live="polite">
       {children}
     </p>
   );
@@ -130,18 +157,50 @@ export function StepWeg({ weg, onWeg }) {
 // ---------------------------------------------------------------------------
 // Schritt „Position" – ein Tipp, und es steht im Profil.
 // ---------------------------------------------------------------------------
-export function StepPosition({ weg, wert, onWert, onGespeichert }) {
-  const [fehler, setFehler] = useState(false);
+// Zitat des Profil-Punkts aus der Spieler-Leiste. Bewusst KEIN Coach-Mark und
+// kein Spotlight über der echten Leiste (Lina, 14.08.2026): eine neue
+// Overlay-Mechanik für einen Satz wäre teuer, und die Plattform hat gerade
+// erst eine schwebende Ebene abgeschafft. Stattdessen steht die Form hier im
+// Text – dieselben Maße, dieselbe Ringfarbe, dieselbe Initialen-Kachel wie in
+// components/layout/PlayerNav.js:167-178. Wer sie hier sieht, erkennt sie
+// oben rechts wieder. `aria-hidden`, weil der Satz daneben die Aussage trägt;
+// vorgelesen wäre die Kachel nur Rauschen.
+function AvatarZitat({ player }) {
+  const initialen =
+    `${player?.firstName?.[0] || ""}${player?.lastName?.[0] || ""}`.toUpperCase() || "?";
+  return (
+    <span
+      aria-hidden="true"
+      className="inline-flex flex-shrink-0 items-center justify-center align-middle"
+    >
+      {player?.profileImage ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={player.profileImage}
+          alt=""
+          className="h-6 w-6 rounded-full object-cover ring-2 ring-paper-50/15"
+        />
+      ) : (
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-500/20 text-[10px] font-semibold text-brand-300">
+          {initialen}
+        </span>
+      )}
+    </span>
+  );
+}
+
+export function StepPosition({ weg, wert, onWert, onGespeichert, player }) {
+  const [stand, setStand] = useState(null); // null | ok | fehler | anonym
   const [laeuft, setLaeuft] = useState(null);
 
   async function waehlen(rolle) {
     const neu = wert === rolle ? "" : rolle; // nochmal tippen = abwählen
     onWert(neu);
     setLaeuft(rolle);
-    const ok = await speichern("/api/player/update-profile", { position: neu });
+    const ergebnis = await speichern("/api/player/update-profile", { position: neu });
     setLaeuft(null);
-    setFehler(!ok);
-    if (ok && neu) onGespeichert?.("position");
+    setStand(ergebnis);
+    if (ergebnis === SPEICHERN_OK && neu) onGespeichert?.("position");
   }
 
   return (
@@ -168,8 +227,37 @@ export function StepPosition({ weg, wert, onWert, onGespeichert }) {
         })}
       </div>
 
-      {wert && !fehler && <Gespeichert>Steht in deinem Profil.</Gespeichert>}
-      {fehler && (
+      {/* Patricks Auftrag vom 14.08.2026: „Mein Profil" steht nicht mehr in der
+          waagerechten Leiste, nur noch der Avatar führt hin – das soll im
+          Onboarding DEMONSTRIERT werden, nicht bloß behauptet. Diese Quittung
+          ist der einzige Moment der Tour, in dem das Wort „Profil" fällt,
+          während der Nutzer gerade etwas hineingeschrieben hat (Lina).
+          Nele hat den Wortlaut geschärft: Sie nennt bewusst nur den ORT, nicht
+          die Form – „über dein Bild oben rechts" wäre für den typischen Leser
+          falsch, denn der ist zwei Minuten alt, hat noch kein Foto und findet
+          oben rechts einen Initialenkreis. Die Form zeigt das Zitat daneben. */}
+      {wert && stand === SPEICHERN_OK && (
+        <Gespeichert>
+          <span className="inline-flex flex-wrap items-center gap-1.5">
+            Steht in deinem Profil – da kommst du jederzeit oben rechts hin.
+            <AvatarZitat player={player} />
+          </span>
+        </Gespeichert>
+      )}
+      {/* ⚠️ Ohne diesen eigenen Zweig wäre der Fix ein Rückschritt (Warnung von
+          Nele): Sobald ausgeloggt kein Fehler mehr gesetzt wird, griffe die
+          Quittung oben – und ein Mensch ohne Konto läse „Steht in deinem
+          Profil" über einem Profil, das es nicht gibt. Aus einer sichtbaren
+          Fehlermeldung würde eine unsichtbare Unwahrheit, und das ist die
+          schlechtere von beiden.
+          Bewusst „Für dein Profil", nicht „Notiert": Die Auswahl lebt nur im
+          State dieser Tour, `/signup` weiß nichts von ihr. „Notiert" würde
+          zusagen, dass der Wert bei der Registrierung mitkommt – das tut er
+          nicht. */}
+      {wert && stand === SPEICHERN_ANONYM && (
+        <Hinweis>Für dein Profil – gespeichert wird es, sobald du ein Konto hast.</Hinweis>
+      )}
+      {stand === SPEICHERN_FEHLER && (
         <FormAlert className="mt-3">
           Konnte gerade nicht gespeichert werden. Du kannst das später im Profil nachholen.
         </FormAlert>
@@ -184,16 +272,16 @@ export function StepPosition({ weg, wert, onWert, onGespeichert }) {
 // statt in einem Formular abgefragt zu werden, das niemand ausfüllt.
 // ---------------------------------------------------------------------------
 export function StepStadt({ stadt, land, onOrt, onGespeichert }) {
-  const [fehler, setFehler] = useState(false);
+  const [stand, setStand] = useState(null); // null | ok | fehler | anonym
 
   async function waehlen(c) {
     onOrt({ stadt: c.n, land: c.s });
-    const ok = await speichern("/api/player/update-profile", {
+    const ergebnis = await speichern("/api/player/update-profile", {
       hometown: c.n,
       bundesland: c.s,
     });
-    setFehler(!ok);
-    if (ok) onGespeichert?.("stadt");
+    setStand(ergebnis);
+    if (ergebnis === SPEICHERN_OK) onGespeichert?.("stadt");
   }
 
   return (
@@ -206,8 +294,17 @@ export function StepStadt({ stadt, land, onOrt, onGespeichert }) {
         className={inputClass}
       />
 
-      {land && !fehler && <Gespeichert>{stadt} · {land} – gespeichert.</Gespeichert>}
-      {fehler && (
+      {land && stand === SPEICHERN_OK && (
+        <Gespeichert>
+          {stadt} · {land} – gespeichert.
+        </Gespeichert>
+      )}
+      {land && stand === SPEICHERN_ANONYM && (
+        <Hinweis>
+          {stadt} · {land} – gespeichert wird es, sobald du ein Konto hast.
+        </Hinweis>
+      )}
+      {stand === SPEICHERN_FEHLER && (
         <FormAlert className="mt-3">
           Konnte gerade nicht gespeichert werden. Du kannst das später im Profil nachholen.
         </FormAlert>
@@ -222,20 +319,36 @@ export function StepStadt({ stadt, land, onOrt, onGespeichert }) {
 // computeSteps aus OnboardingChecklist), damit hier nichts als erledigt gilt,
 // was dort noch offen steht.
 // ---------------------------------------------------------------------------
-export function StepUebergabe({ player, weg, verfuegbar, onVerfuegbar, onGespeichert }) {
-  const [fehler, setFehler] = useState(false);
+export function StepUebergabe({
+  player,
+  weg,
+  verfuegbar,
+  onVerfuegbar,
+  onGespeichert,
+  angemeldet = true,
+}) {
+  const [stand, setStand] = useState(null); // null | ok | fehler | anonym
   const schritte = computeSteps(player);
   const erledigt = schritte.filter((s) => s.done).length;
   const pct = Math.round((erledigt / schritte.length) * 100);
 
   async function verfuegbarSetzen() {
     onVerfuegbar(true);
-    const ok = await speichern("/api/player/update-transfer", {
+    const ergebnis = await speichern("/api/player/update-transfer", {
       transferStatus: "verfuegbar",
     });
-    setFehler(!ok);
-    if (ok) onGespeichert?.("verfuegbar");
+    setStand(ergebnis);
+    if (ergebnis === SPEICHERN_OK) onGespeichert?.("verfuegbar");
   }
+
+  // Ohne Konto trägt die Folie nur Titel, Satz und den Weg zur Registrierung
+  // (s. WelcomeTour). Fortschrittsleiste und Checkliste bleiben hier weg:
+  // `computeSteps` rechnet gegen einen `player`, den es ausgeloggt nicht gibt –
+  // „0 von 4 · 0 %" wäre kein Fortschritt, sondern die Aussage „du hast nichts
+  // geschafft" gegenüber jemandem, der noch gar nichts schaffen konnte
+  // (Befund Lina, Begründung Nele, 14.08.2026). Auch der Verfügbar-Handgriff
+  // entfällt: Er würde ins Leere speichern.
+  if (!angemeldet) return null;
 
   return (
     <div className="space-y-4">
@@ -289,7 +402,7 @@ export function StepUebergabe({ player, weg, verfuegbar, onVerfuegbar, onGespeic
             Trag dich als verfügbar ein – du bist damit sichtbar, sobald ein Verein
             im Transfermarkt sucht. Der ist noch im Aufbau, du gehörst zu den Ersten.
           </p>
-          {verfuegbar && !fehler ? (
+          {verfuegbar && stand === SPEICHERN_OK ? (
             <Gespeichert>Du stehst jetzt als verfügbar im Transfermarkt.</Gespeichert>
           ) : (
             <button
@@ -300,7 +413,7 @@ export function StepUebergabe({ player, weg, verfuegbar, onVerfuegbar, onGespeic
               Als verfügbar eintragen
             </button>
           )}
-          {fehler && (
+          {stand === SPEICHERN_FEHLER && (
             <FormAlert className="mt-3">
               Konnte gerade nicht gespeichert werden – im Profil unter &bdquo;Transfer&ldquo; nachholbar.
             </FormAlert>
