@@ -133,81 +133,90 @@ export default function OnboardingChecklist({ player, onDismiss }) {
   const pct = Math.round((doneCount / steps.length) * 100);
   const greetName = player.firstName ? `, ${player.firstName}` : "";
 
+  // Eine Zeile der Liste (für die 4 Kern-Schritte und den Bonus identisch).
+  const renderStep = (s) => (
+    <li key={s.key}>
+      <Link
+        href={s.href}
+        className={`flex items-center gap-3 rounded-md px-3 py-2.5 transition-colors ${
+          s.done ? "bg-transparent" : "bg-navy-700/50 hover:bg-navy-700"
+        }`}
+      >
+        {s.done ? (
+          <PiCheckCircleBold className="text-brand-400 flex-shrink-0" />
+        ) : s.Icon ? (
+          <s.Icon className="text-mist-400 flex-shrink-0" />
+        ) : (
+          <PiCircleBold className="text-mist-600 flex-shrink-0" />
+        )}
+        <span className="flex-1 min-w-0">
+          <span
+            className={`block text-sm font-semibold ${
+              s.done ? "line-through text-mist-600" : "text-paper-50"
+            }`}
+          >
+            {s.label}
+          </span>
+          {!s.done && <span className="block text-xs text-mist-400">{s.desc}</span>}
+        </span>
+        {!s.done && <PiArrowRightBold className="text-mist-600 flex-shrink-0 text-xs" />}
+      </Link>
+    </li>
+  );
+
   return (
-    <div className="rounded-md bg-navy-900 text-paper-50 p-5 sm:p-6 mb-6">
+    // Panel-Sprache der Richtung „Anzeigetafel" – und die 2px-Markenkante der
+    // jeweils EINEN hervorgehobenen Karte: solange die Checkliste erscheint,
+    // ist sie die Handlung der Seite.
+    <div className="rounded-md border border-navy-600 border-t-2 border-t-brand-500 bg-navy-800 text-paper-50 p-5 sm:p-6 mb-6">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg sm:text-xl font-black">Willkommen{greetName}! 🏀</h2>
-          <p className="text-sm text-paper-50/70 mt-0.5">
+          <h2 className="font-display text-xl sm:text-2xl font-black uppercase tracking-wide">
+            Willkommen{greetName}!
+          </h2>
+          <p className="text-sm text-mist-300 mt-0.5">
             Richte dein Profil ein, um direkt loszulegen.
           </p>
         </div>
         <button
           onClick={dismiss}
           aria-label="Ausblenden"
-          className="text-paper-50/50 hover:text-paper-50 p-1 flex-shrink-0"
+          className="text-mist-600 hover:text-paper-50 p-1 flex-shrink-0"
         >
           <PiXBold />
         </button>
       </div>
 
-      {/* Fortschritt */}
+      {/* Fortschritt – zählt und benennt NUR die 4 Kern-Schritte; der Bonus
+          steht unten sichtbar getrennt (Befund Tobias L3: „1 von 4" über einer
+          Liste mit fünf Zeilen las sich als falsche Zahl). */}
       <div className="mt-4">
-        <div className="flex items-center justify-between text-xs text-paper-50/70 mb-1">
+        <div className="flex items-center justify-between text-xs text-mist-300 mb-1">
           <span>
-            {doneCount} von {steps.length} erledigt
+            {doneCount} von {steps.length} Schritten erledigt
           </span>
-          <span>{pct}%</span>
+          <span className="font-mono tabular-nums">{pct}%</span>
         </div>
-        <div className="h-2 rounded-full bg-navy-800/15 overflow-hidden">
+        <div className="h-2 rounded-full bg-navy-700 overflow-hidden">
           <div
-            className="h-full bg-brand-500 transition-all duration-500"
+            className="h-full bg-brand-500 transition-all duration-500 motion-reduce:transition-none"
             style={{ width: `${pct}%` }}
           />
         </div>
       </div>
 
-      {/* Schritte (4 Kern + 1 Bonus: App-Installation) */}
-      <ul className="mt-4 space-y-2">
-        {[...steps, appStep].map((s) => (
-          <li key={s.key}>
-            <Link
-              href={s.href}
-              className={`flex items-center gap-3 rounded-md px-3 py-2.5 transition ${
-                s.done ? "bg-navy-800/5" : "bg-navy-800/10 hover:bg-navy-700/20"
-              }`}
-            >
-              {s.done ? (
-                <PiCheckCircleBold className="text-brand-400 flex-shrink-0" />
-              ) : s.Icon ? (
-                <s.Icon className="text-paper-50/60 flex-shrink-0" />
-              ) : (
-                <PiCircleBold className="text-paper-50/40 flex-shrink-0" />
-              )}
-              <span className="flex-1 min-w-0">
-                <span
-                  className={`block text-sm font-semibold ${
-                    s.done ? "line-through text-paper-50/50" : "text-paper-50"
-                  }`}
-                >
-                  {s.label}
-                  {s.bonus && !s.done && (
-                    <span className="ml-2 align-middle text-[10px] font-bold uppercase tracking-wide text-brand-400">
-                      Bonus
-                    </span>
-                  )}
-                </span>
-                {!s.done && <span className="block text-xs text-paper-50/60">{s.desc}</span>}
-              </span>
-              {!s.done && <PiArrowRightBold className="text-paper-50/40 flex-shrink-0 text-xs" />}
-            </Link>
-          </li>
-        ))}
-      </ul>
+      {/* Die 4 Kern-Schritte */}
+      <ul className="mt-4 space-y-2">{steps.map(renderStep)}</ul>
+
+      {/* Bonus: App-Installation – bewusst außerhalb der Schritt-Liste. */}
+      <p className="mt-4 border-t border-navy-600 pt-3 px-3 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-mist-600">
+        Bonus · zählt nicht zum Fortschritt
+      </p>
+      <ul className="mt-2 space-y-2">{renderStep(appStep)}</ul>
 
       <button
         onClick={dismiss}
-        className="mt-3 text-xs text-paper-50/50 hover:text-paper-50/80 underline"
+        className="mt-3 text-xs text-mist-600 hover:text-mist-300 underline"
       >
         Nicht mehr anzeigen
       </button>
