@@ -11,13 +11,20 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> **Zuletzt deployt: `27a04fe` (13.08.2026, mittags)** – Kaderplätze werden beim Teamwechsel
-> freigegeben (**acht** Wege, `lib/rosterSlots.js`), inkl. `claimToken`, nach zwei Kai-Reviews.
-> Davor `e7a38ce` (Kaderprüfung beim Statistik-Speichern, Feedback-Zugang im Sticky-Chrome,
-> Liga-Suche/R8) und `275f124` (Nachtschicht).
-> **Rollback-Punkte:** `e7a38ce` → `275f124` → `a8e4fd4` (vor der Nachtschicht) → `562c629`
-> (vor dem gesamten Redesign). Auf dem VPS per
+> **Zuletzt deployt: `560e1e6` (13.08.2026, nachmittags)** – **Newsfeed-Umbau** (Spieltag-Leiste
+> am Kopf: nächstes Spiel + letztes Ergebnis des eigenen Teams; Footer mit Impressum/Datenschutz,
+> das fehlte dort völlig; `h1`; mobil beginnt der Feed 500 px weiter oben) und
+> **„Plattform ab 16"**.
+> Davor `27a04fe` (Kaderplatz-Freigabe, acht Wege), `e7a38ce`, `275f124` (Nachtschicht).
+> **Rollback-Punkte:** `27a04fe` → `e7a38ce` → `275f124` → `a8e4fd4` (vor der Nachtschicht) →
+> `562c629` (vor dem gesamten Redesign). Auf dem VPS per
 > `git checkout <hash> && npm run build && pm2 restart hoops-v2`.
+>
+> ⚠️ **PLATTFORM AB 16 JAHREN** (Entscheidung Patrick, 13.08.2026). `LEAGUE_AGE_GROUPS` kennt nur
+> noch `["Senioren", "U18"]` – eine U16-Liga ist die Altersklasse UNTER 16. Auf `hoops_prod`
+> wurden 9 Ligen, 4 Demo-Teams, 4 Beispielprofile entfernt; **kein echter Datensatz war
+> betroffen, 0 echte Profile unter 16**. ⚠️ **Die Regel ist NUR im Liga-Katalog erzwungen** –
+> Registrierung und Profil prüfen kein Mindestalter (offen, gehört Patrick und Nora).
 >
 > ⚠️ **Wer `Player.teamId` ändert, MUSS `slotsFreigeben` aufrufen** – die verbindliche Liste aller
 > acht Wechselwege steht im Kopf von `lib/rosterSlots.js`. Sie war dreimal hintereinander
