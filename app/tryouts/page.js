@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { PiMegaphoneBold, PiMapPinBold, PiUsersBold } from "react-icons/pi";
+import { PiMapPinBold, PiUsersBold } from "react-icons/pi";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import EmptyState from "@/components/ui/EmptyState";
+import WegeZumVerein from "@/components/tryouts/WegeZumVerein";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { positionLabel } from "@/lib/constants";
 
@@ -76,7 +77,15 @@ export default function TryoutsPage() {
         subtitle="Offene Probetrainings – finde dein nächstes Team."
       />
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+      {/* Die Spalte war bisher max-w-3xl, der Seitenkopf darüber max-w-5xl –
+          auf 1280px begann die Überschrift „TRYOUTS" 128px weiter links als der
+          Inhalt darunter. Bei einer reinen Kartenliste fiel das kaum auf, unter
+          einer typografischen Fläche ist es ein sichtbarer Bruch. Jetzt hat die
+          Seite dieselbe Außenkante wie ihr Kopf (und wie /transfermarkt,
+          /teams, /spieler), und die Lesespalte sitzt links darin verankert
+          statt mittig – Zeilenlänge bleibt bei max-w-3xl. */}
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
+        <div className="max-w-3xl">
 
         {loading ? (
           <div className="space-y-3">
@@ -85,10 +94,20 @@ export default function TryoutsPage() {
             ))}
           </div>
         ) : error ? (
-          <EmptyState title="Tryouts konnten nicht geladen werden." />
+          <>
+            <EmptyState title="Tryouts konnten nicht geladen werden." />
+            {/* Auch der Fehlerfall ist eine Sackgasse, wenn nur die Meldung
+                dasteht – die anderen Wege zu einem Verein hängen nicht an
+                dieser einen API. */}
+            <WegeZumVerein variant="fehler" />
+          </>
         ) : tryouts.length === 0 ? (
-          <EmptyState icon={PiMegaphoneBold} title="Aktuell sind keine Tryouts ausgeschrieben." />
+          // Leerzustand: KEIN „leider nichts gefunden" mehr. Die Seite wechselt
+          // die Frage – von „welche Probetrainings gibt es?" zu „wie kommst du
+          // an einen Verein?". Begründung im Kopf von WegeZumVerein.js.
+          <WegeZumVerein variant="leer" />
         ) : (
+          <>
           <div className="space-y-3">
             {tryouts.map((t) => (
               <Link
@@ -137,7 +156,13 @@ export default function TryoutsPage() {
               </Link>
             ))}
           </div>
+          {/* Auch mit Liste endet die Seite sonst im Nichts: Wer bis hier
+              gescrollt hat und nichts Passendes fand, stand vorher genauso vor
+              einer geschlossenen Tür wie im Leerzustand (Ronja, K9). */}
+          <WegeZumVerein variant="anhang" />
+          </>
         )}
+        </div>
       </main>
 
       <Footer />
