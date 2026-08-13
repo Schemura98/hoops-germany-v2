@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Player from "@/models/Player";
 import { getTeamForCapability } from "@/lib/serverAuth";
 import { recordTransfer } from "@/lib/recordTransfer";
+import { slotsFreigeben } from "@/lib/rosterSlots";
 import { followOwnTeam } from "@/lib/teamFollow";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
@@ -56,6 +57,12 @@ async function handler(req) {
       toTeam: team._id,
     });
     await followOwnTeam(player._id, team._id);
+    // Kaderplatz beim alten Verein freigeben (13.08.2026, Befund von Kai) –
+    // dritter Weg, auf dem ein Spieler das Team wechselt. Siehe
+    // lib/rosterSlots.js.
+    if (prevTeam && String(prevTeam) !== String(team._id)) {
+      await slotsFreigeben(player._id, prevTeam);
+    }
   }
 
   return ok({

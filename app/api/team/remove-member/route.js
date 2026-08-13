@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Player from "@/models/Player";
 import { getTeamForCapability } from "@/lib/serverAuth";
 import { recordTransfer } from "@/lib/recordTransfer";
+import { slotsFreigeben } from "@/lib/rosterSlots";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // POST /api/team/remove-member – Team-Admin entfernt ein Mitglied (Dual-Auth).
@@ -34,6 +35,12 @@ async function handler(req) {
 
   player.teamId = null;
   await player.save();
+
+  // Beanspruchten Kaderplatz dieses Vereins freigeben (13.08.2026, Befund von
+  // Kai). Ohne das blieb der Platz auf „belegt" stehen, obwohl der Spieler weg
+  // ist — und die Kaderprüfung beim Statistik-Speichern hätte ihn dauerhaft
+  // weiter als zugehörig gewertet.
+  await slotsFreigeben(player._id, team._id);
 
   await recordTransfer({
     player: player._id,

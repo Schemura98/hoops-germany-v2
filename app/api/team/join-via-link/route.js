@@ -4,6 +4,7 @@ import Team from "@/models/Team";
 import Player from "@/models/Player";
 import { getPlayerFromToken } from "@/lib/serverAuth";
 import { recordTransfer } from "@/lib/recordTransfer";
+import { slotsFreigeben } from "@/lib/rosterSlots";
 import { followOwnTeam } from "@/lib/teamFollow";
 import { getTeamAdminRecipients } from "@/lib/teamAdmins";
 import { sendMail } from "@/lib/mailer";
@@ -62,6 +63,12 @@ async function handler(req) {
 
   if (String(prevTeam || "") !== String(team._id)) {
     await recordTransfer({ player: player._id, fromTeam: prevTeam, toTeam: team._id });
+    // Kaderplatz beim ALTEN Verein freigeben (13.08.2026, Befund von Kai).
+    // Bewusst nur der alte: Ein Platz beim neuen Verein, den derselbe Spieler
+    // gerade beansprucht hat, soll bestehen bleiben. Ohne das behielte der
+    // Ex-Verein den Platz dauerhaft als belegt — und die Kaderprüfung beim
+    // Statistik-Speichern würde den Gewechselten weiter als zugehörig werten.
+    if (prevTeam) await slotsFreigeben(player._id, prevTeam);
   }
   await followOwnTeam(player._id, team._id);
 

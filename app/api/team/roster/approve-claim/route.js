@@ -4,6 +4,7 @@ import Team from "@/models/Team";
 import Player from "@/models/Player";
 import { getTeamForCapability, TEAM_PUBLIC_FIELDS } from "@/lib/serverAuth";
 import { recordTransfer } from "@/lib/recordTransfer";
+import { slotsFreigeben } from "@/lib/rosterSlots";
 import { followOwnTeam } from "@/lib/teamFollow";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
@@ -75,6 +76,12 @@ async function handler(req) {
       toTeam: team._id,
     });
     await followOwnTeam(slot.claimedBy, team._id);
+    // Kaderplatz beim alten Verein freigeben (13.08.2026, Befund von Kai) –
+    // vierter und letzter Weg eines Teamwechsels. Nur der alte Verein, der
+    // gerade bestätigte Platz dieses Teams bleibt selbstverständlich stehen.
+    if (prevTeam && String(prevTeam) !== String(team._id)) {
+      await slotsFreigeben(slot.claimedBy, prevTeam);
+    }
   }
 
   const updated = await Team.findById(team._id).select(TEAM_PUBLIC_FIELDS);
