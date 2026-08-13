@@ -53,7 +53,7 @@ const selectClass = `${inputClassSm} sm:w-auto`;
 // ist das die einzige Zahl der Seite, die ihn wirklich betrifft – sie darf nicht
 // erst nach 40 fremden Zeilen auftauchen. Der Satz sagt nur, was ohnehin in der
 // Tabelle steht; nichts wird zugespitzt, nichts verknappt.
-function EigenePlatzierung({ viewer, ligaName, onSpringen }) {
+function EigenePlatzierung({ viewer, ligaName, onSpringen, sichtbareAnzahl = 0 }) {
   if (!viewer) return null;
 
   if (!viewer.rank) {
@@ -63,7 +63,7 @@ function EigenePlatzierung({ viewer, ligaName, onSpringen }) {
           Deine Platzierung
         </p>
         <p className="mt-1 text-sm text-mist-300">
-          Für diese Auswahl ist noch kein bestätigtes Spiel mit deinen Zahlen
+          Für diese Auswahl ist noch kein gewertetes Spiel mit deinen Zahlen
           erfasst.
         </p>
       </div>
@@ -94,7 +94,11 @@ function EigenePlatzierung({ viewer, ligaName, onSpringen }) {
           ? `Punktgleich mit Platz ${viewer.rank - 1}.`
           : `${viewer.gapAhead} Punkte hinter Platz ${viewer.rank - 1}.`}
       </p>
-      {viewer.rank > 8 && (
+      {/* Nur anbieten, wenn die eigene Zeile wirklich in der Liste steht: die
+          Tabelle ist bei 100 Eintraegen gekappt, der Rang wird aber ueber die
+          volle Sortierung gezaehlt. Ab Platz 101 sprang der Knopf ins Leere
+          (Fund von Kai, 13.08.2026). */}
+      {viewer.rank > 8 && viewer.rank <= sichtbareAnzahl && (
         <button
           type="button"
           onClick={onSpringen}
@@ -201,7 +205,7 @@ function TopscorerInhalt() {
         eyebrow="Bestenliste"
         title="Topscorer"
         subtitle={
-          ligaLabel || "Rangliste nach erzielten Punkten (bestätigte Spiele)."
+          ligaLabel || "Rangliste nach erzielten Punkten (gewertete Spiele)."
         }
       />
 
@@ -263,6 +267,7 @@ function TopscorerInhalt() {
             <EigenePlatzierung
               viewer={viewer}
               ligaName={aktiveLiga?.name || ""}
+              sichtbareAnzahl={scorers.length}
               onSpringen={() =>
                 eigeneZeile.current?.scrollIntoView({
                   behavior: "smooth",
@@ -398,7 +403,7 @@ export default function TopscorerPage() {
           <PageHeader
             eyebrow="Bestenliste"
             title="Topscorer"
-            subtitle="Rangliste nach erzielten Punkten (bestätigte Spiele)."
+            subtitle="Rangliste nach erzielten Punkten (gewertete Spiele)."
           />
           <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
             <BestenlistenWechsel className="mb-5" />

@@ -372,7 +372,7 @@ export default function LigaDetailPage({ params }) {
 
         <p className="mt-3 text-xs text-mist-400">
           Sp = Spiele · S = Siege · N = Niederlagen · Diff = Korbdifferenz. Tabelle aus
-          bestätigten Ergebnissen der Hauptrunde.
+          eingetragenen Ergebnissen der Hauptrunde.
         </p>
         <p className="mt-1 text-xs text-mist-400">
           🏆{" "}
@@ -387,7 +387,10 @@ export default function LigaDetailPage({ params }) {
         {spiele.length > 0 && (
           <Abschnitt
             titel={spieleTitel}
-            mehrHref={`/spiele?league=${league._id}`}
+            // `tab=all`: /spiele startet sonst auf „upcoming". Bei beendeter
+            // Saison landete „Alle N Spiele" damit auf „Noch keine Spiele
+            // angesetzt" — ein Link, der N verspricht und null zeigt.
+            mehrHref={`/spiele?league=${league._id}&tab=all`}
             mehrLabel={
               schedule?.total ? `Alle ${schedule.total} Spiele` : "Alle Spiele"
             }

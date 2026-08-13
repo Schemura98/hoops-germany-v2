@@ -64,6 +64,20 @@ async function handler(req) {
       ? ownLeagueId
       : "");
 
+  // ⚠️ WORTWAHL IN DER OBERFLAECHE HAENGT AN DIESER ZEILE.
+  //
+  // Gefiltert wird auf `status: "completed"` — NICHT auf `resultStatus` und
+  // erst recht nicht auf beidseitiges `submittedBy`. `submit-match-result`
+  // setzt `status = "completed"` unbedingt, also auch bei einseitiger Meldung
+  // (`pending`) und bei Widerspruch (`mismatch`). Diese Tabelle enthaelt
+  // deshalb Spiele, die NICHT doppelt bestaetigt sind.
+  //
+  // Die Seite sagt aus diesem Grund "gewertete Spiele" und nicht "bestaetigte
+  // Spiele" (Fund von Kai, 13.08.2026 — vorher stand dort "bestaetigt", was
+  // eine Belegaussage an einen Status haengte, der sie nicht traegt).
+  //
+  // Wer den Filter spaeter verschaerft, darf das Wort wieder aendern. Wer das
+  // Wort aendert, ohne den Filter zu verschaerfen, baut den Fehler neu ein.
   const matchStage = { status: "completed" };
   if (angewandteLiga) {
     matchStage.leagueId = new mongoose.Types.ObjectId(angewandteLiga);

@@ -103,7 +103,14 @@ export default function PlayerNav({ player }) {
 
   return (
     <nav className="bg-navy-900 sticky top-0 z-50">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+      {/* max-w-6xl wie die Gast-Navbar (Fund von Tobias, 13.08.2026). Mit
+          max-w-5xl war der Streifen 128 px schmaler als die oeffentliche Leiste
+          — bei inzwischen sieben Punkten plus Admin-Verweis, Glocke, Suche und
+          Avatar klebten Wortmarke und erster Punkt aneinander („HOOPS
+          GERMANYLigen") und die laengeren Beschriftungen brachen zweizeilig um.
+          Unabhaengig von der Fensterbreite, weil die Begrenzung am Container
+          hing, nicht am Bildschirm. */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-4 h-16">
         <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
           <img src="/images/logo.svg" alt="Hoops Germany" className="h-9 w-auto object-contain" />
         </Link>
@@ -115,7 +122,7 @@ export default function PlayerNav({ player }) {
               key={l.href}
               href={l.href}
               aria-current={linkAktiv(l) ? "page" : undefined}
-              className={`text-sm transition-colors border-b-2 pb-0.5 ${
+              className={`shrink-0 whitespace-nowrap text-sm transition-colors border-b-2 pb-0.5 ${
                 linkAktiv(l)
                   ? "text-paper-50 font-semibold border-brand-500"
                   : "text-mist-300 hover:text-paper-50 border-transparent"

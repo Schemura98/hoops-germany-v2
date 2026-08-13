@@ -21,6 +21,11 @@ async function handler() {
       positions: t.recruitingPositions || [],
       note: t.recruitingNote || "",
       league: t.leagueId ? { name: t.leagueId.name, level: t.leagueId.level || "" } : null,
+      // `isDemo` wurde bereits selektiert, aber nicht mitgegeben (Fund von Kai,
+      // 13.08.2026). Folge: Wer die Liste zaehlt, zaehlt Beispieldaten mit, und
+      // /transfermarkt konnte das DemoBadge nicht rendern, weil ihm das Feld
+      // fehlte — Beispielvereine sahen dort aus wie echte.
+      isDemo: !!t.isDemo,
     })),
   });
 }

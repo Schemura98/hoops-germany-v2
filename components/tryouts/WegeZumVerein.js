@@ -137,7 +137,13 @@ export default function WegeZumVerein({ variant = "leer" }) {
       // dieser Umbau eigentlich abstellen soll.
       setTeamsFehler(!tRes);
       setTeams(tRes?.data?.teams || []);
-      setSuchendeVereine(rRes ? rRes.data?.teams?.length || 0 : null);
+      // Beispielvereine zaehlen NICHT mit (Fund von Kai, 13.08.2026). Route 01
+      // filtert sie 18 Zeilen weiter unten korrekt heraus — Route 02 zaehlte
+      // sie mit und behauptete einem Vereinssuchenden gegenueber, es gaebe
+      // Vereine, die ihn nie erreichen wird. Derselbe Filter, dieselbe Datei.
+      setSuchendeVereine(
+        rRes ? (rRes.data?.teams || []).filter((t) => !t.isDemo).length : null,
+      );
       const spieler = mRes?.data?.player || null;
       setMe(spieler);
       setVerfuegbar(spieler?.transferStatus === "verfuegbar");

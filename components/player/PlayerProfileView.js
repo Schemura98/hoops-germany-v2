@@ -521,8 +521,9 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                     {season ? "Keine Spiele in dieser Saison." : "Noch keine Spiele erfasst."}
                   </p>
                   <p className="mt-2 text-xs text-mist-400">
-                    Zählt erst, wenn beide Teams das Ergebnis eintragen und es
-                    übereinstimmt.
+                    Zählt, sobald das Spiel als beendet eingetragen ist. Ob beide
+                    Teams das Ergebnis unabhängig gemeldet haben, steht am
+                    jeweiligen Spiel.
                   </p>
                 </>
               ) : (
@@ -544,8 +545,9 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                       hat trotzdem stattgefunden – dem Spieler dafuer Statistik
                       wegzunehmen waere die schlechtere Loesung. */}
                   <p className="mb-4 text-xs text-mist-400">
-                    Zählt erst, wenn beide Teams das Ergebnis eintragen und es
-                    übereinstimmt.
+                    Zählt, sobald das Spiel als beendet eingetragen ist. Ob beide
+                    Teams das Ergebnis unabhängig gemeldet haben, steht am
+                    jeweiligen Spiel.
                   </p>
                   <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {[

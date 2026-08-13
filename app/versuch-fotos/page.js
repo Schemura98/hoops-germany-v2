@@ -24,7 +24,7 @@ import { PiWarningBold, PiChartBarBold } from "react-icons/pi";
 // ══════════════════════════════════════════════════════════════════════════
 
 export const metadata = {
-  title: "Einbauversuch Platzhalter-Fotos – nicht oeffentlich",
+  title: "Einbauversuch Platzhalter-Fotos – nicht öffentlich",
   robots: { index: false, follow: false },
 };
 
@@ -87,7 +87,7 @@ export default function VersuchFotosPage() {
           Direkter Vergleich in derselben Zeile, damit man nicht zwischen zwei
           Seiten erinnern muss: links der Baustein, den die Feature-Strecke
           heute benutzt (ProfileMock – echte Elemente, keine Bilddaten),
-          rechts dieselbe Flaeche als Foto-Panel. */}
+          rechts dieselbe Fläche als Foto-Panel. */}
       <section className="bg-navy-950 px-4 py-20">
         <div className="mx-auto max-w-6xl">
           <Reveal
@@ -97,7 +97,7 @@ export default function VersuchFotosPage() {
             Fall 2 — Foto im Panel
           </Reveal>
           <Reveal as="p" delay={80} className="mt-4 max-w-xl text-mist-400 leading-relaxed">
-            Dieselbe Panel-Flaeche, zweimal: links der Baustein, den die
+            Dieselbe Panel-Fläche, zweimal: links der Baustein, den die
             Feature-Strecke heute verwendet, rechts ein Foto im selben Rahmen.
             Die 2px-Markenleiste sitzt bei beiden an der Oberkante.
           </Reveal>
@@ -144,8 +144,8 @@ export default function VersuchFotosPage() {
                         <p className="text-sm font-bold text-paper-50">Spielerprofile &amp; Statistiken</p>
                       </div>
                       <p className="text-sm leading-relaxed text-mist-400">
-                        Dieselbe Karte, dieselben Rahmen, dieselbe Markenleiste — nur traegt
-                        die obere Haelfte jetzt ein Foto statt der Zahlen, die das Produkt
+                        Dieselbe Karte, dieselben Rahmen, dieselbe Markenleiste — nur trägt
+                        die obere Hälfte jetzt ein Foto statt der Zahlen, die das Produkt
                         eigentlich zeigt.
                       </p>
                     </div>
@@ -157,22 +157,22 @@ export default function VersuchFotosPage() {
         </div>
       </section>
 
-      {/* ─── Fall 3: Foto als Akzentblock auf flacher Flaeche ──────────────
+      {/* ─── Fall 3: Foto als Akzentblock auf flacher Fläche ──────────────
           Der Fall, an dem Milos erste Bildsequenz gescheitert ist: Ein Bild
           mit eingebranntem Hintergrund liegt als sichtbares Rechteck auf der
-          Flaeche. Hier bewusst OHNE Weichzeichner, Verlauf oder Schatten –
-          die Richtung kennt keinen davon. Nur Flaechenstufe und Haarlinie. */}
+          Fläche. Hier bewusst OHNE Weichzeichner, Verlauf oder Schatten –
+          die Richtung kennt keinen davon. Nur Flächenstufe und Haarlinie. */}
       <section className="bg-navy-950 px-4 py-20">
         <div className="mx-auto max-w-6xl">
           <Reveal
             as="h2"
             className="font-display text-3xl font-black uppercase tracking-tight text-paper-50 md:text-5xl"
           >
-            Fall 3 — Foto auf der flachen Flaeche
+            Fall 3 — Foto auf der flachen Fläche
           </Reveal>
           <Reveal as="p" delay={80} className="mt-4 max-w-xl text-mist-400 leading-relaxed">
-            Das Bild, das in der Auswahl als bester Treffer gefuehrt wird
-            (&bdquo;dunkler Grund fuegt sich in Navy, der orange Ring ist fast die
+            Das Bild, das in der Auswahl als bester Treffer geführt wird
+            (&bdquo;dunkler Grund fügt sich in Navy, der orange Ring ist fast die
             Markenfarbe&ldquo;). Hier steht es unretuschiert auf navy-950, ohne
             Verlauf und ohne Schatten — die Richtung kennt beides nicht.
           </Reveal>
@@ -195,9 +195,9 @@ export default function VersuchFotosPage() {
               </picture>
               <PlatzhalterMarke className="absolute right-2 top-2" />
               <figcaption className="mt-4 text-sm leading-relaxed text-mist-400">
-                Danebenstehen lassen und selbst pruefen: Ist der Rand des Bildes eine
-                Kante der Gestaltung oder ein Fremdkoerper? Und wie viele Farben
-                traegt das Foto neben dem einen erlaubten Akzent herein?
+                Danebenstehen lassen und selbst prüfen: Ist der Rand des Bildes eine
+                Kante der Gestaltung oder ein Fremdkörper? Und wie viele Farben
+                trägt das Foto neben dem einen erlaubten Akzent herein?
               </figcaption>
             </figure>
           </Reveal>
@@ -212,16 +212,16 @@ export default function VersuchFotosPage() {
           </h2>
           <div className="mt-6 space-y-4 text-mist-400 leading-relaxed">
             <p>
-              Drei Fotos, drei Einbaustellen, sonst unveraenderte Gestaltung. Nichts
+              Drei Fotos, drei Einbaustellen, sonst unveränderte Gestaltung. Nichts
               hiervon ist beschlossen. Die entschiedene Richtung bleibt &bdquo;kein Foto,
               Vektor&ldquo;; dieser Versuch existiert, damit die Entscheidung an etwas
-              Sichtbarem gepruefft werden kann statt an einer Beschreibung.
+              Sichtbarem geprüft werden kann statt an einer Beschreibung.
             </p>
             <p>
               Die Fotos stammen aus einer freien Stock-Bibliothek. Sie zeigen keine
               Hoops-Teams, keine NRW-Halle und niemanden, der gefragt wurde. Als
-              echtes Material kaemen sie nie in Frage — als Pruefmaterial fuer die
-              Frage &bdquo;traegt ein Foto diese Flaeche?&ldquo; reichen sie.
+              echtes Material kämen sie nie in Frage — als Prüfmaterial für die
+              Frage &bdquo;traegt ein Foto diese Fläche?&ldquo; reichen sie.
             </p>
             <p className="text-mist-600">
               Urteil, Messwerte und Empfehlung:{" "}
