@@ -2583,3 +2583,45 @@ verdeckende Element existiert nicht mehr, einzeln nachgemessen wurden sie nicht.
 **Prozess:** Trend-Sweep Stufe S (Begründung im `referenz-register.md` der Skill
 `design-trend-recherche`), `emil-design-eng` geladen (Chrome-Element, ständig sichtbar → bewusst
 ohne Motion). AGENTS.md-Beschreibung des Buttons nachgezogen.
+
+---
+
+## 13.08.2026 — Newsfeed-Umbau: „Was ist passiert, seit ich weg war?" (Vivien)
+
+**Auftrag Patrick:** „Die Newsfeed Seite könnte meiner Meinung nach auch ein moderneres Design &
+Architektur besitzen." Umgesetzt in vier Commits (`9244492` distDir-Werkzeug · `9c5d0a7`
+Checkliste · `67e373f` Composer · `446317c` Seiten-Umbau), Entscheidungs-Notiz inkl. bewusster
+Auslassungen: **`docs/NEWSFEED-UMBAU-2026-08-13.md`**, Sweep-Notiz (Stufe M):
+`docs/INSPIRATION-NEWSFEED-2026-08-13.md`.
+
+- **Neue Spieltag-Leiste** (`components/feed/SpieltagStrip.js`): nächstes Spiel + letztes
+  Ergebnis des eigenen Teams am Seitenkopf, Beleg-Status (`matchVerification`) direkt daneben,
+  Links auf `/match/[id]`. Ohne Team/Spiele erscheint sie nicht. Ronjas R3 auf den Spieler
+  übertragen — Verbindung zu Gebautem, keine neue Funktion.
+- **Kopf mit h1** (Tobias L5) + Anrede-Eyebrow + Datum in Mono; **Footer mit
+  Impressum/Datenschutz** (Tobias L4, rechtlich relevant — einzige Seite ohne Verweis);
+  `<main>`-Landmarke jetzt auch mobil.
+- **Mobil Feed nach vorn:** alle Widgets eingeklappt, Composer startet einzeilig
+  (`PostComposer` `collapsible`, Funktionshinweise erst bei Fokus), Vorschläge als Akkordeon
+  mit ehrlichem Leertext. Feed-Beginn gemessen 1858 px → 1360 px (390 px, max@test.de).
+- **Checkliste ehrlich** (Tobias L3 = Fall aus `MUSTER-ZAHLEN-DIE-LUEGEN`): „X von 4
+  **Schritten** erledigt", Bonus-Zeile unter eigener Trennzeile „zählt nicht zum Fortschritt";
+  dazu Panel-Sprache (navy-800 + Haarlinie + 2px-Markenkante), Big Shoulders, Emoji raus.
+- **Architektur:** Feed-Logik nach `components/feed/PostFeed.js` ausgelagert; `my-matches`
+  EINMAL in der Seite geladen und an Leiste + Spiele-Widget gereicht (`TeamMatchesWidget`
+  `preloaded`-Props, stand-alone lädt es weiter selbst); Desktop-Vorschläge in die rechte Spalte.
+- **Dev-Werkzeug:** `distDir` per `NEXT_DIST_DIR` umlenkbar (Standard `.next` unverändert) —
+  löst die dokumentierte Kollisionsklasse dev/build/start um `.next`.
+
+**Beleg** (`tmp/newsfeed-umbau-shots.mjs` + `tmp/newsfeed-verhalten.mjs`, Ablage
+`tmp/newsfeed-shots/`, Dev-Server `:3005`, Vorher/Nachher per `git stash`; Konten max + sven,
+390×844 + 1280×900): h1/Footer/Landmarke vorher fehlend, nachher da; kein Überlauf, keine
+Konsolenfehler; Spieltag-Leiste bei Max (Klick navigiert), bei Sven korrekt abwesend; Widget
+öffnet ohne Zweitabruf; Composer fokussiert nach Aufklappen.
+
+**⚠️ Für das nächste Gate:** Auf Port 3000 hängt ein nicht mehr funktionsfähiger, nicht
+beendbarer `next start` (Classifier sperrte `taskkill`); `.next` enthält gemischte Artefakte —
+**vor `npm run build` den Prozess beenden und `.next` löschen.** Build/Playwright-Suite/
+Production-Runtime bewusst den Deploy-Gates überlassen. Offen gemeldet: `AuthShell.js`
+verlinkt Impressum/Datenschutz mit Backslash-Hrefs (`href="\datenschutz"`) — Befund an den
+Strang von heute.
