@@ -47,6 +47,26 @@ test.describe("Login", () => {
 });
 
 test.describe("Signup", () => {
+  // Mindestalter (13.08.2026): Die Plattform ist erst ab 16 gedacht. Der Test
+  // geht bewusst über die API, nicht über das Formular – geprüft werden soll,
+  // dass die Regel serverseitig hält. Ein Häkchen, das nur der Browser prüft,
+  // wäre keine Regel.
+  test("Registrierung ohne Mindestalter-Bestätigung → 400, kein Account", async ({ request }) => {
+    const email = newDisposableEmail("minage");
+    const res = await request.post("/api/player/playerregister", {
+      data: { firstName: "Kai", lastName: "Minderjaehrig", email, password: "test1234" },
+    });
+    expect(res.status()).toBe(400);
+    expect((await res.json()).message).toContain("16 Jahre");
+
+    // Gegenprobe: Der Account darf nicht existieren – eine Anmeldung mit
+    // denselben Daten muss scheitern.
+    const login = await request.post("/api/player/playerlogin", {
+      data: { email, password: "test1234" },
+    });
+    expect(login.ok()).toBeFalsy();
+  });
+
   test("neuer Account mit Wegwerf-Mail → eingeloggt im Newsfeed", async ({ page }) => {
     const email = recordCreatedEmail(newDisposableEmail("signup")); // Intent VOR Anlage aufzeichnen
     await page.goto("/signup");
@@ -55,6 +75,8 @@ test.describe("Signup", () => {
     await page.fill('input[name="email"]', email);
     await page.fill('input[name="password"]', "test1234");
     await page.fill('input[name="confirm"]', "test1234");
+    // Mindestalter-Selbstauskunft ist seit 13.08.2026 Pflicht (ab 16 Jahren).
+    await page.check('input[type="checkbox"]');
     await page.click('button[type="submit"]');
     await page.waitForURL("**/player/newsfeed", { timeout: 60_000 });
     expect(await getPlayerToken(page)).toBeTruthy();
@@ -66,7 +88,13 @@ test.describe("Signup", () => {
     // Eigenen Wegwerf-Account per API anlegen (nicht den Seed-Bestand benutzen) …
     const email = recordCreatedEmail(newDisposableEmail("dup"));
     const create = await request.post("/api/player/playerregister", {
-      data: { firstName: "Kai", lastName: "Duplikat", email, password: "test1234" },
+      data: {
+        firstName: "Kai",
+        lastName: "Duplikat",
+        email,
+        password: "test1234",
+        minAgeConfirmed: true,
+      },
     });
     expect(create.status()).toBe(201);
 
@@ -77,6 +105,8 @@ test.describe("Signup", () => {
     await page.fill('input[name="email"]', email);
     await page.fill('input[name="password"]', "test1234");
     await page.fill('input[name="confirm"]', "test1234");
+    // Mindestalter-Selbstauskunft ist seit 13.08.2026 Pflicht (ab 16 Jahren).
+    await page.check('input[type="checkbox"]');
     await page.click('button[type="submit"]');
     await expect(page.getByText("Diese E-Mail-Adresse ist bereits registriert")).toBeVisible();
     expect(page.url()).toContain("/signup");
