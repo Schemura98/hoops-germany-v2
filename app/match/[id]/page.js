@@ -9,6 +9,9 @@ import {
   PiMapPinBold,
   PiStarFill,
   PiUsersBold,
+  PiTableBold,
+  PiCalendarBlankBold,
+  PiCaretRightBold,
 } from "react-icons/pi";
 import Navbar from "@/components/layout/Navbar";
 import Loading from "@/components/ui/Loading";
@@ -110,9 +113,41 @@ function StatTable({ stats }) {
   );
 }
 
+// Ein Weg weiter, als Zeile in einer Panel-Liste.
+function WegZeile({ href, icon: Icon, label, wert }) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center gap-3 px-4 py-3.5 hover:bg-navy-700 transition-colors duration-150"
+    >
+      <Icon className="shrink-0 text-brand-400" />
+      <span className="min-w-0 flex-1">
+        <span className="block text-[11px] font-medium uppercase tracking-wide text-mist-600">
+          {label}
+        </span>
+        <span className="block truncate text-sm font-medium text-paper-50">{wert}</span>
+      </span>
+      <PiCaretRightBold className="shrink-0 text-xs text-mist-600" />
+    </Link>
+  );
+}
+
+function kurzDatum(d) {
+  try {
+    return new Date(d).toLocaleDateString("de-DE", {
+      weekday: "short",
+      day: "2-digit",
+      month: "2-digit",
+    });
+  } catch {
+    return "";
+  }
+}
+
 export default function MatchIdPage({ params }) {
   const id = params.id;
   const [match, setMatch] = useState(null);
+  const [nextMatch, setNextMatch] = useState(null);
   const [state, setState] = useState("loading"); // loading | ready | notfound
 
   useEffect(() => {
@@ -122,6 +157,7 @@ export default function MatchIdPage({ params }) {
         const { data } = await axios.get(`/api/match/${id}`);
         if (active) {
           setMatch(data.match);
+          setNextMatch(data.nextMatch || null);
           setState("ready");
         }
       } catch {
@@ -192,13 +228,20 @@ export default function MatchIdPage({ params }) {
       <div className="bg-navy-900">
         <div className="max-w-2xl mx-auto px-4 py-10">
           {match.leagueId?.name && (
+            // Die Liga-Zeile war reiner Text – dabei ist sie die naheliegendste
+            // Frage nach einem Ergebnis: „und wo stehen wir jetzt?"
             <p
-              className={`text-center text-xs font-semibold text-brand-400 uppercase tracking-widest ${
+              className={`text-center ${
                 match.stage === "Playoffs" ? "mb-2" : "mb-6"
               }`}
             >
-              {match.leagueId.name}
-              {match.leagueId.season ? ` · ${match.leagueId.season}` : ""}
+              <Link
+                href={`/ligen/${match.leagueId._id}`}
+                className="text-xs font-semibold text-brand-400 uppercase tracking-widest hover:text-brand-300 underline-offset-4 hover:underline"
+              >
+                {match.leagueId.name}
+                {match.leagueId.season ? ` · ${match.leagueId.season}` : ""}
+              </Link>
             </p>
           )}
           {match.stage === "Playoffs" && (
@@ -325,6 +368,32 @@ export default function MatchIdPage({ params }) {
               </h2>
               <StatTable stats={statsB} />
             </div>
+          </div>
+        )}
+
+        {/* Wie es weitergeht. Eine Spielseite war bisher eine Sackgasse: zwei
+            Teamlinks, Spielerlinks, Ende. Die beiden Fragen, mit denen man hier
+            weggeht, sind „wo stehen wir jetzt?" und „wann wieder?". */}
+        {(match.leagueId?._id || nextMatch) && (
+          <div className="mt-6 rounded-md border border-navy-600 bg-navy-800 overflow-hidden divide-y divide-navy-600">
+            {match.leagueId?._id && (
+              <WegZeile
+                href={`/ligen/${match.leagueId._id}`}
+                icon={PiTableBold}
+                label="Wo stehen wir jetzt"
+                wert={`Tabelle · ${match.leagueId.name}`}
+              />
+            )}
+            {nextMatch && (
+              <WegZeile
+                href={`/match/${nextMatch._id}`}
+                icon={PiCalendarBlankBold}
+                label={`Nächstes Spiel · ${kurzDatum(nextMatch.date)}`}
+                wert={`${nextMatch.teamA?.teamName || "—"} – ${
+                  nextMatch.teamB?.teamName || "—"
+                }`}
+              />
+            )}
           </div>
         )}
       </main>
