@@ -18,6 +18,7 @@ import Loading from "@/components/ui/Loading";
 import Footer from "@/components/layout/Footer";
 import Avatar from "@/components/Avatar";
 import SplitFlap from "@/components/ui/SplitFlap";
+import Reveal from "@/components/ui/Reveal";
 import { teamScores, matchVerification } from "@/lib/matchScore";
 
 function formatDate(d) {
@@ -375,7 +376,7 @@ export default function MatchIdPage({ params }) {
             Teamlinks, Spielerlinks, Ende. Die beiden Fragen, mit denen man hier
             weggeht, sind „wo stehen wir jetzt?" und „wann wieder?". */}
         {(match.leagueId?._id || nextMatch) && (
-          <div className="mt-6 rounded-md border border-navy-600 bg-navy-800 overflow-hidden divide-y divide-navy-600">
+          <Reveal className="mt-6 rounded-md border border-navy-600 bg-navy-800 overflow-hidden divide-y divide-navy-600">
             {match.leagueId?._id && (
               <WegZeile
                 href={`/ligen/${match.leagueId._id}`}
@@ -394,7 +395,7 @@ export default function MatchIdPage({ params }) {
                 }`}
               />
             )}
-          </div>
+          </Reveal>
         )}
       </main>
 

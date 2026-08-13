@@ -16,6 +16,7 @@ import DemoBadge from "@/components/DemoBadge";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
+import Reveal from "@/components/ui/Reveal";
 import { teamScores } from "@/lib/matchScore";
 import { positionLabel } from "@/lib/constants";
 import { getPlayerToken, getStoredPlayer, setStoredPlayer } from "@/lib/clientAuth";
@@ -24,7 +25,7 @@ import { getPlayerToken, getStoredPlayer, setStoredPlayer } from "@/lib/clientAu
 // Immer dasselbe Muster, damit „mehr davon" nie gesucht werden muss.
 function Abschnitt({ titel, mehrHref, mehrLabel, children }) {
   return (
-    <section className="mt-8">
+    <Reveal as="section" className="mt-8">
       <div className="mb-3 flex items-baseline justify-between gap-3">
         <h2 className="font-display text-lg font-bold uppercase tracking-wide text-paper-50">
           {titel}
@@ -41,7 +42,7 @@ function Abschnitt({ titel, mehrHref, mehrLabel, children }) {
       <div className="rounded-md border border-navy-600 bg-navy-800 overflow-hidden divide-y divide-navy-600">
         {children}
       </div>
-    </section>
+    </Reveal>
   );
 }
 

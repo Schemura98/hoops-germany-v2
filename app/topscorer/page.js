@@ -16,6 +16,7 @@ import { getPlayerToken } from "@/lib/clientAuth";
 import DemoBadge from "@/components/DemoBadge";
 import ScrollTable from "@/components/ui/ScrollTable";
 import CountUp from "@/components/ui/CountUp";
+import Reveal from "@/components/ui/Reveal";
 
 // Tabellenzeilen-Skeleton im Format der echten Topscorer-Tabelle.
 function TopscorerSkeleton() {
@@ -70,7 +71,7 @@ function EigenePlatzierung({ viewer, ligaName, onSpringen }) {
 
   const fuehrend = viewer.rank === 1;
   return (
-    <div className="mb-5 rounded-md border border-navy-600 border-t-2 border-t-brand-500 bg-navy-800 px-4 py-4">
+    <Reveal className="mb-5 rounded-md border border-navy-600 border-t-2 border-t-brand-500 bg-navy-800 px-4 py-4">
       <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-mist-600">
         Deine Platzierung{ligaName ? ` · ${ligaName}` : ""}
       </p>
@@ -101,7 +102,7 @@ function EigenePlatzierung({ viewer, ligaName, onSpringen }) {
           Zu deiner Zeile
         </button>
       )}
-    </div>
+    </Reveal>
   );
 }
 
