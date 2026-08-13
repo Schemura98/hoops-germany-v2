@@ -2309,3 +2309,83 @@ Commits: `b95bf2a` (Komponente), `4374d2b` (Seite + Spaltenbreite), `b528748` (D
 - **Nicht geprüft:** `prefers-reduced-motion` nur über die Primitive (`Reveal`/`useInView` haben
   saubere Rückfallwege), nicht eigens emuliert; echtes Low-End-Android; Verhalten bei vielen
   echten Vereinen in Route 01 (Dev-DB hat vier).
+
+---
+
+## 13.08.2026 – Das Spielerprofil: Liga-Verweis in der Historie + nächstes Spiel (K6/K7)
+
+**Auftrag:** Ronjas Kontaktpunkte **K6** und **K7** aus `docs/RETENTION-BEFUND-2026-08-13.md`.
+Das Profil ist die meistbesuchte Seitenart und der Ort, an dem die Kernpositionierung sichtbar
+wird – es beantwortete aber nur, was **war**.
+
+### K6 – die Karriere-Historie verliert die Liga nicht mehr
+
+Eine Station verlinkte den **Verein**; die Zeile daneben („Regionalliga Süd · 2025/26") war
+reiner Text. Damit fehlte der Klick von „da habe ich gespielt" zur **Tabelle dieser Saison**.
+
+- `app/api/player/stations/route.js`: neues Feld **`leagueLinkId`**. Getrennt von `leagueId`,
+  weil `leagueId` bei reinen Zugehörigkeiten (Verein ohne gespielte Liga-Partie) bewusst `null`
+  bleibt – die Liga des Vereins wird dort aber angezeigt und soll deshalb auch verlinkt sein.
+  `stationKey` bleibt unberührt.
+- `components/player/PlayerProfileView.js`: Liga-Zeile wird zum Link auf `/ligen/[id]`, mit
+  `stopPropagation`, damit der Klick **nicht** zusätzlich die Station aufklappt. Unterstreichung
+  in `navy-500` als Ruhezustand – auf dem Handy gibt es kein Hover, das eine Verlinkung verrät.
+  **Freundschaftsspiele haben keine Liga und bleiben Text.**
+- Geschützte Leerzeichen um den Trenner: auf 390 px bricht die Zeile jetzt als
+  „Regionalliga / Süd · 2025/26" statt mit einem hängenden „·" am Zeilenende.
+
+⚠️ **Diese Änderung liegt versehentlich in Commit `83fb70b`** („Chronik: /tryouts-Umbau
+protokolliert"). Ursache: Alle Nacht-Agenten teilen **einen** Arbeitsbaum; die Dateien lagen
+kurz im Index (`git apply --cached`), als der Tryouts-Strang committete. Inhaltlich korrekt,
+aber **nicht einzeln rückholbar**. Nicht nachträglich umgeschrieben, weil andere Stränge darauf
+aufbauen. **Lehre: Staging und Commit immer in einem einzigen Befehl.**
+
+### K7 – das Profil zeigt das nächste Spiel
+
+Ronja nennt es „den konkretesten Wiederkehr-Anker, den ein Spieler hat". Neu:
+
+- **`app/api/player/next-match/route.js`** (`POST`, öffentlich): nächste `scheduled`-Partie mit
+  `date >= now` des Vereins, dem der Spieler aktuell angehört. Vereinslos → `nextMatch: null`,
+  kein Fehler. Muster `connectDB()` → prüfen → `ok()/fail()` in `withErrorHandling`.
+- Karte oben im Stats-Tab: **wann, gegen wen, wo** – die Fläche ist ein Link auf `/match/[id]`
+  (129 px hohes Ziel). Sie trägt als **einzige** Fläche dieser Seite die
+  2px-`brand-500`-Anzeigetafel-Leiste (Signatur „aktives Spiel",
+  `docs/VISUELLE-RICHTUNG-2026-08-12.md`).
+- **Kein nächstes Spiel → gar nichts.** Kein Kasten „Keine Ansetzung".
+- **Formuliert ist der Verein, nicht der Spieler:** „Heimspiel gegen Munich Hoops", nicht „sein
+  nächstes Spiel". Angesetzt ist die Partie der **Mannschaft**; ob dieser Spieler aufläuft, weiß
+  die Datenbank nicht. Genau das Muster aus `docs/MUSTER-ZAHLEN-DIE-LUEGEN-2026-08-13.md`.
+- „in 3 Tagen" rechnet in **Kalendertagen**, nicht in 24-Stunden-Blöcken.
+- Eigener `useEffect` statt des vorhandenen `Promise.all`: Fällt die Ansetzung aus, erscheinen die
+  Karriere-Zahlen trotzdem.
+
+Commit: `8ffcd15`.
+
+### Belegbilder (echtes Chromium, Dev-Server Port 3000, Dev-DB `hoopsgermany`)
+
+390 px **und** 1280 px, jeweils geprüft:
+
+| Fall | Beleg |
+|---|---|
+| Verein **mit** Ansetzung (`max-mustermann-1`, eingeloggt `/player/player-detail`) | Karte steht, Liga-Verweis rechts, Link führt auf `/match/…954` bzw. `…953` |
+| **Vereinslos** (`sven-adler`) | keine Karte, keine leere Zeile – Seite beginnt mit „Karriere-Bilanz" |
+| **Verein ohne Ansetzung** | über eine abgefangene XHR-Antwort (`nextMatch: null`) erzwungen, **ohne die Dev-DB anzufassen**: Karte fehlt, kein doppelter Abstand |
+| **Nur eine Station** (`paul-koch-7`) | ein Liga-Verweis, Tabelle korrekt |
+| **Mehrere Stationen + Vorsaison** (`max-mustermann-1`) | zwei Verweise; `2024/25` landet auf der **Archiv-Tabelle** mit Rhein Ballers |
+| **Station ohne Liga** | „Freundschaftsspiele" bleibt Text |
+
+Interaktion nachgemessen statt vermutet: Klick auf den Liga-Link klappt die Station **nicht** auf
+(Zeilenzahl 3 → 3), Klick auf die Zeile daneben klappt weiterhin auf (3 → 4).
+Keine Konsolenfehler; kein Nachlade-Kreisel (`next-match`-Aufrufe im Ruhezustand: 0).
+API-Randfälle geprüft: unbekannte ID → `nextMatch: null`, fehlende/ungültige ID → 400.
+
+### Bewusst nicht gebaut, nicht geprüft
+
+- **Kein `npm run build`** (fremder Dev-Server auf Port 3000), kein Deploy, kein Push –
+  **Gates Kai/Tobias stehen aus.**
+- **`CLAUDE.md` Abschnitt 0 nicht angefasst** – vier Stränge parallel, die Verdichtung gehört in
+  eine Hand.
+- **Konventionen geprüft, kein Handlungsbedarf:** „Spielerprofile" existiert bereits als
+  Feedback-Chip; es entstand **keine neue Route** und kein neuer Analytics-Bereich.
+- **Nicht geprüft:** `prefers-reduced-motion` (die Karte animiert nichts), echtes Low-End-Android,
+  Verhalten bei einem Verein mit sehr vielen Ansetzungen (Dev-DB hat je eine).
