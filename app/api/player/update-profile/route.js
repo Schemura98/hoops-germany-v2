@@ -49,12 +49,6 @@ async function handler(req) {
     // ein Geburtsdatum ein, das 14 ergibt – die Regel wäre eine Formalie, und
     // im Profil stünde offen ein Widerspruch zur eigenen Angabe.
     // `null` (kein/ungültiges Datum) bleibt erlaubt: Das Feld ist optional.
-    if (derived != null && derived < 16) {
-      return fail(
-        "Hoops Germany ist erst ab 16 Jahren. Bitte prüfe dein Geburtsdatum.",
-        400
-      );
-    }
     updates.age = derived == null ? undefined : derived;
   }
   // Mail-Einstellung (Team-Admin): „Ergebnis eintragen"-Erinnerung an/aus.
@@ -67,6 +61,28 @@ async function handler(req) {
   }
 
   await connectDB();
+
+  // Mindestalter erst hier prüfen: Es braucht den GESPEICHERTEN Wert.
+  //
+  // Nur bei einer echten Änderung ablehnen (Fund von Kai). Das Profilformular
+  // schickt beim Speichern immer das komplette Formular mit, auch ein
+  // unverändertes Geburtsdatum. Ein Bestandskonto mit einem gespeicherten
+  // Datum unter 16 hätte sonst kein einziges Feld mehr speichern können –
+  // dasselbe Muster wie bei den Alt-U16-Ligen heute Mittag: Regel verengt,
+  // Altbestand unbedienbar. Eine NEUE Eingabe unter 16 wird weiter abgewiesen.
+  if (updates.birthdate !== undefined) {
+    const abgeleitet = ageFromBirthdate(updates.birthdate);
+    if (abgeleitet != null && abgeleitet < 16) {
+      const bisher = await Player.findById(id).select("birthdate").lean();
+      if (String(updates.birthdate || "") !== String(bisher?.birthdate || "")) {
+        return fail(
+          "Hoops Germany ist erst ab 16 Jahren. Bitte prüfe dein Geburtsdatum.",
+          400
+        );
+      }
+    }
+  }
+
   const player = await Player.findByIdAndUpdate(
     id,
     { $set: updates },

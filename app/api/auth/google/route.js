@@ -65,6 +65,12 @@ export async function GET(req) {
       path: "/",
       maxAge: 600,
     });
+  } else {
+    // Ohne Bestätigung das Cookie aktiv löschen (Kai): Der Callback löscht es
+    // nur auf dem Erfolgspfad. Sonst könnte eine Bestätigung aus einem
+    // abgebrochenen Anlauf bis zu zehn Minuten später einen Anlauf von /login
+    // aus mittragen, bei dem nie jemand ein Häkchen gesetzt hat.
+    res.cookies.delete("g_oauth_minage");
   }
   return res;
 }

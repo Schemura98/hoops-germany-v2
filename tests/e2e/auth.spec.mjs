@@ -51,6 +51,48 @@ test.describe("Signup", () => {
   // geht bewusst über die API, nicht über das Formular – geprüft werden soll,
   // dass die Regel serverseitig hält. Ein Häkchen, das nur der Browser prüft,
   // wäre keine Regel.
+  // Diese Prüfung liest Quelltext statt zu klicken – bewusst.
+  //
+  // Am 13.08.2026 brach die Mindestalter-Pflicht zwei Registrierungswege
+  // (/team/join/[token] und /team/claim/[token]), weil sie dieselbe Route
+  // aufrufen, das neue Feld aber nicht mitschickten. Die Suite war trotzdem
+  // 19/19 grün: Für diese Wege gibt es keinen E2E-Test, und einen zu bauen
+  // verlangt ein Team samt gültigem Einladungs-Token.
+  //
+  // Statt das grüne Häkchen weiter etwas behaupten zu lassen, was es nicht
+  // prüft, sichert dieser Test die Regel dahinter: Wer die Registrierung
+  // aufruft, muss die Bestätigung mitschicken. Findet jemand einen neuen
+  // Aufrufer, schlägt das hier fehl – nicht erst der eingeladene Spieler.
+  test("jeder Aufrufer von playerregister schickt die Mindestalter-Bestätigung", async () => {
+    const { readdirSync, readFileSync, statSync } = await import("fs");
+    const { join } = await import("path");
+
+    const treffer = [];
+    const durchsuchen = (verzeichnis) => {
+      for (const eintrag of readdirSync(verzeichnis)) {
+        const pfad = join(verzeichnis, eintrag);
+        if (statSync(pfad).isDirectory()) {
+          durchsuchen(pfad);
+        } else if (/\.(js|jsx)$/.test(eintrag)) {
+          const inhalt = readFileSync(pfad, "utf8");
+          // Nur Aufrufer, nicht die Route selbst.
+          if (
+            inhalt.includes("/api/player/playerregister") &&
+            !pfad.includes(join("api", "player", "playerregister"))
+          ) {
+            treffer.push({ pfad, hatFeld: inhalt.includes("minAgeConfirmed") });
+          }
+        }
+      }
+    };
+    durchsuchen("app");
+
+    expect(treffer.length, "keine Aufrufer gefunden – Suchmuster prüfen").toBeGreaterThan(0);
+    const ohne = treffer.filter((t) => !t.hatFeld).map((t) => t.pfad);
+    expect(ohne, `Diese Seiten rufen die Registrierung ohne minAgeConfirmed auf: ${ohne.join(", ")}`)
+      .toEqual([]);
+  });
+
   test("Registrierung ohne Mindestalter-Bestätigung → 400, kein Account", async ({ request }) => {
     const email = newDisposableEmail("minage");
     const res = await request.post("/api/player/playerregister", {

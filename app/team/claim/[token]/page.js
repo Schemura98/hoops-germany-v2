@@ -51,6 +51,10 @@ export default function TeamClaimTokenPage({ params }) {
 
   // Register-on-Claim (nicht eingeloggte Eingeladene)
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "" });
+  // Mindestalter-Selbstauskunft, wie auf /signup (13.08.2026). Ohne sie weist
+  // playerregister die Anlage ab – dieser Weg haette sonst eine Fehlermeldung
+  // gezeigt, zu der es kein Bedienelement gibt.
+  const [abSechzehn, setAbSechzehn] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -99,6 +103,10 @@ export default function TeamClaimTokenPage({ params }) {
       setError("Das Passwort muss mindestens 6 Zeichen lang sein.");
       return;
     }
+    if (!abSechzehn) {
+      setError("Bitte bestätige, dass du mindestens 16 Jahre alt bist.");
+      return;
+    }
     setSubmitting(true);
     try {
       const { data } = await axios.post("/api/player/playerregister", {
@@ -106,6 +114,7 @@ export default function TeamClaimTokenPage({ params }) {
         lastName: form.lastName,
         email: form.email,
         password: form.password,
+        minAgeConfirmed: abSechzehn,
       });
       setPlayerToken(data.token);
       setStoredPlayer(data.player);
@@ -257,6 +266,16 @@ export default function TeamClaimTokenPage({ params }) {
             placeholder="Passwort (mind. 6 Zeichen)"
             required
           />
+          {/* Mindestalter wie auf /signup – serverseitig in playerregister erzwungen. */}
+          <label className="flex items-start gap-2.5 cursor-pointer mb-4">
+            <input
+              type="checkbox"
+              checked={abSechzehn}
+              onChange={(e) => setAbSechzehn(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 accent-brand-500"
+            />
+            <span className="text-sm text-mist-300">Ich bin mindestens 16 Jahre alt.</span>
+          </label>
           <button
             type="submit"
             disabled={submitting}
