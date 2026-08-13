@@ -95,32 +95,44 @@ function MatchMini({ match }) {
 
 const LIMIT = 5;
 
-export default function TeamMatchesWidget() {
-  const [data, setData] = useState(null); // { matches, myTeamId, followedTeamIds }
-  const [loading, setLoading] = useState(true);
+// preloaded/preloadedLoading: Die Newsfeed-Seite lädt my-matches bereits für die
+// Spieltag-Leiste und reicht die Daten hier durch – sonst würde derselbe
+// Endpunkt beim Öffnen zweimal abgefragt. Ohne diese Props lädt das Widget
+// weiterhin selbst (Stand-alone-Verwendung).
+export default function TeamMatchesWidget({ preloaded, preloadedLoading }) {
+  const external = preloaded !== undefined || preloadedLoading !== undefined;
+  const [ownData, setOwnData] = useState(null); // { matches, myTeamId, followedTeamIds }
+  const [ownLoading, setOwnLoading] = useState(true);
   const [scope, setScope] = useState("mine"); // mine | followed
   const [tab, setTab] = useState("upcoming"); // upcoming | results
 
   useEffect(() => {
+    if (external) return;
     let active = true;
     (async () => {
       try {
         const token = getPlayerToken();
         const { data } = await axios.post("/api/player/my-matches", { token });
         if (!active) return;
-        setData(data);
-        // Sinnvoller Standard-Bereich: eigenes Team, sonst gefolgte Teams.
-        setScope(data.myTeamId ? "mine" : "followed");
+        setOwnData(data);
       } catch {
-        if (active) setData({ matches: [], myTeamId: null, followedTeamIds: [] });
+        if (active) setOwnData({ matches: [], myTeamId: null, followedTeamIds: [] });
       } finally {
-        if (active) setLoading(false);
+        if (active) setOwnLoading(false);
       }
     })();
     return () => {
       active = false;
     };
-  }, []);
+  }, [external]);
+
+  const data = external ? preloaded : ownData;
+  const loading = external ? !!preloadedLoading : ownLoading;
+
+  // Sinnvoller Standard-Bereich, sobald Daten da sind: eigenes Team, sonst gefolgte.
+  useEffect(() => {
+    if (data) setScope(data.myTeamId ? "mine" : "followed");
+  }, [data]);
 
   const hasMine = !!data?.myTeamId;
   const hasFollowed = (data?.followedTeamIds || []).length > 0;

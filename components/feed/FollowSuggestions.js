@@ -11,7 +11,11 @@ import BaseAvatar from "@/components/Avatar";
 // Hilft neuen Nutzern gegen den leeren Feed. Blendet sich aus, wenn nichts (mehr)
 // vorzuschlagen ist. Die Vorschläge sind per Definition ungefolgt → kein
 // checkfollowing nötig; gefolgte Einträge verschwinden direkt aus der Liste.
-export default function FollowSuggestions() {
+// fallbackText: Standardmäßig blendet sich der Baustein bei leerer Liste aus.
+// In einem vom Nutzer selbst geöffneten Akkordeon (Mobil-Ansicht des Feeds)
+// wäre das eine leere Fläche ohne Erklärung – dort zeigt der Text ehrlich,
+// dass es gerade nichts vorzuschlagen gibt.
+export default function FollowSuggestions({ fallbackText }) {
   const [items, setItems] = useState([]); // {key,type,id,name,subtitle,img,square,href,busy}
   const [loaded, setLoaded] = useState(false);
 
@@ -80,7 +84,15 @@ export default function FollowSuggestions() {
     }
   }
 
-  if (!loaded || items.length === 0) return null;
+  if (!loaded) return null;
+  if (items.length === 0) {
+    if (!fallbackText) return null;
+    return (
+      <div className="bg-navy-800 rounded-md border border-navy-600 p-4">
+        <p className="text-xs text-mist-400">{fallbackText}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-navy-800 rounded-md border border-navy-600 p-4">
