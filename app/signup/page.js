@@ -10,11 +10,17 @@ import AuthShell from "@/components/layout/AuthShell";
 import Button from "@/components/ui/Button";
 import FormAlert from "@/components/ui/FormAlert";
 import { inputClass } from "@/lib/ui";
+import { SIGNUP_SOURCE_KEY, SIGNUP_SOURCE_RE as SRC_RE } from "@/lib/constants";
 
 // Kampagnen-Quellen-Tracking (?src=, z.B. Flyer-QR-Codes): serverseitige Regel ist
 // verbindlich, hier nur ein leichter Client-Filter vor dem Puffern in sessionStorage.
-const SRC_RE = /^[a-z0-9-_]{1,40}$/;
-const SIGNUP_SOURCE_KEY = "signupSource";
+//
+// Schluessel und Muster liegen seit 13.08.2026 in lib/constants.js, weil
+// components/AnalyticsTracker.js die Quelle jetzt auf JEDER Route auffaengt —
+// zwei Stellen, die denselben sessionStorage-Schluessel schreiben, duerfen ihn
+// nicht getrennt buchstabieren. Diese Seite ueberschreibt einen gepufferten
+// Wert bewusst: Wer mit ?src= direkt auf der Registrierung landet, macht die
+// gezieltere Angabe.
 
 function SignupForm() {
   const router = useRouter();
