@@ -2071,6 +2071,16 @@ genannt, auch wenn der längst gemeldet hatte). Beide neuen Zweige nachgemessen:
 Admin-Pfad → „*11 Punkte, 2 Rebounds, 1 Assist. Das Ergebnis ist eingetragen.*";
 nur der Gegner hat gemeldet → „*… sobald auch dein Team das Ergebnis meldet.*"
 
+### Nachtrag `34a166f` – die neue Messung hätte die belastbarste Kennzahl aufgebläht
+`own_stats_notified` wird **serverseitig** geschrieben und trägt die `playerId` des Empfängers.
+`activeUsers` und `region.visitorsByState` zählen aber `distinct playerId` über **alle**
+Ereignisarten (`lib/analyticsSummary.js`). Jede versendete Benachrichtigung hätte ihren Empfänger
+also als „aktiven Nutzer" gezählt, ohne dass er etwas getan hat – ausgerechnet bei der Zahl, die
+Ronja in Abschnitt 3b als die belastbarste im ganzen Report bezeichnet. Beide Abfragen schließen
+`own_stats_notified` jetzt aus. **Nachgemessen auf der Dev-DB: 88 gegen 82 aktive Nutzer (30 Tage)** –
+sechs hätten allein durch den Empfang gezählt. Lehre für künftige Server-Ereignisse mit `playerId`:
+sie gehören nicht in Aktivitäts-Kennzahlen.
+
 ### Offen / bewusst nicht entschieden
 - **Nur eine Nachricht je Spieler und Spiel.** Wer beim Stand „vorläufig" informiert wurde, erfährt
   die spätere Bestätigung **nicht** noch einmal. Das war die Abwägung gegen Rauschen — ob die
