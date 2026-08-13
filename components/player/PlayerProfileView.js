@@ -484,9 +484,32 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                                     ) : (
                                       <span className="font-semibold text-paper-50">{s.teamName}</span>
                                     )}
+                                    {/* „Da habe ich gespielt" führt jetzt auch
+                                        zur Tabelle dieser Saison. Die Zeile war
+                                        reiner Text – die Station verlinkte nur
+                                        den Verein, nie den Wettbewerb.
+                                        Freundschaftsspiele haben keine Liga und
+                                        bleiben deshalb Text. */}
                                     <p className="text-xs text-mist-400">
-                                      {s.leagueName || (s.games === 0 ? "Noch kein Spiel" : "")}
-                                      {s.season ? ` · ${s.season}` : ""}
+                                      {s.leagueLinkId && s.leagueName ? (
+                                        <Link
+                                          href={`/ligen/${s.leagueLinkId}`}
+                                          onClick={(e) => e.stopPropagation()}
+                                          className="inline-block py-0.5 underline decoration-navy-500 underline-offset-2 hover:text-brand-400 hover:decoration-brand-500"
+                                        >
+                                          {s.leagueName}
+                                          {/* Geschuetzte Leerzeichen: Bricht die
+                                              Zeile auf 390px um, soll „· 2025/26"
+                                              beim Ligennamen bleiben statt der
+                                              Trenner am Zeilenende zu hängen. */}
+                                          {s.season ? ` · ${s.season}` : ""}
+                                        </Link>
+                                      ) : (
+                                        <>
+                                          {s.leagueName || (s.games === 0 ? "Noch kein Spiel" : "")}
+                                          {s.season ? ` · ${s.season}` : ""}
+                                        </>
+                                      )}
                                     </p>
                                   </div>
                                 </div>

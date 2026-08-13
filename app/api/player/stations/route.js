@@ -51,6 +51,11 @@ async function handler(req) {
     return {
       teamId: r._id.team ? String(r._id.team) : null,
       leagueId: r._id.league ? String(r._id.league) : null,
+      // Ziel für den Liga-Verweis im Profil. Hier identisch mit `leagueId` –
+      // getrennt geführt, weil `leagueId` unten bei reinen Zugehörigkeiten
+      // bewusst null bleibt (keine gespielten Liga-Partien), die Liga aber
+      // trotzdem angezeigt und damit auch verlinkt werden soll.
+      leagueLinkId: r._id.league ? String(r._id.league) : null,
       teamName: r.team?.teamName || "Unbekanntes Team",
       teamSlug: r.team?.slug || null,
       teamLogo: r.team?.logo || null,
@@ -102,6 +107,7 @@ async function handler(req) {
       stations.push({
         teamId: String(t._id),
         leagueId: null, // keine gespielten Liga-Partien (nur Zugehörigkeit)
+        leagueLinkId: t.leagueId?._id ? String(t.leagueId._id) : null,
         teamName: t.teamName || "Unbekanntes Team",
         teamSlug: t.slug || null,
         teamLogo: t.logo || null,

@@ -2210,3 +2210,102 @@ Liga-Achse); die Verdichtung gehört in eine Hand. Nicht angefasst, weil fremdes
 (Auto-Follow beim Beitritt), `components/layout/Navbar.js`/`PlayerNav.js` (`K8`, `/rangliste` in
 die Navigation), `lib/analyticsSummary.js`. **Nicht geprüft:** Ligen mit Playoffs (die Dev-DB hat
 keine), Verhalten bei sehr vielen Ligen im Filter, echtes Low-End-Android.
+
+---
+
+## 13.08.2026 – `/tryouts`: aus einer geschlossenen Tür werden vier Wege (Vivien)
+
+**Auftrag:** Ronjas Befund `docs/RETENTION-BEFUND-2026-08-13.md`, **R2** mit den Kontaktpunkten
+**K5** und **K9**. Gemessen dort: `/tryouts` hatte im Leerzustand **null Links im `<main>`**.
+Das ist die Seite von **Zielgruppe 3** (`docs/ZIELGRUPPEN.md`: Vereinslose, „wer zweimal nichts
+findet, kommt nicht wieder"), und bei 1 externem Team ist der Leerzustand laut Mats' H4 auf
+Monate der **Normalfall**, nicht die Ausnahme.
+
+### Die Entscheidung vor der Gestaltung
+
+Nicht „ein Link unter die leere Liste", sondern eine andere Frage. Wer hier ankommt, will keine
+Probetrainings sehen – er will **einen Verein finden**. Tryouts sind ein Weg dorthin, nicht das
+Ziel. Die Seite zeigt deshalb im Leerzustand die anderen Wege, jeden mit echten Daten:
+
+| | Weg | Datenquelle |
+|---|---|---|
+| **01** | Vereine in deiner Nähe, direkt anfragbar über die Vereinsseite | `/api/team/fetchteams`, ohne Ort nach Profil-Bundesland vorsortiert, auf Wunsch nach Entfernung (`lib/geo.js`) |
+| **02** | Transfermarkt – der Rückweg, den es bisher nur in eine Richtung gab (**K9**) | `/api/team/recruiting-list` für die echte Zahl |
+| **03** | Von Vereinen gefunden werden: „als verfügbar eintragen" | `/api/player/update-transfer` |
+| **04** | Probetraining ausschreiben – nur für Team-Admins und Ausgeloggte | – |
+
+Neue Komponente **`components/tryouts/WegeZumVerein.js`** in drei Dichten: `leer` (große
+typografische Fläche, ersetzt den `EmptyState`), `anhang` („Kein passendes dabei?" unter der
+gefüllten Liste – dort fehlte der Rückweg genauso) und `fehler` (eigene Überschrift, weil
+„Kein passendes dabei?" nach einem Ladefehler gelogen wäre).
+
+### Drei Entscheidungen, die Ehrlichkeit kosten statt sie zu sparen
+
+- **Keine Demo-Vereine in Route 01.** Die Karte fordert zum Anfragen auf; ein Beispielverein kann
+  nicht antworten. Auf `/teams` und `/transfermarkt` stehen sie weiter (mit Abzeichen) – das ist
+  eine Übersicht, das hier eine Handlungsaufforderung. Auf Prod heißt das: statt 70 Vereinen
+  stehen dort die **echten**, und die Pionier-Rahmung trägt den Rest.
+- **Fehlgeschlagene Anfragen werden als Fehler geführt, nicht als „nichts da".** „Aktuell sucht
+  kein Verein" wäre bei einem Netzwerkfehler eine falsche Tatsachenbehauptung.
+- **Der 1-MB-Städtedatensatz lädt erst auf Anforderung.** Ohne Ort sortiert ein reiner
+  String-Vergleich nach Bundesland; `loadCities()` läuft erst, wenn jemand die Umkreis-Sortierung
+  öffnet. Sonst zahlt jeder Handy-Besucher 1 MB für eine Sortierung, die er nicht wollte.
+
+### Zwei Altlasten, die dabei auffielen
+
+- **Spaltenbreite:** `main` war `max-w-3xl`, der `PageHeader` darüber `max-w-5xl` – auf 1280 px
+  begann „TRYOUTS" **128 px weiter links** als der Inhalt darunter. Unter einer typografischen
+  Fläche ist das ein sichtbarer Bruch. Jetzt gleiche Außenkante wie der Kopf (und wie
+  `/transfermarkt`, `/teams`, `/spieler`), Lesespalte links darin verankert.
+- **Zeilenlänge:** Auf 1280 px liefen die Absätze über **100 Zeichen**. Alle Fließtexte jetzt
+  `max-w-prose`; nachgemessen 42–47 Zeichen. Die Vereinsliste bleibt volle Breite – sie ist
+  Daten, kein Fließtext.
+
+### Nebenbefund am eigenen Belegbild
+
+Mit der echten Persona (`sven.adler@test.de`, Profil-Bundesland **Sachsen**) stand über einer
+Liste aus Hamburg, München, Köln und Berlin die Zeile „ZUERST AUS SACHSEN" – eine Überschrift,
+die ihr eigener Inhalt widerlegt. Der Hinweis nennt das Bundesland jetzt nur noch, wenn dort auch
+wirklich ein Verein steht.
+
+### `/tryouts/[id]` – zwei Ausgänge statt keinem
+
+Wer ein Probetraining öffnete und sich dagegen entschied, hatte keinen Weg zurück: Die Seite
+kannte weder ihre Liste noch den Transfermarkt. Jetzt zwei ruhige Zeilen unter der Karte,
+gedämpft – „Jetzt bewerben" bleibt die einzige betonte Handlung.
+
+### Belege
+
+`tmp/tryouts-wege/` (Skript `tmp/tryouts-wege-shots.mjs`, echtes Chromium), je **390 px und
+1280 px**, **leer und gefüllt**, ein- und ausgeloggt. Zählbarer Unterschied an Links im `<main>`:
+
+| | vorher | nachher (eingeloggt / ausgeloggt) |
+|---|---|---|
+| `/tryouts` leer | **0** | **7 / 8** |
+| `/tryouts` gefüllt | 3 (nur die Tryout-Karten) | **10 / 11** |
+
+Keine Überbreite auf 390 px. Kontrast programmatisch gegen den **tatsächlichen** Hintergrund
+gerechnet: **kein Textknoten unter WCAG AA**. Fehlerzustand durch absichtlich falsche API-URL
+provoziert und geprüft, danach zurückgesetzt.
+
+Commits: `b95bf2a` (Komponente), `4374d2b` (Seite + Spaltenbreite), `b528748` (Detailseite),
+`df2b5ee` (Zeilenlänge), `da4f503` (Sortier-Hinweis).
+
+### Bewusst nicht gebaut, nicht geprüft
+
+- **Das „benachrichtige mich"-Opt-in aus R2 fehlt** – bewusst. Es bittet den Nutzer zu *warten*;
+  echte Vereine, die er heute anschreiben kann, sind die stärkere Antwort. Dazu: Mail lokal nicht
+  testbar (kein SMTP in der Dev-`.env`), und der Versandpfad liegt im Revier des parallel
+  laufenden Benachrichtigungs-Strangs. **Empfehlung: als eigenes Paket, nach R1.**
+- **Kein `npm run build`** (fremder Dev-Server auf Port 3000), kein Deploy, kein Push –
+  **Gates Kai/Tobias stehen aus.**
+- **`CLAUDE.md` Abschnitt 0 nicht angefasst**: vier Arbeitsstränge parallel, die Verdichtung
+  gehört in eine Hand (gleiche Begründung wie beim Liga-Strang).
+- **Konventionen geprüft, kein Handlungsbedarf:** „Tryouts" existiert bereits als Feedback-Chip
+  (`app/feedback/page.js`) und als Analytics-Eimer (`lib/analyticsSummary.js` Zeile 59); es
+  entstand kein neuer Bereich und keine neue Route.
+- **Texte gehen an Nele** zum Zielgruppen-Check (Register nach `ZIELGRUPPEN.md` Z3, Ton an
+  Schritt 5 der Tour angeglichen).
+- **Nicht geprüft:** `prefers-reduced-motion` nur über die Primitive (`Reveal`/`useInView` haben
+  saubere Rückfallwege), nicht eigens emuliert; echtes Low-End-Android; Verhalten bei vielen
+  echten Vereinen in Route 01 (Dev-DB hat vier).
