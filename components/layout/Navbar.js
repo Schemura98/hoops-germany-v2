@@ -207,16 +207,24 @@ export default function Navbar() {
     setTimeout(() => searchInputRef.current?.focus(), 50);
     if (!searchData) {
       try {
-        const [p, t] = await Promise.all([
+        // Ligen sind seit 13.08.2026 mit dabei (Ronjas R8). Vorher fand die
+        // Suche Spieler und Teams, aber keine Liga – ausgerechnet der Begriff,
+        // den ein Vereinsspieler am ehesten eintippt („Bezirksliga", „Kreis
+        // Niers"). Der Katalog ist mit 57 offiziellen Einträgen klein genug,
+        // um wie Spieler und Teams einmal geladen und im Browser gefiltert zu
+        // werden.
+        const [p, t, l] = await Promise.all([
           axios.post("/api/player/fetchall"),
           axios.post("/api/team/fetchteams"),
+          axios.get("/api/leagues"),
         ]);
         setSearchData({
           players: p.data.players || [],
           teams: t.data.teams || [],
+          leagues: l.data.leagues || l.data || [],
         });
       } catch {
-        setSearchData({ players: [], teams: [] });
+        setSearchData({ players: [], teams: [], leagues: [] });
       }
     }
   }, [searchData]);
@@ -237,7 +245,17 @@ export default function Navbar() {
       .filter((t) => t.teamName?.toLowerCase().includes(q))
       .slice(0, 3)
       .map((t) => ({ ...t, _type: "team" }));
-    setResults([...players, ...teams]);
+    // Auch Region und Spielklasse durchsuchen: Wer „Niers" oder „Bezirksliga"
+    // eintippt, meint eine Liga, kennt aber selten ihren vollen Namen.
+    const leagues = (searchData.leagues || [])
+      .filter((l) =>
+        [l.name, l.region, l.bundesland, l.level, l.season]
+          .filter(Boolean)
+          .some((feld) => String(feld).toLowerCase().includes(q)),
+      )
+      .slice(0, 3)
+      .map((l) => ({ ...l, _type: "league" }));
+    setResults([...players, ...teams, ...leagues]);
   }
 
   function closeSearch() {
@@ -645,7 +663,24 @@ export default function Navbar() {
                 </div>
               )}
               {results.map((item) =>
-                item._type === "team" ? (
+                item._type === "league" ? (
+                  <Link
+                    key={`l-${item._id}`}
+                    href={`/ligen/${item._id}`}
+                    onClick={closeSearch}
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-navy-700 transition-colors"
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-navy-700 text-mist-300">
+                      <PiTrophyBold />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-paper-50 truncate">{item.name}</p>
+                      <span className="text-[10px] font-bold text-mist-400 bg-navy-700 px-1.5 py-0.5 rounded-sm uppercase tracking-wide">
+                        Liga{item.season ? ` · ${item.season}` : ""}
+                      </span>
+                    </div>
+                  </Link>
+                ) : item._type === "team" ? (
                   <Link
                     key={`t-${item._id}`}
                     href={`/team/team-detail/${item.slug}`}
