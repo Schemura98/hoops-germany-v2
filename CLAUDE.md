@@ -11,12 +11,19 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> **Zuletzt deployt: `e7a38ce` (13.08.2026, vormittags)** – Kaderprüfung beim Statistik-Speichern
-> (Kais Sicherheitsbefund), Feedback-Zugang aus der schwebenden Ebene ins Sticky-Chrome,
-> Liga-Suche (Ronjas R8), beides nach erneuten Gates von Kai und Tobias.
-> **Rollback-Punkt: `275f124`** – der Stand davor (Nachtschicht). Älter: `a8e4fd4` (vor der
-> Nachtschicht), `562c629` (vor dem gesamten Redesign). Auf dem VPS per
+> **Zuletzt deployt: `27a04fe` (13.08.2026, mittags)** – Kaderplätze werden beim Teamwechsel
+> freigegeben (**acht** Wege, `lib/rosterSlots.js`), inkl. `claimToken`, nach zwei Kai-Reviews.
+> Davor `e7a38ce` (Kaderprüfung beim Statistik-Speichern, Feedback-Zugang im Sticky-Chrome,
+> Liga-Suche/R8) und `275f124` (Nachtschicht).
+> **Rollback-Punkte:** `e7a38ce` → `275f124` → `a8e4fd4` (vor der Nachtschicht) → `562c629`
+> (vor dem gesamten Redesign). Auf dem VPS per
 > `git checkout <hash> && npm run build && pm2 restart hoops-v2`.
+>
+> ⚠️ **Wer `Player.teamId` ändert, MUSS `slotsFreigeben` aufrufen** – die verbindliche Liste aller
+> acht Wechselwege steht im Kopf von `lib/rosterSlots.js`. Sie war dreimal hintereinander
+> unvollständig (zwei → vier → acht); zweimal erzeugte der Fix selbst ein Folgeproblem
+> (verwaister `claimToken` = wiederverwendbarer Einladungslink; leerer Kaderplatz ohne
+> Einladungs-Knopf). Beides gefunden von Kai, beides vor dem Deploy behoben.
 > ⚠️ Diese Zeile führte bis 13.08. `78d833a` als zuletzt deployt – auf dem Server lief
 > tatsächlich `a8e4fd4`. Bei Rollback-Punkten immer am Server nachsehen, nicht hier.
 > Älterer Punkt: `562c629` (Stand VOR dem gesamten Redesign).
