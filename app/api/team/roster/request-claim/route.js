@@ -8,6 +8,7 @@ import { memberJoinedEmail } from "@/lib/emailTemplates";
 import { getBaseUrl } from "@/lib/baseUrl";
 import { positionLabel } from "@/lib/constants";
 import { recordTransfer } from "@/lib/recordTransfer";
+import { slotsFreigeben } from "@/lib/rosterSlots";
 import { followOwnTeam } from "@/lib/teamFollow";
 import { getTeamAdminRecipients } from "@/lib/teamAdmins";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
@@ -72,6 +73,11 @@ async function handler(req) {
 
   if (String(prevTeam || "") !== String(team._id)) {
     await recordTransfer({ player: player._id, fromTeam: prevTeam, toTeam: team._id });
+    // Kaderplatz beim ALTEN Verein freigeben. Ausgerechnet diese Route erzeugt
+    // `claimedBy`-Eintraege - wer per Claim-Link wechselt, hinterliess also
+    // garantiert einen verwaisten Platz. Der gerade beanspruchte Platz DIESES
+    // Teams bleibt stehen (anderes teamId-Argument).
+    if (prevTeam) await slotsFreigeben(player._id, prevTeam);
   }
   await followOwnTeam(player._id, team._id);
 

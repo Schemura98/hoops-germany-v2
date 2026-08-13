@@ -79,6 +79,7 @@ await Teams.updateOne(
         name: "Prüfplatz",
         position: "PG",
         claimedBy: mitglied._id,
+        claimToken: "pruef-token-123",
         status: "confirmed",
       },
     },
@@ -127,6 +128,12 @@ pruefe("remove-member antwortet", 200, weg.status);
 const nach = await zaehle();
 pruefe("Platz des Entfernten ist freigegeben", 0, nach.meiner);
 pruefe("Platz des anderen ist UNBERÜHRT", 1, nach.fremder);
+
+// Kais Fund: Bleibt der claimToken stehen, ist der alte Einladungslink wieder
+// gueltig - der Entfernte koennte sich ohne Genehmigung selbst zurueckholen.
+const tNach = await Teams.findOne({ _id: new mongoose.Types.ObjectId(teamId) });
+const restToken = (tNach.rosterSlots || []).filter((s) => s.claimToken === "pruef-token-123").length;
+pruefe("claimToken ist mit geloescht (kein Wieder-Beitritt)", 0, restToken);
 
 // Zustand vollständig wiederherstellen.
 await Teams.updateOne(

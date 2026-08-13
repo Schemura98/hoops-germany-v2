@@ -13,6 +13,7 @@ import { getAdminNotifyTo } from "@/lib/adminRecipients";
 import { teamPendingEmail } from "@/lib/emailTemplates";
 import { getBaseUrl } from "@/lib/baseUrl";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
+import { slotsFreigeben } from "@/lib/rosterSlots";
 
 // POST /api/team/create – ein eingeloggter Spieler gründet ein Team und wird
 // automatisch dessen Admin. Spieler-geführtes Modell (kein eigener Team-Login).
@@ -67,11 +68,20 @@ async function handler(req) {
   // damit ein noch nicht freigegebenes Team nicht in Liga-/Tabellen-Ansichten auftaucht.
 
   // Spieler wird Admin + Mitglied des eigenen Teams (kann es schon verwalten)
+  const vorherigesTeam = player.teamId || null;
   await Player.findByIdAndUpdate(player._id, {
     isTeamAdmin: true,
     teamAdminOf: team._id,
     teamId: team._id,
   });
+
+  // Kaderplatz beim alten Verein freigeben. Geprüft wird oben nur, ob der
+  // Spieler bereits ein Team *verwaltet* – ein normales Mitglied kann sehr wohl
+  // ein eigenes Team gründen und hinterließ dabei seinen Platz. Liste aller
+  // Wechselwege in lib/rosterSlots.js.
+  if (vorherigesTeam && String(vorherigesTeam) !== String(team._id)) {
+    await slotsFreigeben(player._id, vorherigesTeam);
+  }
 
   await recordTransfer({
     player: player._id,

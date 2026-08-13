@@ -76,9 +76,12 @@ async function handler(req) {
       toTeam: team._id,
     });
     await followOwnTeam(slot.claimedBy, team._id);
-    // Kaderplatz beim alten Verein freigeben (13.08.2026, Befund von Kai) –
-    // vierter und letzter Weg eines Teamwechsels. Nur der alte Verein, der
-    // gerade bestätigte Platz dieses Teams bleibt selbstverständlich stehen.
+    // Kaderplatz beim alten Verein freigeben (13.08.2026, Befund von Kai).
+    // Nur der alte Verein – der gerade bestätigte Platz dieses Teams bleibt
+    // selbstverständlich stehen.
+    // ⚠️ Die vollständige Liste der Wege, auf denen ein Spieler das Team
+    // wechselt, steht in lib/rosterSlots.js. Wer hier einen Weg sucht, findet
+    // ihn dort – NICHT durch Weiterlesen in dieser Datei.
     if (prevTeam && String(prevTeam) !== String(team._id)) {
       await slotsFreigeben(slot.claimedBy, prevTeam);
     }

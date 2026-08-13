@@ -4,6 +4,7 @@ import Team from "@/models/Team";
 import Player from "@/models/Player";
 import { getPlayerFromToken } from "@/lib/serverAuth";
 import { recordTransfer } from "@/lib/recordTransfer";
+import { slotsFreigeben } from "@/lib/rosterSlots";
 import { followOwnTeam } from "@/lib/teamFollow";
 import { getTeamAdminRecipients } from "@/lib/teamAdmins";
 import { sendMail } from "@/lib/mailer";
@@ -76,6 +77,9 @@ async function handler(req) {
 
   if (String(prevTeam || "") !== String(team._id)) {
     await recordTransfer({ player: player._id, fromTeam: prevTeam, toTeam: team._id });
+    // Kaderplatz beim alten Verein freigeben - Liste aller Wechselwege in
+    // lib/rosterSlots.js.
+    if (prevTeam) await slotsFreigeben(player._id, prevTeam);
   }
   await followOwnTeam(player._id, team._id);
 
