@@ -8,7 +8,13 @@ const leagueSchema = new mongoose.Schema(
     // Offizieller Liga-Katalog (Spielklassen-Hierarchie):
     level: String, // Regionalliga | Oberliga | Landesliga | Bezirksliga | Kreisliga | Sonstige
     gender: { type: String, default: "Herren" }, // Herren | Damen | Mixed
-    ageGroup: { type: String, default: "Senioren" }, // Senioren | U18 | U16 | …
+    // Senioren | U18 — mehr nicht. Kein Schema-Enum, weil Altbestände sonst
+    // beim Laden brechen würden; die verbindliche Liste steht in
+    // LEAGUE_AGE_GROUPS (lib/constants.js) und wird serverseitig in
+    // createleague/updateleague erzwungen.
+    // ⚠️ U16 stand hier bis zum 13.08.2026 und ist bewusst raus: Die Plattform
+    // ist erst ab 16 Jahren gedacht, eine U16-Liga ist die Altersklasse UNTER 16.
+    ageGroup: { type: String, default: "Senioren" },
     region: String, // Bezirk/Kreis (z. B. "Bezirk Niederrhein", "Kreis Köln")
     official: { type: Boolean, default: false }, // true = vom Verband, nicht selbst erstellt
     // Maschinenlesbare Demo-Kennzeichnung (additiv). true = Beispieldaten (Testphase),

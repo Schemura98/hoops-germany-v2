@@ -1,6 +1,6 @@
 # NRW-Struktur (WBV) für Hoops Germany
 
-> Der WBV bietet auch Wettbewerbe **unterhalb U16** an – Hoops Germany bildet diese **bewusst nicht** ab.
+> Der WBV bietet auch Wettbewerbe **U16 und jünger** an – Hoops Germany bildet diese **bewusst nicht** ab (Plattform ab 16 Jahren).
 > Staffeln/Staffelanzahlen sind **saisonabhängig** und dürfen **nicht dauerhaft im Frontend hart codiert**
 > werden – aus den tatsächlichen Ligadaten oder einer saisonbezogenen Konfiguration ableiten.
 
@@ -22,7 +22,7 @@ Ebenen (Spielklasse), von oben nach unten:
 Eine **Kreisliga Damen** nur anlegen, wenn sie in tatsächlich gepflegten/importierten Daten existiert –
 nicht automatisch erzeugen.
 
-## Jugend (nur U18 & U16)
+## Jugend (nur U18)
 Mögliche Verbandsebenen:
 1. 1. Jugendregionalliga
 2. 2. Jugendregionalliga
@@ -36,7 +36,7 @@ Anzeige kann zu männlich/weiblich/offen mappen.
 ## Kreisligen (Unterbau, kreisbezogen)
 - Kreisligen sind **einem Basketballkreis** zuzuordnen (`region` = Kreisname).
 - Stufen je Kreis können sein: **1. Kreisliga** und **2. Kreisliga**.
-- Hoops Germany berücksichtigt im Jugendbereich davon **nur U18 & U16**.
+- Hoops Germany berücksichtigt im Jugendbereich davon **nur U18**.
 - **Nicht pauschal voraussetzen:** dass jeder Kreis beide Stufen hat · dass jede Altersklasse in jedem
   Kreis angeboten wird · dass jede Saison dieselbe Struktur hat · dass eine „Kreisklasse" existiert.
 - „**Kreisklasse**" nur verwenden, wenn sie in einer gepflegten/importierten offiziellen Quelle

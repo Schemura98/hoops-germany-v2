@@ -1,7 +1,9 @@
 # Change-Checkliste – vor JEDER Ligaänderung durchgehen
 
 ## Prüffragen
-- [ ] Betrifft die Änderung nur **Senioren, U18 oder U16**? (sonst: stoppen – nicht unterstützt)
+- [ ] Betrifft die Änderung nur **Senioren oder U18**? (sonst: stoppen – nicht unterstützt)
+      ⚠️ U16 ist seit dem 13.08.2026 NICHT mehr unterstützt: Die Plattform ist erst
+      ab 16 Jahren gedacht, eine U16-Liga ist die Altersklasse UNTER 16.
 - [ ] Kompatibel mit der aktuellen Code-Architektur (`current-architecture.md`)?
 - [ ] Wird **Ist-Zustand mit Soll-Produktlogik verwechselt**? (z. B. `active` ≠ „aktuelle Saison")
 - [ ] Werden **historische Saisons** geschützt (nichts überschreiben)?

@@ -19,8 +19,11 @@ Felder: `name`, `season`, `level`, `gender`, `ageGroup`, `region`, `official`, `
 - **Bekannte technische Einschränkung, KEINE gewünschte Produktregel.**
 
 ## Altersklassen (`lib/constants.js` → `LEAGUE_AGE_GROUPS`)
-- UI/Filter unterstützen bereits ausschließlich `["Senioren","U18","U16"]`.
-- **Prod-Daten bestätigt:** 0 Ligen unterhalb U16.
+- UI/Filter unterstützen ausschließlich `["Senioren","U18"]` (seit 13.08.2026;
+  vorher zusätzlich "U16").
+- **Prod-Daten bestätigt (13.08.2026):** 0 Ligen mit U16 oder darunter – die neun
+  vorhandenen wurden mit 4 Demo-Teams und 4 Beispielprofilen entfernt, kein echter
+  Datensatz war betroffen.
 - ⚠️ **Lücke:** Die Admin-APIs `createleague`/`updateleague` **validieren `ageGroup` NICHT serverseitig**
   (nehmen jeden String). Nur das UI-Dropdown begrenzt. → Server-Validierung ist eine offene Härtung.
 
@@ -56,7 +59,7 @@ Felder: `name`, `season`, `level`, `gender`, `ageGroup`, `region`, `official`, `
 - **Kein Cron.** Manuelles, idempotentes Skript.
 - Klont Liga-**Hüllen** in die neue Saison (Upsert auf name+season+gender+ageGroup).
 - **Kopiert KEINE** Ergebnisse/Matches. `--deactivate-old` setzt Altsaison-Ligen `active:false`.
-- Nutzt den aktuellen Katalog → erzeugt keine <U16-Ligen.
+- Nutzt den aktuellen Katalog → erzeugt keine U16-Ligen oder jüngere.
 
 ## Tabellen & Playoffs (`lib/standings.js`, `models/Match.js`)
 - Tabellen werden aus **bestätigten Matches** berechnet (`computeStandings`).

@@ -4,7 +4,13 @@
 > abweicht, ist das eine **technische Schuld**, keine Rechtfertigung, die Regel aufzuweichen.
 
 ## Unterstützte Altersbereiche
-Hoops Germany unterstützt **ausschließlich**: **Senioren · U18 · U16**.
+Hoops Germany unterstützt **ausschließlich**: **Senioren · U18**.
+
+> ⚠️ **Geändert am 13.08.2026 (Entscheidung Patrick).** Seine Worte: die Website
+> ist wirklich erst ab 16 gedacht. U16 ist damit raus – eine U16-Liga ist die
+> Altersklasse UNTER 16, dort spielen 14- und 15-Jährige. In U18 spielen 16- und
+> 17-Jährige, das passt zur Regel. Der Widerspruch zwischen ausgeliefertem Katalog
+> und Altersregel fiel bei Noras rechtlicher Vorprüfung zur Leistungskarte auf.
 
 **Nicht unterstützt** (bewusste Produktentscheidung, kein fehlendes Feature): U14, U12, U10, U8,
 Mini-Basketball, alle jüngeren Altersklassen.
@@ -16,7 +22,7 @@ Nicht unterstützte Altersklassen dürfen:
 - nicht durch das Saison-Rollover erzeugt werden,
 - nicht über indirekte Beziehungen öffentlich sichtbar werden.
 
-Bestehende Altdaten unterhalb U16 **nicht ungeprüft löschen** → erst analysieren, dokumentieren,
+Bestehende Altdaten mit U16 oder jünger **nicht ungeprüft löschen** → erst analysieren, dokumentieren,
 öffentlich ausblenden, sichere Bereinigungs-/Archivoption vorschlagen. (Stand jetzt: auf Prod existieren
 **0** solche Ligen.)
 

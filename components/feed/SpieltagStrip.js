@@ -111,7 +111,18 @@ export default function SpieltagStrip({ data, loading, player }) {
     const my = aIsMine ? score.a : score.b;
     const opp = aIsMine ? score.b : score.a;
     const opponent = aIsMine ? last.teamB : last.teamA;
-    lastView = { my, opp, won: my > opp, opponent, verify: matchVerification(last) };
+    // Drei Ausgänge, nicht zwei. `won: my > opp` hätte ein Unentschieden als
+    // „Niederlage" in Fehlerrot angezeigt — das Datenmodell sieht Unentschieden
+    // ausdrücklich vor (submit-match-result setzt bei aPts === bPts kein
+    // winningTeam, lib/matchScore.js nennt es beim Namen).
+    const ausgang = my > opp ? "sieg" : my < opp ? "niederlage" : "unentschieden";
+    const verify = matchVerification(last);
+    // Nur ein beidseitig bestätigtes Ergebnis darf als Tatsache auftreten.
+    // Solange nur eine Seite gemeldet hat (oder sich beide widersprechen), ist
+    // „Sieg" eine Behauptung aus einer Quelle — dann bleibt das Wort stehen,
+    // aber ohne die grüne Zusage, und der Vorbehalt darunter trägt die Aussage.
+    const belegt = verify?.state === "confirmed" || verify?.state === "final";
+    lastView = { my, opp, ausgang, belegt, opponent, verify };
   }
 
   const nextOpponent = next
@@ -154,10 +165,20 @@ export default function SpieltagStrip({ data, loading, player }) {
             </span>
             <span
               className={`text-xs font-semibold flex-shrink-0 ${
-                lastView.won ? "text-signal-ok" : "text-signal-error"
+                !lastView.belegt
+                  ? "text-mist-300"
+                  : lastView.ausgang === "sieg"
+                  ? "text-signal-ok"
+                  : lastView.ausgang === "niederlage"
+                  ? "text-signal-error"
+                  : "text-mist-300"
               }`}
             >
-              {lastView.won ? "Sieg" : "Niederlage"}
+              {lastView.ausgang === "sieg"
+                ? "Sieg"
+                : lastView.ausgang === "niederlage"
+                ? "Niederlage"
+                : "Unentschieden"}
             </span>
             <div className="min-w-0 flex-1">
               <p className="text-xs text-mist-400 truncate">

@@ -7,12 +7,65 @@
 //
 //   node u16-loeschen.mjs        Probelauf
 //   node u16-loeschen.mjs --weg  loeschen
+import { readFileSync } from "fs";
 import mongoose from "mongoose";
 
-const WEG = process.argv.includes("--weg");
-const JUNG = ["U16", "U14", "U12", "U10"];
+// .env selbst lesen, wie alle scripts/seed-*.mjs — das Projekt hat kein
+// `dotenv` und keinen Env-Loader in den npm-Skripten. Vorher stand hier
+// `process.env.MONGODB_URI`; so wie der Kopfkommentar den Aufruf beschreibt
+// (`node tmp/u16-loeschen.mjs`), wäre die Variable schlicht leer gewesen und
+// `mongoose.connect(undefined)` hätte sofort geworfen. Ausgeführt wurde es
+// nur, weil ich die Variable von Hand vorangestellt habe — eine
+// undokumentierte Voraussetzung. Fund aus Kais Prüfkette.
+//
+// `MONGODB_URI` aus der Umgebung hat weiterhin Vorrang: Auf dem VPS wird das
+// Skript genau so aufgerufen, dort zeigt die lokale .env auf hoops_prod.
+function readEnv(key) {
+  if (process.env[key]) return process.env[key];
+  try {
+    const txt = readFileSync(new URL("../.env", import.meta.url), "utf8");
+    for (const zeile of txt.split(/\r?\n/)) {
+      const t = zeile.trim();
+      if (!t || t.startsWith("#")) continue;
+      const i = t.indexOf("=");
+      if (i !== -1 && t.slice(0, i).trim() === key) return t.slice(i + 1).trim();
+    }
+  } catch {
+    /* keine .env */
+  }
+  return "";
+}
 
-await mongoose.connect(process.env.MONGODB_URI);
+const WEG = process.argv.includes("--weg");
+
+// Die zu entfernenden Altersklassen werden NICHT hier aufgezählt, sondern aus
+// der Produktregel abgeleitet: alles, was `LEAGUE_AGE_GROUPS` nicht erlaubt.
+//
+// Grund (Fund aus Kais Prüfkette): Eine eigene Liste hier wäre eine zweite
+// Wahrheit. Ändert sich die Altersregel später — etwa zurück auf U16 für einen
+// bestimmten Ligatyp —, würde dieses committete Skript bei einem erneuten Lauf
+// weiterhin nach der alten Liste löschen. Seine Sicherungen schützen nur vor
+// echten Spielern, nicht vor einer veralteten Regel.
+//
+// So kann es nicht veralten: Wer `LEAGUE_AGE_GROUPS` ändert, ändert das Skript
+// automatisch mit.
+const { LEAGUE_AGE_GROUPS } = await import("../lib/constants.js");
+const ALLE_KLASSEN = ["Senioren", "U18", "U16", "U14", "U12", "U10"];
+const JUNG = ALLE_KLASSEN.filter((k) => !LEAGUE_AGE_GROUPS.includes(k));
+
+if (JUNG.length === 0) {
+  console.log("LEAGUE_AGE_GROUPS erlaubt alle bekannten Klassen — nichts zu tun.");
+  process.exit(0);
+}
+console.log(`Erlaubt laut Produktregel: ${LEAGUE_AGE_GROUPS.join(", ")}`);
+console.log(`Zu entfernen: ${JUNG.join(", ")}\n`);
+
+const uri = readEnv("MONGODB_URI");
+if (!uri) {
+  console.error("MONGODB_URI fehlt (weder in der Umgebung noch in .env).");
+  process.exit(1);
+}
+await mongoose.connect(uri);
 const db = mongoose.connection;
 console.log("Datenbank:", db.name, WEG ? "· LOESCHEN" : "· Probelauf", "\n");
 
