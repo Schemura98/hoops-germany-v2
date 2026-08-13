@@ -248,6 +248,16 @@ function SignupForm() {
           e.preventDefault();
           setError("Bitte bestätige zuerst, dass du mindestens 16 Jahre alt bist.");
         }}
+        // Tastatur: Ein `a` ohne `href` löst bei Enter kein Klick-Ereignis aus.
+        // Ohne das hier bekäme nur die Maus die Erklärung, und wer per Tastatur
+        // bedient, drückt ins Leere (Fund von Tobias).
+        onKeyDown={(e) => {
+          if (abTZ) return;
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setError("Bitte bestätige zuerst, dass du mindestens 16 Jahre alt bist.");
+          }
+        }}
         className={`w-full flex items-center justify-center gap-2 border rounded-sm px-4 py-2.5 font-medium transition-colors ${
           abTZ
             ? "border-navy-600 hover:border-brand-500 text-mist-300 cursor-pointer"

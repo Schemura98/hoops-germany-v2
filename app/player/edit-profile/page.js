@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import Button from "@/components/ui/Button";
+import FormAlert from "@/components/ui/FormAlert";
 import Loading from "@/components/ui/Loading";
 import { inputClass } from "@/lib/ui";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
@@ -59,6 +60,12 @@ export default function PlayerEditProfilePage() {
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  // Die Fehlermeldung steht ganz oben, der Speichern-Knopf am Ende eines
+  // langen Formulars. Ohne diesen Anker passiert beim Ablehnen im Sichtfeld
+  // des Nutzers NICHTS – der Knopf zuckt kurz, mehr nicht (Fund von Tobias).
+  // Die Mindestalter-Regel macht genau diesen Fall zum ersten Mal wahrscheinlich.
+  const fehlerRef = useRef(null);
+
 
   // Konto löschen (Self-Service)
   const [showDelete, setShowDelete] = useState(false);
@@ -98,6 +105,21 @@ export default function PlayerEditProfilePage() {
 
   const onChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+  // Zur Meldung springen, sobald sie WIRKLICH im Dokument steht. Im catch
+  // direkt nach setError() aufgerufen lief der Sprung ins Leere: React hatte
+  // die Meldung zu dem Zeitpunkt noch nicht gerendert, und die Seite blieb am
+  // Formularende stehen (nachgemessen: Meldung 944 px oberhalb des Sichtfelds).
+  useEffect(() => {
+    if (!error) return;
+    // Bewusst OHNE `behavior: "smooth"`. Das Einblenden des Meldungskastens
+    // verschiebt das Layout um rund 60 px, und die weiche Bewegung wurde davon
+    // überfahren – nachgemessen blieb die Seite am Formularende stehen, die
+    // Meldung 944 px darüber. Ein Sprung ohne Animation ist hier ohnehin
+    // richtig: Die Ablehnung soll sofort sichtbar sein, nicht in einer halben
+    // Sekunde, und `prefers-reduced-motion` ist damit gleich miterledigt.
+    fehlerRef.current?.scrollIntoView({ block: "center" });
+  }, [error]);
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -156,11 +178,11 @@ export default function PlayerEditProfilePage() {
           </Link>
         </div>
 
-        {error && (
-          <div className="mb-4 rounded-sm bg-signal-error/10 border border-signal-error/50 px-4 py-3 text-sm text-signal-error">
-            {error}
-          </div>
-        )}
+        {/* FormAlert statt eigenem Kasten: Es traegt role="alert" und
+            aria-live, die Vorlesesoftware meldet die Ablehnung also von
+            selbst. Der Anker daneben ist fuer die Augen da (siehe onSubmit). */}
+        <div ref={fehlerRef} aria-hidden="true" className="scroll-mt-24" />
+        {error && <FormAlert className="mb-4">{error}</FormAlert>}
 
         <form
           onSubmit={onSubmit}
