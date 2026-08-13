@@ -12,7 +12,9 @@ import {
 } from "react-icons/pi";
 import { useCurrentTeam } from "@/lib/useCurrentTeam";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
+import { useTeamAufgaben } from "@/lib/useTeamAufgaben";
 import { hasTeamPermission, TAB_PERMISSION } from "@/lib/teamPermissions";
+import AufgabenLeiste from "@/components/team/AufgabenLeiste";
 import TeamNav from "@/components/layout/TeamNav";
 import Footer from "@/components/layout/Footer";
 import Loading from "@/components/ui/Loading";
@@ -36,6 +38,8 @@ const TABS = [
 export default function TeamAdminPage() {
   const { team, status, reload } = useCurrentTeam();
   const { player } = useCurrentPlayer();
+  // Was ist offen? – Zahlen aus denselben Endpunkten, die auch die Tabs füttern.
+  const { aufgaben, status: aufgabenStatus, reload: reloadAufgaben } = useTeamAufgaben(team);
   const [active, setActive] = useState("kader");
   const tabBarRef = useRef(null);
   const tabRefs = useRef({});
@@ -47,6 +51,13 @@ export default function TeamAdminPage() {
     hasTeamPermission(team || {}, myId, TAB_PERMISSION[t.key])
   );
   const visibleKeys = visibleTabs.map((t) => t.key).join(",");
+
+  // Tab wechseln und dabei die Aufgabenzahlen auffrischen: Wer gerade eine
+  // Anfrage bearbeitet hat, soll beim Zurückwechseln nicht die alte Zahl sehen.
+  function wechsle(key) {
+    setActive(key);
+    reloadAufgaben();
+  }
 
   // Tab-Deeplink: ?tab=ergebnisse (z.B. aus Mail/Benachrichtigung).
   useEffect(() => {
@@ -120,18 +131,36 @@ export default function TeamAdminPage() {
           </div>
         )}
 
+        <AufgabenLeiste
+          aufgaben={aufgaben}
+          status={aufgabenStatus}
+          sichtbareTabs={visibleTabs.map((t) => t.key)}
+          onSpringen={wechsle}
+        />
+
         {/* Tab-Navigation (einheitlicher Pill-Stil; Refs für Auto-Scroll/Deeplink bleiben) */}
         <div ref={tabBarRef} className="relative flex gap-1 overflow-x-auto bg-navy-700 rounded-md p-1 mb-6">
           {visibleTabs.map((t) => {
             const Icon = t.icon;
             const isActive = t.key === active;
+            // Nur zeigen, wenn es wirklich etwas zu tun gibt. Die Zahl steht für
+            // offene Aufgaben in diesem Tab – nicht für den Bestand. Was genau
+            // gezählt wird, steht in lib/useTeamAufgaben.js; der Vorlesetext
+            // sagt es zusätzlich aus, weil eine nackte Zahl am Reiter
+            // mehrdeutig wäre.
+            const offen = aufgabenStatus === "ready" ? aufgaben.proTab[t.key] || 0 : 0;
             return (
               <button
                 key={t.key}
                 ref={(el) => {
                   tabRefs.current[t.key] = el;
                 }}
-                onClick={() => setActive(t.key)}
+                onClick={() => wechsle(t.key)}
+                aria-label={
+                  offen > 0
+                    ? `${t.label}, ${offen} ${offen === 1 ? "offene Aufgabe" : "offene Aufgaben"}`
+                    : undefined
+                }
                 className={`flex items-center gap-1.5 whitespace-nowrap px-3 sm:px-4 py-1.5 rounded-sm text-sm font-medium transition ${
                   isActive
                     ? "bg-navy-800 text-paper-50"
@@ -140,6 +169,14 @@ export default function TeamAdminPage() {
               >
                 <Icon className="text-xs" />
                 {t.label}
+                {offen > 0 && (
+                  <span
+                    aria-hidden="true"
+                    className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-signal-wait px-1.5 font-mono text-[11px] font-bold tabular-nums text-navy-950"
+                  >
+                    {offen}
+                  </span>
+                )}
               </button>
             );
           })}
