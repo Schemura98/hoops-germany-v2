@@ -122,22 +122,21 @@ const damen = [
 //   bestätigt u. a. Regionalliga bei U16w/U14w. ⚠️ Exakte weibliche 2025/26-Einteilung war
 //   nicht auffindbar → Stufen sind struktur-basiert; bei Abweichung per Admin/„Liga melden"
 //   korrigieren. U10 (beide) noch offen.
-// Entscheidung 26.06.2026: nur Jugend bis einschließlich U16; U14/U12/U10 werden
-// vorerst NICHT abgebildet (siehe Selbstheilung weiter unten – sie entfernt leere
-// Alt-Einträge dieser jüngeren Klassen aus der DB).
+// Entscheidung Patrick, 13.08.2026: Die Plattform ist erst AB 16 JAHREN gedacht.
+// Damit fällt auch U16 weg – eine U16-Liga ist eine Altersklasse UNTER 16, dort
+// spielen 14- und 15-Jährige. Es bleibt nur U18 (dort spielen 16- und
+// 17-Jährige) und Senioren.
+// Vorherige Regel war "Jugend bis einschließlich U16" (26.06.2026); der
+// Widerspruch zwischen ausgeliefertem Katalog und der Altersregel fiel bei
+// Noras rechtlicher Vorprüfung zur Leistungskarte auf.
+// Die Selbstheilung weiter unten entfernt Alt-Einträge dieser Klassen aus der DB.
 const jugend = [
   // männlich
   { name: "U18 Regionalliga", level: "Regionalliga", gender: "Herren", ageGroup: "U18" },
   { name: "U18 Oberliga", level: "Oberliga", gender: "Herren", ageGroup: "U18" },
-  { name: "U16 Regionalliga", level: "Regionalliga", gender: "Herren", ageGroup: "U16" },
-  { name: "U16 Oberliga", level: "Oberliga", gender: "Herren", ageGroup: "U16" },
-  { name: "U16 Landesliga", level: "Landesliga", gender: "Herren", ageGroup: "U16" },
   // weiblich
   { name: "U18 Regionalliga", level: "Regionalliga", gender: "Damen", ageGroup: "U18" },
   { name: "U18 Oberliga", level: "Oberliga", gender: "Damen", ageGroup: "U18" },
-  { name: "U16 Regionalliga", level: "Regionalliga", gender: "Damen", ageGroup: "U16" },
-  { name: "U16 Oberliga", level: "Oberliga", gender: "Damen", ageGroup: "U16" },
-  { name: "U16 Landesliga", level: "Landesliga", gender: "Damen", ageGroup: "U16" },
 ].map((c) => ({ ...c, region: "" }));
 
 const catalog = [
@@ -192,10 +191,12 @@ for (const c of catalog) {
   else updated++;
 }
 
-// ----- Cutoff: jüngere Jugendklassen (unter U16) entfernen -----
-// Entscheidung 26.06.2026: keine U14/U12/U10. Leere offizielle NRW-Ligen dieser Klassen
-// werden gelöscht; solche mit Teams/Spielen bleiben (Schutz echter Daten) + Warnung.
-const REMOVED_AGE_GROUPS = ["U14", "U12", "U10"];
+// ----- Cutoff: alles unter 16 Jahren entfernen -----
+// Entscheidung Patrick, 13.08.2026: Plattform erst ab 16. U16 zählt dazu.
+// Leere offizielle NRW-Ligen dieser Klassen werden gelöscht; solche mit
+// Teams/Spielen bleiben stehen (Schutz echter Daten) + Warnung – dann gehört
+// der Fall zu Patrick, nicht zu einem Seed-Skript.
+const REMOVED_AGE_GROUPS = ["U16", "U14", "U12", "U10"];
 let removedYouth = 0;
 {
   const young = await Leagues.find({
@@ -206,10 +207,10 @@ let removedYouth = 0;
   for (const s of young) {
     const empty = (s.teams?.length || 0) === 0 && (s.matches?.length || 0) === 0;
     if (!empty) {
-      console.warn(`⚠️  Übersprungen (hat Teams/Spiele, <U16): "${s.name}" [${s.gender} ${s.ageGroup}]`);
+      console.warn(`⚠️  Übersprungen (hat Teams/Spiele, unter 16): "${s.name}" [${s.gender} ${s.ageGroup}]`);
       continue;
     }
-    if (DRY) console.log(`− <U16   ${s.gender} ${s.ageGroup} ${s.name} (leer, würde entfernt)`);
+    if (DRY) console.log(`− unter 16   ${s.gender} ${s.ageGroup} ${s.name} (leer, würde entfernt)`);
     else await Leagues.deleteOne({ _id: s._id });
     removedYouth++;
   }
@@ -248,7 +249,7 @@ for (const [key, names] of groups) {
 }
 
 console.log(
-  `✅ Fertig: ${created} angelegt, ${updated} aktualisiert, ${removedYouth} <U16 entfernt, ${removed} leere Alt-Einträge entfernt (${catalog.length} Katalog-Ligen: ${herren.length} Herren-Senioren + ${damen.length} Damen-Senioren + ${jugend.length} Jugend (U18/U16 m/w), Saison ${SEASON}).`
+  `✅ Fertig: ${created} angelegt, ${updated} aktualisiert, ${removedYouth} unter 16 entfernt, ${removed} leere Alt-Einträge entfernt (${catalog.length} Katalog-Ligen: ${herren.length} Herren-Senioren + ${damen.length} Damen-Senioren + ${jugend.length} Jugend (U18 m/w), Saison ${SEASON}).`
 );
 await mongoose.disconnect();
 process.exit(0);

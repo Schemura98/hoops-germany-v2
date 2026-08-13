@@ -18,9 +18,9 @@ async function handler(req) {
   const season = String(body.season || "").trim();
   const bundesland = String(body.bundesland || "").trim();
 
-  // Produktregel: nur unterstützte Altersbereiche (Senioren/U18/U16) – zentral validiert
+  // Produktregel: nur unterstützte Altersbereiche (Senioren/U18 – ab 16 Jahren) – zentral validiert
   // (auch serverseitig, nicht nur UI). Fehlender Wert → Default "Senioren" (Pflichtfeldlogik);
-  // leerer/ungültiger String → 400. Case/Whitespace werden normalisiert ("u16"/" U16 " → "U16").
+  // leerer/ungültiger String → 400. Case/Whitespace werden normalisiert ("u18"/" U18 " → "U18").
   let ageGroup = "Senioren";
   if (body.ageGroup !== undefined && body.ageGroup !== null) {
     ageGroup = normalizeAgeGroup(body.ageGroup);

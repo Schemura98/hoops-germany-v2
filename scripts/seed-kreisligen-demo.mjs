@@ -27,7 +27,9 @@ const NRW = "Nordrhein-Westfalen";
 
 // Repräsentative Kreise über alle 5 Regierungsbezirke (Demo).
 const KREISE = ["Kreis Köln", "Kreis Düsseldorf", "Kreis Dortmund", "Kreis Münster", "Kreis Paderborn"];
-// Kreise, für die zusätzlich Jugend-Kreisligen (U18/U16 männlich) angelegt werden.
+// Kreise, für die zusätzlich eine Jugend-Kreisliga (U18 männlich) angelegt wird.
+// U16 ist am 13.08.2026 entfallen: Die Plattform ist erst ab 16 Jahren gedacht,
+// und eine U16-Liga ist die Altersklasse UNTER 16.
 const JUGEND_KREISE = ["Kreis Köln", "Kreis Düsseldorf"];
 
 function buildLeagues() {
@@ -38,9 +40,8 @@ function buildLeagues() {
     out.push({ name: `2. Kreisliga Herren – ${kreis}`, region: kreis, gender: "Herren", ageGroup: "Senioren" });
   }
   for (const kreis of JUGEND_KREISE) {
-    // Jugend männlich (gender-Feld bleibt "Herren"): 1. Kreisliga U18 + U16
+    // Jugend männlich (gender-Feld bleibt "Herren"): nur 1. Kreisliga U18
     out.push({ name: `1. Kreisliga U18 männlich – ${kreis}`, region: kreis, gender: "Herren", ageGroup: "U18" });
-    out.push({ name: `1. Kreisliga U16 männlich – ${kreis}`, region: kreis, gender: "Herren", ageGroup: "U16" });
   }
   return out;
 }

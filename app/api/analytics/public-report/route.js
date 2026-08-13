@@ -97,7 +97,7 @@ function buildSponsorView(s) {
     // Personen. Über diesen Endpunkt wären das personenbezogene Daten an einen
     // Dritten — die Datenschutzerklärung nennt in Abschnitt 9 aber nur
     // Auftragsverarbeiter, und ein Sponsor ist keiner. Verschärfend: Der
-    // Liga-Katalog enthält U18 und U16; unter den meistbesuchten Profilen kann
+    // Liga-Katalog enthält U18 (16- und 17-Jährige); unter den meistbesuchten Profilen kann
     // ein Minderjähriger stehen, dessen Name dann in einem Sponsorendokument
     // steht.
     //

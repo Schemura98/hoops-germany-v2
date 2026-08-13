@@ -65,17 +65,6 @@ const LEAGUES = [
       "Demo Willich Wolves U18",
     ],
   },
-  {
-    name: "1. Kreisliga U16 männlich – Kreis Niers",
-    gender: "Herren",
-    ageGroup: "U16",
-    teams: [
-      "Demo Kempen Knights U16",
-      "Demo Nettetal Nets U16",
-      "Demo Dülken Dragons U16",
-      "Demo Fischeln Flyers U16",
-    ],
-  },
 ];
 
 const uri = readEnv("MONGODB_URI");

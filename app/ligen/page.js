@@ -26,34 +26,31 @@ const GROUPS = [
   { key: "sh", label: "Senioren Herren", cap: 3 },
   { key: "sd", label: "Senioren Damen", cap: 2 },
   { key: "u18", label: "U18", cap: 2 },
-  { key: "u16", label: "U16", cap: 2 },
   { key: "kreis", label: "Kreisligen", cap: 3 },
 ];
 function groupKey(l) {
   if (l.level === "Kreisliga") return "kreis";
   if (l.ageGroup === "U18") return "u18";
-  if (l.ageGroup === "U16") return "u16";
   if (l.ageGroup === "Senioren" && l.gender === "Damen") return "sd";
   return "sh";
 }
 const groupOrder = (l) => GROUPS.findIndex((g) => g.key === groupKey(l));
 
 // Reine Bereichs-/Kategorie-Einordnung (ignoriert level) – für die Kreisliga-interne
-// Gliederung (Senioren Herren/Damen/U18/U16 INNERHALB eines Basketballkreises).
+// Gliederung (Senioren Herren/Damen/U18 INNERHALB eines Basketballkreises).
 const AGE_BRACKETS = [
   { key: "sh", label: "Senioren Herren" },
   { key: "sd", label: "Senioren Damen" },
   { key: "u18", label: "U18" },
-  { key: "u16", label: "U16" },
 ];
 function ageBracketKey(l) {
   if (l.ageGroup === "U18") return "u18";
-  if (l.ageGroup === "U16") return "u16";
   if (l.ageGroup === "Senioren" && l.gender === "Damen") return "sd";
   return "sh";
 }
 
-const isYouthAge = (a) => a === "U18" || a === "U16";
+// Nur U18: U16 ist seit dem 13.08.2026 raus (Plattform ab 16 Jahren).
+const isYouthAge = (a) => a === "U18";
 // Anzeige-Mapping (Datenwerte bleiben Herren/Damen/Mixed).
 function genderLabel(l) {
   if (isYouthAge(l.ageGroup)) {
@@ -173,7 +170,7 @@ export default function LigenPage() {
 
   const [status, setStatus] = useState("aktiv"); // aktiv | alle | abgeschlossen | vorbereitung
   const [land, setLand] = useState(""); // Bundesland (nur relevant, sobald ≥2 Länder Ligen haben)
-  const [bereich, setBereich] = useState(""); // "" | Senioren | U18 | U16
+  const [bereich, setBereich] = useState(""); // "" | Senioren | U18
   const [kategorie, setKategorie] = useState(""); // "" | Herren | Damen | Mixed
   const [level, setLevel] = useState("");
   const [bezirk, setBezirk] = useState(""); // Regierungsbezirk (nur UI-Gruppierung, keine DB-Entität)
@@ -428,7 +425,6 @@ export default function LigenPage() {
     { label: "Senioren Herren", apply: { bereich: "Senioren", kategorie: "Herren" } },
     { label: "Senioren Damen", apply: { bereich: "Senioren", kategorie: "Damen" } },
     { label: "U18", apply: { bereich: "U18" } },
-    { label: "U16", apply: { bereich: "U16" } },
     { label: "Kreisligen", apply: { level: "Kreisliga" } },
   ];
 
@@ -586,7 +582,6 @@ export default function LigenPage() {
                 <option value="">Alle Bereiche</option>
                 <option value="Senioren">Senioren</option>
                 <option value="U18">U18</option>
-                <option value="U16">U16</option>
               </select>
 
               <select value={kategorie} onChange={(e) => setKategorie(e.target.value)} className={selectCls} aria-label="Kategorie">

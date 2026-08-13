@@ -171,7 +171,7 @@ export default function EinstellungenTab({ team, reload }) {
     [leagueRequests]
   );
 
-  const isYouth = leagueFilter.bereich === "U18" || leagueFilter.bereich === "U16";
+  const isYouth = leagueFilter.bereich === "U18";
   const kategorieOptions = isYouth
     ? [
         { v: "", l: "Alle" },
@@ -479,7 +479,6 @@ export default function EinstellungenTab({ team, reload }) {
                 <option value="">Alle Bereiche</option>
                 <option value="Senioren">Senioren</option>
                 <option value="U18">U18</option>
-                <option value="U16">U16</option>
               </select>
               <select
                 aria-label="Kategorie filtern"

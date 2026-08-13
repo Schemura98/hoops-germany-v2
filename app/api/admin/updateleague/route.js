@@ -45,7 +45,7 @@ async function handler(req) {
   if (body.level !== undefined) updates.level = String(body.level).trim();
   if (body.gender !== undefined) updates.gender = String(body.gender).trim();
   if (body.ageGroup !== undefined) {
-    // Produktregel: nur Senioren/U18/U16 – zentral validiert/normalisiert.
+    // Produktregel: nur Senioren/U18 (Plattform ab 16 Jahren) – zentral validiert/normalisiert.
     const ageGroup = normalizeAgeGroup(body.ageGroup);
     if (!ageGroup) {
       return fail(
