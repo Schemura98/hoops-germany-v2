@@ -2389,3 +2389,114 @@ API-Randfälle geprüft: unbekannte ID → `nextMatch: null`, fehlende/ungültig
   Feedback-Chip; es entstand **keine neue Route** und kein neuer Analytics-Bereich.
 - **Nicht geprüft:** `prefers-reduced-motion` (die Karte animiert nichts), echtes Low-End-Android,
   Verhalten bei einem Verein mit sehr vielen Ansetzungen (Dev-DB hat je eine).
+
+---
+
+## 13.08.2026 — Orientierung: die Rangliste wird erreichbar, /team/admin sagt was ansteht
+
+**Auftrag:** Ronjas Retention-Befund `docs/RETENTION-BEFUND-2026-08-13.md`, Posten **R7/K8**
+(`/rangliste` gebaut und aus keiner Navigationsliste erreichbar) und **R3** (Team-Admin sieht beim
+Wiedereinstieg nicht, was zu tun ist). Ausdrückliche Vorgabe: Navigation ist Weglassen, nicht
+Hinzufügen — ein achter Punkt in der Leiste wäre die falsche Antwort.
+
+### 1. „Bestenlisten" statt eines achten Navigationspunktes — Commit `003b5b9`
+
+**Befund, nachgemessen:** In das gesamte Projekt führte genau **ein** Link auf `/rangliste`
+(`components/feed/TopTeamsWidget.js` Z. 140, Seitenspalte des eingeloggten Feeds). 257 Zeilen
+fertiges Produkt, für einen ausgeloggten Besucher unauffindbar.
+
+- **Topscorer (Spieler) und Rangliste (Teams) teilen sich einen Navigationspunkt** namens
+  **„Bestenlisten"** (`components/layout/Navbar.js`, `components/layout/PlayerNav.js`). Der Punkt
+  ist auf **beiden** Routen aktiv (`auchAktivAuf`). Gleich viele Punkte wie vorher, eine
+  erreichbare Seite mehr.
+- **Umschalter „Spieler | Teams"** auf beiden Seiten: neue Bausteine
+  **`components/ui/LinkTabs.js`** (optisch identisch mit `components/ui/Tabs`, aber als echte
+  `<Link>` — teilbar, in neuem Tab zu öffnen, für Suchmaschinen sichtbar) und
+  **`components/layout/BestenlistenWechsel.js`**. Eingebaut in `app/topscorer/page.js` (auch im
+  Suspense-Fallback) und `app/rangliste/page.js`; deren Eyebrow lautet jetzt einheitlich
+  „Bestenliste".
+- **Mobil-Menü mit Gruppentiteln** (Wettbewerb / Wer spielt / Wechseln / Mein Bereich bzw. Konto)
+  in Navbar und PlayerNav. Eine senkrechte Liste kann sich Überschriften leisten; aus einer Wand
+  aus sieben Zeilen werden vier kurze Listen. Titelfarbe `mist-600` auf `navy-950` = 4,93:1
+  (Wert aus `tailwind.config.js`, ausreichend für Labels dieser Größe).
+- **`/installieren`** stand nur im Footer. Neu im **Konto-Bereich** des eingeloggten Mobil-Menüs
+  (bewusst nicht in der Inhaltsleiste) und mit **eigenem Bereichs-Eimer „App-Installation"** in
+  `lib/analyticsSummary.js` — vorher fiel die Seite unter „Sonstiges".
+
+**Wirkung auf die Messung:** Der Eimer „Rangliste" (`lib/analyticsSummary.js` Z. 58) war
+strukturell auf nahe null festgenagelt. Ronjas Warnung zu Mats' **H2** — „ein ‚H2 widerlegt‘ auf
+dieser Datenbasis wäre ein Fehlschluss" — ist damit für den Navigations-Teil ausgeräumt; die
+beiden anderen Verzerrungen (ObjectId-Profilaufrufe, interner Verkehr) bestehen weiter.
+
+### 2. „Zu erledigen" auf `/team/admin` — Commit `c16a3cb`
+
+Neu: **`lib/useTeamAufgaben.js`** (Berechnung + Hook) und **`components/team/AufgabenLeiste.js`**,
+eingebunden in `app/team/admin/page.js`. **Keine API-Änderung** — die Zahlen kommen aus denselben
+zwei Endpunkten, die die Tabs ohnehin nutzen (`/api/team/matches/list`,
+`/api/team/fetchjoinrequests`) plus `rosterSlots` aus dem bereits geladenen Team.
+
+- Leiste **über** der Tab-Leiste, auf der einen hervorgehobenen Karte mit
+  2px-`brand-500`-Oberkante (Signatur aus `docs/VISUELLE-RICHTUNG-2026-08-12.md`).
+- Posten sind **anklickbar** und springen in den zuständigen Tab; die Zählstände werden beim
+  Tabwechsel aufgefrischt (nachgemessen: 2 → 1 nach dem Ablehnen einer Anfrage).
+- **Zähler-Abzeichen an den Reitern**, nur bei > 0, in `signal-wait` mit dunkler Schrift. Weil eine
+  nackte Zahl am Reiter mehrdeutig wäre, sagt der Vorlesetext sie aus
+  („Ergebnisse, 3 offene Aufgaben").
+- **Der Fall „nichts zu tun" ist ein eigener, ausgesprochener Zustand** („Alles erledigt — hier
+  wartet gerade nichts auf dich"), kein Verschwinden der Fläche.
+- In **beiden** Zuständen darunter das **nächste Spiel** (Datum + Gegner) bzw. der Weg zum
+  Spielplan, wenn keins eingetragen ist.
+- Ladephase zeigt einen **Platzhalter gleicher Höhe** (keine springende Tab-Leiste); bei einem
+  Fehler verschwindet die Leiste kommentarlos, statt eine Zahl zu behaupten.
+
+**Definitionen — jede Zahl zählt, was ihre Beschriftung sagt**
+(`docs/MUSTER-ZAHLEN-DIE-LUEGEN-2026-08-13.md`):
+
+| Posten | Zählt genau |
+|---|---|
+| Beitrittsanfragen | offene Anfragen; der Endpunkt liefert nur `teamJoinRequest`-Träger, erledigte sind gar nicht dabei |
+| Platz freigeben | `rosterSlots[].status === "pending"` (wartet auf „Genehmigen") |
+| Widerspruch klären | `resultStatus === "mismatch"` |
+| Ergebnis fehlt | Spiel vorbei, nicht abgesagt, **eigene** Meldung fehlt **und** `resultStatus !== "confirmed"` — die zweite Bedingung schützt vor dem Super-Admin-Nachtrag, bei dem das Ergebnis dasteht, aber ohne Meldung des Teams |
+| Box-Score fehlt | Ergebnis steht, Spielerwerte des eigenen Teams fehlen. **Überschneidungsfrei** zu „Ergebnis fehlt". Eine 0/0/0-Zeile gilt als „nicht eingetragen" — dieselbe Regel wie in `lib/statsNotify.js` |
+
+Künftige Spiele zählen **nie** mit. Ein Co-Admin sieht nur Posten zu Tabs, die er auch öffnen darf.
+
+**Anschluss an R1 (Commit `c4dd91d`, dieselbe Nacht):** Fehlen Box-Scores, steht darunter, warum
+sich die Eingabe lohnt — „eure Spieler mit Konto bekommen ihre Zahlen dann als Benachrichtigung".
+**Bewusst keine Zahl:** Die dafür nötige Angabe `Match.notifiedStatsPlayers` liefert
+`/api/team/matches/list` nicht, und jeder Ersatzwert hätte etwas anderes gemeint als das, was der
+Spieler sieht (Karriere-Statistik zählt über `status: "completed"`, nicht über `resultStatus`).
+
+### Belegbilder (echtes Chromium, Dev-Server Port 3000, Dev-DB `hoopsgermany`)
+
+390 px **und** 1280 px, jeweils ohne Konsolenfehler; Bilder unter `tmp/orientierung-shots/` und
+`tmp/admin-aufgaben-shots/`:
+
+| Fall | Beleg |
+|---|---|
+| Öffentliche Navigation, ausgeloggt | Mobil-Menü mit vier Gruppentiteln; „Bestenlisten" auf `/rangliste` aktiv markiert |
+| Umschalter | Klick „Spieler" auf `/rangliste` führt auf `/topscorer`, Umschalter dort aktiv auf „Spieler" |
+| Eingeloggte Navigation | PlayerNav-Menü mit Gruppen + „App installieren" im Konto-Bereich |
+| **Offene Aufgaben** (`max@test.de`) | drei Posten (2 Beitrittsanfragen · 1 Platz freigeben · 1 Ergebnis fehlt), drei Reiter-Abzeichen |
+| **Nichts zu tun** (`elias.hoffmann5@test.de`) | „Alles erledigt" + nächstes Spiel, **kein** Abzeichen an einem Reiter |
+| **Box-Score fehlt** (`finn.klein9@test.de`) | „4 Box-Scores fehlen" + Benachrichtigungs-Satz |
+
+Der Zustand für das erste Bild wurde **additiv und umkehrbar** angelegt
+(`tmp/admin-aufgaben-zustand.mjs`, mit `--weg` zurückgenommen) — **nicht** neu geseedet, weil drei
+Agenten parallel auf derselben Dev-DB arbeiteten. Die Zustände „nichts zu tun" und „Box-Score
+fehlt" existierten in den Demo-Daten bereits echt.
+
+### Bewusst nicht gebaut, nicht geprüft
+
+- **Kein `npm run build`** (fremder Dev-Server auf Port 3000), kein Deploy, kein Push —
+  **Gates Kai/Tobias stehen aus.**
+- **`CLAUDE.md` Abschnitt 0 nicht angefasst** — mehrere Stränge parallel, Verdichtung in eine Hand.
+- **Konventionen geprüft, kein Handlungsbedarf beim Feedback-Formular:** „Ligen & Tabellen" und
+  „Teams & Kader" decken beide Bereiche ab; es entstand **keine neue Route**.
+- **Offen geblieben, bewusst:** `PlayerNav` führt weiterhin **nicht** zu Transfermarkt und Tryouts —
+  ein eingeloggter Spieler erreicht beide nur über die öffentliche Navbar oder den Footer. Das ist
+  ein eigener Befund, kein Teil von R7/K8.
+- **Nicht geprüft:** echtes Low-End-Android, Tastaturbedienung des Umschalters mit Screenreader,
+  Verhalten eines Co-Admins mit eingeschränkten Rechten (nur im Code abgesichert, nicht im Browser
+  durchgespielt), Prod-Daten.
