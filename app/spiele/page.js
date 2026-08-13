@@ -1,9 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
-import { PiBasketballBold, PiMapPinBold, PiTrophyBold } from "react-icons/pi";
+import {
+  PiBasketballBold,
+  PiMapPinBold,
+  PiTrophyBold,
+  PiTableBold,
+} from "react-icons/pi";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
@@ -146,16 +152,71 @@ function SpielePageSkeleton() {
   );
 }
 
-export default function SpielePage() {
+// Erlaubte Tab-Werte – aus der URL darf nichts Beliebiges in den Zustand.
+const TABS = ["upcoming", "results", "all"];
+const STAGES = ["all", "Hauptrunde", "Playoffs"];
+
+function SpieleInhalt() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [tab, setTab] = useState("upcoming"); // upcoming | results | all
-  const [stage, setStage] = useState("all"); // all | Hauptrunde | Playoffs
-  const [league, setLeague] = useState(""); // leagueId
-  const [season, setSeason] = useState("");
-  const [ort, setOrt] = useState("");
-  const [dateFrom, setDateFrom] = useState("");
+  // Startwerte kommen aus der URL: Damit ist /spiele?league=… ein echter,
+  // teilbarer Zustand – und erst dadurch sind die Liga-Seite und die
+  // Spielseite überhaupt auf den Spielplan verlinkbar.
+  const [tab, setTab] = useState(() => {
+    const t = searchParams.get("tab");
+    return TABS.includes(t) ? t : "upcoming";
+  });
+  const [stage, setStage] = useState(() => {
+    const s = searchParams.get("stage");
+    return STAGES.includes(s) ? s : "all";
+  });
+  const [league, setLeague] = useState(() => searchParams.get("league") || ""); // leagueId
+  const [season, setSeason] = useState(() => searchParams.get("season") || "");
+  const [ort, setOrt] = useState(() => searchParams.get("ort") || "");
+  const [dateFrom, setDateFrom] = useState(() => searchParams.get("ab") || "");
+
+  // Zustand → URL. Bewusst `replace` statt `push`: Ein Filterklick ist kein
+  // Seitenwechsel. Wer von der Liga-Tabelle herkommt, landet mit der
+  // Zurück-Taste wieder dort und nicht in seiner eigenen Filter-Historie.
+  const zuletztGeschrieben = useRef(null);
+  useEffect(() => {
+    const qs = new URLSearchParams();
+    if (tab !== "upcoming") qs.set("tab", tab);
+    if (stage !== "all") qs.set("stage", stage);
+    if (league) qs.set("league", league);
+    if (season) qs.set("season", season);
+    if (ort) qs.set("ort", ort);
+    if (dateFrom) qs.set("ab", dateFrom);
+    const next = qs.toString();
+    if (next === zuletztGeschrieben.current) return;
+    zuletztGeschrieben.current = next;
+    if (next === searchParams.toString()) return;
+    router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
+    // searchParams absichtlich nicht in den Abhängigkeiten: sonst schreibt
+    // dieser Effekt seine eigene Änderung erneut.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, stage, league, season, ort, dateFrom, pathname, router]);
+
+  // URL → Zustand. Greift, wenn die Adresse von außen wechselt: Zurück-Taste
+  // oder ein Link auf /spiele?league=… , während die Seite schon offen ist.
+  useEffect(() => {
+    const cur = searchParams.toString();
+    if (cur === zuletztGeschrieben.current) return;
+    zuletztGeschrieben.current = cur;
+    const t = searchParams.get("tab");
+    const s = searchParams.get("stage");
+    setTab(TABS.includes(t) ? t : "upcoming");
+    setStage(STAGES.includes(s) ? s : "all");
+    setLeague(searchParams.get("league") || "");
+    setSeason(searchParams.get("season") || "");
+    setOrt(searchParams.get("ort") || "");
+    setDateFrom(searchParams.get("ab") || "");
+  }, [searchParams]);
 
   useEffect(() => {
     let active = true;
@@ -232,6 +293,11 @@ export default function SpielePage() {
     [matches, startOfToday]
   );
 
+  // Kommt jemand über einen Liga-Link hier an, muss die Seite sagen, wo er
+  // ist – und der Weg zurück zur Tabelle derselben Liga muss dieselbe Zeile
+  // anbieten, nicht ein Menü drei Klicks weiter.
+  const aktiveLiga = league ? leagueOptions.find((l) => l.id === league) : null;
+
   return (
     <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
@@ -239,7 +305,9 @@ export default function SpielePage() {
       <PageHeader
         eyebrow="Wettbewerb"
         title="Spiele"
-        subtitle="Anstehende Partien und aktuelle Ergebnisse."
+        subtitle={
+          aktiveLiga ? aktiveLiga.label : "Anstehende Partien und aktuelle Ergebnisse."
+        }
       />
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
@@ -251,6 +319,18 @@ export default function SpielePage() {
           <EmptyState icon={PiBasketballBold} title="Noch keine Spiele angesetzt." />
         ) : (
           <div>
+            {/* Der Rückweg zur Tabelle steht dort, wo die Liga-Ansicht anfängt –
+                nicht am Seitenende. Wer den Spielplan einer Liga ansieht, hat
+                genau eine nächste Frage: wo stehen die jetzt? */}
+            {aktiveLiga && (
+              <Link
+                href={`/ligen/${league}`}
+                className="mb-4 inline-flex items-center gap-2 rounded-md border border-navy-600 bg-navy-800 px-4 py-2.5 text-sm font-semibold text-paper-50 hover:border-brand-500 hover:text-brand-300 transition-colors duration-150"
+              >
+                <PiTableBold className="text-brand-400" /> Tabelle dieser Liga
+              </Link>
+            )}
+
             <Tabs
               className="mb-4 max-w-md"
               fluid
@@ -331,5 +411,31 @@ export default function SpielePage() {
 
       <Footer />
     </div>
+  );
+}
+
+// useSearchParams verlangt eine Suspense-Grenze, sonst bricht der Build beim
+// Vorrendern. Der Platzhalter ist derselbe Skelett-Aufbau wie beim Laden der
+// Spiele – die Seite springt beim Übergang also nicht.
+export default function SpielePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-navy-950 flex flex-col">
+          <Navbar />
+          <PageHeader
+            eyebrow="Wettbewerb"
+            title="Spiele"
+            subtitle="Anstehende Partien und aktuelle Ergebnisse."
+          />
+          <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+            <SpielePageSkeleton />
+          </main>
+          <Footer />
+        </div>
+      }
+    >
+      <SpieleInhalt />
+    </Suspense>
   );
 }
