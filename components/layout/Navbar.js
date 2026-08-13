@@ -28,10 +28,12 @@ import {
   clearAdminToken,
   setStoredPlayer,
 } from "@/lib/clientAuth";
+import useMenuHoehe from "@/lib/useMenuHoehe";
 import { timeAgo } from "@/lib/timeAgo";
 import { notificationHref } from "@/lib/notifications";
 import { trackEvent } from "@/lib/trackEvent";
 import Avatar from "@/components/Avatar";
+import DemoBadge from "@/components/DemoBadge";
 import Reveal from "@/components/ui/Reveal";
 import FeedbackLink from "@/components/layout/FeedbackLink";
 
@@ -101,6 +103,8 @@ export default function Navbar() {
   const notifRef = useRef(null);
 
   const [mobileOpen, setMobileOpen] = useState(false);
+  const menuRef = useRef(null);
+  const menuMaxHoehe = useMenuHoehe(menuRef, mobileOpen);
 
   const isLoggedIn = !!me;
 
@@ -502,9 +506,23 @@ export default function Navbar() {
             Teil der Sticky-Leiste – ist es höher als der Viewport, kann der
             Seiten-Scroll seine unteren Zeilen NIE erreichen (sticky scrollt
             nicht mit). Eingeloggt war „Abmelden" auf kleinen Displays genau
-            deshalb unerreichbar. Jetzt scrollt das Menü selbst. */}
+            deshalb unerreichbar. Jetzt scrollt das Menü selbst.
+
+            7rem statt 4rem (Fund von Tobias, 13.08.2026): Abgezogen wurden
+            bisher nur die 64 px der Leiste. Der nicht schließbare
+            Testphase-Banner steht bei Scroll 0 darüber und schiebt das Menü um
+            45 px nach unten – die letzte Zeile („Feedback geben") stand
+            dadurch 4,5 px im Bild und war per Touch nicht erreichbar, weil
+            `overscroll-contain` die Weitergabe an die Seite blockt.
+            Bewusst großzügig gerechnet: Fällt der Banner nach der Testphase
+            weg, ist das Menü 48 px kürzer als möglich – das kostet etwas
+            Innenscroll, aber nie eine unerreichbare Zeile. */}
         {mobileOpen && (
-          <div className="lg:hidden bg-navy-900 border-t border-navy-600 divide-y divide-navy-600/60 max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain">
+          <div
+            ref={menuRef}
+            style={menuMaxHoehe ? { maxHeight: menuMaxHoehe } : undefined}
+            className="lg:hidden bg-navy-900 border-t border-navy-600 divide-y divide-navy-600/60 max-h-[calc(100dvh-7rem)] overflow-y-auto overscroll-contain"
+          >
             {NAV_GRUPPEN.map((g) => (
               <div key={g.titel}>
                 <p className="bg-navy-950 px-5 py-2 font-display text-[11px] font-bold uppercase tracking-[0.2em] text-mist-600">
@@ -675,8 +693,18 @@ export default function Navbar() {
                     </span>
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-paper-50 truncate">{item.name}</p>
-                      <span className="text-[10px] font-bold text-mist-400 bg-navy-700 px-1.5 py-0.5 rounded-sm uppercase tracking-wide">
-                        Liga{item.season ? ` · ${item.season}` : ""}
+                      <span className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-[10px] font-bold text-mist-400 bg-navy-700 px-1.5 py-0.5 rounded-sm uppercase tracking-wide">
+                          Liga{item.season ? ` · ${item.season}` : ""}
+                        </span>
+                        {/* Ohne diese Kennzeichnung war die Suche die einzige
+                            Flaeche, auf der Demo-Ligen wie echte aussahen
+                            (Fund von Kai, 13.08.2026) — ausgerechnet der
+                            prominenteste Einstieg fuer genau die Begriffe, auf
+                            die dieser Umbau zielt („Kreisliga", „Niers").
+                            /ligen markiert sie seit jeher; die Regel steht im
+                            Kopf von components/DemoBadge.js. */}
+                        {item.isDemo && <DemoBadge />}
                       </span>
                     </div>
                   </Link>

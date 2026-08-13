@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
   PiSignOutBold,
@@ -12,6 +12,7 @@ import {
   PiDeviceMobileBold,
 } from "react-icons/pi";
 import { clearPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
+import useMenuHoehe from "@/lib/useMenuHoehe";
 import NotificationBell from "@/components/layout/NotificationBell";
 import FeedbackLink from "@/components/layout/FeedbackLink";
 
@@ -76,6 +77,8 @@ export default function PlayerNav({ player }) {
   const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const menuRef = useRef(null);
+  const menuMaxHoehe = useMenuHoehe(menuRef, mobileOpen);
 
   // Aktive Seite markieren (exakt oder als Unterpfad).
   const isActive = (href) =>
@@ -198,9 +201,15 @@ export default function PlayerNav({ player }) {
       {/* Mobile-Menü. `max-h` + eigenes Scrollen (13.08.2026): Das Menü ist
           Teil der Sticky-Leiste – ist es höher als der Viewport, kann der
           Seiten-Scroll seine unteren Zeilen NIE erreichen (sticky scrollt
-          nicht mit). Jetzt scrollt das Menü selbst. */}
+          nicht mit). Jetzt scrollt das Menü selbst.
+          7rem statt 4rem – siehe Begründung in Navbar.js (der Testphase-Banner
+          schiebt das Menü nach unten, die letzte Zeile war unerreichbar). */}
       {mobileOpen && (
-        <div className="lg:hidden bg-navy-900 border-t border-navy-600 divide-y divide-navy-600/60 max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain">
+        <div
+            ref={menuRef}
+            style={menuMaxHoehe ? { maxHeight: menuMaxHoehe } : undefined}
+            className="lg:hidden bg-navy-900 border-t border-navy-600 divide-y divide-navy-600/60 max-h-[calc(100dvh-7rem)] overflow-y-auto overscroll-contain"
+          >
           <Link
             href={START.href}
             onClick={() => setMobileOpen(false)}
