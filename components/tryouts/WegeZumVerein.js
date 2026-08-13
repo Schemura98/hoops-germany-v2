@@ -226,7 +226,7 @@ export default function WegeZumVerein({ variant = "leer" }) {
         >
           {kopf.titel}
         </h2>
-        <p className={`text-sm leading-relaxed text-mist-300 ${leer ? "mt-4" : "mt-2"}`}>
+        <p className={`max-w-prose text-sm leading-relaxed text-mist-300 ${leer ? "mt-4" : "mt-2"}`}>
           {kopf.text}
         </p>
       </Reveal>
@@ -241,7 +241,7 @@ export default function WegeZumVerein({ variant = "leer" }) {
         {/* ------------------------------------------------------------- */}
         <Reveal delay={staffel(0)}>
           <Route nr="01" titel="Vereine in deiner Nähe" hervorgehoben={leer}>
-            <p className="mt-1 text-sm text-mist-400">
+            <p className="mt-1 max-w-prose text-sm text-mist-400">
               Auf jeder Vereinsseite kannst du direkt anfragen.
             </p>
 
@@ -369,7 +369,7 @@ export default function WegeZumVerein({ variant = "leer" }) {
         {/* --------------------------------------------------------------- */}
         <Reveal delay={staffel(1)}>
           <Route nr="02" titel="Transfermarkt">
-            <p className="mt-1 text-sm leading-relaxed text-mist-400">
+            <p className="mt-1 max-w-prose text-sm leading-relaxed text-mist-400">
               {suchendeVereine === null ? (
                 // Zahl unbekannt (noch nicht geladen oder Anfrage fehlgeschlagen)
                 // – dann wird keine behauptet.
@@ -409,7 +409,7 @@ export default function WegeZumVerein({ variant = "leer" }) {
           <Route nr="03" titel="Von Vereinen gefunden werden">
             {!angemeldet ? (
               <>
-                <p className="mt-1 text-sm leading-relaxed text-mist-400">
+                <p className="mt-1 max-w-prose text-sm leading-relaxed text-mist-400">
                   Mit einem Profil stehst du im Transfermarkt, sobald du dich als
                   verfügbar einträgst. Der ist noch im Aufbau – du gehörst zu den
                   Ersten.
@@ -440,7 +440,7 @@ export default function WegeZumVerein({ variant = "leer" }) {
               </>
             ) : (
               <>
-                <p className="mt-1 text-sm leading-relaxed text-mist-400">
+                <p className="mt-1 max-w-prose text-sm leading-relaxed text-mist-400">
                   Trag dich als verfügbar ein – du bist damit sichtbar, sobald ein
                   Verein im Transfermarkt sucht. Der ist noch im Aufbau, du
                   gehörst zu den Ersten.
@@ -473,7 +473,7 @@ export default function WegeZumVerein({ variant = "leer" }) {
         {zeigeAusschreiben && (
           <Reveal delay={staffel(3)}>
             <Route nr="04" titel="Ihr sucht Spieler?">
-              <p className="mt-1 text-sm leading-relaxed text-mist-400">
+              <p className="mt-1 max-w-prose text-sm leading-relaxed text-mist-400">
                 Schreibt ein Probetraining aus – es steht dann auf dieser Seite.
               </p>
               <Link
