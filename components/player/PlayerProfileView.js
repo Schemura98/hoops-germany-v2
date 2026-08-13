@@ -12,6 +12,9 @@ import {
   PiIdentificationCardBold,
   PiNewspaperClippingBold,
   PiCaretDownBold,
+  PiCalendarBlankBold,
+  PiCaretRightBold,
+  PiMapPinBold,
 } from "react-icons/pi";
 import PlayerPosts from "@/components/posts/PlayerPosts";
 import Avatar from "@/components/Avatar";
@@ -33,6 +36,125 @@ function gameDate(d) {
   } catch {
     return "";
   }
+}
+
+// Wochentag und Datum getrennt geholt und ohne Komma zusammengesetzt:
+// `toLocaleDateString` mit `weekday` liefert im Deutschen „So., 16.08.2026" –
+// das Komma kollidiert in der Zeile mit den Mittelpunkt-Trennern.
+function spielDatum(d) {
+  try {
+    const dt = new Date(d);
+    const wochentag = dt.toLocaleDateString("de-DE", { weekday: "short" });
+    const datum = dt.toLocaleDateString("de-DE", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+    return `${wochentag} ${datum}`;
+  } catch {
+    return "";
+  }
+}
+
+function spielZeit(d) {
+  try {
+    return new Date(d).toLocaleTimeString("de-DE", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return "";
+  }
+}
+
+// Abstand in KALENDERTAGEN, nicht in 24-Stunden-Blöcken. „Morgen 9 Uhr" ist
+// morgen, auch wenn es nur 15 Stunden hin sind – und ein Spiel heute Abend ist
+// heute, nicht „in 0 Tagen". Ab einer Woche sagt das Datum selbst genug.
+function wannText(d) {
+  try {
+    const heute = new Date();
+    heute.setHours(0, 0, 0, 0);
+    const ziel = new Date(d);
+    ziel.setHours(0, 0, 0, 0);
+    const tage = Math.round((ziel - heute) / 86400000);
+    if (tage <= 0) return "heute";
+    if (tage === 1) return "morgen";
+    if (tage < 7) return `in ${tage} Tagen`;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// Der einzige zeitkritische Punkt auf einem Spielerprofil: die nächste
+// angesetzte Partie seines Vereins. Deshalb bekommt genau diese Karte die
+// 2px-Anzeigetafel-Leiste (Signatur-Element, „aktives Spiel" –
+// docs/VISUELLE-RICHTUNG-2026-08-12.md); sonst hebt auf dieser Seite nichts ab.
+//
+// Bewusst zurückhaltend formuliert: Angesetzt ist die Partie des VEREINS.
+// Ob dieser Spieler aufläuft, weiß niemand – „sein nächstes Spiel" wäre eine
+// Behauptung, die die Daten nicht decken (Muster: docs/MUSTER-ZAHLEN-DIE-LUEGEN).
+//
+// Gibt es keine Ansetzung, rendert die Karte gar nichts. Ein leerer Kasten
+// „Kein nächstes Spiel" wäre eine Zeile, die niemandem etwas gibt.
+function NextMatchCard({ match, teamId }) {
+  if (!match?._id) return null;
+
+  const heim = String(match.teamA?._id || "") === String(teamId || "");
+  const gegner = heim ? match.teamB : match.teamA;
+  const wann = wannText(match.date);
+  const kontext =
+    match.stage === "Playoffs"
+      ? match.playoffRound || "Playoffs"
+      : match.leagueId?.name || "";
+
+  return (
+    <div className="overflow-hidden rounded-md border border-navy-600 border-t-2 border-t-brand-500 bg-navy-800">
+      <div className="flex items-center justify-between gap-3 bg-navy-900 px-5 py-3">
+        <h2 className="flex shrink-0 items-center gap-2 text-sm font-bold uppercase tracking-wide text-paper-50">
+          <PiCalendarBlankBold className="text-sm text-brand-400" /> Nächstes Spiel
+        </h2>
+        {kontext && (
+          <span className="min-w-0 truncate text-xs text-mist-400">{kontext}</span>
+        )}
+      </div>
+
+      <Link
+        href={`/match/${match._id}`}
+        className="block px-5 py-4 transition-colors duration-150 hover:bg-navy-700"
+      >
+        <p className="font-mono text-xs uppercase tracking-wide tabular-nums text-mist-300">
+          {spielDatum(match.date)} · {spielZeit(match.date)} Uhr
+          {wann && <span className="text-brand-400"> · {wann}</span>}
+        </p>
+
+        <div className="mt-2.5 flex items-center gap-3">
+          <Avatar
+            name={gegner?.teamName}
+            src={gegner?.logo}
+            className="h-11 w-11 flex-shrink-0"
+            textClass="text-sm"
+            square
+          />
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-mist-600">
+              {heim ? "Heimspiel gegen" : "Auswärts bei"}
+            </p>
+            <p className="truncate font-display text-xl font-bold uppercase tracking-tight text-paper-50">
+              {gegner?.teamName || "Unbekannt"}
+            </p>
+          </div>
+          <PiCaretRightBold className="shrink-0 text-xs text-mist-600" />
+        </div>
+
+        {match.location && (
+          <p className="mt-2.5 flex items-center gap-1.5 text-xs text-mist-400">
+            <PiMapPinBold className="shrink-0 text-mist-600" /> {match.location}
+          </p>
+        )}
+      </Link>
+    </div>
+  );
 }
 
 function StatCell({ label, value, sub, small }) {
@@ -84,6 +206,8 @@ const TABS = [
 export default function PlayerProfileView({ player, viewerId, actions }) {
   const [stats, setStats] = useState(null);
   const [stations, setStations] = useState([]);
+  const [nextMatch, setNextMatch] = useState(null);
+  const [nextMatchTeamId, setNextMatchTeamId] = useState(null);
   const [tab, setTab] = useState("stats");
   const [season, setSeason] = useState(""); // "" = alle
   const [openStation, setOpenStation] = useState(null); // key der ausgeklappten Station
@@ -109,6 +233,30 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
         setStations(st.data.stations || []);
       } catch {
         /* ignorieren */
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [player?._id]);
+
+  // Bewusst ein eigener Aufruf und nicht im Promise.all oben: Fällt die
+  // Ansetzung aus, sollen die Karriere-Zahlen trotzdem erscheinen (und
+  // umgekehrt). Ein gemeinsames Promise.all würde beim ersten Fehler beides
+  // verschlucken.
+  useEffect(() => {
+    if (!player?._id) return;
+    let active = true;
+    (async () => {
+      try {
+        const { data } = await axios.post("/api/player/next-match", {
+          playerId: player._id,
+        });
+        if (!active) return;
+        setNextMatch(data.nextMatch || null);
+        setNextMatchTeamId(data.teamId || null);
+      } catch {
+        /* ohne Ansetzung bleibt die Karte einfach weg */
       }
     })();
     return () => {
@@ -338,6 +486,8 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
         {tab === "stats" && (
           <>
+            <NextMatchCard match={nextMatch} teamId={nextMatchTeamId} />
+
             <SectionCard
               title="Karriere-Bilanz"
               action={
