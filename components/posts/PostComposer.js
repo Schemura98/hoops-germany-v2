@@ -10,7 +10,15 @@ import BaseAvatar from "@/components/Avatar";
 import MentionTextarea from "./MentionTextarea";
 
 // Eingabe-Karte für neue Beiträge. Team-Admins können zusätzlich „als Verein" posten.
-export default function PostComposer({ player, onCreated }) {
+//
+// collapsible (13.08.2026): Auf Mobil startet die Karte als einzeilige
+// Schaltfläche und klappt erst beim Antippen zur vollen Eingabe auf – der
+// Feed rückt dadurch näher an den Seitenanfang. Die Funktionshinweise
+// (@/#/YouTube/Foto) erscheinen erst bei Fokus oder vorhandenem Inhalt,
+// statt dauerhaft zwei Zeilen zu belegen.
+export default function PostComposer({ player, onCreated, collapsible = false }) {
+  const [expanded, setExpanded] = useState(!collapsible);
+  const [focused, setFocused] = useState(false);
   const [content, setContent] = useState("");
   const [image, setImage] = useState("");
   const [showImage, setShowImage] = useState(false);
@@ -65,8 +73,34 @@ export default function PostComposer({ player, onCreated }) {
     }
   }
 
+  // Eingeklappt: eine Zeile, die wie ein Eingabefeld aussieht, aber erst beim
+  // Antippen die volle Karte lädt (der echte Fokus landet dann per autoFocus
+  // direkt im Textfeld).
+  if (!expanded) {
+    return (
+      <div className="bg-navy-800 rounded-md border border-navy-600 p-3">
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className="flex w-full items-center gap-3 text-left"
+        >
+          <Avatar player={player} />
+          <span className="flex-1 rounded-sm border border-navy-600 bg-navy-700 px-4 py-2.5 text-sm text-mist-400">
+            Was gibt&apos;s Neues?
+          </span>
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-navy-800 rounded-md border border-navy-600 p-4">
+    <div
+      className="bg-navy-800 rounded-md border border-navy-600 p-4"
+      onFocusCapture={() => setFocused(true)}
+      onBlurCapture={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) setFocused(false);
+      }}
+    >
       <div className="flex gap-3">
         {asTeam && team ? (
           <BaseAvatar name={team.teamName} src={team.logo} square />
@@ -105,10 +139,13 @@ export default function PostComposer({ player, onCreated }) {
               asTeam ? "Neuigkeit vom Verein teilen…" : "Was gibt's Neues? Tippe @ für Erwähnungen"
             }
             rows={2}
+            autoFocus={collapsible}
             className="w-full resize-none rounded-sm border border-navy-600 px-3 py-2 text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
           />
 
-          {/* Kurzer Hinweis auf die Post-Funktionen (dezent, immer sichtbar). */}
+          {/* Kurzer Hinweis auf die Post-Funktionen – erst beim Schreiben,
+              damit die Karte im Ruhezustand nicht zwei Zeilen höher ist. */}
+          {(focused || content.trim() || showImage || image) && (
           <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-mist-400">
             <span>
               <b className="font-semibold text-mist-400">@</b> erwähnt Spieler
@@ -123,6 +160,7 @@ export default function PostComposer({ player, onCreated }) {
               <PiImageBold className="text-[10px]" /> Foto anhängen
             </span>
           </div>
+          )}
 
           {showImage && (
             <div className="mt-3">
