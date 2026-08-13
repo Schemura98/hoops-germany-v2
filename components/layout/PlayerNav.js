@@ -13,6 +13,7 @@ import {
 } from "react-icons/pi";
 import { clearPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
 import NotificationBell from "@/components/layout/NotificationBell";
+import FeedbackLink from "@/components/layout/FeedbackLink";
 
 // Gleiche Ordnung wie in der öffentlichen Navbar (Befund R7/K8, 13.08.2026):
 // „Bestenlisten" trägt Topscorer UND Rangliste – die Rangliste war aus keiner
@@ -147,6 +148,9 @@ export default function PlayerNav({ player }) {
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-3 -mr-1">
+          {/* Feedback fest im Chrome statt als schwebender Knopf – Herkunft
+              und Begründung in components/layout/FeedbackLink.js. */}
+          <FeedbackLink />
           <NotificationBell />
           <Link
             href="/player/player-detail"
@@ -191,9 +195,12 @@ export default function PlayerNav({ player }) {
         </div>
       </div>
 
-      {/* Mobile-Menü */}
+      {/* Mobile-Menü. `max-h` + eigenes Scrollen (13.08.2026): Das Menü ist
+          Teil der Sticky-Leiste – ist es höher als der Viewport, kann der
+          Seiten-Scroll seine unteren Zeilen NIE erreichen (sticky scrollt
+          nicht mit). Jetzt scrollt das Menü selbst. */}
       {mobileOpen && (
-        <div className="lg:hidden bg-navy-900 border-t border-navy-600 divide-y divide-navy-600/60">
+        <div className="lg:hidden bg-navy-900 border-t border-navy-600 divide-y divide-navy-600/60 max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain">
           <Link
             href={START.href}
             onClick={() => setMobileOpen(false)}
@@ -275,6 +282,7 @@ export default function PlayerNav({ player }) {
             <PiSignOutBold className="w-4 h-4 flex-shrink-0" />
             <span className="text-sm font-medium">Abmelden</span>
           </button>
+          <FeedbackLink variant="row" onNavigate={() => setMobileOpen(false)} />
         </div>
       )}
     </nav>

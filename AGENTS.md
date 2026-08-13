@@ -565,8 +565,10 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
   - **Logo führt zur Startseite** (Navbar + PlayerNav `href="/"` statt `/home`/`/player/newsfeed`):
     eingeloggte User erreichen die Begrüßungs-Startseite (Gruß via `LandingHero`). Nebenbei den
     „Mein Profil"-Button in `LandingHero` gefixt (zeigte auf den Feed → jetzt `/player/player-detail`).
-  - **Schwebender Feedback-Button** (`components/FeedbackButton.js`, im Root-Layout): fixiert unten
-    rechts auf allen Seiten (Text ab `sm`, mobil nur Icon), ausgeblendet auf `/feedback` und `/admin`.
+  - **Feedback-Zugang im Sticky-Chrome** (`components/layout/FeedbackLink.js`, seit 13.08.2026 –
+    ersetzt den schwebenden `FeedbackButton`, der dreimal unabhängig als Inhalts-Verdeckung gemeldet
+    wurde): brand-farbenes Symbol in Navbar/PlayerNav/TeamNav + Zeile „Feedback geben" (Gruppe
+    „Testphase") in beiden Mobil-Menüs. Kein fixiertes Overlay mehr, keine Ausnahmeliste nötig.
   - **Analytics geprüft + „Traffic nach Bereich"**: `AnalyticsTracker` (Root-Layout) trackt jeden
     Seitenaufruf außer `/admin`; `summary` liefert Aufrufe/Sessions/Top-Pfade/7-Tage – funktioniert.
     **Neu:** `summary` bündelt Pfade serverseitig per `$switch` in Bereiche (Spielerprofile, Teams,

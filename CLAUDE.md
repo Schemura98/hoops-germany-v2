@@ -146,7 +146,9 @@
   (generiertes Initialen-Logo mit deterministischer Namensfarbe – Fallback für Spieler & Teams, überall),
   `components/player/PlayerProfileView.js` (komplettes Spieler-Profil), `components/CityInput.js`
   (Stadt-Typeahead), `components/CityRadiusFilter.js` (Umkreis-Filter), `components/layout/Navbar.js`
-  (öffentlich, login-bewusst), `components/landing/HeroScrollStage.js` (scroll-gesteuerte Hero-Bühne
+  (öffentlich, login-bewusst), `components/layout/FeedbackLink.js` (Feedback-Zugang im Sticky-Chrome
+  aller drei Leisten, seit 13.08.2026 – ersetzt den schwebenden FeedbackButton, der dreimal
+  unabhängig als Inhalts-Verdeckung gemeldet wurde; Mobil-Menüs scrollen seitdem selbst), `components/landing/HeroScrollStage.js` (scroll-gesteuerte Hero-Bühne
   „Sprungball": ein rAF-Controller für alle Deko-Ebenen, Ziel wird zur Laufzeit am CTA-Rechteck
   gemessen, kein Pinning, `prefers-reduced-motion` rendert Ball/Emblem gar nicht) mit
   `components/landing/HeroGlyphs.js` (Ball, Korb-Emblem, Spielfeld-Bogen als reine Vektoren).
@@ -253,8 +255,10 @@
     mit Sticky-Spalte auf Rangliste/Topscorer/Liga-Tabelle, einheitliche mobile Filterleisten,
     optional `CountUp`/`Reveal` auf den öffentlichen Seiten). **Welle 4 ist erledigt** (12.08.2026):
     LegalShell-Zeilenlänge (`max-w-xl`) und Sprungnavigation stehen, der oauth-landing-Fehlerzustand
-    hat Logo und Ausweg, und der FeedbackButton ist auf der Einstiegs-/Formularstrecke ausgeblendet –
-    er lag auf 390×640 gemessen über den letzten 36 px von „Konto erstellen".
+    hat Logo und Ausweg, und der FeedbackButton war auf der Einstiegs-/Formularstrecke ausgeblendet –
+    er lag auf 390×640 gemessen über den letzten 36 px von „Konto erstellen". **Überholt am
+    13.08.2026:** Der schwebende Knopf ist insgesamt entfernt; der Feedback-Zugang sitzt im
+    Sticky-Chrome (`components/layout/FeedbackLink.js`, Protokoll in der Chronik).
 11. **Startseite als Scroll-Erlebnis – was noch offen ist:** Konzepte liegen vollständig vor
     (`docs/LANDING-KONZEPT-2026-08-11.md` inkl. Nachtrag, `docs/HERO-KONZEPT-2026-08-11.md`,
     `docs/LANDING-COPY-2026-08-11.md`). Gebaut sind Hero-Stufe 1, Feature-Choreografie (Stufe 1),

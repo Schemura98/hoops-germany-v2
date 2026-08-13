@@ -1,7 +1,6 @@
 import "./globals.css";
 import { display, sans, mono } from "@/lib/fonts";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
-import FeedbackButton from "@/components/FeedbackButton";
 import TestPhaseBanner from "@/components/TestPhaseBanner";
 import WelcomeTour from "@/components/onboarding/WelcomeTour";
 import PageTransition from "@/components/layout/PageTransition";
@@ -31,8 +30,11 @@ export default function RootLayout({ children }) {
       >
         <AnalyticsTracker />
         <TestPhaseBanner />
+        {/* Der schwebende FeedbackButton wurde am 13.08.2026 entfernt – der
+            Feedback-Zugang sitzt jetzt fest im Sticky-Chrome der drei
+            Navigationsleisten (components/layout/FeedbackLink.js, dort steht
+            auch das Warum). */}
         <PageTransition>{children}</PageTransition>
-        <FeedbackButton />
         <WelcomeTour />
       </body>
     </html>

@@ -2532,3 +2532,54 @@ Gelöst nach demselben Prinzip wie „Bestenlisten" — **Punktzahl unverändert
 **Bewusst nicht angefasst:** die öffentliche Navbar. Dort stehen Transfermarkt und Tryouts weiter
 getrennt — sie muss weder Newsfeed noch Profil tragen und hat den Platz. Die beiden Leisten
 unterscheiden sich also an dieser einen Stelle; das ist gewollt, nicht vergessen.
+
+## 13.08.2026 – Feedback-Zugang: aus der schwebenden Ebene ins Sticky-Chrome (Vivien)
+
+**Anlass:** Der schwebende `FeedbackButton` wurde in der Nacht auf den 13.08. von **drei
+unabhängigen Prüfern** als Inhalts-Verdeckung gemeldet (Liga-Achse: Ecke dichter Tabellen ·
+Spielerprofil: ø-Wert der Historie auf 390 px · Tobias' Deploy-Gate, gemessen: „Abmelden" im
+offenen Mobil-Menü, Pfeil der 4. Vereinszeile auf `/tryouts`, REB-Wert von Elias Hoffmann im
+Box-Score). Dreimal vertagt; Auftrag war die **Wurzel-Lösung**, ausdrücklich keine weitere
+Routen-Ausnahme in `OHNE_KNOPF`.
+
+**Entscheidung:** Die Form war das Problem, nicht die Routen. Eine fixierte Ebene über dem Inhalt
+verdeckt in einem Produkt, dessen Argument Zahlen sind, zwangsläufig irgendwann eine Zahl oder
+einen Bedienpunkt — jede Ausnahmeliste vertagt nur die nächste Meldung. Der Zugang sitzt jetzt
+**fest im Sticky-Chrome** statt darüber:
+
+- **Neu `components/layout/FeedbackLink.js`** (ein Baustein, zwei Formen): `variant="icon"` =
+  Sprechblasen-Symbol in `brand-400` (einziges Farbsignal der Leiste, gleiche Sprache wie der
+  Team-Admin-Punkt, aktiv auf `/feedback` markiert) · `variant="row"` = Zeile „Feedback geben"
+  mit eigenem Gruppentitel **„Testphase"** im Muster der Mobil-Menüs (Bogen zum Banner).
+- **Eingebaut in alle drei Leisten:** `Navbar` (Symbol vor der Suche + Menü-Zeile), `PlayerNav`
+  (Symbol vor der Glocke + Menü-Zeile), `TeamNav` (Symbol vor Abmelden). Damit trägt auch
+  `/team/admin` den Zugang.
+- **Entfernt:** `components/FeedbackButton.js` samt Einbindung im Root-Layout — inklusive der
+  gesamten Scroll-Versteck-Logik und der `OHNE_KNOPF`-Ausnahmeliste (ersatzlos überflüssig:
+  reservierte Fläche braucht keine Ausnahmen).
+- **Sichtbarkeits-Bilanz (warum das ein Ersatz ist, kein Verlust):** Das Chrome ist 100 % der
+  Scrollzeit sichtbar — der alte Knopf versteckte sich beim Runterscrollen, also während des
+  Lesens. Das Wort „Feedback geben" tragen weiterhin Testphase-Banner (oben auf jeder Seite),
+  die neue Menü-Zeile und der Footer. Tastatur/Vorlesen: natürliche Lesereihenfolge der
+  Navigation statt fixiertes Element am Baumende; kein Motion nötig, `prefers-reduced-motion`
+  damit trivial erfüllt.
+- **Beifang, an der Wurzel behoben:** Beide Mobil-Menüs sind Teil der Sticky-Leiste — war das
+  Menü höher als der Viewport, waren seine unteren Zeilen per Seiten-Scroll **nie erreichbar**
+  (sticky scrollt nicht mit; eingeloggt betraf das auf kleinen Displays „Abmelden" selbst).
+  Beide Menüs scrollen jetzt selbst (`max-h-[calc(100dvh-4rem)] overflow-y-auto
+  overscroll-contain`).
+
+**Beleg** (`tmp/feedback-knopf-messen.mjs` + `tmp/feedback-menue-erreichbar.mjs`, Ablage
+`tmp/feedback-shots/vorher|nachher/`, Dev-Server, `max@test.de`): Vorher trifft
+`document.elementFromPoint` an allen drei gemeldeten Stellen den Knopf (Abmelden-Zeile bei
+überlappender Geometrie · Pfeilmitte der 4. Vereinszeile · rechte Hälfte der REB-Zelle, Überlapp
+23×41 px). Nachher trifft dieselbe Probe Abmelden-Zeile, Vereinszeile und Zelle; kein fixiertes
+Element mit `aria-label="Feedback geben"` existiert mehr; die Menü-Zeile ist bei 390×640 per
+Menü-Scroll erreichbar und führt auf `/feedback` (Navbar UND PlayerNav); Desktop 1280 px geprüft.
+**Nicht geprüft:** echtes Gerät (nur Playwright/Chromium), Screenreader-Ansage, die beiden
+zuerst gemeldeten Stellen (Liga-Tabellen-Ecke, ø-Wert Spielerhistorie) nur implizit — das
+verdeckende Element existiert nicht mehr, einzeln nachgemessen wurden sie nicht.
+
+**Prozess:** Trend-Sweep Stufe S (Begründung im `referenz-register.md` der Skill
+`design-trend-recherche`), `emil-design-eng` geladen (Chrome-Element, ständig sichtbar → bewusst
+ohne Motion). AGENTS.md-Beschreibung des Buttons nachgezogen.

@@ -33,6 +33,7 @@ import { notificationHref } from "@/lib/notifications";
 import { trackEvent } from "@/lib/trackEvent";
 import Avatar from "@/components/Avatar";
 import Reveal from "@/components/ui/Reveal";
+import FeedbackLink from "@/components/layout/FeedbackLink";
 
 // Öffentliche, login-bewusste Navigation auf navy-900 mit Wortmarken-Logo.
 // Der aktive Punkt wird durch die 2px-Brand-Leiste markiert – dasselbe Signal
@@ -299,6 +300,9 @@ export default function Navbar() {
 
           {/* Aktionen rechts */}
           <div className="flex items-center gap-4">
+            {/* Feedback fest im Chrome statt als schwebender Knopf – Herkunft
+                und Begründung in components/layout/FeedbackLink.js. */}
+            <FeedbackLink />
             <button
               onClick={openSearch}
               className="text-paper-50 hover:text-brand-400 transition-colors"
@@ -476,9 +480,13 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile-Menü */}
+        {/* Mobile-Menü. `max-h` + eigenes Scrollen (13.08.2026): Das Menü ist
+            Teil der Sticky-Leiste – ist es höher als der Viewport, kann der
+            Seiten-Scroll seine unteren Zeilen NIE erreichen (sticky scrollt
+            nicht mit). Eingeloggt war „Abmelden" auf kleinen Displays genau
+            deshalb unerreichbar. Jetzt scrollt das Menü selbst. */}
         {mobileOpen && (
-          <div className="lg:hidden bg-navy-900 border-t border-navy-600 divide-y divide-navy-600/60">
+          <div className="lg:hidden bg-navy-900 border-t border-navy-600 divide-y divide-navy-600/60 max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain">
             {NAV_GRUPPEN.map((g) => (
               <div key={g.titel}>
                 <p className="bg-navy-950 px-5 py-2 font-display text-[11px] font-bold uppercase tracking-[0.2em] text-mist-600">
@@ -603,6 +611,7 @@ export default function Navbar() {
                 </Link>
               </>
             )}
+            <FeedbackLink variant="row" onNavigate={() => setMobileOpen(false)} />
           </div>
         )}
       </nav>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PiUsersBold, PiSignOutBold, PiArrowSquareOutBold } from "react-icons/pi";
 import { clearTeamToken, clearPlayerToken } from "@/lib/clientAuth";
+import FeedbackLink from "@/components/layout/FeedbackLink";
 
 export default function TeamNav({ team }) {
   const router = useRouter();
@@ -41,6 +42,9 @@ export default function TeamNav({ team }) {
               Öffentliches Profil <PiArrowSquareOutBold className="text-xs" />
             </Link>
           )}
+          {/* Feedback fest im Chrome statt als schwebender Knopf – Herkunft
+              und Begründung in components/layout/FeedbackLink.js. */}
+          <FeedbackLink />
           <button
             onClick={logout}
             className="text-paper-50/80 hover:text-brand-400 transition-colors"
