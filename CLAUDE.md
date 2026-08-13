@@ -11,20 +11,33 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> **Zuletzt deployt: `560e1e6` (13.08.2026, nachmittags)** – **Newsfeed-Umbau** (Spieltag-Leiste
-> am Kopf: nächstes Spiel + letztes Ergebnis des eigenen Teams; Footer mit Impressum/Datenschutz,
-> das fehlte dort völlig; `h1`; mobil beginnt der Feed 500 px weiter oben) und
-> **„Plattform ab 16"**.
-> Davor `27a04fe` (Kaderplatz-Freigabe, acht Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Punkte:** `27a04fe` → `e7a38ce` → `275f124` → `a8e4fd4` (vor der Nachtschicht) →
-> `562c629` (vor dem gesamten Redesign). Auf dem VPS per
+> **Zuletzt deployt: `3c38959` (13.08.2026, abends)** – Altersnachweis bei der Registrierung
+> (s. u.), nach Gates von Kai und Tobias.
+> Davor: `5073951` (Alt-Ligen bleiben bedienbar), `560e1e6` (**Newsfeed-Umbau**: Spieltag-Leiste
+> am Kopf mit nächstem Spiel und letztem Ergebnis; Footer mit Impressum/Datenschutz, das fehlte
+> dort völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe,
+> acht Wege), `e7a38ce`, `275f124` (Nachtschicht).
+> **Rollback-Kette:** `5073951` → `560e1e6` → `27a04fe` → `e7a38ce` → `275f124` →
+> `a8e4fd4` (vor der Nachtschicht) → `562c629` (vor dem gesamten Redesign). Auf dem VPS per
 > `git checkout <hash> && npm run build && pm2 restart hoops-v2`.
 >
-> ⚠️ **PLATTFORM AB 16 JAHREN** (Entscheidung Patrick, 13.08.2026). `LEAGUE_AGE_GROUPS` kennt nur
-> noch `["Senioren", "U18"]` – eine U16-Liga ist die Altersklasse UNTER 16. Auf `hoops_prod`
-> wurden 9 Ligen, 4 Demo-Teams, 4 Beispielprofile entfernt; **kein echter Datensatz war
-> betroffen, 0 echte Profile unter 16**. ⚠️ **Die Regel ist NUR im Liga-Katalog erzwungen** –
-> Registrierung und Profil prüfen kein Mindestalter (offen, gehört Patrick und Nora).
+> ⚠️ **PLATTFORM AB 16 JAHREN** (Entscheidung Patrick, 13.08.2026). Wirkt an **fünf** Stellen:
+> `LEAGUE_AGE_GROUPS` = `["Senioren", "U18"]` (eine U16-Liga ist die Altersklasse UNTER 16) ·
+> **`/signup`**, **`/team/join/[token]`** und **`/team/claim/[token]`** verlangen die
+> Selbstauskunft „mindestens 16" · `playerregister` erzwingt sie **serverseitig** ·
+> der **Google-Weg** legt neue Konten nur mit dem Cookie `g_oauth_minage` an ·
+> `update-profile` weist ein **neu eingetragenes** Geburtsdatum unter 16 ab.
+> Bewusst **kein Pflicht-Geburtsdatum**: `age`/`birthdate` sind über die öffentliche Profil-API
+> einsehbar – ein Pflichtfeld hätte die Datenmenge vergrößert. Beleg je Konto:
+> `Player.minAgeConfirmedAt`.
+> Auf `hoops_prod` wurden 9 U16-Ligen, 4 Demo-Teams, 4 Beispielprofile entfernt; **kein echter
+> Datensatz war betroffen, 0 echte Profile unter 16**.
+> ⚠️ Ein Test in `tests/e2e/auth.spec.mjs` liest den **Quelltext** und prüft, dass jeder
+> Aufrufer von `playerregister` die Bestätigung mitschickt – genau diese Lücke ließ die
+> Einladungswege an 19 grünen Tests vorbei brechen. **Neuer Aufrufer ⇒ Feld mitschicken.**
+> ⚠️ Offen und bei Patrick/Nora: der Wortlaut einer **Einwilligungserklärung**. Was heute
+> dasteht, ist eine Tatsachenangabe des Nutzers, kein Rechtstext. Und: Der Google-OAuth-Weg
+> ist lokal nicht testbar (keine Keys) – **nach dem Deploy einmal echt auf Prod durchspielen**.
 >
 > ⚠️ **Wer `Player.teamId` ändert, MUSS `slotsFreigeben` aufrufen** – die verbindliche Liste aller
 > acht Wechselwege steht im Kopf von `lib/rosterSlots.js`. Sie war dreimal hintereinander

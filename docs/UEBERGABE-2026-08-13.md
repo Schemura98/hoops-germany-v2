@@ -10,9 +10,9 @@ frischer Kopf sofort wissen muss.
 
 | | |
 |---|---|
-| **Live auf hoopsgermany.de** | `27a04fe` |
-| **Lokal committet, noch nicht deployt** | 6 Commits: Newsfeed-Umbau (5, Vivien) + „Plattform ab 16" (1) |
-| **Rollback-Kette** | `27a04fe` → `e7a38ce` → `275f124` → `a8e4fd4` (vor der Nachtschicht) → `562c629` (vor dem Redesign) |
+| **Live auf hoopsgermany.de** | `3c38959` |
+| **Lokal noch nicht deployt** | nichts – der Arbeitsbaum ist sauber |
+| **Rollback-Kette** | `5073951` → `560e1e6` → `27a04fe` → `e7a38ce` → `275f124` → `a8e4fd4` (vor der Nachtschicht) → `562c629` (vor dem Redesign) |
 
 Rollback ist immer dieselbe Zeile auf dem VPS:
 
@@ -20,9 +20,14 @@ Rollback ist immer dieselbe Zeile auf dem VPS:
 cd /root/hoops-v2 && git checkout <hash> && npm run build && pm2 restart hoops-v2
 ```
 
-**Wenn die Gates (Kai, Tobias) grün melden, gehen die 6 Commits raus.** Melden sie
-einen Blocker, bleibt es liegen — dann steht der Befund in dieser Datei nicht mehr,
-sondern im Chat.
+**Alles ist deployt und durch beide Gates gegangen.** Seit dem Stand von gestern Abend
+(`a8e4fd4`) sind es rund 70 Commits.
+
+Was heute live ging, in Stichworten: Nachtschicht (Benachrichtigungen „Deine Zahlen
+stehen", Liga-Achse, Plattform-Tour, `/tryouts`-Wege, Navigation, Signup-Motiv) ·
+Kaderprüfung beim Statistik-Speichern · Feedback-Zugang ins Sticky-Chrome ·
+Liga-Suche · Kaderplatz-Freigabe über acht Wechselwege · Newsfeed-Umbau ·
+„Plattform ab 16" inklusive Altersnachweis bei der Registrierung.
 
 ---
 
@@ -35,10 +40,11 @@ sondern im Chat.
    bestätigtes Spiel, über das eine Karte entstehen könnte.
 2. **Sponsorenlogo auf der Karte?** Laut Nora ist das Logo der **Auslöser** der
    Gewerbeanmeldung, nicht eine spätere Zutat.
-3. **Altersnachweis bei der Registrierung.** Die Regel „ab 16" ist jetzt in Katalog und
-   Daten umgesetzt — aber sie steht **nirgends im Produkt** (Grep über `app/` nach
-   Mindestalter/Altersgrenze/„ab 16" = 0 Treffer). Niemand hindert einen 14-Jährigen
-   an der Registrierung. Rechtlicher Bezug → gehört Patrick und Nora.
+3. **Wortlaut einer Einwilligungserklärung.** Der Altersnachweis ist gebaut und live,
+   aber was dort steht, ist eine **Tatsachenangabe des Nutzers**, kein Rechtstext. Ob es
+   eine förmliche Einwilligung braucht, gehört Patrick und Nora.
+   Dazu: Der **Google-OAuth-Weg ist lokal nicht testbar** (keine Keys) — die
+   Cookie-Logik wurde nur im Code geprüft. **Einmal echt auf Prod durchspielen.**
 4. **„Mein Profil"** ist aus der waagerechten Navigationsleiste verschwunden (der Avatar
    daneben führt zum selben Ziel). Einzeiler zurück, falls er es vermisst.
 5. **Internes Testkonto mit Altersangabe „1"** auf `hoops_prod` — offensichtlicher
