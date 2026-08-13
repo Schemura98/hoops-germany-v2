@@ -111,15 +111,23 @@ export default function Navbar() {
   const linkAktiv = (l) =>
     isActive(l.href) || (l.auchAktivAuf || []).some((h) => isActive(h));
   // Klassen-Helfer (konsistente Borders → kein Layout-Shift zwischen aktiv/inaktiv).
+  // `shrink-0 whitespace-nowrap` (13.08.2026, Fund von Tobias): Eingeloggt
+  // traegt die oeffentliche Leiste zusaetzlich Feed, Team-Admin, Mein Team und
+  // Mein Profil — elf Punkte. Ohne diese beiden Klassen schrumpften die
+  // Beschriftungen und brachen zweizeilig um („Team-Admin", „Mein Team", „Mein
+  // Profil"), waehrend die Nachbarn einzeilig blieben. Ausgeloggt faellt es
+  // nicht auf, weil dort vier Punkte weniger stehen.
   const deskClassAktiv = (aktiv) =>
-    `text-sm transition-colors border-b-2 pb-0.5 ${
+    `shrink-0 whitespace-nowrap text-sm transition-colors border-b-2 pb-0.5 ${
       aktiv
         ? "text-paper-50 font-semibold border-brand-500"
         : "text-mist-300 hover:text-paper-50 border-transparent"
     }`;
   const deskClass = (href) => deskClassAktiv(isActive(href));
+  // Dieselbe Regel wie oben — dieser Punkt traegt zusaetzlich ein Symbol und
+  // brach als einziger noch zweizeilig um.
   const deskAdminClass = (href) =>
-    `flex items-center gap-1.5 text-sm font-medium border-b-2 pb-0.5 ${
+    `flex shrink-0 whitespace-nowrap items-center gap-1.5 text-sm font-medium border-b-2 pb-0.5 ${
       isActive(href)
         ? "text-brand-300 border-brand-500"
         : "text-brand-400 hover:text-brand-300 border-transparent"
@@ -258,7 +266,11 @@ export default function Navbar() {
   return (
     <>
       <nav className="sticky top-0 z-50 bg-navy-900 text-paper-50 border-b border-navy-600">
-        <div className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 h-16">
+        {/* `gap-4`: Ohne Mindestabstand stiessen Wortmarke und erster Punkt
+            direkt aneinander („HOOPS GERMANYLigen"), sobald die eingeloggte
+            Fassung die Leiste fuellt — justify-between verteilt nur den REST,
+            es haelt keinen Abstand frei. */}
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4 px-4 sm:px-6 h-16">
           {/* Logo */}
           <Link
             href="/"
