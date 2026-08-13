@@ -180,11 +180,18 @@ export default function WegeZumVerein({ variant = "leer" }) {
     });
   }, [teams, ort, cityMap, me]);
 
-  // Wonach ist sortiert? Wird ausgeschrieben, damit die Reihenfolge nicht
-  // wie ein Ranking gelesen wird, das sie nicht ist.
+  // Wonach ist sortiert? Wird ausgeschrieben, damit die Reihenfolge nicht wie
+  // ein Ranking gelesen wird, das sie nicht ist.
+  //
+  // „Zuerst aus <Land>" steht nur da, wenn dort auch wirklich einer ist. Sonst
+  // las Sven (Profil: Sachsen) über einer Liste aus Hamburg, München, Köln und
+  // Berlin die Zeile „Zuerst aus Sachsen" – eine Überschrift, die ihr eigener
+  // Inhalt widerlegt. Beim ersten Belegbild genau so aufgetreten.
+  const landTreffer =
+    !!me?.bundesland && vereine.some((t) => t.bundesland === me.bundesland);
   const sortierHinweis = ort
     ? `Nach Entfernung zu ${ort.n}`
-    : me?.bundesland
+    : landTreffer
     ? `Zuerst aus ${me.bundesland}`
     : "Alphabetisch";
 
