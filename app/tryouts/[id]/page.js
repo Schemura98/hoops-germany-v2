@@ -3,7 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { PiUsersBold, PiMapPinBold, PiCalendarBlankBold } from "react-icons/pi";
+import {
+  PiUsersBold,
+  PiMapPinBold,
+  PiCalendarBlankBold,
+  PiCaretLeftBold,
+  PiArrowRightBold,
+} from "react-icons/pi";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
@@ -184,6 +190,27 @@ export default function TryoutDetailPage({ params }) {
               </Button>
             )}
           </div>
+        </div>
+
+        {/* Wer sich hier gegen das Probetraining entscheidet – falscher Ort,
+            falsches Datum, falsche Position –, hatte bisher keinen Weg zurück:
+            die Seite kannte weder die Liste, aus der sie kam, noch den
+            Transfermarkt. Zwei Zeilen, damit die Reise nicht hier endet. */}
+        <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-navy-600 pt-5 text-sm">
+          <Link
+            href="/tryouts"
+            className="inline-flex items-center gap-1.5 rounded-sm font-medium text-mist-300 transition-colors duration-150 hover:text-brand-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950"
+          >
+            <PiCaretLeftBold aria-hidden="true" className="text-xs" />
+            Alle Probetrainings
+          </Link>
+          <Link
+            href="/transfermarkt"
+            className="inline-flex items-center gap-1.5 rounded-sm font-medium text-mist-300 transition-colors duration-150 hover:text-brand-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950"
+          >
+            Vereine, die jemanden suchen
+            <PiArrowRightBold aria-hidden="true" className="text-xs" />
+          </Link>
         </div>
       </main>
 
