@@ -29,6 +29,7 @@ import {
 } from "@/lib/clientAuth";
 import { timeAgo } from "@/lib/timeAgo";
 import { notificationHref } from "@/lib/notifications";
+import { trackEvent } from "@/lib/trackEvent";
 import Avatar from "@/components/Avatar";
 import Reveal from "@/components/ui/Reveal";
 
@@ -304,7 +305,18 @@ export default function Navbar() {
                             </div>
                           );
                           return href ? (
-                            <Link key={n._id || i} href={href} onClick={() => setNotifOpen(false)}>
+                            <Link
+                              key={n._id || i}
+                              href={href}
+                              onClick={() => {
+                                setNotifOpen(false);
+                                // „Deine Zahlen stehen" – Öffnen messen (Gegenstück
+                                // zu `own_stats_notified`, s. lib/statsNotify.js).
+                                if (n.type === "own_stats" && n.matchId) {
+                                  trackEvent("own_stats_opened", `/match/${n.matchId}`);
+                                }
+                              }}
+                            >
                               {inner}
                             </Link>
                           ) : (

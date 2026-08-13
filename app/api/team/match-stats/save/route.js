@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Match from "@/models/Match";
 import { getTeamForCapability } from "@/lib/serverAuth";
 import { recordAudit } from "@/lib/audit";
+import { notifyOwnStats } from "@/lib/statsNotify";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 function toCount(v) {
@@ -69,6 +70,15 @@ async function handler(req) {
       teamId: team._id,
       summary: `${team.teamName} bearbeitete die Spieler-Statistiken (${entries.length} Einträge)`,
     });
+  }
+
+  // Spieler über ihre eigenen Werte informieren (nur beim ersten Mal je Spieler –
+  // eine Korrektur löst keine zweite Nachricht aus, s. lib/statsNotify.js).
+  // Fire-and-forget in der Wirkung: ein Fehler hier darf das Speichern nie kippen.
+  try {
+    await notifyOwnStats(match);
+  } catch (err) {
+    console.error("[OWN STATS NOTIFY ERROR]", err);
   }
 
   return ok({ message: "Statistiken gespeichert." });

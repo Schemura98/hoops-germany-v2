@@ -44,6 +44,11 @@ const matchSchema = new mongoose.Schema(
     winningTeamPoints: Number,
     losingTeamPoints: Number,
     notifiedPendingResult: { type: Boolean, default: false },
+    // Wer wurde bereits über seine eigenen Werte im Box-Score informiert
+    // (Benachrichtigung "own_stats", lib/statsNotify.js)? Verhindert, dass eine
+    // Korrektur der Statistiken eine zweite Nachricht auslöst. Bewusst je Spieler
+    // statt als Boolean: wer erst bei der Korrektur dazukommt, bekommt seine erste.
+    notifiedStatsPlayers: [{ type: mongoose.Schema.Types.ObjectId, ref: "players" }],
     // Optionale Zusatzinfos (z. B. aus Demo-Daten): MVP, Zuschauerzahl, Spielbericht.
     mvp: { type: mongoose.Schema.Types.ObjectId, ref: "players" },
     attendance: Number,

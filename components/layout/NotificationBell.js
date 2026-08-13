@@ -18,9 +18,11 @@ import {
   PiEnvelopeOpenBold,
   PiCheckBold,
   PiXBold,
+  PiChartLineUpBold,
 } from "react-icons/pi";
 import { getPlayerToken, getStoredPlayer } from "@/lib/clientAuth";
 import { notificationHref } from "@/lib/notifications";
+import { trackEvent } from "@/lib/trackEvent";
 import { timeAgo } from "@/lib/timeAgo";
 import Reveal from "@/components/ui/Reveal";
 
@@ -31,6 +33,7 @@ const ICON = {
   member_joined: PiUserPlusBold,
   team_invite: PiEnvelopeOpenBold,
   match_result: PiBasketballBold,
+  own_stats: PiChartLineUpBold,
   pending_result: PiBasketballBold,
   result_mismatch: PiWarningBold,
   transfer: PiArrowsLeftRightBold,
@@ -96,6 +99,15 @@ export default function NotificationBell() {
   }
 
   const me = getStoredPlayer();
+
+  // Klick auf eine Benachrichtigung. Für „Deine Zahlen stehen" zusätzlich messen,
+  // ob die Nachricht wirklich geöffnet wird (Gegenstück zu `own_stats_notified`).
+  function handleOpenNotification(n) {
+    setOpen(false);
+    if (n.type === "own_stats" && n.matchId) {
+      trackEvent("own_stats_opened", `/match/${n.matchId}`);
+    }
+  }
 
   return (
     <div className="relative">
@@ -189,7 +201,7 @@ export default function NotificationBell() {
                   return (
                     <li key={n._id}>
                       {href ? (
-                        <Link href={href} onClick={() => setOpen(false)}>
+                        <Link href={href} onClick={() => handleOpenNotification(n)}>
                           {inner}
                         </Link>
                       ) : (

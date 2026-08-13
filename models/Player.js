@@ -12,6 +12,8 @@ const notificationSchema = new mongoose.Schema(
         "team_invite",
         "pending_result",
         "match_result",
+        // Eigene Werte aus einem Box-Score sind eingetragen (lib/statsNotify.js)
+        "own_stats",
         "transfer",
         "result_mismatch",
         "team_admin_granted",
