@@ -302,7 +302,7 @@ export function StepUebergabe({ player, weg, verfuegbar, onVerfuegbar, onGespeic
           )}
           {fehler && (
             <FormAlert className="mt-3">
-              Konnte gerade nicht gespeichert werden – im Profil unter „Transfer" nachholbar.
+              Konnte gerade nicht gespeichert werden – im Profil unter &bdquo;Transfer&ldquo; nachholbar.
             </FormAlert>
           )}
         </div>
