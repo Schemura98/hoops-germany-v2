@@ -73,6 +73,82 @@ function Card({ title, hint, children, right }) {
   );
 }
 
+// Onboarding-Trichter der Plattform-Tour. Ergänzt 13.08.2026 – die Ereignisse
+// wurden vorher gespeichert und nirgends gezeigt.
+//
+// Der Trichter zeigt Sitzungen je Schritt, nicht Ereignisse; die Abbruchspalte
+// nennt den Schritt, auf dem geschlossen wurde. Bewusst KEINE Balken für die
+// Abbrüche: Die Zahl ist klein und die Aussage liegt im Vergleich zur Zeile
+// darüber, nicht in der Balkenlänge.
+function OnboardingCard({ ob, period }) {
+  if (!ob) return null;
+  const max = ob.steps.reduce((m, s) => Math.max(m, s.erreicht), 0) || 1;
+  const leer = ob.started === 0;
+
+  return (
+    <Card
+      title="Einstieg: Plattform-Tour"
+      hint={`Wie weit kommen neue Nutzer? · ${period} · gezählt werden Sitzungen`}
+      right={
+        ob.completionRate !== null && (
+          <span className="font-mono text-xs tabular-nums text-brand-400">
+            {ob.completionRate}% abgeschlossen
+          </span>
+        )
+      }
+    >
+      {leer ? (
+        <p className="text-sm text-mist-400">
+          Im gewählten Zeitraum hat noch niemand die Tour gesehen.
+        </p>
+      ) : (
+        <>
+          <div className="space-y-2.5">
+            {ob.steps.map((s) => (
+              <div key={s.key} className="flex items-center gap-3">
+                <span className="w-36 sm:w-52 truncate text-xs text-mist-400">{s.label}</span>
+                <div className="h-3 flex-1 overflow-hidden rounded-full bg-navy-700">
+                  <div
+                    className="h-full rounded-full bg-brand-500"
+                    style={{ width: `${(s.erreicht / max) * 100}%` }}
+                  />
+                </div>
+                <span className="w-10 text-right text-xs font-semibold text-paper-50">
+                  {nf(s.erreicht)}
+                </span>
+                <span
+                  className="w-16 text-right text-xs text-mist-400"
+                  title="Hier wurde die Tour abgebrochen"
+                >
+                  {s.abgebrochen ? `−${nf(s.abgebrochen)} ab` : "—"}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-5 grid gap-5 sm:grid-cols-2">
+            <div>
+              <p className="mb-2 text-xs font-semibold text-mist-300">Gewählte Situation</p>
+              <Bars items={ob.branches} empty="Noch keine Antwort." />
+            </div>
+            <div>
+              <p className="mb-2 text-xs font-semibold text-mist-300">
+                In der Tour wirklich gespeichert
+              </p>
+              <Bars items={ob.actions} empty="Noch nichts gespeichert." />
+            </div>
+          </div>
+
+          <p className="mt-4 border-t border-navy-600 pt-3 text-xs text-mist-400">
+            Checkliste im Feed: {nf(ob.checklist.stepsDone)} Schritte erledigt ·{" "}
+            {nf(ob.checklist.dismissed)}× ausgeblendet
+          </p>
+        </>
+      )}
+    </Card>
+  );
+}
+
 // „Deine Zahlen stehen" – trägt der Wiederaufrufgrund aus Ronjas Befund R1?
 // Versendet vs. geöffnet. Bewusst nur diese zwei Zahlen: eine Öffnungsquote ohne
 // Versand wäre erfunden, deshalb wird sie bei 0 gar nicht gezeigt.
@@ -385,13 +461,14 @@ export default function AdminAnalyticsPage() {
           <EngagementCards eng={summary.engagement} period={periodLabel} />
           <RegionCard region={summary.region} />
           <ContentCard content={summary.content} period={periodLabel} />
-          <OwnStatsCard os={summary.ownStats} period={periodLabel} />
-
           {summary.signupSources?.length > 0 && (
             <Card title="Registrierungen nach Quelle" hint="Aus ?src= beim Registrieren (z.B. Flyer-QR-Codes) · allzeit, nur echte Accounts">
               <Bars items={summary.signupSources.map((s) => ({ label: s.src, value: s.count }))} />
             </Card>
           )}
+
+          <OnboardingCard ob={summary.onboarding} period={periodLabel} />
+          <OwnStatsCard os={summary.ownStats} period={periodLabel} />
 
           <Card title="Beliebteste Seiten" hint={`Im Zeitraum: ${periodLabel}`}>
             {summary.topPaths.length === 0 ? (

@@ -68,3 +68,36 @@ body {
     animation: none;
   }
 }
+
+/* Schrittwechsel der Plattform-Tour (components/onboarding/WelcomeTour.js).
+   Richtungsabhängig: vorwärts kommt der Inhalt von rechts, zurück von links –
+   damit „Zurück" auch räumlich als Zurück gelesen wird. Der Versatz kommt aus
+   --tour-dir und wird von der Komponente gesetzt.
+
+   Keyframe statt Transition ist hier ausnahmsweise richtig: Der Schrittinhalt
+   wird bei jedem Wechsel neu gemountet, es gibt also nichts zu unterbrechen.
+   Animiert werden ausschließlich opacity und transform. */
+@keyframes tour-step-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--tour-dir, 14px));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.tour-step-in {
+  animation: tour-step-in 260ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* Reduzierte Bewegung heißt nicht „keine Animation", sondern „keine Bewegung":
+   Die Blende bleibt (sie hilft zu verstehen, dass der Inhalt gewechselt hat),
+   der Versatz entfällt. */
+@media (prefers-reduced-motion: reduce) {
+  .tour-step-in {
+    --tour-dir: 0px;
+    animation-duration: 160ms;
+    animation-timing-function: linear;
+  }
+}

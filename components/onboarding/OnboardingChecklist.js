@@ -15,7 +15,12 @@ import { getPlayerToken } from "@/lib/clientAuth";
 import { trackEvent } from "@/lib/trackEvent";
 
 // Leitet den Erledigt-Status der 4 Kern-Schritte aus dem Spieler-Objekt ab (aus getmyinfo).
-function computeSteps(player) {
+//
+// Exportiert, weil die Plattform-Tour (components/onboarding/WelcomeTour.js) auf
+// ihrer letzten Seite denselben Stand anzeigt und dorthin übergibt. Zwei Kopien
+// dieser Liste würden sofort auseinanderlaufen: Die Tour würde „erledigt" melden,
+// was die Checkliste im Feed noch offen führt.
+export function computeSteps(player) {
   return [
     {
       key: "photo",

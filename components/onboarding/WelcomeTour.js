@@ -1,54 +1,120 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import axios from "axios";
-import {
-  PiBasketballBold,
-  PiChartBarBold,
-  PiUsersBold,
-  PiTrophyBold,
-  PiArrowsLeftRightBold,
-  PiXBold,
-  PiArrowLeftBold,
-  PiArrowRightBold,
-} from "react-icons/pi";
+import { PiXBold, PiArrowLeftBold, PiArrowRightBold } from "react-icons/pi";
+import Button from "@/components/ui/Button";
+import SplitFlap from "@/components/ui/SplitFlap";
+import TourProofBoard from "@/components/onboarding/TourProofBoard";
+import { StepWeg, StepPosition, StepStadt, StepUebergabe } from "@/components/onboarding/TourSteps";
 import { getPlayerToken } from "@/lib/clientAuth";
 import { trackEvent } from "@/lib/trackEvent";
 
-// Inhalt der Willkommens-Tour (Anreiz: „Was kannst du hier alles tun?").
-const STEPS = [
+// ---------------------------------------------------------------------------
+// Plattform-Tour „Aufwärmen"
+//
+// Umbau 13.08.2026 (Vivien, Auftrag Patrick). Die Vorgänger-Fassung waren fünf
+// identische Lesefolien mit Icon, Absatz und Weiter-Knopf. Drei Dinge daran
+// waren das eigentliche Problem, und alle drei sind hier adressiert:
+//
+//   1. Sie endete im Nichts – `close(true)` schloss das Fenster und ließ den
+//      Nutzer stehen. Jetzt endet sie auf demselben Fortschrittsstand, den die
+//      Checkliste im Feed führt (gemeinsame Quelle `computeSteps`), mit den
+//      ersten Punkten bereits abgehakt, weil sie in der Tour passiert sind.
+//   2. Tour und Checkliste wussten nichts voneinander. Jetzt teilen sie die
+//      Definition der Startschritte.
+//   3. Sie maß nur „fertig"/„abgebrochen". Jetzt bekommt jeder Schritt ein
+//      eigenes Ereignis, und der Abbruch trägt den Schritt als Zusatzfeld –
+//      erst damit ist überhaupt sichtbar, WO Leute aussteigen.
+//
+// Leitgedanke: Jeder Schritt tut etwas Echtes, statt etwas zu beschreiben.
+// Position und Stadt werden wirklich gespeichert (keine Attrappe), die Frage
+// nach der Situation verkürzt den Rest, und der Beweis steht vorn – bevor um
+// irgendetwas gebeten wird.
+//
+// Bewusst NICHT gebaut: Abzeichen, Punktestände, Serien-Mechanik, Konfetti.
+// Das wäre „spaßig" auf Kosten der Glaubwürdigkeit – und die Belegbarkeit der
+// Zahlen ist das einzige Argument, das diese Plattform wirklich hat.
+// ---------------------------------------------------------------------------
+
+const SCHRITTE = [
   {
-    icon: PiBasketballBold,
-    title: "Willkommen bei Hoops Germany! 🏀",
-    text: "Deine Community-Plattform für Amateur-Basketball in NRW – Spieler, Teams, Ligen, Spiele, Tryouts und Transfers an einem Ort. Hier ein kurzer Überblick, was du alles machen kannst.",
+    key: "beweis",
+    marke: "Warum hier",
+    // Korrektur Nele, 13.08.2026: Der erste Entwurf hieß „Zahlen, die niemand
+    // bestreitet". Das ist nicht bloß zugespitzt, sondern falsch – die
+    // Plattform kennt sehr wohl einen `resultStatus: "mismatch"`, Widerspruch
+    // passiert und wird eskaliert. Die Aussage ist „beide bestätigen
+    // unabhängig", nicht „es gibt keinen Streit". Eine Behauptung, die das
+    // eigene Produkt widerlegt, ist genau dort tödlich, wo Belegbarkeit das
+    // einzige Argument ist.
+    titel: "Zahlen, die beide Seiten bestätigen",
+    text: "Auf Hoops trägt nicht einer die Zahlen ein. Beide Teams melden das Ergebnis unabhängig voneinander – erst wenn beide dasselbe sagen, zählt es. Deshalb muss ein Verein deinen Statistiken nicht glauben.",
   },
   {
-    icon: PiChartBarBold,
-    title: "Dein Profil & deine Statistiken",
-    text: "Lege ein aussagekräftiges Profil an – mit Foto, Position, Verein und Steckbrief. Deine Spiele zahlen automatisch auf deine Karriere-Statistiken (Punkte, Assists, Rebounds) und deine Spielerhistorie ein.",
+    key: "weg",
+    marke: "Kurz nachgefragt",
+    titel: "Was passt gerade auf dich?",
+    text: "Eine Frage – danach wird der Rest kürzer.",
   },
   {
-    icon: PiUsersBold,
-    title: "Teams & Kader",
-    text: "Tritt deinem Verein bei – oder gründe dein eigenes Team und werde automatisch Team-Admin. Verwalte deinen Kader, lade Mitspieler ein und ernenne weitere Admins.",
+    key: "position",
+    marke: "Dein Profil",
+    titel: "Wo stehst du auf dem Feld?",
+    titelAdmin: "Was machst du im Team?",
+    text: "Ein Tipp genügt – es steht sofort in deinem Profil, kein Formular.",
   },
   {
-    icon: PiTrophyBold,
-    title: "Spiele, Ligen & Tabellen",
-    text: "Trage Spiele und Ergebnisse ein, verfolge offizielle Ligen mit Tabellen und Playoffs und sieh dir die Topscorer an. Beide Teams bestätigen Ergebnisse – fair und transparent.",
+    key: "stadt",
+    marke: "Dein Profil",
+    titel: "Wo spielst du?",
+    // Nele, 13.08.2026: Vorher stand hier der Funktionsname „Umkreissuche".
+    // Der Nutzen ist „Leute aus deiner Nähe finden dich", nicht der Name des
+    // Filters, der das erledigt.
+    text: "Setzt Ort und Bundesland auf einmal – damit dich Teams und Tryouts aus deiner Nähe finden.",
   },
   {
-    icon: PiArrowsLeftRightBold,
-    title: "Transfermarkt, Tryouts & Community",
-    text: "Finde Spieler oder Vereine im Transfermarkt, bewirb dich auf Tryouts und bleib im Newsfeed auf dem Laufenden – folge Spielern und Teams und teile deine Highlights: mit Fotos, @Erwähnungen, #Hashtags und Video-Links (z. B. YouTube).",
+    key: "start",
+    marke: "Los geht's",
+    titel: "Du hast schon angefangen",
+    text: "Der Rest wartet als Checkliste in deinem Feed. Du kannst jederzeit dort weitermachen.",
   },
 ];
 
+// Der eine konkrete nächste Schritt je Weg. Gründung und Beitritt sind eigene
+// Seiten mit eigenem Freigabeprozess – die gehören nicht in ein Dialogfenster,
+// deshalb sind das Links und keine Formulare.
+const ZIELE = {
+  verein: { label: "Team suchen", href: "/teams" },
+  admin: { label: "Team gründen", href: "/team/create" },
+  suche: { label: "Tryouts ansehen", href: "/tryouts" },
+};
+
 export default function WelcomeTour() {
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState(0);
+  const [sichtbar, setSichtbar] = useState(false); // treibt die Ein-/Ausblende-Kurve
+  const [index, setIndex] = useState(0);
+  const [richtung, setRichtung] = useState(1);
+  const [player, setPlayer] = useState(null);
+
+  // Antworten der Tour. Werden aus dem Profil vorbelegt, damit ein bereits
+  // gepflegtes Feld nicht als leer erscheint (und nicht überschrieben wird).
+  const [weg, setWeg] = useState("");
+  const [position, setPosition] = useState("");
+  const [ort, setOrt] = useState({ stadt: "", land: "" });
+  const [verfuegbar, setVerfuegbar] = useState(false);
+
   const pathname = usePathname();
+  const panelRef = useRef(null);
+  const schliessendRef = useRef(false);
+
+  const profilUebernehmen = useCallback((p) => {
+    setPlayer(p);
+    setPosition(p?.position || "");
+    setOrt({ stadt: p?.hometown || "", land: p?.bundesland || "" });
+    setVerfuegbar(p?.transferStatus === "verfuegbar");
+  }, []);
 
   // Auto-Start einmalig pro Login/Registrierung. Läuft bei jedem Routenwechsel neu,
   // damit ein Login/Registrierung NACH dem ersten Mount erkannt wird (Tour liegt im
@@ -65,120 +131,374 @@ export default function WelcomeTour() {
       try {
         const { data } = await axios.post("/api/player/getmyinfo", { token });
         if (data?.player && !data.player.welcomeSeen) {
-          setStep(0);
+          profilUebernehmen(data.player);
+          setIndex(0);
+          setRichtung(1);
           setOpen(true);
         }
       } catch {
         /* ignorieren */
       }
     })();
-  }, [pathname]);
+  }, [pathname, profilUebernehmen]);
 
-  // Erneut öffnen (z.B. aus dem Footer) via Custom-Event.
+  // Erneut öffnen (z.B. aus dem Footer) via Custom-Event. Hier fehlt das
+  // Profil – es wird nachgeladen, sonst stünde die letzte Seite ohne Stand da.
   useEffect(() => {
     const handler = () => {
-      setStep(0);
+      setIndex(0);
+      setRichtung(1);
       setOpen(true);
+      const token = getPlayerToken();
+      if (!token) return;
+      axios
+        .post("/api/player/getmyinfo", { token })
+        .then(({ data }) => data?.player && profilUebernehmen(data.player))
+        .catch(() => {});
     };
     window.addEventListener("hg:open-tour", handler);
     return () => window.removeEventListener("hg:open-tour", handler);
-  }, []);
+  }, [profilUebernehmen]);
 
-  // completed=true nur beim expliziten Abschluss auf der letzten Seite ("Los geht's"),
-  // sonst gilt die Tour als übersprungen (X-Button oder "Überspringen").
-  async function close(completed = false) {
-    setOpen(false);
-    trackEvent(completed ? "tour_completed" : "tour_skipped", pathname);
-    const token = getPlayerToken();
-    if (token) {
-      try {
-        await axios.post("/api/player/mark-welcome-seen", { token });
-      } catch {
-        /* ignorieren */
+  // Auftritt: erst mounten, dann im nächsten Frame die Zielwerte setzen, damit
+  // der Übergang überhaupt läuft. Beim Schließen umgekehrt – und schneller:
+  // Wo der Nutzer entscheidet, darf es ruhig sein, wo das System antwortet,
+  // muss es zügig sein.
+  useEffect(() => {
+    if (!open) return;
+    schliessendRef.current = false;
+    const raf = requestAnimationFrame(() => setSichtbar(true));
+    return () => cancelAnimationFrame(raf);
+  }, [open]);
+
+  // Seite hinter dem Dialog nicht mitscrollen lassen.
+  useEffect(() => {
+    if (!open) return;
+    const vorher = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = vorher;
+    };
+  }, [open]);
+
+  const schritt = SCHRITTE[index];
+  const letzter = index === SCHRITTE.length - 1;
+
+  // Jeder Schritt meldet sich selbst. Erst dadurch entsteht die Abbruchkurve:
+  // Ohne dieses Ereignis weiß man nur, DASS jemand ausgestiegen ist.
+  useEffect(() => {
+    if (!open || !sichtbar) return;
+    trackEvent("tour_step", pathname, schritt.key);
+  }, [open, sichtbar, schritt.key, pathname]);
+
+  // completed=true nur beim expliziten Abschluss auf der letzten Seite,
+  // sonst gilt die Tour als übersprungen (X-Knopf, „Überspringen", Escape).
+  // Das Zusatzfeld trägt beim Abschluss den gewählten Weg und beim Abbruch
+  // den Schritt, auf dem abgebrochen wurde.
+  const close = useCallback(
+    async (completed = false) => {
+      if (schliessendRef.current) return;
+      schliessendRef.current = true;
+      trackEvent(
+        completed ? "tour_completed" : "tour_skipped",
+        pathname,
+        completed ? weg || "ohne_weg" : SCHRITTE[index].key
+      );
+      setSichtbar(false);
+      setTimeout(() => setOpen(false), 200);
+      // Die Seite dahinter hat den Spieler geladen, BEVOR die Tour Position und
+      // Ort gespeichert hat. Ohne dieses Signal stünde die Checkliste im Feed
+      // danach auf einem Stand, den die Tour gerade widerlegt hat.
+      window.dispatchEvent(new Event("hg:player-updated"));
+      const token = getPlayerToken();
+      if (token) {
+        try {
+          await axios.post("/api/player/mark-welcome-seen", { token });
+        } catch {
+          /* ignorieren */
+        }
+      }
+    },
+    [pathname, index, weg]
+  );
+
+  // Escape schließt, Tab bleibt im Dialog. Beides fehlte der Vorgängerfassung –
+  // wer mit der Tastatur ankam, konnte hinter das Fenster tabben und dort
+  // unsichtbar navigieren.
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        close(false);
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const box = panelRef.current;
+      if (!box) return;
+      const f = box.querySelectorAll(
+        'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!f.length) return;
+      const erste = f[0];
+      const letzte = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === erste) {
+        e.preventDefault();
+        letzte.focus();
+      } else if (!e.shiftKey && document.activeElement === letzte) {
+        e.preventDefault();
+        erste.focus();
       }
     }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, close]);
+
+  // Beim Öffnen den Fokus ins Fenster holen (Screenreader lesen dann Titel und
+  // Inhalt, statt weiter auf der Seite dahinter zu stehen).
+  useEffect(() => {
+    if (open && sichtbar) panelRef.current?.focus();
+  }, [open, sichtbar]);
+
+  function weiter() {
+    setRichtung(1);
+    setIndex((n) => Math.min(n + 1, SCHRITTE.length - 1));
   }
+  function zurueck() {
+    setRichtung(-1);
+    setIndex((n) => Math.max(n - 1, 0));
+  }
+
+  // Ein gewählter Weg führt direkt weiter – die Antwort IST die Bestätigung,
+  // ein zusätzliches „Weiter" wäre ein Klick ohne Aussage.
+  function wegWaehlen(k) {
+    setWeg(k);
+    trackEvent("tour_branch", pathname, k);
+    setTimeout(() => weiter(), 160);
+  }
+
+  function aktionGemeldet(k) {
+    trackEvent("tour_action", pathname, k);
+  }
+
+  // Der lokale Stand fließt in das Spieler-Objekt zurück, damit die letzte
+  // Seite die gerade eben gesetzten Werte schon als erledigt zeigt.
+  const spielerStand = useMemo(
+    () => ({
+      ...(player || {}),
+      position: position || player?.position,
+      bundesland: ort.land || player?.bundesland,
+      hometown: ort.stadt || player?.hometown,
+    }),
+    [player, position, ort]
+  );
+
+  const ziel = ZIELE[weg] || ZIELE.verein;
+  const titel = weg === "admin" && schritt.titelAdmin ? schritt.titelAdmin : schritt.titel;
 
   if (!open) return null;
 
-  const s = STEPS[step];
-  const Icon = s.icon;
-  const isLast = step === STEPS.length - 1;
-
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60">
-      <div className="relative w-full max-w-md rounded-md bg-navy-800 overflow-hidden">
-        {/* Schließen */}
-        <button
-          onClick={() => close(false)}
-          aria-label="Schließen"
-          className="absolute top-3 right-3 text-paper-50/70 hover:text-paper-50 p-1 z-10"
-        >
-          <PiXBold />
-        </button>
+    <div
+      className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tour-titel"
+    >
+      {/* Verdunklung – eigene Ebene, damit sie unabhängig vom Fenster blendet */}
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-label="Tour schließen"
+        onClick={() => close(false)}
+        className={`absolute inset-0 bg-navy-950/90 transition-opacity duration-300 ease-out-strong motion-reduce:transition-none ${
+          sichtbar ? "opacity-100" : "opacity-0"
+        }`}
+      />
 
-        {/* Navy-Kopf mit Icon */}
-        <div className="bg-navy-900 px-6 pt-8 pb-6 text-center">
-          <div className="mx-auto mb-3 h-14 w-14 rounded-md bg-brand-500 flex items-center justify-center text-navy-950 text-2xl">
-            <Icon />
-          </div>
-          <h2 className="text-paper-50 font-black text-lg">{s.title}</h2>
+      {/* Fenster. Mobil eine Bogenfläche von unten (Daumenreichweite, volle
+          Breite), ab sm ein zentriertes Panel. Die Bewegung unterscheidet sich
+          entsprechend: unten hereinfahren vs. zentriert aufziehen. */}
+      <div
+        ref={panelRef}
+        tabIndex={-1}
+        className={`relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-lg border border-navy-600 bg-navy-800 outline-none transition-[opacity,transform] duration-300 ease-out-strong motion-reduce:transition-opacity motion-reduce:!translate-y-0 motion-reduce:!scale-100 sm:max-h-[88dvh] sm:max-w-lg sm:rounded-lg ${
+          sichtbar
+            ? "translate-y-0 opacity-100 sm:scale-100"
+            : "translate-y-full opacity-100 sm:translate-y-0 sm:scale-[0.97] sm:opacity-0"
+        }`}
+      >
+        {/* Signaturleiste der Richtung „Anzeigetafel": 2px Marke an der
+            Oberkante – dieselbe Geste wie an Navbar und Seitenkopf. */}
+        <div className="h-0.5 flex-shrink-0 bg-brand-500" />
+
+        {/* Griff – sagt mobil ohne Worte, dass das eine Fläche von unten ist */}
+        <div className="flex justify-center pt-2 sm:hidden" aria-hidden="true">
+          <div className="h-1 w-9 rounded-full bg-navy-600" />
         </div>
 
-        {/* Text */}
-        <div className="px-6 py-5">
-          <p className="text-sm text-mist-400 leading-relaxed text-center min-h-[88px]">
-            {s.text}
-          </p>
+        {/* Kopf */}
+        <div className="flex-shrink-0 px-5 pb-4 pt-3 sm:px-6 sm:pt-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              {/* Kapitelziffer als Konturzahl – dieselbe Sprache wie die
+                  Kapitelmarken der Startseite, hier als Schrittzähler. Die
+                  Klappe schlägt bei jedem Wechsel um: eine Anzeigetafel
+                  wechselt ihre Ziffern nicht sanft. */}
+              <SplitFlap key={schritt.key}>
+                <span
+                  className="font-display block select-none text-[2.5rem] font-black leading-none text-transparent [-webkit-text-stroke:1.5px_#F68C3E]"
+                  aria-hidden="true"
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+              </SplitFlap>
+              <div className="min-w-0">
+                <p className="font-display text-[11px] font-bold uppercase tracking-[0.2em] text-brand-400">
+                  {schritt.marke}
+                </p>
+                <p className="font-mono text-[11px] tabular-nums text-mist-400">
+                  Schritt {index + 1} von {SCHRITTE.length}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => close(false)}
+              aria-label="Tour schließen"
+              className="-mr-1 -mt-1 flex-shrink-0 rounded-sm p-2 text-mist-400 transition-colors hover:text-paper-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+            >
+              <PiXBold />
+            </button>
+          </div>
 
-          {/* Fortschritts-Punkte */}
-          <div className="flex justify-center gap-2 mt-4">
-            {STEPS.map((_, i) => (
+          {/* Segmentleiste statt Punkten – Anzeigetafel-Sprache, und sie zeigt
+              gleichzeitig, wie viel noch kommt. Anklickbar nur rückwärts:
+              vorspringen würde die Schritte überspringen, die etwas speichern. */}
+          <div className="mt-4 flex items-center gap-1" aria-hidden="true">
+            {SCHRITTE.map((s, i) => (
               <button
-                key={i}
-                onClick={() => setStep(i)}
-                aria-label={`Schritt ${i + 1}`}
-                className={`h-2 rounded-full transition-all ${
-                  i === step ? "w-6 bg-brand-500" : "w-2 bg-navy-600 hover:bg-navy-500"
-                }`}
-              />
+                key={s.key}
+                type="button"
+                tabIndex={-1}
+                disabled={i > index}
+                onClick={() => {
+                  setRichtung(-1);
+                  setIndex(i);
+                }}
+                className="flex h-4 flex-1 items-center disabled:cursor-default"
+              >
+                <span
+                  className={`w-full rounded-full transition-[height,background-color] duration-300 ease-out-strong motion-reduce:transition-none ${
+                    i === index
+                      ? "h-[5px] bg-brand-500"
+                      : i < index
+                        ? "h-[3px] bg-brand-700"
+                        : "h-[3px] bg-navy-600"
+                  }`}
+                />
+              </button>
             ))}
           </div>
+        </div>
 
-          {/* Navigation */}
-          <div className="flex items-center justify-between mt-5">
-            {step > 0 ? (
-              <button
-                onClick={() => setStep((n) => n - 1)}
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-mist-400 hover:text-paper-50"
-              >
-                <PiArrowLeftBold className="text-xs" /> Zurück
-              </button>
-            ) : (
-              <button
-                onClick={() => close(false)}
-                className="text-sm font-medium text-mist-400 hover:text-paper-50 transition-colors"
-              >
-                Überspringen
-              </button>
-            )}
+        {/* Inhalt. Eigene Scrollfläche, damit der Fuß mobil immer erreichbar
+            bleibt; Mindesthöhe, damit das Fenster zwischen den Schritten nicht
+            springt. */}
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5 sm:px-6">
+          {/* Mindesthöhe: 15rem als Boden, damit das Fenster zwischen den
+              Schritten nicht zappelt. Der Stadt-Schritt bekommt mehr, weil der
+              Vorschlagskasten der Typeahead-Eingabe sonst am Panelrand
+              abgeschnitten wird – das Panel schrumpft ohne diese Zeile auf die
+              Höhe des Eingabefelds (auf 390px UND auf dem Desktop gemessen).
+              Bewusst nur dort und nicht pauschal: 20rem überall hinterlässt auf
+              den kurzen Schritten eine tote Fläche unter dem Inhalt. */}
+          <div
+            key={schritt.key}
+            className={`tour-step-in ${schritt.key === "stadt" ? "min-h-[20rem]" : "min-h-[15rem]"}`}
+            style={{ "--tour-dir": richtung > 0 ? "14px" : "-14px" }}
+          >
+            <h2
+              id="tour-titel"
+              className="font-display text-balance text-2xl font-black uppercase leading-[1.05] tracking-tight text-paper-50 sm:text-3xl"
+            >
+              {titel}
+            </h2>
+            <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-mist-400">
+              {schritt.text}
+            </p>
 
-            {isLast ? (
-              <button
-                onClick={() => close(true)}
-                className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-navy-950 font-semibold rounded-md px-5 py-2.5 text-sm"
-              >
-                Los geht&apos;s
-              </button>
-            ) : (
-              <button
-                onClick={() => setStep((n) => n + 1)}
-                className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-navy-950 font-semibold rounded-md px-5 py-2.5 text-sm"
-              >
-                Weiter <PiArrowRightBold className="text-xs" />
-              </button>
-            )}
+            <div className="mt-4">
+              {schritt.key === "beweis" && <TourProofBoard />}
+              {schritt.key === "weg" && <StepWeg weg={weg} onWeg={wegWaehlen} />}
+              {schritt.key === "position" && (
+                <StepPosition
+                  weg={weg}
+                  wert={position}
+                  onWert={setPosition}
+                  onGespeichert={aktionGemeldet}
+                />
+              )}
+              {schritt.key === "stadt" && (
+                <StepStadt
+                  stadt={ort.stadt}
+                  land={ort.land}
+                  onOrt={setOrt}
+                  onGespeichert={aktionGemeldet}
+                />
+              )}
+              {schritt.key === "start" && (
+                <StepUebergabe
+                  player={spielerStand}
+                  weg={weg}
+                  verfuegbar={verfuegbar}
+                  onVerfuegbar={setVerfuegbar}
+                  onGespeichert={aktionGemeldet}
+                />
+              )}
+            </div>
           </div>
+        </div>
+
+        {/* Fuß */}
+        <div className="flex flex-shrink-0 items-center justify-between gap-3 border-t border-navy-600 bg-navy-900 px-5 py-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] sm:px-6">
+          {index > 0 ? (
+            <Button variant="ghost" size="sm" onClick={zurueck} className="-ml-3">
+              <PiArrowLeftBold className="text-xs" aria-hidden="true" /> Zurück
+            </Button>
+          ) : (
+            <Button variant="ghost" size="sm" onClick={() => close(false)} className="-ml-3">
+              Überspringen
+            </Button>
+          )}
+
+          {letzter ? (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                href="/player/newsfeed"
+                onClick={() => close(true)}
+              >
+                Zum Feed
+              </Button>
+              <Button size="md" href={ziel.href} onClick={() => close(true)}>
+                {ziel.label} <PiArrowRightBold className="text-xs" aria-hidden="true" />
+              </Button>
+            </div>
+          ) : schritt.key === "weg" ? (
+            // Auf der Frage-Seite sind die drei Antworten die Handlung. Ein
+            // orangefarbenes „Weiter" daneben wäre ein zweites Primärziel im
+            // selben Blickfeld und würde genau an der Antwort vorbeiführen –
+            // deshalb hier bewusst leise. Weggehen bleibt trotzdem möglich:
+            // niemand wird zu einer Angabe gezwungen.
+            <Button variant="ghost" size="sm" onClick={weiter} className="-mr-3">
+              Ohne Angabe weiter <PiArrowRightBold className="text-xs" aria-hidden="true" />
+            </Button>
+          ) : (
+            <Button size="md" onClick={weiter}>
+              Weiter <PiArrowRightBold className="text-xs" aria-hidden="true" />
+            </Button>
+          )}
         </div>
       </div>
     </div>
