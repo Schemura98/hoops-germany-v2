@@ -2131,3 +2131,82 @@ Demo-Fixtures und interner Testkonten – nach außen falsch), alle `newLast30`/
 stehen vor einem Deploy an. Nebenbefund, nicht geändert: „Beliebteste Seiten" zeigt rohe Pfade
 inkl. Profil-Slugs, obwohl der Reportkopf „keine personenbezogenen Daten" behauptet; die Namen
 stehen ohnehin unter „Beliebteste Inhalte", die Aussage im Kopf ist trotzdem zu absolut.
+
+---
+
+## 13.08.2026 – Die Liga-Achse: Spiel → Liga → Spielplan → Topscorer (Ronjas K1–K4 + R4/R5)
+
+**Auftrag:** Patricks Freigabe „innovativ wie Apple", ausdrücklich inklusive besserer Verknüpfung
+zwischen Unterseiten. Grundlage: `docs/RETENTION-BEFUND-2026-08-13.md`, Abschnitt 1 (R4, R5) und
+Abschnitt 2 (Kontaktpunkte K1–K4). Gebaut wurde **kein** neues Feature, sondern der durchgehende
+Weg zwischen fünf bereits fertigen Seiten, die bisher jede für sich in einer Sackgasse endeten.
+Mobil zuerst (390 px), Gestaltungssprache „Anzeigetafel" unverändert.
+
+**Commits (einzeln rückholbar, in dieser Reihenfolge):**
+
+| Commit | Was |
+|---|---|
+| `5a02569` | **K3** – `/spiele`: Filter aus der URL lesbar **und** in die URL schreibbar |
+| `fa308c4` | Demo-Seed setzt `Team.leagueId` (Voraussetzung für „meine Liga") |
+| `25d03b1` | **R5 + R4 + K4** – Topscorer je Liga, eigener Rang, Vereinslinks |
+| `ecd4daf` | **K2** – `/ligen/[id]` wird Knotenpunkt (Spielplan + Topscorer + Rückweg) |
+| `5d1d626` | **K1** – `/match/[id]`: Liga-Zeile verlinkt, zwei Wege weiter |
+
+### K3 – die Wurzel zuerst (`app/spiele/page.js`)
+`useSearchParams` kam in der Datei nicht vor; `/spiele?league=…` tat nichts. Damit waren K1 und K2
+technisch gar nicht verlinkbar. Jetzt kommen `tab`, `stage`, `league`, `season`, `ort`, `ab` aus der
+Adresse und werden per `router.replace` zurückgeschrieben – bewusst `replace`, damit ein Filterklick
+keine Historie anlegt und die Zurück-Taste zur Herkunftsseite führt (verifiziert: Liga → Spielplan →
+Filter ändern → zurück landet auf `/ligen/[id]`). `useSearchParams` verlangt eine Suspense-Grenze;
+der Platzhalter ist derselbe Skelettaufbau wie beim Laden.
+
+### R5/R4/K4 – Topscorer (`app/api/player/topscorer/route.js`, `app/topscorer/page.js`)
+Die API kannte nur `season`. Neu: `leagueId` (schlägt `season`), `token` → **echter eigener Rang**,
+gezählt über die **volle** Sortierung und erst danach auf 100 gekürzt – wer auf Platz 137 steht,
+bekommt die Wahrheit statt gar keine Antwort. `ownLeague: true` beim ersten Aufruf ohne Filter wählt
+die eigene Liga vor (`Player.teamId → Team.leagueId`), aber nur, wenn in dieser Liga überhaupt
+gespielt wurde. Zusätzlich `leagues` (nur Ligen mit gewerteten Spielen) für den Filter.
+Seite: Kasten „Deine Platzierung" über der Liste (Platz, Abstand nach vorn, „Zu deiner Zeile"),
+eigene Zeile mit derselben 2px-Markenkante wie in der Liga-Tabelle plus „Du"-Marke, Vereinsnamen
+endlich verlinkt, unten Tabelle + Spielplan derselben Liga. **Ausgeloggt unverändert.**
+Der Satz im Kasten nennt nur, was in der Tabelle ohnehin steht – keine Verknappung.
+
+### K2 – Liga-Seite als Knotenpunkt (`app/api/leagues/[id]/route.js`, `app/ligen/[id]/page.js`)
+API liefert zusätzlich `schedule` (die nächsten 3 Partien, die letzten 3 Ergebnisse, Gesamtzahl).
+Die Seite beantwortet jetzt drei Fragen nacheinander – wo stehen wir (Tabelle), wann wieder
+(Spielplan; ohne anstehende Partie treten die letzten Ergebnisse an dieselbe Stelle), wer trifft
+(Top 3 dieser Liga, eigene Anfrage). Jeder Abschnitt trägt seinen Weg in die Tiefe an derselben
+Stelle rechts oben („Alle 8 Spiele", „Ganze Bestenliste"). Spielzeilen im Paarungs-Layout
+(Datum oben, beide Mannschaften untereinander), damit auf 390 px keine Vereinsnamen zerfallen.
+`components/layout/PageHeader.js` bekam dafür einen **optionalen** `back={{href,label}}` –
+Detailseiten hatten bisher keinen Rückweg außer der Browser-Taste.
+
+### K1 – Spielseite (`app/api/match/[id]/route.js`, `app/match/[id]/page.js`)
+Liga-Zeile über der Anzeigetafel ist jetzt ein Link zur Tabelle. Unter dem Box-Score genau **zwei**
+Wege: „Wo stehen wir jetzt" (Tabelle) und „Nächstes Spiel" – die API liefert dafür `nextMatch`
+(nächste angesetzte Partie einer der beiden Mannschaften). Bewusst nur zwei: der Knotenpunkt ist
+die Liga-Seite, nicht diese.
+
+**Belegbilder:** `tmp/liga-achse/vorher/` und `tmp/liga-achse/nachher/`, je 390 px und 1280 px
+(Skript `tmp/liga-achse-shots.mjs`, echtes Chromium). Zählbarer Unterschied an Links im `<main>`:
+`/ligen/[id]` 4 → 11 · `/match/[id]` 8 → 10 · `/spiele?league=…` Parameter wirkungslos → wirksam ·
+`/topscorer` bleibt global → springt eingeloggt auf `?league=…`.
+
+**Verhaltensprobe** (`tmp/liga-achse-verhalten.mjs`, 390 px): ausgeloggt kein Platzierungs-Kasten
+und keine Liga-Vorauswahl · Direktlink `/topscorer?league=…` trägt · Zurück-Taste führt zur
+Liga-Seite, nicht in die Filter-Historie · eigene Zeile markiert (Max: global Platz 1, **in seiner
+Liga Platz 9** – genau der Fall aus R5) · keine Überbreite auf 390 px · **keine Konsolenfehler**.
+
+**Nebenbefund behoben:** `scripts/seed-demo.mjs` setzte `League.teams`, aber nie `Team.leagueId`.
+Deshalb blieb lokal die Liga-Karte auf `/team/team-detail` leer (Ronjas Seed-Artefakt) und die
+„meine Liga"-Vorauswahl war überhaupt nicht testbar. Die laufende Dev-DB wurde **additiv**
+nachgezogen (`tmp/liga-rueckverweis.mjs`, kein `--purge`, weil parallel andere Agenten auf
+derselben Dev-DB arbeiten).
+
+**Offen / bewusst nicht getan:** kein `npm run build` (fremder Dev-Server auf Port 3000), kein
+Deploy, kein Push – **Gates Kai/Tobias stehen noch aus**. `CLAUDE.md` Abschnitt 0 bewusst nicht
+angefasst: Am selben Tag liefen drei Arbeitsstränge parallel (Tour, Benachrichtigungen,
+Liga-Achse); die Verdichtung gehört in eine Hand. Nicht angefasst, weil fremdes Revier: `K10`
+(Auto-Follow beim Beitritt), `components/layout/Navbar.js`/`PlayerNav.js` (`K8`, `/rangliste` in
+die Navigation), `lib/analyticsSummary.js`. **Nicht geprüft:** Ligen mit Playoffs (die Dev-DB hat
+keine), Verhalten bei sehr vielen Ligen im Filter, echtes Low-End-Android.
