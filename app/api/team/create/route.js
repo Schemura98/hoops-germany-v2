@@ -85,7 +85,11 @@ async function handler(req) {
 
   await recordTransfer({
     player: player._id,
-    fromTeam: player.teamId || null,
+    // Dieselbe Variable wie die Freigabe oben. `player.teamId` traegt hier zwar
+    // noch denselben Wert (findByIdAndUpdate mutiert das lokale Dokument
+    // nicht), aber wer das spaeter auf player.save() umbaut, erzeugt eine
+    // stille Divergenz zwischen Transfer-Eintrag und Slot-Freigabe.
+    fromTeam: vorherigesTeam,
     toTeam: team._id,
     type: "found",
   });

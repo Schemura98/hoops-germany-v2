@@ -836,9 +836,22 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                   </div>
                 </div>
 
-                {/* Einladungs-Aktionen (nur solange nicht bestätigt) */}
-                {slot.status !== "confirmed" && slot.claimToken && (
+                {/* Einladungs-Aktionen (nur solange nicht bestätigt).
+                    Die Bedingung hing früher zusätzlich an `slot.claimToken` –
+                    ein freigegebener Platz (Token gelöscht, siehe
+                    lib/rosterSlots.js) zeigte dadurch ÜBERHAUPT keinen Knopf
+                    mehr, und der Admin konnte ihn nur löschen und neu anlegen.
+                    Genau der Umweg, den die Freigabe beseitigen sollte
+                    (Fund von Kai, 13.08.2026).
+                    Jetzt getrennt: „Per E-Mail einladen" geht immer, weil
+                    send-invite-email bei fehlendem Token selbst eines erzeugt.
+                    Link-Kopieren und WhatsApp brauchen ein vorhandenes Token –
+                    einen Link anzubieten, den es nicht gibt, wäre schlimmer
+                    als der fehlende Knopf. */}
+                {slot.status !== "confirmed" && (
                   <div className="mt-3 flex flex-wrap items-center gap-2 pl-12">
+                    {slot.claimToken && (
+                    <>
                     <Button variant="secondary" size="sm" onClick={() => copyClaim(slot)}>
                       {copiedId === slot._id ? (
                         <PiCheckBold className="text-signal-ok" />
@@ -855,6 +868,8 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                     >
                       <PiWhatsappLogoBold className="text-signal-ok" /> WhatsApp
                     </Button>
+                    </>
+                    )}
                     <Button
                       variant="secondary"
                       size="sm"
