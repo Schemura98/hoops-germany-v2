@@ -83,7 +83,33 @@ async function handler(req, ctx) {
       return new Date(x.date) - new Date(y.date);
     });
 
+  // Spielplan-Ausschnitt: Die Tabelle beantwortet „wo stehen wir", der
+  // Spielplan „was kommt". Bis heute endete die Liga-Seite nach der Tabelle,
+  // obwohl beide Datenquellen längst existieren.
+  const heute = new Date();
+  heute.setHours(0, 0, 0, 0);
+  const spielFelder =
+    "teamA teamB date location status winningTeam winningTeamPoints losingTeamPoints resultStatus teamAResult teamBResult stage playoffRound";
+  const [naechste, letzte, spieleGesamt] = await Promise.all([
+    Match.find({ leagueId: league._id, status: "scheduled", date: { $gte: heute } })
+      .select(spielFelder)
+      .populate("teamA", "teamName slug logo")
+      .populate("teamB", "teamName slug logo")
+      .sort({ date: 1 })
+      .limit(3)
+      .lean(),
+    Match.find({ leagueId: league._id, status: "completed" })
+      .select(spielFelder)
+      .populate("teamA", "teamName slug logo")
+      .populate("teamB", "teamName slug logo")
+      .sort({ date: -1 })
+      .limit(3)
+      .lean(),
+    Match.countDocuments({ leagueId: league._id, status: { $ne: "cancelled" } }),
+  ]);
+
   return ok({
+    schedule: { upcoming: naechste, recent: letzte, total: spieleGesamt },
     league: {
       _id: league._id,
       name: league.name,

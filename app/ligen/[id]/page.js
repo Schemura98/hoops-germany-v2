@@ -3,14 +3,115 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { PiUsersBold, PiBasketballBold, PiTrophyBold, PiCrownBold } from "react-icons/pi";
+import {
+  PiUsersBold,
+  PiBasketballBold,
+  PiTrophyBold,
+  PiCrownBold,
+  PiCaretRightBold,
+} from "react-icons/pi";
 import Navbar from "@/components/layout/Navbar";
 import ScrollTable from "@/components/ui/ScrollTable";
 import DemoBadge from "@/components/DemoBadge";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { teamScores } from "@/lib/matchScore";
+import { positionLabel } from "@/lib/constants";
 import { getPlayerToken, getStoredPlayer, setStoredPlayer } from "@/lib/clientAuth";
+
+// Ein Abschnitt der Liga-Seite: Überschrift links, der Weg in die Tiefe rechts.
+// Immer dasselbe Muster, damit „mehr davon" nie gesucht werden muss.
+function Abschnitt({ titel, mehrHref, mehrLabel, children }) {
+  return (
+    <section className="mt-8">
+      <div className="mb-3 flex items-baseline justify-between gap-3">
+        <h2 className="font-display text-lg font-bold uppercase tracking-wide text-paper-50">
+          {titel}
+        </h2>
+        {mehrHref && (
+          <Link
+            href={mehrHref}
+            className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-brand-400 hover:text-brand-300"
+          >
+            {mehrLabel} <PiCaretRightBold className="text-xs" />
+          </Link>
+        )}
+      </div>
+      <div className="rounded-md border border-navy-600 bg-navy-800 overflow-hidden divide-y divide-navy-600">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+function kurzDatum(d) {
+  try {
+    return new Date(d).toLocaleDateString("de-DE", {
+      weekday: "short",
+      day: "2-digit",
+      month: "2-digit",
+    });
+  } catch {
+    return "";
+  }
+}
+
+function uhrzeit(d) {
+  try {
+    return new Date(d).toLocaleTimeString("de-DE", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return "";
+  }
+}
+
+// Spielzeile im Paarungs-Layout: Datum oben, beide Teams untereinander mit
+// ihrem Wert rechts. Auf 390px lesbar, ohne dass Vereinsnamen zu „Essen En…"
+// zerfallen – die Falle, in die die Anzeigetafel auf /match schon einmal lief.
+function SpielZeile({ m }) {
+  const score = teamScores(m);
+  const aVorn = score && score.a > score.b;
+  const bVorn = score && score.b > score.a;
+  return (
+    <Link
+      href={`/match/${m._id}`}
+      className="block px-4 py-3 hover:bg-navy-700 transition-colors duration-150"
+    >
+      <p className="font-mono tabular-nums text-[11px] text-mist-400">
+        {kurzDatum(m.date)}
+        {!score ? ` · ${uhrzeit(m.date)}` : ""}
+      </p>
+      <div className="mt-1.5 space-y-1">
+        {[
+          { team: m.teamA, wert: score?.a, vorn: aVorn },
+          { team: m.teamB, wert: score?.b, vorn: bVorn },
+        ].map(({ team, wert, vorn }, i) => (
+          <div key={i} className="flex items-center justify-between gap-3">
+            <span
+              className={`min-w-0 truncate text-sm ${
+                vorn ? "font-semibold text-paper-50" : "text-mist-300"
+              }`}
+            >
+              {team?.teamName || "—"}
+            </span>
+            {score != null && (
+              <span
+                className={`shrink-0 font-mono tabular-nums text-sm ${
+                  vorn ? "font-bold text-paper-50" : "text-mist-400"
+                }`}
+              >
+                {wert}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    </Link>
+  );
+}
 
 // Tabellen-Skeleton im Format der echten Standings-Tabelle, damit Navbar/PageHeader
 // beim Laden stehen bleiben (kein Layout-Sprung beim Wechsel auf den echten Inhalt).
@@ -42,6 +143,24 @@ export default function LigaDetailPage({ params }) {
   // Ausgeloggte keine zusätzliche Anfrage auslösen. Ist nichts gespeichert,
   // sieht die Tabelle exakt aus wie bisher.
   const [eigenesTeam, setEigenesTeam] = useState(null);
+  // Top 3 dieser Liga. Bewusst eigene Anfrage: Die Tabelle soll nicht darauf
+  // warten müssen, und ohne Ergebnis fehlt schlicht ein Abschnitt.
+  const [topscorer, setTopscorer] = useState(null);
+
+  useEffect(() => {
+    let aktiv = true;
+    axios
+      .post("/api/player/topscorer", { leagueId: id })
+      .then(({ data }) => {
+        if (aktiv) setTopscorer((data.scorers || []).slice(0, 3));
+      })
+      .catch(() => {
+        if (aktiv) setTopscorer([]);
+      });
+    return () => {
+      aktiv = false;
+    };
+  }, [id]);
 
   useEffect(() => {
     let aktiv = true;
@@ -119,7 +238,14 @@ export default function LigaDetailPage({ params }) {
     );
   }
 
-  const { league, standings, champion, playoffs = [] } = data;
+  const { league, standings, champion, playoffs = [], schedule } = data;
+  const naechste = schedule?.upcoming || [];
+  const letzte = schedule?.recent || [];
+  // Anstehendes zuerst – wer eine Liga-Seite öffnet, fragt eher „wann wieder"
+  // als „was war". Steht nichts mehr an, treten die letzten Ergebnisse an
+  // dieselbe Stelle, statt einen leeren Kasten zu hinterlassen.
+  const spiele = naechste.length > 0 ? naechste : letzte;
+  const spieleTitel = naechste.length > 0 ? "Nächste Spiele" : "Letzte Ergebnisse";
   const championId = champion?.teamId ? String(champion.teamId) : null;
 
   // Playoffs nach Runde gruppieren (API liefert sie bereits in Runden-Reihenfolge).
@@ -134,7 +260,12 @@ export default function LigaDetailPage({ params }) {
     <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
 
-      <PageHeader eyebrow="Liga-Tabelle" title={league.name} subtitle={league.season} />
+      <PageHeader
+        eyebrow="Liga-Tabelle"
+        title={league.name}
+        subtitle={league.season}
+        back={{ href: "/ligen", label: "Alle Ligen" }}
+      />
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
         {league.finished && (
@@ -248,6 +379,64 @@ export default function LigaDetailPage({ params }) {
             ? "Meister über die Playoffs (Finalsieger)."
             : "Meister über die Abschlusstabelle der Hauptrunde (keine Playoffs)."}
         </p>
+
+        {/* Spielplan dieser Liga. Bis heute endete die Seite nach der Tabelle –
+            obwohl „wann spielen die wieder?" die naheliegendste Anschlussfrage
+            ist und die Daten längst da waren. */}
+        {spiele.length > 0 && (
+          <Abschnitt
+            titel={spieleTitel}
+            mehrHref={`/spiele?league=${league._id}`}
+            mehrLabel={
+              schedule?.total ? `Alle ${schedule.total} Spiele` : "Alle Spiele"
+            }
+          >
+            {spiele.map((m) => (
+              <SpielZeile key={m._id} m={m} />
+            ))}
+          </Abschnitt>
+        )}
+
+        {/* Topscorer dieser Liga – nicht der globalen Bestenliste. */}
+        {topscorer && topscorer.length > 0 && (
+          <Abschnitt
+            titel="Topscorer"
+            mehrHref={`/topscorer?league=${league._id}`}
+            mehrLabel="Ganze Bestenliste"
+          >
+            {topscorer.map((s, i) => (
+              <div key={s.playerId} className="flex items-center gap-3 px-4 py-3">
+                <span
+                  className={`font-mono tabular-nums w-5 shrink-0 text-sm font-bold ${
+                    i === 0 ? "text-brand-400" : "text-mist-600"
+                  }`}
+                >
+                  {i + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <Link
+                    href={`/player/view-player/${s.slug || s.playerId}`}
+                    className="block truncate text-sm font-medium text-paper-50 hover:text-brand-400"
+                  >
+                    {s.firstName} {s.lastName}
+                  </Link>
+                  <p className="truncate text-xs text-mist-400">
+                    {positionLabel(s.position) || "—"}
+                    {s.teamName ? ` · ${s.teamName}` : ""}
+                  </p>
+                </div>
+                <span className="shrink-0 text-right">
+                  <span className="font-mono tabular-nums block text-sm font-bold text-paper-50">
+                    {s.ppg.toFixed(1)}
+                  </span>
+                  <span className="block text-[10px] uppercase tracking-wide text-mist-600">
+                    PKT/Spiel
+                  </span>
+                </span>
+              </div>
+            ))}
+          </Abschnitt>
+        )}
 
         {/* Playoffs */}
         {playoffRounds.length > 0 && (

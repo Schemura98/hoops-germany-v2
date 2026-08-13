@@ -1,11 +1,27 @@
+import Link from "next/link";
+import { PiCaretLeftBold } from "react-icons/pi";
+
 // Wiederkehrender Seitenkopf für öffentliche Listen- und Detailseiten.
 // Flache navy-900-Fläche, darunter die 2px-Markenleiste: die „Anzeigetafel"-
 // Kante, die auf jeder Seite an genau dieser Stelle wiederkehrt und dem Kopf
 // seine Verankerung gibt (früher machte das ein Navy-Verlauf).
-export default function PageHeader({ eyebrow, title, subtitle, children }) {
+//
+// `back` (optional, { href, label }) setzt den Rückweg zur übergeordneten
+// Liste über die Überschrift – Detailseiten wie /ligen/[id] hatten bisher gar
+// keinen, außer der Zurück-Taste des Browsers.
+export default function PageHeader({ eyebrow, title, subtitle, back, children }) {
   return (
     <div className="bg-navy-900 border-b-2 border-brand-500 px-6 py-10">
       <div className="max-w-5xl mx-auto">
+        {back && (
+          <Link
+            href={back.href}
+            className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-mist-400 hover:text-brand-300 transition-colors duration-150"
+          >
+            <PiCaretLeftBold className="text-xs" />
+            {back.label}
+          </Link>
+        )}
         {eyebrow && (
           <p className="font-display text-brand-400 text-sm font-bold uppercase tracking-[0.2em] mb-1">
             {eyebrow}
