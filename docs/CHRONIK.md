@@ -1981,3 +1981,130 @@ Ball folgt beim Zurückscrollen dem Balken (70px/70px), Navbar-Knöpfe reagieren
 das inzwischen sauber als „ungeklärt" statt als Entwarnung – und genau diese Ehrlichkeit ist der Grund,
 warum seine Berichte etwas wert sind. Die offenen Punkte lassen sich mit Playwright nachziehen
 (`tmp/tobias-befunde-check.mjs`, `tmp/mobil-tastatur-check.mjs`).
+
+---
+
+## 13.08.2026 – „Deine Zahlen stehen": der Spieler erfährt es endlich (Ronjas R1)
+
+**Auslöser:** `docs/RETENTION-BEFUND-2026-08-13.md`, Hebel **R1** (Ronja). Befund wörtlich:
+Ein Spieler erfährt nie, dass seine eigenen Zahlen gelandet sind — `app/api/team/match-stats/save`
+verschickte **keine einzige** Benachrichtigung, und `submit-match-result` benachrichtigte nur die
+**Follower** beider Teams. Ein Team-Beitritt legt aber kein Follow an. Ein Spieler mit 24 Punkten
+hörte also von niemandem, dass seine Karriere-Statistik sich geändert hat — das Kernmotiv der
+Hauptzielgruppe lag fertig in den Daten und wurde nicht ausgeliefert.
+
+### Commits
+- `c4dd91d` Der Spieler erfährt jetzt, dass seine Zahlen gelandet sind
+- `ddd4131` Messen, ob die neue Benachrichtigung wirklich trägt
+
+### Was gebaut wurde
+- **Neu: `lib/statsNotify.js`** (`notifyOwnStats(match)`) — die gesamte Logik an einer Stelle,
+  aufgerufen aus `app/api/team/match-stats/save/route.js` **und**
+  `app/api/team/submit-match-result/route.js` (jeweils nach `match.save()`, in eigenem `try/catch`,
+  darf den Speichervorgang nie kippen).
+- **Empfängerregel:** nur `playerStats[].player` gesetzt (Account vorhanden), `didNotPlay` nicht
+  gesetzt **und** mindestens ein Wert > 0. Der Statistik-Editor (`components/team/tabs/ErgebnisseTab.js`)
+  sendet immer den **ganzen Kader** mit — eine 0/0/0-Zeile heißt „noch nicht eingetragen", nicht
+  „hat nichts gemacht". Ohne diese Regel hätte jeder Kaderspieler eine Nachricht bekommen.
+  Slot-Spieler ohne Account bekommen nichts.
+- **Genau einmal:** neues Feld **`Match.notifiedStatsPlayers: [ObjectId]`** (`models/Match.js`).
+  Bewusst je Spieler statt als Boolean wie `notifiedPendingResult`: eine **Korrektur** des
+  Box-Scores löst keine zweite Nachricht aus, ein Spieler, der **erst bei der Korrektur** dazukommt,
+  bekommt aber seine erste.
+- **Der Text trägt den Beleg** (Kernpositionierung „wie LinkedIn, nur nachweisbar"):
+  bei `resultStatus: "confirmed"` → „*Bestätigt – beide Teams haben das Ergebnis unabhängig
+  gemeldet.*", bei `pending` → „*Noch vorläufig – bestätigt ist die Zahl, sobald <Gegner> das
+  Ergebnis ebenfalls meldet.*". Es wird **nie** eine Bestätigung behauptet, die es nicht gibt.
+  Bei `mismatch` wird **nichts** versendet und **niemand** vermerkt — der nächste Aufruf (nach der
+  Auflösung) holt es nach. Ronjas Satz dazu: die Belegbarkeit stand bisher überall als *Regel*,
+  nirgends als *Ereignis*. Dies ist das Ereignis.
+- **Kein Sackgassen-Eintrag:** neuer Typ `own_stats` in `models/Player.js` (Enum) und in
+  `lib/notifications.js` → `/match/[id]`; Symbol `PiChartLineUpBold` in
+  `components/layout/NotificationBell.js`. Ziel ist die Spielseite mit Box-Score **und** dem
+  Abzeichen „Von beiden Teams bestätigt".
+- **Kein Mailversand.** Bewusst nur In-App über `Player.notifications` — eine Mail ist eine
+  Entscheidung, die Patrick wach treffen soll (SMTP ist lokal ohnehin nicht konfiguriert).
+
+### Messung (Ronjas Erfolgsfrage zu R1)
+- **`own_stats_notified`** — serverseitig beim Versand, ein `AnalyticsEvent` je Spieler **mit
+  `playerId`** (`lib/statsNotify.js`).
+- **`own_stats_opened`** — Klick in der Glocke (`components/layout/NotificationBell.js` und
+  `components/layout/Navbar.js`, beide über `lib/trackEvent.js`).
+- **`lib/analyticsSummary.js`**: neuer Block `ownStats` (`notified`, `notifiedPlayers` = *distinct*
+  Spieler, `opened`, `openRate`). Die Quote bleibt `null`, solange nichts versendet wurde — keine
+  erfundene „0 %". Karte `OwnStatsCard` in `app/admin/analytics/page.js`.
+  **`components/admin/SponsorReportView.js` wurde nicht angefasst** — die Zahl geht nicht nach außen.
+- **`app/feedback/page.js`**: Themen-Chip **„Benachrichtigungen"** ergänzt (Konvention
+  `update-feedback-analytics`). Kein neuer Pfad-Prefix → kein neuer `$switch`-Zweig nötig.
+
+### Verifikation (lokal, Dev-DB `hoopsgermany`, 375×812, Dev-Server nach Schema-Änderung neu gestartet)
+Alle Belege aus der Datenbank ausgelesen bzw. am Bildschirm geprüft:
+1. **Box-Score über die echte Oberfläche gespeichert** (`/team/admin?tab=ergebnisse`, `max@test.de`,
+   Spiel vs. Rhein Ballers) → 8 Benachrichtigungen, Text z. B. „*Deine Zahlen aus dem Spiel gegen
+   Rhein Ballers stehen: 26 Punkte, 12 Rebounds, 9 Assists. Bestätigt – beide Teams haben das
+   Ergebnis unabhängig gemeldet.*"
+2. **Zweites Speichern desselben Box-Scores** → unverändert 1 Benachrichtigung je Spieler,
+   `notifiedStatsPlayers` weiterhin 8, keine neuen Analytics-Ereignisse. **Keine Doppelung.**
+3. **Statistiken vor dem Ergebnis** (Spiel noch `scheduled`) → **nichts** versendet; erst das
+   Einreichen des Ergebnisses löste den Versand aus (Nachhol-Pfad in `submit-match-result`).
+4. **Nur wer wirklich gespielt hat:** im selben Spiel bekamen Max (18/5/3) und Jonas (7/1/2) eine
+   Nachricht, Leon und Noah (je 0/0/0) **keine**.
+5. **Widerspruch:** Rhein Ballers meldete gegenläufig → `mismatch`; die beiden Rhein-Ballers-Spieler
+   mit Werten bekamen **nichts**. Nach der Korrektur (`confirmed`) bekamen sie genau **eine**
+   Nachricht mit dem Bestätigungs-Satz — Max und Jonas **keine zweite**.
+6. **Sichtbar geprüft** (Screenshot 375×812): Glocke zeigt beide Einträge mit Symbol und korrektem
+   Text; Klick führt auf `/match/<id>` mit Box-Score und „Von beiden Teams bestätigt".
+7. **Admin-Auswertung** zeigt „Versendet 12 · Erreichte Spieler 8 · Geöffnet 1 · 8 % geöffnet".
+8. `npx eslint` auf allen berührten Dateien: 0 Fehler (nur eine vorbestehende `<img>`-Warnung in
+   `Navbar.js`).
+
+### Offen / bewusst nicht entschieden
+- **Nur eine Nachricht je Spieler und Spiel.** Wer beim Stand „vorläufig" informiert wurde, erfährt
+  die spätere Bestätigung **nicht** noch einmal. Das war die Abwägung gegen Rauschen — ob die
+  Bestätigung ein eigenes, zweites Ereignis verdient, entscheidet Patrick.
+- **Kein Mailversand, kein Opt-out-Feld.** Sobald eine Mail dazukommt, gehört sie nach dem Muster
+  `emailPendingResult` mit eigenem Opt-out gebaut.
+- **Kein `npm run build`, kein Deploy, kein Push** — auf dem Dev-Server lief parallel eine andere
+  Sitzung.
+
+### Nachtrag 13.08.2026 – Sponsor-Report: serverseitige Positivliste (noch nicht committet/deployt)
+
+**Befund (aus `docs/TOUR-UMBAU-2026-08-13.md` §8, dort nur eingedämmt):**
+`/api/analytics/public-report` reichte das **komplette** Objekt aus `computeAnalyticsSummary()`
+an jeden aus, der Link und Passwort hatte. Die Trennung „Plattform (intern)" ↔ „Sponsor-Report"
+passierte erst clientseitig über den `tab`-Zustand in `app/admin/analytics/page.js` – wer die
+Netzwerkantwort las, bekam alles. Am 13.08. war nur der neue `summary.onboarding` per
+Destructuring entfernt worden; das Muster „durchreichen und einzeln herausnehmen" blieb.
+
+**Umgestellt:** `app/api/analytics/public-report/route.js` baut das Antwortobjekt jetzt in
+`buildSponsorView()` aus **ausdrücklich benannten Feldern neu** (Positivliste). Folge: Jedes
+künftig in `lib/analyticsSummary.js` ergänzte Feld ist automatisch **nicht** öffentlich, statt
+automatisch öffentlich zu sein. Die Sperrliste steht als Kommentar mit Begründung je Feld im Kopf
+der Datei. Die Listenlängen sind auf die der Anzeige gekürzt (`sections` 6, `topPaths` 8,
+`region.*` 8, `content.*` 5) – was abgeschnitten dargestellt wird, wird gar nicht erst gesendet.
+
+**Maßstab war NICHT der Sponsor-Tab des Admin-Dashboards**, sondern
+`components/admin/SponsorReportView.js` – die einzige Ansicht hinter diesem Endpunkt
+(`app/sponsor-report/[token]/page.js`). Der Admin-Tab hängt an `/api/analytics/summary` und war nie
+der öffentliche Weg. Der Report zeigt mehr als in der Aufgabenstellung vermutet: **`region` und
+`content` gehören zum Report** („Regionale Stärke", „Beliebteste Inhalte") und mussten bleiben.
+
+**Draußen** (je mit Grund im Code): `platform.users`/`platform.teams` (Bestand **inkl.**
+Demo-Fixtures und interner Testkonten – nach außen falsch), alle `newLast30`/`prevLast30`/
+`newThisMonth`, `signupSources` (Wirksamkeit der Akquise-Kanäle), `onboarding`, `ownStats`,
+`sectionViews`, `activeUsers.d7`, `reach.viewsAllTime`/`visitorsAllTime`,
+`region.usersByCity`/`visitorsByState`, `devices.unbekannt`.
+
+**Verifiziert** (Dev-DB `hoopsgermany`, Skripte in `tmp/`):
+- `tmp/sponsor-allowlist-check.mjs` – Wegwerf-Share angelegt, Endpunkt aufgerufen, alle
+  Blattpfade der Antwort gegen Freigabe- **und** Sperrliste geprüft: 29 Pfade, **0 fehlend,
+  0 durchgerutscht, 0 unerwartet**; Share danach wieder entfernt (`reportshares` ist wieder leer).
+- `tmp/sponsor-report-shot.mjs` – öffentliche Seite gegen echtes Chromium, 1280 px und 390 px:
+  alle 9 Abschnitte gerendert, **0** „Keine Daten."-Blöcke, keine Konsolenfehler, keine interne
+  Kennzahl im Text. Bilder: `tmp/sponsor-shots/`.
+
+**Offen / bewusst nicht getan:** kein Commit (Anweisung Patricks abwarten), kein `npm run build`
+(fremder Dev-Server lief auf Port 3000), damit **Deploy-Gates Kai/Tobias noch nicht gelaufen** –
+stehen vor einem Deploy an. Nebenbefund, nicht geändert: „Beliebteste Seiten" zeigt rohe Pfade
+inkl. Profil-Slugs, obwohl der Reportkopf „keine personenbezogenen Daten" behauptet; die Namen
+stehen ohnehin unter „Beliebteste Inhalte", die Aussage im Kopf ist trotzdem zu absolut.

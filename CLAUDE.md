@@ -158,6 +158,11 @@
 - **Geo-Suche:** Feld `bundesland` an Player/Team/League; `lib/geo.js` + `public/data/de-cities.json`
   (14.910 Orte mit lat/lng, lazy geladen) für Stadt+Umkreis (Haversine). Stadt-Eingabe per Typeahead
   setzt das Bundesland automatisch.
+- **Benachrichtigungen:** Ziel je Typ zentral in `lib/notifications.js` (`notificationHref`),
+  Symbol-Zuordnung in `components/layout/NotificationBell.js` (`ICON`), Typ-Enum in
+  `models/Player.js`. **Ein neuer Typ muss an allen drei Stellen gepflegt werden**, sonst
+  entsteht ein Eintrag ohne Symbol oder ohne Ziel. Versandlogik je Ereignis in eigener lib
+  (z. B. `lib/statsNotify.js` für `own_stats`, `lib/notifyEngagement.js` für Feed-Interaktionen).
 - Token-Keys in localStorage: `playerAuthToken`, `teamAuthToken` (legacy, kaum noch genutzt), `adminAuthToken`.
 
 ### Feature-Stand (Kurzüberblick – alles live auf hoopsgermany.de, Details in der Chronik)
@@ -181,12 +186,18 @@
   Zahlen stammen aus Spielen, die **beide Teams unabhängig gemeldet und bestätigt** haben
   (`resultStatus: confirmed` mit beidseitigem `submittedBy`). Ein Verein muss dem Spieler also
   nicht glauben. Bei Feature-, Text- und Gestaltungsentscheidungen mitdenken.
-  ⚠️ **Lücke (Stand 12.08.2026):** Dieses Argument steht **nirgends im nutzersichtbaren Text**
-  – Landing und „So funktioniert's" sagen nur „sichtbar für Vereine und Scouts", was jede
-  Plattform sagt. Formulierung gehört Nele; vergleichende Aussagen („einzige Plattform,
-  die…") wegen §6 UWG an Nora.
+  ✅ **Korrektur 13.08.2026 (Befund Ronja, fünf belegte Fundstellen):** Der Beleg-Satz steht
+  **sehr wohl** im nutzersichtbaren Text (Landing-Szenen 1+3, „So funktioniert's",
+  Karrierepanel, `/topscorer`, `/ligen/[id]`, Abzeichen auf `/match/[id]`) – die frühere
+  „Lücke"-Notiz war überholt. Seit `c4dd91d` ist die Belegbarkeit zusätzlich als **Ereignis**
+  eingelöst (Benachrichtigung „Deine Zahlen stehen", s. Spielbetrieb). Vergleichende Aussagen
+  („einzige Plattform, die…") weiterhin wegen §6 UWG an Nora, Formulierungen an Nele.
 - **Spielbetrieb:** Ergebnis-Verifikation + Mismatch-Eskalation an beide Admins + Super-Admins,
   Box-Scores, Topscorer/Rangliste saison-fähig, Spielerhistorie mit Einzelspielen, Karriere-Timeline.
+  **Benachrichtigung „Deine Zahlen stehen"** (13.08.2026, `lib/statsNotify.js`, Typ `own_stats`):
+  Spieler mit erfassten Werten im Box-Score werden **genau einmal je Spiel** informiert
+  (Merkfeld `Match.notifiedStatsPlayers`), Text trägt den Beleg-Status (bestätigt / noch
+  vorläufig), bei `mismatch` gar nichts, Ziel `/match/[id]`. Nur In-App, **keine Mail**.
 - **Onboarding & Wachstum:** Willkommens-Tour, Onboarding-Checklist (Feed + Startseite), PWA
   (`/installieren`), login-bewusste Landing, Testphase-Banner.
 - **Admin & Analytics:** Analytics Phase 1–3 Teil 1 (Dashboard, Sponsor-Report, teilbarer
@@ -239,8 +250,21 @@
     die Ergebnis-Szene) **nur**, falls Ronjas Nutzungsprüfung zeigt, dass die Doppel-Bestätigung
     nicht verstanden wird; Test auf echtem Low-End-Android (bisher nur 4×-CPU-Drosselung);
     Neles „nice to have"-Textvorschläge für die Karten 2/5/6.
-12. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
-13. **Optional / bewusst offen:** Best-of-Serien + echte Playoff-Bracket-Grafik; Status-basierte
+12. **Entscheidungen zu „Deine Zahlen stehen" (`own_stats`, seit 13.08.2026 gebaut):**
+    (a) Soll die spätere **Bestätigung** eines zunächst vorläufigen Ergebnisses eine **zweite**
+    Nachricht auslösen? Heute bewusst nein (Rauschen-Abwägung) – wer beim Stand „vorläufig"
+    informiert wurde, erfährt die Bestätigung nicht noch einmal. (b) Soll es dazu eine **Mail**
+    geben? Heute bewusst nicht; falls ja, nach dem Muster `emailPendingResult` **mit eigenem
+    Opt-out**. Beides gehört Patrick.
+13. **Weitere Hebel aus `docs/RETENTION-BEFUND-2026-08-13.md`** (Ronja, priorisiert): R2
+    Leerzustand `/tryouts` ohne Ausweg, R3 Zähler-Abzeichen am Team-Admin-Panel, R4 eigene Zeile
+    in Topscorer/Rangliste, R5 **Liga-Filter für den Topscorer** (heute nur global – ein
+    Kreisliga-Spieler wird gegen Regionalliga sortiert), R7 `/rangliste` aus der Navigation
+    unerreichbar, R8 Ligen nicht suchbar, K1–K10 fehlende Verlinkungen. **R1 ist erledigt.**
+    Dazu Abschnitt 3a: der **Sponsor-Report druckt ungefilterte Gesamtzahlen inkl. Demo-Daten**
+    (Faktor ~45 bei Nutzern, ~70 bei Teams) – dringend, weil er aus dem Haus geht.
+14. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
+15. **Optional / bewusst offen:** Best-of-Serien + echte Playoff-Bracket-Grafik; Status-basierte
     Tabellen-Exklusion; Stat-Filter Hauptrunde/Playoffs/Gesamt; stabiler `leagueKey`; Benachrichtigung bei
     Team-Follow; sharp-Resize für gespeicherte Upload-JPEGs; Super-Admin-Tabellen auf `<Loading>`/`EmptyState`;
     Folge-Vorschläge nur für neue User; TransferEvents bleiben nach Team-Löschung als Historie (Design);
