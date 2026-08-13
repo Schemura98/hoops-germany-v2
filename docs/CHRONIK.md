@@ -2058,6 +2058,19 @@ Alle Belege aus der Datenbank ausgelesen bzw. am Bildschirm geprüft:
 8. `npx eslint` auf allen berührten Dateien: 0 Fehler (nur eine vorbestehende `<img>`-Warnung in
    `Navbar.js`).
 
+### Nachtrag `df21dd7` – der Beleg-Satz hing an der falschen Bedingung
+Beim Nachprüfen des Super-Admin-Pfads gefunden: `app/api/admin/updatematch/route.js` setzt
+`resultStatus: "confirmed"`, obwohl dort **eine einzige Person beide Punktzahlen tippt** – beide
+`submittedBy` bleiben leer. Die Nachricht hätte in diesem Fall „beide Teams haben das Ergebnis
+unabhängig gemeldet" behauptet, ohne dass jemand unabhängig gemeldet hat. **Exakt derselbe Fehler,
+den Kai am 12.08.2026 im Abzeichen auf `/match/[id]` gefunden hat** – ein Statusfeld ist kein Beleg,
+solange nicht geprüft ist, wer es setzen kann. Der Satz hängt jetzt an beidseitigem `submittedBy`;
+drei Fälle: beidseitig gemeldet → Bestätigungs-Satz · vom Super-Admin nachgetragen → „Das Ergebnis
+ist eingetragen." · einseitig → benennt korrekt, **wer** noch fehlt (vorher wurde immer der Gegner
+genannt, auch wenn der längst gemeldet hatte). Beide neuen Zweige nachgemessen:
+Admin-Pfad → „*11 Punkte, 2 Rebounds, 1 Assist. Das Ergebnis ist eingetragen.*";
+nur der Gegner hat gemeldet → „*… sobald auch dein Team das Ergebnis meldet.*"
+
 ### Offen / bewusst nicht entschieden
 - **Nur eine Nachricht je Spieler und Spiel.** Wer beim Stand „vorläufig" informiert wurde, erfährt
   die spätere Bestätigung **nicht** noch einmal. Das war die Abwägung gegen Rauschen — ob die
