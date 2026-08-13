@@ -11,18 +11,31 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> **Zuletzt deployt: `78d833a` (12.08.2026)** – Wow-Ebene komplett: **Ballreise (A10)** – der Ball
-> setzt an der Hero-Schaltfläche auf und reitet danach die Fortschrittsleiste der Feature-Strecke
-> mit, bis er am Ende im Korb landet –, **überbreite Überschrift (A1)**, **Kapitelmarke (A5)** und
-> die scroll-gebundene **Bildsequenz „Sprungball“** (45 Bilder, 191 KB, lädt erst beim Scrollen).
-> Davor: `07a1a0e` (Stufen A–C), `1c42810` (Redesign „Anzeigetafel“ auf Navy).
-> Protokoll: `docs/CHRONIK.md`, Einträge 12.08.2026.
-> **Rollback-Punkt davor: `562c629`** (Stand VOR dem gesamten Redesign) (auf dem VPS auschecken, `npm run build`, `pm2 restart hoops-v2`).
+> **Rollback-Punkt: `a8e4fd4`** – der Live-Stand VOR der Nachtschicht 13.08.2026, auf dem VPS
+> per `git checkout a8e4fd4 && npm run build && pm2 restart hoops-v2` wiederherstellbar.
+> ⚠️ Diese Zeile führte bis 13.08. `78d833a` als zuletzt deployt – auf dem Server lief
+> tatsächlich `a8e4fd4`. Bei Rollback-Punkten immer am Server nachsehen, nicht hier.
+> Älterer Punkt: `562c629` (Stand VOR dem gesamten Redesign).
 >
-> ⏸️ **PAUSIERT am 12.08.2026** (Patrick programmiert parallel die Agenten im General Backoffice um).
-> **Einstiegspunkt für die nächste Sitzung: `docs/WIEDERAUFNAHME-2026-08-12.md`** – dort steht, was
-> live ist, was lokal fertig aber ungeprüft wartet (Bildsequenz „Sprungball"), und welche
-> Entscheidung Vivien von Patrick braucht.
+> 🌙 **NACHTSCHICHT 13.08.2026** – Patrick hat sie autonom laufen lassen (alle Freigaben,
+> Deploy ausdrücklich eingeschlossen), sechs Stränge parallel. Kern: **Ronjas Retention-Befund**
+> (`docs/RETENTION-BEFUND-2026-08-13.md`) – sie fand **keine fehlende Funktion**, sondern überall
+> fehlende **Verbindungen** zwischen bereits Gebautem. Danach umgesetzt:
+> **R1** Spieler erfährt jetzt, dass seine Zahlen gelandet sind (`lib/statsNotify.js`) ·
+> **Liga-Achse** Spiel → Liga → Spielplan → Topscorer, mit echtem Liga-Filter und eigener
+> Platzierung · **`/tryouts`** von 0 auf 7 Links im Leerzustand · **Plattform-Tour** vier von fünf
+> Schritten mit echter Handlung · **Navigation** `/rangliste` erreichbar ohne die Leiste wachsen zu
+> lassen · **Spielerprofil** nächstes Spiel + Liga-Verweise · Signup-Motiv (Vereinshalle statt
+> Profi-Arena mit Fremdwerbung).
+>
+> ⚠️ **Das wichtigste Ergebnis der Nacht ist kein Feature: `docs/MUSTER-ZAHLEN-DIE-LUEGEN-2026-08-13.md`.**
+> Sieben Fehler derselben Sorte an einem Tag – *eine Zahl oder Aussage, die im Sinne des Codes
+> stimmt und im Sinne des Lesers falsch ist*. Darunter: der Sponsoren-Report zeigte ungefilterte
+> Bestände (70 Teams statt 1, 410 Profile statt 9), sein Endpunkt reichte das komplette interne
+> Summary an jeden mit Link durch, und er übermittelte **Klarnamen echter Spieler**. Alles behoben,
+> **niemandem gezeigt** (von Patrick bestätigt). **Vor jeder nutzersichtbaren Zahl dieses Dokument
+> lesen.** Zwei weitere Fälle fingen erst die Deploy-Gates ab – Kai und Tobias meldeten beide
+> „geht nicht live", beide Befunde sind in `0da9683` behoben.
 >
 > 📜 **Vollständige Meilenstein-Chronik mit Commit-Hashes: `docs/CHRONIK.md`** (am 08.08.2026 wörtlich und
 > verlustfrei aus diesem Abschnitt ausgelagert – dort stehen ALLE datierten Protokolle seit dem Go-Live).
