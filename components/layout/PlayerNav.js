@@ -18,6 +18,18 @@ import NotificationBell from "@/components/layout/NotificationBell";
 // „Bestenlisten" trägt Topscorer UND Rangliste – die Rangliste war aus keiner
 // Navigationsliste des Projekts erreichbar. Im Mobil-Menü tragen die Punkte
 // Gruppentitel; die senkrechte Liste kann sich das leisten.
+//
+// Gruppe „Wechseln" nachgetragen (13.08.2026): Der Newsfeed rendert KEINEN
+// Footer, und diese Leiste kannte weder Transfermarkt noch Tryouts. Ein
+// eingeloggter Spieler stand auf seiner Startseite damit vor einer echten
+// Sackgasse – er musste erst eine öffentliche Seite ansteuern, um überhaupt an
+// die Navbar zu kommen, die beides führt. Betroffen war ausgerechnet die
+// Zielgruppe, für die beide Seiten gebaut sind (Vereinslose, Z3).
+//
+// `nurMobil` heißt: erscheint im Mobil-Menü, nicht in der waagerechten Leiste.
+// Auf dem Handy kostet eine Zeile mehr nichts, waagerecht kostet sie einen von
+// sieben Plätzen. /transfermarkt führt prominent auf /tryouts weiter (und seit
+// heute Nacht auch zurück) – der Weg bleibt also einen Klick lang.
 const NAV_GRUPPEN = [
   {
     titel: "Wettbewerb",
@@ -34,12 +46,22 @@ const NAV_GRUPPEN = [
       { href: "/spieler", label: "Spieler" },
     ],
   },
+  {
+    titel: "Wechseln",
+    links: [
+      { href: "/transfermarkt", label: "Transfermarkt" },
+      { href: "/tryouts", label: "Tryouts", nurMobil: true },
+    ],
+  },
 ];
 
 const START = { href: "/player/newsfeed", label: "Newsfeed" };
 const PROFIL = { href: "/player/player-detail", label: "Mein Profil" };
 
-const links = [START, ...NAV_GRUPPEN.flatMap((g) => g.links), PROFIL];
+// Waagerechte Leiste: OHNE „Mein Profil" – direkt daneben steht dasselbe Ziel
+// als Bild-und-Name-Verknüpfung (größeres Ziel, eindeutiger). Der Platz gehört
+// dem Transfermarkt, der bisher gar nicht erreichbar war. Punktzahl unverändert.
+const links = [START, ...NAV_GRUPPEN.flatMap((g) => g.links).filter((l) => !l.nurMobil)];
 
 // Eine Zeile im Mobil-Menü (aktiv = Markenkante links, wie am aktiven Tab).
 const zeileClass = (aktiv) =>
@@ -121,6 +143,10 @@ export default function PlayerNav({ player }) {
           <NotificationBell />
           <Link
             href="/player/player-detail"
+            // Seit die waagerechte Leiste „Mein Profil" nicht mehr doppelt
+            // führt, ist das hier der Profil-Punkt – also trägt er auch dessen
+            // Markierung.
+            aria-current={isActive("/player/player-detail") ? "page" : undefined}
             className="flex items-center gap-2 px-1 rounded-full hover:bg-navy-700/5 transition-colors"
             title="Mein Profil"
           >

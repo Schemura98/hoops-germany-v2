@@ -2500,3 +2500,35 @@ fehlt" existierten in den Demo-Daten bereits echt.
 - **Nicht geprüft:** echtes Low-End-Android, Tastaturbedienung des Umschalters mit Screenreader,
   Verhalten eines Co-Admins mit eingeschränkten Rechten (nur im Code abgesichert, nicht im Browser
   durchgespielt), Prod-Daten.
+
+### Nachtrag am selben Tag: die eingeloggte Sackgasse — Commit folgt unten
+
+Beim Nachsehen zu R7/K8 fiel ein dritter Fall derselben Sorte auf, diesmal schwerer:
+
+**Nachgemessen:** `app/player/newsfeed/page.js`, `app/post/[id]/page.js` und
+`app/feed/tag/[tag]/page.js` rendern **keinen Footer**. Zusammen mit einer `PlayerNav`, die weder
+Transfermarkt noch Tryouts führte, hatte ein eingeloggter Spieler **auf seiner Startseite nach dem
+Login null Wege** zu beiden Seiten — er musste erst eine öffentliche Seite ansteuern, um überhaupt
+an die Navbar zu kommen, die sie führt. Betroffen war ausgerechnet Ronjas Persona „Sven" (Z3,
+Vereinslose) — und damit auch der in derselben Nacht umgebaute Leerzustand von `/tryouts`
+(Commits `b95bf2a`, `4374d2b`, von null auf sieben Wege), der so für eingeloggte Nutzer praktisch
+unerreichbar blieb.
+
+Gelöst nach demselben Prinzip wie „Bestenlisten" — **Punktzahl unverändert**:
+
+- Neue Gruppe **„Wechseln"** im Mobil-Menü der `PlayerNav` mit **beiden** Zeilen (Transfermarkt,
+  Tryouts) — identisch zur öffentlichen Navbar. Auf dem Handy kostet eine Zeile nichts.
+- In der **waagerechten Leiste** steht **Transfermarkt** statt **„Mein Profil"**. Letzteres war
+  doppelt: direkt daneben steht dasselbe Ziel als Bild-und-Name-Verknüpfung (größeres Ziel,
+  eindeutiger) — die trägt jetzt auch die `aria-current`-Markierung. `/tryouts` ist von
+  `/transfermarkt` aus prominent verlinkt (und seit `4374d2b` auch zurück), bleibt also einen Klick
+  entfernt.
+- Sieben Punkte vorher, sieben Punkte nachher; zwei erreichbare Seiten mehr.
+
+**Beleg** (`sven.adler@test.de`, 390 px und 1280 px, keine Konsolenfehler,
+`tmp/orientierung-shots/*-5-*`, `*-6-*`): Vom Newsfeed führt der Mobil-Menü-Punkt „Tryouts" auf
+`/tryouts`, der Desktop-Punkt „Transfermarkt" auf `/transfermarkt`.
+
+**Bewusst nicht angefasst:** die öffentliche Navbar. Dort stehen Transfermarkt und Tryouts weiter
+getrennt — sie muss weder Newsfeed noch Profil tragen und hat den Platz. Die beiden Leisten
+unterscheiden sich also an dieser einen Stelle; das ist gewollt, nicht vergessen.
