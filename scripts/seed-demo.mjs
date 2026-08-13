@@ -393,6 +393,13 @@ league.matches = matchDocs
   .map((m) => m._id);
 prevLeague.matches = prevMatchDocs.map((m) => m._id);
 await Leagues.insertMany([league, prevLeague]);
+// Rückverweis Team → Liga. Fehlte bisher, obwohl League.teams gesetzt war:
+// Dadurch blieb lokal die Liga-Karte auf /team/team-detail leer und alles, was
+// von "meiner Liga" ausgeht (Topscorer-Vorauswahl), war nicht testbar.
+await Teams.updateMany(
+  { _id: { $in: league.teams } },
+  { $set: { leagueId: league._id } }
+);
 console.log(`📅 ${matchDocs.length} Spiele · 2 Ligen (inkl. Vorsaison-Transfer für Max)`);
 
 // ----- Transfer-Events (Transfer-Feed) -----
