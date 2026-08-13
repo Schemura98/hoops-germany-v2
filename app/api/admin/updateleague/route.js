@@ -44,17 +44,11 @@ async function handler(req) {
   if (body.bundesland !== undefined) updates.bundesland = String(body.bundesland).trim();
   if (body.level !== undefined) updates.level = String(body.level).trim();
   if (body.gender !== undefined) updates.gender = String(body.gender).trim();
-  if (body.ageGroup !== undefined) {
-    // Produktregel: nur Senioren/U18 (Plattform ab 16 Jahren) – zentral validiert/normalisiert.
-    const ageGroup = normalizeAgeGroup(body.ageGroup);
-    if (!ageGroup) {
-      return fail(
-        `Altersklasse „${String(body.ageGroup)}" wird nicht unterstützt. Erlaubt: ${LEAGUE_AGE_GROUPS.join(", ")}.`,
-        400
-      );
-    }
-    updates.ageGroup = ageGroup;
-  }
+  // Die Altersklasse wird erst nach dem Laden der Liga geprüft (siehe unten):
+  // Ein Altbestand, dessen Klasse heute nicht mehr erlaubt ist, muss trotzdem
+  // in allen ANDEREN Feldern bearbeitbar bleiben.
+  const eingereichteAltersklasse =
+    body.ageGroup !== undefined ? String(body.ageGroup) : null;
   if (body.region !== undefined) updates.region = String(body.region).trim();
   if (body.playoffMode !== undefined)
     updates.playoffMode = body.playoffMode === "best_of_1" ? "best_of_1" : "keine";
@@ -63,13 +57,43 @@ async function handler(req) {
   if (body.champion !== undefined)
     updates.champion = body.champion ? body.champion : null; // "" / null → Meister löschen
 
-  if (Object.keys(updates).length === 0) {
+  if (Object.keys(updates).length === 0 && eingereichteAltersklasse === null) {
     return fail("Keine Änderungen übermittelt", 400);
   }
 
   await connectDB();
   const current = await League.findById(body.leagueId);
   if (!current) return fail("Liga nicht gefunden", 404);
+
+  // Altersklasse: Produktregel ist „nur Senioren/U18" (Plattform ab 16 Jahren).
+  //
+  // ABER: Ein Altbestand darf dadurch nicht unbearbeitbar werden. Das
+  // Admin-Formular schickt die aktuelle Altersklasse bei JEDER Speicherung mit
+  // (app/admin/leagues/page.js) – eine Liga, die noch „U16" trägt, hätte sich
+  // sonst nicht einmal umbenennen oder löschen lassen, weil die Prüfung an
+  // einem Feld scheitert, das der Admin gar nicht angefasst hat.
+  // Das Seed-Skript lässt solche Ligen bewusst stehen, wenn sie Teams oder
+  // Spiele haben – der Zustand ist also vorgesehen, nicht hypothetisch.
+  // (Dreimal unabhängig gemeldet in Kais Prüfkette.)
+  //
+  // Regel: Unveränderte Altklasse wird durchgelassen und NICHT geschrieben.
+  // Eine echte Änderung muss weiterhin auf die erlaubte Liste treffen.
+  if (eingereichteAltersklasse !== null) {
+    const normalisiert = normalizeAgeGroup(eingereichteAltersklasse);
+    const unveraendert =
+      eingereichteAltersklasse.trim() === String(current.ageGroup || "").trim();
+    if (!normalisiert && !unveraendert) {
+      return fail(
+        `Altersklasse „${eingereichteAltersklasse}" wird nicht unterstützt. Erlaubt: ${LEAGUE_AGE_GROUPS.join(", ")}.`,
+        400
+      );
+    }
+    if (normalisiert) updates.ageGroup = normalisiert;
+  }
+
+  if (Object.keys(updates).length === 0) {
+    return fail("Keine Änderungen übermittelt", 400);
+  }
 
   // Dublettenschutz beim Umbenennen / Saison-Ändern (eigene Liga ausgenommen).
   if (updates.name !== undefined || updates.season !== undefined) {

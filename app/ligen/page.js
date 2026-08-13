@@ -30,7 +30,13 @@ const GROUPS = [
 ];
 function groupKey(l) {
   if (l.level === "Kreisliga") return "kreis";
-  if (l.ageGroup === "U18") return "u18";
+  // Jede Jugendklasse (nicht nur U18) gehört in den Jugend-Abschnitt. Vorher
+  // fiel alles außer „U18" und „Senioren Damen" in „Senioren Herren" durch —
+  // ein Altbestand mit „U16" wäre auf der öffentlichen Seite als
+  // Herren-Seniorenliga erschienen. Das Seed-Skript lässt solche Ligen
+  // bewusst stehen, wenn sie Teams oder Spiele haben, der Fall ist also
+  // vorgesehen. Dreimal unabhängig gemeldet in Kais Prüfkette.
+  if (typeof l.ageGroup === "string" && /^U\d/i.test(l.ageGroup)) return "u18";
   if (l.ageGroup === "Senioren" && l.gender === "Damen") return "sd";
   return "sh";
 }
@@ -44,13 +50,17 @@ const AGE_BRACKETS = [
   { key: "u18", label: "U18" },
 ];
 function ageBracketKey(l) {
-  if (l.ageGroup === "U18") return "u18";
+  // Wie groupKey: jede Jugendklasse in den Jugend-Bereich, nicht nur U18.
+  if (typeof l.ageGroup === "string" && /^U\d/i.test(l.ageGroup)) return "u18";
   if (l.ageGroup === "Senioren" && l.gender === "Damen") return "sd";
   return "sh";
 }
 
-// Nur U18: U16 ist seit dem 13.08.2026 raus (Plattform ab 16 Jahren).
-const isYouthAge = (a) => a === "U18";
+// Unterstuetzt wird nur U18 (Plattform ab 16 Jahren, seit 13.08.2026). Die
+// Pruefung bleibt aber bewusst breit: Ein Altbestand mit einer anderen
+// Jugendklasse soll die maennlich/weiblich-Beschriftung bekommen und nicht als
+// Seniorenliga durchgehen.
+const isYouthAge = (a) => typeof a === "string" && /^U\d/i.test(a);
 // Anzeige-Mapping (Datenwerte bleiben Herren/Damen/Mixed).
 function genderLabel(l) {
   if (isYouthAge(l.ageGroup)) {
