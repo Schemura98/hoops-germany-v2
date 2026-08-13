@@ -1,0 +1,343 @@
+<title>Leistungskarte – zum Ansehen</title>
+
+<style>
+  /* Bewusst einfarbig dunkel: Das Produkt ist dark-only (app/globals.css setzt
+     color-scheme: dark). Die Karte auf hellem Grund zu zeigen, würde sie
+     falsch darstellen. Alle Werte sind die echten Tokens aus
+     docs/VISUELLE-RICHTUNG-2026-08-12.md, nicht nachempfunden. */
+  :root {
+    --grund:   #0B1220;  /* navy-950 */
+    --leiste:  #111A2E;  /* navy-900 */
+    --panel:   #182543;  /* navy-800 */
+    --hover:   #223058;  /* navy-700 */
+    --linie:   #3D5080;  /* navy-600 */
+    --papier:  #F7F8FA;  /* paper-50 */
+    --nebel3:  #C3C9D4;  /* mist-300 */
+    --nebel4:  #9AA3B4;  /* mist-400 */
+    --nebel6:  #6B7488;  /* mist-600 */
+    --marke:   #F07A27;  /* brand-500 */
+
+    --display: ui-sans-serif, "Segoe UI", system-ui, sans-serif;
+    --text:    ui-sans-serif, "Segoe UI", system-ui, sans-serif;
+    --mono:    ui-monospace, "Cascadia Mono", "Consolas", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--grund);
+    color: var(--papier);
+    font-family: var(--text);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .huelle {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 5rem;
+  }
+
+  .kopf { border-bottom: 2px solid var(--marke); padding-bottom: 1.25rem; margin-bottom: 2rem; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: .7rem;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--nebel6);
+    margin: 0 0 .5rem;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(1.8rem, 6vw, 2.6rem);
+    line-height: 1.05;
+    letter-spacing: -.01em;
+    text-transform: uppercase;
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1.15rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    text-wrap: balance;
+    margin: 2.75rem 0 .75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--linie);
+  }
+
+  p { margin: 0 0 1rem; max-width: 62ch; }
+  .gedaempft { color: var(--nebel3); }
+  strong { color: var(--papier); font-weight: 650; }
+
+  .hinweis {
+    background: var(--panel);
+    border: 1px solid var(--linie);
+    border-left: 3px solid var(--marke);
+    border-radius: 6px;
+    padding: .9rem 1.1rem;
+    margin: 1.25rem 0;
+    color: var(--nebel3);
+    font-size: .93rem;
+  }
+  .hinweis p:last-child { margin-bottom: 0; }
+
+  /* ---- Die Karte selbst ---------------------------------------------- */
+  .buehne { display: grid; gap: 1.5rem; margin: 1.5rem 0 .5rem; }
+  @media (min-width: 46rem) { .buehne { grid-template-columns: 1fr 1fr; align-items: start; } }
+
+  .karte {
+    background: var(--panel);
+    border: 1px solid var(--linie);
+    border-radius: 10px;
+    padding: 1.4rem 1.3rem;
+    font-family: var(--mono);
+    font-size: .78rem;
+    line-height: 1.5;
+  }
+
+  .karte .zeile-oben {
+    color: var(--nebel4);
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    font-size: .68rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .zahl {
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: 4.5rem;
+    line-height: .85;
+    color: var(--papier);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .zahl-label {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--marke);
+    text-align: center;
+    margin-top: .2rem;
+  }
+  .neben {
+    text-align: center;
+    color: var(--nebel3);
+    font-size: .72rem;
+    letter-spacing: .08em;
+    margin-top: .45rem;
+  }
+
+  .name {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 1.25rem;
+    letter-spacing: .01em;
+    text-transform: uppercase;
+    color: var(--papier);
+    margin-top: 1.6rem;
+  }
+  .verein { color: var(--nebel4); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; }
+
+  .markenleiste { height: 2px; background: var(--marke); margin: 1.1rem 0 .9rem; }
+
+  .stand { color: var(--papier); font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+  .beleg { color: var(--marke); letter-spacing: .06em; text-transform: uppercase; font-size: .7rem; margin-top: .25rem; }
+  .probe { color: var(--nebel3); letter-spacing: .04em; font-size: .68rem; margin-top: .2rem; }
+
+  .fuss {
+    display: flex; justify-content: space-between; gap: 1rem;
+    align-items: baseline; margin-top: 1.4rem;
+    color: var(--nebel4); font-size: .66rem; letter-spacing: .06em;
+  }
+  .marke-wort { font-family: var(--display); font-weight: 800; letter-spacing: .06em; color: var(--nebel3); }
+
+  .teamzeile { display: flex; justify-content: space-between; align-items: baseline; }
+  .teamzeile .pkt { font-family: var(--display); font-weight: 900; font-size: 2.2rem; color: var(--papier); font-variant-numeric: tabular-nums; }
+  .teamzeile .nm  { font-family: var(--display); font-weight: 700; font-size: 1.05rem; text-transform: uppercase; letter-spacing: .03em; }
+
+  .bildunterschrift {
+    font-size: .82rem; color: var(--nebel4); margin-top: .6rem; max-width: none;
+  }
+  .bildunterschrift b { color: var(--nebel3); font-weight: 600; }
+
+  /* ---- Tabellen ------------------------------------------------------- */
+  .rahmen { overflow-x: auto; margin: 1.25rem 0; }
+  table { border-collapse: collapse; width: 100%; font-size: .88rem; min-width: 30rem; }
+  th, td { text-align: left; padding: .6rem .7rem; border-bottom: 1px solid var(--linie); vertical-align: top; }
+  th { font-family: var(--mono); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--nebel6); font-weight: 500; }
+  td { color: var(--nebel3); }
+  td:first-child { color: var(--papier); }
+
+  ul { margin: 0 0 1rem; padding-left: 1.1rem; max-width: 62ch; color: var(--nebel3); }
+  li { margin-bottom: .4rem; }
+
+  .ampel { display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; margin-right: .45rem; vertical-align: baseline; }
+  .rot { background: #E5484D; } .gelb { background: #E5B045; } .gruen { background: #46A758; }
+
+  .schluss { margin-top: 3rem; padding-top: 1.25rem; border-top: 2px solid var(--marke); }
+</style>
+
+<div class="huelle">
+
+  <header class="kopf">
+    <p class="eyebrow">Entscheidungsvorlage · 13.08.2026 · nichts davon ist gebaut</p>
+    <h1>Die Leistungskarte</h1>
+  </header>
+
+  <p class="gedaempft">Du hast gesagt, du kannst dir die Funktion nicht vorstellen. Deshalb
+  steht hier zuerst das Bild und erst danach der Text. Die Farben und Abstände sind die
+  echten aus eurer Gestaltungsrichtung — nur die Schriften sind Platzhalter, weil sie sich
+  in eine einzelne Datei nicht einbetten lassen.</p>
+
+  <h2>So sähe sie aus</h2>
+
+  <div class="buehne">
+
+    <div>
+      <div class="karte">
+        <p class="zeile-oben">1. Kreisliga Niers · 2025/26 · Sa 12.10.2025</p>
+
+        <div class="zahl">24</div>
+        <div class="zahl-label">Punkte</div>
+        <div class="neben">6 REBOUNDS · 3 ASSISTS</div>
+
+        <div class="name">Max Mustermann</div>
+        <div class="verein">Test Baskets · Guard</div>
+
+        <div class="markenleiste"></div>
+
+        <div class="stand">TEST BASKETS&nbsp;&nbsp;78 : 65&nbsp;&nbsp;MUNICH HOOPS</div>
+        <div class="beleg">Ergebnis von beiden Teams bestätigt</div>
+        <div class="probe">Summe der Spielerwerte = 78 · passt zum Ergebnis</div>
+
+        <div class="fuss">
+          <span class="marke-wort">HOOPS GERMANY</span>
+          <span>HOOPSGERMANY.DE/P/MAX-MUSTERMANN</span>
+        </div>
+      </div>
+      <p class="bildunterschrift"><b>Leistungskarte (Spieler).</b> Selten, gezielt — das
+      Beweisstück fürs Gespräch mit einem Verein.</p>
+    </div>
+
+    <div>
+      <div class="karte">
+        <p class="zeile-oben">1. Kreisliga Niers · 2025/26 · Sa 12.10.2025</p>
+
+        <div class="teamzeile"><span class="nm">Test Baskets</span><span class="pkt">78</span></div>
+        <div class="teamzeile"><span class="nm">Munich Hoops</span><span class="pkt">65</span></div>
+
+        <div class="markenleiste"></div>
+        <div class="beleg">Ergebnis von beiden Teams bestätigt</div>
+        <div class="probe" style="margin-top:.9rem">MEISTE PUNKTE: M. MUSTERMANN (24)</div>
+
+        <div class="fuss">
+          <span class="marke-wort">HOOPS GERMANY</span>
+          <span>HOOPSGERMANY.DE</span>
+        </div>
+      </div>
+      <p class="bildunterschrift"><b>Ergebniskarte (Team).</b> Wöchentlich, vom Verein
+      gepostet — der eigentliche Verteilungskanal.</p>
+    </div>
+
+  </div>
+
+  <div class="hinweis">
+    <p><strong>Neles Kernbeobachtung:</strong> Der Spieler postet seine eigenen 24 Punkte
+    nicht — im Vereinssport gilt Eigenlob als peinlich, die Mannschaft zieht ihn damit auf.
+    Was real passiert: <strong>der Verein postet, der Spieler teilt weiter.</strong> Deshalb
+    zwei Karten statt einer.</p>
+  </div>
+
+  <h2>Wozu das gut wäre</h2>
+
+  <ul>
+    <li><strong>Euer Alleinstellungsmerkmal wird transportabel.</strong> Die Doppelbestätigung
+    steht heute nur auf eurer Website — also dort, wo nur Leute sind, die schon da sind.</li>
+    <li><strong>Werbung, die andere freiwillig machen.</strong> Ein Spieler postet die Karte,
+    weil sie ihn gut aussehen lässt, nicht weil ihr ihn darum bittet.</li>
+    <li><strong>Eine Zahl, die einem Sponsor standhält:</strong> „X Registrierungen kamen über
+    geteilte Leistungskarten" — jede einzelne nachweisbar, über die Adresse unten auf der Karte.</li>
+  </ul>
+
+  <p>Die Zeile <em>„Summe der Spielerwerte = 78 · passt zum Ergebnis"</em> ist der dritte
+  Beleg und kostet nichts außer einer Addition: Die eingetragenen Spielerpunkte ergeben genau
+  den Endstand, den zwei unabhängige Parteien gemeldet haben. <strong>Regel: positiv oder gar
+  nichts</strong> — nie ein rotes „stimmt nicht" auf einer Karte, die jemand teilen soll.</p>
+
+  <h2>Was dagegen spricht</h2>
+
+  <div class="rahmen">
+    <table>
+      <thead><tr><th>Einwand</th><th>von wem</th><th>Gewicht</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Multiplikator auf einer Basis von null — mit einem externen Verein entsteht kein bestätigtes Spiel</td>
+          <td>Nele</td>
+          <td><span class="ampel rot"></span>der stärkste</td>
+        </tr>
+        <tr>
+          <td>Ein Bild mit Klarnamen, das zur Verbreitung angeboten wird, ist etwas anderes als ein Profil</td>
+          <td>Nora</td>
+          <td><span class="ampel rot"></span>ungeklärt</td>
+        </tr>
+        <tr>
+          <td>Zwölf im Kader, aber nur zwei bis drei haben eine Zahl — Zweiklassen-Anzeige in der Mannschaft</td>
+          <td>Nele</td>
+          <td><span class="ampel gelb"></span>gestaltbar</td>
+        </tr>
+        <tr>
+          <td>Die Teamkarte nennt einen Dritten, der den Knopf nicht gedrückt hat</td>
+          <td>Nora</td>
+          <td><span class="ampel gelb"></span>lösbar</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Der Weg, der ohne Anwalt startet</h2>
+
+  <p><strong>Stufe 0: Die Karte erzeugt zunächst nur einen Link, keine Bilddatei.</strong>
+  Das erzeugt keine neue Zusammenstellung von Daten, ist löschbar, braucht keine anwaltliche
+  Klärung — und misst genau die Frage, die Nele selbst als ungeprüfte Vermutung gekennzeichnet
+  hat: <em>Teilt ein Kreisliga-Spieler so etwas überhaupt?</em></p>
+
+  <p>Das ist der Punkt: Der Weg beantwortet die teuerste offene Frage, <strong>bevor</strong>
+  Geld für Anwalt und Bilderzeugung fließt.</p>
+
+  <h2>Was nur du entscheiden kannst</h2>
+
+  <div class="rahmen">
+    <table>
+      <thead><tr><th>Frage</th><th>Folge</th></tr></thead>
+      <tbody>
+        <tr><td>Wollen wir das überhaupt?</td><td>alles Weitere hängt daran</td></tr>
+        <tr><td>Erst Stufe 0 messen — oder direkt die Bilddatei?</td><td>Stufe 0 kostet fast nichts und beantwortet die Kernfrage</td></tr>
+        <tr><td>Sponsorenlogo drauf?</td><td>löst laut Nora die Gewerbeanmeldung aus — ohne Logo kostet die Karte dich in dieser Richtung nichts</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="schluss">
+    <p class="eyebrow">Mein Rat, wenn du ihn willst</p>
+    <p><strong>Stufe 0 zuerst — aber nicht wegen der Rechtsfrage.</strong> Wegen Neles Einwand:
+    Mit einem externen Verein gibt es nichts zu teilen. Die Karte ist eine gute Idee zum
+    falschen Zeitpunkt. Sie wird richtig, sobald echte Vereine echte Spiele bestätigen.</p>
+    <p class="gedaempft" style="font-size:.85rem">Vollständige Unterlagen:
+    <code>docs/LEISTUNGSKARTE-KONZEPT-2026-08-13.md</code> (Nele, 638 Zeilen) ·
+    <code>docs/RECHT-LEISTUNGSKARTE-2026-08-13.md</code> (Nora, 675 Zeilen) ·
+    <code>docs/leistungskarte/README.md</code> (diese Zusammenfassung als Text).</p>
+  </div>
+
+</div>
