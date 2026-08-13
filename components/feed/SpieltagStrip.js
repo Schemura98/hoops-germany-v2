@@ -19,7 +19,14 @@ import { teamScores, matchVerification } from "@/lib/matchScore";
 // - Kein „Heim/Auswärts": teamA/teamB trägt diese Bedeutung im Datenmodell nicht.
 // - Der Beleg-Status steht NEBEN dem Ergebnis (Bestätigt/strittig/unbestätigt),
 //   Quelle ist matchVerification – dieselbe Logik wie auf /match/[id].
-// - Ergebnisse ohne Punktestand (z.B. offener Mismatch) erscheinen nicht als Zahl.
+// - Ergebnisse ohne Punktestand erscheinen nicht als Zahl.
+// - Bei STRITTIGEM Ergebnis erscheint die Zahl, aber KEIN Sieg/Niederlage-Wort:
+//   submit-match-result setzt bei Mismatch den Punktestand aus der Sicht von
+//   Team A (Z. 222). Ein Urteil darauf zu gründen wäre die Meinung einer Seite,
+//   als Tatsache gesetzt. Die anderen Flächen fetten nur den Sieger, sie
+//   urteilen nicht in Worten — die Leiste darf das erst recht nicht.
+//   (Der frühere Kommentar behauptete hier, ein offener Mismatch habe keinen
+//   Punktestand. Das stimmt nicht; Fund von Kai.)
 // - Kein Team / keine Spiele → die Leiste erscheint gar nicht, statt mit
 //   leeren Kästen Präsenz zu behaupten.
 //
@@ -71,14 +78,14 @@ export default function SpieltagStrip({ data, loading, player }) {
   if (loading) {
     return (
       <div className="grid gap-3 sm:grid-cols-2 mb-6" aria-hidden="true">
-        <div className="rounded-md border border-navy-600 bg-navy-800 p-4">
+        <Card padding="p-4">
           <Skeleton className="h-3 w-24 mb-3" />
           <Skeleton className="h-5 w-2/3" />
-        </div>
-        <div className="hidden sm:block rounded-md border border-navy-600 bg-navy-800 p-4">
+        </Card>
+        <Card padding="p-4" className="hidden sm:block">
           <Skeleton className="h-3 w-24 mb-3" />
           <Skeleton className="h-5 w-1/2" />
-        </div>
+        </Card>
       </div>
     );
   }
@@ -122,7 +129,11 @@ export default function SpieltagStrip({ data, loading, player }) {
     // „Sieg" eine Behauptung aus einer Quelle — dann bleibt das Wort stehen,
     // aber ohne die grüne Zusage, und der Vorbehalt darunter trägt die Aussage.
     const belegt = verify?.state === "confirmed" || verify?.state === "final";
-    lastView = { my, opp, ausgang, belegt, opponent, verify };
+    // Strittig = beide Seiten haben gemeldet und widersprechen sich. Dann
+    // entfällt das Urteilswort ganz (Fund von Kai): Der Punktestand stammt in
+    // diesem Fall aus der Sicht von Team A, ein „Sieg" wäre dessen Meinung.
+    const strittig = verify?.state === "mismatch";
+    lastView = { my, opp, ausgang, belegt, strittig, opponent, verify };
   }
 
   const nextOpponent = next
@@ -163,23 +174,25 @@ export default function SpieltagStrip({ data, loading, player }) {
             <span className="font-mono text-lg font-bold tabular-nums text-paper-50 flex-shrink-0">
               {lastView.my}:{lastView.opp}
             </span>
-            <span
-              className={`text-xs font-semibold flex-shrink-0 ${
-                !lastView.belegt
-                  ? "text-mist-300"
-                  : lastView.ausgang === "sieg"
-                  ? "text-signal-ok"
+            {lastView.strittig ? null : (
+              <span
+                className={`text-xs font-semibold flex-shrink-0 ${
+                  !lastView.belegt
+                    ? "text-mist-300"
+                    : lastView.ausgang === "sieg"
+                    ? "text-signal-ok"
+                    : lastView.ausgang === "niederlage"
+                    ? "text-signal-error"
+                    : "text-mist-300"
+                }`}
+              >
+                {lastView.ausgang === "sieg"
+                  ? "Sieg"
                   : lastView.ausgang === "niederlage"
-                  ? "text-signal-error"
-                  : "text-mist-300"
-              }`}
-            >
-              {lastView.ausgang === "sieg"
-                ? "Sieg"
-                : lastView.ausgang === "niederlage"
-                ? "Niederlage"
-                : "Unentschieden"}
-            </span>
+                  ? "Niederlage"
+                  : "Unentschieden"}
+              </span>
+            )}
             <div className="min-w-0 flex-1">
               <p className="text-xs text-mist-400 truncate">
                 gegen {lastView.opponent?.teamName || "Unbekannt"} · {dayLabel(last.date)}

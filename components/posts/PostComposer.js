@@ -8,6 +8,7 @@ import ImageUpload from "@/components/ImageUpload";
 import Avatar from "./Avatar";
 import BaseAvatar from "@/components/Avatar";
 import MentionTextarea from "./MentionTextarea";
+import Card from "@/components/ui/Card";
 
 // Eingabe-Karte für neue Beiträge. Team-Admins können zusätzlich „als Verein" posten.
 //
@@ -78,7 +79,7 @@ export default function PostComposer({ player, onCreated, collapsible = false })
   // direkt im Textfeld).
   if (!expanded) {
     return (
-      <div className="bg-navy-800 rounded-md border border-navy-600 p-3">
+      <Card padding="p-3">
         <button
           type="button"
           onClick={() => setExpanded(true)}
@@ -89,7 +90,7 @@ export default function PostComposer({ player, onCreated, collapsible = false })
             Was gibt&apos;s Neues?
           </span>
         </button>
-      </div>
+      </Card>
     );
   }
 

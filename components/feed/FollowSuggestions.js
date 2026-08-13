@@ -6,6 +6,7 @@ import axios from "axios";
 import { PiPlusBold, PiUsersThreeBold } from "react-icons/pi";
 import { getPlayerToken } from "@/lib/clientAuth";
 import BaseAvatar from "@/components/Avatar";
+import Card from "@/components/ui/Card";
 
 // „Vorschläge für dich" – Spieler/Vereine aus der eigenen Region/Liga zum Folgen.
 // Hilft neuen Nutzern gegen den leeren Feed. Blendet sich aus, wenn nichts (mehr)
@@ -88,9 +89,9 @@ export default function FollowSuggestions({ fallbackText }) {
   if (items.length === 0) {
     if (!fallbackText) return null;
     return (
-      <div className="bg-navy-800 rounded-md border border-navy-600 p-4">
+      <Card padding="p-4">
         <p className="text-xs text-mist-400">{fallbackText}</p>
-      </div>
+      </Card>
     );
   }
 
