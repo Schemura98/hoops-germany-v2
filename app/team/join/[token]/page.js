@@ -5,6 +5,8 @@ import Link from "next/link";
 import axios from "axios";
 import { PiBasketballBold, PiUsersBold } from "react-icons/pi";
 import { getPlayerToken, setPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
+import RechtsLinks from "@/components/layout/RechtsLinks";
+import { MINDESTALTER_HINWEIS } from "@/lib/constants";
 
 function Shell({ children }) {
   return (
@@ -18,6 +20,12 @@ function Shell({ children }) {
           Hoops Germany
         </Link>
         <div className="bg-navy-800 rounded-md border border-navy-600 p-8">{children}</div>
+        {/* Hier entsteht ein Konto – also gehört der Verweis auf
+            Datenschutzerklärung und Impressum hierher (Art. 13 DSGVO, § 5 DDG).
+            Er fehlte bis zum 14.08.2026 vollständig: Diese Seite bringt eine
+            eigene Hülle mit, `AuthShell` trägt ihn nicht, und `Footer` steht
+            nicht im Wurzel-Layout (Befund Nora). */}
+        <RechtsLinks className="mt-6" />
       </div>
     </main>
   );
@@ -97,7 +105,7 @@ export default function TeamJoinTokenPage({ params }) {
       return;
     }
     if (!abSechzehn) {
-      setError("Bitte bestätige, dass du mindestens 16 Jahre alt bist.");
+      setError(MINDESTALTER_HINWEIS);
       return;
     }
     setSubmitting(true);
@@ -285,7 +293,20 @@ export default function TeamJoinTokenPage({ params }) {
             placeholder="Passwort (mind. 6 Zeichen)"
             required
           />
-          {/* Mindestalter wie auf /signup – serverseitig in playerregister erzwungen. */}
+          {/* Mindestalter wie auf /signup – serverseitig in playerregister erzwungen.
+              Die Begründung steht hier als eigene Zeile ÜBER dem Häkchen und
+              nicht im Häkchen-Text (Wortlaut Nele, 14.08.2026): Der bleibt an
+              allen drei Stellen wortgleich und rechtlich sauber, weil er eine
+              Tatsachenangabe ist und keine Willenserklärung.
+              Warum hier überhaupt: /signup trägt den Grund in der Unterzeile
+              von AuthShell – diese Seite bringt eine eigene Hülle ohne
+              `subtitle` mit. Ohne diese Zeile bliebe die Begründung auf zwei
+              von drei kontoerzeugenden Wegen aus. Und laut Noras Abschnitt 6
+              treffen ausgerechnet diese beiden ab September am ehesten auf
+              einen 15-Jährigen: Ein Team-Admin lädt seinen U18-Kader ein. */}
+          <p className="mb-2 text-xs text-mist-400">
+            Ab 16 Jahren – Name, Verein und Zahlen sieht hier jeder, auch ohne Konto.
+          </p>
           <label className="flex items-start gap-2.5 cursor-pointer mb-4">
             <input
               type="checkbox"

@@ -10,7 +10,12 @@ import AuthShell from "@/components/layout/AuthShell";
 import Button from "@/components/ui/Button";
 import FormAlert from "@/components/ui/FormAlert";
 import { inputClass } from "@/lib/ui";
-import { SIGNUP_SOURCE_KEY, SIGNUP_SOURCE_RE as SRC_RE } from "@/lib/constants";
+import {
+  SIGNUP_SOURCE_KEY,
+  SIGNUP_SOURCE_RE as SRC_RE,
+  MINDESTALTER_HINWEIS,
+  MINDESTALTER_HINWEIS_GOOGLE,
+} from "@/lib/constants";
 
 // Kampagnen-Quellen-Tracking (?src=, z.B. Flyer-QR-Codes): serverseitige Regel ist
 // verbindlich, hier nur ein leichter Client-Filter vor dem Puffern in sessionStorage.
@@ -66,7 +71,7 @@ function SignupForm() {
   useEffect(() => {
     if (searchParams.get("error") === "min_age_required") {
       setError(
-        "Bitte bestätige zuerst, dass du mindestens 16 Jahre alt bist – dann klappt auch die Anmeldung mit Google.",
+        MINDESTALTER_HINWEIS_GOOGLE,
       );
     }
   }, [searchParams]);
@@ -86,7 +91,7 @@ function SignupForm() {
       return;
     }
     if (!abTZ) {
-      setError("Bitte bestätige, dass du mindestens 16 Jahre alt bist.");
+      setError(MINDESTALTER_HINWEIS);
       return;
     }
 
@@ -124,7 +129,18 @@ function SignupForm() {
       // Halbbild würde ihn abschneiden.
       imagePosition="35% center"
       title="Registrieren"
-      subtitle="Erstelle dein kostenloses Spielerprofil."
+      // Die Altersgrenze steht seit 14.08.2026 VOR den Feldern, nicht erst am
+      // Häkchen darunter (Befund Lina, Wortlaut Nele). Vorher füllte ein
+      // 14-Jähriger das ganze Formular aus und erfuhr erst beim Absenden, dass
+      // er nicht darf.
+      // Der genannte Grund ist eine Tatsache über das Produkt, keine
+      // Rechtsaussage: `fetchsingleplayerinfo` verlangt keinen Token und gibt
+      // Name, Verein und Werte heraus, `/spieler` und `/topscorer` sind
+      // ungeschützt. Deshalb „auch ohne Konto" – geprüft, nicht behauptet.
+      // ⚠️ Bewusst NICHT „gesetzlich vorgeschrieben" (es gibt keine solche
+      // Norm, es ist eine Betreiberentscheidung) und NICHT „wir prüfen dein
+      // Alter" (wird nicht geprüft) – Noras rote Linien.
+      subtitle="Dein kostenloses Spielerprofil – ab 16 Jahren. Der Grund: Name, Verein und deine Zahlen sieht hier jeder, auch ohne Konto."
       footer={
         <>
           Bereits ein Konto?{" "}
@@ -246,7 +262,7 @@ function SignupForm() {
         onClick={(e) => {
           if (abTZ) return;
           e.preventDefault();
-          setError("Bitte bestätige zuerst, dass du mindestens 16 Jahre alt bist.");
+          setError(MINDESTALTER_HINWEIS_GOOGLE);
         }}
         // Tastatur: Ein `a` ohne `href` löst bei Enter kein Klick-Ereignis aus.
         // Ohne das hier bekäme nur die Maus die Erklärung, und wer per Tastatur
@@ -255,7 +271,7 @@ function SignupForm() {
           if (abTZ) return;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            setError("Bitte bestätige zuerst, dass du mindestens 16 Jahre alt bist.");
+            setError(MINDESTALTER_HINWEIS_GOOGLE);
           }
         }}
         className={`w-full flex items-center justify-center gap-2 border rounded-sm px-4 py-2.5 font-medium transition-colors ${

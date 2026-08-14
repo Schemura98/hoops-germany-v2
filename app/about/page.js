@@ -16,6 +16,18 @@ export default function AboutPage() {
         Erstelle dein Spielerprofil, zeige deine Statistiken und finde Anschluss an ein
         Team. Vereine verwalten ihren Kader, schreiben Tryouts aus und tragen Spiele sowie
         Ergebnisse ein. Über den Transfermarkt finden Spieler und Teams zueinander.
+        {/* Die Altersgrenze und ihr Grund, seit 14.08.2026 (Befund Lina: /about
+            enthielt „16" nicht, gemessen; Wortlaut Nele). Die Grenze ist eine
+            Bedingung des Angebots und steht deshalb hier, nicht als eigener
+            Abschnitt – sonst wäre sie eines von vier Dingen, die diese Seite
+            über uns sagt.
+            Der Schlusssatz sagt dem Jüngeren, dass er nichts verpasst, ohne
+            zuzusagen, dass es die Plattform in zwei Jahren noch gibt oder die
+            Grenze dann noch bei 16 liegt. Mehr geht hier ehrlich nicht. */}{" "}
+        Mitmachen kannst du ab 16 Jahren. Der Grund ist die Öffentlichkeit der Profile:
+        Name, Verein und Statistiken kann hier jeder sehen, auch ohne Konto – und diese
+        Entscheidung wollen wir niemandem unter 16 abverlangen. Bist du jünger: Der
+        Basketball läuft dir nicht weg.
       </p>
 
       <LegalHeading>Unsere Mission</LegalHeading>

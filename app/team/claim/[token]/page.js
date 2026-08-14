@@ -5,7 +5,8 @@ import Link from "next/link";
 import axios from "axios";
 import { PiBasketballBold, PiUsersBold } from "react-icons/pi";
 import { getPlayerToken, setPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
-import { positionLabel } from "@/lib/constants";
+import { positionLabel, MINDESTALTER_HINWEIS } from "@/lib/constants";
+import RechtsLinks from "@/components/layout/RechtsLinks";
 
 function Shell({ children }) {
   return (
@@ -21,6 +22,12 @@ function Shell({ children }) {
         <div className="bg-navy-800 rounded-md border border-navy-600 p-8">
           {children}
         </div>
+        {/* Hier entsteht ein Konto – also gehört der Verweis auf
+            Datenschutzerklärung und Impressum hierher (Art. 13 DSGVO, § 5 DDG).
+            Er fehlte bis zum 14.08.2026 vollständig, aus demselben Grund wie
+            auf /team/join: eigene Hülle, kein AuthShell, kein Footer im
+            Wurzel-Layout (Befund Nora). */}
+        <RechtsLinks className="mt-6" />
       </div>
     </main>
   );
@@ -104,7 +111,7 @@ export default function TeamClaimTokenPage({ params }) {
       return;
     }
     if (!abSechzehn) {
-      setError("Bitte bestätige, dass du mindestens 16 Jahre alt bist.");
+      setError(MINDESTALTER_HINWEIS);
       return;
     }
     setSubmitting(true);
@@ -266,7 +273,15 @@ export default function TeamClaimTokenPage({ params }) {
             placeholder="Passwort (mind. 6 Zeichen)"
             required
           />
-          {/* Mindestalter wie auf /signup – serverseitig in playerregister erzwungen. */}
+          {/* Mindestalter wie auf /signup – serverseitig in playerregister erzwungen.
+              Begründung als eigene Zeile über dem Häkchen, aus demselben Grund
+              wie auf /team/join: Diese Seite bringt eine eigene Hülle ohne
+              `subtitle` mit, in der die Unterzeile von /signup fehlt. Der
+              Häkchen-Text selbst bleibt an allen drei Stellen wortgleich
+              (Wortlaut Nele, 14.08.2026). */}
+          <p className="mb-2 text-xs text-mist-400">
+            Ab 16 Jahren – Name, Verein und Zahlen sieht hier jeder, auch ohne Konto.
+          </p>
           <label className="flex items-start gap-2.5 cursor-pointer mb-4">
             <input
               type="checkbox"

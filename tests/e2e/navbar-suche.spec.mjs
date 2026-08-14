@@ -81,12 +81,38 @@ test.describe("Such-Overlay – Auswege", () => {
   // Das Overlay sagt `aria-modal="true"` zu – für einen Screenreader ist die
   // Seite dahinter damit inert. Diese beiden Tests halten fest, dass die Zusage
   // auch eingelöst wird (Befund A5 von Kai, 14.08.2026).
-  test("Tab bleibt im Dialog", async ({ page }) => {
+  test("Tab bleibt im Dialog – auch mit Trefferliste und rückwärts", async ({ page }) => {
     const dialog = await sucheOeffnen(page);
-    // Mehrfach tabben – ohne Falle wäre der Fokus längst hinter dem Dialog.
-    for (let i = 0; i < 6; i++) await page.keyboard.press("Tab");
-    const drin = await dialog.evaluate((box) => box.contains(document.activeElement));
-    expect(drin, "der Fokus ist aus dem Dialog gewandert").toBe(true);
+    // ⚠️ Erst tippen (Befund A2 von Kai): Bei leerem Suchbegriff hat das Panel
+    // genau zwei fokussierbare Elemente, und die Falle wird kaum gefordert.
+    // Der interessante Fall ist die gefüllte Trefferliste – dort werden die
+    // Ziele bei jedem Tastendruck neu abgefragt.
+    await suchfeld(dialog).fill("a");
+    await expect(dialog.getByRole("link").first()).toBeVisible({ timeout: 15_000 });
+
+    for (let i = 0; i < 12; i++) await page.keyboard.press("Tab");
+    let drin = await dialog.evaluate((box) => box.contains(document.activeElement));
+    expect(drin, "der Fokus ist beim Vorwärtstabben aus dem Dialog gewandert").toBe(true);
+
+    // Rückwärts war bislang komplett ungeprüft – der `e.shiftKey`-Zweig lief nie.
+    for (let i = 0; i < 12; i++) await page.keyboard.press("Shift+Tab");
+    drin = await dialog.evaluate((box) => box.contains(document.activeElement));
+    expect(drin, "der Fokus ist beim Rückwärtstabben aus dem Dialog gewandert").toBe(true);
+  });
+
+  test("Klick auf eine tote Stelle im Panel wirft den Fokus nicht hinaus", async ({ page }) => {
+    // Befund A3 von Kai: Ohne `tabIndex={-1}` am Panel landet ein Klick auf
+    // eine nicht fokussierbare Stelle (Lupensymbol, Leerraum, „Keine
+    // Ergebnisse") auf `<body>`. Dann greift keine der Kantenprüfungen mehr,
+    // und der nächste Tab läuft hinter das Overlay – derselbe Ausgang wie ohne
+    // Falle, nur mit der Maus betreten.
+    const dialog = await sucheOeffnen(page);
+    const box = await dialog.boundingBox();
+    // Knapp unter den Kopf des Panels, wo weder Feld noch Knopf liegen.
+    await page.mouse.click(box.x + 12, box.y + box.height - 8);
+    await page.keyboard.press("Tab");
+    const drin = await dialog.evaluate((el) => el.contains(document.activeElement));
+    expect(drin, "nach einem Klick ins Leere führt Tab aus dem Dialog heraus").toBe(true);
   });
 
   test("nach dem Schließen kehrt der Fokus auf den Öffner zurück", async ({ page }) => {

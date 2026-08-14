@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PiArrowLeftBold } from "react-icons/pi";
+import RechtsLinks from "@/components/layout/RechtsLinks";
 
 // Geteiltes Split-Screen-Layout für alle Auth-Seiten (Login, Signup, Reset,
 // Team-Login/Register). Links das Formular, rechts ein Vollbild-Motiv.
@@ -78,26 +79,12 @@ export default function AuthShell({
 
           {/* Hinweis auf die Datenschutzerklärung, 13.08.2026 (Fund von Nora,
               docs/RECHT-LEISTUNGSKARTE-2026-08-13.md): Auf /signup wurde sie
-              bisher NIRGENDS verlinkt — weder auf der Seite noch hier. Das
-              betrifft Art. 13 DSGVO und ist unabhängig von allem anderen die
-              billigste Verbesserung.
-
-              Bewusst ein reiner VERWEIS, keine Einwilligungserklärung. Der
-              Wortlaut einer Zustimmung („mit der Registrierung willigst du
-              ein…") ist ein Rechtstext und gehört zu Nora bzw. einem Anwalt,
-              nicht zu einem Bauteil. Hier steht nur, wo die Information liegt.
-
+              bisher NIRGENDS verlinkt — weder auf der Seite noch hier.
               In AuthShell statt in /signup, damit Login, Registrierung und
-              Passwort-Zurücksetzen ihn gemeinsam tragen. */}
-          <p className="mt-6 text-center text-xs text-mist-600">
-            <Link href="/datenschutz" className="hover:text-mist-400 underline underline-offset-2">
-              Datenschutz
-            </Link>
-            <span className="mx-2" aria-hidden="true">·</span>
-            <Link href="/impressum" className="hover:text-mist-400 underline underline-offset-2">
-              Impressum
-            </Link>
-          </p>
+              Passwort-Zurücksetzen ihn gemeinsam tragen.
+              Seit 14.08.2026 als geteilte Komponente – Begründung und die
+              Rechtsgrundlagen stehen dort. */}
+          <RechtsLinks className="mt-6" />
         </div>
       </div>
 

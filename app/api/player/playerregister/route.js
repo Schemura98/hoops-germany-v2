@@ -8,6 +8,7 @@ import { sendMail } from "@/lib/mailer";
 import { welcomeEmail } from "@/lib/emailTemplates";
 import { getBaseUrl } from "@/lib/baseUrl";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
+import { MINDESTALTER_HINWEIS } from "@/lib/constants";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Kampagnen-Quellen-Tracking (?src= bei /signup): nur [a-z0-9-_], max. 40 Zeichen.
@@ -33,7 +34,7 @@ async function handler(req) {
   // Formular geprüft wird, ist keine Regel – es ist eine Bitte, die jeder mit
   // einem direkten Aufruf dieser Route übergeht.
   if (body.minAgeConfirmed !== true) {
-    return fail("Bitte bestätige, dass du mindestens 16 Jahre alt bist", 400);
+    return fail(MINDESTALTER_HINWEIS, 400);
   }
 
   await connectDB();

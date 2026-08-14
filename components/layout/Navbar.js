@@ -311,7 +311,7 @@ export default function Navbar() {
     //
     // Tab bleibt im Dialog (Befund A5 von Kai, nachgezogen am 14.08.2026).
     // Das Overlay sagt `aria-modal="true"` zu – für einen Screenreader ist die
-    // Seite dahinter damit inert. Ohne Fокusfalle tabbte man trotzdem hinaus
+    // Seite dahinter damit inert. Ohne Fokusfalle tabbte man trotzdem hinaus
     // und navigierte dort unsichtbar weiter: eine Zusage, die die Umsetzung
     // nicht einlöste. `WelcomeTour.js` macht dasselbe Muster vor.
     function onKeyDown(e) {
@@ -328,6 +328,18 @@ export default function Navbar() {
       if (!ziele.length) return;
       const erste = ziele[0];
       const letzte = ziele[ziele.length - 1];
+      // ⚠️ Zweite Hälfte der Falle (Befund A3 von Kai): Klickt jemand auf eine
+      // nicht fokussierbare Stelle im Panel – das Lupensymbol, den Text „Keine
+      // Ergebnisse", die Fläche zwischen zwei Treffern –, steht
+      // `document.activeElement` auf `<body>`. Dann trifft weder `=== erste`
+      // noch `=== letzte`, und der nächste Tab läuft in die Seite HINTER dem
+      // Overlay. Das ist derselbe Ausgang wie ohne Falle, nur mit der Maus
+      // betreten statt mit der Tastatur.
+      if (!box.contains(document.activeElement)) {
+        e.preventDefault();
+        erste.focus();
+        return;
+      }
       if (e.shiftKey && document.activeElement === erste) {
         e.preventDefault();
         letzte.focus();
@@ -755,10 +767,16 @@ export default function Navbar() {
         >
           <div
             ref={searchPanelRef}
+            // `tabIndex={-1}`: Das Panel nimmt Klicks auf seine eigene Fläche
+            // selbst als Fokus auf, statt ihn an `<body>` fallen zu lassen –
+            // dieselbe Absicherung wie das Tour-Panel in WelcomeTour.js. Ohne
+            // sie fiele der Fokus bei einem Klick daneben aus dem Dialog, und
+            // die Falle im keydown-Handler hätte nichts mehr zu greifen.
+            tabIndex={-1}
             role="dialog"
             aria-modal="true"
             aria-label="Suche"
-            className="bg-navy-800 border border-navy-600 rounded-md w-full max-w-lg overflow-hidden"
+            className="bg-navy-800 border border-navy-600 rounded-md w-full max-w-lg overflow-hidden outline-none"
           >
             <div className="flex items-center gap-3 px-4 py-3 border-b border-navy-600">
               <PiMagnifyingGlassBold className="text-mist-600 flex-shrink-0" />
