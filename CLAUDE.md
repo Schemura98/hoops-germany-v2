@@ -398,15 +398,20 @@
     Leseposition + Scroll-Sperre, die Sackgasse auf `/team/create`, beide
     Admin-Benachrichtigungen, tote Wege (`teamSlug`/`matchId`) nach dem Löschen eines Teams.
     **Neu offen, klein:** (a) Ein Escape bedient mehrere Ebenen gleichzeitig – wer die Sperren
-    stapelt, sollte auch die Escape-Ebenen stapeln (Kai). (b) Die Profil-Oberfläche kann
-    Positions-**Kürzel** nicht schreiben: das `select` bietet nur Langformen, wer einmal
-    speichert, migriert still von „SG" auf „Shooting Guard" (Tobias) – hängt an Punkt (f).
+    stapelt, sollte auch die Escape-Ebenen stapeln (Kai). (b) ✅ **gegenstandslos** – die
+    Profil-Oberfläche kann Positions-Kürzel nicht schreiben (Tobias' N4); auf Prod gibt es
+    deshalb keine, s. (f).
     (c) Ein **offener** Kaderplatz ohne Position zeigt „—", wo die gesuchte Position die
     eigentliche Information wäre → Nele. (d) Auf `/team/create` steht erst „Team gründen", dann
     die Korrektur – trägt die Reihenfolge? → Vivien/Nele. (e) `PlayerNav` hat **keine Suche**:
     eingeloggt ist sie nur auf öffentlichen Seiten erreichbar → Lina/Ronja.
-    (f) `scripts/migrate-positions.mjs` auf Prod ausführen? Alt-Kürzel sind heute harmlos (alle
-    Lesezugriffe laufen durch `positionLabel`, auch die Filter), sauber wäre es an der Quelle.
+    (f) ✅ **erledigt/gegenstandslos:** `scripts/migrate-positions.mjs` wurde am 15.08.2026 auf Dev
+    ausgeführt (19 Positionen, Idempotenz belegt). **Auf `hoops_prod` gibt es nichts zu
+    migrieren** – gemessen: 392 kanonische Positionen, 0 Kürzel, und auch 0 Varianten in
+    Groß-/Kleinschreibung oder mit Leerzeichen (also nichts, was das Skript übersehen hätte).
+    Grund ist Tobias' N4 in sein Gegenteil verkehrt: Das `select` im Profil **kann** Kürzel gar
+    nicht schreiben, sie waren ein reines Seed-Artefakt der Dev-DB. Ein Konto mit Kürzel kann auf
+    Prod nur entstehen, wenn jemand direkt in die DB schreibt.
     ⚠️ **Methodik-Lehren aus den Gates vom 14.08.:** (1) Während ein Browser-Gate gegen `next dev`
     läuft, darf im selben Arbeitsbaum **nicht weitergebaut** werden – der Prüfer sieht sonst Code,
     der nicht im geprüften Commit ist. (2) **`preview_stop` beendet den Dev-Server nicht**, es löst
