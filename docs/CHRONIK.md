@@ -2945,3 +2945,81 @@ Browser-Gate läuft, darf im selben Arbeitsbaum nicht weitergebaut werden.
 das `team_assigned` hervorgebracht hat, eine Ebene höher. `team_admin_granted` existiert, ein
 Gegenstück für den Entzug nicht. Neu erreichbar, weil er die Rechte vorher behielt.
 **Offen an Nele:** Die Notiz sagt „Kontaktformular", der Footer-Link heißt „Kontakt".
+
+---
+
+## 14.08.2026 (Teil 4) — Notiz an den verdrängten Team-Admin
+
+Zwei Commits (`93b0fc4` · `551ab46`). Wortlaute **Nele**, zwei Gate-Runden mit **Kai** und **Tobias**.
+
+### Produktentscheidung Patrick
+Folge aus Teil 3: Seit der Rechteentzug greift, verliert der bisherige Gründer `isTeamAdmin` und
+`teamAdminOf` – und hätte es erst gemerkt, wenn `/team/admin` ihn abweist (Befund Kai). Dasselbe
+Argument, das `team_assigned` hervorgebracht hat, eine Ebene höher.
+- **Neuer Typ `team_admin_revoked`**, Symbol `PiShieldSlashBold`, ausgelöst über die gemeinsame
+  **`lib/notifyTeamAdminRevoked.js`** an **drei** Stellen: `setteamadmin` (Setzen **und**
+  `remove`-Zweig) sowie `transfer-team-admin`.
+- ⚠️ `notificationHref` führt bewusst **NICHT** auf `/team/admin` – genau die Abweisung dort ist der
+  Zustand, den die Nachricht ersetzt; ein Klick in die Absage machte die Notiz zur Ankündigung einer
+  Kränkung (Nele). Ziel ist die Vereinsseite, wo der genannte Nachfolger bestätigt wird.
+- ⚠️ Nur bei **tatsächlichem** Entzug (`modifiedCount > 0`). Kai hat belegt, warum das exakt das
+  richtige Kriterium ist: `lib/serverAuth.js` hört auf `teamAdminOf`, nicht auf `adminPlayerId` –
+  damit gilt `teamAdminOf` entfernt ⟺ Zugriff entzogen ⟺ `modifiedCount > 0`.
+
+### Wortlaut (Nele) – zwei Fassungen, weil es zwei Sachverhalte sind
+Mit Nachfolger: „Die Verwaltung von {Team} liegt jetzt bei {Vorname Nachname} – die Admin-Rechte für
+den Verein hast du damit nicht mehr, **Mitglied von {Team} bleibst du**. Eingetragen hat das die
+Verwaltung von Hoops Germany; wenn das nicht stimmt, schreib uns über „Kontakt"."
+Ohne Nachfolger (`remove`-Zweig): „Die Admin-Rechte für {Team} hast du nicht mehr – Mitglied von
+{Team} bleibst du. …" – „jemand anderem" wäre dort falsch, es rückt niemand nach.
+- **Der Name des Nachfolgers IST der Rückweg** – das unterscheidet den Fall von `team_assigned`:
+  Dort gab es keine zweite Adresse, hier eine Person im selben Verein, die die Rücknahme auslösen
+  kann. Ein Formular stattdessen machte eine vereinsinterne Sache zu einem Fall für uns.
+- ⚠️ „Mitglied von {Team} bleibst du" steht im **selben Satz** – „Rauswurf" ist die
+  wahrscheinlichste Fehllesart, und die entkräftet man nicht in Satz zwei.
+- „schreib uns" bleibt als **zweite** Spur: `setteamadmin` kann jemanden zum Haupt-Admin machen, der
+  vorher kein Mitglied war – dann ist der genannte Name womöglich ein Fremder.
+- Dazu Neles Angleichung (Hinweis Kai): „Kontaktformular" → **„Kontakt"**, auch im bestehenden
+  `team_assigned`-Text. Footer-Eintrag und `h1` heißen so; wer ein Wort genannt bekommt und es nicht
+  wörtlich findet, hat so viel wie keinen Hinweis.
+
+### Der Typen-Test hat sich bewährt
+`team_admin_revoked` zuerst **nur** ins Enum aufgenommen → der Test meldete sofort beide fehlenden
+Stellen („Typen ohne Symbol", „Typen ohne eigenes Ziel"). Genau wofür Kai ihn eingefordert hatte.
+
+### Gate-Nacharbeit (`551ab46`)
+- **Kai 7:** In `transfer-team-admin` ging die Notiz **vor** `newAdmin.save()` raus. Scheitert der
+  Save, wäre der Entzug vollzogen und die Nachricht nennte einen Nachfolger, der nie einer wurde.
+  Jetzt danach.
+- **Tobias:** Der **`remove`-Zweig** von `setteamadmin` entzieht ebenfalls Rechte und **meldete
+  nichts** – dieselbe Lücke, die derselbe Commit eine Ebene weiter gerade geschlossen hatte. Ihm
+  außerhalb seines Auftrags aufgefallen.
+- **Kai 4:** Der Namensausfall auf „jemand anderem" passierte **lautlos** (`firstName`/`lastName`
+  sind nicht `required`, der Google-Weg legt Leerstrings an). Jetzt `console.warn`.
+- ⚠️ **Kai 1–3, die Zeichenfenster zum vierten Mal:** In **derselben** Testdatei standen noch drei
+  Formen desselben Fehlers – ein `{0,200}`-Fenster, eine `indexOf("};")`-Grenze und die neue
+  Klammerzählung **ohne Sicherung**. Die `indexOf`-Grenze war die unangenehmste: Ihr Ausfall geht in
+  die **falsche** Richtung, weil `slice(ab, -1)` den Rest der Datei nimmt und der Test dadurch
+  **großzügiger** wird statt strenger. Alle vier Abgrenzungen laufen jetzt über **eine**
+  Helferfunktion `blockAb`, die wirft statt still etwas Falsches zu liefern.
+- Neuer Test (von Kai und Tobias unabhängig vorgeschlagen): Die Zusage „keine Notiz, wenn nichts
+  entzogen wurde" hängt allein an `modifiedCount > 0` – und **eine ausbleibende Notiz wirft keinen
+  Fehler**.
+
+**Gates:** `57 passed / 0 skipped`, Lint 0 Fehler, Build sauber, `npm start` 200. Tobias hat am
+Produkt belegt: genau eine Notiz beim Verdrängten, Symbol-Pfad stimmt mit `PiShieldSlashBold`
+überein, Klickziel Vereinsseite, `/team/admin` weist ab, Kader führt ihn weiter; Gegenprobe (Verein
+ohne Haupt-Admin) **schweigt**; Text auf 390 px in **7 Zeilen ungekürzt**, kein Scrollbalken.
+
+⚠️ **Prozess-Lehre (Kai):** Der `security-review`-Skill wählt seine Basis selbst und diffte gegen
+`main` – 4,3 MB, ~500 Dateien. Bei einem Langläufer-Branch wie `redesign` verdünnt das die Prüfung
+bis zur Wirkungslosigkeit. **Immer die Commit-Basis vorgeben.**
+
+**Offen an Patrick:** (a) Der Nachfolgername friert beim Schreiben ein – bei A→B→C hält A eine Notiz
+„liegt **jetzt** bei B"; schärfer als gewöhnliches Veralten, weil der Name der Rückweg IST
+(→ Nele). (b) Über `/admin/teams` bekommt der Beförderte zusätzlich `team_admin_granted`, über
+`/admin/players` gar nichts. (c) `/team/admin` leitet den Verdrängten auf „TEAM GRÜNDEN" – er könnte
+versehentlich einen zweiten Verein anlegen (→ Nele/Ronja).
+**Offen (klein):** `teamSlug` ist eine Momentaufnahme – bei gelöschtem Verein greift der Fallback
+nicht und der Klick landet auf 404; `team_invite` liefert in derselben Lage `null`. Escape schließt
+die Glocke nicht.

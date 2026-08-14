@@ -11,7 +11,12 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> **Zuletzt deployt: `2503433` (14.08.2026, am Server verifiziert)** – dritte Runde: **stille Notiz
+> **Zuletzt deployt: `551ab46` (14.08.2026, am Server verifiziert)** – vierte Runde: **Notiz an den
+> verdrängten Team-Admin** (`team_admin_revoked`; er verlor die Rechte seit der dritten Runde und
+> hätte es erst gemerkt, wenn `/team/admin` ihn abweist – ausgelöst an **drei** Stellen, inkl. dem
+> `remove`-Zweig, der ebenfalls schwieg) · Klickziel bewusst **nicht** `/team/admin`, sondern die
+> Vereinsseite · Notiz erst **nach** dem Speichern des Nachfolgers, sonst nennt sie jemanden, der
+> nie einer wurde. Davor: **`2503433`** – dritte Runde: **stille Notiz
 > an den umgehängten Spieler** (neuer Typ `team_assigned`; er war sonst die einzige Person, die von
 > einer Änderung an seinem Profil nichts erfährt – nur bei ECHTER Zuordnungsänderung) ·
 > **Symbol-Tabelle `NOTIF_ICON` für BEIDE Glocken** (die in `Navbar.js` hatte gar keine und zeigte
@@ -40,8 +45,8 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `9f9fb77` (zweite Runde 14.08.) → `5b84f69` (erste Runde) → `5197d2c` (der
-> Stand, der bis zum 14.08. tatsächlich lief) → `3c38959` →
+> **Rollback-Kette:** `2503433` (dritte Runde 14.08.) → `9f9fb77` (zweite) → `5b84f69` (erste) →
+> `5197d2c` (der Stand, der bis zum 14.08. tatsächlich lief) → `3c38959` →
 > `5073951` → `560e1e6` → `27a04fe` → `e7a38ce` → `275f124` → `a8e4fd4` (vor der Nachtschicht) →
 > `562c629` (vor dem gesamten Redesign). Auf dem VPS per
 > `git checkout <hash> && npm run build && pm2 restart hoops-v2`.
@@ -390,12 +395,16 @@
     keins; die Quittung darunter korrigiert es sofort → Nele/Lina. (e) **B4:** Position steht auf
     der Kaderkarte doppelt (graue Zeile + oranges Abzeichen) → Vivien. (f) **B5:** Suche öffnen
     springt an den Seitenanfang, Escape stellt die Leseposition nicht wieder her; der Hintergrund
-    scrollt trotz `aria-modal` weiter → Ronja. (g) **Kai an Patrick:** Der **verdrängte
-    Team-Admin** erfährt vom Rechteentzug nichts – dasselbe Argument, das `team_assigned`
-    hervorgebracht hat, eine Ebene höher: Er verliert die Adminrechte über einen Verein und merkt
-    es erst, wenn `/team/admin` ihn abweist. `team_admin_granted` existiert, ein Gegenstück für den
-    Entzug nicht. **Neu erreichbar**, weil er die Rechte vorher behielt. (Die Notiz an den
-    umgehängten Spieler selbst ist seit `7604578` gebaut.) (h) `scripts/migrate-positions.mjs`
+    scrollt trotz `aria-modal` weiter → Ronja. (g) **erledigt** – der verdrängte
+    Team-Admin bekommt seit `93b0fc4` eine Notiz (`team_admin_revoked`), ebenso der umgehängte
+    Spieler seit `7604578`. **Neu offen daraus** (Kai/Tobias, 14.08.): (g1) Der **Nachfolgername
+    friert beim Schreiben ein** – bei A→B→C hält A eine Notiz „liegt **jetzt** bei B"; schärfer als
+    gewöhnliches Veralten, weil der Name der Rückweg IST → Nele/Patrick. (g2) Über `/admin/teams`
+    bekommt der **Beförderte** zusätzlich `team_admin_granted`, über `/admin/players` gar nichts →
+    Patrick. (g3) `/team/admin` leitet den Verdrängten auf **„TEAM GRÜNDEN"** – er könnte
+    versehentlich einen zweiten Verein anlegen → Nele/Ronja. (g4) `teamSlug` in Benachrichtigungen
+    ist eine Momentaufnahme: bei gelöschtem Verein greift der Fallback nicht und der Klick landet
+    auf 404 (`team_invite` liefert dort `null`). (h) `scripts/migrate-positions.mjs`
     auf Prod ausführen? Alt-Kürzel sind heute harmlos (alle Lesezugriffe laufen durch
     `positionLabel`, auch die Filter), sauber wäre es an der Quelle. (i) **Nele:** „X hat Y
     verlassen" behauptet eine Handlung des Spielers, auch wenn ein Admin ihn entfernt hat.
@@ -408,6 +417,16 @@
     höhere Timeouts noch eine leichtere Seite noch eine Übergangs-Pause, weil die Ursache ein
     unbekannter Ausgangszustand war (Auto-Start der Tour bei `welcomeSeen: false` verdeckt den
     Footer-Knopf). Erst den Zustand deterministisch machen, dann an Wartezeiten denken.
+    (4) **Der `security-review`-Skill wählt seine Basis selbst** und diffte gegen `main` – 4,3 MB,
+    ~500 Dateien. Bei einem Langläufer-Branch wie `redesign` verdünnt das die Prüfung bis zur
+    Wirkungslosigkeit. **Immer die Commit-Basis vorgeben** (`git diff <basis>..HEAD`).
+    (5) ⚠️ **Feste Zeichenfenster in Quelltext-Tests sind eine Fehlerklasse für sich.** An einem Tag
+    viermal aufgetreten: `slice(ab, ab + 400)`, `{0,200}` in einer Regex, `indexOf("]")`,
+    `indexOf("};")`. Sie brechen in beide Richtungen – zu kurz gibt falsches Rot, und
+    `indexOf`-Grenzen liefern bei Ausfall `-1`, wodurch `slice(ab, -1)` den ganzen Rest der Datei
+    nimmt und der Test **großzügiger** wird. Immer Klammerzählung, und die Hilfsfunktion soll
+    **werfen** statt still etwas Falsches zu liefern (Muster: `blockAb` in
+    `tests/e2e/benachrichtigungs-typen.spec.mjs`).
 16. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
 17. **Optional / bewusst offen:** Best-of-Serien + echte Playoff-Bracket-Grafik; Status-basierte
     Tabellen-Exklusion; Stat-Filter Hauptrunde/Playoffs/Gesamt; stabiler `leagueKey`; Benachrichtigung bei
