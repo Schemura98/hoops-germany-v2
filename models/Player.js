@@ -26,6 +26,14 @@ const notificationSchema = new mongoose.Schema(
         "team_assigned",
         "result_mismatch",
         "team_admin_granted",
+        // Gegenstück zu `team_admin_granted`: Die Verwaltungsrechte über einen
+        // Verein wurden entzogen, weil ein Super-Admin jemand anderen zum
+        // Haupt-Admin gemacht hat. Bis zum 14.08.2026 gab es diesen Typ nicht –
+        // und den Entzug auch nicht, das war Tobias' Rechte-Befund. Seit er
+        // greift, hätte der Betroffene ihn erst gemerkt, wenn /team/admin ihn
+        // abweist (Befund Kai). ⚠️ Er bleibt MITGLIED des Vereins; nur die
+        // Verwaltungsrechte sind weg.
+        "team_admin_revoked",
         "team_pending",
         "team_approved",
         "post_like",

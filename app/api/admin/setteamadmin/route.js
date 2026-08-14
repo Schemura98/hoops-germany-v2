@@ -6,6 +6,7 @@ import { getAdminFromToken } from "@/lib/serverAuth";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 import { slotsFreigeben } from "@/lib/rosterSlots";
 import { recordTransfer } from "@/lib/recordTransfer";
+import { notifyTeamAdminRevoked } from "@/lib/notifyTeamAdminRevoked";
 
 // Meldet dem Spieler, dass seine Vereinszuordnung geändert wurde.
 //
@@ -41,6 +42,12 @@ async function benachrichtigeZuordnung(player, vorherigesTeam, team) {
     //    „Vorfall" gelesen wird, obwohl nichts passiert ist. Im Klartext und
     //    nicht als Link, weil `notificationHref` auf die Vereinsseite führt.
     //    ⚠️ Setzt voraus, dass `/kontakt` erreichbar bleibt (Footer, geprüft).
+    //    ⚠️ „Kontakt" in Anführungszeichen und NICHT „das Kontaktformular"
+    //    (Angleichung Nele, 14.08.2026, auf Kais Hinweis): Der Footer-Eintrag
+    //    und die `h1` auf /kontakt heißen beide „Kontakt". Wer ein Wort genannt
+    //    bekommt und es auf der Seite nicht wörtlich findet, hat so viel wie
+    //    keinen Hinweis. Die Anführungszeichen markieren es als Beschriftung,
+    //    nach der man sucht, statt als Gattungsbegriff.
     // Ein dritter Fall („keinem Team mehr zugeordnet") kann hier nicht
     // auftreten: Der `remove`-Zweig dieser Route fasst `teamId` nicht an.
     const vorherText = vorher?.teamName
@@ -49,7 +56,7 @@ async function benachrichtigeZuordnung(player, vorherigesTeam, team) {
     const message =
       `Dein Profil ist jetzt ${team.teamName} zugeordnet – ${vorherText}. ` +
       `Eingetragen hat das die Verwaltung von Hoops Germany. ` +
-      `Wenn das nicht stimmt, schreib uns über das Kontaktformular.`;
+      `Wenn das nicht stimmt, schreib uns über „Kontakt".`;
 
     await Player.updateOne(
       { _id: player._id },
@@ -136,10 +143,15 @@ async function handler(req) {
   // stillschweigend entfernen.
   const bisheriger = team.adminPlayerId;
   if (bisheriger && String(bisheriger) !== String(player._id)) {
-    await Player.updateOne(
+    const { modifiedCount } = await Player.updateOne(
       { _id: bisheriger, teamAdminOf: team._id },
       { $set: { isTeamAdmin: false }, $unset: { teamAdminOf: "" } }
     );
+    // ⚠️ Nur benachrichtigen, wenn tatsächlich etwas entzogen wurde. Greift der
+    // `teamAdminOf`-Wächter nicht, hatte die Person hier gar keine Rechte – eine
+    // Meldung darüber wäre eine Aussage über ein Ereignis, das nicht
+    // stattgefunden hat. Dieselbe Regel wie bei `team_assigned`.
+    if (modifiedCount > 0) await notifyTeamAdminRevoked(bisheriger, team, player);
   }
   await Team.findByIdAndUpdate(team._id, { adminPlayerId: player._id });
 

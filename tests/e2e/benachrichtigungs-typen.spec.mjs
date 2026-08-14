@@ -166,12 +166,53 @@ test.describe("Benachrichtigungstypen sind vollständig gepflegt", () => {
     ).toBe(true);
   });
 
-  test("der neue Typ team_assigned ist an allen drei Stellen da", async () => {
-    // Namentlich, weil er der Anlass dieses Tests war und weil die drei
-    // Fundstellen zusammengehören – fällt eine weg, ist der Rest wertlos.
-    expect(typenAusModell(), "team_assigned fehlt im Enum").toContain("team_assigned");
-    const zentral = lies("lib", "notifications.js");
-    expect(zentral, "team_assigned fehlt in NOTIF_ICON").toContain("team_assigned:");
-    expect(zentral, "team_assigned fehlt in notificationHref").toContain('"team_assigned"');
+  for (const typ of ["team_assigned", "team_admin_revoked"]) {
+    test(`der Typ ${typ} ist an allen drei Stellen da`, async () => {
+      // Namentlich, weil beide der Anlass dieser Datei waren und weil die drei
+      // Fundstellen zusammengehören – fällt eine weg, ist der Rest wertlos.
+      expect(typenAusModell(), `${typ} fehlt im Enum`).toContain(typ);
+      const zentral = lies("lib", "notifications.js");
+      expect(zentral, `${typ} fehlt in NOTIF_ICON`).toContain(`${typ}:`);
+      expect(zentral, `${typ} fehlt in notificationHref`).toContain(`"${typ}"`);
+    });
+  }
+
+  test("der Rechteentzug führt NICHT auf /team/admin", async () => {
+    // ⚠️ Genau die Abweisung dort ist der Zustand, den diese Nachricht ersetzen
+    // soll – ein Klick, der in die Absage führt, macht die Notiz zur
+    // Ankündigung einer Kränkung (Nele). Der Empfänger bleibt Mitglied, also
+    // gehört er auf die Vereinsseite.
+    const quelle = lies("lib", "notifications.js");
+    const ab = quelle.indexOf('n.type === "team_admin_revoked"');
+    expect(ab, "team_admin_revoked kommt in notificationHref nicht vor").toBeGreaterThan(-1);
+
+    // ⚠️ Den if-Block per Klammerzählung abgrenzen, NICHT über ein festes
+    // Zeichenfenster. Ein erster Versuch nahm 300 Zeichen ab der Fundstelle –
+    // die reichten bis in den NÄCHSTEN Zweig (`team_admin_granted`), der zu
+    // Recht auf /team/admin zeigt, und der Test schlug fälschlich an. Genau die
+    // Falle, die Kai zuvor zweimal gezeigt hat; sie ist mir trotzdem wieder
+    // passiert.
+    const auf = quelle.indexOf("{", ab);
+    let tiefe = 0;
+    let bis = auf;
+    for (let i = auf; i < quelle.length; i++) {
+      if (quelle[i] === "{") tiefe++;
+      else if (quelle[i] === "}") {
+        tiefe--;
+        if (tiefe === 0) {
+          bis = i;
+          break;
+        }
+      }
+    }
+    const zweig = quelle.slice(auf, bis);
+
+    expect(zweig, "der Rechteentzug führt nicht auf die Vereinsseite").toContain(
+      "/team/team-detail/"
+    );
+    expect(
+      /["'`]\/team\/admin["'`]/.test(zweig),
+      "der Rechteentzug zeigt auf /team/admin – dort wird der Empfänger abgewiesen"
+    ).toBe(false);
   });
 });

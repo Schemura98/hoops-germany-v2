@@ -111,16 +111,21 @@ test.describe("Rechtsverweise auf kontoerzeugenden Seiten (Art. 13 DSGVO, § 5 D
     const route = join(PROJECT_ROOT, "app", "kontakt", "page.js");
     expect(() => readFileSync(route, "utf8"), "app/kontakt/page.js fehlt").not.toThrow();
 
-    // Und die Nachricht muss weiter auf genau diesen Weg zeigen.
-    const setteamadmin = readFileSync(
-      join(PROJECT_ROOT, "app", "api", "admin", "setteamadmin", "route.js"),
-      "utf8"
-    );
-    expect(
-      setteamadmin.includes("Kontaktformular"),
-      "die team_assigned-Nachricht nennt das Kontaktformular nicht mehr – " +
-        "dann kann dieser Test weg"
-    ).toBe(true);
+    // Und beide Nachrichten müssen weiter auf genau diesen Weg zeigen.
+    // ⚠️ Sie nennen das Wort „Kontakt", nicht „Kontaktformular" (Angleichung
+    // Nele): Der Footer-Eintrag und die `h1` auf /kontakt heißen so, und wer
+    // ein Wort genannt bekommt, sucht auf der Seite danach.
+    for (const [datei, wofuer] of [
+      [join("app", "api", "admin", "setteamadmin", "route.js"), "team_assigned"],
+      [join("lib", "notifyTeamAdminRevoked.js"), "team_admin_revoked"],
+    ]) {
+      const quelle = readFileSync(join(PROJECT_ROOT, datei), "utf8");
+      expect(
+        /schreib uns über [„"]Kontakt/.test(quelle),
+        `die ${wofuer}-Nachricht verweist nicht mehr auf „Kontakt" – ` +
+          `dann diesen Test anpassen oder entfernen`
+      ).toBe(true);
+    }
   });
 
   test("die Hüllen tragen die Verweise auch wirklich", async () => {

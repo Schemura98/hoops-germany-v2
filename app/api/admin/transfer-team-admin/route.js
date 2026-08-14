@@ -4,6 +4,7 @@ import Team from "@/models/Team";
 import Player from "@/models/Player";
 import { getAdminFromToken } from "@/lib/serverAuth";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
+import { notifyTeamAdminRevoked } from "@/lib/notifyTeamAdminRevoked";
 
 // POST /api/admin/transfer-team-admin – Super-Admin überträgt die Team-Admin-Rolle
 // (Gründer) an ein ausgewähltes Mitglied. Der bisherige Admin wird normales Mitglied.
@@ -32,10 +33,14 @@ async function handler(req) {
   // ist die defensive Haltung die richtige. Von zwei Fassungen derselben
   // Operation soll sich die sicherere ausbreiten.
   if (team.adminPlayerId && String(team.adminPlayerId) !== String(newAdmin._id)) {
-    await Player.updateOne(
+    const { modifiedCount } = await Player.updateOne(
       { _id: team.adminPlayerId, teamAdminOf: team._id },
       { $set: { isTeamAdmin: false }, $unset: { teamAdminOf: "" } }
     );
+    // Nur bei tatsächlichem Entzug melden – s. die gleichlautende Stelle in
+    // `setteamadmin`. Der Betroffene erfuhr davon bislang gar nichts und hätte
+    // es erst gemerkt, wenn /team/admin ihn abweist (Befund Kai).
+    if (modifiedCount > 0) await notifyTeamAdminRevoked(team.adminPlayerId, team, newAdmin);
   }
 
   // Neuen Admin setzen
