@@ -100,14 +100,18 @@ test.describe("Benachrichtigungstypen sind vollständig gepflegt", () => {
     // Zuordnung und rendete für JEDEN Typ hart einen Basketball – unabhängig
     // gemeldet von Kai (A3) und Tobias. Der Symbol-Test oben konnte das
     // strukturell nicht merken, weil er nur eine Datei kannte.
+    // ⚠️ Auf die INDIZIERUNG prüfen, nicht auf den Namen (Befund Kai): Ein
+    // bloßes `includes("NOTIF_ICON")` ist schon durch die Importzeile erfüllt.
+    // Wer importiert und daneben ein Symbol hart stehen lässt – genau der
+    // Zustand, den dieser Test verhindern soll –, wäre grün geblieben.
     for (const datei of [
       ["components", "layout", "NotificationBell.js"],
       ["components", "layout", "Navbar.js"],
     ]) {
       const quelle = lies(...datei);
       expect(
-        quelle.includes("NOTIF_ICON"),
-        `${datei.join("/")} nutzt die gemeinsame Symbol-Tabelle nicht`
+        /NOTIF_ICON\[\s*n\.type\s*\]/.test(quelle),
+        `${datei.join("/")} schlägt das Symbol nicht in der gemeinsamen Tabelle nach`
       ).toBe(true);
     }
   });

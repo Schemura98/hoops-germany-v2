@@ -23,10 +23,17 @@ async function handler(req) {
     return fail("Spieler ist kein Mitglied dieses Teams", 400);
   }
 
-  // Bisherigen Admin (Gründer) zu normalem Mitglied zurückstufen
+  // Bisherigen Admin (Gründer) zu normalem Mitglied zurückstufen.
+  // ⚠️ Der Filter verlangt zusätzlich `teamAdminOf: team._id` (Befund Kai,
+  // 14.08.2026): `setteamadmin` macht dieselbe Operation und hatte den
+  // Wächter, diese Geschwister-Route nicht. Zeigt `adminPlayerId` auf jemanden,
+  // dessen `teamAdminOf` inzwischen auf einen ANDEREN Verein verweist, nähme
+  // die ungesicherte Fassung ihm dort die Rechte weg – bei einem Rechteentzug
+  // ist die defensive Haltung die richtige. Von zwei Fassungen derselben
+  // Operation soll sich die sicherere ausbreiten.
   if (team.adminPlayerId && String(team.adminPlayerId) !== String(newAdmin._id)) {
     await Player.updateOne(
-      { _id: team.adminPlayerId },
+      { _id: team.adminPlayerId, teamAdminOf: team._id },
       { $set: { isTeamAdmin: false }, $unset: { teamAdminOf: "" } }
     );
   }

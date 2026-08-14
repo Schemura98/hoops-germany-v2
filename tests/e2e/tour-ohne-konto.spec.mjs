@@ -173,22 +173,67 @@ test.describe("Avatar-Zitat sitzt im Satz (mobil)", () => {
     expect(res.status()).toBe(200);
     const { token } = await res.json();
 
+    // ⚠️ Auto-Start ausschalten, bevor die Seite lädt. Die Tour öffnet sich für
+    // Konten mit `welcomeSeen: false` von selbst – nach `seed-demo.mjs` trifft
+    // das zu. Dann liegt ihr Overlay über dem Footer-Knopf, der Klick läuft in
+    // einen Timeout, und je nachdem ob ein früherer Test das Flag schon gesetzt
+    // hatte, war dieser Test mal grün und mal rot. Wartezeiten haben das nicht
+    // geheilt und konnten es nicht: Das Problem war der unbekannte
+    // Ausgangszustand, nicht die Geschwindigkeit.
+    await request.post("/api/player/mark-welcome-seen", { data: { token } });
+
     await page.goto("/spieler");
     await page.evaluate((t) => localStorage.setItem("playerAuthToken", t), token);
-    // Seite MIT Spieler-Leiste – nur dort zeigt die Quittung das Zitat.
-    await page.goto("/player/player-detail");
+    // ⚠️ Seite MIT Spieler-Leiste – nur dort zeigt die Quittung das Zitat.
+    // Bewusst `/player/update-password` und nicht `/player/player-detail`:
+    // Beide tragen `PlayerNav`, aber das Profil lädt Karriere, Statistiken und
+    // Historie nach. Unter der Last der vollen Suite wurde es dort so spät
+    // interaktiv, dass selbst 60 s Klick-Wiederholung nicht reichten – einzeln
+    // lief derselbe Test durch. Geprüft wird hier das LAYOUT der Quittung, nicht
+    // die Erreichbarkeit der Tour; die deckt die ausgeloggte Variante oben ab.
+    // Die leichtere Seite ist deshalb die richtige Wahl, keine Notlösung.
+    await page.goto("/player/update-password");
     await expect(page.locator("[data-profil-avatar]")).toHaveCount(1);
 
     const tour = tourLocator(page);
-    await expect(async () => {
-      await page.getByRole("button", { name: "Plattform-Tour" }).click();
-      await expect(tour).toBeVisible({ timeout: 2000 });
-    }).toPass({ timeout: 30_000 });
+    // ⚠️ Erst prüfen, ob die Tour schon von selbst offen ist – NICHT blind
+    // klicken. Sie startet für Konten mit `welcomeSeen: false` automatisch, und
+    // seit `seed-demo.mjs` trifft das zu. Liegt ihr Overlay bereits über der
+    // Seite, ist der Footer-Knopf verdeckt: Der Klick läuft dann in einen
+    // Timeout, obwohl das Ziel längst erreicht ist. Genau daran war dieser Test
+    // sporadisch rot – etwa jeder dritte Lauf, abhängig davon, ob ein früherer
+    // Test `welcomeSeen` für dieses Konto schon gesetzt hatte.
+    const schonOffen = await tour.isVisible().catch(() => false);
+    if (!schonOffen) {
+      const oeffner = page.getByRole("button", { name: "Plattform-Tour" });
+      await oeffner.waitFor({ state: "visible", timeout: 30_000 });
+      await expect(async () => {
+        await oeffner.click();
+        await expect(tour).toBeVisible({ timeout: 3000 });
+      }).toPass({ timeout: 60_000 });
+    }
+    await expect(tour).toBeVisible();
 
-    // Zu Schritt 3 (Position) durchklicken.
-    await tour.getByRole("button", { name: /^Weiter/ }).click();
-    await tour.getByRole("button", { name: /Ich spiele in einem Verein/i }).click();
-    await tour.getByRole("button", { name: "Point Guard", exact: true }).click();
+    // Von hier an ist der Schritt unbekannt: Der Auto-Start beginnt bei
+    // Schritt 1, der Footer-Klick ebenfalls – aber ein bereits offener Dialog
+    // könnte weiter sein. Deshalb bis zur Positionsfrage vorklicken statt zwei
+    // feste Klicks anzunehmen.
+    const chip = tour.getByRole("button", { name: "Point Guard", exact: true });
+    for (let i = 0; i < 6; i++) {
+      if (await chip.isVisible().catch(() => false)) break;
+      const weg = tour.getByRole("button", { name: /Ich spiele in einem Verein/i });
+      const weiter = tour.getByRole("button", { name: /^Weiter/ });
+      if (await weg.isVisible().catch(() => false)) await weg.click();
+      else if (await weiter.isVisible().catch(() => false)) await weiter.click();
+      else break;
+      // ⚠️ Der Tour-Dialog blendet Schritte mit einem Übergang ein. Ohne diese
+      // Pause prüft die Schleife den nächsten Schritt, während er noch
+      // hereinfährt – sie läuft dann ins Leere und der Chip wird nie erreicht.
+      await page.waitForTimeout(400);
+    }
+    // Hart warten statt annehmen: Playwright hält hier auf den Übergang.
+    await expect(chip).toBeVisible({ timeout: 15_000 });
+    await chip.click();
 
     const quittung = tour.getByText(/Steht in deinem Profil/i).first();
     await expect(quittung).toBeVisible();
@@ -223,11 +268,18 @@ test.describe("Avatar-Zitat sitzt im Satz (mobil)", () => {
 
       // Breite eines echten Leerzeichens im selben Kontext – Maßstab dafür,
       // was „nur ein Wortabstand" bedeutet.
+      // ⚠️ `whiteSpace = "pre"` ist nicht kosmetisch (Befund Kai): In einem
+      // `<p>` mit normalem `white-space` kollabiert der Browser ein einzelnes
+      // Leerzeichen, die gemessene Breite ist 0, ein Fallback greift – und die
+      // Schwelle stünde still wieder auf einer Konstanten, also genau auf dem,
+      // was diese Messung abschaffen sollte. Der Test wäre grün geblieben und
+      // hätte es verdeckt.
       const probe = document.createElement("span");
       probe.textContent = " ";
       probe.style.visibility = "hidden";
+      probe.style.whiteSpace = "pre";
       absatz.appendChild(probe);
-      const leerzeichen = probe.getBoundingClientRect().width || 4;
+      const leerzeichen = probe.getBoundingClientRect().width;
       probe.remove();
 
       const s = spanne.getBoundingClientRect();
