@@ -215,12 +215,22 @@ export function StepPosition({ weg, wert, onWert, onGespeichert, player }) {
   }, []);
 
   async function waehlen(rolle) {
+    const vorher = wert;
     const neu = wert === rolle ? "" : rolle; // nochmal tippen = abwählen
     onWert(neu);
     setLaeuft(rolle);
     const ergebnis = await speichern("/api/player/update-profile", { position: neu });
     setLaeuft(null);
     setStand(ergebnis);
+    // ⚠️ Bei einem echten Fehler den optimistischen Wert zurücknehmen (offener
+    // Gate-Punkt 15b). `onWert` setzt sofort, damit der Chip ohne Verzögerung
+    // reagiert – der Wert fließt aber über `spielerStand` in `computeSteps`,
+    // und die Schlussfolie zählte den Schritt dann als erledigt, obwohl nichts
+    // ankam. Der Nutzer las zweimal „Konnte gerade nicht gespeichert werden"
+    // und danach „Du bist startklar".
+    // Beim ANONYMEN Fall bleibt der Wert stehen: Dort ist nichts
+    // schiefgegangen, und `StepUebergabe` rendert ausgeloggt ohnehin nichts.
+    if (ergebnis === SPEICHERN_FEHLER) onWert(vorher);
     if (ergebnis === SPEICHERN_OK && neu) onGespeichert?.("position");
   }
 
@@ -297,8 +307,16 @@ export function StepPosition({ weg, wert, onWert, onGespeichert, player }) {
           State dieser Tour, `/signup` weiß nichts von ihr. „Notiert" würde
           zusagen, dass der Wert bei der Registrierung mitkommt – das tut er
           nicht. */}
+      {/* ⚠️ „dafür brauchst du ein Konto", NICHT „gespeichert wird es, sobald
+          du ein Konto hast" (Nebenbefund Nele, 14.08.2026). Die alte Fassung
+          ließ sich lesen als „der Wert kommt bei der Registrierung mit" – das
+          tut er nicht, `/signup` weiß nichts von dieser Tour. Genau die Sorte
+          Zusage, die der anonym-Zweig ursprünglich verhindern sollte.
+          Nele hatte „Übernehmen kannst du das, sobald du ein Konto hast"
+          vorgeschlagen; das trägt dieselbe Mehrdeutigkeit („übernehmen" klingt
+          nach Aufbewahrung). Diese Fassung sagt nur, was fehlt. */}
       {wert && stand === SPEICHERN_ANONYM && (
-        <Hinweis>Für dein Profil – gespeichert wird es, sobald du ein Konto hast.</Hinweis>
+        <Hinweis>Für dein Profil – dafür brauchst du ein Konto.</Hinweis>
       )}
       {/* Abwählen quittiert sonst gar nichts (Befund Tobias, 14.08.2026):
           Nochmal auf den aktiven Chip tippen speichert `""` – eingeloggt löscht
@@ -322,12 +340,17 @@ export function StepStadt({ stadt, land, onOrt, onGespeichert }) {
   const [stand, setStand] = useState(null); // null | ok | fehler | anonym
 
   async function waehlen(c) {
+    const vorher = { stadt, land };
     onOrt({ stadt: c.n, land: c.s });
     const ergebnis = await speichern("/api/player/update-profile", {
       hometown: c.n,
       bundesland: c.s,
     });
     setStand(ergebnis);
+    // Bei einem echten Fehler zurücknehmen – s. die gleichlautende Stelle in
+    // `StepPosition`. Sonst zählt die Schlussfolie einen Schritt als erledigt,
+    // der nie ankam.
+    if (ergebnis === SPEICHERN_FEHLER) onOrt(vorher);
     if (ergebnis === SPEICHERN_OK) onGespeichert?.("stadt");
   }
 
@@ -350,7 +373,7 @@ export function StepStadt({ stadt, land, onOrt, onGespeichert }) {
       )}
       {land && stand === SPEICHERN_ANONYM && (
         <Hinweis>
-          {stadt} · {land} – gespeichert wird es, sobald du ein Konto hast.
+          {stadt} · {land} – dafür brauchst du ein Konto.
         </Hinweis>
       )}
       {stand === SPEICHERN_FEHLER && (

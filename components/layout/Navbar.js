@@ -108,6 +108,7 @@ export default function Navbar() {
   const [notifs, setNotifs] = useState([]);
   const [unread, setUnread] = useState(0);
   const notifRef = useRef(null);
+  const notifOeffnerRef = useRef(null);
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileOpenerRef = useRef(null);
@@ -216,7 +217,13 @@ export default function Navbar() {
 
   const openSearch = useCallback(async () => {
     setSearchOpen(true);
-    setTimeout(() => searchInputRef.current?.focus(), 50);
+    // `preventScroll` (Befund B5 von Tobias, 14.08.2026): Das Fokussieren eines
+    // Feldes in einem `fixed`-Overlay ließ den Browser die Seite dahinter an
+    // den Anfang springen – gemessen von `scrollY = 900` auf `0`. Wer auf
+    // /spieler weit unten war und kurz etwas nachschlägt, findet danach seine
+    // Stelle nicht wieder. Zusammen mit der Scroll-Sperre unten bleibt die
+    // Leseposition erhalten.
+    setTimeout(() => searchInputRef.current?.focus({ preventScroll: true }), 50);
     if (!searchData) {
       try {
         // Ligen sind seit 13.08.2026 mit dabei (Ronjas R8). Vorher fand die
@@ -298,6 +305,36 @@ export default function Navbar() {
     // schließt, muss sich von ganz oben erneut durch die Seite tabben.
     searchOpenerRef.current?.focus();
   }
+
+  // Hintergrund nicht mitscrollen lassen, solange die Suche offen ist
+  // (Befund B5 von Tobias). Das Overlay sagt `aria-modal="true"` zu – für
+  // einen Screenreader ist die Seite dahinter inert, mit der Maus ließ sie
+  // sich aber weiterschieben. Dasselbe Muster wie in `WelcomeTour.js`; der
+  // vorherige Wert wird gemerkt, damit eine andere Ebene, die ihn gesetzt hat
+  // (Tour, Mobil-Menü), ihn beim Schließen nicht verliert.
+  useEffect(() => {
+    if (!searchOpen) return;
+    const vorher = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = vorher;
+    };
+  }, [searchOpen]);
+
+  // Escape schließt auch die Glocke (Befund Tobias, 14.08.2026). Sie war die
+  // letzte Ebene dieser Leiste, die auf die Taste nicht reagierte – Suche und
+  // mobiles Menü tun es seit heute. Drei Aufklapp-Ebenen sollten dieselbe
+  // Antwort auf dieselbe Taste geben, sonst rät man jedes Mal neu.
+  useEffect(() => {
+    if (!notifOpen) return;
+    function onKeyDown(e) {
+      if (e.key !== "Escape") return;
+      setNotifOpen(false);
+      notifOeffnerRef.current?.focus();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [notifOpen]);
 
   // Escape schließt auch das mobile Menü (Befund B3 von Tobias, 14.08.2026).
   // Es blieb offen, während das Such-Overlay direkt daneben sauber schließt –
@@ -443,9 +480,11 @@ export default function Navbar() {
             {isLoggedIn && (
               <div className="relative" ref={notifRef}>
                 <button
+                  ref={notifOeffnerRef}
                   onClick={toggleNotif}
                   className="p-2 -m-1 text-paper-50 hover:text-brand-400 transition-colors"
                   aria-label="Benachrichtigungen"
+                  aria-expanded={notifOpen}
                 >
                   {/* Das innere `relative span` trägt jetzt den Bezugsrahmen des
                       Zählers, nicht mehr der Button: Sobald der Button Padding

@@ -172,6 +172,33 @@ async function handler(req) {
   }
   await Team.findByIdAndUpdate(team._id, { adminPlayerId: player._id });
 
+  // Auch der BEFÖRDERTE erfährt es (Befund Tobias, 14.08.2026): Über
+  // `/admin/teams` bekam er seit jeher ein `team_admin_granted`, über diesen
+  // Weg gar nichts – dieselbe Handlung, zwei verschiedene Auskünfte, je
+  // nachdem welches Werkzeug der Super-Admin zufällig benutzt. Seit heute wird
+  // der Verdrängte auf beiden Wegen informiert; ohne diese Zeile wäre
+  // ausgerechnet der Begünstigte der einzige, der nichts hört.
+  // Nur wenn er die Rolle nicht ohnehin schon hatte – sonst meldeten wir ein
+  // Ereignis, das nicht stattgefunden hat.
+  if (String(team.adminPlayerId || "") !== String(player._id)) {
+    await Player.updateOne(
+      { _id: player._id },
+      {
+        $push: {
+          notifications: {
+            type: "team_admin_granted",
+            teamId: team._id,
+            teamName: team.teamName,
+            teamSlug: team.slug,
+            message: `Du bist jetzt Team-Admin von ${team.teamName}.`,
+            read: false,
+            createdAt: new Date(),
+          },
+        },
+      }
+    );
+  }
+
   // Transfer protokollieren (Gate-Befund 13.08.2026, nachgezogen am 14.08.).
   // Dieser Pfad setzt `player.teamId` oben mit – ohne Eintrag fehlte dem
   // Spieler ausgerechnet die Station, die ein Super-Admin vergeben hat: Der

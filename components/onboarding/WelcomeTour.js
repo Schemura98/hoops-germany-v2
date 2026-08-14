@@ -81,6 +81,13 @@ const SCHRITTE = [
     // Antippen – ein Stolperer ausgerechnet in dem Satz, der Einfachheit
     // verspricht (Nele, 14.08.2026).
     text: "Einmal antippen genügt – es steht sofort in deinem Profil, kein Formular.",
+    // Ohne Konto gibt es kein Profil, in dem etwas „sofort steht" (Befund B2
+    // von Tobias). Eine Einheitsfassung müsste genau das Versprechen wegnehmen,
+    // das den Schritt für den Hauptfall trägt – deshalb zwei Fassungen (Nele).
+    // Der zweite Halbsatz greift wörtlich die Quittung darunter auf, damit
+    // Einleitung und Quittung dieselbe Zusage machen statt sich zu korrigieren.
+    textOhneKonto:
+      "Einmal antippen genügt, kein Formular – so schnell ist dein Profil ausgefüllt, sobald du ein Konto hast.",
   },
   {
     key: "stadt",
@@ -404,7 +411,10 @@ export default function WelcomeTour() {
   const titel =
     abweichung?.titel ??
     (weg === "admin" && schritt.titelAdmin ? schritt.titelAdmin : schritt.titel);
-  const text = abweichung?.text ?? schritt.text;
+  // `textOhneKonto` schlägt den Standardtext, wenn niemand angemeldet ist –
+  // heute nur bei Schritt „position" gesetzt (s. dort).
+  const text =
+    abweichung?.text ?? (!angemeldet && schritt.textOhneKonto ? schritt.textOhneKonto : schritt.text);
 
   if (!open) return null;
 

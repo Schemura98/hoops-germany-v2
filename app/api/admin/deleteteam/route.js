@@ -53,6 +53,19 @@ async function handler(req) {
     { $pull: { followingTeams: teamId } }
   );
 
+  // Den toten Verweis aus Benachrichtigungen nehmen (Befund Kai, 14.08.2026).
+  // `teamSlug` wird beim Versand als Momentaufnahme in die Notification
+  // geschrieben. Ohne diese Zeile bleibt er nach der Löschung stehen,
+  // `notificationHref` bildet weiter `/team/team-detail/<slug>` – und der Klick
+  // landet auf einer 404 statt auf dem Fallback, den es für genau diesen Fall
+  // gibt. Der EINTRAG bleibt bewusst erhalten: „X hat dich eingeladen" ist
+  // Historie, auch wenn der Verein weg ist. Nur der Weg dorthin verschwindet.
+  await Player.updateMany(
+    { "notifications.teamId": teamId },
+    { $unset: { "notifications.$[n].teamSlug": "" } },
+    { arrayFilters: [{ "n.teamId": teamId }] }
+  );
+
   // 5. Team selbst löschen.
   await Team.findByIdAndDelete(teamId);
 

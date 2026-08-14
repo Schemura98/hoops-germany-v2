@@ -87,7 +87,11 @@ test.describe("Plattform-Tour ohne Konto", () => {
     // sichtbaren Fehlermeldung eine unsichtbare Unwahrheit.
     await expect(tour.getByText(/Steht in deinem Profil/i)).toHaveCount(0);
     await expect(
-      tour.getByText(/gespeichert wird es, sobald du ein Konto hast/i)
+      // ⚠️ Wortlaut geändert am 14.08.2026 (Nebenbefund Nele): „gespeichert
+      // wird es, sobald du ein Konto hast" ließ sich lesen als „der Wert kommt
+      // bei der Registrierung mit" – das tut er nicht. Jetzt sagt die Zeile
+      // nur, was fehlt.
+      tour.getByText(/dafür brauchst du ein Konto/i)
     ).toBeVisible();
   });
 

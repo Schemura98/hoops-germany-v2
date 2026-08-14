@@ -328,11 +328,27 @@ export default function TeamTeamDetailSlugPage({ params }) {
                         </p>
                         <p className="text-xs text-mist-400">{positionLabel(m.position) || "—"}</p>
                       </div>
-                      {m.position && (
-                        <span className="text-xs font-semibold text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded-md">
-                          {positionLabel(m.position)}
-                        </span>
-                      )}
+                      {/* ⚠️ Hier stand bis zum 14.08.2026 zusätzlich ein oranges
+                          Positions-Abzeichen – dieselbe Angabe wie die Unterzeile
+                          darüber (Befund Tobias, Browser-Gate, „niedrig").
+                          Entfernt, nicht die Unterzeile, aus drei Gründen:
+                          (1) Der rechte Rand dieser Liste gehört dem STATUS: Bei
+                          den offenen Plätzen direkt darunter sitzt an genau
+                          derselben Stelle „Ausstehend"/„eingeladen". Die Spalte
+                          wechselte mitten in einer Liste ihre Bedeutung von
+                          Position auf Status – wer sie von oben nach unten
+                          scannt, liest zwei Dinge als eins.
+                          (2) Die Unterzeile ist die Zeilensprache, die die
+                          Slot-Zeilen hier und die Kader-/Slot-Listen in
+                          `components/team/tabs/KaderTab.js` sowie
+                          `/transfermarkt` ohnehin verwenden. Das Abzeichen war
+                          die Ausnahme, nicht die Regel.
+                          (3) `brand-500` ist der EINE Akzent (Anzeigetafel,
+                          `docs/VISUELLE-RICHTUNG-2026-08-12.md`). Eine Position
+                          ist keine Auszeichnung und darf ihn nicht verbrauchen.
+                          Das Chip auf `/spieler` bleibt bewusst: Das ist eine
+                          Kachelansicht ohne Unterzeile, dort ist es die einzige
+                          Darstellung und doppelt nichts. */}
                     </Link>
                   );
                 })}

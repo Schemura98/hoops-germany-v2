@@ -104,6 +104,46 @@ export default function TeamCreatePage() {
           </p>
         </div>
 
+        {/* Hinweis für alle, die hier landen, obwohl sie längst in einem Kader
+            stehen (Befund Tobias, Wortlaut Nele, 14.08.2026).
+            Zwei Wege führen hierher, ohne dass jemand ein Team gründen will:
+            `lib/useCurrentTeam.js` leitet einen eingeloggten Nicht-Admin von
+            `/team/admin` wortlos hierher um – seit dem Rechteentzug trifft das
+            auch den verdrängten Gründer mit altem Lesezeichen –, und mancher
+            tippt `/team/admin` schlicht neugierig ein.
+            Ohne diesen Hinweis las sich die Seite als Aufforderung, und ein
+            versehentlich gegründeter Zweitverein muss hinterher von Hand
+            aufgeräumt werden.
+            ⚠️ Der Text unterstellt bewusst nicht, jemand habe sich verirrt, und
+            sagt nichts darüber, ob er je Admin war – er muss für beide Fälle
+            tragen. Der Weg zur Gründung bleibt offen: Wer wirklich ein zweites
+            Team will, kann weiterhin. */}
+        {/* ⚠️ Der Vereinsname steht in `player.team` (populiert von
+            `getmyinfo`), NICHT als `player.teamName` – `teamId` allein ist eine
+            ObjectId. Ohne diese Unterscheidung hätte hier dauerhaft der
+            Fallback „deinem Team" gestanden, und niemandem wäre es aufgefallen. */}
+        {player?.teamId && (
+          <div className="mb-4 rounded-md border border-navy-600 bg-navy-800 px-4 py-3.5">
+            <p className="text-sm text-mist-300">
+              Du bist im Kader von{" "}
+              <span className="font-semibold text-paper-50">
+                {player.team?.teamName || "deinem Team"}
+              </span>{" "}
+              – dafür musst du hier nichts anlegen. Auf dieser Seite entsteht ein{" "}
+              <span className="font-semibold text-paper-50">neues</span> Team; verwalten kann
+              es nur, wer dort als Team-Admin eingetragen ist.
+            </p>
+            {player.team?.slug && (
+              <Link
+                href={`/team/team-detail/${player.team.slug}`}
+                className="mt-2 inline-block text-sm font-medium text-brand-400 hover:text-brand-300"
+              >
+                Zu {player.team.teamName || "deinem Team"} →
+              </Link>
+            )}
+          </div>
+        )}
+
         {error && (
           <div className="mb-4 rounded-sm bg-signal-error/10 border border-signal-error/50 px-4 py-3 text-sm text-signal-error">
             {error}

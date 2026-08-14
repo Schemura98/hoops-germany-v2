@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
 // Nur noch die Symbole, die diese Datei selbst zeichnet: die Glocke im Kopf
@@ -26,6 +26,23 @@ export default function NotificationBell() {
   const [items, setItems] = useState([]);
   const [unread, setUnread] = useState(0);
   const [open, setOpen] = useState(false);
+  const oeffnerRef = useRef(null);
+
+  // Escape schließt die Glocke und gibt den Fokus zurück (Befund Tobias,
+  // 14.08.2026). Sie war die letzte Ebene der Leiste, die auf die Taste nicht
+  // reagierte – Such-Overlay und mobiles Menü tun es seit heute. Drei
+  // Aufklapp-Ebenen in derselben Leiste sollten dieselbe Antwort auf dieselbe
+  // Taste geben, sonst rät man jedes Mal neu.
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(e) {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      oeffnerRef.current?.focus();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open]);
   const [respondingTeam, setRespondingTeam] = useState(null);
   const [responded, setResponded] = useState({}); // teamId -> "accepted" | "declined"
 
@@ -91,9 +108,11 @@ export default function NotificationBell() {
   return (
     <div className="relative">
       <button
+        ref={oeffnerRef}
         onClick={toggle}
         className="p-2 -m-1 text-paper-50/80 hover:text-brand-400 transition-colors"
         aria-label="Benachrichtigungen"
+        aria-expanded={open}
       >
         <span className="relative block">
           <PiBellBold className="text-lg" />
