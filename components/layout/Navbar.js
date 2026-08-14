@@ -29,6 +29,7 @@ import {
   setStoredPlayer,
 } from "@/lib/clientAuth";
 import useMenuHoehe from "@/lib/useMenuHoehe";
+import { sperreAn, sperreAus } from "@/lib/scrollSperre";
 import { timeAgo } from "@/lib/timeAgo";
 import {
   notificationHref,
@@ -309,16 +310,15 @@ export default function Navbar() {
   // Hintergrund nicht mitscrollen lassen, solange die Suche offen ist
   // (Befund B5 von Tobias). Das Overlay sagt `aria-modal="true"` zu – für
   // einen Screenreader ist die Seite dahinter inert, mit der Maus ließ sie
-  // sich aber weiterschieben. Dasselbe Muster wie in `WelcomeTour.js`; der
-  // vorherige Wert wird gemerkt, damit eine andere Ebene, die ihn gesetzt hat
-  // (Tour, Mobil-Menü), ihn beim Schließen nicht verliert.
+  // sich aber weiterschieben.
+  // ⚠️ Über `lib/scrollSperre.js`, NICHT mit einem selbst gemerkten Wert
+  // (Befund A2 von Kai): Zwei Ebenen, die sich je den vorherigen Zustand
+  // merken, hinterlassen bei verschachtelter Aufhebung eine dauerhaft
+  // gesperrte Seite. Die Begründung steht dort.
   useEffect(() => {
     if (!searchOpen) return;
-    const vorher = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = vorher;
-    };
+    sperreAn();
+    return sperreAus;
   }, [searchOpen]);
 
   // Escape schließt auch die Glocke (Befund Tobias, 14.08.2026). Sie war die
@@ -335,6 +335,17 @@ export default function Navbar() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [notifOpen]);
+
+  // Das offene Mobil-Menü sperrt den Hintergrund ebenfalls (Befund N1 von
+  // Tobias): Bis dahin scrollte die Seite dahinter mit (gemessen 1555 → 1855),
+  // während das Such-Overlay direkt daneben sperrt. Dieselbe Leiste, zwei
+  // Antworten auf dieselbe Geste. Über denselben Zähler wie die anderen
+  // Ebenen – das Menü kann zusammen mit der Suche offen sein.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    sperreAn();
+    return sperreAus;
+  }, [mobileOpen]);
 
   // Escape schließt auch das mobile Menü (Befund B3 von Tobias, 14.08.2026).
   // Es blieb offen, während das Such-Overlay direkt daneben sauber schließt –

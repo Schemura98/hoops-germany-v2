@@ -66,6 +66,20 @@ async function handler(req) {
     { arrayFilters: [{ "n.teamId": teamId }] }
   );
 
+  // Dasselbe für die gelöschten Spiele (Befund A3 von Kai): Schritt 1 dieser
+  // Route entfernt alle Partien des Teams, ließ `matchId` auf den
+  // Benachrichtigungen aber stehen. `notificationHref` prüft `own_stats` und
+  // `match_result` VOR dem generischen `teamSlug`-Zweig – wer „Deine Zahlen
+  // stehen" für eines dieser Spiele bekommen hat, klickte weiter auf ein
+  // gelöschtes Spiel. Derselbe tote Weg, nur über das andere Feld.
+  if (matchIds.length) {
+    await Player.updateMany(
+      { "notifications.matchId": { $in: matchIds } },
+      { $unset: { "notifications.$[m].matchId": "" } },
+      { arrayFilters: [{ "m.matchId": { $in: matchIds } }] }
+    );
+  }
+
   // 5. Team selbst löschen.
   await Team.findByIdAndDelete(teamId);
 

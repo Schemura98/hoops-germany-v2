@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import {
   PiBasketballBold,
@@ -204,6 +204,7 @@ function AvatarZitat({ player }) {
 export function StepPosition({ weg, wert, onWert, onGespeichert, player }) {
   const [stand, setStand] = useState(null); // null | ok | fehler | anonym
   const [laeuft, setLaeuft] = useState(null);
+  const laufendeNr = useRef(0);
   // Steht die Spieler-Leiste mit dem Profil-Avatar gerade auf dem Bildschirm?
   // Nur dann darf die Quittung „oben rechts" sagen und die Form zeigen – auf
   // öffentlichen Seiten gibt es dort einen Textlink oder (mobil) nur den
@@ -219,7 +220,16 @@ export function StepPosition({ weg, wert, onWert, onGespeichert, player }) {
     const neu = wert === rolle ? "" : rolle; // nochmal tippen = abwählen
     onWert(neu);
     setLaeuft(rolle);
+    // ⚠️ Laufende Nummer je Anfrage (Befund A1 von Kai): Gesperrt ist nur der
+    // Chip, der gerade lädt – die anderen bleiben klickbar. Wer während eines
+    // langsamen Requests einen zweiten tippt, bekam sonst zwei Rücknahmen in
+    // der Reihenfolge ihrer Antworten, und am Ende stand ein Wert, den niemand
+    // gespeichert hat. Genau die Zusage, die dieser Zweig einlösen soll.
+    // Umgekehrt hätte eine späte Fehlermeldung einen Wert gelöscht, der
+    // inzwischen erfolgreich gespeichert wurde.
+    const meine = ++laufendeNr.current;
     const ergebnis = await speichern("/api/player/update-profile", { position: neu });
+    if (meine !== laufendeNr.current) return; // eine neuere Anfrage ist maßgeblich
     setLaeuft(null);
     setStand(ergebnis);
     // ⚠️ Bei einem echten Fehler den optimistischen Wert zurücknehmen (offener
@@ -338,14 +348,24 @@ export function StepPosition({ weg, wert, onWert, onGespeichert, player }) {
 // ---------------------------------------------------------------------------
 export function StepStadt({ stadt, land, onOrt, onGespeichert }) {
   const [stand, setStand] = useState(null); // null | ok | fehler | anonym
+  const laufendeNr = useRef(0);
 
   async function waehlen(c) {
-    const vorher = { stadt, land };
+    // ⚠️ NICHT `stadt` als Vorher-Wert merken (Befund A6 von Kai): `CityInput`
+    // schreibt bei jedem Tastendruck über `onChange` hinein – gemerkt würde das
+    // halbfertige Tippfragment („Düsseld"), nicht der zuletzt gespeicherte Ort.
+    // Die Rücknahme stellte damit einen Zustand her, den es nie gab.
+    // Maßgeblich ist `land`: Es wird ausschließlich beim Auswählen eines
+    // Vorschlags gesetzt, ist also der einzige belastbare Anker – und es ist
+    // auch das Feld, an dem `computeSteps` den Schritt misst.
+    const vorher = land ? { stadt, land } : { stadt: "", land: "" };
     onOrt({ stadt: c.n, land: c.s });
+    const meine = ++laufendeNr.current;
     const ergebnis = await speichern("/api/player/update-profile", {
       hometown: c.n,
       bundesland: c.s,
     });
+    if (meine !== laufendeNr.current) return; // s. StepPosition
     setStand(ergebnis);
     // Bei einem echten Fehler zurücknehmen – s. die gleichlautende Stelle in
     // `StepPosition`. Sonst zählt die Schlussfolie einen Schritt als erledigt,

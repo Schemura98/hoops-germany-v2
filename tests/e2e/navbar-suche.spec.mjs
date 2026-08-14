@@ -152,6 +152,53 @@ test.describe("Such-Overlay – Ligen (Ronjas R8)", () => {
   });
 });
 
+test.describe("Scroll-Sperre über mehrere Ebenen", () => {
+  // Befund A2 von Kai: Vorher merkte sich jede Ebene den vorherigen
+  // `body.overflow`-Wert selbst. Schlossen zwei Ebenen in der falschen
+  // Reihenfolge, blieb die Seite DAUERHAFT gesperrt – ohne dass ein Overlay zu
+  // sehen war, nur ein Reload half. Und die schädliche Reihenfolge war die
+  // wahrscheinliche, weil ein Escape-Druck beide Ebenen erledigt.
+  // Der Zähler in `lib/scrollSperre.js` löst das; dieser Test hält es fest,
+  // denn eine hängende Sperre wirft keinen Fehler.
+  test("zwei Ebenen geben die Sperre erst gemeinsam frei", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(SEITE);
+
+    const gesperrt = () =>
+      page.evaluate(() => document.body.style.overflow === "hidden");
+
+    // Ebene 1: Mobil-Menü
+    await page.getByRole("button", { name: /Menü (öffnen|schließen)/ }).click();
+    await expect(page.locator("#mobil-menue")).toBeVisible();
+    expect(await gesperrt(), "Menü sperrt nicht").toBe(true);
+
+    // Ebene 2: Suche darüber
+    await page.getByLabel("Suche öffnen").click();
+    const dialog = page.getByRole("dialog", { name: "Suche" });
+    await expect(dialog).toBeVisible();
+    expect(await gesperrt(), "Sperre fehlt bei zwei Ebenen").toBe(true);
+
+    // ⚠️ Escape statt zweier Klicks – das ist die Reihenfolge, die vorher brach.
+    // Zwei Klicks schließen zwangsläufig von oben nach unten (die untere Ebene
+    // ist ja verdeckt), und in DIESER Reihenfolge stimmten die gemerkten Werte
+    // zufällig. Ein erster Versuch dieses Tests war deshalb auch ohne Zähler
+    // grün. Escape erledigt beide Ebenen auf einen Schlag und legt damit die
+    // Aufräum-Reihenfolge offen, um die es geht.
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    await expect(page.locator("#mobil-menue")).toBeHidden();
+
+    expect(
+      await gesperrt(),
+      "die Seite bleibt gesperrt, obwohl kein Overlay mehr offen ist – nur ein Reload hilft"
+    ).toBe(false);
+
+    // Und sie lässt sich wirklich wieder scrollen.
+    await page.evaluate(() => window.scrollTo(0, 400));
+    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+  });
+});
+
 test.describe("Mobiles Menü", () => {
   // Befund B3 von Tobias: Escape schloss das Menü nicht, während das
   // Such-Overlay in derselben Leiste sauber darauf reagiert – dieselbe Taste,

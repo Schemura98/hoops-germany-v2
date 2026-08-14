@@ -159,18 +159,27 @@ async function handler(req) {
   // ein Team bewusst zusätzlich, und ein Wechsel an der Spitze soll sie nicht
   // stillschweigend entfernen.
   const bisheriger = team.adminPlayerId;
+  let entzogen = false;
   if (bisheriger && String(bisheriger) !== String(player._id)) {
     const { modifiedCount } = await Player.updateOne(
       { _id: bisheriger, teamAdminOf: team._id },
       { $set: { isTeamAdmin: false }, $unset: { teamAdminOf: "" } }
     );
-    // ⚠️ Nur benachrichtigen, wenn tatsächlich etwas entzogen wurde. Greift der
-    // `teamAdminOf`-Wächter nicht, hatte die Person hier gar keine Rechte – eine
-    // Meldung darüber wäre eine Aussage über ein Ereignis, das nicht
-    // stattgefunden hat. Dieselbe Regel wie bei `team_assigned`.
-    if (modifiedCount > 0) await notifyTeamAdminRevoked(bisheriger, team, player);
+    entzogen = modifiedCount > 0;
   }
   await Team.findByIdAndUpdate(team._id, { adminPlayerId: player._id });
+
+  // ⚠️ Beide Nachrichten gehen ERST hier raus, nach dem Team-Update (Befund A5
+  // von Kai): Vorher stand die Entzugs-Notiz davor und die Beförderungs-Notiz
+  // dahinter – zwei Fassungen derselben Operation, wieder auseinandergelaufen.
+  // Die Schwester-Route `transfer-team-admin` meldet seit heute ebenfalls erst,
+  // wenn der neue Zustand steht; von zwei Fassungen soll sich die sicherere
+  // ausbreiten.
+  // ⚠️ Nur benachrichtigen, wenn tatsächlich etwas entzogen wurde. Greift der
+  // `teamAdminOf`-Wächter nicht, hatte die Person hier gar keine Rechte – eine
+  // Meldung darüber wäre eine Aussage über ein Ereignis, das nicht
+  // stattgefunden hat. Dieselbe Regel wie bei `team_assigned`.
+  if (entzogen) await notifyTeamAdminRevoked(bisheriger, team, player);
 
   // Auch der BEFÖRDERTE erfährt es (Befund Tobias, 14.08.2026): Über
   // `/admin/teams` bekam er seit jeher ein `team_admin_granted`, über diesen
@@ -180,7 +189,13 @@ async function handler(req) {
   // ausgerechnet der Begünstigte der einzige, der nichts hört.
   // Nur wenn er die Rolle nicht ohnehin schon hatte – sonst meldeten wir ein
   // Ereignis, das nicht stattgefunden hat.
-  if (String(team.adminPlayerId || "") !== String(player._id)) {
+  // ⚠️ `bisheriger` statt `team.adminPlayerId` (Befund A4 von Kai): Beides
+  // liest heute denselben Vor-Zustand, aber nur weil `findByIdAndUpdate` das
+  // lokale Mongoose-Dokument zufällig nicht mutiert. Wer die Zeile später aufs
+  // idiomatische `team.adminPlayerId = …; await team.save()` umstellt, schaltet
+  // diese Nachricht still ab, und kein Test bemerkt es. Der Vor-Zustand steht
+  // weiter oben ohnehin explizit fest.
+  if (String(bisheriger || "") !== String(player._id)) {
     await Player.updateOne(
       { _id: player._id },
       {

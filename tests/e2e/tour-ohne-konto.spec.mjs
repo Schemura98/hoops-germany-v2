@@ -222,9 +222,15 @@ test.describe("Avatar-Zitat sitzt im Satz (mobil)", () => {
     // Schritt 1, der Footer-Klick ebenfalls – aber ein bereits offener Dialog
     // könnte weiter sein. Deshalb bis zur Positionsfrage vorklicken statt zwei
     // feste Klicks anzunehmen.
-    const chip = tour.getByRole("button", { name: "Point Guard", exact: true });
+    // ⚠️ NICHT auf einen festen Chip klicken. Ein Klick auf den bereits aktiven
+    // wählt ab (`wert === rolle ? "" : rolle`) – dann ist `wert` leer und die
+    // Quittung erscheint zu Recht nicht. Weil der Test die Position speichert,
+    // war er beim ERSTEN Lauf grün und beim zweiten rot: Er hinterließ genau
+    // den Zustand, an dem er scheitert. Dieselbe Klasse Problem wie beim
+    // Tour-Auto-Start – ein Test, der seinen eigenen Ausgangszustand verändert.
+    const irgendeinChip = tour.getByRole("button", { name: "Point Guard", exact: true });
     for (let i = 0; i < 6; i++) {
-      if (await chip.isVisible().catch(() => false)) break;
+      if (await irgendeinChip.isVisible().catch(() => false)) break;
       const weg = tour.getByRole("button", { name: /Ich spiele in einem Verein/i });
       const weiter = tour.getByRole("button", { name: /^Weiter/ });
       if (await weg.isVisible().catch(() => false)) await weg.click();
@@ -235,8 +241,19 @@ test.describe("Avatar-Zitat sitzt im Satz (mobil)", () => {
       // hereinfährt – sie läuft dann ins Leere und der Chip wird nie erreicht.
       await page.waitForTimeout(400);
     }
-    // Hart warten statt annehmen: Playwright hält hier auf den Übergang.
-    await expect(chip).toBeVisible({ timeout: 15_000 });
+    await expect(irgendeinChip).toBeVisible({ timeout: 15_000 });
+
+    // Einen Chip wählen, der NICHT bereits aktiv ist – sonst wählt der Klick ab.
+    const alle = ["Point Guard", "Shooting Guard", "Small Forward", "Power Forward", "Center"];
+    let chip = null;
+    for (const name of alle) {
+      const k = tour.getByRole("button", { name, exact: true });
+      if ((await k.getAttribute("aria-pressed")) !== "true") {
+        chip = k;
+        break;
+      }
+    }
+    expect(chip, "kein inaktiver Positions-Chip gefunden").not.toBeNull();
     await chip.click();
 
     const quittung = tour.getByText(/Steht in deinem Profil/i).first();

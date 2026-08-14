@@ -11,6 +11,7 @@ import { StepWeg, StepPosition, StepStadt, StepUebergabe } from "@/components/on
 import { computeSteps } from "@/components/onboarding/OnboardingChecklist";
 import { getPlayerToken } from "@/lib/clientAuth";
 import { positionLabel } from "@/lib/constants";
+import { sperreAn, sperreAus } from "@/lib/scrollSperre";
 import { trackEvent } from "@/lib/trackEvent";
 
 // ---------------------------------------------------------------------------
@@ -261,11 +262,13 @@ export default function WelcomeTour() {
   // Seite hinter dem Dialog nicht mitscrollen lassen.
   useEffect(() => {
     if (!open) return;
-    const vorher = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = vorher;
-    };
+    // ⚠️ Über `lib/scrollSperre.js` statt eines selbst gemerkten Wertes
+    // (Befund A2 von Kai, 14.08.2026): Diese Ebene und das Such-Overlay können
+    // gleichzeitig offen sein, und beim Schließen in der falschen Reihenfolge
+    // blieb die Seite dauerhaft gesperrt. Der Zähler dort gibt erst frei, wenn
+    // keine Ebene mehr sperrt.
+    sperreAn();
+    return sperreAus;
   }, [open]);
 
   const schritt = SCHRITTE[index];
