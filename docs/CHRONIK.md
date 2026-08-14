@@ -3023,3 +3023,81 @@ versehentlich einen zweiten Verein anlegen (→ Nele/Ronja).
 **Offen (klein):** `teamSlug` ist eine Momentaufnahme – bei gelöschtem Verein greift der Fallback
 nicht und der Klick landet auf 404; `team_invite` liefert in derselben Lage `null`. Escape schließt
 die Glocke nicht.
+
+---
+
+## 14./15.08.2026 (Teil 5) — Alle offenen Gate-Punkte, Scroll-Sperre mit Zähler
+
+Zwei Commits (`2903b9e` · `cabb62d`). Texte **Nele**, Kaderkarte **Vivien**, zwei Gate-Runden mit
+**Kai** und **Tobias**. Damit sind alle elf offenen Punkte aus Roadmap 15 abgearbeitet.
+
+### Viviens Fund war besser als der gemeldete Befund
+Tobias hatte die doppelte Position auf der Kaderkarte als „redundant" gemeldet. Der eigentliche
+Grund: In **derselben** Liste tragen die offenen Plätze an **exakt derselben Stelle rechts** ihr
+Status-Abzeichen. Die Spalte wechselte mitten in einer durchlaufenden Liste ihre Bedeutung von
+*Position* auf *Status* – wer sie von oben nach unten scannt, liest zwei Dinge als eines. Das
+Positions-Chip entwertete die einzige Stelle, die einen Zustand anzeigt; dazu ist `brand-500` der
+**eine** Akzent, und eine Spielposition ist keine Auszeichnung.
+Sie hat geprüft, dass es diese Doppelung nirgends sonst gibt – `/spieler` zeigt nur das Chip
+(Kachelansicht ohne Unterzeile), alle anderen Flächen nur die Unterzeile.
+
+### Die Sackgasse nach dem Rechteentzug
+Wer `/team/admin` ohne Admin-Rechte aufruft, landete **wortlos** auf `/team/create`. Seit dem
+Entzug trifft das auch den verdrängten Gründer mit altem Lesezeichen – er konnte versehentlich
+einen Zweitverein anlegen. Neles Hinweis erscheint nur bei `player.teamId`, sagt was fehlt und
+unterstellt nichts; er muss auch für den tragen, der die Adresse neugierig eintippt.
+⚠️ Beim Einbau gefangen: Der Vereinsname steht in **`player.team`** (populiert von `getmyinfo`),
+nicht als `player.teamName`. Ohne die Unterscheidung hätte dort dauerhaft „deinem Team" gestanden.
+
+### ⚠️ Kais A2: die Seite blieb dauerhaft gesperrt
+Jede Overlay-Ebene merkte sich den vorherigen `body.overflow`-Wert **selbst**. Schlossen zwei in
+der falschen Reihenfolge, blieb `hidden` stehen – ohne dass ein Overlay zu sehen war, nur ein
+Reload half. Und die schädliche Reihenfolge ist die **wahrscheinliche**: Such-Overlay `z-[999]`,
+Tour `z-[60]`, man schließt naheliegend zuerst die Suche; ein einzelner Escape-Druck erledigt
+ohnehin beide, wobei die Tour ihr Schließen um 200 ms verzögert.
+→ **`lib/scrollSperre.js`** mit Zähler: gesperrt beim ersten `sperreAn()`, freigegeben erst beim
+letzten `sperreAus()`. Kompensiert zugleich die verschwindende Scrollleiste (Kais A7 – sonst
+springt die Seite ~15 px, ausgerechnet in einer Änderung fürs Halten der Leseposition).
+Tobias' **N1** im selben Zug: Das Mobil-Menü sperrte **gar nicht** (gemessen 1555 → 1855), während
+die Suche daneben sperrt. Nutzt jetzt denselben Zähler.
+
+### Kais A1: die Rücknahme konnte erfinden, was sie verhindern sollte
+Gesperrt ist nur der Chip, der gerade lädt. Ein zweiter Tipp während eines langsamen Requests
+erzeugte zwei Rücknahmen in der Reihenfolge ihrer Antworten – am Ende stand ein Wert, den niemand
+gespeichert hat, und die Schlussfolie zählte ihn. Jetzt eine laufende Nummer je Anfrage.
+**A6:** In `StepStadt` war der gemerkte Wert das halbfertige Tippfragment (`CityInput` schreibt bei
+jedem Tastendruck), nicht der gespeicherte Ort. Die Rücknahme hängt jetzt an `land`.
+
+### Weitere Gate-Befunde
+- **A3:** `deleteteam` löscht alle Spiele, ließ `matchId` auf Benachrichtigungen aber stehen –
+  derselbe tote Weg wie bei `teamSlug`, nur über das andere Feld.
+- **A4:** Die Bedingung der Beförderungs-Notiz stimmte nur, **weil** `findByIdAndUpdate` das lokale
+  Dokument zufällig nicht mutiert. Wer auf `team.save()` umstellt, schaltet sie still ab.
+- **A5:** Entzugs-Notiz vor, Beförderungs-Notiz nach dem Team-Update – zwei Fassungen derselben
+  Operation, wieder auseinandergelaufen. Beide jetzt danach.
+
+### ⚠️ Zwei eigene Testfehler, dieselbe Klasse
+1. Der erste Sperr-Test war **grün, auch ohne Zähler**. Er schloss die Ebenen per Klick – und das
+   geht zwangsläufig von oben nach unten, weil die untere verdeckt ist; in dieser Reihenfolge
+   stimmten die gemerkten Werte zufällig. Erst **Escape** legt die Aufräum-Reihenfolge offen.
+2. Der Avatar-Layout-Test klickte fest auf „Point Guard" und **speicherte** die Position damit.
+   Beim nächsten Lauf war sie gesetzt, derselbe Klick wählte ab, die Quittung verschwand – er
+   hinterließ genau den Zustand, an dem er scheitert. Jetzt wählt er einen Chip ohne
+   `aria-pressed="true"`.
+**Lehre:** Ein Test, der seinen eigenen Ausgangszustand verändert, ist beim zweiten Lauf rot.
+Dasselbe Muster wie der Tour-Auto-Start tags zuvor.
+
+**Gates:** `58 passed / 0 skipped` (dreimal in Folge), Lint 0 Fehler, Build sauber, `npm start` 200.
+Tobias hat alle neun browserprüfbaren Punkte am Produkt bestätigt, darunter: echter Vereinsname im
+Hinweis, Escape auf beiden Glocken mit Fokusrückgabe, Leseposition 900 → 900, 0 Positions-Chips auf
+der Kaderkarte, alle neuen Texte wörtlich.
+
+⚠️ **Prozess (Kai, zum zweiten Mal):** Der `security-review`-Skill wählt seine Basis **selbst** und
+nahm erneut `main` (4,3 MB), obwohl sie im Auftrag stand – er liest den Auftragstext nicht als
+Vorgabe. Der Hinweis in `CLAUDE.md` erreicht ihn nicht; das muss anders gelöst werden.
+
+**Offen:** Kais A8 (ein Escape bedient mehrere Ebenen – wer die Sperren stapelt, sollte auch die
+Escape-Ebenen stapeln) · Tobias' N4 (die Profil-Oberfläche kann Positions-Kürzel nicht schreiben;
+wer speichert, migriert still von „SG" auf „Shooting Guard") · Neles Frage zum Leerzustand eines
+offenen Kaderplatzes ohne Position · Textreihenfolge auf `/team/create` (erst „Team gründen", dann
+die Korrektur) → Vivien/Nele.

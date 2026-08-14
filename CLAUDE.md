@@ -11,7 +11,13 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> **Zuletzt deployt: `551ab46` (14.08.2026, am Server verifiziert)** – vierte Runde: **Notiz an den
+> **Zuletzt deployt: `cabb62d` (15.08.2026, am Server verifiziert)** – fünfte Runde: **alle elf
+> offenen Gate-Punkte** aus Roadmap 15 abgearbeitet. Kern: **`lib/scrollSperre.js`** (zwei Overlays
+> hinterließen bei falscher Schließreihenfolge eine **dauerhaft gesperrte Seite** – nur ein Reload
+> half) · Hinweis auf `/team/create` für alle, die dort landen, obwohl sie im Kader stehen (sonst
+> versehentlich ein Zweitverein) · Kaderkarte ohne doppelte Position (die rechte Spalte trägt jetzt
+> **nur** Status) · Glocken-Leerzustand für alle Rollen · Tour-Schritt 3 ausgeloggt ehrlich ·
+> optimistisches Speichern wird bei Fehlern zurückgenommen. Davor: **`551ab46`** – vierte Runde: **Notiz an den
 > verdrängten Team-Admin** (`team_admin_revoked`; er verlor die Rechte seit der dritten Runde und
 > hätte es erst gemerkt, wenn `/team/admin` ihn abweist – ausgelöst an **drei** Stellen, inkl. dem
 > `remove`-Zweig, der ebenfalls schwieg) · Klickziel bewusst **nicht** `/team/admin`, sondern die
@@ -45,8 +51,8 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `2503433` (dritte Runde 14.08.) → `9f9fb77` (zweite) → `5b84f69` (erste) →
-> `5197d2c` (der Stand, der bis zum 14.08. tatsächlich lief) → `3c38959` →
+> **Rollback-Kette:** `551ab46` (vierte Runde 14.08.) → `2503433` (dritte) → `9f9fb77` (zweite) →
+> `5b84f69` (erste) → `5197d2c` (der Stand, der bis zum 14.08. tatsächlich lief) → `3c38959` →
 > `5073951` → `560e1e6` → `27a04fe` → `e7a38ce` → `275f124` → `a8e4fd4` (vor der Nachtschicht) →
 > `562c629` (vor dem gesamten Redesign). Auf dem VPS per
 > `git checkout <hash> && npm run build && pm2 restart hoops-v2`.
@@ -385,29 +391,22 @@
 14. **Aus `docs/ENTDECKBARKEIT-BEFUND-2026-08-14.md`** (Lina): **P2 ist erledigt** – „ab 16" wird
     seit `3fa822e` auf `/signup`, `/about` und beiden Einladungsseiten begründet (Nora → Nele).
     Offen bleibt Linas eigene Frage, ob ihre Rolle von Vivien/Nele/Ronja aufgesogen wird.
-15. **Aus den Gates vom 14.08. noch offen** (erledigt sind: `recordTransfer`-Post, Fokusfalle,
-    `TeamNav`, Alt-Kürzel, mobiles Menü mit Escape):
-    (a) **`GLOCKE_LEER`** ist der Leerzustand *aller* Benachrichtigungstypen, spricht aber nur über
-    eigene Spielwerte → Nele. (b) Optimistisches `onWert` vor dem Speichern kann die
-    Tour-Schlussfolie bei API-Fehlern zu positiv zählen. (c) `PlayerNav` hat **keine Suche**:
-    eingeloggt ist sie nur auf öffentlichen Seiten erreichbar → Lina/Ronja. (d) **B2 (Tobias):**
-    Ausgeloggt sagt Tour-Schritt 3 „es steht sofort in deinem Profil" – wer kein Konto hat, hat
-    keins; die Quittung darunter korrigiert es sofort → Nele/Lina. (e) **B4:** Position steht auf
-    der Kaderkarte doppelt (graue Zeile + oranges Abzeichen) → Vivien. (f) **B5:** Suche öffnen
-    springt an den Seitenanfang, Escape stellt die Leseposition nicht wieder her; der Hintergrund
-    scrollt trotz `aria-modal` weiter → Ronja. (g) **erledigt** – der verdrängte
-    Team-Admin bekommt seit `93b0fc4` eine Notiz (`team_admin_revoked`), ebenso der umgehängte
-    Spieler seit `7604578`. **Neu offen daraus** (Kai/Tobias, 14.08.): (g1) Der **Nachfolgername
-    friert beim Schreiben ein** – bei A→B→C hält A eine Notiz „liegt **jetzt** bei B"; schärfer als
-    gewöhnliches Veralten, weil der Name der Rückweg IST → Nele/Patrick. (g2) Über `/admin/teams`
-    bekommt der **Beförderte** zusätzlich `team_admin_granted`, über `/admin/players` gar nichts →
-    Patrick. (g3) `/team/admin` leitet den Verdrängten auf **„TEAM GRÜNDEN"** – er könnte
-    versehentlich einen zweiten Verein anlegen → Nele/Ronja. (g4) `teamSlug` in Benachrichtigungen
-    ist eine Momentaufnahme: bei gelöschtem Verein greift der Fallback nicht und der Klick landet
-    auf 404 (`team_invite` liefert dort `null`). (h) `scripts/migrate-positions.mjs`
-    auf Prod ausführen? Alt-Kürzel sind heute harmlos (alle Lesezugriffe laufen durch
-    `positionLabel`, auch die Filter), sauber wäre es an der Quelle. (i) **Nele:** „X hat Y
-    verlassen" behauptet eine Handlung des Spielers, auch wenn ein Admin ihn entfernt hat.
+15. **Aus den Gates vom 14./15.08. — die Liste ist abgearbeitet.** Erledigt: der
+    `recordTransfer`-Post, Fokusfalle und Fokus-Rückgabe, `TeamNav`-Klickfläche, Alt-Kürzel,
+    Escape auf Menü/Suche/**beiden Glocken**, `GLOCKE_LEER` für alle Rollen, optimistisches
+    Speichern mit Rücknahme, Tour-Schritt 3 ausgeloggt, doppelte Position auf der Kaderkarte,
+    Leseposition + Scroll-Sperre, die Sackgasse auf `/team/create`, beide
+    Admin-Benachrichtigungen, tote Wege (`teamSlug`/`matchId`) nach dem Löschen eines Teams.
+    **Neu offen, klein:** (a) Ein Escape bedient mehrere Ebenen gleichzeitig – wer die Sperren
+    stapelt, sollte auch die Escape-Ebenen stapeln (Kai). (b) Die Profil-Oberfläche kann
+    Positions-**Kürzel** nicht schreiben: das `select` bietet nur Langformen, wer einmal
+    speichert, migriert still von „SG" auf „Shooting Guard" (Tobias) – hängt an Punkt (f).
+    (c) Ein **offener** Kaderplatz ohne Position zeigt „—", wo die gesuchte Position die
+    eigentliche Information wäre → Nele. (d) Auf `/team/create` steht erst „Team gründen", dann
+    die Korrektur – trägt die Reihenfolge? → Vivien/Nele. (e) `PlayerNav` hat **keine Suche**:
+    eingeloggt ist sie nur auf öffentlichen Seiten erreichbar → Lina/Ronja.
+    (f) `scripts/migrate-positions.mjs` auf Prod ausführen? Alt-Kürzel sind heute harmlos (alle
+    Lesezugriffe laufen durch `positionLabel`, auch die Filter), sauber wäre es an der Quelle.
     ⚠️ **Methodik-Lehren aus den Gates vom 14.08.:** (1) Während ein Browser-Gate gegen `next dev`
     läuft, darf im selben Arbeitsbaum **nicht weitergebaut** werden – der Prüfer sieht sonst Code,
     der nicht im geprüften Commit ist. (2) **`preview_stop` beendet den Dev-Server nicht**, es löst
@@ -424,7 +423,17 @@
     viermal aufgetreten: `slice(ab, ab + 400)`, `{0,200}` in einer Regex, `indexOf("]")`,
     `indexOf("};")`. Sie brechen in beide Richtungen – zu kurz gibt falsches Rot, und
     `indexOf`-Grenzen liefern bei Ausfall `-1`, wodurch `slice(ab, -1)` den ganzen Rest der Datei
-    nimmt und der Test **großzügiger** wird. Immer Klammerzählung, und die Hilfsfunktion soll
+    (6) ⚠️ **Ein Test, der seinen eigenen Ausgangszustand verändert, ist beim ZWEITEN Lauf rot.**
+    Zweimal an einem Tag: Der Tour-Auto-Start (`welcomeSeen`) verdeckte den Footer-Knopf, und ein
+    Layout-Test klickte fest auf „Point Guard" – beim nächsten Lauf war die Position gesetzt,
+    derselbe Klick wählte ab. Beide Male sah es nach Flakiness aus und war Zustandsabhängigkeit.
+    Entweder den Zustand vorher deterministisch setzen oder am Vorgefundenen entlang wählen
+    (z. B. einen Chip ohne `aria-pressed="true"`).
+    (7) ⚠️ **Eine Gegenprobe muss die richtige Reihenfolge treffen.** Der erste Test für die
+    Scroll-Sperre war auch OHNE Fix grün: Er schloss die Overlays per Klick, und das geht
+    zwangsläufig von oben nach unten – genau die Reihenfolge, in der das alte Muster zufällig
+    funktionierte. Erst Escape (schließt beide auf einmal) legte den Fehler offen.
+    (5-Fortsetzung) Immer Klammerzählung, und die Hilfsfunktion soll
     **werfen** statt still etwas Falsches zu liefern (Muster: `blockAb` in
     `tests/e2e/benachrichtigungs-typen.spec.mjs`).
 16. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
