@@ -11,7 +11,7 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> **Zuletzt deployt: `582d59d` (14.08.2026)** – Linas erster Einsatz: **Plattform-Tour ohne Konto**
+> **Zuletzt deployt: `5b84f69` (14.08.2026, am Server verifiziert)** – Linas erster Einsatz: **Plattform-Tour ohne Konto**
 > repariert (sie ist über den Footer ausgeloggt erreichbar und meldete dort einen Speicherfehler
 > über einen Versuch, den es nie gab; Schlussfolie „Du hast schon angefangen" über „0 von 4 · 0 %";
 > beide Ausgänge führten in die Anmeldemaske) · **Tour-Schritt 1 versprach zu viel** (doppelt
@@ -22,9 +22,15 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `7510a79` → `3c38959` → `5073951` → `560e1e6` → `27a04fe` → `e7a38ce` →
-> `275f124` → `a8e4fd4` (vor der Nachtschicht) → `562c629` (vor dem gesamten Redesign). Auf dem
-> VPS per `git checkout <hash> && npm run build && pm2 restart hoops-v2`.
+> **Rollback-Kette:** `5197d2c` (der Stand, der bis zum 14.08. tatsächlich lief) → `3c38959` →
+> `5073951` → `560e1e6` → `27a04fe` → `e7a38ce` → `275f124` → `a8e4fd4` (vor der Nachtschicht) →
+> `562c629` (vor dem gesamten Redesign). Auf dem VPS per
+> `git checkout <hash> && npm run build && pm2 restart hoops-v2`.
+> ⚠️ **Zum zweiten Mal in zwei Tagen stimmte diese Zeile nicht:** Sie führte `3c38959` als
+> zuletzt deployt, auf dem Server lief aber `5197d2c` (am 13.08. war es `78d833a` gegen
+> tatsächlich `a8e4fd4`). Der Grund ist immer derselbe – es wird committet und die Zeile
+> gepflegt, ohne dass derselbe Vorgang auch deployt. **Vor jedem Rollback am Server nachsehen
+> (`ssh … "cd /root/hoops-v2 && git log --oneline -1"`), nicht dieser Zeile glauben.**
 >
 > ⚠️ **PLATTFORM AB 16 JAHREN** (Entscheidung Patrick, 13.08.2026). Wirkt an **fünf** Stellen:
 > `LEAGUE_AGE_GROUPS` = `["Senioren", "U18"]` (eine U16-Liga ist die Altersklasse UNTER 16) ·
@@ -49,9 +55,6 @@
 > unvollständig (zwei → vier → acht); zweimal erzeugte der Fix selbst ein Folgeproblem
 > (verwaister `claimToken` = wiederverwendbarer Einladungslink; leerer Kaderplatz ohne
 > Einladungs-Knopf). Beides gefunden von Kai, beides vor dem Deploy behoben.
-> ⚠️ Diese Zeile führte bis 13.08. `78d833a` als zuletzt deployt – auf dem Server lief
-> tatsächlich `a8e4fd4`. Bei Rollback-Punkten immer am Server nachsehen, nicht hier.
-> Älterer Punkt: `562c629` (Stand VOR dem gesamten Redesign).
 >
 > 🌙 **NACHTSCHICHT 13.08.2026** (Details: Chronik) – autonom gelaufen, sechs Stränge. Kern:
 > **Ronjas Retention-Befund** (`docs/RETENTION-BEFUND-2026-08-13.md`) – **keine fehlende
