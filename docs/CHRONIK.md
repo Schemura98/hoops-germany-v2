@@ -2753,3 +2753,110 @@ Umhängung und ihre Rücknahme erzeugen zwei nicht löschbare Posts). Stiller Mo
 Spielwerte. **Offen (vorbestehend):** optimistisches `onWert` vor dem Speichern kann die
 Schlussfolie bei API-Fehlern zu positiv zählen; das Such-Overlay sagt `aria-modal` zu, hat aber
 keine Fokusfalle und gibt den Fokus nicht zurück.
+
+---
+
+## 14.08.2026 (Teil 2) — Admin-Korrekturen posten nicht mehr, Rechtsverweise vollständig, „ab 16" begründet
+
+Vier Commits (`6d7a9a6` · `3fa822e` · `9f9fb77`, dazu die Doku-Commits). Beteiligt: **Nora**
+(`docs/RECHT-MINDESTALTER-2026-08-14.md`), **Nele** (Wortlaute), **Kai** und **Tobias** (Gates).
+
+### Produktentscheidung Patrick: `recordTransfer` mit stillem Modus
+Kais Gate-Befund A2. `recordTransfer` schrieb zwei Dinge, die zusammenfielen: die **Station im
+Lebenslauf** (`TransferEvent`) und die **Neuigkeit** (`autoPostTransfer` + Follower-Benachrichtigung).
+- Neu: `recordTransfer({ still: true })` schreibt nur die Station. Gesetzt **ausschließlich** in
+  `app/api/admin/setteamadmin/route.js` – dort korrigiert ein Super-Admin eine falsche Zuordnung,
+  es wechselt niemand. Ein Post wäre eine Nachricht über ein Ereignis, das nie stattfand, und
+  weder Post noch Benachrichtigung sind löschbar (die Rückkorrektur erzeugte einen zweiten).
+- **Bewusst nicht global**: Für die sieben echten Wechselwege ist der Auto-Post gewollt. Die
+  Asymmetrie gab den Ausschlag – ein fehlender Post ist harmlos, ein falscher nicht rücknehmbar.
+- `tests/e2e/transfer-still.spec.mjs`. ⚠️ Der **zweite** Test ist der wichtigere: Er prüft, dass die
+  echten Wege **laut bleiben**. Würde jemand `still: true` aus Vorsicht überall ergänzen,
+  verschwände der Transfer aus dem Feed, ohne dass ein Test rot wird – „kein Post" wirft keinen
+  Fehler.
+- **Von Tobias am Produkt belegt:** Admin-Korrektur → TransferEvents 9→10, Posts **25→25**,
+  Benachrichtigungen **9→9**, Station im Karriere-Verlauf sichtbar. Gegenprobe echter Beitritt →
+  Posts **25→26**, drei Follower benachrichtigt.
+
+### Noras Pflichtpunkt: Rechtsverweise fehlten auf zwei von drei Registrierungswegen
+`/signup` verwies über `AuthShell` auf Datenschutz und Impressum. `/team/join/[token]` und
+`/team/claim/[token]` legen genauso Konten an, bringen aber eine **eigene Hülle** mit – ohne
+`AuthShell`, ohne `Footer`, und `Footer` steht nicht im Wurzel-Layout. Dort fehlte der Verweis
+vollständig (Art. 13 DSGVO, § 5 DDG).
+- Behoben als **`components/layout/RechtsLinks.js`**, nicht als dreifach kopierter Block.
+- `tests/e2e/rechtsverweise.spec.mjs` (von Nora empfohlen, Muster der `playerregister`-Prüfung):
+  **war erst rot** und benannte genau die zwei Seiten. ⚠️ Die Hüllen-Prüfung ist zweistufig, seit
+  `AuthShell` die Links über `RechtsLinks` bezieht – einstufig hätte sie `/signup` fälschlich
+  gemeldet.
+- Im Browser auf allen drei Wegen belegt, auch im Fehlerzustand „Einladung ungültig".
+
+### Noras Einordnung zum Mindestalter (Frage seit 13.08. offen)
+**Die Selbstauskunft ist richtig und darf nicht zur Einwilligung umgebaut werden.** Art. 8 DSGVO
+greift nur bei Einwilligung; die Datenschutzerklärung nennt aber Vertrag (lit. b). Und „Ich bin
+mindestens 16" ist eine **Tatsachenangabe, keine Willenserklärung** – man widerruft sein Alter
+nicht. Art. 28 DSA stützt zusätzlich die Entscheidung gegen ein Pflicht-Geburtsdatum.
+Offen beim Anwalt (im ohnehin geplanten Termin): §§ 107, 108 BGB – Wirksamkeit des
+unentgeltlichen Nutzungsvertrags mit einem 16-Jährigen; dazu F4-a bis F4-c.
+
+### Neles Texte: die Regel steht jetzt vor dem Formular
+Linas P2. Gemessen hatte sie: `/about`, `/datenschutz` und die Startseite nannten die Grenze nicht.
+- **`app/signup/page.js`** `subtitle`, **`app/about/page.js`** Absatz „Was wir bieten", dazu eine
+  Zeile über dem Häkchen auf **beiden Einladungsseiten** (die haben keine Unterzeile – und laut
+  Nora treffen ausgerechnet sie ab September am ehesten auf einen 15-Jährigen, weil ein Team-Admin
+  seinen U18-Kader einlädt).
+- Der genannte Grund ist geprüft: `fetchsingleplayerinfo` verlangt keinen Token, `/spieler` und
+  `/topscorer` sind ungeschützt → „auch ohne Konto".
+- ⚠️ **Neles vierter Baustein war nicht bestellt und ist der wichtigste**: „Bitte bestätige, dass du
+  mindestens 16 Jahre alt bist" ist an jemanden gerichtet, der ein Häkchen **vergessen** hat. Einem
+  14-Jährigen sagt der Satz „setz das Häkchen", nicht „du darfst hier nicht" – der Weg des
+  geringsten Widerstands ist die Falschangabe, bei genau der Person, die die Regel ausschließen
+  soll. Neu: „Hoops Germany ist ab 16 Jahren. Wenn du mindestens 16 bist, setz bitte das Häkchen."
+  Von Nora geprüft und als Verbesserung bestätigt.
+- ⚠️ Noras Hinweis beim Gegenlesen: Es sind **sechs** Strings, nicht drei – der Google-Weg spricht
+  die Regel dreimal eigenständig aus. Alle sechs liegen jetzt als `MINDESTALTER_HINWEIS(_GOOGLE)`
+  in `lib/constants.js`. Der **Häkchen-Text selbst** bleibt unverändert.
+
+### Kais Gate-Befunde
+- **A4 (Sicherheit, vorbestehend, reproduziert):** `positionLabel` griff ungeschützt in die
+  Prototyp-Kette. `position` ist ein freier String ohne Allowlist – `position: "__proto__"` gab
+  `Object.prototype` zurück, also ein Objekt statt eines Strings. Über 30 Stellen rendern den Wert
+  direkt als React-Kind, darunter `/spieler` und `/transfermarkt`: **Ein einziges Konto hätte diese
+  öffentlichen Seiten für alle Besucher zerlegt.** Jetzt `hasOwnProperty`.
+- **A1 (er hat gemessen, wo ich geraten hatte):** Das 400-Zeichen-Fenster in
+  `transfer-still.spec.mjs` ist heute schon zu kurz – der Aufruf in `app/api/team/create/route.js`
+  misst **416** Zeichen. Jetzt Klammerzählung, jeder Aufruf je Datei, `lib` mitgescannt, absolut ab
+  `PROJECT_ROOT`.
+- **A2:** Die Fehlermeldung von Test 2 hätte den nächsten Leser dazu gebracht, ein berechtigtes
+  `still` zu **entfernen** statt die Liste zu ergänzen. Test 3 heißt jetzt, was er tut (er vergleicht
+  Zeichenpositionen, nicht den Kontrollfluss).
+- **A3:** Die Fokusfalle kopierte das `WelcomeTour`-Muster nur zur Hälfte – ohne `tabIndex={-1}` am
+  Panel landet ein Klick auf eine tote Stelle auf `<body>`, dann greift keine Kantenprüfung mehr.
+- **A5:** Ein kyrillisches о und к in einem Kommentar („Fокusfalle") – `grep` findet ihn nicht.
+
+### Tobias' Auflage B1 – und ein Test, der zuerst falsch grün war
+Er gab B1 als **nicht behoben** zurück: `Gespeichert` war ein **Flex-Container**, damit wurde jedes
+Kind ein eigenes Flex-Item – auch der `<span>` mitten im Satz. Zwei Flex-Items teilen sich
+grundsätzlich keine Zeilenbox, `whitespace-nowrap` konnte nicht wirken. Auf 390 px klaffte ein
+Loch von 169 px mitten im Satz; auf 1280 px passte zufällig alles in eine Zeile.
+`Gespeichert` rendert jetzt im Textfluss.
+⚠️ **Der erste Test dazu war falsch grün**: Er maß den Schluss-Span allein – darin sitzt der Avatar
+auch im kaputten Zustand sauber, die Lücke klafft davor. Erst die Gegenprobe (Flex wiederhergestellt
+→ Test trotzdem grün) hat das aufgedeckt. Jetzt beide Richtungen belegt: mit Fix grün, ohne Fix rot
+(„Lücke 148 px").
+Dazu **B3**: Das mobile Menü ignorierte Escape, während das Such-Overlay daneben sauber schließt;
+der Hamburger trug dauerhaft „Menü öffnen" ohne `aria-expanded`/`aria-controls`.
+
+**Gates:** `48 passed / 0 skipped`, Lint 0 Fehler, Build sauber, `npm start` auf sieben Seiten 200.
+Kai: kein Blocker (aber ein berechtigter Methodik-Blocker, s. u.). Tobias: freigabefähig, 0
+Konsolen-/Netzwerkfehler über 19 Routen in 390 px und 1280 px.
+
+⚠️ **Methodik-Lehre (Kais Blocker B1):** Während Tobias gegen `next dev` prüfte, wurde im selben
+Arbeitsbaum weitergebaut – sein Browser sah damit Code, der nicht im geprüften Commit war. **Vor
+einem Browser-Gate den Baum sauber machen und während des Gates nicht am Produktcode arbeiten.**
+
+**Offen an andere:** B2 (Nele/Lina – ausgeloggt sagt Tour-Schritt 3 „es steht sofort in deinem
+Profil", wer kein Konto hat, hat keins) · B4 (Vivien – Position steht auf der Kaderkarte doppelt) ·
+B5 (Ronja – Suche öffnen springt an den Seitenanfang, Hintergrund scrollt trotz `aria-modal`) ·
+Kais Frage an Patrick: stille In-App-Notiz an den umgehängten Spieler selbst? · `migrate-positions.mjs`
+auf Prod? · Nele: „X hat Y verlassen" behauptet eine Handlung des Spielers, auch wenn ein Admin ihn
+entfernt hat.

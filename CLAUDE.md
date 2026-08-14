@@ -11,7 +11,17 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> **Zuletzt deployt: `5b84f69` (14.08.2026, am Server verifiziert)** – Linas erster Einsatz: **Plattform-Tour ohne Konto**
+> **Zuletzt deployt: `9f9fb77` (14.08.2026, am Server verifiziert)** – zweite Runde des Tages:
+> **Admin-Korrekturen posten nicht mehr öffentlich** (`recordTransfer({ still: true })`, nur in
+> `setteamadmin` – Entscheidung Patrick auf Kais Befund) · **Rechtsverweise auf ALLEN drei
+> kontoerzeugenden Wegen** (`components/layout/RechtsLinks.js`; sie fehlten auf `/team/join` und
+> `/team/claim` völlig – Noras einziger Pflichtpunkt, Art. 13 DSGVO/§ 5 DDG) · **„ab 16" wird
+> begründet, bevor das Formular ausgefüllt ist** (Neles Texte auf `/signup`, `/about`, beiden
+> Einladungsseiten; die sechs Mindestalter-Meldungen liegen jetzt in `lib/constants.js`) ·
+> **Sicherheitsfix `positionLabel`** (`position: "__proto__"` gab `Object.prototype` zurück und
+> hätte `/spieler` und `/transfermarkt` für alle Besucher zerlegt – Befund Kai) · Fokusfalle,
+> mobiles Menü mit Escape, Avatar-Zitat im Textfluss.
+> Davor: **`5b84f69`** – Linas erster Einsatz: **Plattform-Tour ohne Konto**
 > repariert (sie ist über den Footer ausgeloggt erreichbar und meldete dort einen Speicherfehler
 > über einen Versuch, den es nie gab; Schlussfolie „Du hast schon angefangen" über „0 von 4 · 0 %";
 > beide Ausgänge führten in die Anmeldemaske) · **Tour-Schritt 1 versprach zu viel** (doppelt
@@ -22,7 +32,8 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `5197d2c` (der Stand, der bis zum 14.08. tatsächlich lief) → `3c38959` →
+> **Rollback-Kette:** `5b84f69` (erste Runde 14.08.) → `5197d2c` (der Stand, der bis zum 14.08.
+> tatsächlich lief) → `3c38959` →
 > `5073951` → `560e1e6` → `27a04fe` → `e7a38ce` → `275f124` → `a8e4fd4` (vor der Nachtschicht) →
 > `562c629` (vor dem gesamten Redesign). Auf dem VPS per
 > `git checkout <hash> && npm run build && pm2 restart hoops-v2`.
@@ -46,9 +57,20 @@
 > ⚠️ Ein Test in `tests/e2e/auth.spec.mjs` liest den **Quelltext** und prüft, dass jeder
 > Aufrufer von `playerregister` die Bestätigung mitschickt – genau diese Lücke ließ die
 > Einladungswege an 19 grünen Tests vorbei brechen. **Neuer Aufrufer ⇒ Feld mitschicken.**
-> ⚠️ Offen und bei Patrick/Nora: der Wortlaut einer **Einwilligungserklärung**. Was heute
-> dasteht, ist eine Tatsachenangabe des Nutzers, kein Rechtstext. Und: Der Google-OAuth-Weg
-> ist lokal nicht testbar (keine Keys) – **nach dem Deploy einmal echt auf Prod durchspielen**.
+> ✅ **Geklärt am 14.08.2026 (Nora, `docs/RECHT-MINDESTALTER-2026-08-14.md`): Die Selbstauskunft
+> ist das richtige Instrument und darf NICHT zur Einwilligung umgebaut werden.** Art. 8 DSGVO
+> greift nur bei Einwilligung als Rechtsgrundlage – die Datenschutzerklärung nennt aber Vertrag
+> (lit. b); und „Ich bin mindestens 16" ist eine **Tatsachenangabe, keine Willenserklärung**
+> (man widerruft sein Alter nicht), als Einwilligung formuliert trüge der Satz im Streitfall
+> nichts. Art. 28 DSA stützt zusätzlich die Entscheidung gegen ein Pflicht-Geburtsdatum.
+> ⚠️ Beim Anwalt (im ohnehin geplanten Termin, kein neuer Kostenpunkt): **§§ 107, 108 BGB** –
+> ist der unentgeltliche Nutzungsvertrag mit einem 16-Jährigen ohne Eltern wirksam? Wenn nein,
+> wackelt lit. b. Dazu F4-a bis F4-c aus Noras Befund.
+> ⚠️ Der Google-OAuth-Weg ist lokal nicht testbar (keine Keys) – **einmal echt auf Prod
+> durchspielen**.
+> ⚠️ **Entscheidbar für Patrick:** Bestandskonten von vor dem 13.08. haben keinen Altersbeleg,
+> und `models/Player.js` verbietet zu Recht das nachträgliche Setzen. Einmalige Bestätigung
+> beim nächsten Login? In der Testphase billig.
 >
 > ⚠️ **Wer `Player.teamId` ändert, MUSS `slotsFreigeben` aufrufen** – die verbindliche Liste aller
 > acht Wechselwege steht im Kopf von `lib/rosterSlots.js`. Sie war dreimal hintereinander
@@ -225,6 +247,17 @@
   über die Oberfläche („oben rechts") nur, wenn das Gemeinte auch da ist: Der Marker
   **`data-profil-avatar`** in `components/layout/PlayerNav.js` wird zur Laufzeit geprüft, weil
   PlayerNav **pro Seite** eingebunden ist und auf öffentlichen Seiten fehlt.
+- **Transfer = zwei Dinge, seit 14.08.2026 trennbar:** `lib/recordTransfer.js` schreibt die
+  **Station im Lebenslauf** (`TransferEvent`) UND die **Neuigkeit** (Feed-Post +
+  Follower-Benachrichtigung). `still: true` schreibt nur die Station – gesetzt **ausschließlich**
+  in `app/api/admin/setteamadmin/route.js`, weil dort korrigiert und nicht gewechselt wird.
+  ⚠️ Für die sieben echten Wechselwege muss der Post bleiben; `tests/e2e/transfer-still.spec.mjs`
+  prüft **beide** Richtungen, denn „kein Post" wirft keinen Fehler.
+- **Rechtsverweise auf kontoerzeugenden Seiten:** `components/layout/RechtsLinks.js` ist die EINE
+  Stelle für Datenschutz + Impressum. Jede Fläche, auf der ein Konto entsteht, muss sie tragen
+  (Art. 13 DSGVO, § 5 DDG) – `tests/e2e/rechtsverweise.spec.mjs` erzwingt das. Die
+  Mindestalter-Meldungen liegen als `MINDESTALTER_HINWEIS(_GOOGLE)` in `lib/constants.js`
+  (sechs Fundstellen, davon drei im Google-Weg).
 - **Benachrichtigungen:** Ziel je Typ zentral in `lib/notifications.js` (`notificationHref`,
   dazu `GLOCKE_LEER` – **ein** Leerzustands-String für beide Glocken, die vorher auseinanderliefen),
   Symbol-Zuordnung in `components/layout/NotificationBell.js` (`ICON`), Typ-Enum in
@@ -329,25 +362,27 @@
 13. **Rest aus `docs/RETENTION-BEFUND-2026-08-13.md`** (Ronja) – von Lina am 14.08. am Live-Stand
     gegengeprüft: **R1–R5, R7, R8 und K1–K3/K5/K9 sind erledigt und verifiziert**. Offen bleiben
     die übrigen K-Verlinkungen. Der Sponsor-Report-Punkt (Abschnitt 3a) ist behoben.
-14. **Aus `docs/ENTDECKBARKEIT-BEFUND-2026-08-14.md` noch offen** (Lina):
-    **P2 „ab 16" ohne Begründung** – `/about`, `/datenschutz` und die Startseite nennen die Grenze
-    nicht (gemessen), ein 14-Jähriger füllt das ganze Formular aus, bevor er es erfährt.
-    ⚠️ Wortlaut **zuerst Nora** (Tatsachenangabe vs. Einwilligung, s. Punkt 3 dieser Liste),
-    **dann Nele** – nicht selbst formulieren.
-    Dazu Linas eigene Frage, ob ihre Rolle von Vivien/Nele/Ronja aufgesogen wird.
-15. **Aus den Gates vom 14.08. (Kai/Tobias) bewusst zurückgestellt:**
-    (a) **`recordTransfer` legt einen öffentlichen Feed-Post an und benachrichtigt alle Follower** –
-    `/admin/players` ist aber auch ein *Korrektur*werkzeug; eine Umhängung und ihre Rücknahme
-    erzeugen zwei nicht löschbare Posts. **Produktentscheidung Patrick**, relevant vor dem
-    Umhängen/Entfernen der Demo-Daten (Punkt 2). (b) `GLOCKE_LEER` ist der Leerzustand *aller*
-    Benachrichtigungstypen, spricht aber nur über eigene Spielwerte → Nele. (c) Optimistisches
-    `onWert` vor dem Speichern kann die Tour-Schlussfolie bei API-Fehlern zu positiv zählen.
-    (d) Das Such-Overlay sagt `aria-modal` zu, hat aber **keine Fokusfalle** und gibt den Fokus
-    nach dem Schließen nicht zurück (`WelcomeTour.js` macht es vor). (e) `TeamNav` „Abmelden"
-    misst ~16×16 px – letzter bekannter Verstoß gegen WCAG 2.5.8. (f) `PlayerNav` hat **keine
-    Suche**: eingeloggt ist sie nur auf öffentlichen Seiten erreichbar. (g) Alt-Kürzel wie
-    `position: "SF"` wählen in der Tour keinen Chip vor (`POSITION_LABELS` greift nur für die
-    Anzeige).
+14. **Aus `docs/ENTDECKBARKEIT-BEFUND-2026-08-14.md`** (Lina): **P2 ist erledigt** – „ab 16" wird
+    seit `3fa822e` auf `/signup`, `/about` und beiden Einladungsseiten begründet (Nora → Nele).
+    Offen bleibt Linas eigene Frage, ob ihre Rolle von Vivien/Nele/Ronja aufgesogen wird.
+15. **Aus den Gates vom 14.08. noch offen** (erledigt sind: `recordTransfer`-Post, Fokusfalle,
+    `TeamNav`, Alt-Kürzel, mobiles Menü mit Escape):
+    (a) **`GLOCKE_LEER`** ist der Leerzustand *aller* Benachrichtigungstypen, spricht aber nur über
+    eigene Spielwerte → Nele. (b) Optimistisches `onWert` vor dem Speichern kann die
+    Tour-Schlussfolie bei API-Fehlern zu positiv zählen. (c) `PlayerNav` hat **keine Suche**:
+    eingeloggt ist sie nur auf öffentlichen Seiten erreichbar → Lina/Ronja. (d) **B2 (Tobias):**
+    Ausgeloggt sagt Tour-Schritt 3 „es steht sofort in deinem Profil" – wer kein Konto hat, hat
+    keins; die Quittung darunter korrigiert es sofort → Nele/Lina. (e) **B4:** Position steht auf
+    der Kaderkarte doppelt (graue Zeile + oranges Abzeichen) → Vivien. (f) **B5:** Suche öffnen
+    springt an den Seitenanfang, Escape stellt die Leseposition nicht wieder her; der Hintergrund
+    scrollt trotz `aria-modal` weiter → Ronja. (g) **Kai an Patrick:** Durch `still: true` erfährt
+    der umgehängte Spieler jetzt gar nichts mehr – stille In-App-Notiz? (h) `scripts/migrate-positions.mjs`
+    auf Prod ausführen? Alt-Kürzel sind heute harmlos (alle Lesezugriffe laufen durch
+    `positionLabel`, auch die Filter), sauber wäre es an der Quelle. (i) **Nele:** „X hat Y
+    verlassen" behauptet eine Handlung des Spielers, auch wenn ein Admin ihn entfernt hat.
+    ⚠️ **Methodik-Lehre aus Kais Blocker:** Während ein Browser-Gate gegen `next dev` läuft, darf
+    im selben Arbeitsbaum **nicht weitergebaut** werden – der Prüfer sieht sonst Code, der nicht im
+    geprüften Commit ist. Vor dem Gate committen oder stashen.
 16. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
 17. **Optional / bewusst offen:** Best-of-Serien + echte Playoff-Bracket-Grafik; Status-basierte
     Tabellen-Exklusion; Stat-Filter Hauptrunde/Playoffs/Gesamt; stabiler `leagueKey`; Benachrichtigung bei
