@@ -2860,3 +2860,88 @@ B5 (Ronja – Suche öffnen springt an den Seitenanfang, Hintergrund scrollt tro
 Kais Frage an Patrick: stille In-App-Notiz an den umgehängten Spieler selbst? · `migrate-positions.mjs`
 auf Prod? · Nele: „X hat Y verlassen" behauptet eine Handlung des Spielers, auch wenn ein Admin ihn
 entfernt hat.
+
+---
+
+## 14.08.2026 (Teil 3) — Stille Notiz an den Umgehängten, gemeinsame Symbol-Tabelle, Rechteentzug
+
+Vier Commits (`7604578` · `4cbd88b` · `2503433`, dazu Doku). Zwei Gate-Runden mit **Kai** und
+**Tobias**; Wortlaute von **Nele**.
+
+### Produktentscheidung Patrick: der Betroffene erfährt es
+Folge der Stilllegung aus Teil 2 (Kais Befund): Seit `recordTransfer({ still: true })` erzeugt der
+Verwaltungspfad keinen Post und keine Follower-Meldung mehr – und weil `recordTransfer` nie den
+Spieler selbst benachrichtigt hat, war ausgerechnet der Betroffene die einzige Person, die von
+einer Änderung an seinem eigenen Profil nichts erfährt.
+- **Neuer Typ `team_assigned`** (`models/Player.js`, `NOTIF_ICON`, `notificationHref`), ausgelöst in
+  `app/api/admin/setteamadmin/route.js` über `benachrichtigeZuordnung`. Nur In-App, keine Mail.
+- ⚠️ **Nur bei einer ECHTEN Zuordnungsänderung.** Bloße Rechtevergabe fürs selbe Team löst nichts
+  aus – sonst meldete die Plattform ein Ereignis, das nicht stattgefunden hat. Von Tobias dreifach
+  am Produkt belegt (0 → 0).
+- **Wortlaut (Nele):** „Dein Profil ist jetzt {Team} zugeordnet – {vorher}. Eingetragen hat das die
+  Verwaltung von Hoops Germany. Wenn das nicht stimmt, schreib uns über das Kontaktformular."
+  Zustand statt Vorgang („ist zugeordnet", kein Subjekt „du"); „zugeordnet" statt „im Kader", weil
+  der Code `Player.teamId` setzt und Roster-Slots eine andere Sache sind; Urheber benannt **ohne**
+  Grund zu behaupten (nicht „korrigiert" – das behauptete, was vorher der Fall war). Der Rückweg
+  ist das Einzige, was die Nachricht handlungsfähig macht: Anders als bei `own_stats` gibt es
+  nichts anzuklicken.
+- Neles Bonus: `transferMessage` Fall `leave` heißt jetzt „X **steht nicht mehr im Kader von** Y."
+  „hat verlassen" behauptete eine Handlung des Spielers, auch wenn ein Admin ihn entfernt hat.
+
+### Kais zwei Blocker
+- **Meine Ausnahmeliste war eine Ausrede.** Sechs Typen hatte ich mit „sehen nur Admins in eigenen
+  Oberflächen" von der Symbolpflicht ausgenommen. Widerlegt: `getnotifications` filtert überhaupt
+  nicht nach Typ, und `set-member-admin` schiebt `team_admin_granted` an ein **normales
+  Kadermitglied**. Der Test zertifizierte sechs echte Lücken – und die Gegenprobe war wertlos, weil
+  der geprüfte Typ nicht in der Liste stand. **Liste gelöscht, Symbole ergänzt.**
+- **Der Commit protokollierte etwas als behoben, das es nicht war.** `TransferFeedWidget.js` baut
+  den Satz selbst und sagte weiter „hat X verlassen" – auf `/player/newsfeed`, zweimal gerendert.
+
+### Gemeinsame Symbol-Tabelle (Kai A3 + Tobias, unabhängig)
+Die zweite Glocke in `components/layout/Navbar.js` hatte **gar keine** Zuordnung und rendete für
+jeden Typ hart einen Basketball. Die Drei-Stellen-Regel aus `CLAUDE.md` erfasste sie nicht, und kein
+Test konnte es merken. **`NOTIF_ICON` liegt jetzt in `lib/notifications.js`**, beide Glocken ziehen
+daraus, `tests/e2e/benachrichtigungs-typen.spec.mjs` hält es fest.
+⚠️ Der Test prüft die **Indizierung** (`NOTIF_ICON[n.type]`), nicht den Namen – ein
+`includes("NOTIF_ICON")` wäre schon durch die Importzeile erfüllt gewesen.
+
+### Rechteentzug (Befund Tobias, „mittel")
+`setteamadmin` überschrieb `Team.adminPlayerId`, ließ beim bisherigen Gründer aber
+`isTeamAdmin`/`teamAdminOf` stehen. Da die Dual-Auth über `teamAdminOf` läuft, behielt er vollen
+Zugriff auf `/team/admin`, obwohl das Team längst auf jemand anderen zeigte.
+- Entzug jetzt in `setteamadmin` **und** – als Nachzug (Kai A3 der zweiten Runde) – in
+  `app/api/admin/transfer-team-admin/route.js`, das dieselbe Operation ohne den
+  `teamAdminOf`-Wächter machte.
+- ⚠️ **Nur der bisherige `adminPlayerId`, nicht die Co-Admins.** Kais Begründung ist die bessere:
+  `set-member-admin` verlangt `isMainAdmin` – die Rücknahme liegt damit beim neuen Haupt-Admin, und
+  der verdrängte Gründer kann sie nicht mehr auslösen.
+
+### Ein Test-Muster, das dreimal danebenlag
+Der Avatar-Layout-Test war sporadisch rot. Timeout erhöht, leichtere Seite gewählt, Übergangs-Pause
+ergänzt – **keine der drei Maßnahmen half, eine verschlimmerte es.** Die Ursache war kein Timing,
+sondern ein unbekannter Ausgangszustand: Die Tour startet für Konten mit `welcomeSeen: false` von
+selbst; liegt ihr Overlay über der Seite, ist der Footer-Knopf verdeckt und der Klick läuft in
+einen Timeout, obwohl das Ziel erreicht ist. Ob der Test grün war, hing daran, ob ein früherer Test
+das Flag gesetzt hatte. **Lösung: `mark-welcome-seen` vor dem Laden.** Vier volle Läufe: 54/54.
+⚠️ Zweite Lehre aus derselben Datei: Meine Leerzeichen-Probe für die relative Schwelle **maß
+nichts** – in einem `<p>` kollabiert ein einzelnes Leerzeichen, Breite 0, Fallback greift, Schwelle
+still wieder konstant. `whiteSpace = "pre"` macht sie messbar (belegt: 3 px statt geraten 4).
+
+### Weitere Gate-Befunde eingearbeitet
+`positionLabel` mit `hasOwnProperty` (`position: "__proto__"` gab `Object.prototype` zurück und
+hätte `/spieler` und `/transfermarkt` für alle Besucher zerlegt) · Klammerzählung fürs Enum-Parsing
+· Wächter gegen leere Typenliste in der Quelle statt je Test · `/kontakt`-Test in
+`rechtsverweise.spec.mjs`, weil die neue Nachricht darauf verweist.
+
+**Gates:** `54 passed / 0 skipped` (viermal in Folge), Lint 0 Fehler, Build sauber, `npm start` auf
+sechs Seiten 200. Kai: freigegeben. Tobias: freigabefähig, 0 Konsolen-/Netzwerkfehler.
+
+⚠️ **Zwei Umgebungs-Lehren:** (1) `preview_stop` löst den Dev-Server nur aus der Verwaltung, beendet
+ihn aber nicht – PID 53664 hielt Port 3000 im Zustand `ABHÖREN` weiter (Tobias hat es gemeldet,
+bewusst nicht selbst beendet). Vor jedem Build `curl http://localhost:3000`. (2) Während ein
+Browser-Gate läuft, darf im selben Arbeitsbaum nicht weitergebaut werden.
+
+**Offen an Patrick:** Der verdrängte Gründer erfährt vom Rechteentzug nichts – dasselbe Argument,
+das `team_assigned` hervorgebracht hat, eine Ebene höher. `team_admin_granted` existiert, ein
+Gegenstück für den Entzug nicht. Neu erreichbar, weil er die Rechte vorher behielt.
+**Offen an Nele:** Die Notiz sagt „Kontaktformular", der Footer-Link heißt „Kontakt".
