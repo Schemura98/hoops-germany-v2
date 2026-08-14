@@ -105,9 +105,71 @@ test.describe("Such-Overlay – Ligen (Ronjas R8)", () => {
   });
 });
 
+test.describe("Nachfiltern, sobald die Daten da sind", () => {
+  // Der einzige echte Funktionsfehler, den dieser Umbau behoben hat – und er
+  // hatte zunächst keinen Test (Befund A7 von Kai). Die Suche lädt Spieler,
+  // Teams und Ligen erst beim Öffnen. Wer sofort lostippt, tat das gegen ein
+  // leeres `searchData`; die Eingabe wurde verworfen und nichts filterte nach,
+  // also stand „Keine Ergebnisse" über etwas, das es gibt. Ohne diesen Test
+  // kann der Effekt bei der nächsten Navbar-Überarbeitung still verschwinden –
+  // er trägt ein `eslint-disable` und sieht nach Aufräum-Kandidat aus.
+  test("Eingabe VOR dem Laden der Daten geht nicht verloren", async ({ page }) => {
+    // Die drei Abrufe künstlich verzögern, damit das Rennen sicher entsteht.
+    for (const muster of ["**/api/player/fetchall", "**/api/team/fetchteams", "**/api/leagues"]) {
+      await page.route(muster, async (route) => {
+        await new Promise((r) => setTimeout(r, 1500));
+        await route.continue();
+      });
+    }
+
+    await page.goto(SEITE);
+    await page.getByLabel("Suche öffnen").click();
+    const dialog = page.getByRole("dialog", { name: "Suche" });
+    await expect(dialog).toBeVisible();
+
+    // Sofort tippen – die Daten sind garantiert noch unterwegs.
+    await suchfeld(dialog).fill("Max");
+    await expect(dialog.getByText("Lädt…")).toBeVisible();
+
+    // Ohne den Nachfilter-Effekt bliebe es bei „Keine Ergebnisse", ohne dass
+    // der Nutzer je erfährt, dass es Treffer gäbe.
+    await expect(dialog.getByRole("link").first()).toBeVisible({ timeout: 15_000 });
+    await expect(dialog.getByText("Keine Ergebnisse")).toHaveCount(0);
+  });
+});
+
 test.describe("Trefferflächen der Chrome-Symbole (WCAG 2.5.8)", () => {
   // 24 px ist das Mindestmaß der Richtlinie. Gemeldet wurden 20×20 px.
   const MINDEST = 24;
+
+  // ⚠️ ALLE Icon-Knöpfe der Leiste prüfen, nicht eine Auswahl. Die erste
+  // Fassung dieses Tests nannte Lupe und Feedback beim Namen – der Hamburger
+  // blieb dadurch bei 20×20 px und rutschte an 34 grünen Tests vorbei, obwohl
+  // er der einzige Zugang zur mobilen Navigation ist (gefunden von Tobias am
+  // Gerät, nicht hier). Eine Namensliste prüft, woran man gedacht hat; diese
+  // Fassung prüft, was da ist.
+  test("jeder Icon-Knopf der öffentlichen Leiste ist groß genug (mobil)", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(SEITE);
+
+    const leiste = page.locator("nav").first();
+    const ziele = leiste.locator("a[aria-label], button[aria-label]");
+    const anzahl = await ziele.count();
+    expect(anzahl, "keine beschrifteten Icon-Ziele gefunden").toBeGreaterThan(0);
+
+    const zuKlein = [];
+    for (let i = 0; i < anzahl; i++) {
+      const ziel = ziele.nth(i);
+      if (!(await ziel.isVisible())) continue;
+      const label = await ziel.getAttribute("aria-label");
+      const box = await ziel.boundingBox();
+      if (!box) continue;
+      if (Math.round(box.width) < MINDEST || Math.round(box.height) < MINDEST) {
+        zuKlein.push(`${label}: ${Math.round(box.width)}×${Math.round(box.height)}`);
+      }
+    }
+    expect(zuKlein, `zu kleine Trefferflächen: ${zuKlein.join(", ")}`).toEqual([]);
+  });
 
   for (const label of ["Suche öffnen", "Feedback geben"]) {
     test(`„${label}" misst mindestens ${MINDEST}×${MINDEST} px`, async ({ page }) => {

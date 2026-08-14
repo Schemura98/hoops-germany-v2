@@ -71,10 +71,14 @@ export default function FeedbackLink({ variant = "icon", onNavigate }) {
   // `p-2 -m-1`: Das Symbol misst 20×20 px, die Klickfläche lag damit unter dem
   // 24er-Mindestmaß (WCAG 2.5.8, Gate-Befund 13.08.2026) – auf einem Handy
   // trifft man das nur mit Zielen. Das Padding hebt die Trefferfläche auf 36 px,
-  // das negative Margin nimmt den Zuwachs aus dem Layout wieder heraus, sodass
-  // der Abstand zu Suche und Glocke unverändert bleibt. Dasselbe Muster nutzt
-  // NotificationBell bereits – hier und beim Suchknopf war es nur nicht
-  // nachgezogen.
+  // das negative Margin nimmt einen Teil davon aus dem Layout zurück.
+  // ⚠️ Nachgerechnet von Kai, 14.08.2026: Es nimmt NICHT den ganzen Zuwachs
+  // zurück – p-2 gibt 8 px, -m-1 nimmt 4 px, die Layout-Box wächst also um
+  // 4 px pro Seite. (Für exakt unverändert bräuchte es -m-2.) Hier steht
+  // trotzdem -m-1, weil NotificationBell dieses Muster seit jeher nutzt und
+  // eine Leiste mit zwei verschiedenen Rhythmen schlechter wäre als 4 px mehr
+  // Luft. Ein früherer Stand dieses Kommentars behauptete „Abstand bleibt
+  // unverändert" – das war schlicht falsch gerechnet.
   return (
     <Link
       href="/feedback"

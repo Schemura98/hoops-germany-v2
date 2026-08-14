@@ -163,6 +163,17 @@ export default function PlayerNav({ player }) {
             aria-current={isActive("/player/player-detail") ? "page" : undefined}
             className="flex items-center gap-2 px-1 rounded-full hover:bg-navy-700/5 transition-colors"
             title="Mein Profil"
+            // Marker für das Avatar-Zitat in der Tour (components/onboarding/
+            // TourSteps.js). Die Quittung dort sagt „da kommst du jederzeit oben
+            // rechts hin" und zeigt die Form daneben – das darf sie nur, wenn
+            // diese Leiste auch wirklich auf dem Bildschirm steht. PlayerNav
+            // wird pro Seite eingebunden, nicht im Layout; auf öffentlichen
+            // Seiten trägt die Navbar stattdessen einen Textlink (Desktop) bzw.
+            // gar nichts (Mobil, dort liegt Profil im Hamburger). Befund von
+            // Tobias, 14.08.2026. Der Marker statt einer Pfadliste, weil eine
+            // Liste bei der nächsten neuen Seite still veraltet – dieser Weg
+            // prüft, was tatsächlich da ist.
+            data-profil-avatar="true"
           >
             {player?.profileImage ? (
               // eslint-disable-next-line @next/next/no-img-element

@@ -125,6 +125,38 @@ test.describe("Plattform-Tour ohne Konto", () => {
   });
 });
 
+// Die Quittung nach dem Positions-Tipp sagt „da kommst du jederzeit oben rechts
+// hin" und zeigt den Avatar daneben – aber nur, wenn die Spieler-Leiste
+// tatsächlich auf dem Bildschirm steht. Erkannt wird das am Marker
+// `data-profil-avatar` in components/layout/PlayerNav.js. Dieser Test hält
+// beide Hälften fest: Ohne ihn könnte der Marker beim nächsten Umbau still
+// verschwinden, und die Quittung fiele wortlos auf die kurze Fassung zurück –
+// oder, schlimmer, jemand setzt ihn in die öffentliche Navbar, wo gar kein
+// Avatar steht (Befund Tobias, 14.08.2026).
+test.describe("Profil-Avatar als Bezugspunkt der Tour", () => {
+  test("öffentliche Seiten tragen den Marker NICHT", async ({ page }) => {
+    await page.goto(SEITE);
+    await expect(page.locator("[data-profil-avatar]")).toHaveCount(0);
+  });
+
+  test("die Spieler-Leiste trägt den Marker", async ({ page, request }) => {
+    const res = await request.post("/api/player/playerlogin", {
+      data: { email: "sven.adler@test.de", password: "test123" },
+    });
+    expect(res.status()).toBe(200);
+    const { token } = await res.json();
+    expect(token).toBeTruthy();
+
+    await page.goto(SEITE);
+    await page.evaluate((t) => localStorage.setItem("playerAuthToken", t), token);
+    await page.goto("/player/player-detail");
+
+    const marker = page.locator("[data-profil-avatar]");
+    await expect(marker).toHaveCount(1);
+    await expect(marker).toHaveAttribute("href", "/player/player-detail");
+  });
+});
+
 test.describe("Plattform-Tour – Beleg-Aussage", () => {
   test("verspricht keine doppelte Bestätigung der eigenen Zahlen", async ({ page }) => {
     const tour = await tourOeffnenOhneKonto(page);

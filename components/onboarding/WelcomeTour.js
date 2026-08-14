@@ -271,15 +271,23 @@ export default function WelcomeTour() {
     async (completed = false) => {
       if (schliessendRef.current) return;
       schliessendRef.current = true;
-      // Ausgeloggte Durchläufe tragen „ohne_konto" statt des Wegs (Hinweis
+      // Ausgeloggte Durchläufe werden als solche gekennzeichnet (Hinweis
       // Nele/Ben, 14.08.2026): Sonst mischt sich der Erstbesucher, der die Tour
-      // über den Footer geöffnet hat, in dieselbe Abschlussquote wie ein frisch
+      // über den Footer geöffnet hat, in dieselbe Quote wie ein frisch
       // registrierter Nutzer – zwei Gruppen mit völlig verschiedener Bedeutung
       // in einer Zahl.
+      // Der Abbruch trägt die Kennzeichnung seit dem Nachtrag ebenfalls (Befund
+      // A8 von Kai): Vorher war nur die Abschlussquote getrennt, während die
+      // Abbruchkurve – die interessantere der beiden – weiter beide Gruppen
+      // vermischte. Eine halb gezogene Trennlinie ist irreführender als keine.
       trackEvent(
         completed ? "tour_completed" : "tour_skipped",
         pathname,
-        completed ? (angemeldet ? weg || "ohne_weg" : "ohne_konto") : SCHRITTE[index].key
+        completed
+          ? angemeldet
+            ? weg || "ohne_weg"
+            : "ohne_konto"
+          : `${SCHRITTE[index].key}${angemeldet ? "" : ":ohne_konto"}`
       );
       setSichtbar(false);
       setTimeout(() => setOpen(false), 200);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import {
   PiBasketballBold,
@@ -192,6 +192,15 @@ function AvatarZitat({ player }) {
 export function StepPosition({ weg, wert, onWert, onGespeichert, player }) {
   const [stand, setStand] = useState(null); // null | ok | fehler | anonym
   const [laeuft, setLaeuft] = useState(null);
+  // Steht die Spieler-Leiste mit dem Profil-Avatar gerade auf dem Bildschirm?
+  // Nur dann darf die Quittung „oben rechts" sagen und die Form zeigen – auf
+  // öffentlichen Seiten gibt es dort einen Textlink oder (mobil) nur den
+  // Hamburger (Befund Tobias, 14.08.2026). Zur Laufzeit geprüft statt über eine
+  // Pfadliste, die still veraltet.
+  const [zeigtAvatar, setZeigtAvatar] = useState(false);
+  useEffect(() => {
+    setZeigtAvatar(!!document.querySelector("[data-profil-avatar]"));
+  }, []);
 
   async function waehlen(rolle) {
     const neu = wert === rolle ? "" : rolle; // nochmal tippen = abwählen
@@ -236,12 +245,30 @@ export function StepPosition({ weg, wert, onWert, onGespeichert, player }) {
           die Form – „über dein Bild oben rechts" wäre für den typischen Leser
           falsch, denn der ist zwei Minuten alt, hat noch kein Foto und findet
           oben rechts einen Initialenkreis. Die Form zeigt das Zitat daneben. */}
-      {wert && stand === SPEICHERN_OK && (
+      {/* `stand === null` heisst „noch nichts angetippt" – der Wert kommt dann
+          aus dem Profil und ist sehr wohl gespeichert. Ohne diesen Zweig
+          verliert ein Spieler mit gepflegter Position seine Bestätigungszeile
+          (Befund A6 von Kai); die alte Bedingung `!fehler` war initial `true`
+          und deckte das ab. Ausgeloggt greift er nicht, weil dort kein Profil
+          vorbelegt und `wert` leer ist. */}
+      {wert && (stand === SPEICHERN_OK || stand === null) && (
         <Gespeichert>
-          <span className="inline-flex flex-wrap items-center gap-1.5">
-            Steht in deinem Profil – da kommst du jederzeit oben rechts hin.
-            <AvatarZitat player={player} />
-          </span>
+          {zeigtAvatar ? (
+            // `whitespace-nowrap` um das letzte Wort UND das Zitat: Auf 390 px
+            // rutschte der Avatar sonst allein in eine dritte Zeile und las
+            // sich als loses Abzeichen statt als Zitat der Form (Befund Tobias).
+            <>
+              Steht in deinem Profil – da kommst du jederzeit oben{" "}
+              <span className="whitespace-nowrap">
+                rechts hin. <AvatarZitat player={player} />
+              </span>
+            </>
+          ) : (
+            // Ohne sichtbare Spieler-Leiste bliebe „oben rechts" eine Aussage
+            // über etwas, das dort nicht steht – genau der Fehlertyp, gegen den
+            // dieser Umbau angetreten ist.
+            "Steht in deinem Profil."
+          )}
         </Gespeichert>
       )}
       {/* ⚠️ Ohne diesen eigenen Zweig wäre der Fix ein Rückschritt (Warnung von
@@ -257,6 +284,10 @@ export function StepPosition({ weg, wert, onWert, onGespeichert, player }) {
       {wert && stand === SPEICHERN_ANONYM && (
         <Hinweis>Für dein Profil – gespeichert wird es, sobald du ein Konto hast.</Hinweis>
       )}
+      {/* Abwählen quittiert sonst gar nichts (Befund Tobias, 14.08.2026):
+          Nochmal auf den aktiven Chip tippen speichert `""` – eingeloggt löscht
+          man die Position damit still aus dem Profil, ohne jede Rückmeldung. */}
+      {!wert && stand === SPEICHERN_OK && <Hinweis>Position wieder entfernt.</Hinweis>}
       {stand === SPEICHERN_FEHLER && (
         <FormAlert className="mt-3">
           Konnte gerade nicht gespeichert werden. Du kannst das später im Profil nachholen.
@@ -294,7 +325,9 @@ export function StepStadt({ stadt, land, onOrt, onGespeichert }) {
         className={inputClass}
       />
 
-      {land && stand === SPEICHERN_OK && (
+      {/* `stand === null`: aus dem Profil vorbelegt, also gespeichert – s. die
+          gleichlautende Stelle in StepPosition (Befund A6 von Kai). */}
+      {land && (stand === SPEICHERN_OK || stand === null) && (
         <Gespeichert>
           {stadt} · {land} – gespeichert.
         </Gespeichert>
@@ -402,8 +435,19 @@ export function StepUebergabe({
             Trag dich als verfügbar ein – du bist damit sichtbar, sobald ein Verein
             im Transfermarkt sucht. Der ist noch im Aufbau, du gehörst zu den Ersten.
           </p>
-          {verfuegbar && stand === SPEICHERN_OK ? (
-            <Gespeichert>Du stehst jetzt als verfügbar im Transfermarkt.</Gespeichert>
+          {/* `stand === null` = aus dem Profil vorbelegt (WelcomeTour setzt
+              `verfuegbar` aus `transferStatus`). Ohne diesen Zweig las ein
+              Spieler, der längst verfügbar ist, die Aufforderung „Als verfügbar
+              eintragen" – eine Handlungsaufforderung für etwas Erledigtes und
+              damit eine falsche Aussage über sein eigenes Profil (Befund A1 von
+              Kai). Die alte Bedingung `!fehler` war initial `true`; beim Umbau
+              auf `stand` ist das durchgerutscht.
+              Der Satz sagt bewusst nicht mehr „Du stehst JETZT als verfügbar":
+              Bei einem vorbelegten Wert behauptete das, die Zeile sei die Folge
+              eines gerade getanen Klicks. Neutral stimmt er in beiden Fällen;
+              dass es geklappt hat, trägt ohnehin der grüne Haken. */}
+          {verfuegbar && (stand === SPEICHERN_OK || stand === null) ? (
+            <Gespeichert>Du stehst als verfügbar im Transfermarkt.</Gespeichert>
           ) : (
             <button
               type="button"

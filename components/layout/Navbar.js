@@ -296,15 +296,18 @@ export default function Navbar() {
   // also ausschließlich, solange das Overlay offen ist.
   useEffect(() => {
     if (!searchOpen) return;
+    // `closeSearch` aufrufen statt seinen Rumpf zu kopieren (Befund A12 von
+    // Kai): Zwei Stellen mit derselben Aufgabe laufen irgendwann auseinander –
+    // genau der Defekt, den `GLOCKE_LEER` im selben Commit für die Glocke
+    // behebt. `closeSearch` ist eine Funktionsdeklaration (hoisted) und ruft
+    // nur Setter, die React stabil hält; eine veraltete Closure kann hier
+    // nichts anrichten.
     function onKeyDown(e) {
-      if (e.key === "Escape") {
-        setSearchOpen(false);
-        setSearchTerm("");
-        setResults([]);
-      }
+      if (e.key === "Escape") closeSearch();
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchOpen]);
 
   async function toggleNotif() {
@@ -539,9 +542,15 @@ export default function Navbar() {
             )}
 
             {/* Mobile-Toggle */}
+            {/* `p-2 -m-1` wie bei den Nachbarn. Er war der letzte 20×20-Knopf
+                dieser Leiste – und ausgerechnet der einzige Zugang zur
+                gesamten mobilen Navigation auf öffentlichen Seiten (gemessen
+                von Tobias, 14.08.2026). Er rutschte durch, weil die Prüfung
+                Feedback, Lupe und Glocke abdeckte und ihn nicht; ein Test
+                misst jetzt ALLE Icon-Knöpfe der Leiste, nicht eine Auswahl. */}
             <button
               onClick={() => setMobileOpen((v) => !v)}
-              className="lg:hidden text-paper-50 hover:text-brand-400 transition-colors"
+              className="lg:hidden p-2 -m-1 text-paper-50 hover:text-brand-400 transition-colors"
               aria-label="Menü öffnen"
             >
               {mobileOpen ? <PiXBold className="w-5 h-5" /> : <PiListBold className="w-5 h-5" />}
