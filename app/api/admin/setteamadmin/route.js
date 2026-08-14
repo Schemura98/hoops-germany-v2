@@ -7,6 +7,71 @@ import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 import { slotsFreigeben } from "@/lib/rosterSlots";
 import { recordTransfer } from "@/lib/recordTransfer";
 
+// Meldet dem Spieler, dass seine Vereinszuordnung geändert wurde.
+//
+// ⚠️ Der Text darf NICHT behaupten, der Spieler sei gewechselt – er hat nichts
+// getan, jemand anderes hat eine Zuordnung geändert. Genau daran krankt die
+// bestehende Transfer-Nachricht („X hat Y verlassen." auch dann, wenn ein Admin
+// ihn entfernt hat, Befund Kai). Und er erfindet keinen Grund: Der Code weiß
+// nicht, ob korrigiert, umstrukturiert oder ein Fehler behoben wurde.
+//
+// Fehlertolerant wie `recordTransfer`: Ein Problem beim Benachrichtigen darf
+// das Setzen der Admin-Rechte nicht kippen.
+async function benachrichtigeZuordnung(player, vorherigesTeam, team) {
+  try {
+    const vorher = vorherigesTeam
+      ? await Team.findById(vorherigesTeam).select("teamName")
+      : null;
+
+    // Wortlaut Nele, 14.08.2026. Jede Wendung ist begründet:
+    //  • „Dein Profil ist … zugeordnet" – Zustand, kein Vorgang, kein Subjekt
+    //    „du". Der Spieler hat nichts getan.
+    //  • „zugeordnet", NICHT „im Kader": Der Code setzt `Player.teamId`;
+    //    Roster-Slots sind eine andere Sache und können leer bleiben. „Du
+    //    stehst jetzt im Kader" wäre im Sinne des Codes richtig und im Sinne
+    //    des Lesers womöglich falsch.
+    //  • „Eingetragen hat das die Verwaltung von Hoops Germany" benennt den
+    //    Urheber, ohne einen GRUND zu behaupten. Bewusst nicht „korrigiert"
+    //    oder „berichtigt" – jedes dieser Verben behauptet, was vorher der
+    //    Fall war, und das weiß der Code nicht. Bewusst auch nicht „ein
+    //    Administrator": das verwechselt sich mit dem Team-Admin.
+    //  • Der Rückweg ist das Einzige, was die Nachricht handlungsfähig macht:
+    //    Anders als bei `own_stats` gibt es hier nichts anzuklicken. Ohne ihn
+    //    bliebe dem Spieler nur Rätselraten – die Sorte Sackgasse, die als
+    //    „Vorfall" gelesen wird, obwohl nichts passiert ist. Im Klartext und
+    //    nicht als Link, weil `notificationHref` auf die Vereinsseite führt.
+    //    ⚠️ Setzt voraus, dass `/kontakt` erreichbar bleibt (Footer, geprüft).
+    // Ein dritter Fall („keinem Team mehr zugeordnet") kann hier nicht
+    // auftreten: Der `remove`-Zweig dieser Route fasst `teamId` nicht an.
+    const vorherText = vorher?.teamName
+      ? `vorher ${vorher.teamName}`
+      : "vorher war kein Team hinterlegt";
+    const message =
+      `Dein Profil ist jetzt ${team.teamName} zugeordnet – ${vorherText}. ` +
+      `Eingetragen hat das die Verwaltung von Hoops Germany. ` +
+      `Wenn das nicht stimmt, schreib uns über das Kontaktformular.`;
+
+    await Player.updateOne(
+      { _id: player._id },
+      {
+        $push: {
+          notifications: {
+            type: "team_assigned",
+            teamId: team._id,
+            teamName: team.teamName,
+            teamSlug: team.slug,
+            message,
+            read: false,
+            createdAt: new Date(),
+          },
+        },
+      }
+    );
+  } catch (err) {
+    console.error("[TEAM_ASSIGNED NOTIFY ERROR]", err);
+  }
+}
+
 // POST /api/admin/setteamadmin – Spieler als Team-Admin setzen/entfernen (Admin).
 async function handler(req) {
   const body = await req.json().catch(() => ({}));
@@ -77,12 +142,31 @@ async function handler(req) {
   // Ereignis, das nie stattgefunden hat – und beide sind nicht löschbar, die
   // Rückkorrektur erzeugte also einen zweiten falschen Post. Die Station im
   // Lebenslauf entsteht trotzdem; genau darum ging es bei diesem Aufruf.
+  const zuordnungGeaendert = String(vorherigesTeam || "") !== String(team._id);
+
   await recordTransfer({
     player: player._id,
     fromTeam: vorherigesTeam,
     toTeam: team._id,
     still: true,
   });
+
+  // Stille Notiz an den Betroffenen (Entscheidung Patrick, 14.08.2026, auf
+  // Kais Befund hin). Die Stilllegung oben nimmt Post und Follower-Meldung weg
+  // – dadurch wäre ausgerechnet der Spieler die einzige Person geblieben, die
+  // von einer Änderung an seinem eigenen Profil nichts erfährt. Nur In-App,
+  // keine Mail: Eine Verwaltungskorrektur ist keine Nachricht, für die jemand
+  // sein Postfach öffnen muss.
+  //
+  // ⚠️ Nur bei einer ECHTEN Zuordnungsänderung. Vergibt ein Super-Admin bloß
+  // Admin-Rechte für das Team, in dem der Spieler ohnehin schon ist, hat sich
+  // seine Zugehörigkeit nicht geändert – eine Meldung darüber wäre eine
+  // Aussage über ein Ereignis, das nicht stattgefunden hat. Dieselbe Prüfung
+  // wie bei `slotsFreigeben` oben, und `recordTransfer` verwirft diesen Fall
+  // aus demselben Grund selbst.
+  if (zuordnungGeaendert) {
+    await benachrichtigeZuordnung(player, vorherigesTeam, team);
+  }
 
   return ok({ message: `${player.firstName} ist jetzt Admin von ${team.teamName}` });
 }

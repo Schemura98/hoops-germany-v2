@@ -37,6 +37,10 @@ const ICON = {
   pending_result: PiBasketballBold,
   result_mismatch: PiWarningBold,
   transfer: PiArrowsLeftRightBold,
+  // Bewusst dasselbe Symbol wie `transfer`: Für den Leser ist beides eine
+  // Änderung seiner Vereinszugehörigkeit. Der Unterschied liegt darin, WER
+  // gehandelt hat, und den trägt der Text – nicht das Icon.
+  team_assigned: PiArrowsLeftRightBold,
   post_like: PiHeartFill,
   post_comment: PiChatCircleBold,
   comment_reply: PiArrowBendUpLeftBold,

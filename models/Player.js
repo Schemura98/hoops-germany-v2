@@ -15,6 +15,15 @@ const notificationSchema = new mongoose.Schema(
         // Eigene Werte aus einem Box-Score sind eingetragen (lib/statsNotify.js)
         "own_stats",
         "transfer",
+        // Ein Super-Admin hat die Vereinszuordnung geändert (/admin/players).
+        // Eigener Typ neben `transfer`, weil dort der Spieler selbst gehandelt
+        // hat und seine Follower informiert werden – hier hat jemand anderes
+        // eine Zuordnung korrigiert, und die Nachricht geht ausschließlich an
+        // den Betroffenen. Seit dem 14.08.2026 erzeugt dieser Pfad bewusst
+        // keinen öffentlichen Post mehr (`recordTransfer({ still: true })`);
+        // ohne diesen Typ wäre der Spieler die einzige Person geblieben, die
+        // von der Änderung an seinem eigenen Profil nichts erfährt (Befund Kai).
+        "team_assigned",
         "result_mismatch",
         "team_admin_granted",
         "team_pending",
