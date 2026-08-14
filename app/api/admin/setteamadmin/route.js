@@ -94,6 +94,11 @@ async function handler(req) {
 
   // Entfernen
   if (remove) {
+    // Für die Notiz VOR dem Zurücksetzen merken – danach ist `teamAdminOf` weg.
+    const verlorenesTeam = player.teamAdminOf
+      ? await Team.findById(player.teamAdminOf).select("teamName slug")
+      : null;
+
     if (player.teamAdminOf) {
       await Team.updateOne(
         { _id: player.teamAdminOf, adminPlayerId: player._id },
@@ -103,6 +108,18 @@ async function handler(req) {
     player.isTeamAdmin = false;
     player.teamAdminOf = undefined;
     await player.save();
+
+    // ⚠️ Auch dieser Zweig entzieht Rechte – und meldete es bis zum 14.08.2026
+    // nicht (Befund Tobias). Dieselbe Lücke, die der Commit eine Zeile weiter
+    // unten gerade geschlossen hat: Der Betroffene hätte es erst gemerkt, wenn
+    // `/team/admin` ihn abweist.
+    // Ohne dritten Parameter, weil hier NIEMAND nachrückt – die Rechte werden
+    // ersatzlos entfernt. `notifyTeamAdminRevoked` fällt dann auf „jemand
+    // anderem" zurück, was hier falsch wäre; deshalb bekommt es einen eigenen
+    // Wortlaut über `ohneNachfolger`.
+    if (verlorenesTeam) {
+      await notifyTeamAdminRevoked(player._id, verlorenesTeam, null, { ohneNachfolger: true });
+    }
     return ok({ message: "Team-Admin-Rechte entfernt" });
   }
 

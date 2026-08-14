@@ -25,6 +25,33 @@ function lies(...teile) {
   return readFileSync(join(PROJECT_ROOT, ...teile), "utf8");
 }
 
+// Grenzt einen Block per Klammerzählung ab, ab der ersten öffnenden Klammer
+// nach `startIndex`.
+//
+// ⚠️ Diese Datei hatte drei verschiedene Formen, denselben Fehler zu machen:
+// ein festes Zeichenfenster, eine `indexOf("};")`-Grenze und ein zweites festes
+// Fenster. Kai hat sie über mehrere Runden alle gefunden – die letzte mit dem
+// Hinweis, dass ihr Ausfall in die FALSCHE Richtung geht: `indexOf` liefert
+// `-1`, `slice(ab, -1)` nimmt dann den ganzen Rest der Datei, und der Test wird
+// großzügiger statt strenger. Deshalb hier eine Funktion statt drei Varianten,
+// und sie wirft, statt still etwas Falsches zu liefern.
+function blockAb(quelle, startIndex, auf = "{", zu = "}") {
+  const start = quelle.indexOf(auf, startIndex);
+  expect(start, `öffnende ${auf} nach Index ${startIndex} nicht gefunden`).toBeGreaterThan(-1);
+  let tiefe = 0;
+  for (let i = start; i < quelle.length; i++) {
+    if (quelle[i] === auf) tiefe++;
+    else if (quelle[i] === zu) {
+      tiefe--;
+      if (tiefe === 0) return quelle.slice(start, i);
+    }
+  }
+  // Bewusst hart: Ein unbalancierter Block heißt, dass die Annahme über die
+  // Datei nicht mehr stimmt. Stillschweigend „den Rest nehmen" hat genau die
+  // großzügige Ausfallrichtung, die hier schon einmal drin war.
+  throw new Error(`Block ab Index ${start} ist nicht geschlossen – Suchmuster prüfen`);
+}
+
 // Typen aus dem Enum in models/Player.js.
 //
 // ⚠️ Klammerzählung statt `indexOf("]")` (Befund A7 von Kai) – dieselbe
@@ -38,22 +65,9 @@ function typenAusModell() {
   const ab = quelle.indexOf("enum: [");
   expect(ab, "enum-Block in models/Player.js nicht gefunden").toBeGreaterThan(-1);
 
-  const auf = quelle.indexOf("[", ab);
-  let tiefe = 0;
-  let bis = -1;
-  for (let i = auf; i < quelle.length; i++) {
-    if (quelle[i] === "[") tiefe++;
-    else if (quelle[i] === "]") {
-      tiefe--;
-      if (tiefe === 0) {
-        bis = i;
-        break;
-      }
-    }
-  }
-  expect(bis, "enum-Block nicht geschlossen – Klammerzählung gescheitert").toBeGreaterThan(auf);
-
-  const block = quelle.slice(auf, bis);
+  // Dieselbe Helferfunktion wie überall sonst in dieser Datei, nur mit eckigen
+  // Klammern – vier Varianten derselben Abgrenzung waren genau das Problem.
+  const block = blockAb(quelle, ab, "[", "]");
   // Nur echte Werte, keine Wörter aus den Kommentarzeilen dazwischen.
   const typen = block
     .split(/\r?\n/)
@@ -84,7 +98,7 @@ test.describe("Benachrichtigungstypen sind vollständig gepflegt", () => {
     const tabelle = lies("lib", "notifications.js");
     const ab = tabelle.indexOf("export const NOTIF_ICON = {");
     expect(ab, "NOTIF_ICON-Tabelle nicht gefunden").toBeGreaterThan(-1);
-    const iconBlock = tabelle.slice(ab, tabelle.indexOf("};", ab));
+    const iconBlock = blockAb(tabelle, ab);
 
     const ohne = typen.filter((t) => !new RegExp(`\\b${t}\\s*:`).test(iconBlock));
     expect(
@@ -155,10 +169,16 @@ test.describe("Benachrichtigungstypen sind vollständig gepflegt", () => {
 
     expect(quelle, "die Bedingung `zuordnungGeaendert` fehlt").toContain("zuordnungGeaendert");
     // Sie muss den Aufruf tatsächlich bewachen, nicht nur irgendwo stehen.
+    // ⚠️ Klammerzählung statt `{0,200}` (Befund Kai): Das feste Fenster war
+    // heute unkritisch, weil der Block kurz ist – aber ein Kommentar darin
+    // hätte den Aufruf hinausgeschoben und den Test falsch rot gemacht. Genau
+    // der Mechanismus, der mir an diesem Tag viermal untergekommen ist.
+    const beiWaechter = quelle.indexOf("if (zuordnungGeaendert)");
+    expect(beiWaechter, "kein `if (zuordnungGeaendert)` gefunden").toBeGreaterThan(-1);
     expect(
-      /if\s*\(\s*zuordnungGeaendert\s*\)\s*\{[\s\S]{0,200}?benachrichtigeZuordnung/.test(quelle),
+      blockAb(quelle, beiWaechter),
       "benachrichtigeZuordnung wird nicht von zuordnungGeaendert bewacht"
-    ).toBe(true);
+    ).toContain("benachrichtigeZuordnung");
     // Und sie muss den Vorher-Wert vergleichen, nicht bloß auf Existenz prüfen.
     expect(
       /zuordnungGeaendert\s*=\s*String\(/.test(quelle),
@@ -177,6 +197,37 @@ test.describe("Benachrichtigungstypen sind vollständig gepflegt", () => {
     });
   }
 
+  test("der Rechteentzug meldet nur, wenn wirklich etwas entzogen wurde", async () => {
+    // Von Kai und Tobias unabhängig vorgeschlagen. Tobias hat am Produkt
+    // belegt, dass ein Verein ohne Haupt-Admin keine Entzugs-Notiz erzeugt –
+    // der Schutz hängt aber allein an `modifiedCount > 0`. Eine spätere
+    // Umstellung auf ein `updateOne` ohne den `teamAdminOf`-Wächter würde ihn
+    // lautlos aushebeln, und **eine ausbleibende Notiz wirft keinen Fehler**:
+    // kein bestehender Test hätte es gemerkt.
+    for (const datei of [
+      ["app", "api", "admin", "setteamadmin", "route.js"],
+      ["app", "api", "admin", "transfer-team-admin", "route.js"],
+    ]) {
+      const quelle = lies(...datei);
+      const pfad = datei.join("/");
+
+      expect(quelle, `${pfad} ruft notifyTeamAdminRevoked nicht auf`).toContain(
+        "notifyTeamAdminRevoked("
+      );
+      // Der Wächter im Filter – ohne ihn würde einem Fremdverein-Admin die
+      // Rolle entzogen.
+      expect(
+        /teamAdminOf:\s*team\._id/.test(quelle),
+        `${pfad}: der Entzug filtert nicht auf teamAdminOf`
+      ).toBe(true);
+      // Und die Notiz muss an das Ergebnis des Updates gebunden sein.
+      expect(
+        /modifiedCount/.test(quelle),
+        `${pfad}: die Notiz hängt nicht an modifiedCount`
+      ).toBe(true);
+    }
+  });
+
   test("der Rechteentzug führt NICHT auf /team/admin", async () => {
     // ⚠️ Genau die Abweisung dort ist der Zustand, den diese Nachricht ersetzen
     // soll – ein Klick, der in die Absage führt, macht die Notiz zur
@@ -186,26 +237,16 @@ test.describe("Benachrichtigungstypen sind vollständig gepflegt", () => {
     const ab = quelle.indexOf('n.type === "team_admin_revoked"');
     expect(ab, "team_admin_revoked kommt in notificationHref nicht vor").toBeGreaterThan(-1);
 
-    // ⚠️ Den if-Block per Klammerzählung abgrenzen, NICHT über ein festes
-    // Zeichenfenster. Ein erster Versuch nahm 300 Zeichen ab der Fundstelle –
-    // die reichten bis in den NÄCHSTEN Zweig (`team_admin_granted`), der zu
-    // Recht auf /team/admin zeigt, und der Test schlug fälschlich an. Genau die
-    // Falle, die Kai zuvor zweimal gezeigt hat; sie ist mir trotzdem wieder
-    // passiert.
-    const auf = quelle.indexOf("{", ab);
-    let tiefe = 0;
-    let bis = auf;
-    for (let i = auf; i < quelle.length; i++) {
-      if (quelle[i] === "{") tiefe++;
-      else if (quelle[i] === "}") {
-        tiefe--;
-        if (tiefe === 0) {
-          bis = i;
-          break;
-        }
-      }
-    }
-    const zweig = quelle.slice(auf, bis);
+    // ⚠️ Über `blockAb` abgrenzen, NICHT über ein festes Zeichenfenster. Ein
+    // erster Versuch nahm 300 Zeichen ab der Fundstelle – die reichten bis in
+    // den NÄCHSTEN Zweig (`team_admin_granted`), der zu Recht auf /team/admin
+    // zeigt, und der Test schlug fälschlich an.
+    // Die eigene Schleife an dieser Stelle hatte danach noch einen zweiten
+    // Mangel (Befund Kai): Sie setzte `bis = auf` ohne Sicherung. Wäre die
+    // Zählung je gescheitert, wäre `zweig` leer gewesen – und dann ist
+    // ausgerechnet die NEGATIVE Assertion unten leer-wahr. `blockAb` wirft
+    // stattdessen.
+    const zweig = blockAb(quelle, ab);
 
     expect(zweig, "der Rechteentzug führt nicht auf die Vereinsseite").toContain(
       "/team/team-detail/"
