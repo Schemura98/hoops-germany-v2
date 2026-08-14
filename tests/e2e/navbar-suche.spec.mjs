@@ -152,6 +152,32 @@ test.describe("Such-Overlay – Ligen (Ronjas R8)", () => {
   });
 });
 
+test.describe("Mobiles Menü", () => {
+  // Befund B3 von Tobias: Escape schloss das Menü nicht, während das
+  // Such-Overlay in derselben Leiste sauber darauf reagiert – dieselbe Taste,
+  // zwei Antworten. Dazu trug der Knopf dauerhaft „Menü öffnen", auch wenn der
+  // nächste Druck schließt.
+  test("Escape schließt und gibt den Fokus zurück", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(SEITE);
+
+    const knopf = page.getByRole("button", { name: /Menü (öffnen|schließen)/ });
+    await knopf.click();
+    const menue = page.locator("#mobil-menue");
+    await expect(menue).toBeVisible();
+    await expect(knopf).toHaveAttribute("aria-expanded", "true");
+    await expect(knopf).toHaveAccessibleName("Menü schließen");
+
+    await page.keyboard.press("Escape");
+    await expect(menue).toBeHidden();
+    await expect(knopf).toHaveAttribute("aria-expanded", "false");
+    await expect(knopf).toHaveAccessibleName("Menü öffnen");
+
+    const label = await page.evaluate(() => document.activeElement?.getAttribute("aria-label"));
+    expect(label).toBe("Menü öffnen");
+  });
+});
+
 test.describe("Nachfiltern, sobald die Daten da sind", () => {
   // Der einzige echte Funktionsfehler, den dieser Umbau behoben hat – und er
   // hatte zunächst keinen Test (Befund A7 von Kai). Die Suche lädt Spieler,

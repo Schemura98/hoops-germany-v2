@@ -157,6 +157,82 @@ test.describe("Profil-Avatar als Bezugspunkt der Tour", () => {
   });
 });
 
+// Das Avatar-Zitat soll den Satz ergänzen, nicht neben ihm stehen. Genau das
+// ging beim ersten Versuch schief: `Gespeichert` war ein Flex-Container, jedes
+// Kind wurde ein eigenes Flex-Item, und auf 390 px klaffte mitten im Satz eine
+// Lücke von 169 px („…jederzeit oben" endete bei x=117, „rechts hin. (MM)"
+// begann bei x=285). Gemessen von Tobias — kein Test konnte das fangen, denn
+// zerfallenes Layout wirft keinen Fehler. Prüfkriterium von Kai.
+test.describe("Avatar-Zitat sitzt im Satz (mobil)", () => {
+  test("Zitat und Satzende teilen dieselbe Zeile", async ({ page, request }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+
+    const res = await request.post("/api/player/playerlogin", {
+      data: { email: "sven.adler@test.de", password: "test123" },
+    });
+    expect(res.status()).toBe(200);
+    const { token } = await res.json();
+
+    await page.goto("/spieler");
+    await page.evaluate((t) => localStorage.setItem("playerAuthToken", t), token);
+    // Seite MIT Spieler-Leiste – nur dort zeigt die Quittung das Zitat.
+    await page.goto("/player/player-detail");
+    await expect(page.locator("[data-profil-avatar]")).toHaveCount(1);
+
+    const tour = tourLocator(page);
+    await expect(async () => {
+      await page.getByRole("button", { name: "Plattform-Tour" }).click();
+      await expect(tour).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 30_000 });
+
+    // Zu Schritt 3 (Position) durchklicken.
+    await tour.getByRole("button", { name: /^Weiter/ }).click();
+    await tour.getByRole("button", { name: /Ich spiele in einem Verein/i }).click();
+    await tour.getByRole("button", { name: "Point Guard", exact: true }).click();
+
+    const quittung = tour.getByText(/Steht in deinem Profil/i).first();
+    await expect(quittung).toBeVisible();
+
+    // ⚠️ Gemessen wird die Lücke ZWISCHEN dem Text davor und dem Schluss-Span,
+    // nicht innerhalb des Spans. Die erste Fassung dieses Tests maß den Span
+    // allein — darin saß der Avatar auch im kaputten Zustand sauber, und der
+    // Test blieb grün, während der Satz sichtbar auseinanderfiel. Erst die
+    // Gegenprobe (Flex-Container wiederhergestellt → Test trotzdem grün) hat
+    // das aufgedeckt.
+    const masse = await quittung.evaluate((absatz) => {
+      const spanne = absatz.querySelector("span.whitespace-nowrap");
+      if (!spanne) return null;
+      // Letzte Zeile des Textes, der VOR dem Span steht.
+      const bereich = document.createRange();
+      bereich.setStart(absatz, 0);
+      bereich.setEndBefore(spanne);
+      const zeilen = [...bereich.getClientRects()].filter((r) => r.width > 0);
+      const davor = zeilen[zeilen.length - 1];
+      const s = spanne.getBoundingClientRect();
+      return davor
+        ? { davorTop: davor.top, davorRechts: davor.right, spanTop: s.top, spanLinks: s.left }
+        : null;
+    });
+
+    expect(masse, "Text vor dem Span nicht gefunden").not.toBeNull();
+
+    const gleicheZeile = Math.abs(masse.spanTop - masse.davorTop) < 8;
+    const luecke = masse.spanLinks - masse.davorRechts;
+
+    // Zwei zulässige Zustände: Der Span setzt den Satz in derselben Zeile fort
+    // (dann darf die Lücke nur ein Leerzeichen breit sein), ODER er beginnt
+    // eine neue Zeile (dann steht er links). Unzulässig ist genau der Fall,
+    // den Tobias gemessen hat: gleiche Zeile, aber 169 px Loch dazwischen.
+    const inOrdnung = gleicheZeile ? luecke < 24 : masse.spanLinks < masse.davorRechts;
+    expect(
+      inOrdnung,
+      `Der Satz zerfällt: Span ${gleicheZeile ? "in derselben Zeile" : "in neuer Zeile"}, ` +
+        `Lücke ${Math.round(luecke)} px (davorRechts=${Math.round(masse.davorRechts)}, ` +
+        `spanLinks=${Math.round(masse.spanLinks)})`
+    ).toBe(true);
+  });
+});
+
 test.describe("Plattform-Tour – Beleg-Aussage", () => {
   test("verspricht keine doppelte Bestätigung der eigenen Zahlen", async ({ page }) => {
     const tour = await tourOeffnenOhneKonto(page);

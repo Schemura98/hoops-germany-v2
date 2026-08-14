@@ -105,6 +105,7 @@ export default function Navbar() {
   const notifRef = useRef(null);
 
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileOpenerRef = useRef(null);
   const menuRef = useRef(null);
   const menuMaxHoehe = useMenuHoehe(menuRef, mobileOpen);
 
@@ -292,6 +293,21 @@ export default function Navbar() {
     // schließt, muss sich von ganz oben erneut durch die Seite tabben.
     searchOpenerRef.current?.focus();
   }
+
+  // Escape schließt auch das mobile Menü (Befund B3 von Tobias, 14.08.2026).
+  // Es blieb offen, während das Such-Overlay direkt daneben sauber schließt –
+  // dieselbe Leiste, zwei verschiedene Antworten auf dieselbe Taste. Fokus
+  // zurück auf den Hamburger, sonst fällt er beim Schließen auf `<body>`.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    function onKeyDown(e) {
+      if (e.key !== "Escape") return;
+      setMobileOpen(false);
+      mobileOpenerRef.current?.focus();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [mobileOpen]);
 
   // Escape schließt die Suche (Gate-Befund 13.08.2026, nachgezogen am 14.08.).
   // Vorher führte aus dem Overlay genau ein Weg heraus: das kleine ×. Wer
@@ -591,11 +607,18 @@ export default function Navbar() {
                 gesamten mobilen Navigation auf öffentlichen Seiten (gemessen
                 von Tobias, 14.08.2026). Er rutschte durch, weil die Prüfung
                 Feedback, Lupe und Glocke abdeckte und ihn nicht; ein Test
-                misst jetzt ALLE Icon-Knöpfe der Leiste, nicht eine Auswahl. */}
+                misst jetzt ALLE Icon-Knöpfe der Leiste, nicht eine Auswahl.
+                `aria-expanded`/`aria-controls` + wechselnde Beschriftung
+                (Befund B3 von Tobias): Der Knopf hieß dauerhaft „Menü öffnen",
+                auch wenn der nächste Druck schließt – ein Screenreader hörte
+                also immer dasselbe, egal in welchem Zustand das Menü war. */}
             <button
+              ref={mobileOpenerRef}
               onClick={() => setMobileOpen((v) => !v)}
               className="lg:hidden p-2 -m-1 text-paper-50 hover:text-brand-400 transition-colors"
-              aria-label="Menü öffnen"
+              aria-label={mobileOpen ? "Menü schließen" : "Menü öffnen"}
+              aria-expanded={mobileOpen}
+              aria-controls="mobil-menue"
             >
               {mobileOpen ? <PiXBold className="w-5 h-5" /> : <PiListBold className="w-5 h-5" />}
             </button>
@@ -619,6 +642,7 @@ export default function Navbar() {
             Innenscroll, aber nie eine unerreichbare Zeile. */}
         {mobileOpen && (
           <div
+            id="mobil-menue"
             ref={menuRef}
             style={menuMaxHoehe ? { maxHeight: menuMaxHoehe } : undefined}
             className="lg:hidden bg-navy-900 border-t border-navy-600 divide-y divide-navy-600/60 max-h-[calc(100dvh-7rem)] overflow-y-auto overscroll-contain"

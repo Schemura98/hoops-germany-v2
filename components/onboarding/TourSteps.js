@@ -84,10 +84,22 @@ async function speichern(pfad, daten) {
 
 // Kleine Bestätigungszeile nach einer echten Speicherung. Bewusst zurückhaltend
 // (kein Konfetti, kein Abzeichen): Sie sagt nur, dass etwas passiert ist.
+//
+// ⚠️ Textfluss, KEIN Flex-Container (Befund B1 von Tobias, 14.08.2026). Vorher
+// stand hier `flex items-center gap-1.5`. Damit wurde jedes Kind zu einem
+// eigenen Flex-Item – auch ein `<span>` mitten im Satz. Auf 390 px riss das den
+// Satz auseinander: „…jederzeit oben" endete bei x=117, „rechts hin. (MM)"
+// begann erst bei x=285, dazwischen 169 px Lücke. Ein `whitespace-nowrap` am
+// Span half nicht und konnte nicht helfen — zwei Flex-Items teilen sich
+// grundsätzlich keine Zeilenbox. Auf 1280 px passte zufällig alles in eine
+// Zeile, dort fiel es nicht auf.
+// Das Häkchen läuft jetzt als Inline-Element mit; bei mehrzeiligem Text sitzt
+// es dadurch in der ERSTEN Zeile statt vertikal über dem ganzen Block zentriert
+// — typografisch ohnehin richtiger.
 function Gespeichert({ children }) {
   return (
-    <p className="mt-3 flex items-center gap-1.5 text-xs text-signal-ok" aria-live="polite">
-      <PiCheckBold className="flex-shrink-0" aria-hidden="true" />
+    <p className="mt-3 text-xs text-signal-ok" aria-live="polite">
+      <PiCheckBold className="mr-1.5 inline-block align-[-0.125em]" aria-hidden="true" />
       {children}
     </p>
   );
@@ -254,13 +266,17 @@ export function StepPosition({ weg, wert, onWert, onGespeichert, player }) {
       {wert && (stand === SPEICHERN_OK || stand === null) && (
         <Gespeichert>
           {zeigtAvatar ? (
-            // `whitespace-nowrap` um das letzte Wort UND das Zitat: Auf 390 px
-            // rutschte der Avatar sonst allein in eine dritte Zeile und las
-            // sich als loses Abzeichen statt als Zitat der Form (Befund Tobias).
+            // `whitespace-nowrap` hält nur das letzte Wort und das Zitat
+            // zusammen, damit der Avatar nicht allein in eine neue Zeile
+            // rutscht und als loses Abzeichen gelesen wird (Befund Tobias).
+            // Dass das überhaupt wirkt, hängt daran, dass `Gespeichert` seit
+            // dem 14.08.2026 im Textfluss rendert und nicht mehr als Flex —
+            // im Flex-Container war jedes Kind ein eigenes Item und konnte
+            // die Zeilenbox des Nachbarn gar nicht teilen.
             <>
-              Steht in deinem Profil – da kommst du jederzeit oben{" "}
+              Steht in deinem Profil – da kommst du jederzeit{" "}
               <span className="whitespace-nowrap">
-                rechts hin. <AvatarZitat player={player} />
+                oben rechts hin. <AvatarZitat player={player} />
               </span>
             </>
           ) : (
