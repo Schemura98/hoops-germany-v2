@@ -77,6 +77,27 @@ test.describe("Such-Overlay – Auswege", () => {
     await page.getByLabel("Suche schließen").click();
     await expect(dialog).toBeHidden();
   });
+
+  // Das Overlay sagt `aria-modal="true"` zu – für einen Screenreader ist die
+  // Seite dahinter damit inert. Diese beiden Tests halten fest, dass die Zusage
+  // auch eingelöst wird (Befund A5 von Kai, 14.08.2026).
+  test("Tab bleibt im Dialog", async ({ page }) => {
+    const dialog = await sucheOeffnen(page);
+    // Mehrfach tabben – ohne Falle wäre der Fokus längst hinter dem Dialog.
+    for (let i = 0; i < 6; i++) await page.keyboard.press("Tab");
+    const drin = await dialog.evaluate((box) => box.contains(document.activeElement));
+    expect(drin, "der Fokus ist aus dem Dialog gewandert").toBe(true);
+  });
+
+  test("nach dem Schließen kehrt der Fokus auf den Öffner zurück", async ({ page }) => {
+    const dialog = await sucheOeffnen(page);
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    // Ohne Rückgabe landet der Fokus auf <body>: Wer die Suche mit der Tastatur
+    // öffnet und schließt, müsste sich von ganz oben neu durchtabben.
+    const label = await page.evaluate(() => document.activeElement?.getAttribute("aria-label"));
+    expect(label).toBe("Suche öffnen");
+  });
 });
 
 test.describe("Such-Overlay – Ligen (Ronjas R8)", () => {

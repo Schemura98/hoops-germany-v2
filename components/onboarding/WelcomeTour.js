@@ -10,6 +10,7 @@ import TourProofBoard from "@/components/onboarding/TourProofBoard";
 import { StepWeg, StepPosition, StepStadt, StepUebergabe } from "@/components/onboarding/TourSteps";
 import { computeSteps } from "@/components/onboarding/OnboardingChecklist";
 import { getPlayerToken } from "@/lib/clientAuth";
+import { positionLabel } from "@/lib/constants";
 import { trackEvent } from "@/lib/trackEvent";
 
 // ---------------------------------------------------------------------------
@@ -181,7 +182,14 @@ export default function WelcomeTour() {
 
   const profilUebernehmen = useCallback((p) => {
     setPlayer(p);
-    setPosition(p?.position || "");
+    // Alt-Kürzel auf den ausgeschriebenen Namen bringen (Befund Tobias,
+    // 14.08.2026). Bestandskonten tragen teils noch `"SF"` statt
+    // `"Small Forward"`; die Chips der Tour heißen ausgeschrieben, also war bei
+    // einem gepflegten Feld trotzdem nichts vorausgewählt – es sah aus, als
+    // hätte der Nutzer nie eine Position angegeben. `positionLabel` mappt die
+    // Kürzel und lässt alles andere (auch Rollen wie „Coach") unverändert
+    // durch.
+    setPosition(positionLabel(p?.position) || "");
     setOrt({ stadt: p?.hometown || "", land: p?.bundesland || "" });
     setVerfuegbar(p?.transferStatus === "verfuegbar");
   }, []);

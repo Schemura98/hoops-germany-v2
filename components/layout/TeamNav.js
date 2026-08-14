@@ -45,13 +45,18 @@ export default function TeamNav({ team }) {
           {/* Feedback fest im Chrome statt als schwebender Knopf – Herkunft
               und Begründung in components/layout/FeedbackLink.js. */}
           <FeedbackLink />
+          {/* `p-2 -m-1` + feste Symbolgröße wie bei den Nachbarn. Vorher rendete
+              das Symbol in Standardgröße ohne Padding und maß ~16×16 px – der
+              letzte bekannte Verstoß gegen WCAG 2.5.8 (24 px), gefunden von Kai
+              am 14.08.2026, und ausgerechnet auf `/team/admin`, einer stark
+              mobil genutzten Fläche. */}
           <button
             onClick={logout}
-            className="text-paper-50/80 hover:text-brand-400 transition-colors"
+            className="p-2 -m-1 text-paper-50/80 hover:text-brand-400 transition-colors"
             aria-label="Abmelden"
             title="Abmelden"
           >
-            <PiSignOutBold />
+            <PiSignOutBold className="w-5 h-5" />
           </button>
         </div>
       </div>

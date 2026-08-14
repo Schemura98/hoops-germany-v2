@@ -95,6 +95,8 @@ export default function Navbar() {
   const [results, setResults] = useState([]);
   const [searchData, setSearchData] = useState(null); // {players, teams}
   const searchInputRef = useRef(null);
+  const searchPanelRef = useRef(null); // Grenze der Fokusfalle
+  const searchOpenerRef = useRef(null); // wohin der Fokus nach dem Schließen zurückgeht
 
   // Benachrichtigungen
   const [notifOpen, setNotifOpen] = useState(false);
@@ -285,6 +287,10 @@ export default function Navbar() {
     setSearchOpen(false);
     setSearchTerm("");
     setResults([]);
+    // Fokus dorthin zurück, wo er herkam (Befund A5 von Kai). Ohne das landet
+    // er auf `<body>`: Wer die Suche mit der Tastatur öffnet und wieder
+    // schließt, muss sich von ganz oben erneut durch die Seite tabben.
+    searchOpenerRef.current?.focus();
   }
 
   // Escape schließt die Suche (Gate-Befund 13.08.2026, nachgezogen am 14.08.).
@@ -302,8 +308,33 @@ export default function Navbar() {
     // behebt. `closeSearch` ist eine Funktionsdeklaration (hoisted) und ruft
     // nur Setter, die React stabil hält; eine veraltete Closure kann hier
     // nichts anrichten.
+    //
+    // Tab bleibt im Dialog (Befund A5 von Kai, nachgezogen am 14.08.2026).
+    // Das Overlay sagt `aria-modal="true"` zu – für einen Screenreader ist die
+    // Seite dahinter damit inert. Ohne Fокusfalle tabbte man trotzdem hinaus
+    // und navigierte dort unsichtbar weiter: eine Zusage, die die Umsetzung
+    // nicht einlöste. `WelcomeTour.js` macht dasselbe Muster vor.
     function onKeyDown(e) {
-      if (e.key === "Escape") closeSearch();
+      if (e.key === "Escape") {
+        closeSearch();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const box = searchPanelRef.current;
+      if (!box) return;
+      const ziele = box.querySelectorAll(
+        'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!ziele.length) return;
+      const erste = ziele[0];
+      const letzte = ziele[ziele.length - 1];
+      if (e.shiftKey && document.activeElement === erste) {
+        e.preventDefault();
+        letzte.focus();
+      } else if (!e.shiftKey && document.activeElement === letzte) {
+        e.preventDefault();
+        erste.focus();
+      }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -368,6 +399,7 @@ export default function Navbar() {
                 und Begründung in components/layout/FeedbackLink.js. */}
             <FeedbackLink />
             <button
+              ref={searchOpenerRef}
               onClick={openSearch}
               className="p-2 -m-1 text-paper-50 hover:text-brand-400 transition-colors"
               aria-label="Suche öffnen"
@@ -722,6 +754,7 @@ export default function Navbar() {
           }}
         >
           <div
+            ref={searchPanelRef}
             role="dialog"
             aria-modal="true"
             aria-label="Suche"

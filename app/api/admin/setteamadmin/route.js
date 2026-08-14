@@ -68,10 +68,20 @@ async function handler(req) {
   // `recordTransfer` leitet den Typ selbst ab (kein vorheriges Team = "join",
   // sonst "move") und ist fehlertolerant – ein Problem beim Loggen darf das
   // Setzen der Admin-Rechte nicht scheitern lassen.
+  //
+  // ⚠️ `still: true` – Entscheidung Patrick, 14.08.2026 (Kais Befund A2).
+  // Dies ist ein Verwaltungspfad: Ein Super-Admin setzt Rechte bzw. korrigiert
+  // eine falsche Zuordnung. Es wechselt niemand, also gibt es auch nichts zu
+  // vermelden. Der Feed-Post und die Follower-Benachrichtigung, die
+  // `recordTransfer` sonst erzeugt, wären hier eine Nachricht über ein
+  // Ereignis, das nie stattgefunden hat – und beide sind nicht löschbar, die
+  // Rückkorrektur erzeugte also einen zweiten falschen Post. Die Station im
+  // Lebenslauf entsteht trotzdem; genau darum ging es bei diesem Aufruf.
   await recordTransfer({
     player: player._id,
     fromTeam: vorherigesTeam,
     toTeam: team._id,
+    still: true,
   });
 
   return ok({ message: `${player.firstName} ist jetzt Admin von ${team.teamName}` });
