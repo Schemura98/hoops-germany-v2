@@ -3,7 +3,7 @@
 
 ---
 
-## 0. AKTUELLER STAND (Überblick · Stand 11.08.2026)
+## 0. AKTUELLER STAND (Überblick · Stand 14.08.2026)
 
 > 🟢 **v2 IST LIVE auf https://hoopsgermany.de** (seit 24.06.2026). Hostinger-VPS `92.113.25.249`
 > (Ubuntu 24.04), Code in `/root/hoops-v2` (Branch **`redesign`**), PM2-Prozess **`hoops-v2` auf Port 3001**,
@@ -11,15 +11,20 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> **Zuletzt deployt: `3c38959` (13.08.2026, abends)** – Altersnachweis bei der Registrierung
-> (s. u.), nach Gates von Kai und Tobias.
-> Davor: `5073951` (Alt-Ligen bleiben bedienbar), `560e1e6` (**Newsfeed-Umbau**: Spieltag-Leiste
-> am Kopf mit nächstem Spiel und letztem Ergebnis; Footer mit Impressum/Datenschutz, das fehlte
-> dort völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe,
-> acht Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `5073951` → `560e1e6` → `27a04fe` → `e7a38ce` → `275f124` →
-> `a8e4fd4` (vor der Nachtschicht) → `562c629` (vor dem gesamten Redesign). Auf dem VPS per
-> `git checkout <hash> && npm run build && pm2 restart hoops-v2`.
+> **Zuletzt deployt: `582d59d` (14.08.2026)** – Linas erster Einsatz: **Plattform-Tour ohne Konto**
+> repariert (sie ist über den Footer ausgeloggt erreichbar und meldete dort einen Speicherfehler
+> über einen Versuch, den es nie gab; Schlussfolie „Du hast schon angefangen" über „0 von 4 · 0 %";
+> beide Ausgänge führten in die Anmeldemaske) · **Tour-Schritt 1 versprach zu viel** (doppelt
+> bestätigt ist das *Ergebnis*, nicht der Box-Score) · **„Mein Profil" wird im Onboarding
+> demonstriert** (Avatar-Zitat) · Klickflächen, Escape in der Suche, Transfer-Protokoll in
+> `setteamadmin`. Nach Gates von Kai und Tobias, deren Befunde in `582d59d` eingearbeitet sind.
+> Davor: `3c38959` (Altersnachweis, s. u.), `5073951` (Alt-Ligen bleiben bedienbar), `560e1e6`
+> (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
+> völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
+> Wege), `e7a38ce`, `275f124` (Nachtschicht).
+> **Rollback-Kette:** `7510a79` → `3c38959` → `5073951` → `560e1e6` → `27a04fe` → `e7a38ce` →
+> `275f124` → `a8e4fd4` (vor der Nachtschicht) → `562c629` (vor dem gesamten Redesign). Auf dem
+> VPS per `git checkout <hash> && npm run build && pm2 restart hoops-v2`.
 >
 > ⚠️ **PLATTFORM AB 16 JAHREN** (Entscheidung Patrick, 13.08.2026). Wirkt an **fünf** Stellen:
 > `LEAGUE_AGE_GROUPS` = `["Senioren", "U18"]` (eine U16-Liga ist die Altersklasse UNTER 16) ·
@@ -48,25 +53,29 @@
 > tatsächlich `a8e4fd4`. Bei Rollback-Punkten immer am Server nachsehen, nicht hier.
 > Älterer Punkt: `562c629` (Stand VOR dem gesamten Redesign).
 >
-> 🌙 **NACHTSCHICHT 13.08.2026** – Patrick hat sie autonom laufen lassen (alle Freigaben,
-> Deploy ausdrücklich eingeschlossen), sechs Stränge parallel. Kern: **Ronjas Retention-Befund**
-> (`docs/RETENTION-BEFUND-2026-08-13.md`) – sie fand **keine fehlende Funktion**, sondern überall
-> fehlende **Verbindungen** zwischen bereits Gebautem. Danach umgesetzt:
-> **R1** Spieler erfährt jetzt, dass seine Zahlen gelandet sind (`lib/statsNotify.js`) ·
-> **Liga-Achse** Spiel → Liga → Spielplan → Topscorer, mit echtem Liga-Filter und eigener
-> Platzierung · **`/tryouts`** von 0 auf 7 Links im Leerzustand · **Plattform-Tour** vier von fünf
-> Schritten mit echter Handlung · **Navigation** `/rangliste` erreichbar ohne die Leiste wachsen zu
-> lassen · **Spielerprofil** nächstes Spiel + Liga-Verweise · Signup-Motiv (Vereinshalle statt
-> Profi-Arena mit Fremdwerbung).
+> 🌙 **NACHTSCHICHT 13.08.2026** (Details: Chronik) – autonom gelaufen, sechs Stränge. Kern:
+> **Ronjas Retention-Befund** (`docs/RETENTION-BEFUND-2026-08-13.md`) – **keine fehlende
+> Funktion**, sondern überall fehlende **Verbindungen** zwischen bereits Gebautem. Ergebnis u. a.
+> Benachrichtigung „Deine Zahlen stehen", Liga-Achse, `/tryouts`-Wege, Tour mit echten Handlungen.
 >
-> ⚠️ **Das wichtigste Ergebnis der Nacht ist kein Feature: `docs/MUSTER-ZAHLEN-DIE-LUEGEN-2026-08-13.md`.**
-> Sieben Fehler derselben Sorte an einem Tag – *eine Zahl oder Aussage, die im Sinne des Codes
-> stimmt und im Sinne des Lesers falsch ist*. Darunter: der Sponsoren-Report zeigte ungefilterte
-> Bestände (70 Teams statt 1, 410 Profile statt 9), sein Endpunkt reichte das komplette interne
-> Summary an jeden mit Link durch, und er übermittelte **Klarnamen echter Spieler**. Alles behoben,
-> **niemandem gezeigt** (von Patrick bestätigt). **Vor jeder nutzersichtbaren Zahl dieses Dokument
-> lesen.** Zwei weitere Fälle fingen erst die Deploy-Gates ab – Kai und Tobias meldeten beide
-> „geht nicht live", beide Befunde sind in `0da9683` behoben.
+> 🔎 **ENTDECKBARKEIT 14.08.2026** – **Lina Vogts erster Einsatz**
+> (`docs/ENTDECKBARKEIT-BEFUND-2026-08-14.md`): Sie fragt nicht wie Ronja „warum kommt jemand
+> **wieder**", sondern „findet ein Erstbesucher es beim **ersten** Mal überhaupt". Ihr Kernbefund
+> war ein Defekt, den niemand gesucht hatte: Die **Plattform-Tour ist über den Footer ausgeloggt
+> erreichbar** – die einzige Fläche, die vor der Registrierung erklärt – und war dort kaputt
+> (Speicherfehler ohne Speicherversuch; „Du hast schon angefangen" über „0 von 4 · 0 %"; beide
+> Ausgänge in die Anmeldemaske). Alles behoben, Wortlaute von Nele, Gates von Kai und Tobias.
+>
+> ⚠️ **Das wichtigste Dokument bleibt `docs/MUSTER-ZAHLEN-DIE-LUEGEN-2026-08-13.md`** – *eine Zahl
+> oder Aussage, die im Sinne des Codes stimmt und im Sinne des Lesers falsch ist*. Acht Fälle am
+> 13.08. (u. a. Sponsoren-Report mit ungefilterten Beständen **und Klarnamen echter Spieler** –
+> behoben, niemandem gezeigt), **vier weitere am 14.08.**: Tour-Schritt 1 versprach eine doppelte
+> Bestätigung der **eigenen Zahlen** (doppelt bestätigt ist das **Ergebnis**, den Box-Score trägt
+> **ein** Team-Admin ein) · der Such-Platzhalter verschwieg die mitdurchsuchten Ligen · „oben
+> rechts" zeigte auf einen Avatar, den öffentliche Seiten nicht haben · und **mein eigener Fix
+> erzeugte den nächsten Fall** (ein längst verfügbarer Spieler wurde aufgefordert, sich als
+> verfügbar einzutragen – Befund Kai). **Vor jeder nutzersichtbaren Zahl oder Zusage dieses
+> Dokument lesen.**
 >
 > 📜 **Vollständige Meilenstein-Chronik mit Commit-Hashes: `docs/CHRONIK.md`** (am 08.08.2026 wörtlich und
 > verlustfrei aus diesem Abschnitt ausgelagert – dort stehen ALLE datierten Protokolle seit dem Go-Live).
@@ -204,7 +213,17 @@
 - **Geo-Suche:** Feld `bundesland` an Player/Team/League; `lib/geo.js` + `public/data/de-cities.json`
   (14.910 Orte mit lat/lng, lazy geladen) für Stadt+Umkreis (Haversine). Stadt-Eingabe per Typeahead
   setzt das Bundesland automatisch.
-- **Benachrichtigungen:** Ziel je Typ zentral in `lib/notifications.js` (`notificationHref`),
+- **Onboarding-Tour, drei Regeln (seit 14.08.2026):** (1) `speichern()` in
+  `components/onboarding/TourSteps.js` hat **drei** Ausgänge – `SPEICHERN_OK` / `_FEHLER` /
+  `_ANONYM`. Die Tour ist über den Footer auch **ausgeloggt** erreichbar; „kein Konto" ist kein
+  Fehler. Ein neuer Schritt muss alle drei behandeln, sonst entsteht entweder eine Fehlermeldung
+  ohne Fehler oder – schlimmer – eine Erfolgsquittung ohne Speicherung. (2) `stand === null`
+  bedeutet **„aus dem Profil vorbelegt", also gespeichert** – nicht „nichts passiert". (3) Aussagen
+  über die Oberfläche („oben rechts") nur, wenn das Gemeinte auch da ist: Der Marker
+  **`data-profil-avatar`** in `components/layout/PlayerNav.js` wird zur Laufzeit geprüft, weil
+  PlayerNav **pro Seite** eingebunden ist und auf öffentlichen Seiten fehlt.
+- **Benachrichtigungen:** Ziel je Typ zentral in `lib/notifications.js` (`notificationHref`,
+  dazu `GLOCKE_LEER` – **ein** Leerzustands-String für beide Glocken, die vorher auseinanderliefen),
   Symbol-Zuordnung in `components/layout/NotificationBell.js` (`ICON`), Typ-Enum in
   `models/Player.js`. **Ein neuer Typ muss an allen drei Stellen gepflegt werden**, sonst
   entsteht ein Eintrag ohne Symbol oder ohne Ziel. Versandlogik je Ereignis in eigener lib
@@ -304,15 +323,30 @@
     informiert wurde, erfährt die Bestätigung nicht noch einmal. (b) Soll es dazu eine **Mail**
     geben? Heute bewusst nicht; falls ja, nach dem Muster `emailPendingResult` **mit eigenem
     Opt-out**. Beides gehört Patrick.
-13. **Weitere Hebel aus `docs/RETENTION-BEFUND-2026-08-13.md`** (Ronja, priorisiert): R2
-    Leerzustand `/tryouts` ohne Ausweg, R3 Zähler-Abzeichen am Team-Admin-Panel, R4 eigene Zeile
-    in Topscorer/Rangliste, R5 **Liga-Filter für den Topscorer** (heute nur global – ein
-    Kreisliga-Spieler wird gegen Regionalliga sortiert), R7 `/rangliste` aus der Navigation
-    unerreichbar, R8 Ligen nicht suchbar, K1–K10 fehlende Verlinkungen. **R1 ist erledigt.**
-    Dazu Abschnitt 3a: der **Sponsor-Report druckt ungefilterte Gesamtzahlen inkl. Demo-Daten**
-    (Faktor ~45 bei Nutzern, ~70 bei Teams) – dringend, weil er aus dem Haus geht.
-14. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
-15. **Optional / bewusst offen:** Best-of-Serien + echte Playoff-Bracket-Grafik; Status-basierte
+13. **Rest aus `docs/RETENTION-BEFUND-2026-08-13.md`** (Ronja) – von Lina am 14.08. am Live-Stand
+    gegengeprüft: **R1–R5, R7, R8 und K1–K3/K5/K9 sind erledigt und verifiziert**. Offen bleiben
+    die übrigen K-Verlinkungen. Der Sponsor-Report-Punkt (Abschnitt 3a) ist behoben.
+14. **Aus `docs/ENTDECKBARKEIT-BEFUND-2026-08-14.md` noch offen** (Lina):
+    **P2 „ab 16" ohne Begründung** – `/about`, `/datenschutz` und die Startseite nennen die Grenze
+    nicht (gemessen), ein 14-Jähriger füllt das ganze Formular aus, bevor er es erfährt.
+    ⚠️ Wortlaut **zuerst Nora** (Tatsachenangabe vs. Einwilligung, s. Punkt 3 dieser Liste),
+    **dann Nele** – nicht selbst formulieren.
+    Dazu Linas eigene Frage, ob ihre Rolle von Vivien/Nele/Ronja aufgesogen wird.
+15. **Aus den Gates vom 14.08. (Kai/Tobias) bewusst zurückgestellt:**
+    (a) **`recordTransfer` legt einen öffentlichen Feed-Post an und benachrichtigt alle Follower** –
+    `/admin/players` ist aber auch ein *Korrektur*werkzeug; eine Umhängung und ihre Rücknahme
+    erzeugen zwei nicht löschbare Posts. **Produktentscheidung Patrick**, relevant vor dem
+    Umhängen/Entfernen der Demo-Daten (Punkt 2). (b) `GLOCKE_LEER` ist der Leerzustand *aller*
+    Benachrichtigungstypen, spricht aber nur über eigene Spielwerte → Nele. (c) Optimistisches
+    `onWert` vor dem Speichern kann die Tour-Schlussfolie bei API-Fehlern zu positiv zählen.
+    (d) Das Such-Overlay sagt `aria-modal` zu, hat aber **keine Fokusfalle** und gibt den Fokus
+    nach dem Schließen nicht zurück (`WelcomeTour.js` macht es vor). (e) `TeamNav` „Abmelden"
+    misst ~16×16 px – letzter bekannter Verstoß gegen WCAG 2.5.8. (f) `PlayerNav` hat **keine
+    Suche**: eingeloggt ist sie nur auf öffentlichen Seiten erreichbar. (g) Alt-Kürzel wie
+    `position: "SF"` wählen in der Tour keinen Chip vor (`POSITION_LABELS` greift nur für die
+    Anzeige).
+16. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
+17. **Optional / bewusst offen:** Best-of-Serien + echte Playoff-Bracket-Grafik; Status-basierte
     Tabellen-Exklusion; Stat-Filter Hauptrunde/Playoffs/Gesamt; stabiler `leagueKey`; Benachrichtigung bei
     Team-Follow; sharp-Resize für gespeicherte Upload-JPEGs; Super-Admin-Tabellen auf `<Loading>`/`EmptyState`;
     Folge-Vorschläge nur für neue User; TransferEvents bleiben nach Team-Löschung als Historie (Design);

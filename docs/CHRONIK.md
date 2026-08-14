@@ -2625,3 +2625,131 @@ beendbarer `next start` (Classifier sperrte `taskkill`); `.next` enthält gemisc
 Production-Runtime bewusst den Deploy-Gates überlassen. Offen gemeldet: `AuthShell.js`
 verlinkt Impressum/Datenschutz mit Backslash-Hrefs (`href="\datenschutz"`) — Befund an den
 Strang von heute.
+
+---
+
+## 14.08.2026 — Linas erster Einsatz + Gate-Nacharbeit: Entdeckbarkeit, ausgeloggte Tour, Klickflächen
+
+Zwei Commits (`7510a79` Umsetzung · `582d59d` Nacharbeit nach Kai + Tobias). Grundlage:
+**`docs/ENTDECKBARKEIT-BEFUND-2026-08-14.md`** (Lina Vogt, erster Einsatz überhaupt) und
+Neles Wortlaute. Beide fanden dieselbe Fehlerklasse wie am Vortag — Aussagen, die im Sinne
+des Codes stimmen und im Sinne des Lesers falsch sind (`docs/MUSTER-ZAHLEN-DIE-LUEGEN-2026-08-13.md`).
+
+### Produktivdatenbank (angewiesen von Patrick)
+- **`hoops_prod`:** Internes Testkonto (`isInternal: true`) trug `birthdate: "2025-04-25"` —
+  laufendes Jahr statt Geburtsjahr, daraus korrekt `age: 1`. Auf einer Plattform ab 16 stand
+  damit öffentlich „1 Jahre". **`age` + `birthdate` entfernt statt ein Jahr zu raten**
+  (Geburtsdatum ist kein Pflichtfeld). Trockenlauf, dann `matched: 1 / modified: 1`; danach
+  0 unplausible Altersangaben. Ursache war bereits geschlossen (16er-Prüfung seit 13.08.,
+  Konto vom 26.06.). Skripte: `tmp/prod-alter-pruefen.mjs`, `tmp/prod-alter-korrigieren.mjs`.
+
+### Tour-Texte (Nele)
+- **Schritt 1 war der teuerste Fall:** „Zahlen, die beide Seiten bestätigen" / „muss ein Verein
+  deinen Statistiken nicht glauben". Doppelt bestätigt ist aber das **Ergebnis** (beidseitiges
+  `submittedBy`), nicht der Box-Score — den trägt **ein** Team-Admin ein. `lib/statsNotify.js`
+  formuliert das seit jeher korrekt, `components/onboarding/WelcomeTour.js` tat es nicht.
+  Neu: „Beide melden. Dann zählt es." + Schlusssatz nur noch über das, was `beidseitigBelegt`
+  prüft. Am Code gegengeprüft, Befund bestätigt.
+- Schritt 3 „Einmal antippen genügt" (vorher „Ein Tipp" = Ratschlag statt Antippen), Schritt 4
+  „In welcher Stadt spielst du?" + Richtung gedreht („damit **du** findest", nicht „damit dich
+  Teams finden" — Nachfrage-Seite existiert noch nicht). Weg-Hinweise in
+  `components/onboarding/TourSteps.js` entzerrt (waren fast wortgleich).
+
+### Plattform-Tour ohne Konto (Befund Lina, Defekt)
+Über den Footer-Link (`components/onboarding/TourLink.js` → Event `hg:open-tour`) ist die Tour
+**ausgeloggt** erreichbar und damit die einzige Fläche, die vor der Registrierung erklärt.
+- `speichern()` in `TourSteps.js` gab bei fehlendem Token dasselbe `false` wie bei einem
+  Netzwerkfehler → „Konnte gerade nicht gespeichert werden" über einen Versuch, den es nie gab.
+  **Jetzt drei Ausgänge:** `SPEICHERN_OK` / `_FEHLER` / `_ANONYM`; alle drei Schritte von
+  `fehler`-Boolean auf `stand` umgestellt, neue Komponente `Hinweis` (kein Haken, kein Alarm).
+  ⚠️ Ohne eigenen anonym-Zweig wäre der Fix ein Rückschritt gewesen — die Erfolgsquittung
+  „Steht in deinem Profil" hätte dann jemand ohne Profil gelesen.
+- Schlussfolie sagte „Du hast schon angefangen" über „0 von 4 · 0 %". Neu: `schlussfolie()` in
+  `WelcomeTour.js` (0 / 1–3 / 4 von 4 / ohne Konto), Titel und Zahl aus **derselben** Quelle
+  (`computeSteps`). `StepUebergabe` rendert ausgeloggt `null` (kein Fortschritt gegen einen
+  Spieler, den es nicht gibt).
+- Beide Ausgänge führten in die Anmeldemaske. Neu: „Konto erstellen" → `/signup`; Zweitausgang
+  „Erst mal umsehen" über `zielOhneKonto()` — ⚠️ für `weg === "admin"` auf `/teams` umgebogen,
+  weil `/team/create` einen Login verlangt.
+- Analytics: `tour_completed`/`tour_skipped` kennzeichnen ausgeloggte Durchläufe (`ohne_konto`),
+  sonst mischten sich Erstbesucher und frisch Registrierte in einer Quote.
+
+### „Mein Profil" im Onboarding demonstrieren (Auftrag Patrick)
+„Mein Profil" steht nicht mehr in der waagerechten Leiste, nur der Avatar führt hin.
+- Quittung nach dem Positions-Tipp (`TourSteps.js`) nennt den Ort **und zeigt die Form**:
+  neue Komponente `AvatarZitat` (dieselben Maße/Farben wie `PlayerNav`). Bewusst **kein**
+  Coach-Mark — neue Overlay-Mechanik für einen Satz, kurz nachdem eine schwebende Ebene
+  abgeschafft wurde.
+- ⚠️ Nele korrigierte „über **dein Bild** oben rechts": Der typische Leser hat noch kein Foto
+  und sieht einen Initialenkreis. Der Text nennt nur den Ort, die Form zeigt das Zitat.
+- ⚠️ Tobias maß nach: `PlayerNav` wird **pro Seite** eingebunden, nicht im Layout — auf
+  öffentlichen Seiten steht dort ein Textlink (Desktop) bzw. nichts (mobil). Gelöst über den
+  Marker **`data-profil-avatar`** in `components/layout/PlayerNav.js`; die Quittung prüft zur
+  Laufzeit und fällt sonst auf „Steht in deinem Profil." zurück. Bewusst kein Pfad-Abgleich —
+  eine Liste veraltet still bei der nächsten neuen Seite.
+
+### Leerzustände (Lina P1 / Nele)
+- **`GLOCKE_LEER` in `lib/notifications.js`** — ein String für beide Glocken
+  (`NotificationBell.js` + die eigene Umsetzung in `Navbar.js`; sie waren bereits
+  auseinandergelaufen). „Noch nichts. Sobald deine Zahlen aus einem Spiel **eingetragen** sind,
+  stehen sie hier." ⚠️ Bewusst „eingetragen", nicht „bestätigt": `notifyOwnStats` versendet auch
+  bei einseitiger Meldung.
+- **`app/topscorer/page.js`**: zweiter Satz über die Benachrichtigung. ⚠️ Nele korrigierte Linas
+  Entwurf „sobald dein Team ein Ergebnis einträgt" — `notifyOwnStats` verlangt zusätzlich einen
+  erfassten Wert **für diesen Spieler**.
+- **`components/onboarding/OnboardingChecklist.js`**: Ertrag statt Wiederholung. ⚠️ „**Erst mit
+  Team** stehen …", nicht „danach steht …" — `SpieltagStrip` hat zwei Bedingungen (Team UND Spiel).
+
+### Restpunkte aus den Gates vom 13.08. + Suche
+- **Klickflächen** (WCAG 2.5.8): Feedback, Lupe, Glocke **und** Hamburger der öffentlichen Navbar
+  auf 36 px (`p-2 -m-1`). Der Hamburger war der letzte 20×20-Knopf — und der einzige Zugang zur
+  mobilen Navigation; gefunden von Tobias am Gerät, nicht vom Test.
+  ⚠️ Der Glocken-Zähler hängt jetzt an einem inneren `relative span`, sonst wäre er durch das
+  Padding 8 px nach außen gerutscht.
+- **Such-Overlay** (`Navbar.js`): Escape schließt, Klick auf den Grund schließt (mit
+  `e.target === e.currentTarget`, sonst schließt jeder Klick ins Feld), `role="dialog"`/
+  `aria-modal`, Platzhalter nennt **Ligen** (mitdurchsucht seit 13.08., Beschriftung verschwieg es).
+- 🐞 **Echter Bugfix:** `onSearchChange` verwarf Eingaben, solange `searchData` noch nicht geladen
+  war, und filterte danach nie nach → „Keine Ergebnisse" über etwas, das existiert. Logik nach
+  `trefferBerechnen()` gezogen + Nachfilter-Effekt.
+- **`app/api/admin/setteamadmin/route.js`** ruft `recordTransfer()`. Damit rufen **alle acht**
+  Wechselwege aus `lib/rosterSlots.js` es auf (von Kai gegengeprüft). Vorher fehlte im Lebenslauf
+  ausgerechnet die Station, die ein Super-Admin vergeben hat.
+- `deletePlayer` → `slotsFreigeben` stand als offen in der Übergabe, war aber bereits erledigt.
+
+### Gate-Nacharbeit (`582d59d`) — beide Gates „kein Blocker", neun Befunde berechtigt
+- **Kais A1 war ein selbst eingebauter Regress:** Beim Umbau `fehler` (initial `!fehler` = wahr)
+  → `stand` (initial `null`) verloren drei Bedingungen ihren Startzustand. Ein längst verfügbarer
+  Spieler las „Als verfügbar eintragen"; vorbelegte Position/Stadt verloren ihre
+  Bestätigungszeile (A6). Behoben über `stand === null` = „kommt aus dem Profil".
+- **A7:** Der Nachfilter-Bugfix hatte keinen Test → jetzt einer, der die drei Abrufe verzögert
+  und sofort tippt.
+- **A4:** Kommentar behauptete, `-m-1` nehme den Padding-Zuwachs komplett zurück — falsch
+  gerechnet (p-2 = 8 px, -m-1 = 4 px). `-m-1` bleibt (Hausmuster von `NotificationBell`), der
+  Kommentar sagt jetzt die Wahrheit.
+- **A8** (Abbruchkurve trennte „ohne Konto" nicht), **A12** (Escape kopierte den Rumpf von
+  `closeSearch` statt es aufzurufen), Tobias' Umbruch des Avatar-Zitats auf 390 px
+  (`whitespace-nowrap`) und das stille Abwählen der Position.
+
+### Tests
+Neu: **`tests/e2e/navbar-suche.spec.mjs`** (Auswege, Ligen, Nachfiltern, Trefferflächen) und
+**`tests/e2e/tour-ohne-konto.spec.mjs`** (drei Wege ausgeloggt, Beleg-Aussage, `data-profil-avatar`).
+⚠️ Der Trefferflächen-Test misst **alle** beschrifteten Icon-Ziele der Leiste, nicht eine
+Namensliste — genau daran war der Hamburger vorbeigerutscht.
+⚠️ `tour-ohne-konto` greift den Dialog über `[aria-labelledby="tour-titel"]`, **nicht** über
+seinen Text: Der zugängliche Name wechselt mit jedem Schritt.
+
+**Gates:** `38 passed / 0 skipped`, `npm run build` sauber, Production-Runtime (`npm start`) auf
+fünf Seiten HTTP 200. **Kai** (Quelltext, `security-review` 0 Befunde ≥ Konfidenz 8) und
+**Tobias** (Browser, mobil zuerst, 0 Konsolen-/Netzwerkfehler) je „kein Blocker".
+
+**Backoffice:** Hanna hat Lina als **Agentin** nachgetragen (vorher nur als Skill),
+`coordinatesWith` → Ronja/Vivien/Nele/Nora.
+
+**Offen an Patrick:** `recordTransfer` legt einen **öffentlichen Feed-Post** an und
+benachrichtigt alle Follower — `/admin/players` ist aber auch ein Korrekturwerkzeug (eine
+Umhängung und ihre Rücknahme erzeugen zwei nicht löschbare Posts). Stiller Modus?
+**Offen an Nele:** `GLOCKE_LEER` ist der Leerzustand *aller* Typen, spricht aber nur über eigene
+Spielwerte. **Offen (vorbestehend):** optimistisches `onWert` vor dem Speichern kann die
+Schlussfolie bei API-Fehlern zu positiv zählen; das Such-Overlay sagt `aria-modal` zu, hat aber
+keine Fokusfalle und gibt den Fokus nicht zurück.
