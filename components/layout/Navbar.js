@@ -30,7 +30,12 @@ import {
 } from "@/lib/clientAuth";
 import useMenuHoehe from "@/lib/useMenuHoehe";
 import { timeAgo } from "@/lib/timeAgo";
-import { notificationHref, GLOCKE_LEER } from "@/lib/notifications";
+import {
+  notificationHref,
+  GLOCKE_LEER,
+  NOTIF_ICON,
+  NOTIF_ICON_FALLBACK,
+} from "@/lib/notifications";
 import { trackEvent } from "@/lib/trackEvent";
 import Avatar from "@/components/Avatar";
 import DemoBadge from "@/components/DemoBadge";
@@ -483,8 +488,19 @@ export default function Navbar() {
                                 href ? "hover:bg-navy-700 transition-colors" : ""
                               }`}
                             >
+                              {/* Bis zum 14.08.2026 stand hier für JEDEN Typ
+                                  hart ein Basketball – „Deine Zahlen stehen",
+                                  ein Like, eine Erwähnung und eine
+                                  Team-Zuordnung sahen identisch aus. Diese
+                                  Glocke war damit von der Drei-Stellen-Regel
+                                  aus CLAUDE.md gar nicht erfasst, und kein Test
+                                  konnte es merken (Befund Kai A3 + Tobias).
+                                  Jetzt dieselbe Tabelle wie NotificationBell. */}
                               <span className="h-8 w-8 flex-shrink-0 rounded-full bg-brand-500/15 text-brand-400 flex items-center justify-center">
-                                <PiBasketballBold className="text-sm" />
+                                {(() => {
+                                  const Icon = NOTIF_ICON[n.type] || NOTIF_ICON_FALLBACK;
+                                  return <Icon className="text-sm" />;
+                                })()}
                               </span>
                               <div className="min-w-0">
                                 <p className="text-sm text-paper-50 leading-snug">{n.message}</p>

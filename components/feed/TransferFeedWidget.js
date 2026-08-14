@@ -40,9 +40,17 @@ function TransferText({ t }) {
         </>
       );
     case "leave":
+      // ⚠️ Muss mit `transferMessage` in lib/recordTransfer.js gleichlauten.
+      // Dieses Widget baut den Satz aus den Rohdaten selbst – als der Wortlaut
+      // dort am 14.08.2026 geändert wurde, blieb er hier stehen, und auf
+      // /player/newsfeed standen zwei verschiedene Sätze über dasselbe
+      // Ereignis (Befund Kai B2). Ausgelöst wird `leave` von
+      // `app/api/team/remove-member/route.js` – also genau vom Fall „ein
+      // Team-Admin hat ihn entfernt". „hat verlassen" behauptete dort eine
+      // Handlung des Spielers, die es nie gab.
       return (
         <>
-          hat <TeamTag team={t.fromTeam} /> verlassen
+          steht nicht mehr im Kader von <TeamTag team={t.fromTeam} />
         </>
       );
     case "join":

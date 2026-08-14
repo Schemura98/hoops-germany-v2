@@ -3,49 +3,24 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import {
-  PiBellBold,
-  PiUserPlusBold,
-  PiUsersBold,
-  PiCheckCircleBold,
-  PiBasketballBold,
-  PiWarningBold,
-  PiArrowsLeftRightBold,
-  PiHeartFill,
-  PiChatCircleBold,
-  PiArrowBendUpLeftBold,
-  PiAtBold,
-  PiEnvelopeOpenBold,
-  PiCheckBold,
-  PiXBold,
-  PiChartLineUpBold,
-} from "react-icons/pi";
+// Nur noch die Symbole, die diese Datei selbst zeichnet: die Glocke im Kopf
+// und die beiden Knöpfe der Einladungs-Zeile. Die Typ-Zuordnung kommt aus
+// lib/notifications.js.
+import { PiBellBold, PiCheckBold, PiXBold } from "react-icons/pi";
 import { getPlayerToken, getStoredPlayer } from "@/lib/clientAuth";
-import { notificationHref, GLOCKE_LEER } from "@/lib/notifications";
+import {
+  notificationHref,
+  GLOCKE_LEER,
+  NOTIF_ICON,
+  NOTIF_ICON_FALLBACK,
+} from "@/lib/notifications";
 import { trackEvent } from "@/lib/trackEvent";
 import { timeAgo } from "@/lib/timeAgo";
 import Reveal from "@/components/ui/Reveal";
 
-const ICON = {
-  follow: PiUserPlusBold,
-  join_request: PiUsersBold,
-  join_approved: PiCheckCircleBold,
-  member_joined: PiUserPlusBold,
-  team_invite: PiEnvelopeOpenBold,
-  match_result: PiBasketballBold,
-  own_stats: PiChartLineUpBold,
-  pending_result: PiBasketballBold,
-  result_mismatch: PiWarningBold,
-  transfer: PiArrowsLeftRightBold,
-  // Bewusst dasselbe Symbol wie `transfer`: Für den Leser ist beides eine
-  // Änderung seiner Vereinszugehörigkeit. Der Unterschied liegt darin, WER
-  // gehandelt hat, und den trägt der Text – nicht das Icon.
-  team_assigned: PiArrowsLeftRightBold,
-  post_like: PiHeartFill,
-  post_comment: PiChatCircleBold,
-  comment_reply: PiArrowBendUpLeftBold,
-  mention: PiAtBold,
-};
+// Die Symbol-Tabelle liegt seit dem 14.08.2026 in lib/notifications.js –
+// dieselbe Quelle wie fuer die zweite Glocke in components/layout/Navbar.js,
+// die vorher gar keine hatte (Befund Kai A3 + Tobias).
 
 export default function NotificationBell() {
   const [items, setItems] = useState([]);
@@ -152,7 +127,7 @@ export default function NotificationBell() {
             ) : (
               <ul className="divide-y divide-navy-600">
                 {items.map((n) => {
-                  const Icon = ICON[n.type] || PiBellBold;
+                  const Icon = NOTIF_ICON[n.type] || NOTIF_ICON_FALLBACK;
                   const isInvite = n.type === "team_invite";
                   const href = isInvite ? null : notificationHref(n, me);
                   const status = isInvite ? responded[String(n.teamId)] : null;

@@ -20,6 +20,7 @@
 import { test, expect } from "@playwright/test";
 import { readdirSync, readFileSync, statSync } from "fs";
 import { join } from "path";
+import { PROJECT_ROOT } from "./helpers/env.mjs";
 
 // Die Route, über die ein Konto entsteht. Wer sie aufruft, zeigt ein
 // Registrierungsformular – und braucht die Verweise.
@@ -95,6 +96,31 @@ test.describe("Rechtsverweise auf kontoerzeugenden Seiten (Art. 13 DSGVO, § 5 D
       `Diese Seiten legen ein Konto an, verweisen aber weder selbst noch über eine ` +
         `Hülle auf /datenschutz und /impressum: ${ohne.join(", ")}`
     ).toEqual([]);
+  });
+
+  test("der Weg zum Kontaktformular steht im Footer", async () => {
+    // Die Benachrichtigung `team_assigned` endet mit „schreib uns über das
+    // Kontaktformular" – und das ist dort das Einzige, was den Empfänger
+    // handlungsfähig macht: Anders als bei `own_stats` gibt es nichts
+    // anzuklicken (Wortlaut Nele, Prüfhinweis Kai A8). Bricht der Weg dorthin
+    // weg, wird aus einem Ausweg eine Sackgasse, ohne dass irgendetwas rot
+    // wird. Dieselbe Klasse Zusage wie die Rechtsverweise oben, deshalb hier.
+    const footer = readFileSync(join(PROJECT_ROOT, "components", "layout", "Footer.js"), "utf8");
+    expect(footer, "Footer verlinkt /kontakt nicht mehr").toContain("/kontakt");
+
+    const route = join(PROJECT_ROOT, "app", "kontakt", "page.js");
+    expect(() => readFileSync(route, "utf8"), "app/kontakt/page.js fehlt").not.toThrow();
+
+    // Und die Nachricht muss weiter auf genau diesen Weg zeigen.
+    const setteamadmin = readFileSync(
+      join(PROJECT_ROOT, "app", "api", "admin", "setteamadmin", "route.js"),
+      "utf8"
+    );
+    expect(
+      setteamadmin.includes("Kontaktformular"),
+      "die team_assigned-Nachricht nennt das Kontaktformular nicht mehr – " +
+        "dann kann dieser Test weg"
+    ).toBe(true);
   });
 
   test("die Hüllen tragen die Verweise auch wirklich", async () => {

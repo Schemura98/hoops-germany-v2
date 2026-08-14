@@ -123,6 +123,24 @@ async function handler(req) {
   if (vorherigesTeam && String(vorherigesTeam) !== String(team._id)) {
     await slotsFreigeben(player._id, vorherigesTeam);
   }
+  // ⚠️ Dem VERDRÄNGTEN Admin die Rechte nehmen (Befund Tobias, 14.08.2026).
+  // Bislang überschrieb die Zeile darunter nur `Team.adminPlayerId`, ließ beim
+  // bisherigen Gründer aber `isTeamAdmin`/`teamAdminOf` stehen. Da die
+  // Dual-Auth über `teamAdminOf` läuft (lib/serverAuth.js), behielt er damit
+  // vollen Zugriff auf `/team/admin` – Kader ändern, Ergebnisse eintragen,
+  // Mitglieder entfernen –, obwohl das Team längst auf jemand anderen zeigte.
+  // Er stand dann in seinem eigenen Profil weiter als Admin eines Vereins, der
+  // ihn nicht mehr als solchen führt.
+  // Nur der bisherige Gründer wird entrechtet, nicht die Co-Admins: Die hat
+  // ein Team bewusst zusätzlich, und ein Wechsel an der Spitze soll sie nicht
+  // stillschweigend entfernen.
+  const bisheriger = team.adminPlayerId;
+  if (bisheriger && String(bisheriger) !== String(player._id)) {
+    await Player.updateOne(
+      { _id: bisheriger, teamAdminOf: team._id },
+      { $set: { isTeamAdmin: false }, $unset: { teamAdminOf: "" } }
+    );
+  }
   await Team.findByIdAndUpdate(team._id, { adminPlayerId: player._id });
 
   // Transfer protokollieren (Gate-Befund 13.08.2026, nachgezogen am 14.08.).
@@ -161,9 +179,14 @@ async function handler(req) {
   // ⚠️ Nur bei einer ECHTEN Zuordnungsänderung. Vergibt ein Super-Admin bloß
   // Admin-Rechte für das Team, in dem der Spieler ohnehin schon ist, hat sich
   // seine Zugehörigkeit nicht geändert – eine Meldung darüber wäre eine
-  // Aussage über ein Ereignis, das nicht stattgefunden hat. Dieselbe Prüfung
-  // wie bei `slotsFreigeben` oben, und `recordTransfer` verwirft diesen Fall
-  // aus demselben Grund selbst.
+  // Aussage über ein Ereignis, das nicht stattgefunden hat. `recordTransfer`
+  // verwirft diesen Fall aus demselben Grund selbst.
+  // ⚠️ NICHT dieselbe Prüfung wie bei `slotsFreigeben` oben (Befund A1 von
+  // Kai): Die verlangt zusätzlich `vorherigesTeam &&`, weil es ohne Vorverein
+  // keinen Platz freizugeben gibt. Hier ist das Fehlen eines Vorvereins
+  // gerade ein gültiger Fall – die Erstzuordnung soll ebenfalls eine Notiz
+  // auslösen, und der Text hat dafür eine eigene Fassung. Wer die beiden
+  // Bedingungen später vereinheitlicht, verschluckt genau diesen Fall.
   if (zuordnungGeaendert) {
     await benachrichtigeZuordnung(player, vorherigesTeam, team);
   }

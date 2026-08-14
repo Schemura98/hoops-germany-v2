@@ -199,6 +199,17 @@ test.describe("Avatar-Zitat sitzt im Satz (mobil)", () => {
     // Test blieb grün, während der Satz sichtbar auseinanderfiel. Erst die
     // Gegenprobe (Flex-Container wiederhergestellt → Test trotzdem grün) hat
     // das aufgedeckt.
+    // ⚠️ Die Schwellen werden GEMESSEN, nicht gesetzt (Befund A6 von Kai).
+    // Eine frühere Fassung verglich gegen feste 8 und 24 Pixel bei `text-xs`.
+    // Zeilenhöhe und Leerzeichenbreite skalieren aber mit Zoomstufe und
+    // Root-Schriftgröße, die Konstanten nicht: Bei etwa 200 % Zoom hätte ein
+    // KORREKTES Layout die 8-px-Toleranz gerissen und der Test wäre falsch rot
+    // geworden. Jetzt leitet er beide Maße aus der Zeile selbst ab.
+    // Dazu `document.fonts.ready`: Geist kommt selbstgehostet über
+    // `next/font/local` – ohne das Warten vermisst der Test womöglich eine
+    // Fallback-Schrift und damit ein anderes Layout als das ausgelieferte.
+    await page.evaluate(() => document.fonts.ready);
+
     const masse = await quittung.evaluate((absatz) => {
       const spanne = absatz.querySelector("span.whitespace-nowrap");
       if (!spanne) return null;
@@ -208,27 +219,48 @@ test.describe("Avatar-Zitat sitzt im Satz (mobil)", () => {
       bereich.setEndBefore(spanne);
       const zeilen = [...bereich.getClientRects()].filter((r) => r.width > 0);
       const davor = zeilen[zeilen.length - 1];
+      if (!davor) return null;
+
+      // Breite eines echten Leerzeichens im selben Kontext – Maßstab dafür,
+      // was „nur ein Wortabstand" bedeutet.
+      const probe = document.createElement("span");
+      probe.textContent = " ";
+      probe.style.visibility = "hidden";
+      absatz.appendChild(probe);
+      const leerzeichen = probe.getBoundingClientRect().width || 4;
+      probe.remove();
+
       const s = spanne.getBoundingClientRect();
-      return davor
-        ? { davorTop: davor.top, davorRechts: davor.right, spanTop: s.top, spanLinks: s.left }
-        : null;
+      return {
+        davorTop: davor.top,
+        davorRechts: davor.right,
+        zeilenhoehe: davor.height,
+        leerzeichen,
+        spanTop: s.top,
+        spanLinks: s.left,
+      };
     });
 
     expect(masse, "Text vor dem Span nicht gefunden").not.toBeNull();
 
-    const gleicheZeile = Math.abs(masse.spanTop - masse.davorTop) < 8;
+    // „Gleiche Zeile" = die Oberkanten liegen enger beieinander als eine halbe
+    // Zeilenhöhe. Der Span enthält den Avatar und darf etwas höher sein.
+    const gleicheZeile = Math.abs(masse.spanTop - masse.davorTop) < masse.zeilenhoehe * 0.75;
     const luecke = masse.spanLinks - masse.davorRechts;
+    // „Nur ein Wortabstand" = höchstens drei Leerzeichen breit.
+    const maxLuecke = masse.leerzeichen * 3;
 
     // Zwei zulässige Zustände: Der Span setzt den Satz in derselben Zeile fort
     // (dann darf die Lücke nur ein Leerzeichen breit sein), ODER er beginnt
     // eine neue Zeile (dann steht er links). Unzulässig ist genau der Fall,
     // den Tobias gemessen hat: gleiche Zeile, aber 169 px Loch dazwischen.
-    const inOrdnung = gleicheZeile ? luecke < 24 : masse.spanLinks < masse.davorRechts;
+    const inOrdnung = gleicheZeile ? luecke < maxLuecke : masse.spanLinks < masse.davorRechts;
     expect(
       inOrdnung,
       `Der Satz zerfällt: Span ${gleicheZeile ? "in derselben Zeile" : "in neuer Zeile"}, ` +
-        `Lücke ${Math.round(luecke)} px (davorRechts=${Math.round(masse.davorRechts)}, ` +
-        `spanLinks=${Math.round(masse.spanLinks)})`
+        `Lücke ${Math.round(luecke)} px (erlaubt ${Math.round(maxLuecke)}, ` +
+        `davorRechts=${Math.round(masse.davorRechts)}, spanLinks=${Math.round(masse.spanLinks)}, ` +
+        `Zeilenhöhe ${Math.round(masse.zeilenhoehe)})`
     ).toBe(true);
   });
 });
