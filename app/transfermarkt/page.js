@@ -19,6 +19,7 @@ import {
   POSITIONS,
   PLAYER_ROLES,
   positionLabel,
+  POSITION_FEHLT,
 } from "@/lib/constants";
 import { loadCities, cityCoords, haversineKm } from "@/lib/geo";
 import { getPlayerToken } from "@/lib/clientAuth";
@@ -400,7 +401,7 @@ export default function TransfermarktPage() {
                         {p.isDemo && <DemoBadge className="ml-2 align-middle" />}
                       </p>
                       <p className="text-xs text-mist-400 truncate">
-                        {positionLabel(p.position) || "Position offen"}
+                        {positionLabel(p.position) || POSITION_FEHLT}
                         {p.teamId?.teamName ? ` · aktuell: ${p.teamId.teamName}` : ""}
                       </p>
                       {(p.hometown || p.bundesland) && (

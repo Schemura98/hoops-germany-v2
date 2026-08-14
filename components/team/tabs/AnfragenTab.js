@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { PiCheckBold, PiXBold, PiUsersThreeBold } from "react-icons/pi";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
-import { positionLabel } from "@/lib/constants";
+import { positionLabel, POSITION_FEHLT } from "@/lib/constants";
 import Loading from "@/components/ui/Loading";
 import EmptyState from "@/components/ui/EmptyState";
 import TabAlert from "@/components/team/tabs/TabAlert";
@@ -99,7 +99,7 @@ export default function AnfragenTab() {
                       {p.firstName} {p.lastName}
                     </p>
                     <p className="text-xs text-mist-400">
-                      {positionLabel(p.position) || "Position offen"}
+                      {positionLabel(p.position) || POSITION_FEHLT}
                       {p.nationality ? ` · ${p.nationality}` : ""}
                     </p>
                   </div>

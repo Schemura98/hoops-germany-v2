@@ -21,7 +21,7 @@ import { Skeleton, SkeletonList } from "@/components/ui/Skeleton";
 import FollowButton from "@/components/FollowButton";
 import PostCard from "@/components/posts/PostCard";
 import { teamScores } from "@/lib/matchScore";
-import { positionLabel, teamSeasonStatusLabel } from "@/lib/constants";
+import { positionLabel, teamSeasonStatusLabel, POSITION_FEHLT } from "@/lib/constants";
 import { getPlayerToken } from "@/lib/clientAuth";
 import Avatar from "@/components/Avatar";
 
@@ -326,7 +326,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
                             </span>
                           )}
                         </p>
-                        <p className="text-xs text-mist-400">{positionLabel(m.position) || "—"}</p>
+                        <p className="text-xs text-mist-400">{positionLabel(m.position) || POSITION_FEHLT}</p>
                       </div>
                       {/* ⚠️ Hier stand bis zum 14.08.2026 zusätzlich ein oranges
                           Positions-Abzeichen – dieselbe Angabe wie die Unterzeile
@@ -364,10 +364,27 @@ export default function TeamTeamDetailSlugPage({ params }) {
                         <p className="text-sm font-medium text-mist-300 truncate">
                           {slot.name || "Offener Platz"}
                         </p>
-                        <p className="text-xs text-mist-400">{positionLabel(slot.position) || "—"}</p>
+                        <p className="text-xs text-mist-400">{positionLabel(slot.position) || POSITION_FEHLT}</p>
                       </div>
+                      {/* ⚠️ EIN Wert statt „Ausstehend"/„eingeladen" (Befund und
+                          Wortlaut Nele, 15.08.2026). Beides war falsch:
+                          • `pending` wird im ganzen Code NIRGENDS gesetzt –
+                            `request-claim` springt direkt auf `confirmed`,
+                            `approve-claim` prüft nur darauf. Der erste Zweig war
+                            unerreichbar, öffentlich erschien immer „eingeladen".
+                          • Und „eingeladen" behauptete etwas, das kein Feld
+                            belegt: Das Slot-Schema hält nicht fest, ob je ein
+                            Link verschickt wurde. Ein Platz, den ein Admin vor
+                            einer Minute angelegt und niemandem geschickt hat,
+                            stand öffentlich als „eingeladen".
+                          • Derselbe Datensatz heißt im Team-Admin-Panel „Frei" –
+                            ein Zustand, zwei sich widersprechende Wörter.
+                          Für einen Fremden, der einen Gegner-Kader ansieht,
+                          zählt ohnehin nur eines: Der Name ist noch nicht
+                          bestätigt. „Noch" macht daraus einen Zwischenstand –
+                          „Nicht bestätigt" allein läse sich wie „abgelehnt". */}
                       <span className="text-xs font-medium rounded-sm px-3 py-1 bg-signal-wait/15 text-signal-wait">
-                        {slot.status === "pending" ? "Ausstehend" : "eingeladen"}
+                        Noch nicht bestätigt
                       </span>
                     </div>
                   ))}

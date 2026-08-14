@@ -22,7 +22,7 @@ import {
   PiCaretDownBold,
 } from "react-icons/pi";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
-import { POSITIONS, positionLabel } from "@/lib/constants";
+import { POSITIONS, positionLabel, POSITION_FEHLT } from "@/lib/constants";
 import { TEAM_PERMISSIONS } from "@/lib/teamPermissions";
 import ConfirmAction from "@/components/ui/ConfirmAction";
 import Button from "@/components/ui/Button";
@@ -581,7 +581,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                   </span>
                   <div className="min-w-0">
                     <p className="font-medium text-paper-50 truncate">{m.name}</p>
-                    <p className="text-xs text-mist-400">{positionLabel(m.position) || "Position offen"}</p>
+                    <p className="text-xs text-mist-400">{positionLabel(m.position) || POSITION_FEHLT}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
@@ -797,7 +797,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                         {slot.name || "Unbenannter Slot"}
                       </p>
                       <p className="text-xs text-mist-400">
-                        {positionLabel(slot.position) || "Position offen"}
+                        {positionLabel(slot.position) || POSITION_FEHLT}
                       </p>
                     </div>
                   </div>

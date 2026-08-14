@@ -11,7 +11,7 @@ import {
   PiMegaphoneBold,
 } from "react-icons/pi";
 import { getTeamAuthToken } from "@/lib/useCurrentTeam";
-import { POSITIONS, positionLabel } from "@/lib/constants";
+import { POSITIONS, positionLabel, POSITION_FEHLT } from "@/lib/constants";
 import ConfirmAction from "@/components/ui/ConfirmAction";
 import Button from "@/components/ui/Button";
 import Loading from "@/components/ui/Loading";
@@ -348,7 +348,7 @@ export default function TryoutsTab() {
                             {a.playerId.firstName} {a.playerId.lastName}
                           </p>
                           <p className="text-xs text-mist-400">
-                            {positionLabel(a.playerId.position) || "Position offen"}
+                            {positionLabel(a.playerId.position) || POSITION_FEHLT}
                           </p>
                         </div>
                       </li>
