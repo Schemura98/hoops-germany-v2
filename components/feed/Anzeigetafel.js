@@ -175,7 +175,23 @@ export default function Anzeigetafel({ data, loading, player }) {
     const opponent = aIsMine ? last.teamB : last.teamA;
     const ausgang = my > opp ? "sieg" : my < opp ? "niederlage" : "unentschieden";
     const verify = matchVerification(last);
-    const belegt = verify?.state === "confirmed" || verify?.state === "final";
+    // ⚠️ Auch HIER `beidseitigBelegt` (Befund Tobias, zweite Runde).
+    //
+    // Diese Zeile lautete `verify?.state === "confirmed" || "final"` – wörtlich
+    // aus dem alten `SpieltagStrip` übernommen. Ich hatte in der ersten
+    // Nacharbeit nur den TEXT von Register 3 korrigiert und die
+    // Farb-/Vorbehaltslogik von Register 2 auf dem alten, falschen Prädikat
+    // stehen lassen. Folge, von Tobias nebeneinander beobachtet:
+    //   Register 2: „80:94 Niederlage" in Fehlerrot, OHNE Vorbehaltszeile
+    //   Register 3: zum SELBEN Spiel „Ergebnis noch nicht beidseitig bestätigt"
+    // Der Widerspruch war damit nicht mehr zwischen zwei Seiten, sondern
+    // innerhalb einer Leiste – gleichzeitig sichtbar statt erst nach einem
+    // Klick.
+    //
+    // In dieser Fläche IST die Farbe die Beleg-Aussage: Ein rot gefärbtes
+    // „Niederlage" ohne Vorbehalt behauptet eine feststehende Tatsache. Für ein
+    // vom Admin eingetragenes Ergebnis ist das genauso falsch wie das Wort.
+    const belegt = beidseitigBelegt(last);
     const strittig = verify?.state === "mismatch";
     lastView = { my, opp, ausgang, belegt, strittig, opponent, verify };
   }
@@ -254,19 +270,26 @@ export default function Anzeigetafel({ data, loading, player }) {
             <p className="mt-1.5 text-xs text-mist-400 truncate">
               gegen {lastView.opponent?.teamName || "Unbekannt"} · {dayLabel(last.date)}
             </p>
-            {lastView.verify &&
-              lastView.verify.state !== "confirmed" &&
-              lastView.verify.state !== "final" && (
-                <p
-                  className={`text-[11px] truncate ${
-                    lastView.verify.state === "mismatch"
-                      ? "text-signal-error"
-                      : "text-signal-wait"
-                  }`}
-                >
-                  {lastView.verify.label}
+            {/* ⚠️ Der Vorbehalt hängt an `belegt`, NICHT mehr am Anzeige-Zustand
+                (Befund Tobias, zweite Runde). Die alte Bedingung war
+                `state !== "confirmed" && state !== "final"` – beim Admin-Fall
+                (`state === "confirmed"`, aber ohne `submittedBy`) erschien also
+                gar kein Vorbehalt, und beim `final`-Fall ebenso wenig. Genau
+                die zwei Fälle, um die es geht.
+                ⚠️ Und NICHT `verify.label` benutzen: Das sagt beim Admin-Fall
+                „Bestätigt" – die Falschaussage, die diese Runde beseitigen
+                soll. */}
+            {lastView.strittig ? (
+              <p className="text-[11px] truncate text-signal-error">
+                {lastView.verify.label}
+              </p>
+            ) : (
+              !lastView.belegt && (
+                <p className="text-[11px] truncate text-signal-wait">
+                  Noch nicht von beiden Teams bestätigt
                 </p>
-              )}
+              )
+            )}
           </Register>
         )}
 
@@ -282,8 +305,24 @@ export default function Anzeigetafel({ data, loading, player }) {
                 ["AST", letztesMitWerten.meineWerte.assists],
                 ["REB", letztesMitWerten.meineWerte.rebounds],
               ]
-                // Ein nicht erfasster Wert ist nicht null Punkte. Nur zeigen,
-                // was auch eingetragen wurde.
+                // ⚠️ EHRLICHE GRENZE dieses Filters (Befund im dritten
+                // Prüflauf): Er fängt nur einen wirklich fehlenden Wert ab –
+                // und den gibt es fast nie. `models/Match.js` deklariert
+                // `points/assists/rebounds` mit `default: 0`, und `toCount()`
+                // in `match-stats/save` macht aus jeder leeren Eingabe eine
+                // `0`. Das Datenmodell unterscheidet „nicht erfasst" also
+                // nicht von „null erzielt".
+                //
+                // Folge, die hier offen benannt gehört: Trägt ein Admin nur
+                // Rebounds ein, steht hier „0 PKT · 0 AST · 5 REB" – zwei
+                // Zahlen, die niemand eingetragen hat. Das `summe > 0`-Tor
+                // oben verkleinert den Fall (eine komplett leere Zeile
+                // erscheint gar nicht), beseitigt ihn aber nicht.
+                //
+                // Sauber lösbar erst mit einem Feld, das „nicht erfasst" von
+                // „null" trennt. Steht als offener Punkt in der Übergabe.
+                // Der frühere Kommentar behauptete an dieser Stelle einen
+                // Schutz, den es nicht gibt.
                 .filter(([, v]) => v != null)
                 .map(([k, v]) => (
                   <span key={k} className="flex-shrink-0">

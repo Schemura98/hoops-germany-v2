@@ -42,7 +42,7 @@ export function computeSteps(player) {
       // Ertrag statt Aufforderung (Befund Lina, Wortlaut Nele, 14.08.2026):
       // Die Zeile wiederholte nur das Label darüber und nannte nicht, was man
       // danach bekommt. „Nächstes Spiel" und „Letztes Ergebnis" stehen wörtlich
-      // als Beschriftungen in components/feed/SpieltagStrip.js – der Nutzer
+      // als Beschriftungen in components/feed/Anzeigetafel.js – der Nutzer
       // erkennt sie wieder.
       // ⚠️ Bewusst „Erst mit Team …", nicht „danach steht …": Die Leiste hängt
       // an ZWEI Bedingungen (Team UND ein angesetztes/abgeschlossenes Spiel).
@@ -67,6 +67,14 @@ export function computeSteps(player) {
 export default function OnboardingChecklist({ player, onDismiss }) {
   const [hidden, setHidden] = useState(false);
   const [appInstalled, setAppInstalled] = useState(false);
+  // ⚠️ MUSS hier oben stehen, vor jedem frühen `return`. Ich hatte diesen Hook
+  // zuerst direkt über `dismiss()` eingefügt – also NACH dem `return null` in
+  // Zeile ~118. Das ist eine Hooks-Verletzung („Rendered more hooks than
+  // during the previous render") und wäre zur Laufzeit geworfen; der Build
+  // meldet so etwas nicht. Kai hatte die Hooks-Reihenfolge dieser Datei in der
+  // ersten Runde ausdrücklich geprüft und für sauber befunden – ich habe sie
+  // danach kaputtgemacht.
+  const [dismissFehler, setDismissFehler] = useState(false);
   const pathname = usePathname();
   const prevDoneRef = useRef(null);
 
@@ -130,13 +138,23 @@ export default function OnboardingChecklist({ player, onDismiss }) {
 
   async function dismiss() {
     setHidden(true); // sofort ausblenden (optimistisch)
+    setDismissFehler(false);
     trackEvent("checklist_dismissed", pathname);
     try {
       await axios.post("/api/player/dismiss-onboarding", { token: getPlayerToken() });
+      onDismiss?.();
     } catch {
-      /* In-App-Anzeige ist ausgeblendet; Flag wird beim nächsten Mal erneut versucht */
+      // ⚠️ Optimistisches Speichern ZURÜCKNEHMEN (Befund Tobias, 15.08.2026).
+      //
+      // Hier stand nur ein Kommentar: „Flag wird beim nächsten Mal erneut
+      // versucht". Das stimmte nicht – die Liste blieb ausgeblendet, kam nach
+      // dem Neuladen wieder, und der Nutzer bekam nie eine Meldung. Er klickt
+      // also erneut, und wieder, ohne je zu erfahren warum.
+      // Das widerspricht der Regel aus `cabb62d`, die genau dafür da ist:
+      // Ein optimistischer Zustand, der serverseitig scheitert, muss zurück.
+      setHidden(false);
+      setDismissFehler(true);
     }
-    onDismiss?.();
   }
 
   const pct = Math.round((doneCount / steps.length) * 100);
@@ -189,6 +207,12 @@ export default function OnboardingChecklist({ player, onDismiss }) {
   if (pct >= 50) {
     const offen = steps.find((s) => !s.done);
     return (
+      <>
+      {dismissFehler && (
+        <p role="alert" className="mb-2 text-xs text-signal-error">
+          Konnte nicht ausgeblendet werden. Bitte später noch einmal versuchen.
+        </p>
+      )}
       <div className="mb-6 flex items-center gap-3 rounded-md border border-navy-600 bg-navy-800 px-4 py-2.5">
         <div className="h-1 flex-1 overflow-hidden rounded-full bg-navy-700" aria-hidden="true">
           <div className="h-full bg-brand-500" style={{ width: `${pct}%` }} />
@@ -201,9 +225,14 @@ export default function OnboardingChecklist({ player, onDismiss }) {
           // machen (Befund Tobias M2): Der Link maß 117 × 16 px und war der
           // einzige Weg aus der Checkliste heraus – 16 px unterschreiten jede
           // brauchbare Schwelle, und das auf dem Hauptgerät.
+          // ⚠️ `py-3.5 -my-3.5` statt `py-2 -my-2` (Nachmessung Tobias,
+          // zweite Runde): Meine erste Korrektur brachte 117×32 px – verdoppelt,
+          // aber weiter unter dem 44-px-Richtwert, und die Akkordeon-Knöpfe
+          // direkt darunter messen 356×44. Jetzt 44 px hoch, ohne dass die
+          // Zeile höher wird.
           <Link
             href={offen.href}
-            className="truncate whitespace-nowrap py-2 -my-2 text-xs font-semibold text-brand-400 hover:text-brand-300"
+            className="truncate whitespace-nowrap py-3.5 -my-3.5 text-xs font-semibold text-brand-400 hover:text-brand-300"
           >
             {offen.label}
           </Link>
@@ -216,15 +245,20 @@ export default function OnboardingChecklist({ player, onDismiss }) {
             dem Analytics-Ereignis war für diese Gruppe tote Funktion.
             Vorher war der Knopf immer da – das war ein stiller Verlust durch
             meinen Umbau, keine Entwurfsentscheidung. */}
+        {/* ⚠️ 44×44 Klickfläche (Nachmessung Tobias): Meine erste Fassung ergab
+            20×20 px – exakt die Größe, die in `582d59d` schon einmal als
+            „Tobias' Hamburger 20×20" behoben wurde. Derselbe Fehler an neuer
+            Stelle. `-m-3 p-3` vergrößert die Fläche, ohne die Zeile zu dehnen. */}
         <button
           type="button"
           onClick={dismiss}
           aria-label="Ausblenden"
-          className="-m-1 flex-shrink-0 p-1 text-mist-600 transition-colors hover:text-mist-300"
+          className="-m-3 flex-shrink-0 p-3 text-mist-600 transition-colors hover:text-mist-300"
         >
           <PiXBold className="text-xs" />
         </button>
       </div>
+      </>
     );
   }
 
