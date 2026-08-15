@@ -201,7 +201,33 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", foto 
         // klingt zum Stillstand hin aus (Rest-Drehung statt abruptem Stopp).
         angle = SETTLE_FROM * 280 + settle * 40;
       }
-      const x = targetX + Math.sin(tb * Math.PI * 2.2) * wobbleAmp;
+      let x = targetX + Math.sin(tb * Math.PI * 2.2) * wobbleAmp;
+
+      // ── Übergabe an die Fortschritts-Leiste (15.08.2026, Auftrag Patrick) ──
+      // Vorher endete die Reise hier: Der Ball kam am Aufsetzpunkt zur Ruhe und
+      // scrollte dann eingefroren aus dem Bild – gemessen stand sein transform
+      // ab 10 % Seitenscroll unverändert, während der Streckenball erst rund
+      // 245px später einsetzte. Dazwischen trug niemand das Motiv, und aus
+      // "einer Reise durch die Seite" wurden zwei Auftritte.
+      //
+      // Jetzt rollt er weiter, sobald der Hero das Bild verlässt, und blendet
+      // dabei aus – die Leiste übernimmt genau dort. Bezug ist die Unterkante
+      // des Heros, NICHT `t`: `t` ist nach 45 % der Hero-Höhe fertig, also lange
+      // bevor die Bühne wirklich weg ist. Der Ball würde sonst mitten im Bild
+      // verschwinden.
+      const sichtHoehe = window.innerHeight || 1;
+      const tu = clamp(
+        (sichtHoehe - rect.bottom) / Math.max(1, sichtHoehe - NAVBAR_HEIGHT),
+        0,
+        1
+      );
+      if (tu > 0) {
+        // Der Ball rollt in Laufrichtung aus dem Bild – die Drehung folgt dabei
+        // der zurückgelegten Strecke (Weg/Radius), wie auf der Leiste auch.
+        const abrollweg = tu * (rect.width - targetX + BALL_R * 4);
+        x += abrollweg;
+        angle += (abrollweg / BALL_R) * (180 / Math.PI);
+      }
 
       // Kein Ausblenden mehr am Ziel: Der Ball bleibt sichtbar am Ruhepunkt
       // stehen (die eigentliche Landung findet jetzt auf der Fortschritts-
@@ -213,6 +239,13 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", foto 
       // multiplizieren sich, damit das Einblenden nicht überschrieben wird).
       const textRect = textRef?.current?.getBoundingClientRect();
       ballOpacity *= ballOpacityNearText(rect.top + y, textRect);
+
+      // Ausblenden der Übergabe erst in deren zweiter Hälfte: Wer den Hero zügig
+      // durchscrollt, soll das Weiterrollen noch sehen, nicht nur ein
+      // Verschwinden. Steht bewusst NACH der Deklaration von `ballOpacity` –
+      // die erste Fassung rechnete oben im `tu`-Block damit und wäre in die
+      // temporale Totzone gelaufen (ReferenceError bei jedem Frame).
+      if (tu > 0) ballOpacity *= 1 - clamp((tu - 0.5) / 0.5, 0, 1);
 
       ball.style.transform = `translate3d(${(x - BALL_R).toFixed(1)}px, ${(y - BALL_R).toFixed(
         1

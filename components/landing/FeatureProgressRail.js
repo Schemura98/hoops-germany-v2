@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { RailBallGlyph, HoopEmblem } from "@/components/landing/HeroGlyphs";
+import {
+  RailBallGlyph,
+  HoopEmblem,
+  RAIL_BALL_R,
+  rollwinkel,
+} from "@/components/landing/HeroGlyphs";
 
 // Fortschritts-Anzeige der Feature-Strecke (Konzept
 // docs/LANDING-KONZEPT-2026-08-11.md, Abschnitt 7 / Stufe 2).
@@ -50,6 +55,55 @@ const WING_NUDGE = 9; // px
 // Sektion zusammen, deutlich nach dem Moment, in dem der letzte Punkt aktiv wird).
 const ARRIVE_T = 0.96;
 
+// ── Dribbel-Spur (Punkt 3, 15.08.2026, Auftrag Patrick) ────────────────────
+// Der Ball hinterlässt seinen Weg, wie ihn ein Trainer auf die Taktiktafel
+// malen würde. Das ist KEINE frei gewählte Deko-Linie:
+//
+// In der Taktiktafel-Notation hat jede Linienform eine feste Bedeutung –
+// durchgezogen = Laufweg, gestrichelt = Pass, **Zickzack = Dribbling**. Unser
+// Ball dribbelt die Strecke entlang, also ist die Zickzack-Linie die einzige
+// notationsrichtige Form. Eine gerade Linie hieße „der Ball wurde getragen",
+// eine gestrichelte „er wurde gepasst". Dieselbe Konvention benutzt
+// PlayDiagram.js für Laufweg und Pass.
+//
+// Technik wie dort: `pathLength="1"` normiert die Pfadlänge auf 1, danach
+// zeichnet `strokeDashoffset` von 1 auf 0 den Pfad exakt von Anfang bis Ende –
+// ohne `getTotalLength()`, also ohne Layout-Zugriff pro Bild.
+const SPUR_AMPLITUDE = 4.5; // px seitlicher Ausschlag der Zickzack-Linie
+const SPUR_WELLE = 15; // px Länge einer halben Welle
+
+// Baut den Zickzack-Pfad einer Dribbel-Strecke. `mitteBei(fortschritt)` liefert
+// die seitliche Mittellinie an dieser Stelle – dadurch trägt die Spur die
+// Flügel-Auslenkung des Balls mit und läuft nicht stur geradeaus.
+// `senkrecht`: true = Strecke verläuft in y (Desktop-Leiste), false = in x.
+function dribbelPfad(von, bis, mitteBei, senkrecht) {
+  const laenge = bis - von;
+  if (laenge <= 0) return "";
+  const schritte = Math.max(2, Math.round(laenge / SPUR_WELLE));
+  // ⚠️ Faktor 2 am Steuerpunkt, und der ist nicht willkürlich: Eine quadratische
+  // Bézierkurve erreicht ihren Steuerpunkt NICHT – ihr Scheitel liegt auf halbem
+  // Weg dorthin. Ohne den Faktor wäre die sichtbare Amplitude nur halb so groß
+  // wie `SPUR_AMPLITUDE` behauptet (nachgemessen: 5px statt 9px Bandhöhe).
+  // Eine Konstante, die das Doppelte ihres Wertes bedeutet, ist eine Falle für
+  // den Nächsten, der sie justiert.
+  const punkt = (l, seite) => {
+    const f = laenge === 0 ? 0 : l / laenge;
+    const mitte = mitteBei(f);
+    const quer = mitte + seite * SPUR_AMPLITUDE * 2;
+    return senkrecht ? [quer, von + l] : [von + l, quer];
+  };
+  const [sx, sy] = punkt(0, 0);
+  let d = `M${sx.toFixed(1)} ${sy.toFixed(1)}`;
+  for (let i = 0; i < schritte; i++) {
+    const l0 = (laenge * i) / schritte;
+    const l1 = (laenge * (i + 1)) / schritte;
+    const [kx, ky] = punkt((l0 + l1) / 2, i % 2 === 0 ? 1 : -1);
+    const [ex, ey] = punkt(l1, 0);
+    d += ` Q${kx.toFixed(1)} ${ky.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`;
+  }
+  return d;
+}
+
 const clamp01 = (v) => Math.min(1, Math.max(0, v));
 
 export default function FeatureProgressRail({ labels = [] }) {
@@ -64,6 +118,8 @@ export default function FeatureProgressRail({ labels = [] }) {
   const ballDesktopRef = useRef(null);
   const goalDesktopRef = useRef(null);
   const goalRingRef = useRef(null); // nur der Ring des Korb-Emblems (fuer den Farbblitz)
+  const spurMobileRef = useRef(null); // Dribbel-Spur, waagerecht
+  const spurDesktopRef = useRef(null); // Dribbel-Spur, senkrecht
   const activeRef = useRef(-1);
   const arrivedRef = useRef(false); // einmalige Ankunft – danach eingefroren
   const tickingRef = useRef(false);
@@ -93,7 +149,12 @@ export default function FeatureProgressRail({ labels = [] }) {
         if (animiert) {
           ballMobileRef.current.style.transition = "transform 320ms cubic-bezier(0.34,1.56,0.64,1)";
         }
-        ballMobileRef.current.style.transform = `translate3d(${(trackW - 7).toFixed(1)}px, -50%, 0)`;
+        // Endstand MIT Drehwinkel: Ohne ihn schnappte der Ball bei der Ankunft
+        // auf 0deg zurück – er wäre die ganze Strecke gerollt und am Ziel
+        // plötzlich wieder unverdreht.
+        ballMobileRef.current.style.transform = `translate3d(${(
+          trackW - RAIL_BALL_R
+        ).toFixed(1)}px, -50%, 0) rotate(${rollwinkel(trackW).toFixed(1)}deg)`;
         ballMobileRef.current.style.opacity = "1";
       }
       if (goalMobileRef.current) goalMobileRef.current.style.opacity = "1";
@@ -111,7 +172,15 @@ export default function FeatureProgressRail({ labels = [] }) {
             "transform 420ms cubic-bezier(0.34,1.56,0.64,1), opacity 260ms ease-out";
           if (goalRingRef.current) goalRingRef.current.classList.add("rail-goal-flash-ring");
         }
-        ballDesktopRef.current.style.transform = `translate3d(-50%, ${zielY.toFixed(1)}px, 0)`;
+        // Auch hier der Drehwinkel des Endstands (s. mobil oben). Bezug ist der
+        // erste Punkt, damit er zur laufenden Drehung passt und nicht springt.
+        const ersterRectZiel = dotsRef.current[0]?.getBoundingClientRect();
+        const ersterYZiel = ersterRectZiel
+          ? ersterRectZiel.top + ersterRectZiel.height / 2 - colRect.top
+          : 0;
+        ballDesktopRef.current.style.transform = `translate3d(-50%, ${zielY.toFixed(
+          1
+        )}px, 0) rotate(${rollwinkel(zielY - ersterYZiel).toFixed(1)}deg)`;
         ballDesktopRef.current.style.opacity = "1";
         goalDesktopRef.current.style.opacity = "1";
       }
@@ -158,8 +227,24 @@ export default function FeatureProgressRail({ labels = [] }) {
       // den Balken fuellt, damit beide immer exakt uebereinstimmen.
       if (trackRef.current && ballMobileRef.current) {
         const trackW = trackRef.current.getBoundingClientRect().width;
-        ballMobileRef.current.style.transform = `translate3d(${(trackW * t - 7).toFixed(1)}px, -50%, 0)`;
+        // Der Ball ROLLT die Leiste entlang, er gleitet nicht: Die Drehung
+        // folgt der zurückgelegten Strecke (s. `rollwinkel` in HeroGlyphs).
+        const strecke = trackW * t;
+        ballMobileRef.current.style.transform = `translate3d(${(
+          strecke - RAIL_BALL_R
+        ).toFixed(1)}px, -50%, 0) rotate(${rollwinkel(strecke).toFixed(1)}deg)`;
         ballMobileRef.current.style.opacity = "1";
+
+        // Die Dribbel-Spur liegt auf voller Länge im Pfad und wird über den
+        // Strichversatz aufgedeckt – so bleibt sie exakt beim Ball, ohne dass
+        // der Pfad pro Bild neu gebaut werden müsste.
+        if (spurMobileRef.current) {
+          if (spurMobileRef.current.dataset.breite !== String(Math.round(trackW))) {
+            spurMobileRef.current.dataset.breite = String(Math.round(trackW));
+            spurMobileRef.current.setAttribute("d", dribbelPfad(0, trackW, () => 0, false));
+          }
+          spurMobileRef.current.style.strokeDashoffset = String(1 - t);
+        }
       }
 
       // Desktop: zwischen erstem und letztem Punkt interpolieren, mit
@@ -177,10 +262,35 @@ export default function FeatureProgressRail({ labels = [] }) {
         const y = ersterY + (letzterY - ersterY) * frac;
         const gewicht = (mitte) => Math.max(0, 1 - Math.abs(continuous - mitte));
         const nudgeX = -WING_NUDGE * gewicht(WING_LEFT_INDEX) + WING_NUDGE * gewicht(WING_RIGHT_INDEX);
+        // Wie mobil: die Drehung folgt dem Weg. Gemessen wird ab dem ERSTEN
+        // Punkt, nicht ab 0 – sonst startet der Ball bereits verdreht, obwohl
+        // er noch keinen Millimeter zurückgelegt hat.
         ballDesktopRef.current.style.transform = `translate3d(calc(-50% + ${nudgeX.toFixed(
           1
-        )}px), ${y.toFixed(1)}px, 0)`;
+        )}px), ${y.toFixed(1)}px, 0) rotate(${rollwinkel(y - ersterY).toFixed(1)}deg)`;
         ballDesktopRef.current.style.opacity = "1";
+
+        // Dribbel-Spur: einmal je Layout gebaut, danach nur aufgedeckt. Die
+        // Mittellinie trägt dieselbe Flügel-Auslenkung wie der Ball – sonst
+        // liefe die Spur schnurgerade, während der Ball seitlich ausschert.
+        if (spurDesktopRef.current) {
+          const kennung = `${Math.round(ersterY)}-${Math.round(letzterY)}`;
+          if (spurDesktopRef.current.dataset.spanne !== kennung) {
+            spurDesktopRef.current.dataset.spanne = kennung;
+            const mitteBei = (f) => {
+              const c = f * (labels.length - 1);
+              return (
+                -WING_NUDGE * Math.max(0, 1 - Math.abs(c - WING_LEFT_INDEX)) +
+                WING_NUDGE * Math.max(0, 1 - Math.abs(c - WING_RIGHT_INDEX))
+              );
+            };
+            spurDesktopRef.current.setAttribute(
+              "d",
+              dribbelPfad(ersterY, letzterY, mitteBei, true)
+            );
+          }
+          spurDesktopRef.current.style.strokeDashoffset = String(1 - frac);
+        }
 
         if (goalDesktopRef.current) {
           // Das Korb-Emblem daemmert schon auf, waehrend sich der Ball dem
@@ -276,6 +386,29 @@ export default function FeatureProgressRail({ labels = [] }) {
               style={{ transform: "scaleX(0)" }}
             />
           </div>
+          {/* Dribbel-Spur, waagerecht. `overflow-visible` ist nötig, weil der
+              Zickzack über die 4px des Balkens hinausschwingt; der innere
+              Versatz legt y=0 auf die Balkenmitte. */}
+          <svg
+            aria-hidden="true"
+            className="pointer-events-none absolute left-0 top-1/2 h-8 w-full -translate-y-1/2 overflow-visible"
+            fill="none"
+          >
+            <g transform="translate(0,16)">
+              <path
+                ref={spurMobileRef}
+                data-spur="mobil"
+                d=""
+                pathLength="1"
+                strokeDasharray="1"
+                style={{ strokeDashoffset: 1 }}
+                stroke={FARBE_AKTIV}
+                strokeOpacity="0.45"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </g>
+          </svg>
           <RailBallGlyph ref={ballMobileRef} />
         </div>
       </div>
@@ -290,6 +423,30 @@ export default function FeatureProgressRail({ labels = [] }) {
           ref={railColRef}
           className="sticky top-1/2 flex -translate-y-1/2 flex-col items-center gap-3"
         >
+          {/* Dribbel-Spur, senkrecht. Breite 40px deckt den größten Ausschlag
+              ab (Flügel-Auslenkung 9 + Amplitude 4,5); der innere Versatz legt
+              x=0 auf die Spaltenmitte, dieselbe Bezugsachse wie beim Ball.
+              Steht als ERSTES Kind, damit die Punkte darüber liegen. */}
+          <svg
+            aria-hidden="true"
+            className="pointer-events-none absolute left-1/2 top-0 h-full w-10 -translate-x-1/2 overflow-visible"
+            fill="none"
+          >
+            <g transform="translate(20,0)">
+              <path
+                ref={spurDesktopRef}
+                data-spur="desktop"
+                d=""
+                pathLength="1"
+                strokeDasharray="1"
+                style={{ strokeDashoffset: 1 }}
+                stroke={FARBE_AKTIV}
+                strokeOpacity="0.45"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </g>
+          </svg>
           {labels.map((label, i) => (
             <span
               key={label}

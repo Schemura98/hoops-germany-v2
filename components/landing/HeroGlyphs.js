@@ -76,21 +76,45 @@ export const HoopEmblem = forwardRef(function HoopEmblem({ ringRef, ...props }, 
 });
 
 // Ball-Marker der Fortschritts-Leiste: derselbe Ball, aber FLACH – reines
-// brand-500, ohne den Verlauf/Schatten des Hero-Balls. Klein genug, um neben
-// den 8px-Punkten (Desktop) bzw. dem 4px-Balken (Mobil) nicht zu dominieren,
-// aber rund und orange genug, um als "derselbe Ball" erkennbar zu bleiben –
-// die Wiedererkennung trägt hier über Farbe/Position, nicht über Bilddetail.
+// brand-500, ohne den Verlauf/Schatten des Hero-Balls. Die Wiedererkennung
+// trägt hier über Farbe/Form/Bewegung, nicht über Bilddetail.
+//
+// ⚠️ GRÖSSE UND DREHUNG GEHÖREN ZUSAMMEN (15.08.2026, Auftrag Patrick).
+// Vorher: 14px, und der Controller setzte AUSSCHLIESSLICH `translate3d` – der
+// Ball glitt die Leiste hinunter, ohne sich zu drehen. Gemessen legte er über
+// den halben Seitenscroll (~2.500px) rund 100px zurück; als 14px-Punkt auf
+// einer Haarlinie war er als Ball praktisch nicht wahrnehmbar.
+//
+// Jetzt 20px UND scroll-gekoppelte Rollbewegung (`rollwinkel()` unten). Beides
+// zusammen, denn einzeln macht keines davon den Unterschied: Ein größerer Ball
+// ohne Drehung ist ein größerer Punkt, eine Drehung an einem 14px-Punkt sieht
+// niemand.
+//
+// ⚠️ Die Grenze dieser Lösung, damit sie niemand für mehr hält, als sie ist:
+// Das ist eine FLÄCHENDREHUNG. Ein echter Ball rotiert um eine Achse, seine
+// Nähte verschwinden hinter der Kugel. Bei 20px trägt die Täuschung, weil das
+// Auge die Naht als Speiche liest. **Deutlich größer darf dieser Glyph nicht
+// werden** – ab etwa 40px kippt er ins Rad-Artige. Wer mehr Präsenz will,
+// braucht anderes Material (gerenderte Bildsequenz), nicht mehr Pixel.
+export const RAIL_BALL_PX = 20;
+export const RAIL_BALL_R = RAIL_BALL_PX / 2;
+
+// Rollwinkel in Grad für eine zurückgelegte Strecke: Ein Ball, der ohne zu
+// rutschen rollt, dreht sich um Strecke/Radius (Bogenmaß). Genau deshalb wirkt
+// es physikalisch – die Drehung ist nicht frei gewählt, sie folgt dem Weg.
+export const rollwinkel = (streckePx) => (streckePx / RAIL_BALL_R) * (180 / Math.PI);
+
 export const RailBallGlyph = forwardRef(function RailBallGlyph(props, ref) {
   return (
     <svg
       ref={ref}
       aria-hidden="true"
-      width="14"
-      height="14"
+      width={RAIL_BALL_PX}
+      height={RAIL_BALL_PX}
       viewBox="0 0 14 14"
       fill="none"
       className="pointer-events-none absolute left-0 top-1/2 opacity-0 will-change-transform"
-      style={{ transformOrigin: "7px 7px" }}
+      style={{ transformOrigin: `${RAIL_BALL_R}px ${RAIL_BALL_R}px` }}
       {...props}
     >
       <circle cx="7" cy="7" r="6" fill="#F07A27" />
