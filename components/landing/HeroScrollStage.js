@@ -90,8 +90,7 @@ const SETTLE_FROM = 0.82;
 // meiste Aufmerksamkeit
 // liegt, und ohne dass jemand scrollen muss.
 const MD_BREAKPOINT = 768;
-const EINFLUG_MS = 600;
-const EINFLUG_KURVE = "cubic-bezier(0.23, 1, 0.32, 1)";
+const EINFLUG_MS = 520; // Vivien: Vorlauf vor der Headline nicht verspielen
 
 // Anzeigegröße des Hero-Balls. Seit dem 15.08.2026 (Auftrag Patrick: "groß")
 // eine gerenderte Bildsequenz statt des 28px-Vektors – erst in dieser Größe
@@ -160,27 +159,33 @@ function ballDeckkraftUeberKaesten(
 ) {
   let kleinste = 1;
   for (const k of kaesten) {
-    // Keine waagerechte Überschneidung ⇒ dieser Kasten ist kein Grund.
     if (ballRechts < k.left || ballLinks > k.right) continue;
-    // ⚠️ SENKRECHT ZÄHLEN JETZT DIE BALLKANTEN, NICHT DIE MITTE (Befund Kai,
-    // dritte Runde: „senkrecht der Mittelpunkt, waagerecht die volle Breite" –
-    // zwei Maßstäbe in einer Funktion).
-    // Sichtbar wurde es erst durch Viviens neue Bahn: Seit der Ball tiefer
-    // fällt, zieht er durch die Schaltflächenreihe. Gemessen bei 768x1024 lag
-    // seine Deckkraft dabei auf „Teams entdecken" bei 1,00 – seine untere
-    // Hälfte deckte die Taste, während sein MITTELPUNKT noch 88px darüber
-    // stand und die Regel deshalb schwieg. Genau die Kontrastregression, gegen
-    // die diese Funktion gebaut wurde.
-    const ueberlappt = ballUnten >= k.top && ballOben <= k.bottom;
-    let d = 1;
-    if (ueberlappt) d = TEXT_DIM_FLOOR;
-    else if (ballUnten < k.top && k.top - ballUnten <= TEXT_FADE_MARGIN) {
-      const f = (TEXT_FADE_MARGIN - (k.top - ballUnten)) / TEXT_FADE_MARGIN;
-      d = 1 - f * (1 - TEXT_DIM_FLOOR);
-    } else if (ballOben > k.bottom && ballOben - k.bottom <= TEXT_FADE_MARGIN) {
-      const f = (TEXT_FADE_MARGIN - (ballOben - k.bottom)) / TEXT_FADE_MARGIN;
-      d = 1 - f * (1 - TEXT_DIM_FLOOR);
-    }
+    // ⚠️ NUR ECHTE ÜBERLAPPUNG DUNKELT AB (Entscheidung Vivien, fünfte Runde).
+    // Vorher rampte die Deckkraft schon im ANFLUG: sobald die Ballkante 24px
+    // an einen Kasten heranreichte. Das erzeugte einen Widerspruch zwischen
+    // zwei Mechanismen, die beide recht zu haben glaubten – die Lückensuche
+    // garantiert per Konstruktion, dass die RUHELAGE keinen Kasten schneidet,
+    // und dieselbe Position wurde trotzdem auf 0,40 gedimmt. Gemessen bei
+    // 768x1024: Ballkante 6px von der Subline, also mitten im Anflugfenster.
+    // Viviens Satz dazu: Jede Abdunkelung in der Ruhelage ist definitionsgemäß
+    // falsch – sie kann nur aus einer Näherung stammen, nicht aus Überlappung.
+    // Die Weichzeichnung bleibt, sie sitzt jetzt im KONTAKT statt im Anflug:
+    // Rampe über die ersten `TEXT_FADE_MARGIN` Pixel Eindringtiefe.
+    const eindringen =
+      Math.min(ballUnten, k.bottom) - Math.max(ballOben, k.top);
+    if (eindringen <= 0) continue; // keine Überlappung ⇒ kein Grund
+    // ⚠️ SCHALTFLÄCHEN DIMMEN SOFORT VOLL, TEXTZEILEN RAMPEN.
+    // Beides sind Entscheidungen von Vivien, die einander an dieser Stelle
+    // widersprachen: „nur echte Überlappung dunkelt ab" (fünfte Runde) gegen
+    // „eine Schaltfläche ist eine GEFÜLLTE Fläche, der Ball dahinter ist ein
+    // Kontrastproblem über die ganze Pille" (zweite Runde). Mit der reinen
+    // Eindringtiefen-Rampe stand der Ball bei 1px Überlappung noch auf 0,97 –
+    // und genau darüber ist die Kontrastregression entstanden, gegen die diese
+    // Funktion gebaut wurde (1,67:1 statt 4,5:1 auf „Teams entdecken").
+    // Bei einer Textzeile ist eine streifende Berührung dagegen kein
+    // Kontrastproblem; dort trägt die Rampe.
+    const f = k.taste ? 1 : Math.min(1, eindringen / TEXT_FADE_MARGIN);
+    const d = 1 - f * (1 - TEXT_DIM_FLOOR);
     if (d < kleinste) kleinste = d;
   }
   return kleinste;
@@ -298,7 +303,8 @@ export default function HeroScrollStage({
       const bedienelemente = new Set(inhalt.querySelectorAll("a, button"));
       for (const el of bedienelemente) {
         const r = el.getBoundingClientRect();
-        if (r.width > 0 && r.height > 0) kaesten.push(relativ(r));
+        if (r.width > 0 && r.height > 0)
+          kaesten.push({ ...relativ(r), taste: true });
       }
       // Textknoten außerhalb der Bedienelemente – deren Fläche ist schon erfasst.
       const knotenLauf = document.createTreeWalker(
@@ -318,7 +324,8 @@ export default function HeroScrollStage({
         const bereich = document.createRange();
         bereich.selectNodeContents(k);
         for (const r of bereich.getClientRects()) {
-          if (r.width > 0 && r.height > 0) kaesten.push(relativ(r));
+          if (r.width > 0 && r.height > 0)
+            kaesten.push({ ...relativ(r), taste: false });
         }
       }
       kaestenRef.current = kaesten;
@@ -435,7 +442,11 @@ export default function HeroScrollStage({
         else belegt.push([oben, unten]);
       }
 
-      const noetig = 2 * BALL_R + 16;
+      // ⚠️ +8 RESERVIERT DEN ÜBERSCHWINGER (Vivien, fünfte Runde): Der
+      // Aufsetzer geht 4px nach unten, und bei 375 hat der Ball zur ersten
+      // Zeile nur rund 10px Luft. Ohne die Reserve berührt ausgerechnet der
+      // schönste Frame die Headline.
+      const noetig = 2 * BALL_R + 16 + 8;
 
       // ══ DIE RUHELAGE HÄNGT AN DER FENSTERHÖHE, NICHT AN DER BÜHNE ═════════
       // Entscheidung Vivien (fünfte Runde) – und der Befund, der vier Runden
@@ -658,20 +669,60 @@ export default function HeroScrollStage({
       // (dieselbe Falle wie bei der Lande-Animation der Leiste, Befund Kai K2).
       if (mobil && !eingeflogenRef.current) {
         eingeflogenRef.current = true;
-        const start = `translate3d(${(x - BALL_R).toFixed(1)}px, ${(
-          y0 - BALL_R
-        ).toFixed(1)}px, 0)`;
-        const ziel = ball.style.transform;
-        ball.style.transition = "none";
-        ball.style.transform = start;
-        requestAnimationFrame(() => {
-          if (!ballRef.current) return;
-          ballRef.current.style.transition = `transform ${EINFLUG_MS}ms ${EINFLUG_KURVE}`;
-          ballRef.current.style.transform = ziel;
-          window.setTimeout(() => {
-            if (ballRef.current) ballRef.current.style.transition = "";
-          }, EINFLUG_MS + 50);
-        });
+        // ══ DER EINFLUG NIMMT DIE SEQUENZ MIT ═══════════════════════════════
+        // Entscheidung Vivien (fünfte Runde). Vorher fiel der Ball mobil als
+        // STANDBILD herein: `tb` ist mobil fest 1, der Drehwinkel damit
+        // konstant – gemessen 1 von 32 Sprite-Bildern, null Wechsel. Wir haben
+        // eine 32-Bild-Rotationssequenz für 104 KB gebaut und auf dem
+        // Hauptgerät kein einziges Bild gezeigt.
+        //
+        // ⚠️ EINE DREHUNG IST HIER NICHT ERFUNDEN, und der Grund ist nicht
+        // derselbe wie auf der Leiste: `rollwinkel()` beschreibt ROLLEN auf
+        // einer Fläche. Der Einflug ist FLUG – und ein fliegender Ball dreht
+        // sich ohnehin, Spin ist beim Basketball die Regel.
+        // ⚠️ DIE RATE IST GEWÄHLT, NICHT HERGELEITET: Weg durch Radius, also
+        // dasselbe Verhältnis wie überall sonst (bei 375 rund 247°, gut zwei
+        // Drittel einer Umdrehung). Der Grund ist EINHEITLICHKEIT, damit ein
+        // großer Ball auf kurzem Weg nicht wirbelt – nicht Physik. Ohne diesen
+        // Satz steht hier in vier Wochen wieder eine Begründung, welche die
+        // Zeichnung nicht trägt.
+        //
+        // Statt einer CSS-Übergangszeit läuft der Einflug jetzt über rAF: Nur
+        // so lassen sich Position, Bildwahl UND der Aufsetzer aus einer Hand
+        // steuern. Die Kurve bleibt eine Verzögerung – Vivien hat die
+        // naheliegende Beschleunigung ausdrücklich verworfen: Der Ball beginnt
+        // seinen Fall AUSSERHALB des Bildes, hat an der Kante also längst
+        // Tempo. „Schnell herein, dann abbremsen" ist die richtige Lesart;
+        // eine Beschleunigung von der Kante weg sähe aus wie abgeschossen.
+        const startY = y0 - BALL_R;
+        const zielY = y - BALL_R;
+        const weg = zielY - startY;
+        const gesamtWinkel = (weg / BALL_R) * (180 / Math.PI);
+        const beginn = performance.now();
+        const schritt = () => {
+          const el = ballRef.current;
+          if (!el) return;
+          const t2 = Math.min(1, (performance.now() - beginn) / EINFLUG_MS);
+          // easeOutQuint – praktisch deckungsgleich mit der bisherigen
+          // cubic-bezier(0.23, 1, 0.32, 1), nur in JS auswertbar.
+          const e = 1 - Math.pow(1 - t2, 5);
+          // ⚠️ DERSELBE AUFSETZER WIE IM SCROLL-PFAD (`SETTLE_FROM`), bewusst
+          // dieselbe Rechnung: Reines Ausklingen auf null liest sich als
+          // Schweben – ein Gegenstand mit Masse driftet nicht die letzten
+          // Pixel. So teilen sich die beiden Momente, in denen der Ball zur
+          // Ruhe kommt, eine Bewegungssignatur.
+          const ueber = Math.sin(e * Math.PI) * 4 * (1 - e);
+          const yJetzt = startY + weg * e - ueber;
+          el.style.transform = `translate3d(${(x - BALL_R).toFixed(1)}px, ${yJetzt.toFixed(1)}px, 0)`;
+          const bildJetzt =
+            ((Math.round((gesamtWinkel * e * BALL_SPRITE_FRAMES) / 360) %
+              BALL_SPRITE_FRAMES) +
+              BALL_SPRITE_FRAMES) %
+            BALL_SPRITE_FRAMES;
+          el.style.backgroundPositionX = `${(bildJetzt / (BALL_SPRITE_FRAMES - 1)) * 100}%`;
+          if (t2 < 1) requestAnimationFrame(schritt);
+        };
+        requestAnimationFrame(schritt);
       }
     };
 

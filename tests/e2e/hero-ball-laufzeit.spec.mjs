@@ -224,6 +224,35 @@ test.describe("Hero-Ball – Laufzeit auf /", () => {
       }
     });
 
+    test(`${breite}x${hoehe}: in der Ruhelage ist der Ball voll deckend`, async ({
+      page,
+    }) => {
+      // ⚠️ DER WIDERSPRUCH, DEN DIESE ZEILE FÜR IMMER WEGPRÜFT (Vivien):
+      // Die Lückensuche garantiert per Konstruktion, dass die Ruhelage KEINEN
+      // Inhaltskasten schneidet – das ist ihr ganzer Zweck. Trotzdem dunkelte
+      // die Abdunkelung dieselbe Position auf 0,40 ab, weil sie schon im
+      // ANFLUG rampte. Zwei Mechanismen, die beide recht zu haben glaubten.
+      // Jede Abdunkelung in der Ruhelage ist damit definitionsgemäß falsch.
+      await page.setViewportSize({ width: breite, height: hoehe });
+      await page.goto("/", { waitUntil: "networkidle" });
+      const proben = await page.evaluate(abtasten, 12);
+      expect(proben).not.toBeNull();
+
+      const sichtbar = proben.filter((p) => p.deck > 0.02);
+      expect(sichtbar.length).toBeGreaterThan(3);
+      // Ruhelage = tiefste bühnenrelative Lage, ERSTES Erreichen (danach ändert
+      // das Ausrollen nur noch x).
+      const tiefste = Math.max(...sichtbar.map((p) => p.mitteImRahmen));
+      const inRuhe = sichtbar.find((p) => p.mitteImRahmen === tiefste);
+      expect(
+        inRuhe.deck,
+        `In der Ruhelage steht der Ball auf Deckkraft ${inRuhe.deck} statt 1,00 ` +
+          `(scrollY ${inRuhe.y}). Die Lückensuche hat die Position als frei ` +
+          `bestimmt – wird sie trotzdem gedimmt, widersprechen sich zwei ` +
+          `Mechanismen und die Abdunkelung stammt aus einer Näherung.`,
+      ).toBeGreaterThan(0.98);
+    });
+
     test(`${breite}x${hoehe}: die Ruhelage liegt unterhalb des Scrollwegs bis zur Ankunft`, async ({
       page,
     }) => {

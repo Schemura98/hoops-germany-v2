@@ -712,22 +712,19 @@
     Die Defekte sind behoben; was bleibt, sind bewusst akzeptierte Abweichungen –
     **kein Regressionsverdacht, sondern Entscheidungen:**
     (a) ⚠️ **ZUERST: WAS DIE ZAHL MISST** (Befund Kai, vierte Runde). Es gibt
-    ZWEI Kennzahlen, und sie wurden verwechselt:
-    **Geometrisch** = Anteil des Balls im Sichtfeld abzüglich Navbar.
-    **Wirksam** = derselbe Wert **mal Deckkraft**.
-    Mobil sind das **80 % geometrisch / 43 % wirksam an derselben Position** –
-    das war kein Vorher/Nachher, wie ich es gemeldet hatte. Ab 1024 fallen beide
-    zusammen (Deckkraft 1,00 → 83 %). Viviens 55-%-Prüfmaß ist gegen die eine
-    Zahl klar verfehlt und gegen die andere klar erfüllt; **es bezieht sich auf
-    die WIRKSAME**. Ohne diese Festlegung ist es derselbe Fehler eine Ebene
-    tiefer als „Bühne gegen Sichtfeld" – nur „sichtbar" gegen „sichtbar und
-    nicht weggedimmt".
-    (a-Fortsetzung) **Wirksame Fläche mobil 43 %, bei 768×1024 rund 50–58 %**
-    (Messungen streuen je Schrittweite) gegen Viviens Prüfmaß von ≥ 55 %. Der Ball ist dort nicht kleiner, er wird stärker
-    gedimmt: Die Abdunkelung zählt seit der Symmetrie-Korrektur schon eine
-    **Berührung** mit einem Inhaltskasten, nicht erst die Mittellage. Das ist der
-    Preis dafür, dass die Kontrastlücke zu ist (vorher Deckkraft 1,00 über
-    „Teams entdecken"). Feinjustierung, kein Fehler.
+    ZWEI Kennzahlen: **geometrisch** = Anteil des Balls im Sichtfeld abzüglich
+    Navbar, **wirksam** = derselbe Wert **mal Deckkraft**. Sie wurden von mir
+    verwechselt (ich meldete „80 % → 43 %" als Vorher/Nachher – es waren beide
+    Kennzahlen an derselben Position). **Viviens 55-%-Prüfmaß meint die
+    WIRKSAME** – von ihr bestätigt: „Ein voll deckender Ball hinter der Navbar
+    und ein weggedimmter Ball im Bild sind beide ‚nicht gesehen'."
+    ✅ **Die frühere Ausnahme ist ERLEDIGT, nicht mehr eingefroren.** Sie lautete
+    „mobil 43 %, 768×1024 50 % gegen ≥ 55 %". Ursache war eine Abdunkelung, die
+    schon im **Anflug** rampte, obwohl die Lückensuche die Ruhelage per
+    Konstruktion als frei bestimmt – zwei Mechanismen, die einander
+    widersprachen. Seit die Abdunkelung nur noch bei **echter Überlappung**
+    greift: **Deckkraft in der Ruhelage 1,00 auf jedem Viewport**, wirksame
+    Sichtbarkeit **80 % mobil / 83 % ab 768**. Prüfmaß erfüllt.
     (b) **320 px liegt außerhalb des Zielbereichs** (Entscheidung Vivien) – der
     beginnt bei 375. Dort gilt nur „überhaupt sichtbar" (erfüllt: 43 %, ~138 px
     Fenster), nicht die 150-px-Schwelle. Die war eine gegriffene runde Zahl.
