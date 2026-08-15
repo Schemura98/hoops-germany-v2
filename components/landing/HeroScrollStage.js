@@ -146,20 +146,29 @@ const clamp = (v, min, max) => {
 //     heller Messpunkte.
 // Jetzt läuft sie über alle Kästen (Textzeilen + ganze Bedienelemente) und nimmt
 // das Minimum: Es zählt der ungünstigste Kasten, nicht der erste.
-function ballDeckkraftUeberKaesten(ballMitteY, kaesten, ballLinks, ballRechts) {
+function ballDeckkraftUeberKaesten(ballOben, ballUnten, kaesten, ballLinks, ballRechts) {
   let kleinste = 1;
   for (const k of kaesten) {
     // Keine waagerechte Überschneidung ⇒ dieser Kasten ist kein Grund.
     if (ballRechts < k.left || ballLinks > k.right) continue;
+    // ⚠️ SENKRECHT ZÄHLEN JETZT DIE BALLKANTEN, NICHT DIE MITTE (Befund Kai,
+    // dritte Runde: „senkrecht der Mittelpunkt, waagerecht die volle Breite" –
+    // zwei Maßstäbe in einer Funktion).
+    // Sichtbar wurde es erst durch Viviens neue Bahn: Seit der Ball tiefer
+    // fällt, zieht er durch die Schaltflächenreihe. Gemessen bei 768x1024 lag
+    // seine Deckkraft dabei auf „Teams entdecken" bei 1,00 – seine untere
+    // Hälfte deckte die Taste, während sein MITTELPUNKT noch 88px darüber
+    // stand und die Regel deshalb schwieg. Genau die Kontrastregression, gegen
+    // die diese Funktion gebaut wurde.
+    const ueberlappt = ballUnten >= k.top && ballOben <= k.bottom;
     let d = 1;
-    if (ballMitteY < k.top - TEXT_FADE_MARGIN) d = 1;
-    else if (ballMitteY < k.top) {
-      const f = (ballMitteY - (k.top - TEXT_FADE_MARGIN)) / TEXT_FADE_MARGIN;
+    if (ueberlappt) d = TEXT_DIM_FLOOR;
+    else if (ballUnten < k.top && k.top - ballUnten <= TEXT_FADE_MARGIN) {
+      const f = (TEXT_FADE_MARGIN - (k.top - ballUnten)) / TEXT_FADE_MARGIN;
       d = 1 - f * (1 - TEXT_DIM_FLOOR);
-    } else if (ballMitteY <= k.bottom) d = TEXT_DIM_FLOOR;
-    else if (ballMitteY <= k.bottom + TEXT_FADE_MARGIN) {
-      const f = (ballMitteY - k.bottom) / TEXT_FADE_MARGIN;
-      d = TEXT_DIM_FLOOR + f * (1 - TEXT_DIM_FLOOR);
+    } else if (ballOben > k.bottom && ballOben - k.bottom <= TEXT_FADE_MARGIN) {
+      const f = (TEXT_FADE_MARGIN - (ballOben - k.bottom)) / TEXT_FADE_MARGIN;
+      d = 1 - f * (1 - TEXT_DIM_FLOOR);
     }
     if (d < kleinste) kleinste = d;
   }
@@ -410,78 +419,79 @@ export default function HeroScrollStage({
         else belegt.push([k[0], k[1]]);
       }
 
-      // Erste Lücke von oben, in die der Ball samt Luft passt.
       const noetig = 2 * BALL_R + 16;
-      // ⚠️ BEIDE KANTEN DER LÜCKE, nicht nur die untere. Viviens Formel nennt
-      // nur `passend.bottom` und klammert nach außen – das reicht nicht, weil
-      // der 0.42-Deckel den Ball wieder NACH OBEN zieht, unter Umständen aus
-      // der Lücke heraus. Gemessen bei 768: Lücke 254..462, Deckel 314, Ball
-      // damit auf 226..402 – also 30px zurück in die Headline-Zeile, obwohl die
-      // Lückensuche korrekt gearbeitet hatte. Der Deckel muss IN die Lücke
-      // geklammert werden, nicht daneben.
-      let lueckeOben = null;
-      let lueckeUnten = null;
-      let unterkante = 0; // Unterkante des zuletzt betrachteten belegten Bereichs
+
+      // ══ DIE RUHELAGE HÄNGT AN DER FENSTERHÖHE, NICHT AN DER BÜHNE ═════════
+      // Entscheidung Vivien (fünfte Runde) – und der Befund, der vier Runden
+      // gekostet hat: Wir haben nur BREITEN geprüft, der Ausfall hing an der
+      // HÖHE. Deshalb konnten zwei Messungen derselben Breite beide stimmen und
+      // sich widersprechen (768x812 grün, 768x1024 rot).
+      //
+      // Der frühere `0.42`-Deckel war ein Anteil der BÜHNENhöhe. Die Bühne ist
+      // `calc(100vh - 4rem)`, wächst also mit dem Fenster – und mit ihr der
+      // Scrollweg bis zur Ankunft:
+      //     S_ank = Bühnenhöhe * PROGRESS_SPAN * BALL_SPAN
+      // Bei 768x1024 sind das 324px, der Ball müsste also mindestens auf
+      // `S_ank + BALL_R + 8` = 412 ruhen; gebaut war 148. Ergebnis: iPad
+      // hochkant zeigte ihn an 0 von 29 Messpunkten. Bei einem kürzeren Fenster
+      // derselben Breite war derselbe Code grün.
+      //
+      // `sichtMitte` ist dagegen von Bauart höhenbewusst: Beide Größen ziehen
+      // die Fensterhöhe mit, die Ruhelage wandert automatisch mit.
+      const sichtHoeheJetzt = window.innerHeight || 1;
+      const sAnk = rect.height * PROGRESS_SPAN * BALL_SPAN;
+      const sichtUnten = sAnk + BALL_R + 8;
+      const sichtMitte = sAnk + (sichtHoeheJetzt - NAVBAR_HEIGHT) / 2;
+
+      // Alle Lücken im Band – nicht nur die erste. Aus jeder wird der zulässige
+      // Bereich für die BALLMITTE; tauglich ist eine Lücke nur, wenn dieser
+      // Bereich bis in den bei Ankunft sichtbaren Teil reicht.
+      const tauglich = [];
+      let unterkante = 0;
+      const pruefen = (oben, unten) => {
+        if (unten - oben < noetig) return;
+        const bis = unten - BALL_R - 8;
+        if (bis < sichtUnten) return; // bei Ankunft komplett über dem Bild
+        tauglich.push({ von: Math.max(oben + BALL_R + 8, sichtUnten), bis });
+      };
       for (const [oben, unten] of belegt) {
-        if (oben - unterkante >= noetig) {
-          lueckeOben = unterkante;
-          lueckeUnten = oben;
-          break;
-        }
+        pruefen(unterkante, oben);
         unterkante = Math.max(unterkante, unten);
       }
-      if (lueckeUnten === null && rect.height - unterkante >= noetig) {
-        lueckeOben = unterkante;
-        lueckeUnten = rect.height;
+      pruefen(unterkante, rect.height);
+
+      // Die Lücke, deren zulässiger Bereich `sichtMitte` am nächsten liegt.
+      // ⚠️ „nächstgelegene", nicht „oberste" – Absicht: Bei 768 hätte die
+      // oberste zwar eine sichtbare Lage ergeben, aber auf gleicher Höhe wie
+      // das orange „COMMUNITY". Die Regel löst Tobias' Kompositionspunkt damit
+      // mit, statt ihn zu einer Extraregel zu machen.
+      let gewaehlt = null;
+      for (const l of tauglich) {
+        const abstand =
+          sichtMitte < l.von
+            ? l.von - sichtMitte
+            : sichtMitte > l.bis
+              ? sichtMitte - l.bis
+              : 0;
+        if (!gewaehlt || abstand < gewaehlt.abstand)
+          gewaehlt = { ...l, abstand };
       }
 
-      // ⚠️ KEINE PASSENDE LÜCKE = DER EINE FALL, IN DEM DIE ABDUNKELUNG TRAGEND
-      // IST. Vivien besteht darauf, dass das protokolliert wird statt still zu
-      // geschehen – es ist die Stelle, an der die Ruhelage überlappt und der
-      // Kontrast nur noch am Dimmen hängt.
-      if (lueckeUnten === null && !ohneLueckeGemeldetRef.current) {
-        ohneLueckeGemeldetRef.current = true;
-        // eslint-disable-next-line no-console
-        console.warn(
-          `[HeroScrollStage] Keine Lücke ≥ ${noetig}px im Ball-Band (Breite ${Math.round(
-            rect.width,
-          )}px). Die Ruhelage überlappt Inhalt; der Kontrast hängt jetzt an der Abdunkelung.`,
-        );
-      }
-
-      // ⚠️ DER 0.42-DECKEL IST NICHT KOSMETIK (Vivien): Ohne ihn ruht der Ball
-      // bei 1024 auf y = 456 und bei 768 auf 150 – ein Sprung über eine kleine
-      // Breitenänderung. Mit Deckel läuft targetY monoton 77/84/150/298/309/351
-      // über 375→1440 und ist an die Bühnenhöhe gebunden, also ruhig beim
-      // Ziehen des Fensters.
-      // Die untere Klammer bleibt als Sicherung: Mit der korrigierten Eingabe
-      // feuert sie auf keiner der sieben Breiten – genau so soll sich eine
-      // Sicherung verhalten.
-      // Mobil: fester Platz im obersten freien Streifen – die Lückensuche
-      // liefert ihn, der Scroll-Fall entfällt (s. Konstantenblock oben).
+      // Mobil bleibt es beim Ladeauftritt im obersten Streifen: Dort gibt es
+      // keinen Scrollweg bis zur Ankunft, `S_ank` ist gegenstandslos.
       const mobil = window.innerWidth < MD_BREAKPOINT;
-      const targetY =
-        lueckeUnten !== null
-          ? // In die Lücke hinein geklammert: Der Deckel wirkt nur, soweit die
-            // Lücke ihn zulässt.
-            clamp(
-              clamp(
-                rect.height * 0.42,
-                lueckeOben + 8 + BALL_R,
-                lueckeUnten - 8 - BALL_R,
-              ),
-              BALL_R + 8,
-              rect.height - BALL_R - 8,
-            )
-          : // Keine passende Lücke – bisheriges Verhalten, s. Warnung oben.
-            clamp(
-              Math.min(
-                rect.height * 0.42,
-                (belegt.length ? belegt[0][0] : rect.height) - BALL_R - 8,
-              ),
-              BALL_R + 8,
-              rect.height - BALL_R - 8,
-            );
+      const obersterKasten = belegt.length ? belegt[0][0] : rect.height;
+      const imStreifen = clamp(
+        obersterKasten - BALL_R - 8,
+        BALL_R + 8,
+        Math.max(BALL_R + 8, rect.height - BALL_R - 8),
+      );
+      const targetY = mobil
+        ? imStreifen
+        : gewaehlt
+          ? clamp(sichtMitte, gewaehlt.von, gewaehlt.bis)
+          : // Keine taugliche Lücke – s. Warnung oben.
+            imStreifen;
 
       // Ball: reine Fallbewegung mit leichtem Wackeln – läuft mit der
       // Scrollrichtung statt gegen sie und braucht keine seitliche Fläche.
@@ -584,7 +594,8 @@ export default function HeroScrollStage({
       // und nicht nur bei `resize`: s. Kommentar an `kaestenBauen`.
       // Ebenfalls bühnenrelativ: `x`/`y` sind es ohnehin, die Kästen jetzt auch.
       ballOpacity *= ballDeckkraftUeberKaesten(
-        y,
+        y - BALL_R,
+        y + BALL_R,
         kaestenRef.current,
         x - BALL_R,
         x + BALL_R,

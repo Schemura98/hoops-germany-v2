@@ -35,7 +35,29 @@ import { test, expect } from "@playwright/test";
 // an der Fensterhöhe. Das ist die Roadmap-15-(7)-Falle in Reinform: eine
 // Gegenprobe, die nur eine Lage trifft, ist grün ohne Fix.
 
-const BREITEN = [320, 375, 430, 768, 1024, 1440];
+// ⚠️ ZWEI ACHSEN, NICHT EINE (Befund Vivien, fünfte Runde). Vier Gate-Runden
+// lang haben wir nur BREITEN geprüft – der Ausfall hing an der FENSTERHÖHE.
+// Die Bühne ist `calc(100vh - 4rem)` und wächst mit dem Fenster; mit ihr der
+// Scrollweg bis zur Ankunft. Deshalb konnten zwei Messungen derselben Breite
+// beide stimmen und sich widersprechen: 768x812 grün, 768x1024 rot.
+// Jede Zeile hier ist ein reales Gerät, nicht eine runde Zahl.
+const VIEWPORTS = [
+  [320, 568], // kleinstes Telefon – außerhalb des Zielbereichs, s. unten
+  [375, 812], // iPhone, lang
+  [375, 667], // iPhone, kurz
+  [430, 932], // großes Telefon
+  [768, 1024], // iPad hochkant – DER Fall, der vier Runden lang unentdeckt blieb
+  [1024, 768], // iPad quer
+  [1280, 800], // Notebook
+  [1440, 900], // Notebook, groß
+  [1440, 1200], // hoher Desktop – dieselbe Klasse wie iPad hochkant
+];
+
+// Der Zielbereich beginnt bei 375 (Entscheidung Vivien). Bei 320 gilt nur
+// „überhaupt sichtbar"; die 150px-Schwelle war dort eine geratene runde Zahl
+// und wäre den Abstand zur Eyebrow nicht wert.
+const ZIELBEREICH_AB = 375;
+const FENSTER_MIN = 150;
 
 // Muss mit TEXT_DIM_FLOOR in components/landing/HeroScrollStage.js
 // übereinstimmen. Kleine Toleranz, weil die Deckkraft als String mit drei
@@ -135,8 +157,8 @@ const abtasten = async (schritt) => {
 };
 
 test.describe("Hero-Ball – Laufzeit auf /", () => {
-  for (const breite of BREITEN) {
-    test(`${breite}px: der Ball ist überhaupt irgendwann zu sehen`, async ({
+  for (const [breite, hoehe] of VIEWPORTS) {
+    test(`${breite}x${hoehe}: der Ball ist überhaupt irgendwann zu sehen`, async ({
       page,
     }) => {
       // ⚠️ DIE ZUSICHERUNG, DIE ZWEI RUNDEN GEFEHLT HAT (Vorschlag Tobias).
@@ -147,7 +169,7 @@ test.describe("Hero-Ball – Laufzeit auf /", () => {
       // Sinne des Lesers falsch.
       // Diese hier ist absichtlich die schwächste denkbare Aussage – und
       // trotzdem die einzige, die den Ausfall gefunden hätte.
-      await page.setViewportSize({ width: breite, height: 812 });
+      await page.setViewportSize({ width: breite, height: hoehe });
       await page.goto("/", { waitUntil: "networkidle" });
 
       const proben = await page.evaluate(abtasten, 12);
@@ -171,10 +193,10 @@ test.describe("Hero-Ball – Laufzeit auf /", () => {
       ).toBeGreaterThan(ballFlaeche * 0.25);
     });
 
-    test(`${breite}px: der Ball ist am Ruhepunkt zu genau 20 % angeschnitten`, async ({
+    test(`${breite}x${hoehe}: der Ball ist am Ruhepunkt zu genau 20 % angeschnitten`, async ({
       page,
     }) => {
-      await page.setViewportSize({ width: breite, height: 812 });
+      await page.setViewportSize({ width: breite, height: hoehe });
       await page.goto("/", { waitUntil: "networkidle" });
 
       const proben = await page.evaluate(abtasten, 12);
@@ -221,10 +243,10 @@ test.describe("Hero-Ball – Laufzeit auf /", () => {
       }
     });
 
-    test(`${breite}px: über keiner Schaltfläche läuft der Ball heller als der Bodenwert`, async ({
+    test(`${breite}x${hoehe}: über keiner Schaltfläche läuft der Ball heller als der Bodenwert`, async ({
       page,
     }) => {
-      await page.setViewportSize({ width: breite, height: 812 });
+      await page.setViewportSize({ width: breite, height: hoehe });
       await page.goto("/", { waitUntil: "networkidle" });
 
       const proben = await page.evaluate(abtasten, 12);
