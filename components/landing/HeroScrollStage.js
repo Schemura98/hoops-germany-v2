@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BallGlyph } from "@/components/landing/HeroGlyphs";
+import { BallSprite, BALL_SPRITE_FRAMES } from "@/components/landing/HeroGlyphs";
 import PlayDiagram from "@/components/landing/PlayDiagram";
 
 // Scroll-gesteuerte Hero-Bühne „Sprungball" – Stufe 1 (mobil zuerst).
@@ -66,7 +66,17 @@ const PLAY_SPAN = 0.6;
 // statt weiter durchzufallen und im Netz zu verschwinden (A10-Anpassung).
 const SETTLE_FROM = 0.82;
 
-const BALL_R = 14; // halbe Kantenlänge des Ball-SVG (28px)
+// Anzeigegröße des Hero-Balls. Seit dem 15.08.2026 (Auftrag Patrick: "groß")
+// eine gerenderte Bildsequenz statt des 28px-Vektors – erst in dieser Größe
+// ist überhaupt zu sehen, dass die Nähte über eine Kugel wandern.
+// Mobil kleiner, weil der Ball sonst mehr als ein Drittel der Breite belegt und
+// die Headline erdrückt, die er eigentlich begleiten soll.
+// Die Größe steht als Tailwind-Klasse an der Komponente (mobil 104px, ab md
+// 176px), NICHT hier – der Controller MISST sie am Element (`offsetWidth`).
+// Grund: Der Radius steckt an drei Stellen (Positionierung ab Mittelpunkt,
+// Startlage über dem Bildrand, Rollwinkel). Eine zweite Quelle für dieselbe
+// Zahl wäre die klassische Stelle, an der später eine von beiden nachgezogen
+// wird und die andere nicht.
 
 // Weicher Puffer, über den der Ball vor und nach dem Textblock abdunkelt.
 const TEXT_FADE_MARGIN = 24;
@@ -167,6 +177,9 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", child
       const ball = ballRef.current;
       if (!cta || !ball) return;
 
+      // Radius am Element gemessen, nicht angenommen – s. Kommentar oben.
+      const BALL_R = ball.offsetWidth / 2 || 1;
+
       // Zielpunkt: obere Ecke der primären Schaltfläche, halb über deren Kante –
       // wie ein Abzeichen, nie über der Beschriftung. Hier setzt der Ball jetzt
       // nur noch AUF, statt zu landen (s. Kommentar oben).
@@ -242,9 +255,23 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", child
       // temporale Totzone gelaufen (ReferenceError bei jedem Frame).
       if (tu > 0) ballOpacity *= 1 - clamp((tu - 0.5) / 0.5, 0, 1);
 
+      // KEIN `rotate()` mehr: Die Drehung steckt in der Bildsequenz. Eine
+      // zusätzliche Flächendrehung würde die echte Kugelrotation überlagern
+      // und den ganzen Zweck der Sequenz aufheben – der Ball sähe aus, als
+      // taumele er.
       ball.style.transform = `translate3d(${(x - BALL_R).toFixed(1)}px, ${(y - BALL_R).toFixed(
         1
-      )}px, 0) rotate(${angle.toFixed(1)}deg)`;
+      )}px, 0)`;
+      // Bildwahl aus dem Drehwinkel. Der Streifen deckt EINE volle Umdrehung
+      // ab, deshalb modulo 360 – `angle` läuft während der Übergabe auf
+      // mehrere tausend Grad hoch.
+      const bild =
+        ((Math.round((angle / 360) * BALL_SPRITE_FRAMES) % BALL_SPRITE_FRAMES) +
+          BALL_SPRITE_FRAMES) %
+        BALL_SPRITE_FRAMES;
+      // Prozent statt Pixel: dadurch ist die Bildwahl von der Anzeigegröße
+      // unabhängig und stimmt mobil wie am Desktop ohne Umrechnung.
+      ball.style.backgroundPositionX = `${(bild / (BALL_SPRITE_FRAMES - 1)) * 100}%`;
       ball.style.opacity = clamp(ballOpacity, 0, 1).toFixed(3);
     };
 
@@ -286,7 +313,9 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", child
 
       {/* Ball nur bei erlaubter Bewegung – das Korb-Emblem sitzt seit A10 nicht
           mehr hier, sondern am Ende der Fortschritts-Leiste. */}
-      {animated && <BallGlyph ref={ballRef} />}
+      {animated && (
+        <BallSprite ref={ballRef} className="h-[104px] w-[104px] md:h-[176px] md:w-[176px]" />
+      )}
 
       <div className="relative z-10 mx-auto max-w-4xl px-6 py-24 text-center">{children}</div>
     </div>

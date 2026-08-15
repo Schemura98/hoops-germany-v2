@@ -48,6 +48,61 @@ export const BallGlyph = forwardRef(function BallGlyph(props, ref) {
   );
 });
 
+// ── Hero-Ball als gerenderte Bildsequenz (15.08.2026, Auftrag Patrick) ─────
+//
+// Ersetzt `BallGlyph` im Hero. Der Vektor-Ball dreht sich per CSS `rotate()`,
+// also in der FLÄCHE – wie ein Rad. Bei 28px fällt das nicht auf, in Hero-Größe
+// sofort: Die Nähte laufen im Kreis, statt über die Kugel zu wandern.
+//
+// Diese Sequenz ist echte 3D-Geometrie (Erzeuger: scripts/generate-ball-
+// rotation.mjs). 32 Bilder einer vollen Umdrehung um eine geneigte Achse,
+// nebeneinander in einem Streifen.
+//
+// Warum Hintergrundbild und nicht <img>: Die Bildwahl geschieht allein über
+// `background-position-x` in Prozent. Dadurch ist sie von der Anzeigegröße
+// UNABHÄNGIG – derselbe Streifen trägt 110px mobil und 200px am Desktop, ohne
+// eine einzige Umrechnung im Controller.
+//
+// ⚠️ DER HERO LÄDT DAMIT ERSTMALS WIEDER BILDDATEN (104 KB AVIF / 160 KB WebP).
+// Das war beim Redesign am 12.08.2026 bewusst abgeschafft worden – damals ging
+// es um ein 1000x652-Foto, das formatfüllend hochskaliert unter einem
+// 65%-Overlay verschwand, also viel Gewicht für fast keine Wirkung. Hier ist
+// das Verhältnis umgekehrt: Das Motiv IST die Bewegung, es trägt die ganze
+// Seite, und es gibt keinen Vektorweg zu echter Kugelrotation. Wer die Zahl
+// drücken muss: `--frames 24` kostet rund ein Viertel und ist bei zügigem
+// Scrollen kaum unterscheidbar (gemessen 24/32/48 am 15.08.2026).
+// ⚠️ Die beiden Bildquellen stehen in `app/globals.css` unter
+// `.hero-ball-sprite`, NICHT hier: Ein Rückfall von AVIF auf WebP braucht
+// ZWEI `background-image`-Deklarationen hintereinander (Browser ohne
+// `image-set` behalten die erste). Ein React-Style-Objekt kann denselben
+// Schlüssel nicht zweimal tragen – im Inline-Style gäbe es also entweder
+// keinen Rückfall oder kein AVIF.
+export const BALL_SPRITE_FRAMES = 32;
+
+// ⚠️ `className` wird ZUSAMMENGEFÜGT, nicht durchgereicht. Die erste Fassung
+// hatte `{...props}` hinter `className` stehen – damit überschrieb jede
+// aufrufende Stelle die eigene Klasse der Komponente, `hero-ball-sprite` fiel
+// weg und mit ihr das Bild. Der Ball war unsichtbar, ohne dass irgendwo ein
+// Fehler auftrat: ein 176px großes, leeres div.
+// Die GRÖSSE kommt bewusst nur aus `className` (Tailwind, brechpunktfähig) –
+// eine zusätzliche Prop wäre eine zweite Quelle für dieselbe Zahl, und der
+// Controller misst ohnehin am Element.
+export const BallSprite = forwardRef(function BallSprite({ className = "", ...props }, ref) {
+  return (
+    <div
+      ref={ref}
+      aria-hidden="true"
+      className={`hero-ball-sprite pointer-events-none absolute left-0 top-0 opacity-0 will-change-transform ${className}`}
+      style={{
+        backgroundSize: `${BALL_SPRITE_FRAMES * 100}% 100%`,
+        backgroundRepeat: "no-repeat",
+        filter: "drop-shadow(0 6px 16px rgba(0,0,0,.45))",
+      }}
+      {...props}
+    />
+  );
+});
+
 // Korb-Emblem – Ring + Netz, bewusst klein (wie ein Abzeichen). Bis 12.08.2026
 // an der Hero-CTA, jetzt das Reiseziel am Ende der Fortschritts-Leiste
 // (FeatureProgressRail.js). `ringRef` ist optional und zeigt zusätzlich auf den

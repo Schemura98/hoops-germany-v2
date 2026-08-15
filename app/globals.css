@@ -101,3 +101,17 @@ body {
     animation-timing-function: linear;
   }
 }
+
+/* Hero-Ball als gerenderte Bildsequenz (15.08.2026).
+   Zwei Deklarationen mit Absicht: Browser ohne `image-set` behalten die
+   erste (WebP, universell unterstuetzt), alle anderen nehmen AVIF – rund
+   ein Drittel kleiner. Das gehoert hierher und nicht ins Style-Objekt der
+   Komponente, weil ein React-Style denselben Schluessel nur einmal traegt.
+   Erzeugt von scripts/generate-ball-rotation.mjs. */
+.hero-ball-sprite {
+  background-image: url("/images/ball-basketball-32x200.webp");
+  background-image: image-set(
+    url("/images/ball-basketball-32x200.avif") type("image/avif"),
+    url("/images/ball-basketball-32x200.webp") type("image/webp")
+  );
+}
