@@ -86,7 +86,8 @@ const SETTLE_FROM = 0.82;
 //
 // Deshalb fällt er mobil beim LADEN in seinen Platz statt beim Scrollen, bleibt
 // liegen und scrollt danach mit der Bühne weg wie jedes andere Element. Er ist
-// damit im ersten Bild zu sehen – dort, wo mobil die meiste Aufmerksamkeit
+// damit im ersten BILDSCHIRM zu sehen, ohne zu scrollen – dort, wo mobil die
+// meiste Aufmerksamkeit
 // liegt, und ohne dass jemand scrollen muss.
 const MD_BREAKPOINT = 768;
 const EINFLUG_MS = 600;
@@ -117,8 +118,12 @@ const TEXT_DIM_FLOOR = 0.2;
 // dritte Runde). `Math.min(max, Math.max(min, v))` gibt bei `min > max`
 // wortlos `max` zurück – die Fehlerklasse aus CLAUDE.md Roadmap 15 (5):
 // „die Hilfsfunktion soll WERFEN statt still etwas Falsches zu liefern".
-// Real erreichbar an einem gezogenen Fenster: Die äußere Klammer der Bahnwahl
-// invertiert, sobald die Bühne niedriger als `2 * BALL_R + 16` wird.
+// ⚠️ Die frühere Begründung („real erreichbar an einem gezogenen Fenster")
+// galt der alten äußeren Klammer der Bahnwahl und ist mit der höhenbewussten
+// Wahl entfallen – Kai hat alle acht Aufrufstellen durchgerechnet, keine kann
+// `min > max` erreichen. Der Wurf bleibt trotzdem: Eine Hilfsfunktion, die
+// still etwas Falsches liefert, ist genau die Fehlerklasse aus Roadmap 15 (5),
+// und die nächste Aufrufstelle kennt diese Rechnung nicht.
 const clamp = (v, min, max) => {
   if (min > max) {
     throw new RangeError(
@@ -146,7 +151,13 @@ const clamp = (v, min, max) => {
 //     heller Messpunkte.
 // Jetzt läuft sie über alle Kästen (Textzeilen + ganze Bedienelemente) und nimmt
 // das Minimum: Es zählt der ungünstigste Kasten, nicht der erste.
-function ballDeckkraftUeberKaesten(ballOben, ballUnten, kaesten, ballLinks, ballRechts) {
+function ballDeckkraftUeberKaesten(
+  ballOben,
+  ballUnten,
+  kaesten,
+  ballLinks,
+  ballRechts,
+) {
   let kleinste = 1;
   for (const k of kaesten) {
     // Keine waagerechte Überschneidung ⇒ dieser Kasten ist kein Grund.
@@ -188,7 +199,6 @@ export default function HeroScrollStage({
   const punkteRef = useRef([]);
   const ballRef = useRef(null);
   const eingeflogenRef = useRef(false); // mobiler Ladeauftritt: nur einmal
-  const ohneLueckeGemeldetRef = useRef(false); // Warnung nur einmal je Sitzung
   const kaestenRef = useRef([]); // Zeilen-/Elementkaesten des Inhalts, s. kaestenBauen
   const tickingRef = useRef(false);
 
@@ -410,13 +420,19 @@ export default function HeroScrollStage({
 
       // Belegte y-Intervalle im Band, sortiert und verschmolzen.
       const belegt = [];
-      for (const k of kaestenRef.current
-        .filter((k) => !(k.right < bandLinks || k.left > bandRechts))
-        .map((k) => [k.top, k.bottom])
+      // `k` hieß hier dreimal etwas anderes in einer Anweisung (Kasten im
+      // filter, Kasten im map, Intervall in der for-Kopfzeile) – dieselbe
+      // Klasse wie das doppelte `lauf` aus Runde 3 (Befund Kai K9).
+      for (const [oben, unten] of kaestenRef.current
+        .filter(
+          (kasten) => !(kasten.right < bandLinks || kasten.left > bandRechts),
+        )
+        .map((kasten) => [kasten.top, kasten.bottom])
         .sort((a, b) => a[0] - b[0])) {
-        const letzte = belegt[belegt.length - 1];
-        if (letzte && k[0] <= letzte[1]) letzte[1] = Math.max(letzte[1], k[1]);
-        else belegt.push([k[0], k[1]]);
+        const letztes = belegt[belegt.length - 1];
+        if (letztes && oben <= letztes[1])
+          letztes[1] = Math.max(letztes[1], unten);
+        else belegt.push([oben, unten]);
       }
 
       const noetig = 2 * BALL_R + 16;

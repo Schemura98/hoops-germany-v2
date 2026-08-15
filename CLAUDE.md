@@ -588,6 +588,12 @@
     (4) **Der `security-review`-Skill wählt seine Basis selbst** und diffte gegen `main` – 4,3 MB,
     ~500 Dateien. Bei einem Langläufer-Branch wie `redesign` verdünnt das die Prüfung bis zur
     Wirkungslosigkeit. **Immer die Commit-Basis vorgeben** (`git diff <basis>..HEAD`).
+    ⚠️ **Nachtrag 15.08.2026 (Kai, vierte Runde): Die Vorgabe im Auftrag WIRKT NICHT.**
+    Der Skill-Rumpf übernimmt sie nicht und setzt sich in jeder Runde erneut auf `main`
+    (zuletzt 4,7 MB inkl. `tmp/`-Screenshots und `.claude/`-Skills). Die Basis-Einschränkung
+    muss **manuell durchgehalten** werden – also den Diff selbst erzeugen und die Analyse
+    darauf ausführen, statt dem Skill zu vertrauen. Bei fünf Dateien ist das vertretbar,
+    bei einem größeren Diff nicht.
     (5) ⚠️ **Feste Zeichenfenster in Quelltext-Tests sind eine Fehlerklasse für sich.** An einem Tag
     viermal aufgetreten: `slice(ab, ab + 400)`, `{0,200}` in einer Regex, `indexOf("]")`,
     `indexOf("};")`. Sie brechen in beide Richtungen – zu kurz gibt falsches Rot, und
@@ -705,15 +711,31 @@
     Roadmap 20 (a)–(d) ist umgesetzt, sechs Runden mit Vivien, drei Gate-Runden.
     Die Defekte sind behoben; was bleibt, sind bewusst akzeptierte Abweichungen –
     **kein Regressionsverdacht, sondern Entscheidungen:**
-    (a) **Sichtbare Ballfläche mobil 43 %, bei 768×1024 50 %** gegen Viviens
-    Prüfmaß von ≥ 55 %. Der Ball ist dort nicht kleiner, er wird stärker
+    (a) ⚠️ **ZUERST: WAS DIE ZAHL MISST** (Befund Kai, vierte Runde). Es gibt
+    ZWEI Kennzahlen, und sie wurden verwechselt:
+    **Geometrisch** = Anteil des Balls im Sichtfeld abzüglich Navbar.
+    **Wirksam** = derselbe Wert **mal Deckkraft**.
+    Mobil sind das **80 % geometrisch / 43 % wirksam an derselben Position** –
+    das war kein Vorher/Nachher, wie ich es gemeldet hatte. Ab 1024 fallen beide
+    zusammen (Deckkraft 1,00 → 83 %). Viviens 55-%-Prüfmaß ist gegen die eine
+    Zahl klar verfehlt und gegen die andere klar erfüllt; **es bezieht sich auf
+    die WIRKSAME**. Ohne diese Festlegung ist es derselbe Fehler eine Ebene
+    tiefer als „Bühne gegen Sichtfeld" – nur „sichtbar" gegen „sichtbar und
+    nicht weggedimmt".
+    (a-Fortsetzung) **Wirksame Fläche mobil 43 %, bei 768×1024 rund 50–58 %**
+    (Messungen streuen je Schrittweite) gegen Viviens Prüfmaß von ≥ 55 %. Der Ball ist dort nicht kleiner, er wird stärker
     gedimmt: Die Abdunkelung zählt seit der Symmetrie-Korrektur schon eine
     **Berührung** mit einem Inhaltskasten, nicht erst die Mittellage. Das ist der
     Preis dafür, dass die Kontrastlücke zu ist (vorher Deckkraft 1,00 über
     „Teams entdecken"). Feinjustierung, kein Fehler.
     (b) **320 px liegt außerhalb des Zielbereichs** (Entscheidung Vivien) – der
-    beginnt bei 375. Dort gilt nur „überhaupt sichtbar" (erfüllt: 43 %, 138 px
+    beginnt bei 375. Dort gilt nur „überhaupt sichtbar" (erfüllt: 43 %, ~138 px
     Fenster), nicht die 150-px-Schwelle. Die war eine gegriffene runde Zahl.
+    ⚠️ Diese Unterscheidung stand bis zur vierten Runde **nur hier und nicht im
+    Test**: `ZIELBEREICH_AB`/`FENSTER_MIN` waren definiert und unbenutzt, weil
+    meine Ergänzung am Suchmuster gescheitert war und ich die Fehlermeldung
+    nicht nachgezogen habe (Befund Kai K4). Seit dem 15.08.2026 gilt sie im Test
+    – wer sie ändert, ändert beide Stellen.
     (c) Der `drop-shadow` ist entfernt, die **Verläufe im Ball bleiben** – Viviens
     Grenze: keine Verläufe auf Flächen der Oberfläche, sehr wohl auf einem
     dargestellten Gegenstand. ⚠️ Gehört noch als Regel in

@@ -149,7 +149,13 @@ const abtasten = async (schritt) => {
       deck,
       anteil,
       sichtbareFlaeche,
+      ballBreite: b.width,
+      // Nur die Geometrie, OHNE Deckkraft – Kai K1: „sichtbar" und „sichtbar
+      // und nicht weggedimmt" sind zwei Kennzahlen, und sie wurden verwechselt.
+      sichtbareFlaecheGeometrisch: sichtL * sichtH,
       imRahmen: Math.round(b.top - s.top),
+      mitteImRahmen: b.top - s.top + b.height / 2,
+      buehnenHoehe: s.height,
       tasten,
     });
   }
@@ -185,12 +191,66 @@ test.describe("Hero-Ball – Laufzeit auf /", () => {
 
       // Und nicht nur ein Aufblitzen: mindestens ein Viertel des Balls muss
       // einmal gleichzeitig sichtbar und deckend sein.
-      const ballFlaeche = 104 * 104; // mobil; ab md ist er größer, also strenger
+      // ⚠️ GEMESSEN, NICHT VERDRAHTET (Befund Kai K3, vierte Runde). Hier stand
+      // `104 * 104` – die mobile Ballgröße VOR `efceed1`, das sie auf 88
+      // gesenkt hat. Der Schwellwert forderte damit mobil 34,9 % statt des
+      // versprochenen Viertels, und ab `md` (176px) nur 8,7 %. Der Kommentar
+      // daneben behauptete zusätzlich „ab md strenger" – es war das Gegenteil.
+      // Eine Schwelle, die sich als Anteil ausgibt und keiner ist, gehört in
+      // docs/MUSTER-ZAHLEN-DIE-LUEGEN.
+      const ballFlaeche = proben[0].ballBreite * proben[0].ballBreite;
       expect(
         beste,
         `Der Ball ist auf ${breite}px zwar nicht ganz unsichtbar, aber nie ` +
           `nennenswert im Bild (beste Sichtbarkeit ${Math.round(beste)} px²).`,
       ).toBeGreaterThan(ballFlaeche * 0.25);
+
+      // ⚠️ DIE REGEL, DIE BISHER NUR IN DER DOKU STAND (Befund Kai K4).
+      // `ZIELBEREICH_AB` und `FENSTER_MIN` waren definiert und NIRGENDS
+      // verwendet – meine Ergänzung war damals am Suchmuster gescheitert, ich
+      // habe die Fehlermeldung gesehen und nicht nachgezogen. In `CLAUDE.md`
+      // stand die Unterscheidung trotzdem als geltende Regel. Jetzt gilt sie.
+      if (breite >= ZIELBEREICH_AB) {
+        const sichtbar = proben.filter((p) => p.sichtbareFlaeche > 0);
+        const fenster =
+          sichtbar.length > 1
+            ? sichtbar[sichtbar.length - 1].y - sichtbar[0].y
+            : 0;
+        expect(
+          fenster,
+          `Auf ${breite}x${hoehe} ist der Ball nur über ${fenster}px Scrollweg zu ` +
+            `sehen; gefordert sind ${FENSTER_MIN}px. Ein Aufblitzen ist kein Auftritt.`,
+        ).toBeGreaterThanOrEqual(FENSTER_MIN);
+      }
+    });
+
+    test(`${breite}x${hoehe}: die Ruhelage liegt unterhalb des Scrollwegs bis zur Ankunft`, async ({
+      page,
+    }) => {
+      // ⚠️ DIE UNGLEICHUNG, DIE VIER RUNDEN GEFEHLT HAT (Vivien):
+      //     targetY >= Bühnenhöhe * PROGRESS_SPAN * BALL_SPAN + BALL_R + 8
+      // Der Ball erreicht seine Ruhelage erst, NACHDEM die Seite `S_ank`
+      // gescrollt ist. Liegt sie darüber, ist er bei Ankunft längst aus dem
+      // Bild – und jede bühnenrelative Kennzahl meldet trotzdem grün. Genau so
+      // blieb iPad hochkant vier Runden unentdeckt.
+      // Mobil gilt sie nicht: Dort fällt der Ball beim Laden, es gibt keinen
+      // Scrollweg bis zur Ankunft.
+      if (breite < 768) return;
+      await page.setViewportSize({ width: breite, height: hoehe });
+      await page.goto("/", { waitUntil: "networkidle" });
+      const proben = await page.evaluate(abtasten, 12);
+      expect(proben).not.toBeNull();
+      const sichtbar = proben.filter((p) => p.deck > 0.02);
+      expect(sichtbar.length).toBeGreaterThan(3);
+
+      const ruhe = Math.max(...sichtbar.map((p) => p.mitteImRahmen));
+      const sAnk = sichtbar[0].buehnenHoehe * 0.45 * 0.75; // PROGRESS_SPAN * BALL_SPAN
+      const r = sichtbar[0].ballBreite / 2;
+      expect(
+        ruhe,
+        `Ruhelage ${Math.round(ruhe)} liegt über dem Scrollweg bis zur Ankunft ` +
+          `(${Math.round(sAnk + r + 8)}); der Ball wäre aus dem Bild, bevor er ankommt.`,
+      ).toBeGreaterThanOrEqual(sAnk + r + 8 - 2);
     });
 
     test(`${breite}x${hoehe}: der Ball ist am Ruhepunkt zu genau 20 % angeschnitten`, async ({

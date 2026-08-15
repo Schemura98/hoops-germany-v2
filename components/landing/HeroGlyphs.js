@@ -116,7 +116,17 @@ export const HoopEmblem = forwardRef(function HoopEmblem(
       height="14"
       viewBox="0 0 20 14"
       fill="none"
-      className={`pointer-events-none opacity-0 will-change-transform ${className}`}
+      // ⚠️ KEIN `opacity-0` MEHR (Befund Tobias B1, vierte Runde) – und das ist
+      // eine Regression, die mein eigener K3-Fix erzeugt hat:
+      // Solange `className` die Aufrufer-Klasse ERSETZTE, fiel das `opacity-0`
+      // hier weg und das Emblem war sichtbar. Seit `cd51c92` wird
+      // ZUSAMMENGEFÜGT – also blieb es stehen. Die Deckkraft steuert aber der
+      // umschließende `span`, an dem die Ref hängt: Wrapper 1 × SVG 0 = 0.
+      // Ergebnis: Das Korb-Emblem wurde auf KEINEM Viewport mehr gezeichnet,
+      // die Ballreise endete an nichts, und der Farbblitz `rail-goal-flash-ring`
+      // lag im selben unsichtbaren SVG.
+      // Sichtbarkeit gehört hier dem Wrapper, nicht dem Glyph.
+      className={`pointer-events-none will-change-transform ${className}`}
       style={{ ...style, transformOrigin: "10px 3px" }}
       {...props}
     >

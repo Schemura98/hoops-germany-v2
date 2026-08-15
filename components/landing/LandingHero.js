@@ -77,15 +77,15 @@ const HERO_W = "w-full sm:w-52";
 //
 // Die Fläche selbst liefert `HeroScrollStage` (scroll-gesteuerte Bewegung,
 // Konzept docs/HERO-KONZEPT-2026-08-11.md). Der Inhalt hier bleibt unverändert –
-// ⚠️ `ctaRef` zeigt seit dem 15.08.2026 auf NICHTS mehr in der Bühne: Der Ball
-// zielt nicht mehr auf die Schaltfläche. Die Ref bleibt hier, weil sie die
-// primäre Aktion markiert und das eine nützliche Information ist – sie wird nur
-// nicht mehr an `HeroScrollStage` weitergereicht.
+// ⚠️ `ctaRef` ist am 15.08.2026 ENTFALLEN. Der Ball zielt seit Viviens
+// Bahn-Entscheidung nicht mehr auf die Schaltfläche. Ich hatte die Ref zunächst
+// stehenlassen mit der Begründung, sie „markiere die primäre Aktion" – Kais
+// Einwand (K6) trifft: Ein `useRef`, das niemand liest, ist keine
+// Dokumentation, sondern ein Leser, den der Nächste vergeblich sucht.
 export default function LandingHero() {
   const [player, setPlayer] = useState(null); // null = lädt / ausgeloggt
   const [checked, setChecked] = useState(false);
   const [signal, setSignal] = useState(null); // offene Sache für Wiederkehrer
-  const ctaRef = useRef(null);
   // Inhaltsblock: Badge + Headline + Subline UND die Schaltflaechenreihe. Der
   // fallende Ball dunkelt ab, solange er auf dieser Hoehe ist.
   // ⚠️ Die Schaltflaechen kamen am 15.08.2026 dazu (Befund Tobias B): Vorher
@@ -187,11 +187,7 @@ export default function LandingHero() {
                   >
                     <PiUserBold /> Mein Profil
                   </Link>
-                  <Link
-                    ref={ctaRef}
-                    href="/home"
-                    className={`${HERO_PRIMARY} ${HERO_W}`}
-                  >
+                  <Link href="/home" className={`${HERO_PRIMARY} ${HERO_W}`}>
                     <PiNewspaperBold /> Zum Feed
                   </Link>
                   <Link
@@ -262,7 +258,6 @@ export default function LandingHero() {
                 className="flex flex-col sm:flex-row gap-4 justify-center"
               >
                 <Link
-                  ref={ctaRef}
                   href="/signup"
                   className="bg-brand-500 hover:bg-brand-400 text-navy-950 font-bold py-4 px-8 rounded-md text-lg flex items-center justify-center gap-2 transition-[transform,background-color] duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
                 >
