@@ -69,6 +69,29 @@ const PLAY_SPAN = 0.6;
 // statt weiter durchzufallen und im Netz zu verschwinden (A10-Anpassung).
 const SETTLE_FROM = 0.82;
 
+// ══ UNTER `md` IST DER BALL KEIN SCROLL-ELEMENT ═══════════════════════════
+// Entscheidung Vivien, 15.08.2026 (fünfte Runde), und sie hat es BEWIESEN,
+// nicht behauptet: Unterhalb 768px gibt es keine scroll-getriebene Lösung.
+//
+// Der Ball erreicht seine Ruhelage nach einem Scrollweg von
+//   S_ank = Bühnenhöhe · PROGRESS_SPAN · BALL_SPAN  (= 0,3375 · Höhe)
+// Damit er dann noch im Bild ist, muss `targetY >= S_ank + BALL_R + 8` gelten.
+// Bei 375 sind das 311. Die EINZIGE Lücke, die einen 104px-Ball fasst, ist der
+// Streifen über der Eyebrow (0..137) – sein zulässiger Mittenbereich endet bei
+// 77. Die übrigen Lücken sind 64/73/16/16/96px hoch, alle zu klein.
+// Es gibt schlicht keinen Wert, der beide Bedingungen erfüllt. Kein Deckel,
+// kein Lückenkriterium und keine dritte Bahn ändert das: Der Inhalt füllt die
+// Bühne, und die einzige freie Fläche ist der Streifen, der als erstes
+// wegscrollt. Gemessen war der Ball dort an 0 von 176 Positionen sichtbar.
+//
+// Deshalb fällt er mobil beim LADEN in seinen Platz statt beim Scrollen, bleibt
+// liegen und scrollt danach mit der Bühne weg wie jedes andere Element. Er ist
+// damit im ersten Bild zu sehen – dort, wo mobil die meiste Aufmerksamkeit
+// liegt, und ohne dass jemand scrollen muss.
+const MD_BREAKPOINT = 768;
+const EINFLUG_MS = 600;
+const EINFLUG_KURVE = "cubic-bezier(0.23, 1, 0.32, 1)";
+
 // Anzeigegröße des Hero-Balls. Seit dem 15.08.2026 (Auftrag Patrick: "groß")
 // eine gerenderte Bildsequenz statt des 28px-Vektors – erst in dieser Größe
 // ist überhaupt zu sehen, dass die Nähte über eine Kugel wandern.
@@ -155,6 +178,7 @@ export default function HeroScrollStage({
   const linienRef = useRef([]);
   const punkteRef = useRef([]);
   const ballRef = useRef(null);
+  const eingeflogenRef = useRef(false); // mobiler Ladeauftritt: nur einmal
   const ohneLueckeGemeldetRef = useRef(false); // Warnung nur einmal je Sitzung
   const kaestenRef = useRef([]); // Zeilen-/Elementkaesten des Inhalts, s. kaestenBauen
   const tickingRef = useRef(false);
@@ -433,6 +457,9 @@ export default function HeroScrollStage({
       // Die untere Klammer bleibt als Sicherung: Mit der korrigierten Eingabe
       // feuert sie auf keiner der sieben Breiten – genau so soll sich eine
       // Sicherung verhalten.
+      // Mobil: fester Platz im obersten freien Streifen – die Lückensuche
+      // liefert ihn, der Scroll-Fall entfällt (s. Konstantenblock oben).
+      const mobil = window.innerWidth < MD_BREAKPOINT;
       const targetY =
         lueckeUnten !== null
           ? // In die Lücke hinein geklammert: Der Deckel wirkt nur, soweit die
@@ -458,10 +485,13 @@ export default function HeroScrollStage({
 
       // Ball: reine Fallbewegung mit leichtem Wackeln – läuft mit der
       // Scrollrichtung statt gegen sie und braucht keine seitliche Fläche.
-      const tb = clamp(t / BALL_SPAN, 0, 1);
+      // ⚠️ MOBIL FÄLLT NICHTS SCROLL-GESTEUERT (Vivien, s. Konstantenblock).
+      // `tb` bleibt auf 1, der Ball steht ab dem ersten Bild an seinem Platz;
+      // den Einflug übernimmt eine CSS-Übergangszeit beim Laden.
+      const tb = mobil ? 1 : clamp(t / BALL_SPAN, 0, 1);
       const y0 = -BALL_R * 2;
       const y1 = targetY - 2;
-      let y = y0 + (y1 - y0) * tb;
+      let y = mobil ? y1 : y0 + (y1 - y0) * tb;
 
       // Wackeln/Drehung klingen zum Aufsetzer hin aus, statt bis zum letzten
       // Frame mit voller Amplitude weiterzulaufen – ein Ball, der zur Ruhe
@@ -593,6 +623,29 @@ export default function HeroScrollStage({
       // unabhängig und stimmt mobil wie am Desktop ohne Umrechnung.
       ball.style.backgroundPositionX = `${(bild / (BALL_SPRITE_FRAMES - 1)) * 100}%`;
       ball.style.opacity = clamp(ballOpacity, 0, 1).toFixed(3);
+
+      // Mobiler Ladeauftritt: Der Ball steht schon an seinem Platz (s. oben).
+      // Er wird EINMAL von oben dorthin geführt, indem der erste Frame ihn
+      // oberhalb absetzt und der zweite die Übergangszeit setzt. Danach nie
+      // wieder – ein Übergang, der bei jedem Scroll neu startet, käme nie an
+      // (dieselbe Falle wie bei der Lande-Animation der Leiste, Befund Kai K2).
+      if (mobil && !eingeflogenRef.current) {
+        eingeflogenRef.current = true;
+        const start = `translate3d(${(x - BALL_R).toFixed(1)}px, ${(
+          y0 - BALL_R
+        ).toFixed(1)}px, 0)`;
+        const ziel = ball.style.transform;
+        ball.style.transition = "none";
+        ball.style.transform = start;
+        requestAnimationFrame(() => {
+          if (!ballRef.current) return;
+          ballRef.current.style.transition = `transform ${EINFLUG_MS}ms ${EINFLUG_KURVE}`;
+          ballRef.current.style.transform = ziel;
+          window.setTimeout(() => {
+            if (ballRef.current) ballRef.current.style.transition = "";
+          }, EINFLUG_MS + 50);
+        });
+      }
     };
 
     // Geplanten Frame merken, damit er beim Abmelden nicht mehr gegen bereits
@@ -644,7 +697,7 @@ export default function HeroScrollStage({
       {animated && (
         <BallSprite
           ref={ballRef}
-          className="h-[104px] w-[104px] md:h-[176px] md:w-[176px]"
+          className="h-[88px] w-[88px] md:h-[176px] md:w-[176px]"
         />
       )}
 
