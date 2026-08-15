@@ -701,6 +701,34 @@
     Dazu offen: Zickzack statt Sinuswelle für die Dribbel-Spur (die Notationsbegründung im Code
     trägt erst dann wieder), und der `drop-shadow` auf dem Hero-Ball – Patricks Freigabe deckt
     ihn, die Abweichung von `docs/VISUELLE-RICHTUNG` sollte aber bei Vivien liegen.
+20b. **Ball-Choreografie: EINGEFROREN am 15.08.2026 (Entscheidung Patrick).**
+    Roadmap 20 (a)–(d) ist umgesetzt, sechs Runden mit Vivien, drei Gate-Runden.
+    Die Defekte sind behoben; was bleibt, sind bewusst akzeptierte Abweichungen –
+    **kein Regressionsverdacht, sondern Entscheidungen:**
+    (a) **Sichtbare Ballfläche mobil 43 %, bei 768×1024 50 %** gegen Viviens
+    Prüfmaß von ≥ 55 %. Der Ball ist dort nicht kleiner, er wird stärker
+    gedimmt: Die Abdunkelung zählt seit der Symmetrie-Korrektur schon eine
+    **Berührung** mit einem Inhaltskasten, nicht erst die Mittellage. Das ist der
+    Preis dafür, dass die Kontrastlücke zu ist (vorher Deckkraft 1,00 über
+    „Teams entdecken"). Feinjustierung, kein Fehler.
+    (b) **320 px liegt außerhalb des Zielbereichs** (Entscheidung Vivien) – der
+    beginnt bei 375. Dort gilt nur „überhaupt sichtbar" (erfüllt: 43 %, 138 px
+    Fenster), nicht die 150-px-Schwelle. Die war eine gegriffene runde Zahl.
+    (c) Der `drop-shadow` ist entfernt, die **Verläufe im Ball bleiben** – Viviens
+    Grenze: keine Verläufe auf Flächen der Oberfläche, sehr wohl auf einem
+    dargestellten Gegenstand. ⚠️ Gehört noch als Regel in
+    `docs/VISUELLE-RICHTUNG-2026-08-12.md` nachgetragen.
+    ⚠️ **Die zwei Sätze, die diese sechs Runden teuer gemacht haben** (beide von
+    Vivien, beide gehören in `MUSTER-ZAHLEN-DIE-LUEGEN`):
+    > „Frei" ist eine Aussage über die **Bühne**, „sichtbar" eine über das
+    > **Sichtfeld**. Wer in Bühnenkoordinaten spezifiziert, was ein Mensch sehen
+    > soll, bekommt grüne Kennzahlen über einen Gegenstand außerhalb des Bildschirms.
+
+    > Vier Runden lang haben wir **Breiten** geprüft. Der Ausfall hing an der
+    > **Fensterhöhe**. Eine Prüfmatrix mit nur einer Achse lässt beide Seiten
+    > korrekt messen und trotzdem zu gegensätzlichen Ergebnissen kommen.
+    Der Laufzeit-Test `tests/e2e/hero-ball-laufzeit.spec.mjs` prüft deshalb jetzt
+    **neun Viewports mit Höhenachse**, jeder ein reales Gerät.
 21. **`/images/` hat keine Cache-Vorgabe** (Befund Kai, 15.08.2026). `deploy/nginx-hoopsgermany.conf`
     setzt `expires 30d` nur für die Upload-Verzeichnisse; `/images/` läuft über `location /` in den
     Next-Prozess, und `next.config.mjs` setzt kein `headers()`. Die 104 KB der Ball-Sequenz sind
