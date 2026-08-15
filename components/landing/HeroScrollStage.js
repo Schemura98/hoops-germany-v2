@@ -246,6 +246,8 @@ export default function HeroScrollStage({
   // Fix hat nur nachgemessen und damit aus der stillen Fehlplatzierung einen
   // SICHTBAREN Satz gemacht: Ball landet, steht 300ms, springt 20px (Kai).
   const kaestenFinalRef = useRef(false);
+  // Meldet den unmöglichen Streifen EINMAL, nicht in jedem Frame.
+  const streifenGemeldetRef = useRef(false);
   const kaestenRef = useRef([]); // Zeilen-/Elementkaesten des Inhalts, s. kaestenBauen
   const tickingRef = useRef(false);
 
@@ -620,6 +622,33 @@ export default function HeroScrollStage({
       // keinen Scrollweg bis zur Ankunft, `S_ank` ist gegenstandslos.
       const mobil = window.innerWidth < MD_BREAKPOINT;
       const obersterKasten = belegt.length ? belegt[0][0] : rect.height;
+      // ⚠️ DIE KLAMMER DARF DEN UNMÖGLICHEN FALL NICHT GLÄTTEN
+      // (Befund Vivien, 16.08.2026 – unabhängig von allem anderen zu tun).
+      // `imStreifen` hängt den Ball 8px ÜBER den obersten Kasten. Passt er dort
+      // nicht hin, fing die untere Klammer das bisher STILLSCHWEIGEND ab und
+      // legte ihn überlappend hin – genau die Fehlerklasse, gegen welche die
+      // Lückensuche gebaut wurde, im mobilen Zweig überlebt.
+      // Wie knapp das ist: Auf 375 liegt die Ist-Lage bei 49, die Klammer bei
+      // 44. **Fünf Pixel.** Das ist kein Sicherheitsabstand, das ist ein
+      // Zufall – ein anderer Zeilenumbruch, eine andere Schriftmetrik nach
+      // einem Font-Update oder ein zusätzliches Wort im Eyebrow genügen, und
+      // der Ball liegt still auf dem Badge, von der Abdunkelung kaschiert.
+      // Dasselbe Register wie `clamp`, das seit der dritten Runde wirft statt
+      // still `max` zu liefern.
+      const noetigOben = 2 * BALL_R + 16;
+      if (obersterKasten < noetigOben && !streifenGemeldetRef.current) {
+        streifenGemeldetRef.current = true;
+        // Kein Wurf: Das hier läuft im Scroll-Pfad einer Live-Seite, ein
+        // Ausnahmefehler nähme dem Leser die Startseite. Aber es schweigt nicht.
+        // ⚠️ Die Meldung nennt BEIDE Stellschrauben, nicht nur den Defekt –
+        // sonst findet der nächste Leser eine Fehlermeldung ohne Ausweg.
+        console.error(
+          `[HeroScrollStage] Der obere Streifen fasst den Ball nicht: ` +
+            `verfügbar ${Math.round(obersterKasten)}px, nötig ${noetigOben}px ` +
+            `(2·R + 16). Der Ball wird überlappend platziert. Entweder der ` +
+            `mobile Durchmesser sinkt oder die Badge-Zeile rückt nach unten.`,
+        );
+      }
       const imStreifen = clamp(
         obersterKasten - BALL_R - 8,
         BALL_R + 8,

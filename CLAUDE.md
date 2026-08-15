@@ -756,6 +756,28 @@
     43 % stammten aus genau der Abdunkelung, die (a) zwei Zeilen weiter oben als
     behoben feiert. Die Zahl, deren Beseitigung der Absatz meldet, stand darunter
     noch als Beleg. **Eine korrigierte Aussage zieht ihre Belegzahlen mit.** Die war eine gegriffene runde Zahl.
+    ⚠️ **UND DIE ZWEITE ZAHL DERSELBEN FEHLERFORM, 16.08.2026 (Vivien, selbst
+    zurückgezogen).** Ihr erstes Prüfmaß zum Ball-Abstand lautete „auf 375–430
+    kein Inhaltskasten näher als **16 px**, weder waagerecht noch senkrecht".
+    Sie hat es kassiert, mit der schärfsten Begründung dieser Arbeit:
+    > Der **senkrechte** Abstand ist eine Code-Konstante (`+ 8`) – frei wählbar.
+    > Der **waagerechte** ist ein **Rest**: Viewport-Breite − Badge-Breite −
+    > Anschnitt. Er wird nicht gesetzt, er **fällt an**. Eine Zahl über „beide
+    > Achsen" behandelt eine **Stellschraube** und einen **Restbetrag** als
+    > dieselbe Größe.
+    Das ist die Bühne/Sichtfeld-Verwechslung im neuen Kostüm: in einer Einheit
+    spezifizieren, die niemand steuert. ⚠️ Dazu: **Die klemmende Achse wechselt
+    mit der Breite** – auf 375 bindet die Waagerechte (10,15 px), auf 320 die
+    Senkrechte (dort überlappt der Ball das Badge waagerecht um 17 px). Eine
+    Messung mit nur einer Achse kommt auf beiden Breiten zu einem Wert und auf
+    einer davon zum falschen Schluss.
+    **Geltendes Prüfmaß** (`tests/e2e/hero-abstand.spec.mjs`): gegenüber jedem
+    Inhaltskasten – Textzeile ODER gefüllte Fläche, gemessen an der
+    **gezeichneten** Fläche – mindestens **8 px auf mindestens einer Achse**
+    („kein Kontakt, keine geteilte Kante"). Der waagerechte Abstand hat **keinen
+    Sollwert**; wer ihn vergrößern will, muss eine der drei Entscheidungen
+    aufgeben – Durchmesser mobil 72 px, Anschnitt `0,6·R`, Badge-Breite – **und
+    benennen welche**.
     ⚠️ Diese Unterscheidung stand bis zur vierten Runde **nur hier und nicht im
     Test**: `ZIELBEREICH_AB`/`FENSTER_MIN` waren definiert und unbenutzt, weil
     meine Ergänzung am Suchmuster gescheitert war und ich die Fehlermeldung
