@@ -166,7 +166,12 @@
     Echte Nutzer/Feedback. **NIEMALS schreiben/löschen.** Alte `test`-Daten erst beim **Cutover** löschen
     (alte Seite läuft bis dahin als Fallback). Launch-Entscheidung (final mit Patrick & Jonatan):
     kompletter Neustart, **keine Migration**.
-- **Projektort:** `C:\dev\hoops-germany-v2` – **NICHT zurück nach OneDrive** (OneDrive sperrt `.next`).
+- **Projektort:** `~/Projekte/hoops-germany-v2` (macOS, seit 15.08.2026) – **NICHT in einen
+  synchronisierten Ordner legen**. Ein Sync-Dienst greift dauernd auf `.next/` und `node_modules/`
+  zu, während Build und Dev-Server dort schreiben; unter Windows sperrte OneDrive dadurch `.next`.
+  Auf dem Mac heißen die Kandidaten **iCloud Drive** (`~/Library/Mobile Documents/…`, auch
+  `~/Desktop` und `~/Documents`, sobald „Schreibtisch & Dokumente" synchronisiert wird) und
+  **Dropbox** (`~/Dropbox`). `~/Projekte` liegt bewusst außerhalb davon.
 - **`npm run build` NIE parallel zu laufendem `next dev`** (überschreibt dessen `.next`-CSS → ungestylte
   Seiten/CSS-404; Dev-Server danach neu starten). Nach Dev-Server-Lock ggf. `.next` löschen vor dem Build.
   ⚠️ **Port-Prüfung sprachunabhängig machen:** Windows ist hier **deutsch**, `netstat` schreibt
@@ -181,7 +186,11 @@
   (chown root:www-data, chmod a+rX) neu anlegen – sonst sind Bild-Uploads kaputt (Details: Chronik, 26.06./27.06.).
 
 ### Projektort & Umgebung
-- **Lokaler Pfad: `C:\dev\hoops-germany-v2`** (NICHT zurück nach OneDrive – OneDrive sperrt `.next`).
+- **Lokaler Pfad: `~/Projekte/hoops-germany-v2`** auf macOS (Umzug von Windows am 15.08.2026,
+  Hintergrund: `docs/UMZUG-WINDOWS-MAC.md`). **Nicht in einen synchronisierten Ordner verschieben** –
+  iCloud Drive (inkl. `~/Desktop`/`~/Documents` bei aktiver Synchronisierung) und Dropbox greifen
+  in `.next/` und `node_modules/` hinein, während dort gebaut wird. Genau daran scheiterte unter
+  Windows OneDrive.
 - Next.js **14.2.35**, App Router, JavaScript (kein TS), Tailwind.
 - `.env` lokal vorhanden (MongoDB-Atlas, `SECRET_KEY`, `CRON_SECRET`, `NEXTAUTH_URL=http://localhost:3000`). SMTP/Google noch leer.
 - Start: `npm run dev` → http://localhost:3000. DB-Test: `node scripts/dbcheck.mjs`.

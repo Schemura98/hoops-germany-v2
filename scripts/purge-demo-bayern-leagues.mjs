@@ -81,11 +81,16 @@ if (!APPLY) {
 // --- APPLY ---
 // Sicherheits-Backup (JSON) der zu löschenden Dokumente in den Scratchpad
 import { writeFileSync, mkdirSync } from "fs";
+import { fileURLToPath } from "url";
 const matchesToDelete = await Matches.find({ leagueId: { $in: leagueIds } }).lean();
 const backup = { exportedFrom: mongoose.connection.name, leagues: targets, matches: matchesToDelete };
-const backupDir = "C:/Users/schem/AppData/Local/Temp/claude/C--dev-hoops-germany-v2/4f9616ed-5635-471b-8bdd-e51f6b63d878/scratchpad";
+// Ziel relativ zum Skript, nicht absolut: Hier stand bis zum 15.08.2026 ein fester
+// Windows-Scratchpad-Pfad – auf jedem anderen Rechner wäre das Backup entweder
+// fehlgeschlagen oder in einem Ordner gelandet, den niemand wiederfindet.
+// `tmp/` ist gitignored und liegt im Projekt, überlebt also den Lauf.
+const backupDir = fileURLToPath(new URL("../tmp/", import.meta.url));
 try { mkdirSync(backupDir, { recursive: true }); } catch {}
-const backupPath = `${backupDir}/prod-bayern-leagues-backup.json`;
+const backupPath = fileURLToPath(new URL("../tmp/prod-bayern-leagues-backup.json", import.meta.url));
 writeFileSync(backupPath, JSON.stringify(backup, null, 2), "utf8");
 console.log(`\n💾 Backup geschrieben: ${backupPath} (${targets.length} Ligen, ${matchesToDelete.length} Spiele)`);
 

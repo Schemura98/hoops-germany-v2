@@ -301,7 +301,11 @@
 > Newsfeed-Roadmap). Damit ist der Follow-up „Beiträge-Tab auf `/team/team-detail`" abgeschlossen.
 
 ### Projektort & Umgebung
-- **Lokaler Pfad: `C:\dev\hoops-germany-v2`** (NICHT zurück nach OneDrive – OneDrive sperrt `.next`).
+- **Lokaler Pfad: `~/Projekte/hoops-germany-v2`** auf macOS (Umzug von Windows am 15.08.2026,
+  Hintergrund: `docs/UMZUG-WINDOWS-MAC.md`). **Nicht in einen synchronisierten Ordner verschieben** –
+  iCloud Drive (inkl. `~/Desktop`/`~/Documents` bei aktiver Synchronisierung) und Dropbox greifen
+  in `.next/` und `node_modules/` hinein, während dort gebaut wird. Genau daran scheiterte unter
+  Windows OneDrive.
 - Next.js **14.2.35**, App Router, JavaScript (kein TS), Tailwind.
 - `.env` lokal vorhanden (MongoDB-Atlas, `SECRET_KEY`, `CRON_SECRET`, `NEXTAUTH_URL=http://localhost:3000`). SMTP/Google noch leer.
 - Start: `npm run dev` → http://localhost:3000. DB-Test: `node scripts/dbcheck.mjs`.
@@ -445,8 +449,11 @@ Cluster `hoops.tbhsg.mongodb.net` hat ZWEI getrennte DBs:
   `/team/claim/[token]` erlaubt **Account-Anlage direkt** (Name aus Slot vorbefüllt → `playerregister`
   → `request-claim`) + danach optional Profil vervollständigen.
 - **Mail-Politur** (`b6bee6c`): Titel/Intro **zentriert** (Tabellen/Karten bleiben links), **Logo 150→190px**.
-- **Mail-Export für User** (Review in Canva/AI): `C:\Users\schem\OneDrive\Desktop\Hoops-Mail-Vorlagen\`
-  (8 HTML-Dateien + index, Logo eingebettet) – via Builder neu generierbar.
+- **Mail-Export für User** (Review in Canva/AI): 8 HTML-Dateien + index, Logo eingebettet – via
+  Builder neu generierbar. ⚠️ Der Ausgabeordner lag auf dem Windows-Rechner
+  (`…\Desktop\Hoops-Mail-Vorlagen\`) und wurde beim Umzug am 15.08.2026 **nicht mitgenommen**;
+  auf dem Mac existiert er nicht. Wer den Export braucht, erzeugt ihn neu und legt das Ziel
+  dabei fest.
 - **Doku-Konvention + Skill `log-progress`** angelegt (Fortschritt immer hier in Abschnitt 0 festhalten).
 
 #### 🟢 LIVE seit 24.06.2026 – v2 läuft auf https://hoopsgermany.de
@@ -664,7 +671,8 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 >    ChatGPT eine **PDF zu den NRW-Kreisligen** erstellt (Quelle für den fehlenden Katalog-Teil unterhalb der
 >    Bezirksliga; die 22 Basketballkreise haben KEINE zentrale WBV-PDF → bisher offen).
 >    **AUFTRAG (verbindlich, VOR dem Programmieren):** (a) PDF vom User einlesen lassen/finden (Pfad wird in
->    der Session genannt – vermutlich unter `C:\Users\schem\OneDrive\...`), (b) **Inhalt sorgfältig auf
+>    der Session genannt – auf dem Mac am ehesten unter `~/Downloads` oder `~/Projekte/Hoops-Marketing`;
+>    den Pfad erfragen statt raten), (b) **Inhalt sorgfältig auf
 >    Korrektheit prüfen** (ChatGPT-generiert → nicht blind übernehmen! Liganamen/Kreise/Zuordnung
 >    plausibilisieren, nicht raten), (c) **Umlaute korrigieren** bei Bedarf (ä/ö/ü/ß – PDF-/KI-Exporte
 >    verstümmeln die oft). ERST danach ins Seed-Muster (analog `seed-nrw-leagues.mjs`: `official:true`,

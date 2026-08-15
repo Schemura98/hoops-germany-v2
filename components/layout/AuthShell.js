@@ -21,7 +21,7 @@ const MODERN_SOURCES = {
   // europaeische Vereinshalle mit Sprossenwaenden; die orangen Leibchen im
   // Hintergrund treffen zufaellig die Markenfarbe.
   // Herkunft: Pexels, Drago Rapovac — Nachweis in
-  // Hoops-Marketing\_werkzeuge\stock-kandidaten\auswahl\HERKUNFT-AUSWAHL.json
+  // ~/Projekte/Hoops-Marketing/_werkzeuge/stock-kandidaten/auswahl/HERKUNFT-AUSWAHL.json
   "/images/signup-halle-1880.jpg": {
     avif: "/images/signup-halle-1880.avif",
     webp: "/images/signup-halle-1880.webp",

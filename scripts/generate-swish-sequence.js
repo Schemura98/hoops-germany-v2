@@ -15,8 +15,23 @@
 // Preis dafuer (Befund Kai, 12.08.2026): Auf jedem anderen Rechner bricht der
 // Aufruf mit "Cannot find module" ab, ohne zu sagen, woher sharp kommen soll.
 // Deshalb hier ein klarer Hinweis statt eines nackten Absturzes.
+//
+// 15.08.2026 (Umzug Windows -> Mac): Hier stand ein fester Windows-Pfad. Der
+// Werkzeug-Ordner liegt jetzt unter ~/Projekte/Hoops-Marketing/_werkzeuge und
+// wurde bewusst OHNE node_modules uebertragen -- dort ist einmalig ein
+// "npm install" noetig. Der Pfad wird aus dem Home-Verzeichnis zusammengesetzt
+// statt fest verdrahtet, damit er nicht am naechsten Rechnerwechsel zerbricht.
+const os = require("os");
 const SHARP_PFAD =
-  "C:/Users/schem/OneDrive/Desktop/Hoops-Marketing/_werkzeuge/node_modules/sharp";
+  process.env.HOOPS_SHARP_PFAD ||
+  require("path").join(
+    os.homedir(),
+    "Projekte",
+    "Hoops-Marketing",
+    "_werkzeuge",
+    "node_modules",
+    "sharp"
+  );
 let sharp;
 try {
   sharp = require(SHARP_PFAD);
@@ -28,6 +43,9 @@ try {
       [
         "sharp nicht gefunden.",
         `Erwartet unter: ${SHARP_PFAD}`,
+        "Dort einmalig installieren:",
+        "  cd ~/Projekte/Hoops-Marketing/_werkzeuge && npm install",
+        "Anderer Ort? Pfad per Umgebungsvariable HOOPS_SHARP_PFAD setzen.",
         "Alternativ im Projekt installieren: npm i -D sharp",
         "",
         "Die 45 ausgelieferten Bilder in public/images/swish/ wurden mit sharp",
