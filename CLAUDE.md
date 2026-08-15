@@ -171,11 +171,41 @@
 - **Demo-Daten befüllen: `node scripts/seed-demo.mjs`** (4 Teams, 18 Spieler + 2 Super-Admins,
   Liga 2025/26 + Vorsaison-Transfer für Max, abgeschlossene Spiele + Box-Scores, Posts, Follower,
   Bundesländer/Städte → Stats/Topscorer/Tabelle/Spielplan/Stationen/Geo-Filter gefüllt).
-- **Test-Accounts (alle PW `test123`):** Spieler `max@test.de` (= Team-Admin „Test Baskets",
+- **Test-Accounts (alle PW `test123`) – wirksam NUR NOCH auf der Dev-DB `hoopsgermany`:**
+  Spieler `max@test.de` (= Team-Admin „Test Baskets",
   hat FIBA/Instagram + Vorsaison-Transfer), weitere `@test.de`, Free Agents `sven.adler@test.de`/`jay.carter@test.de`.
   **Super-Admins** (Spieler-Login): `p.schemura@gmail.com`, `jonatanbaenavides@gmail.com`;
   /admin-Panel: `admin`/`geheim1234` ODER `patrick`/`test123` · `jonatan`/`test123`. **`team@test.de` existiert NICHT mehr**.
-  Demo-Team-Admin (Prod-Testphase): `demo.coach@nrw-demo.de` / `test123` (Köln Comets).
+  > 🔒 **VORFALL 15.08.2026 – diese Konten waren auf PROD anmeldbar.** Beim Newsfeed-Umbau lief
+  > ein Login-Aufruf versehentlich gegen die Live-Seite statt gegen localhost – und
+  > **`max@test.de` / `test123` funktionierte dort**, als **Team-Admin mit `teamAdminOf`**.
+  > Das Passwort steht in dieser Datei: Wer die Projektdoku liest, konnte sich als
+  > Vereinsverwalter anmelden – Kader ändern, Ergebnisse eintragen, Einladungen verschicken,
+  > also in genau die Belegbarkeit hineinschreiben, die das Produkt verkauft. Das wog schwerer
+  > als der `claimToken`-Leak vom selben Tag: Dort brauchte es erst einen Token aus einer
+  > API-Antwort, hier genügte eine Zeile Dokumentation.
+  > **Gemessen auf `hoops_prod`:** 48 Konten (`@test.de` 18, `@nrw-demo.de` 30), davon
+  > **10 Team-Admins**, 40 in Kadern. ⚠️ Die 18 `@test.de` tragen **kein `seedTag`** – die
+  > Aufräumbefehle aus Roadmap 2 hätten sie **nie erfasst**, sie wären durch den Cutover
+  > gerutscht. Dort sein können sie nur, weil `seed-demo.mjs` (die **Dev**-Basis) irgendwann
+  > gegen `hoops_prod` gelaufen ist; protokolliert ist das nirgends.
+  > **Erledigt:** 47 Passwörter entwertet (je Konto ein eigener bcrypt-Hash eines
+  > Zufallswerts, `tmp/prod-testkonten-entwerten.mjs`). Live belegt: `max@test.de`,
+  > `sven.adler@test.de`, `jay.carter@test.de` → **401**. Rollen und Kader unverändert
+  > (9 Team-Admins vorher/nachher, 39 in Kadern vorher/nachher); **die Dev-DB ist unberührt** –
+  > die Testsuite hängt an genau diesen Konten.
+  > Bewusst **NICHT** `null` gesetzt: Ein Konto ohne Passwort ist im Datenmodell ein
+  > Google-Konto. `playerlogin` weist es zwar sauber ab (`if (!player || !player.password)`),
+  > aber der Google-Pfad sollte für 47 fremde Adressen nicht neu geöffnet werden.
+  > **Nicht gelöscht** – 39 stehen in Kadern, 9 verwalten Vereine; das gehört an den
+  > Demo-Purge (Roadmap 2), wo ohnehin entschieden wird, was verschwindet.
+  ⚠️ **Demo-Team-Admin (Prod-Testphase): `demo.coach@nrw-demo.de` / `test123` (Köln Comets) –
+  weiterhin gültig. ENTSCHEIDUNG Patrick, 15.08.2026 (Option 3).** Bewusst von der Entwertung
+  ausgenommen, damit der dokumentierte Testzugang bestehen bleibt. **Das ist eine bekannte
+  offene Flanke, kein Versehen:** Es ist ein Team-Admin mit `teamAdminOf`, und das Passwort
+  steht in dieser Datei. Vor dem Ende der Testphase entweder Passwort ändern oder Konto
+  sperren – `node tmp/prod-testkonten-entwerten.mjs --echt --auch-demo-coach` erledigt
+  Letzteres.
 
 ### Versionierung / Backup
 - **Off-Machine-Backup: privates GitHub-Repo `github.com/Schemura98/hoops-germany-v2`.**
@@ -228,7 +258,8 @@
 > auf `git diff origin/redesign..HEAD`) und für nutzersichtbare Änderungen **Tobias**
 > (`qa-reviewer`, global unter `~/.claude/agents/`) als unabhängiges Browser-Gate, **mobil zuerst**.
 > ⚠️ Vor Testläufen prüfen, ob ein fremder Dev-Server auf Port 3000 hängt; `npm run build` nie
-> parallel dazu. ⚠️ Ist die Browser-Vorschaufläche ausgeblendet, laufen **keine** rAF-Frames
+> parallel dazu. Prüfskript: `sh scripts/port-frei.sh [PORT]` (Vorgabe 3000, Exit 1 = belegt) –
+> taugt als Vorschaltung: `sh scripts/port-frei.sh && npm run build`. ⚠️ Ist die Browser-Vorschaufläche ausgeblendet, laufen **keine** rAF-Frames
 > (`document.hidden`) — Scroll-/Animationsmessungen dort sind eingefroren und täuschen Fehler vor;
 > dann Playwright gegen echtes Chromium nutzen (Muster: `tmp/hero-preview.mjs`).
 
@@ -240,7 +271,7 @@
   `/team/create` → wird Admin (`adminPlayerId`, `isTeamAdmin`, `teamAdminOf`, eigenes `teamId`).
   Verwaltung von `/team/admin` läuft über den **Spieler-Token** (Dual-Auth). `/team/login` &
   `/team/register` sind nur noch Redirects. `Team.email` ist optional (sparse).
-- **Design-Sprache „Anzeigetafel“ (seit 12.08.2026, Spezifikation `docs/VISUELLE-RICHTUNG-2026-08-12.md`):** nachtblauer Grund `navy-950 #0B1220` (Navigation `navy-900 #111A2E`, Panels `navy-800 #182543`, Hover/Eingaben `navy-700 #223058`, Rahmen `navy-600 #3D5080`), Text `paper-50` / gedämpft `mist-300|400|600`, **ein** Akzent = das echte Logo-Orange `brand-500 #F07A27`, semantische Status in `signal-ok|wait|error`. Schriften: **Big Shoulders Display** (`font-display`, Headlines ab `text-2xl`, Eyebrows, große Zahlen), **Geist** (`font-sans`, Fließtext/UI), **Geist Mono** (`font-mono tabular-nums`, Zahlen in Tabellen) – Geist fehlt im Font-Katalog von Next 14.2.35, deshalb selbst gehostet aus `public/fonts/` über `next/font/local` (`lib/fonts.js`). Radien gestuft 6/10/16px (`rounded-sm|md|lg`). **Farbentscheid Patrick 12.08.2026:** Navy statt des ursprünglich von Vivien vorgeschlagenen warmen Braun – Navy + Orange ist für ihn die Basketball-Paarung. Die Skala heißt deshalb `navy-*`; die Stufung ist unverändert, nur der Farbton wechselte. Werte von Vivien gerechnet (`docs/WOW-KONZEPT-2026-08-12.md` Abschnitt 0). **Keine Verläufe, keine Schatten, kein Glow** – Tiefe entsteht aus Flächenstufe + 1px-Haarlinie. Signatur: 2px `brand-500`-Leiste an genau drei Stellen (Unterkante Navbar/PageHeader, Oberkante der einen hervorgehobenen Karte, aktive Stat-Zahl). Primärbutton = orange Fläche mit **dunklem** Text (`text-navy-950`, 6,88:1) – weiß auf Orange wäre 2,61:1. Icons: `react-icons/pi` (Phosphor Bold), **nicht** mehr `fa`. `app/globals.css` setzt `color-scheme: dark`, damit auch browsereigene Bedienelemente dunkel rendern. Echte Assets in `public/images/` (`logo.svg` = weiße Wortmarke für Navy-Navbar; `logo-hoops.svg` = dunkle Variante, seit dem Redesign nirgends mehr im Einsatz; `login image.jpg`/`signupImage.jpg` = Motive der Auth-Seiten (der **Hero der Startseite trägt seit 12.08.2026 kein Foto mehr**), jeweils mit AVIF/WebP-Varianten `login-image-1000.*`/`signup-image-1000.*` über `AuthShell.js`). `registerimage.jpg`/`playerimage.jpg` waren nie bzw. nicht mehr im Einsatz (`/team/register` ist nur Redirect) und liegen seit 11.08.2026 archiviert in `docs/asset-archive/` (Befund: `docs/ABLAGE-AUDIT-BILDER-2026-08-11.md`). Namenskonvention für neue Bild-Varianten: `docs/NAMENSKONVENTION-BILDER.md` (Kebab-Case, `<basis>-<lange-Kante>.<format>`).
+- **Design-Sprache „Anzeigetafel“ (seit 12.08.2026, Spezifikation `docs/VISUELLE-RICHTUNG-2026-08-12.md`):** nachtblauer Grund `navy-950 #0B1220` (Navigation `navy-900 #111A2E`, Panels `navy-800 #182543`, Hover/Eingaben `navy-700 #223058`, Rahmen `navy-600 #3D5080`), Text `paper-50` / gedämpft `mist-300|400|600`, **ein** Akzent = das echte Logo-Orange `brand-500 #F07A27`, semantische Status in `signal-ok|wait|error`. Schriften: **Big Shoulders Display** (`font-display`, Headlines ab `text-2xl`, Eyebrows, große Zahlen), **Geist** (`font-sans`, Fließtext/UI), **Geist Mono** (`font-mono tabular-nums`, Zahlen in Tabellen) – Geist fehlt im Font-Katalog von Next 14.2.35, deshalb selbst gehostet aus `public/fonts/` über `next/font/local` (`lib/fonts.js`); nachladbar mit `sh scripts/fetch-fonts.sh` (holt das latin-Subset als woff2, `--dry` zeigt nur an). Radien gestuft 6/10/16px (`rounded-sm|md|lg`). **Farbentscheid Patrick 12.08.2026:** Navy statt des ursprünglich von Vivien vorgeschlagenen warmen Braun – Navy + Orange ist für ihn die Basketball-Paarung. Die Skala heißt deshalb `navy-*`; die Stufung ist unverändert, nur der Farbton wechselte. Werte von Vivien gerechnet (`docs/WOW-KONZEPT-2026-08-12.md` Abschnitt 0). **Keine Verläufe, keine Schatten, kein Glow** – Tiefe entsteht aus Flächenstufe + 1px-Haarlinie. Signatur: 2px `brand-500`-Leiste an genau drei Stellen (Unterkante Navbar/PageHeader, Oberkante der einen hervorgehobenen Karte, aktive Stat-Zahl). Primärbutton = orange Fläche mit **dunklem** Text (`text-navy-950`, 6,88:1) – weiß auf Orange wäre 2,61:1. Icons: `react-icons/pi` (Phosphor Bold), **nicht** mehr `fa`. `app/globals.css` setzt `color-scheme: dark`, damit auch browsereigene Bedienelemente dunkel rendern. Echte Assets in `public/images/` (`logo.svg` = weiße Wortmarke für Navy-Navbar; `logo-hoops.svg` = dunkle Variante, seit dem Redesign nirgends mehr im Einsatz; `login image.jpg`/`signupImage.jpg` = Motive der Auth-Seiten (der **Hero der Startseite trägt seit 12.08.2026 kein Foto mehr**), jeweils mit AVIF/WebP-Varianten `login-image-1000.*`/`signup-image-1000.*` über `AuthShell.js`). `registerimage.jpg`/`playerimage.jpg` waren nie bzw. nicht mehr im Einsatz (`/team/register` ist nur Redirect) und liegen seit 11.08.2026 archiviert in `docs/asset-archive/` (Befund: `docs/ABLAGE-AUDIT-BILDER-2026-08-11.md`). Namenskonvention für neue Bild-Varianten: `docs/NAMENSKONVENTION-BILDER.md` (Kebab-Case, `<basis>-<lange-Kante>.<format>`).
 - **Wiederverwendbare Redesign-Bausteine:** `components/layout/AuthShell.js` (Split-Screen Auth),
   `components/layout/PageHeader.js` (Seitenkopf auf `ink-900` mit Marken-Leiste), `components/Avatar.js`
   (generiertes Initialen-Logo mit deterministischer Namensfarbe – Fallback für Spieler & Teams, überall),
@@ -265,21 +296,23 @@
   `Card` hat **3 Importe** (`components/feed/SpieltagStrip.js`, `components/feed/FollowSuggestions.js`,
   `components/posts/PostComposer.js`) und `cardClass` **0 Verwendungen** (nur die Definition in
   `lib/ui.js:22`); stattdessen bauen **141 Stellen** die Panel-Fläche von Hand (`bg-navy-800` +
-  `border-navy-600`). Alle übrigen Primitive sind echt im Einsatz (Stand 12.08.2026, seitdem nicht
-  neu gezählt: Button 23, Loading 18, EmptyState 15, Skeleton 11, Reveal 7, Tabs/FormAlert je 6,
-  CountUp 4, ConfirmAction/ScrollTable je 3). Folge: Eine Änderung an der Kartensprache wirkt
+  `border-navy-600`). Die **141 ist eine Untergrenze**: Zeilen mit `bg-navy-800` gibt es **180** –
+  die übrigen 39 sind ebenfalls handgebaute Panels, nur mit abweichender Rahmenfarbe
+  (`signal-ok`, `brand-500`, dynamisch) oder ganz ohne. Betroffen sind **78 Dateien**. Alle übrigen
+  Primitive sind echt im Einsatz (Button 25, Loading 19, EmptyState 15, Skeleton 13, Reveal 12,
+  FormAlert 9, Tabs 6, CountUp 5, Card/ConfirmAction/ScrollTable/SplitFlap je 3, LinkTabs 1).
+  Folge: Eine Änderung an der Kartensprache wirkt
   **nicht** zentral – sie muss an 141 Stellen nachgezogen werden. Das ist der größte offene
   Konsistenz-Posten des Designsystems (Umbau bewusst zurückgestellt: hohes Regressionsrisiko,
   kein sichtbarer Gewinn). **Nebenbefund:** `components/feed/FollowSuggestions.js` importiert `Card`
   und nutzt es im Leerzustand (Z. 92), baut dieselbe Fläche im Normalzustand aber von Hand (Z. 99) –
   eine Fläche, zwei Wege, in einer Datei. Vollständiger Befund:
   `docs/NEWSFEED-DESKTOP-2026-08-15.md` Abschnitt 1.4.
-  <!-- Mess-Befehle (aus C:\dev\hoops-germany-v2 ausführen), damit diese Zahlen nachprüfbar statt
-       nur behauptet sind – bei jeder Aktualisierung erneut laufen lassen und das Datum mitziehen:
-         grep -rln 'from "@/components/ui/Card"' --include=*.js app components
-         grep -rn "cardClass" --include=*.js app components lib
-         grep -rn "bg-navy-800" --include=*.js app components | grep -c "border-navy-600"
-       Der cardClass-Befehl zählt 0 Verwendungen, wenn er nur `lib/ui.js:22` (die Definition) zeigt. -->
+  **Alle Zahlen dieses Absatzes sind messbar, nicht behauptet:** `npm run design-audit`
+  (`scripts/design-audit.mjs`) zählt sie neu. `--files` zeigt die Fundstellen, `--json` gibt sie
+  maschinenlesbar aus, `--check` vergleicht mit der Baseline im Skript und endet mit exit 1, sobald
+  etwas gedriftet ist. **Bei Drift immer BEIDES nachziehen** – die `BASELINE`-Konstante im Skript
+  und diesen Absatz samt Messdatum. Der Drift ist real: 126 → 141 in drei Tagen (12. → 15.08.2026).
   Bewusst belassen (custom/kompakt): lokale `inputClass` in
   `team/claim`, `admin/leagues`, `admin/update-match`. Optionaler Restschliff: Super-Admin-Tabellen/
   „Lädt…"-Texte auf `<Loading>`/`EmptyState`.
@@ -468,7 +501,7 @@
     läuft, darf im selben Arbeitsbaum **nicht weitergebaut** werden – der Prüfer sieht sonst Code,
     der nicht im geprüften Commit ist. (2) **`preview_stop` beendet den Dev-Server nicht**, es löst
     ihn nur aus der Verwaltung; der Node-Prozess hält Port 3000 weiter (Zustand `ABHÖREN`). Vor
-    jedem Build `curl http://localhost:3000` – sonst läuft der Build in ihn hinein. (3) Ein
+    jedem Build `sh scripts/port-frei.sh` – sonst läuft der Build in ihn hinein. (3) Ein
     **sporadisch roter Test** ist selten ein Timing-Problem: Beim Avatar-Layout-Test halfen weder
     höhere Timeouts noch eine leichtere Seite noch eine Übergangs-Pause, weil die Ursache ein
     unbekannter Ausgangszustand war (Auto-Start der Tour bei `welcomeSeen: false` verdeckt den
@@ -493,8 +526,28 @@
     (5-Fortsetzung) Immer Klammerzählung, und die Hilfsfunktion soll
     **werfen** statt still etwas Falsches zu liefern (Muster: `blockAb` in
     `tests/e2e/benachrichtigungs-typen.spec.mjs`).
-16. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
-17. **Optional / bewusst offen:** Best-of-Serien + echte Playoff-Bracket-Grafik; Status-basierte
+16. **Den Team-Admin bei der Erfassung stützen – Live-Eingabe statt Nachbereitung**
+    (Idee Patrick, 15.08.2026). Die Box-Scores kommen von **Ehrenamtlichen**, die sich
+    freiwillig dazu bereit erklären; sie sind die Quelle, aus der die gesamte Belegbarkeit der
+    Plattform stammt. Heute ist die Erfassung eine **Pflicht nach dem Spiel**: Der Admin führt
+    während der Partie irgendeine eigene Notiz und überträgt sie später. Ziel: Er trägt
+    Punkte/Assists/Rebounds **parallel zum Spiel** direkt hier ein und braucht **keine zweite
+    Dokumentation** – im besten Fall benutzt er Hoops Germany *als* sein Werkzeug am Spielfeldrand.
+    Dazu **rechtzeitig** eine Erinnerung per **Mail UND Glocke** (nicht erst danach – der
+    bestehende `emailPendingResult`-Weg mahnt ein fehlendes Ergebnis *hinterher* an).
+    ⚠️ **Abgrenzung, die vor der Umsetzung geklärt sein muss:** Mats' „wird NICHT
+    gebraucht"-Liste enthält **Live-Ticker**. Das hier ist etwas anderes – ein
+    **Erfassungswerkzeug für den Admin**, kein Zuschauer-Ticker. Ob und ab wann Zwischenstände
+    für andere sichtbar werden, ist eine eigene Entscheidung und **nicht** Teil dieser Idee;
+    sonst entsteht durch die Hintertür genau das Feature, das die Bedarfsanalyse ausschließt.
+    ⚠️ Weitere offene Punkte vor dem Bau: Bedienung mit **einer Hand am Spielfeldrand**
+    (Daumenreichweite, große Ziele, mobil zuerst) · Verhalten **ohne Netz** in der Halle
+    (Zwischenspeicher lokal, später senden – sonst ist ein Funkloch gleich ein Datenverlust) ·
+    wann ein live erfasster Stand als **eingereicht** gilt (die Doppel-Bestätigung darf nicht
+    versehentlich schon durch das Mitschreiben ausgelöst werden) · Vorprüfung an Mats/Ronja,
+    ob die Ehrenamtlichen das überhaupt wollen.
+17. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
+18. **Optional / bewusst offen:** Best-of-Serien + echte Playoff-Bracket-Grafik; Status-basierte
     Tabellen-Exklusion; Stat-Filter Hauptrunde/Playoffs/Gesamt; stabiler `leagueKey`; Benachrichtigung bei
     Team-Follow; sharp-Resize für gespeicherte Upload-JPEGs; Super-Admin-Tabellen auf `<Loading>`/`EmptyState`;
     Folge-Vorschläge nur für neue User; TransferEvents bleiben nach Team-Löschung als Historie (Design);

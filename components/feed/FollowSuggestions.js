@@ -16,7 +16,11 @@ import Card from "@/components/ui/Card";
 // In einem vom Nutzer selbst geöffneten Akkordeon (Mobil-Ansicht des Feeds)
 // wäre das eine leere Fläche ohne Erklärung – dort zeigt der Text ehrlich,
 // dass es gerade nichts vorzuschlagen gibt.
-export default function FollowSuggestions({ fallbackText }) {
+// `nackt` = ohne eigene Karte (fuer die Schiene), `maxAnzahl` begrenzt die
+// Liste. Acht Vorschlaege waren ein Block in der Hoehe eines halben
+// Bildschirms fuer die unwichtigste Aussage der Seite (Befund Ronja/Vivien,
+// 15.08.2026) - und schoben den ersten Beitrag nach unten.
+export default function FollowSuggestions({ fallbackText, nackt = false, maxAnzahl }) {
   const [items, setItems] = useState([]); // {key,type,id,name,subtitle,img,square,href,busy}
   const [loaded, setLoaded] = useState(false);
 
@@ -96,12 +100,14 @@ export default function FollowSuggestions({ fallbackText }) {
   }
 
   return (
-    <div className="bg-navy-800 rounded-md border border-navy-600 p-4">
-      <h3 className="flex items-center gap-2 text-sm font-semibold text-paper-50 mb-3">
-        <PiUsersThreeBold className="text-brand-400" /> Vorschläge für dich
-      </h3>
+    <div className={nackt ? "" : "bg-navy-800 rounded-md border border-navy-600 p-4"}>
+      {!nackt && (
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-paper-50 mb-3">
+          <PiUsersThreeBold className="text-brand-400" /> Vorschläge für dich
+        </h3>
+      )}
       <ul className="space-y-2">
-        {items.map((item) => (
+        {(maxAnzahl ? items.slice(0, maxAnzahl) : items).map((item) => (
           <li key={item.key} className="flex items-center gap-3">
             <Link href={item.href}>
               <BaseAvatar

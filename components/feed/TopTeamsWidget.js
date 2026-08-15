@@ -26,11 +26,19 @@ function rankColor(i) {
   return "text-mist-400";
 }
 
-export default function TopTeamsWidget() {
+// ⚠️ `meinTeamId`/`meineLigaId` sind der Unterschied zwischen einer Rangliste
+// und DEINER Rangliste (Befund Ronja, 15.08.2026): Das Widget stand auf „Alle
+// Ligen" und markierte das eigene Team nicht – es wiederholte damit genau den
+// Fehler, den `/topscorer` seit R5 nicht mehr macht. Wer seine eigene Liga
+// sehen will, musste sie aus einer Liste heraussuchen, in der sie nicht
+// hervorgehoben war.
+export default function TopTeamsWidget({ nackt = false, meinTeamId, meineLigaId } = {}) {
   const [standings, setStandings] = useState([]);
   const [leagues, setLeagues] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [leagueId, setLeagueId] = useState("all");
+  // Eigene Liga vorwählen, wenn bekannt. Bewusst nur als ANFANGSWERT – wer
+  // umstellt, bleibt umgestellt.
+  const [leagueId, setLeagueId] = useState(meineLigaId ? String(meineLigaId) : "all");
   const [bundesland, setBundesland] = useState("all");
 
   useEffect(() => {
@@ -67,10 +75,12 @@ export default function TopTeamsWidget() {
   }, [standings, bundesland]);
 
   return (
-    <div className="bg-navy-800 rounded-md border border-navy-600 p-4">
-      <h3 className="text-sm font-bold text-paper-50 flex items-center gap-2">
-        <PiTrophyBold className="text-brand-400" /> Top-Teams
-      </h3>
+    <div className={nackt ? "" : "bg-navy-800 rounded-md border border-navy-600 p-4"}>
+      {!nackt && (
+        <h3 className="text-sm font-bold text-paper-50 flex items-center gap-2">
+          <PiTrophyBold className="text-brand-400" /> Top-Teams
+        </h3>
+      )}
 
       {/* Filter */}
       {/* Kein `flex-wrap`: Die beiden Felder sollen sich die Breite TEILEN,
@@ -119,11 +129,22 @@ export default function TopTeamsWidget() {
           </p>
         ) : (
           <ol className="space-y-1 pb-1">
-            {rows.map((t, i) => (
+            {rows.map((t, i) => {
+              // Das eigene Team markieren – der zweite Teil von Ronjas Befund.
+              // Bewusst über die Flächenstufe (`bg-navy-700`) und eine
+              // 2px-Kante links, NICHT über eine zweite orange Fläche: Der
+              // Akzent gehört auf dieser Seite der Anzeigetafel.
+              const istMeins = meinTeamId && String(t.teamId) === String(meinTeamId);
+              return (
               <li key={t.teamId}>
                 <Link
                   href={`/team/team-detail/${t.slug}`}
-                  className="flex items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-navy-700 transition-colors"
+                  aria-current={istMeins ? "true" : undefined}
+                  className={`flex items-center gap-2 rounded-sm px-2 py-1.5 transition-colors ${
+                    istMeins
+                      ? "bg-navy-700 border-l-2 border-brand-500 pl-1.5"
+                      : "hover:bg-navy-700"
+                  }`}
                 >
                   <span className={`w-4 text-center text-sm font-bold ${rankColor(i)}`}>
                     {i + 1}
@@ -135,7 +156,11 @@ export default function TopTeamsWidget() {
                     textClass="text-[9px]"
                     square
                   />
-                  <span className="flex-1 truncate text-sm text-paper-50">
+                  <span
+                    className={`flex-1 truncate text-sm ${
+                      istMeins ? "font-semibold text-paper-50" : "text-paper-50"
+                    }`}
+                  >
                     {t.teamName}
                   </span>
                   <span className="text-xs font-medium text-mist-400 tabular-nums whitespace-nowrap">
@@ -143,7 +168,8 @@ export default function TopTeamsWidget() {
                   </span>
                 </Link>
               </li>
-            ))}
+              );
+            })}
           </ol>
         )}
       </div>

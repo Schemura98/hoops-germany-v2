@@ -15,7 +15,8 @@ import { getPlayerToken } from "@/lib/clientAuth";
 import PlayerNav from "@/components/layout/PlayerNav";
 import Footer from "@/components/layout/Footer";
 import PostFeed from "@/components/feed/PostFeed";
-import SpieltagStrip from "@/components/feed/SpieltagStrip";
+import Anzeigetafel from "@/components/feed/Anzeigetafel";
+import Schiene, { SchienenAbschnitt } from "@/components/feed/Schiene";
 import TeamMatchesWidget from "@/components/feed/TeamMatchesWidget";
 import TopTeamsWidget from "@/components/feed/TopTeamsWidget";
 import TransferFeedWidget from "@/components/feed/TransferFeedWidget";
@@ -97,14 +98,21 @@ export default function PlayerNewsfeedPage() {
       <PlayerNav player={player} />
 
       <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-6 sm:py-8">
-        {/* Seitenkopf: Anrede als Eyebrow, h1 (Befund Tobias L5: es gab keins),
-            rechts das heutige Datum in Mono – die Anzeigetafel kennt den Spieltag. */}
-        <header className="mb-5 flex items-end justify-between gap-3">
+        {/* ⚠️ ABWEICHUNG von Viviens Entwurf, bewusst: Sie will den Seitenkopf
+            ganz durch die Tafel ersetzen. Der Kopf bleibt – aber schlank –,
+            weil er die einzige `h1` der Seite trägt. Ohne sie fiele Tobias'
+            Befund L5 zurück („es gab kein h1"), und das ist ein
+            Zugänglichkeits-Punkt, keine Geschmacksfrage.
+            Ihr eigentliches Anliegen ist trotzdem erfüllt: Die Signaturleiste
+            sitzt jetzt auf der Tafel, nicht mehr nirgends. Der Kopf ist von
+            `text-4xl` auf `text-2xl` zurückgenommen, damit die Tafel und nicht
+            das Wort „Newsfeed" das erste Gewicht der Seite ist. */}
+        <header className="mb-4 flex items-end justify-between gap-3">
           <div className="min-w-0">
             <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-400 truncate">
               Hallo{player?.firstName ? ` ${player.firstName}` : ""}
             </p>
-            <h1 className="mt-1 font-display text-3xl sm:text-4xl font-black uppercase tracking-wide leading-none text-paper-50">
+            <h1 className="mt-0.5 font-display text-2xl font-black uppercase tracking-wide leading-none text-paper-50">
               Newsfeed
             </h1>
           </div>
@@ -113,27 +121,73 @@ export default function PlayerNewsfeedPage() {
           </p>
         </header>
 
-        <SpieltagStrip data={matchData} loading={matchesLoading} player={player} />
+        <Anzeigetafel data={matchData} loading={matchesLoading} player={player} />
 
         <OnboardingChecklist player={player} />
 
         {isDesktop ? (
-          <div className="grid lg:grid-cols-[260px_minmax(0,1fr)_300px] gap-6 items-start">
-            {/* Linke Leiste: Spiele von eigenem/gefolgten Teams */}
-            <aside className="space-y-4 lg:sticky lg:top-24">
-              <TeamMatchesWidget preloaded={matchData} preloadedLoading={matchesLoading} />
-              <TopTeamsWidget />
-            </aside>
-
-            {/* Mitte: Composer + Feed */}
+          // ZWEI Zonen statt drei Spalten (Entwurf Vivien, 15.08.2026, §3.2).
+          //
+          // Vorher: `[260px_minmax(0,1fr)_300px]`. Das Dreispalten-Schema fällt
+          // nicht weg, weil drei Spalten schlecht wären, sondern weil ZWEI
+          // davon Restrampen waren: Ihr Inhalt endete, die Spalte lief leer
+          // aus. Der Feed blieb dabei auf 544 px – zu schmal für Fließtext UND
+          // Zahlen zugleich.
+          //
+          // Jetzt: Feed + EINE Schiene. Der Feed-Text wird in `PostCard` auf
+          // Lesebreite gekappt, die Spalte selbst nicht – so dürfen Ergebnis-
+          // zeilen die volle Breite für Zahlen nutzen.
+          <div className="grid lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_380px] gap-x-10 gap-y-6 items-start">
             <PostFeed player={player} />
 
-            {/* Rechte Leiste: Vorschläge + Transfers + News (Sponsorfläche folgt mit #6) */}
-            <aside className="space-y-4 lg:sticky lg:top-24">
-              <FollowSuggestions />
-              <TransferFeedWidget />
-              <NewsWidget compact />
-            </aside>
+            <Schiene className="lg:sticky lg:top-24">
+              <SchienenAbschnitt label="Spiele">
+                <TeamMatchesWidget
+                  preloaded={matchData}
+                  preloadedLoading={matchesLoading}
+                  nackt
+                />
+              </SchienenAbschnitt>
+
+              <SchienenAbschnitt label="Tabelle">
+                {/* Personalisiert (Befund Ronja): eigene Liga vorgewählt,
+                    eigenes Team markiert. Vorher stand hier „Alle Ligen" ohne
+                    jede Markierung – dieselbe Lücke, die /topscorer seit R5
+                    nicht mehr hat. */}
+                <TopTeamsWidget
+                  nackt
+                  meinTeamId={player?.teamId}
+                  meineLigaId={player?.team?.leagueId}
+                />
+              </SchienenAbschnitt>
+
+              <SchienenAbschnitt label="Folgen">
+                {/* Von acht auf drei (Ronja/Vivien): acht Vorschläge waren ein
+                    halber Bildschirm für die unwichtigste Aussage der Seite. */}
+                <FollowSuggestions nackt maxAnzahl={3} />
+              </SchienenAbschnitt>
+
+              {/* ⚠️ `TransferFeedWidget` ist hier ENTFERNT (Befund Ronja):
+                  `lib/recordTransfer.js` schreibt bei jedem Wechsel BEIDES –
+                  den TransferEvent für dieses Widget UND den Auto-Post im
+                  Feed. Dieselbe Nachricht stand also zweimal auf einem Bild.
+                  Entlarvend ist der Kommentar in `transfer-feed/route.js`
+                  selbst: Es füllt „mit aktuellen Community-Transfers auf,
+                  damit das Widget nie leer ist" – eine Fläche, die mit
+                  Belanglosem gefüllt werden muss, hat kein eigenes Publikum.
+                  Die Wechsel stehen weiterhin im Feed, mit Kontext. */}
+
+              {/* ⚠️ `NewsWidget` bleibt vorerst, BEWUSST gegen Viviens
+                  Streichvorschlag. Mats hat Ronjas Begründung korrigiert: Die
+                  „wird NICHT gebraucht"-Zeile der Bedarfsanalyse zielt auf
+                  EIGENE Redaktion, nicht auf einen fremden Strom – für diese
+                  Frage gibt es schlicht keinen Nutzerbeleg, in keine Richtung.
+                  Also: unterste Position, kleinstes Gewicht, und die
+                  Entscheidung fällt nach einer Klickmessung. */}
+              <SchienenAbschnitt label="Basketball-News">
+                <NewsWidget compact nackt />
+              </SchienenAbschnitt>
+            </Schiene>
           </div>
         ) : (
           // Mobil: Widgets als eingeklappte Akkordeons über dem Feed (hinter dem
@@ -156,16 +210,17 @@ export default function PlayerNewsfeedPage() {
               </CollapsibleWidget>
               <CollapsibleWidget
                 icon={<PiTrophyBold className="text-brand-400" />}
-                title="Top-Teams"
+                title="Tabelle"
               >
-                <TopTeamsWidget />
+                <TopTeamsWidget
+                  meinTeamId={player?.teamId}
+                  meineLigaId={player?.team?.leagueId}
+                />
               </CollapsibleWidget>
-              <CollapsibleWidget
-                icon={<PiArrowsLeftRightBold className="text-brand-400" />}
-                title="Transfers"
-              >
-                <TransferFeedWidget />
-              </CollapsibleWidget>
+              {/* ⚠️ „Transfers" auch mobil entfernt. Die Doppelung ist keine
+                  Desktop-Eigenheit: `recordTransfer` schreibt Widget-Eintrag
+                  UND Feed-Beitrag, hier stünde dieselbe Nachricht zweimal auf
+                  einer Seite – nur untereinander statt nebeneinander. */}
               <CollapsibleWidget
                 icon={<PiNewspaperBold className="text-brand-400" />}
                 title="Basketball-News"

@@ -308,8 +308,26 @@ export default function PostCard({ post, currentPlayerId }) {
     ? `/team/team-detail/${teamAuthor.slug}`
     : "#";
 
+  // Zwei Ränge statt einer Schachtel (Entwurf Vivien, 15.08.2026, §3.4).
+  //
+  // Bis heute lagen ein beidseitig bestätigtes 80:94 und „Game Day! Heute
+  // zählt's." in exakt derselben Fläche, mit demselben Rahmen und demselben
+  // Gewicht. Das war der zweitgrößte Beitrag zum „alles gleich"-Eindruck.
+  //
+  // Rang A – Ereignis (`kind === "auto"`): eine Tatsache. Bleibt ein
+  //   Tafel-Segment mit Fläche und Rahmen.
+  // Rang B – Wort (`kind === "user"`): ein Gespräch. Kein Kasten, nur eine
+  //   Trennlinie.
+  //
+  // ⚠️ Das ist ein GEWICHTS-Unterschied, keine Abwertung: Rang B wird ruhiger,
+  // nicht kleiner – die Textgröße bleibt unverändert. Was verschwindet, ist der
+  // Rahmen, der einem Halbsatz das Gewicht einer Meldung gab.
+  const rang = isAuto
+    ? "bg-navy-800 rounded-md border border-navy-600 p-4"
+    : "border-b border-navy-600 pb-5";
+
   return (
-    <div className="bg-navy-800 rounded-md border border-navy-600 p-4">
+    <div className={rang}>
       {isAuto ? (
         <>
           {/* Kopf (Ereignis) */}

@@ -99,7 +99,7 @@ const LIMIT = 5;
 // Spieltag-Leiste und reicht die Daten hier durch – sonst würde derselbe
 // Endpunkt beim Öffnen zweimal abgefragt. Ohne diese Props lädt das Widget
 // weiterhin selbst (Stand-alone-Verwendung).
-export default function TeamMatchesWidget({ preloaded, preloadedLoading }) {
+export default function TeamMatchesWidget({ preloaded, preloadedLoading, nackt = false }) {
   const external = preloaded !== undefined || preloadedLoading !== undefined;
   const [ownData, setOwnData] = useState(null); // { matches, myTeamId, followedTeamIds }
   const [ownLoading, setOwnLoading] = useState(true);
@@ -163,10 +163,12 @@ export default function TeamMatchesWidget({ preloaded, preloadedLoading }) {
   const list = tab === "upcoming" ? upcoming : results;
 
   return (
-    <div className="bg-navy-800 rounded-md border border-navy-600 p-4">
-      <h3 className="text-sm font-bold text-paper-50 flex items-center gap-2">
-        <PiBasketballBold className="text-brand-400" /> Spiele
-      </h3>
+    <div className={nackt ? "" : "bg-navy-800 rounded-md border border-navy-600 p-4"}>
+      {!nackt && (
+        <h3 className="text-sm font-bold text-paper-50 flex items-center gap-2">
+          <PiBasketballBold className="text-brand-400" /> Spiele
+        </h3>
+      )}
 
       {showScopeToggle && (
         <div className="mt-3 grid grid-cols-2 gap-1 rounded-sm bg-navy-700 p-1 text-xs font-medium">

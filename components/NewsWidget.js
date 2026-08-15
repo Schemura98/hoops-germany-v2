@@ -19,7 +19,10 @@ function formatDate(d) {
   }
 }
 
-export default function NewsWidget({ compact = false }) {
+// `nackt`: ohne eigene Karte UND ohne eigene Ueberschrift - fuer die Schiene
+// des Newsfeeds, die den Titel selbst setzt. Ohne das stand "Basketball-News"
+// dort zweimal untereinander (beim Umbau am 15.08.2026 im Browser gemessen).
+export default function NewsWidget({ compact = false, nackt = false }) {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -45,10 +48,12 @@ export default function NewsWidget({ compact = false }) {
   // Kompakte Variante für die Feed-Seitenleiste (vertikale Liste in einer Karte).
   if (compact) {
     return (
-      <div className="bg-navy-800 rounded-md border border-navy-600 p-4">
-        <h3 className="text-sm font-bold text-paper-50 flex items-center gap-2 mb-3">
-          <PiNewspaperBold className="text-brand-400" /> Basketball-News
-        </h3>
+      <div className={nackt ? "" : "bg-navy-800 rounded-md border border-navy-600 p-4"}>
+        {!nackt && (
+          <h3 className="text-sm font-bold text-paper-50 flex items-center gap-2 mb-3">
+            <PiNewspaperBold className="text-brand-400" /> Basketball-News
+          </h3>
+        )}
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (

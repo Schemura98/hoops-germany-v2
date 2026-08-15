@@ -35,6 +35,9 @@ yarn-error.log*
 /public/players/
 /public/posts/
 
+# Wegwerf-Skripte, Screenshots und Logs aus Prüf-/Gate-Läufen (Agenten-Arbeitsreste)
+/tmp/
+
 # vercel
 .vercel
 

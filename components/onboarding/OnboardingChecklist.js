@@ -173,11 +173,46 @@ export default function OnboardingChecklist({ player, onDismiss }) {
     </li>
   );
 
+  // ⚠️ Ab der Hälfte schrumpft die Liste auf EINE Zeile (Entwurf Vivien §4.2,
+  // Befund Ronja, 15.08.2026).
+  //
+  // Gemessen war sie **504 px hoch** und das **einzige** Element der Seite mit
+  // Marken-Rahmen – bei 75 % erledigt und mit einem einzigen offenen Schritt.
+  // Die betonteste Fläche des Newsfeeds war damit eine Aufgabenliste, die fast
+  // fertig war, und sie schob den ersten Beitrag mobil auf y = 1491 px bei
+  // 844 px Bildschirmhöhe.
+  //
+  // Unter 50 % bleibt sie ein Panel – da ist sie echte Hilfe. Darüber ist sie
+  // eine Erinnerung, und eine Erinnerung braucht eine Zeile.
+  // Die Markenkante gibt sie in beiden Fällen ab: Sie gehört jetzt der
+  // Anzeigetafel, denn die trägt die Aussage der Seite.
+  if (pct >= 50) {
+    const offen = steps.find((s) => !s.done);
+    return (
+      <div className="mb-6 flex items-center gap-3 rounded-md border border-navy-600 bg-navy-800 px-4 py-2.5">
+        <div className="h-1 flex-1 overflow-hidden rounded-full bg-navy-700" aria-hidden="true">
+          <div className="h-full bg-brand-500" style={{ width: `${pct}%` }} />
+        </div>
+        <span className="font-mono text-[11px] tabular-nums text-mist-400 whitespace-nowrap">
+          {doneCount}/{steps.length}
+        </span>
+        {offen && (
+          <Link
+            href={offen.href}
+            className="text-xs font-semibold text-brand-400 hover:text-brand-300 whitespace-nowrap truncate"
+          >
+            {offen.label}
+          </Link>
+        )}
+      </div>
+    );
+  }
+
   return (
-    // Panel-Sprache der Richtung „Anzeigetafel" – und die 2px-Markenkante der
-    // jeweils EINEN hervorgehobenen Karte: solange die Checkliste erscheint,
-    // ist sie die Handlung der Seite.
-    <div className="rounded-md border border-navy-600 border-t-2 border-t-brand-500 bg-navy-800 text-paper-50 p-5 sm:p-6 mb-6">
+    // Panel-Sprache der Richtung „Anzeigetafel". Die 2px-Markenkante ist hier
+    // ENTFERNT: Sie sitzt seit dem 15.08. auf der Anzeigetafel, und die Regel
+    // erlaubt sie nur an EINER Stelle je Seite.
+    <div className="rounded-md border border-navy-600 bg-navy-800 text-paper-50 p-5 sm:p-6 mb-6">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="font-display text-xl sm:text-2xl font-black uppercase tracking-wide">

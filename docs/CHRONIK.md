@@ -1692,6 +1692,7 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > dadurch lief einmal ein `npm run build` in Tobias' Dev-Server hinein und erzeugte eine 404-Kaskade
 > in einer seiner Testchargen; er hat sie erkannt, verworfen und wiederholt. Prüfskript liegt als
 > `tmp/port3000.sh` bei, Warnung steht in CLAUDE.md.
+> *(Nachtrag 15.08.2026: umgezogen nach `scripts/port-frei.sh`, Port jetzt Parameter.)*
 >
 > **Nachtrag (12.08.2026, nachmittags): Ronjas Verständnisprüfung und ihre Folgen** (`ec423a2`, live).
 > Patrick ließ nach dem Deploy prüfen, ob sein eigentliches Ziel erreicht ist – „spielerisch die
@@ -1749,6 +1750,7 @@ alle Mails (Willkommen/Einladung/Mismatch/Pending) laufen über denselben Weg = 
 > meiden – WARTEND/FIN_WARTEN_2-Reste sehen sonst wie ein Listener aus. Erkennungsmerkmal ist die
 > Gegenstelle `0.0.0.0:0` bzw. `[::]:0`; das Prüfskript `tmp/port3000.sh` endet jetzt mit Exit-Code 1,
 > damit ein `&&`-verketteter Build gar nicht erst startet.
+> *(Nachtrag 15.08.2026: jetzt `scripts/port-frei.sh`.)*
 >
 > **Nachtrag (12.08.2026, spät): Rückkehr-Signal im eingeloggten Hero** (`dd95a3b` + `0600d3b`, live).
 > Ronjas Befund **O3** (kein persönlicher Grund zurückzukommen) – übergeben an **Lina**. Klarstellung

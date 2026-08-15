@@ -31,7 +31,7 @@ async function handler(req) {
       $or: [{ teamA: { $in: allIds } }, { teamB: { $in: allIds } }],
     })
       .select(
-        "teamA teamB date location status winningTeam winningTeamPoints losingTeamPoints resultStatus teamAResult teamBResult"
+        "teamA teamB date location status winningTeam winningTeamPoints losingTeamPoints resultStatus teamAResult teamBResult playerStats"
       )
       .populate("teamA", "teamName slug logo")
       .populate("teamB", "teamName slug logo")
@@ -39,7 +39,40 @@ async function handler(req) {
       .lean();
   }
 
-  return ok({ matches, myTeamId, followedTeamIds });
+  // Die eigenen Zahlen aus jedem Spiel herauslösen (Befund Ronja, 15.08.2026).
+  //
+  // Die Route lieferte bisher Ergebnisse, aber nie die eigenen Werte – deshalb
+  // stand auf dem Newsfeed keine einzige Zahl über den Betrachter selbst,
+  // obwohl die Plattform als „Scouting mit belegbaren Fakten" antritt und
+  // `lib/statsNotify.js` seit dem 13.08. genau darüber benachrichtigt. Das
+  // Erlebnis war gebaut, nur nicht auf der Fläche, auf der man täglich landet.
+  //
+  // ⚠️ `playerStats` geht NICHT roh hinaus: Es enthält die Werte ALLER Spieler
+  // beider Mannschaften. Für diese Fläche wird der eigene Eintrag
+  // herausgesucht und der Rest verworfen – „erlauben statt verbieten", dieselbe
+  // Regel wie beim Kaderplatz-Leak von heute Morgen. Wer den vollen Box-Score
+  // will, hat dafür `/match/[id]`.
+  const meineWerte = new Map();
+  for (const m of matches) {
+    const eigen = (m.playerStats || []).find(
+      (s) => s.player && String(s.player) === String(player._id)
+    );
+    if (eigen && !eigen.didNotPlay) {
+      meineWerte.set(String(m._id), {
+        points: eigen.points ?? null,
+        assists: eigen.assists ?? null,
+        rebounds: eigen.rebounds ?? null,
+      });
+    }
+    delete m.playerStats;
+  }
+
+  const ausgabe = matches.map((m) => ({
+    ...m,
+    meineWerte: meineWerte.get(String(m._id)) || null,
+  }));
+
+  return ok({ matches: ausgabe, myTeamId, followedTeamIds });
 }
 
 export const POST = withErrorHandling(handler);
