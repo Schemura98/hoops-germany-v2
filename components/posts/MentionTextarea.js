@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import BaseAvatar from "@/components/Avatar";
+import { positionLabel } from "@/lib/constants";
 
 // Eingabefeld mit @-Mention-Autocomplete. Tippt der Nutzer „@" + Namen, erscheint eine
 // Vorschlagsliste (aus /api/player/search); die Auswahl fügt den Handle
@@ -184,9 +185,18 @@ export default function MentionTextarea({
                   <span className="block truncate text-sm font-medium text-paper-50">
                     {p.name}
                   </span>
+                  {/* `positionLabel` statt roher Wert (Kai F-2, 15.08.2026).
+                      ⚠️ Hier bewusst KEIN `POSITION_FEHLT`: Das ist die
+                      Vorschlagsliste beim @-Erwähnen. Die Zeile dient dazu,
+                      zwei Personen mit ähnlichem Namen auseinanderzuhalten –
+                      „Keine Angabe" hilft dabei nicht, es
+                      verlängert nur jeden zweiten Eintrag. Dieselbe
+                      Unterscheidung wie beim Chip auf /spieler: Ein
+                      weggelassener Hinweis ist nicht mehrdeutig, ein
+                      Gedankenstrich in einer Informationszeile war es. */}
                   {(p.position || p.teamName) && (
                     <span className="block truncate text-xs text-mist-400">
-                      {[p.position, p.teamName].filter(Boolean).join(" · ")}
+                      {[positionLabel(p.position), p.teamName].filter(Boolean).join(" · ")}
                     </span>
                   )}
                 </span>

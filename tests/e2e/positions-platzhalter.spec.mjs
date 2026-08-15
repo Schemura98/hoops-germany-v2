@@ -153,7 +153,7 @@ test.describe("Positions-Platzhalter", () => {
         // `|| ""` ist erlaubt – der leere Rückfall ist KEIN Platzhalter, sondern
         // ein Datenwert: In `app/api/player/search` hält er ein API-Feld leer,
         // in `WelcomeTour` belegt er ein Formularfeld vor. Dort wäre ein Satz
-        // wie „Position nicht angegeben" sogar falsch, weil er GESPEICHERT
+        // wie „Keine Angabe" sogar falsch, weil er GESPEICHERT
         // würde. Ein erster Versuch dieses Tests hat sie angeschlagen.
         const literal = rest.match(/^\s*(?:\|\||\?)\s*(["'`])(.*?)\1/);
         if (literal && literal[2].trim() !== "") {
@@ -179,11 +179,40 @@ test.describe("Positions-Platzhalter", () => {
     // blieb bei der Selbstprüfung grün, als ich versuchsweise BEIDE Anzeigen in
     // `KaderTab.js` entfernte. Der Import stand ja noch da. Eine Gegenprobe,
     // die die Einfuhr statt der Verwendung misst, prüft gar nichts.
-    const ohneImport = (quelle) =>
-      quelle
-        .split("\n")
-        .filter((z) => !/^\s*import\b/.test(z))
-        .join("\n");
+    // ⚠️ Und zwar der GANZE Import, nicht nur seine erste Zeile.
+    //
+    // Die erste Fassung filterte `!/^\s*import\b/` – also zeilenweise. Bei
+    // einem mehrzeiligen Import steht `POSITION_FEHLT,` aber allein auf seiner
+    // Zeile, und die beginnt nicht mit `import`. Genau das ist in
+    // `app/transfermarkt/page.js` der Fall, der einzigen Pflichtfläche mit
+    // mehrzeiligem Import: Löscht man dort BEIDE echten Anzeigen, blieb der
+    // Test grün.
+    //
+    // Das ist wörtlich die Fehlerklasse, die der Kommentar direkt darüber als
+    // behoben beschreibt – und sie traf ausgerechnet die Datei, deren
+    // übersehene Fundstelle diesen Test überhaupt ausgelöst hat. Gefunden im
+    // zweiten Review-Durchlauf, nachgemessen.
+    //
+    // Deshalb ein kleiner Zustandsautomat statt eines Zeilenfilters: ab
+    // `import` überspringen, bis die Anweisung endet. Ein einzeiliger Import
+    // endet auf derselben Zeile.
+    const ohneImport = (quelle) => {
+      const raus = [];
+      let imImport = false;
+      for (const z of quelle.split("\n")) {
+        if (!imImport && /^\s*import\b/.test(z)) imImport = true;
+        if (imImport) {
+          // Ende der Anweisung: die Zeile trägt die Quelle (`from "…"`) oder
+          // es ist ein Seiteneffekt-Import (`import "./x.css"`).
+          if (/\bfrom\s+["'][^"']+["']/.test(z) || /^\s*import\s+["'][^"']+["']/.test(z)) {
+            imImport = false;
+          }
+          continue;
+        }
+        raus.push(z);
+      }
+      return raus.join("\n");
+    };
 
     const ohne = PFLICHTFLAECHEN.filter((rel) => {
       const inhalt = ohneImport(
@@ -200,7 +229,7 @@ test.describe("Positions-Platzhalter", () => {
 
     // ⚠️ `app/spieler/page.js` steht bewusst NICHT in der Pflichtliste.
     // Dort ist die Position ein CHIP in `brand-500`, keine Unterzeile – ein
-    // Abzeichen „Position nicht angegeben" verbrauchte den EINEN Akzent für
+    // Abzeichen „Keine Angabe" verbrauchte den EINEN Akzent für
     // eine Nicht-Information (Begründung Vivien). Ein fehlendes Abzeichen ist
     // nicht mehrdeutig; ein Gedankenstrich in einer Unterzeile war es.
     // Der Test hält die Entscheidung fest, damit sie nicht als Versehen
@@ -213,6 +242,54 @@ test.describe("Positions-Platzhalter", () => {
       "Wenn /spieler den Platzhalter jetzt doch rendert, ist die Begründung im " +
         "Kommentar dort und in lib/constants.js überholt – beide mitziehen."
     ).toBe(false);
+  });
+
+  test("keine Fläche rendert die Position roh", async () => {
+    // ⚠️ Die Lücke, die Kai als F-2 gemeldet hat: Alle Prüfungen oben hängen an
+    // `positionLabel(`-AUFRUFSTELLEN. Wer den Wert roh ausgibt, ist für sie
+    // unsichtbar – und genau so sind drei Stellen durch denselben Commit
+    // gerutscht, der die Regel festschreiben sollte:
+    //   KaderTab:414        [p.position, p.teamName].filter(Boolean).join(" · ")
+    //   MentionTextarea:189 dieselbe Form
+    //   ErgebnisseTab:428   ` · {r.position}`
+    // Roh heißt: kein `positionLabel`, also bleibt ein Altwert ein Kürzel und
+    // ein `__proto__` unbehandelt.
+    //
+    // ⚠️ Grenze dieser Prüfung, ausdrücklich: Sie erkennt die ZWEI Formen, die
+    // wirklich vorkamen – die Array-Verkettung und die nackte Ausgabe. Sie ist
+    // KEIN vollständiger JSX-Prüfer. Das hier steht als Warnung, nicht als
+    // Zusicherung; „der Test deckt das ab" war an diesen Tagen mehrfach die
+    // teuerste Annahme.
+    const roh = [];
+    for (const pfad of dateienSammeln()) {
+      // API-Routen ausgenommen: Dort ist `position: x.position` eine
+      // Datendurchreichung an das Frontend, keine Anzeige. Das ist kein
+      // Ermessen, sondern eine andere Sorte Stelle – die Anzeige entscheidet
+      // die Komponente, die das Feld empfängt, und die wird hier geprüft.
+      if (pfad.includes(join("app", "api"))) continue;
+      const inhalt = ohneKommentare(readFileSync(pfad, "utf8"));
+      // Form 1: [x.position, …] – roh in eine Verkettung gegeben.
+      for (const m of inhalt.matchAll(/\[\s*\w+\??\.position\b/g)) {
+        roh.push(`${pfad.replace(PROJECT_ROOT, "")}: ${m[0]}…`);
+      }
+      // Form 2: {x.position} – nackt ausgegeben.
+      //
+      // ⚠️ `(?<!=)` ist nicht kosmetisch: Ohne die Ausnahme schlug die Regel
+      // auf `value={form.position}` (edit-profile) und `value={newSlot.position}`
+      // (KaderTab) an – beides `<select>`-BINDUNGEN, keine Ausgaben. Dort MUSS
+      // der rohe Wert stehen, denn er wird mit den `<option value>` verglichen;
+      // ein `positionLabel(...)` davor würde die Vorauswahl im Formular
+      // stillschweigend zerstören.
+      // Die Unterscheidung ist also inhaltlich, nicht bequem: Vor einer
+      // Ausgabe steht kein `=`.
+      for (const m of inhalt.matchAll(/(?<!=)\{\s*\w+\??\.position\s*\}/g)) {
+        roh.push(`${pfad.replace(PROJECT_ROOT, "")}: ${m[0]}`);
+      }
+    }
+    expect(
+      roh,
+      `Diese Stellen geben die Position roh aus, ohne positionLabel():\n${roh.join("\n")}`
+    ).toEqual([]);
   });
 
   test("der Kaderplatz-Status behauptet keine Einladung", async () => {

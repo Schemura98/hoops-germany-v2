@@ -424,7 +424,29 @@ export default function LigaDetailPage({ params }) {
                   >
                     {s.firstName} {s.lastName}
                   </Link>
-                  <p className="truncate text-xs text-mist-400">
+                  {/* ⚠️ KEIN `truncate` (Befund Tobias N1, 15.08.2026).
+
+                      Auslöser war ein Regress, den mein eigener Fix erzeugt
+                      hatte: „Position nicht angegeben · Hamburg Towers United"
+                      maß 278 px im 229-px-Container, der VEREIN fiel weg
+                      („… · Hamburg To…"). Vorher passte die Zeile mit 218 px.
+
+                      ⚠️ Dieser konkrete Auslöser ist inzwischen weg – der
+                      Platzhalter heißt seit Neles Korrektur „Keine Angabe"
+                      (75 px statt 138 px) und ist damit sogar kürzer als
+                      „Small Forward". Das `truncate` bleibt trotzdem
+                      entfernt, aus zwei Gründen, die nichts mit dem
+                      Platzhalter zu tun haben:
+                        · Der längste ECHTE Wert ist „Sportliche Leitung";
+                          mit einem langen Vereinsnamen überläuft die Zeile
+                          weiterhin.
+                        · Der eigentliche Befund war die Inkonsistenz:
+                          dieselbe Unterzeile bricht auf /topscorer um und
+                          schnitt hier ab. Identischer Inhalt, zwei Verhalten.
+                      Umbruch gewinnt, weil der Verein hier bewusst ergänzt
+                      wurde – „wer ist das eigentlich" ist die zweite Frage
+                      nach dem Namen. */}
+                  <p className="text-xs text-mist-400">
                     {positionLabel(s.position) || POSITION_FEHLT}
                     {s.teamName ? ` · ${s.teamName}` : ""}
                   </p>

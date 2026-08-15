@@ -410,8 +410,32 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                     >
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-paper-50 truncate">{p.name}</p>
+                        {/* ⚠️ Zwei Fehler an einer Zeile (Befund Kai F-1,
+                            15.08.2026 – dieselbe Datei rendert 170 Zeilen
+                            weiter korrekt POSITION_FEHLT).
+
+                            1. Rohes `p.position` statt `positionLabel(...)`,
+                               und ohne Platzhalter: Wer keine Position hat,
+                               stand hier ohne jede Angabe.
+
+                            2. Schwerwiegender: `… || "Vereinslos"` erschien
+                               NUR, wenn auch die Position fehlte. Ein Spieler
+                               MIT Position und OHNE Verein wurde nie als
+                               vereinslos ausgewiesen – die Zeile zeigte dann
+                               bloß „Small Forward". Und genau das ist in
+                               dieser Liste die entscheidende Information:
+                               Wer hier jemanden einlädt, der schon in einem
+                               Kader steht, löst einen VEREINSWECHSEL aus.
+                               Die Zeile war im Sinne des Codes richtig und im
+                               Sinne des Lesers falsch.
+
+                            Deshalb beide Felder getrennt, jedes mit eigenem
+                            Rückfall – nie mehr ein Feld, das das andere
+                            verdeckt. */}
                         <p className="text-xs text-mist-400 truncate">
-                          {[p.position, p.teamName].filter(Boolean).join(" · ") || "Vereinslos"}
+                          {positionLabel(p.position) || POSITION_FEHLT}
+                          {" · "}
+                          {p.teamName || "Vereinslos"}
                         </p>
                       </div>
                       <Button

@@ -265,7 +265,7 @@ export default function TransfermarktPage() {
                         {/* ⚠️ `|| POSITION_FEHLT` statt `filter(Boolean)`
                             (übersehene Fundstelle, Befund Kai 15.08.2026):
                             Auf DERSELBEN Seite sagte die eine Spielerliste
-                            „Position nicht angegeben" und diese schwieg. Der
+                            den Platzhalter und diese schwieg. Der
                             Test konnte es nicht sehen – `filter(Boolean).join()`
                             ist nicht das `||`-Muster, nach dem er sucht. */}
                         <span className="block text-xs text-mist-400 truncate">

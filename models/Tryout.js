@@ -13,7 +13,12 @@ const tryoutSchema = new mongoose.Schema(
     teamId: { type: mongoose.Schema.Types.ObjectId, ref: "teams" },
     date: Date,
     location: String,
-    positions: [String], // ["PG","SG","SF","PF","C"]
+    // Kanonische Namen aus POSITIONS (lib/constants.js), KEINE Kürzel –
+    // `tryouts/create` filtert mit `POSITIONS.includes(p)`, ein Kürzel würde
+    // also stillschweigend verworfen. Hier stand bis zum 15.08.2026
+    // ["PG","SG","SF","PF","C"] (Befund Kai F-5): genau die Sorte Doku, die
+    // im Sinne des Codes einmal stimmte und im Sinne des Lesers falsch ist.
+    positions: [String],
     description: String,
     status: { type: String, enum: ["active", "closed"], default: "active" },
     applicants: [applicantSchema],

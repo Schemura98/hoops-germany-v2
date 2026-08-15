@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/db";
 import Team from "@/models/Team";
 import { getTeamForCapability, TEAM_PUBLIC_FIELDS } from "@/lib/serverAuth";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
+import { ALL_ROLES } from "@/lib/constants";
 
 // POST /api/team/roster/add-slot – neuen Kader-Slot anlegen (Dual-Auth).
 async function handler(req) {
@@ -20,9 +21,28 @@ async function handler(req) {
     return fail("Bitte einen Namen für den Slot angeben", 400);
   }
 
+  // Position gegen die Liste prüfen (Befund Kai F-4, 15.08.2026).
+  //
+  // Hier stand `body.position?.trim() || ""` ohne jede Werteprüfung, und
+  // `models/Team.js` hat `rosterSlots[].position: String` ohne Enum. Dieselbe
+  // Lücke wie bei `Player.position`, nur an der Slot-Grenze – die
+  // Vereinheitlichung endete genau hier. Dass `KaderTab` ein `select` anbietet,
+  // ist wieder nur eine Aussage über den Browser.
+  //
+  // Der Wert ist nicht folgenlos: Er erscheint über `positionLabel(...)` auf
+  // der ÖFFENTLICHEN Vereinsseite und geht in die Einladungsmail.
+  //
+  // ⚠️ Anders als bei `update-profile` braucht es hier KEINE Ausnahme für
+  // unveränderte Altwerte: Ein Slot wird angelegt, nicht bearbeitet – es gibt
+  // keinen Bestand, den eine strenge Regel unbedienbar machen könnte.
+  const position = body.position?.trim() || "";
+  if (position && !ALL_ROLES.includes(position)) {
+    return fail("Diese Position gibt es nicht zur Auswahl.", 400);
+  }
+
   const slot = {
     name,
-    position: body.position?.trim() || "",
+    position,
     number: body.number?.toString().trim() || "",
     status: "empty",
     // Jeder Slot bekommt direkt einen Claim-Token für den Einladungslink.

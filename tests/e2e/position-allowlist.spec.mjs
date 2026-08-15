@@ -33,6 +33,12 @@ async function positionLesen(request, token) {
   return (koerper.data?.player || koerper.player)?.position || "";
 }
 
+async function ortLesen(request, token) {
+  const antwort = await request.post("/api/player/getmyinfo", { data: { token } });
+  const koerper = await antwort.json();
+  return (koerper.data?.player || koerper.player)?.hometown || "";
+}
+
 async function positionSetzen(request, token, position) {
   return request.post("/api/player/update-profile", { data: { token, position } });
 }
@@ -125,6 +131,15 @@ test.describe("Position: Werteprüfung in update-profile", () => {
     // gespeicherter Wert?"), belegt ist hier aber nur der gültige Zweig.
     const token = await startZustand(request);
 
+    // ⚠️ Das mitgeschickte Zweitfeld muss wiederhergestellt werden.
+    //
+    // Die erste Fassung schickte hart `hometown: "Köln"` und stellte es nie
+    // zurück. In der Dev-DB stand danach dauerhaft Köln bei Bundesland Berlin –
+    // ein widersprüchliches Paar, das kein Test rot macht, aber jede spätere
+    // Prüfung an dieser Stelle verwirrt. Gefunden im zweiten Review-Durchlauf.
+    // Der Kopfkommentar behauptete „setzt sie am Ende zurück" und meinte nur
+    // die Position.
+    const vorherOrt = await ortLesen(request, token);
     const antwort = await request.post("/api/player/update-profile", {
       data: { token, position: START, hometown: "Köln" },
     });
@@ -132,5 +147,12 @@ test.describe("Position: Werteprüfung in update-profile", () => {
       antwort.status(),
       "unveränderte Position + anderes Feld muss speicherbar bleiben"
     ).toBe(200);
+
+    // Zweitfeld zurückstellen und das auch nachweisen – ein Aufräumschritt,
+    // der nicht geprüft wird, ist keiner.
+    await request.post("/api/player/update-profile", {
+      data: { token, position: START, hometown: vorherOrt },
+    });
+    expect(await ortLesen(request, token), "Wohnort nicht zurückgestellt").toBe(vorherOrt);
   });
 });

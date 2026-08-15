@@ -14,6 +14,7 @@ import Loading from "@/components/ui/Loading";
 import EmptyState from "@/components/ui/EmptyState";
 import TabAlert from "@/components/team/tabs/TabAlert";
 import { inputClassNum, inputClassStat } from "@/lib/ui";
+import { positionLabel } from "@/lib/constants";
 
 // Breiten lokal, Feld-Tokens zentral (lib/ui.js) – s. Kommentar dort.
 const numInput = `w-20 ${inputClassNum}`;
@@ -424,8 +425,18 @@ export default function ErgebnisseTab({ team }) {
                                     <tr key={r.key} className="border-t border-navy-600">
                                       <td className="py-1.5 pr-2">
                                         <span className="text-paper-50">{r.name}</span>
+                                        {/* `positionLabel` statt roher Wert
+                                            (Kai F-2, 15.08.2026). Kein
+                                            POSITION_FEHLT: Das ist die
+                                            Eingabemaske für den Box-Score –
+                                            die Position steht als Hilfe neben
+                                            dem Namen, nicht als Angabe über
+                                            die Person. */}
                                         {r.position && (
-                                          <span className="text-xs text-mist-400"> · {r.position}</span>
+                                          <span className="text-xs text-mist-400">
+                                            {" · "}
+                                            {positionLabel(r.position)}
+                                          </span>
                                         )}
                                       </td>
                                       <td className="py-1.5 text-center">

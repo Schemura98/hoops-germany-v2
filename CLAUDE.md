@@ -581,7 +581,7 @@ NEXTAUTH_URL=https://hoopsgermany.de
 ```js
 {
   teamId: ObjectId, date, location,
-  positions: [String],  // ["PG","SG","SF","PF","C"]
+  positions: [String],  // kanonische Namen aus POSITIONS, keine Kürzel
   description,
   status: "active"|"closed",
   applicants: [{ playerId, appliedAt }]

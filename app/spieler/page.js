@@ -219,7 +219,7 @@ export default function SpielerPage() {
                       Commit und Doku fälschlich als erledigt geführt war).
                       Diese Liste zeigt die Position als CHIP, nicht als
                       Unterzeile: eine orange Fläche in `brand-500`. Ein
-                      Abzeichen mit „Position nicht angegeben" verbraucht den
+                      Abzeichen mit „Keine Angabe" verbraucht den
                       EINEN Akzent der Anzeigetafel-Sprache für eine
                       Nicht-Information – dieselbe Begründung, mit der Vivien
                       das Positions-Chip von der Kaderkarte entfernt hat.

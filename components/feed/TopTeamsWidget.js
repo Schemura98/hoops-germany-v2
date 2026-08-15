@@ -7,8 +7,17 @@ import { PiTrophyBold } from "react-icons/pi";
 import Avatar from "@/components/Avatar";
 import { BUNDESLAENDER } from "@/lib/constants";
 
+// ⚠️ `min-w-0` und `w-full` sind hier NICHT kosmetisch (Befund Patrick,
+// 15.08.2026: „Das Drop-Down ragt komplett in die Mitte und verdeckt Kontent").
+//
+// Ein natives `<select>` bemisst seine Breite an der LÄNGSTEN `<option>`, nicht
+// am Container. Sobald eine Liga „Regionalliga West Herren 2025/26" heißt,
+// wuchs das Feld über die Seitenspalte hinaus in den Feed. `flex-wrap` half
+// nicht: Umbrechen kann nur zwischen Elementen, nicht innerhalb eines zu
+// breiten. Und ohne `min-w-0` darf ein Flex-Element unter seine Inhaltsbreite
+// gar nicht schrumpfen – das ist die Voreinstellung `min-width: auto`.
 const selectClass =
-  "rounded-sm border border-navy-600 bg-navy-800 px-2 py-1 text-xs text-mist-300 outline-none focus:border-brand-500";
+  "w-full min-w-0 flex-1 truncate rounded-sm border border-navy-600 bg-navy-800 px-2 py-1 text-xs text-mist-300 outline-none focus:border-brand-500";
 
 function rankColor(i) {
   if (i === 0) return "text-signal-wait";
@@ -64,7 +73,11 @@ export default function TopTeamsWidget() {
       </h3>
 
       {/* Filter */}
-      <div className="mt-3 flex flex-wrap gap-2">
+      {/* Kein `flex-wrap`: Die beiden Felder sollen sich die Breite TEILEN,
+          nicht untereinander springen. Mit `flex-1 min-w-0` je Feld passt das
+          in jede Spaltenbreite; steht nur ein Feld da (kein Bundesland in den
+          Daten), nimmt es die volle Breite. */}
+      <div className="mt-3 flex gap-2">
         <select
           value={leagueId}
           onChange={(e) => setLeagueId(e.target.value)}
