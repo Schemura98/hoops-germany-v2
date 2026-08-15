@@ -600,6 +600,32 @@
     (5-Fortsetzung) Immer Klammerzählung, und die Hilfsfunktion soll
     **werfen** statt still etwas Falsches zu liefern (Muster: `blockAb` in
     `tests/e2e/benachrichtigungs-typen.spec.mjs`).
+    ⚠️ **Methodik-Lehre vom 15.08.2026 – ZWEI SESSIONS IM SELBEN ARBEITSBAUM.** An einem Tag
+    dreimal aneinandergeraten; jedes Mal ging es gut aus, und jedes Mal nur, weil jemand
+    hinterher gegenprüfte. Die drei Regeln daraus:
+    (a) **Zuweisung je Datei, bevor gearbeitet wird.** Sonst committet die eine Session in ein
+    bewegliches Ziel: Es wurde ein Entwurf aus dem Arbeitsbaum committet, während die andere
+    Session noch daran schrieb. Und „fertig" heißt fertig – wer danach weiterschreibt, sagt
+    vorher „ich arbeite weiter".
+    (b) **Committen, pushen, deployen sind DREI Erlaubnisse; die untere trägt die obere nicht.**
+    ⚠️ **Und der schärfere Teil: In einem gemeinsamen Arbeitsbaum gilt die GROSSZÜGIGSTE
+    Freigabe für alles, was darunter liegt – dagegen verstoßen muss dabei niemand.** Git kennt
+    keine Teil-Pushes: Wer die Spitze schiebt, schiebt alles darunter. Genau so kam ein Commit
+    auf `origin`, der unter „Commit freigegeben, kein Push" entstanden war; die eine Session
+    hatte Push-Freigabe, die andere nicht, und beide haben sich an ihre Vorgabe gehalten.
+    **An Git sieht man diese Bindung nicht** – sie steht nur im Auftrag.
+    Wer strenger gebunden ist, hat deshalb zwei Wege: **committen und warten**, oder in einem
+    **eigenen Worktree** arbeiten (`git worktree add`). Und vor jedem Push nachsehen, was mitgeht:
+    ```bash
+    git log --oneline origin/redesign..HEAD
+    ```
+    (c) ⚠️ **Der eigene erste Blick auf den Baum kann veraltet sein.** Ein `git log` meldete
+    `c96cb14` als HEAD, während der Reflog längst `1a00846` führte. **Maßgeblich ist der
+    Reflog**, nicht der erste Blick – und für die Frage „wer hat wann gepusht" beantwortet
+    `git reflog show origin/<branch> --date=iso` in EINEM Kommando, was `merge-base
+    --is-ancestor` nur halb beantwortet: Dass ein Commit auf `origin` ist, sagt nichts darüber,
+    **wodurch** er dorthin kam. Beide Sessions haben an diesem Punkt dieselbe Fehlerform
+    produziert – **Ergebnis richtig gemessen, Mechanismus dazu erfunden.**
 16. **Folgen des Sicherheits-Eingriffs vom 15.08.2026 – Entscheidungen, keine Aufräumarbeit.**
     (a) ⚠️ **48 der 66 Prod-Teams haben einen unerreichbaren Admin** (Befund Kai). Meine Meldung
     „Rollen unverändert" war technisch richtig und im Ergebnis das Gegenteil: Diese Vereine sind
