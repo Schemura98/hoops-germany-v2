@@ -174,11 +174,25 @@
   **Dropbox** (`~/Dropbox`). `~/Projekte` liegt bewusst außerhalb davon.
 - **`npm run build` NIE parallel zu laufendem `next dev`** (überschreibt dessen `.next`-CSS → ungestylte
   Seiten/CSS-404; Dev-Server danach neu starten). Nach Dev-Server-Lock ggf. `.next` löschen vor dem Build.
-  ⚠️ **Port-Prüfung sprachunabhängig machen:** Windows ist hier **deutsch**, `netstat` schreibt
-  **`ABHÖREN`** statt `LISTENING` – ein `netstat | grep LISTEN` meldet den Port fälschlich als frei
-  (am 12.08.2026 genau so passiert: Build lief in einen fremden Dev-Server hinein). Stattdessen die
-  Portspalte auswerten (`netstat -ano | awk '$2 ~ /:3000$/ && $4 !~ /:/ {print $5}'`) oder schlicht
-  `curl` gegen `http://localhost:3000` schicken.
+  ⚠️ **Vor jedem Build den Port prüfen** – auf dem Mac (seit 15.08.2026) mit:
+  ```bash
+  sh scripts/port-frei.sh && npm run build
+  ```
+  Das Skript braucht keine Angabe zum System: Es hat **eine** Weiche, und die trennt Windows von
+  allem anderen – macOS fällt in den POSIX-Zweig, nimmt dort `ss` falls vorhanden, sonst
+  `lsof -tiTCP:3000 -sTCP:LISTEN` (auf dem Mac also `lsof`). Exit 1 = belegt, Exit 2 = nicht prüfbar.
+  Ohne Skript geht auch `lsof -tiTCP:3000 -sTCP:LISTEN` oder schlicht ein `curl` gegen
+  `http://localhost:3000`. **Nicht die Windows-Zeile `netstat -ano` übernehmen** – macOS lehnt sie
+  mit „illegal option -- o" ab, und `-p` bedeutet hier **Protokoll**, nicht Prozess. ⚠️ `netstat -an
+  | grep LISTEN` **funktioniert** auf dem Mac dagegen sehr wohl (am 15.08.2026 nachgemessen: findet
+  die Listener); es nennt nur **keine PID**, taugt also zum Erkennen, nicht zum Beenden.
+  ⚠️ **Der Grund für die Prüfung ist plattformunabhängig und bleibt:** `preview_stop` beendet den
+  Dev-Server **nicht**, es löst ihn nur aus der Verwaltung – der Node-Prozess hält Port 3000
+  weiter. Am 15.08.2026 lief ein Build zweimal in einen laufenden Dev-Server hinein, einmal davon
+  trotz fünf vorheriger korrekter Prüfungen.
+  *Historisch (Windows, bis 15.08.2026): Dort schrieb das deutsche `netstat` **`ABHÖREN`** statt
+  `LISTENING`, weshalb `netstat | grep LISTEN` einen belegten Port als frei meldete – am 12.08.2026
+  lief der Build genau deshalb in einen fremden Dev-Server. Auf dem Mac ist das gegenstandslos.*
 - **Schema-Änderungen an Modellen greifen erst nach Dev-Server-Neustart** (mongoose cached das Model).
 - **Vor Deploy immer die Production-Runtime testen** (`npm start`), nicht nur `next dev` (populate-Bug-Lehre).
 - **Bei Neu-Deploy/Server-Umzug:** `deploy/nginx-hoopsgermany.conf` nach `/etc/nginx/sites-available/default`,
@@ -191,6 +205,14 @@
   iCloud Drive (inkl. `~/Desktop`/`~/Documents` bei aktiver Synchronisierung) und Dropbox greifen
   in `.next/` und `node_modules/` hinein, während dort gebaut wird. Genau daran scheiterte unter
   Windows OneDrive.
+- **Agenten & Skills auf macOS nachgezogen (15.08.2026, Protokoll in der Chronik):** Vier Verweise
+  zeigten ins Leere, obwohl die Dateien migriert **aussahen** – u. a. Maliks Pflicht-Skill
+  `team-ausstattung` (liegt unter `~/.claude/skills/`, nicht im General Backoffice) und fünf
+  **Zwitter-Pfade** `~\.claude\skills\` (macOS-Tilde + Windows-Backslashes, auf keinem System
+  auflösbar). ⚠️ **Regel daraus:** Beim Umschreiben von Pfaden jeden neuen Pfad **gegen das
+  Dateisystem halten**, nicht nur den Text lesen – „0 Ersetzungen" ist kein Erfolg, sondern ein
+  unbeantworteter Zustand. Ebenso: Ein INSTALL-VERMERK beschreibt auch Zustand **außerhalb**
+  seines Ordners (`~/.config/watch/.env` fehlte, der Skill hätte stumm neu eingerichtet).
 - Next.js **14.2.35**, App Router, JavaScript (kein TS), Tailwind.
 - `.env` lokal vorhanden (MongoDB-Atlas, `SECRET_KEY`, `CRON_SECRET`, `NEXTAUTH_URL=http://localhost:3000`). SMTP/Google noch leer.
 - Start: `npm run dev` → http://localhost:3000. DB-Test: `node scripts/dbcheck.mjs`.
@@ -551,7 +573,8 @@
     ⚠️ **Methodik-Lehren aus den Gates vom 14.08.:** (1) Während ein Browser-Gate gegen `next dev`
     läuft, darf im selben Arbeitsbaum **nicht weitergebaut** werden – der Prüfer sieht sonst Code,
     der nicht im geprüften Commit ist. (2) **`preview_stop` beendet den Dev-Server nicht**, es löst
-    ihn nur aus der Verwaltung; der Node-Prozess hält Port 3000 weiter (Zustand `ABHÖREN`). Vor
+    ihn nur aus der Verwaltung; der Node-Prozess hält Port 3000 weiter (auf dem Mac sichtbar über
+    `lsof -tiTCP:3000 -sTCP:LISTEN`; unter Windows hieß der Zustand `ABHÖREN`). Vor
     jedem Build `sh scripts/port-frei.sh` – sonst läuft der Build in ihn hinein. (3) Ein
     **sporadisch roter Test** ist selten ein Timing-Problem: Beim Avatar-Layout-Test halfen weder
     höhere Timeouts noch eine leichtere Seite noch eine Übergangs-Pause, weil die Ursache ein
