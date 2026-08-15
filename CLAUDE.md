@@ -11,11 +11,18 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> ⚠️ **Auf `redesign` liegen fünf Commits, die NICHT deployt sind** (`8d7f569` → `cd51c92`,
-> 15.08.2026): die Ball-Choreografie der Startseite, der gerenderte Hero-Ball und zwei
-> Gate-Runden Nacharbeit. **Zwei Gate-Runden sind durch, eine dritte steht aus**, und vier
-> Punkte liegen als Gestaltungsentscheidung bei Vivien (s. Roadmap 20). Nicht deployen, bevor
-> das entschieden ist – live läuft unverändert `164c784`.
+> ⚠️ **Auf `redesign` liegen 24 Commits, die NICHT deployt sind** (`950f23b` → `76aa289`,
+> 15./16.08.2026): der macOS-Umzug, die Ball-Choreografie der Startseite, der gerenderte
+> Hero-Ball und **fünf** Gate-Runden Nacharbeit. Live läuft unverändert `164c784`.
+> ⚠️ **Diese Zeile stand tagelang auf „fünf Commits" und war damit um den Faktor fünf falsch** –
+> es wurde committet und die Zeile gepflegt, ohne den Abstand zum Deploy neu zu zählen. Genau
+> die Fehlerform, die weiter unten schon zweimal für den Rollback-Zeiger protokolliert ist.
+> **Nicht schätzen, zählen:** `git rev-list --count 164c784..HEAD`.
+> Stand nach Runde fünf: Build durch, Playwright **146/146** (gegen `--list` abgeglichen).
+> Kais Deploy-Empfehlung war „noch nicht", begründet mit einem 20-px-Satz nach der Landung auf
+> jedem mobilen Laden – der ist behoben und durch drei neue Tests gedeckt. **Offen sind fünf
+> Gestaltungspunkte bei Vivien** (s. Roadmap 20c) sowie zwei bewusst zurückgestellte
+> Prüf-Lücken (Kais M7/M8; die Abdunkelung greift mobil überhaupt nie).
 > **Zuletzt deployt: `164c784` (15.08.2026 abends, am Server verifiziert).** Newsfeed-Umbau
 > („Die Anzeigetafel nach dem Spiel") nach zwei Gate-Runden. Kern: **`beidseitigBelegt()` in
 > `lib/matchScore.js`** – die EINE Quelle für jede Aussage mit dem Wort „bestätigt".
@@ -769,6 +776,37 @@
     > korrekt messen und trotzdem zu gegensätzlichen Ergebnissen kommen.
     Der Laufzeit-Test `tests/e2e/hero-ball-laufzeit.spec.mjs` prüft deshalb jetzt
     **neun Viewports mit Höhenachse**, jeder ein reales Gerät.
+20c. **Fünf Gestaltungspunkte liegen bei Vivien** (vorgelegt 16.08.2026, aus den
+    Gate-Runden vier und fünf). Nichts davon ist ein Defekt – es sind Abwägungen,
+    die beide Prüfer ausdrücklich ihr zuweisen und nicht der Entwicklung:
+    (a) ⚠️ **Die Abdunkelung greift MOBIL überhaupt nie** (Befund Kai). Gemessen
+    liegt die minimale Ball-Deckkraft auf 320–430 px über den **gesamten**
+    Scrollweg bei **1,00**. Damit ist das ganze Werk aus `taste`-Unterscheidung,
+    `TEXT_DIM_FLOOR` und `TEXT_FADE_MARGIN` auf dem **Hauptgerät wirkungslos** –
+    es wirkt erst ab 768. Frage: gewollter Endzustand (die Lückensuche bzw. die
+    mobile Bahn löst es geometrisch, die Abdunkelung ist nur noch Sicherheitsnetz)
+    oder unentschiedener Nebeneffekt? ⚠️ Wenn gewollt, muss es als **Regel**
+    festgeschrieben werden, sonst „repariert" oder entfernt jemand in vier Wochen
+    eine scheinbar tote Mechanik.
+    (b) **Der harte Sprung 1,00 → 0,20 über Schaltflächen** (~8 px Scrollweg, Faktor
+    1 statt Rampe). ⚠️ Kais Messung dreht die ursprüngliche Begründung um: Von den
+    drei Schaltflächen ist **nur „Als Spieler registrieren" deckend**; dahinter ist
+    der Ball ohnehin unsichtbar. „Team gründen"/„Teams entdecken" sind
+    `rgba(0,0,0,0)` – **dort** entsteht das Kontrastproblem. Die Regel wirkt
+    richtig, die Begründung im Code führte in die falsche Richtung (korrigiert).
+    (c) **Die Drehung steht in den letzten 150 ms des Einflugs still** (Tobias):
+    ab t = 283 ms von 520 ms kein Bildwechsel mehr, gezeigt werden **14 statt 22**
+    der 32 Bilder. Die Verzögerungskurve staucht die Rotation. Physikalisch
+    stimmig oder soll die Bildwahl an die **lineare** Zeit statt an die verzögerte
+    Position koppeln?
+    (d) **Der Ball verdeckt bei der Ankunft das Netz des Korb-Emblems** fast
+    vollständig (Tobias, Neubewertung von C1). Ein Akzent an dieser Stelle fände
+    größtenteils dahinter statt. „Die Geometrie ist die Frage, nicht die
+    Animation."
+    (e) **Die Verlaufs-Regel fehlt in `docs/VISUELLE-RICHTUNG-2026-08-12.md`.**
+    Dort steht pauschal „keine Verläufe, keine Schatten, kein Glow"; Viviens
+    Unterscheidung (keine Verläufe auf **Flächen der Oberfläche**, sehr wohl auf
+    einem **dargestellten Gegenstand**) steht bisher nur in CLAUDE.md.
 21. **`/images/` hat keine Cache-Vorgabe** (Befund Kai, 15.08.2026). `deploy/nginx-hoopsgermany.conf`
     setzt `expires 30d` nur für die Upload-Verzeichnisse; `/images/` läuft über `location /` in den
     Next-Prozess, und `next.config.mjs` setzt kein `headers()`. Die 104 KB der Ball-Sequenz sind
