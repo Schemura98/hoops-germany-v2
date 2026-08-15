@@ -11,8 +11,23 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> **Zuletzt deployt: `074bcf1` (15.08.2026, am Server verifiziert – `pm2 restart` gelaufen,
-> Live-Seiten je 200, Sicherheitsfix am echten Verein nachgemessen).** Sechste/siebte Runde:
+> **Zuletzt deployt: `164c784` (15.08.2026 abends, am Server verifiziert).** Newsfeed-Umbau
+> („Die Anzeigetafel nach dem Spiel") nach zwei Gate-Runden. Kern: **`beidseitigBelegt()` in
+> `lib/matchScore.js`** – die EINE Quelle für jede Aussage mit dem Wort „bestätigt".
+> ⚠️ **Warum das der wichtigste Fix des Tages ist:** Live nachgemessen tragen **137 von 137**
+> abgeschlossenen Spielen auf Prod `resultStatus: "confirmed"` **ohne** beidseitiges
+> `submittedBy` (Seed-Bestand). Der Zwischenstand hätte also **jedes einzelne Spiel** als
+> „beidseitig bestätigt" ausgewiesen – kein Randfall, der Gesamtbestand.
+> Weiter: Anzeigetafel mit drei Registern (inkl. **„Deine Zahlen"** – die erste eigene Zahl, die
+> der Newsfeed je zeigte) · zwei Zonen statt drei Spalten (Feed 700 px statt 544) · Feed mit
+> zwei Rängen · eine Schiene statt fünf Karten · Checkliste ab 50 % einzeilig (504 → 39 px) ·
+> erster Beitrag mobil bei **y = 888 statt 1491**.
+> ✅ Live geprüft: sieben Seiten je 200, `/match/[id]` zeigt korrekt **kein** Beleg-Abzeichen.
+> Alt-Beiträge im Feed tragen weiter „Endergebnis" – das ist für ein Admin-Ergebnis **wahr**,
+> es steht also nirgends live eine Falschaussage (`syncMatchResultPost` läuft nur bei einer
+> Änderung am Spiel; ob nachmigriert wird, ist eine Entscheidung, kein Fehler).
+> Davor: **`074bcf1`** (15.08.2026, am Server verifiziert – `pm2 restart` gelaufen,
+> Live-Seiten je 200, Sicherheitsfix am echten Verein nachgemessen). Sechste/siebte Runde:
 > **öffentlich abrufbare Einladungstoken geschlossen** (`app/api/team/fetchsingleteaminfo`) ·
 > Positions-Platzhalter vereinheitlicht · **Newsfeed-Filter ragte in den Feed**.
 > ⚠️ **Der Sicherheitsfix allein reichte nicht:** Er stoppt das Leck, entwertet aber nicht die
@@ -67,7 +82,9 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `074bcf1` (aktuell live) → `48e8a16` → `c65419d` → `da1abca` (der Stand vom
+> **Rollback-Kette:** `164c784` (aktuell live) → `66f9000` → `4f64af7` → `4f3811d` (Newsfeed-Umbau,
+> von beiden Gates blockiert – NICHT dorthin zurück) → `f23757b` → `074bcf1` (letzter Stand vor
+> dem Newsfeed-Umbau) → `48e8a16` → `c65419d` → `da1abca` (der Stand vom
 > 15.08. vor dieser Runde) → `cabb62d` (fünfte Runde) → `551ab46` (vierte Runde 14.08.) → `2503433` (dritte) → `9f9fb77` (zweite) →
 > `5b84f69` (erste) → `5197d2c` (der Stand, der bis zum 14.08. tatsächlich lief) → `3c38959` →
 > `5073951` → `560e1e6` → `27a04fe` → `e7a38ce` → `275f124` → `a8e4fd4` (vor der Nachtschicht) →
@@ -551,7 +568,29 @@
     (5-Fortsetzung) Immer Klammerzählung, und die Hilfsfunktion soll
     **werfen** statt still etwas Falsches zu liefern (Muster: `blockAb` in
     `tests/e2e/benachrichtigungs-typen.spec.mjs`).
-16. **Den Team-Admin bei der Erfassung stützen – Live-Eingabe statt Nachbereitung**
+16. **Folgen des Sicherheits-Eingriffs vom 15.08.2026 – Entscheidungen, keine Aufräumarbeit.**
+    (a) ⚠️ **48 der 66 Prod-Teams haben einen unerreichbaren Admin** (Befund Kai). Meine Meldung
+    „Rollen unverändert" war technisch richtig und im Ergebnis das Gegenteil: Diese Vereine sind
+    dauerhaft unverwaltbar, ohne Weg zurück außer einem Super-Admin-`setteamadmin`. Trifft ein
+    echter Tester auf eines davon, hat es keinen ansprechbaren Verantwortlichen. Entscheiden,
+    ob das bis zum Demo-Purge so bleibt.
+    (b) ✅ **Erledigt:** `emailPendingResult: false` auf allen 393 `.invalid`-Konten – sonst
+    hätte `notify-pending-results` beim nächsten Cron-Lauf bis zu 34 harte Bounces an eine
+    reservierte TLD geschickt, abgesendet von demselben SMTP-Konto, über das Passwort-Resets
+    echter Nutzer laufen. Gemessen: 0 Seed-Admins bekämen noch eine Mahnung, die 4 echten
+    Team-Admins unberührt.
+    (c) **`POST /api/team/teamlogin` entfernen** (Kai): ein zweiter, vollständiger Auth-Pfad, der
+    `Team.email` + `Team.password` prüft und ein Token mit vollen Team-Admin-Rechten gibt – ohne
+    die `players`-Sammlung zu berühren. Heute harmlos (gemessen: 66 Teams, **0** mit E-Mail,
+    **0** mit Passwort), aber sein einziger Schutz ist, dass zufällig kein Datensatz ihn füllt.
+    Die Seiten sind ohnehin nur Redirects.
+    (d) **Google-Callback wertet `email_verified` nicht aus** (Kai, älter als dieser Vorfall):
+    Er nimmt `email` aus dem ID-Token und adoptiert damit ein bestehendes Konto samt aller
+    Rechte. Für die Seed-Konten jetzt gegenstandslos, für echte Nutzer der Mechanismus, der den
+    Vorfall überhaupt möglich gemacht hat.
+    (e) **`demo.coach`-Zugang wiederherstellen**, falls gewünscht – Passwort auf
+    `demo.coach@nrw-demo.de.invalid` setzen (s. Abschnitt Test-Accounts).
+17. **Den Team-Admin bei der Erfassung stützen – Live-Eingabe statt Nachbereitung**
     (Idee Patrick, 15.08.2026). Die Box-Scores kommen von **Ehrenamtlichen**, die sich
     freiwillig dazu bereit erklären; sie sind die Quelle, aus der die gesamte Belegbarkeit der
     Plattform stammt. Heute ist die Erfassung eine **Pflicht nach dem Spiel**: Der Admin führt
@@ -571,8 +610,8 @@
     wann ein live erfasster Stand als **eingereicht** gilt (die Doppel-Bestätigung darf nicht
     versehentlich schon durch das Mitschreiben ausgelöst werden) · Vorprüfung an Mats/Ronja,
     ob die Ehrenamtlichen das überhaupt wollen.
-17. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
-18. **Optional / bewusst offen:** Best-of-Serien + echte Playoff-Bracket-Grafik; Status-basierte
+18. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
+19. **Optional / bewusst offen:** Best-of-Serien + echte Playoff-Bracket-Grafik; Status-basierte
     Tabellen-Exklusion; Stat-Filter Hauptrunde/Playoffs/Gesamt; stabiler `leagueKey`; Benachrichtigung bei
     Team-Follow; sharp-Resize für gespeicherte Upload-JPEGs; Super-Admin-Tabellen auf `<Loading>`/`EmptyState`;
     Folge-Vorschläge nur für neue User; TransferEvents bleiben nach Team-Löschung als Historie (Design);
