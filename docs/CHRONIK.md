@@ -3511,3 +3511,100 @@ Ein Install-Vermerk beschreibt auch Zustand **außerhalb** seines eigenen Ordner
 gilt nach einem Rechnerwechsel erst wieder, wenn es nachgemessen ist — und eine Inventur nach
 Textmuster findet nur, was man ohnehin vermutet. Beide Male derselbe Fehlertyp: eine Aussage über
 die Welt, die niemand mehr gegen die Welt gehalten hat.
+
+---
+
+## 15.08.2026 (Abend/Nacht) — Die Ball-Reise: gebaut, zweimal geprüft, zweimal widerlegt
+
+Auftrag Patrick: die Startseite einzigartig und emotional machen, „vielleicht kommen wir ja an
+den Innovationsgrad von Apple ran". Fünf Commits, `8d7f569` → `cd51c92`, **keiner davon deployt**.
+
+### Der Ausgangsbefund: Es war schon alles da
+
+Patricks Ideen — ein Ball, der im Korb landet; ein Ball, der über die Feature-Strecke gedribbelt
+wird; ein Ball, der sich dreht — **waren bereits gebaut**. Gemessen statt aus der Doku zitiert:
+`SwishSequence`, `FeatureProgressRail`, `rotate()` im Hero. Das Problem war nicht Erfindung,
+sondern **Präsenz**, und es ließ sich beziffern:
+
+- Der Hero-Ball war nach 10 % Scroll fertig; sein `transform` stand bei 22/34/46 % **identisch**.
+- Der Streckenball war **14 px** groß und legte über 2.500 px Scrollweg rund 100 px zurück.
+- Zwischen beiden klaffte eine Lücke, in der niemand das Motiv trug.
+
+### Was gebaut wurde
+
+1. **Der Streckenball rollt** statt zu gleiten: Drehung = Weg / Radius, also physikalisch statt
+   dekoriert (573° über die Strecke). Größe und Drehung mussten zusammen kommen — einzeln bringt
+   keines etwas.
+2. **Die Dribbel-Spur**: Der Ball hinterlässt seinen Weg. Technik von `PlayDiagram` übernommen
+   (`pathLength="1"` + `strokeDashoffset`, kein `getTotalLength()`).
+3. **Die Übergabe**: Der Hero-Ball rollt aus dem Bild, statt eingefroren wegzuscrollen.
+4. **Der gerenderte Hero-Ball** (`scripts/generate-ball-rotation.mjs`): echte 3D-Geometrie, Nähte
+   als Kreise im Raum, orthografisch projiziert, nur die vordere Halbkugel. 32 Bilder, 104 KB
+   AVIF. ⚠️ **Ohne Blender und ohne Foto** — für einen Ball greift die Materialgrenze nicht, die
+   Vivien für Hallen und Spieler zu Recht benannt hat.
+
+### Die Entscheidung, die das möglich machte
+
+Patrick gab Verläufe, Schatten und Glow frei („wenn es gut eingesetzt wird"). Das war der fehlende
+Baustein: **Ohne Schattierung ist eine Kugel eine Scheibe.** Drei Mittel, je eine Aufgabe —
+Körperverlauf, Kantenabdunklung, Bouncelight. Bewusst **kein** Glanzpunkt.
+
+### Was die Gates fanden — und was das über meine Messungen sagt
+
+**Runde 1** (Kai + Tobias): ein blockierender Befund, acht weitere. **Runde 2**: fünf neue.
+
+⚠️ **Dreimal habe ich etwas als erledigt gemeldet, das es nicht war:**
+
+1. „Der Commit entstand während meines Blicks" — er war drei Stunden alt. Reflog gelesen, erster
+   `git log` war veraltet.
+2. **„Die Lücke ist geschlossen"** — auf keiner Fenstergröße. Ich hatte nur auf 1440 gemessen und
+   nur gefragt, ob der Hero-Ball noch in Bewegung ist. Ob daneben schon ein zweiter steht, habe
+   ich nie abgefragt. **Nicht falsch gemessen — die falsche Frage gestellt.**
+3. **„Zwei Bälle 158 → 0"** — Tobias reproduziert es mit meinem eigenen Kriterium nicht: 23–31
+   Messpunkte auf vier Breiten. Die Abweichung konnte ich nicht erklären; seine Messung ist die
+   feinere und die unabhängige.
+
+### Drei eigene Fehlerklassen, alle mehrfach aufgetreten
+
+**(A) `{...props}` hinter den Grundwerten.** Dreimal dieselbe Wurzel: `className` im `BallSprite`
+(Ball unsichtbar, ein 176-px-leeres div, keine Warnung), `style` im `RailBallGlyph` (Taumelkreis
+42 % des Balldurchmessers), `style` im `HoopEmblem` (latent). Ich habe die erste Stelle behoben und
+die Nachbarkomponente **nicht einmal gesucht**. Erst Kai fand sie. **Lehre: Wer eine
+Schnittstellen-Falle findet, muss alle Geschwister derselben Datei prüfen.**
+
+**(B) Gegenproben, die nicht liefen.** Dreimal scheiterte ein Mutations-Muster an der
+Formatierung, und „0 Treffer" sah aus wie „bestanden". **Lehre: Jede Gegenprobe braucht ein
+`assert`, das wirft, wenn das Muster nicht getroffen wurde.** Ein nicht ausgeführter Gegentest ist
+kein bestandener.
+
+**(C) Prüfskripte mit falschem Bezugspunkt.** Rollwinkel gegen y=0 statt gegen den ersten Punkt;
+Drehpunkt gegen die gedrehte Hülle statt gegen die Elementgröße. **Beide Male meldete das Skript
+Rot, obwohl der Code stimmte.** Kennzeichen: Die Abweichung ist **konstant** — ein echter Fehler
+streut.
+
+### Der strukturelle Befund, der alles erklärt
+
+Kai und Tobias sagten unabhängig denselben Satz: **Kein einziger Test lud „/".** Die Startseite war
+bewusst ausgespart, damit die Scroll-Bühne nicht mitspielt. Deshalb war „78/78 grün" **wahr und
+über diesen Änderungssatz vollständig aussagelos** — ich habe es dreimal als Nachweis präsentiert.
+
+Behoben mit `tests/e2e/hero-ball-laufzeit.spec.mjs`: 12 Fälle über **sechs Fensterbreiten**, beide
+Zusicherungen wörtlich von Tobias. Gegenproben mit erwarteter Signatur: Zielpunkt-Begrenzung
+entfernt → **3 rot (320/375/430)**, exakt die Breiten des Befundes; Abdunkelung abgeschaltet →
+6 rot. Suite **78 → 90**.
+
+### Zwei Fälle fürs Muster-Dokument, beide in meinen eigenen Kommentaren
+
+- Die Spur-Begründung nennt ausführlich die Taktiktafel-Notation („Zickzack = Dribbling") —
+  gerendert wird eine **weiche Sinuswelle**.
+- „Der Ball bleibt sichtbar am Ruhepunkt stehen" — er steht dort seit dem Kontrast-Fix bei **0,20**.
+
+### Nebenher
+
+`/versuch-fotos` stand zwei Tage live auf hoopsgermany.de (noindex, aber abrufbar) und ist
+rückstandslos entfernt. Viviens vier dokumentierte Ausbaustellen stimmten vollständig.
+
+### Offen
+
+Vier **Gestaltungsentscheidungen** für Vivien (Roadmap 20) und die fehlende Cache-Vorgabe für
+`/images/` (Roadmap 21). Eine dritte Gate-Runde steht aus.

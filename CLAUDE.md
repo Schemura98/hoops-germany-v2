@@ -11,6 +11,11 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
+> ⚠️ **Auf `redesign` liegen fünf Commits, die NICHT deployt sind** (`8d7f569` → `cd51c92`,
+> 15.08.2026): die Ball-Choreografie der Startseite, der gerenderte Hero-Ball und zwei
+> Gate-Runden Nacharbeit. **Zwei Gate-Runden sind durch, eine dritte steht aus**, und vier
+> Punkte liegen als Gestaltungsentscheidung bei Vivien (s. Roadmap 20). Nicht deployen, bevor
+> das entschieden ist – live läuft unverändert `164c784`.
 > **Zuletzt deployt: `164c784` (15.08.2026 abends, am Server verifiziert).** Newsfeed-Umbau
 > („Die Anzeigetafel nach dem Spiel") nach zwei Gate-Runden. Kern: **`beidseitigBelegt()` in
 > `lib/matchScore.js`** – die EINE Quelle für jede Aussage mit dem Wort „bestätigt".
@@ -674,6 +679,32 @@
     Team-Follow; sharp-Resize für gespeicherte Upload-JPEGs; Super-Admin-Tabellen auf `<Loading>`/`EmptyState`;
     Folge-Vorschläge nur für neue User; TransferEvents bleiben nach Team-Löschung als Historie (Design);
     `seed-world.mjs --prod` nur nach ausdrücklicher Freigabe des Users.
+20. **Ball-Choreografie der Startseite – vier GESTALTUNGSENTSCHEIDUNGEN für Vivien**
+    (Stand `cd51c92`, 15.08.2026; beide Gate-Prüfer weisen alle vier ihr zu, nicht der
+    Entwicklung). Nichts davon ist ein Defekt – es sind Abwägungen, die am Produkt gemessen sind:
+    (a) ⚠️ **Der Preis des Kontrast-Fixes.** Der Abdunkelungs-Bezug umfasst jetzt auch die
+    Schaltflächenreihe (nötig: Kontrast der Beschriftung war 1,67:1 statt 4,5:1). Folge,
+    gemessen: Der Hero-Ball ist über seinen gesamten Auftritt nur **9–10 % der Zeit** heller als
+    0,6, mittlere Deckkraft **0,66 → 0,36–0,42**, und der **Aufsetzer findet bei 0,20 statt**.
+    Tobias' Wort dafür: *Barrierefreiheit gewonnen, Wirkung verloren.*
+    (b) **Die Übergabe findet mobil räumlich nicht statt.** Der Hero-Ball verlässt das Bild oben
+    rechts, der Streckenball blendet unten LINKS am Balken ein – zwei Auftritte an
+    entgegengesetzten Ecken. Bei 1280/1440 trägt es, weil beide am rechten Rand liegen.
+    (c) **Ruhepunkt unter 640 px 34 px innerhalb der CTA-Ecke.** Nötig, damit der Ball nicht
+    beschnitten wird (vorher 3 % sichtbar) – aber aus dem „Abzeichen an der oberen Ecke" wird
+    eine Scheibe auf der Tastenkante. Der Kommentar in `HeroScrollStage.js` beschreibt noch das
+    Alte.
+    (d) **Die Landung ist auf KEINEM Viewport sichtbar** – Ball und Korb-Emblem stehen bei der
+    Ankunft hinter der stickyen Navbar; mobil sitzt das Emblem links, der Ball landet rechts.
+    ⚠️ **Altbestand, nicht aus dieser Runde** (per `git diff` belegt) – aber es heißt: Die Pointe
+    der „einen Reise durch die Seite" hat noch nie jemand gesehen.
+    Dazu offen: Zickzack statt Sinuswelle für die Dribbel-Spur (die Notationsbegründung im Code
+    trägt erst dann wieder), und der `drop-shadow` auf dem Hero-Ball – Patricks Freigabe deckt
+    ihn, die Abweichung von `docs/VISUELLE-RICHTUNG` sollte aber bei Vivien liegen.
+21. **`/images/` hat keine Cache-Vorgabe** (Befund Kai, 15.08.2026). `deploy/nginx-hoopsgermany.conf`
+    setzt `expires 30d` nur für die Upload-Verzeichnisse; `/images/` läuft über `location /` in den
+    Next-Prozess, und `next.config.mjs` setzt kein `headers()`. Die 104 KB der Ball-Sequenz sind
+    damit **keine Einmalkosten** – auf der Einstiegsseite jedes Erstbesuchers. Entscheidung Patrick.
 
 ### Bekannte Einschränkungen (lokale Dev-Umgebung)
 - SMTP-/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS (hoops_prod) live
