@@ -293,8 +293,20 @@ export default function FeatureProgressRail({ labels = [] }) {
       // Dieselbe Fehlerklasse steht schon im Kommentar oben (Befund Tobias
       // 12.08.2026): Damals war es die eingefrorene Position, jetzt die
       // eingefrorene Übergangsregel.
-      if (ballMobileRef.current) ballMobileRef.current.style.transition = "";
-      if (ballDesktopRef.current) ballDesktopRef.current.style.transition = "";
+      // ⚠️ NUR AUSSERHALB DER ANKUNFTSZONE (Befund Kai K2, zweite Runde).
+      // Die erste Fassung löschte jeden Frame – auch den, in dem
+      // `ballZielSetzen` die Lande-Kurve gerade gesetzt hatte. Da die Ankunft
+      // DURCH Scrollen ausgelöst wird, folgt innerhalb der 320/420ms praktisch
+      // garantiert ein weiteres Scroll-Ereignis: Es riss die Animation mitten
+      // im Flug ab, das Element schnappte auf den Zielwert. Der „Aufsetzer,
+      // kein Teleport" fand damit faktisch nie statt – mein Fix für B2 hätte
+      // die Landung gekostet, die er schützen sollte.
+      // Unterhalb von ARRIVE_T gibt es nichts zu animieren; dort MUSS sie weg,
+      // sonst läuft wieder jeder Frame durch eine überschwingende Kurve.
+      if (t < ARRIVE_T) {
+        if (ballMobileRef.current) ballMobileRef.current.style.transition = "";
+        if (ballDesktopRef.current) ballDesktopRef.current.style.transition = "";
+      }
 
       // Mobil: Spitze des sich fuellenden Balkens – dieselbe Zahl t, die auch
       // den Balken fuellt, damit beide immer exakt uebereinstimmen.
@@ -489,10 +501,7 @@ export default function FeatureProgressRail({ labels = [] }) {
           >
             {/* Native Groesse des Emblems (20x14) statt Skalierung – keine
                 Verzerrung, kein zusaetzlicher Rechenwert. */}
-            <HoopEmblem
-              className="pointer-events-none block h-3.5 w-5"
-              style={{}}
-            />
+            <HoopEmblem className="pointer-events-none block h-3.5 w-5" />
           </span>
         </div>
         <div ref={trackRef} className="relative h-1 w-full">
@@ -587,7 +596,6 @@ export default function FeatureProgressRail({ labels = [] }) {
             <HoopEmblem
               ringRef={goalRingRef}
               className="pointer-events-none block h-full w-full"
-              style={{}}
             />
           </span>
           {/* Desktop: senkrechte Leiste. KEIN `style` mehr – der Drehpunkt

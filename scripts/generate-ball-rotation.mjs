@@ -278,8 +278,13 @@ console.log(`AVIF:     ${kb(`${basis}.avif`)} KB`);
 console.log(`Einzelbilder zur Sichtpruefung: ${OUT}/ball-frame-*.svg`);
 console.log(
   `\nAusgeliefert wird derzeit: public/images/ball-basketball-32x200.{webp,avif}\n` +
-    `Reproduzierbar mit:  node scripts/generate-ball-rotation.mjs --frames 32 --groesse 200 --muster basketball --out public/images\n` +
+    `Dieser Lauf entspricht:     --frames ${FRAMES} --groesse ${GROESSE} --muster ${MUSTER}\n` +
+    `⚠️ NICHT direkt nach public/images/ schreiben: Dieses Skript legt dort auch\n` +
+    `   ${path.basename(basis)}.png (6400x200 RGBA) und drei ball-frame-*.svg ab.\n` +
+    `   public/images/ ist versioniert und wird oeffentlich ausgeliefert; committet\n` +
+    `   sind dort nur .webp und .avif. Also nach tmp/ erzeugen und die zwei\n` +
+    `   Dateien von Hand kopieren.\n` +
     `⚠️ Bei geaenderter Bildzahl MUESSEN mitgezogen werden: BALL_SPRITE_FRAMES in\n` +
     `   components/landing/HeroGlyphs.js UND beide Dateinamen in app/globals.css.\n` +
-    `   tests/e2e/ball-sequenz.spec.mjs prueft genau diese Kopplung.`
+    `   tests/e2e/ball-sequenz.spec.mjs prueft genau diese Kopplung.\n`
 );

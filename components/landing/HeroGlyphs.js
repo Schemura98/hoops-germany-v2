@@ -57,8 +57,15 @@ export const BALL_SPRITE_FRAMES = 32;
 // Die GRÖSSE kommt bewusst nur aus `className` (Tailwind, brechpunktfähig) –
 // eine zusätzliche Prop wäre eine zweite Quelle für dieselbe Zahl, und der
 // Controller misst ohnehin am Element.
+// ⚠️ `style` wird ebenfalls zusammengefügt, und `backgroundSize` steht HINTER
+// dem Spread (Befund Kai K3, zweite Runde). Vorher war nur `className`
+// geschützt – `style` blieb voll überschreibbar, und ausgerechnet darin steckt
+// `backgroundSize`, also genau die Kopplung an `BALL_SPRITE_FRAMES`, die der
+// Test schützen soll. Ein Aufrufer mit eigener `style`-Prop hätte den Ball
+// still zerlegt, und der Test hätte es nicht gemerkt: Er prüft die Definition,
+// nie die Aufrufstellen.
 export const BallSprite = forwardRef(function BallSprite(
-  { className = "", ...props },
+  { className = "", style, ...props },
   ref,
 ) {
   return (
@@ -67,9 +74,10 @@ export const BallSprite = forwardRef(function BallSprite(
       aria-hidden="true"
       className={`hero-ball-sprite pointer-events-none absolute left-0 top-0 opacity-0 will-change-transform ${className}`}
       style={{
-        backgroundSize: `${BALL_SPRITE_FRAMES * 100}% 100%`,
         backgroundRepeat: "no-repeat",
         filter: "drop-shadow(0 6px 16px rgba(0,0,0,.45))",
+        ...style,
+        backgroundSize: `${BALL_SPRITE_FRAMES * 100}% 100%`,
       }}
       {...props}
     />
@@ -81,8 +89,14 @@ export const BallSprite = forwardRef(function BallSprite(
 // (FeatureProgressRail.js). `ringRef` ist optional und zeigt zusätzlich auf den
 // Ring allein – dorthin setzt die Ankunfts-Animation kurz den Signalton
 // `signal-ok`, ohne die Netz-Linien mitzufärben.
+// ⚠️ Dieselbe Absicherung wie bei den beiden Bällen (Befund Kai K3).
+// Hier war das Muster nicht nur latent, sondern AKTIV: Beide Aufrufstellen
+// übergeben `className` UND `style={{}}` – das leere Objekt ersetzte
+// `transformOrigin: "10px 3px"` ersatzlos. Folgenlos nur deshalb, weil derzeit
+// nichts das Emblem dreht. Genau der Zustand, in dem der Drehpunkt des
+// Streckenballs zwei Tage lang lag, bevor er beim ersten `rotate()` auffiel.
 export const HoopEmblem = forwardRef(function HoopEmblem(
-  { ringRef, ...props },
+  { ringRef, className = "", style, ...props },
   ref,
 ) {
   return (
@@ -93,8 +107,8 @@ export const HoopEmblem = forwardRef(function HoopEmblem(
       height="14"
       viewBox="0 0 20 14"
       fill="none"
-      className="pointer-events-none absolute left-0 top-0 opacity-0 will-change-transform"
-      style={{ transformOrigin: "10px 3px" }}
+      className={`pointer-events-none opacity-0 will-change-transform ${className}`}
+      style={{ ...style, transformOrigin: "10px 3px" }}
       {...props}
     >
       <ellipse

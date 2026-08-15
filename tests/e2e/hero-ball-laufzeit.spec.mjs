@@ -1,0 +1,145 @@
+import { test, expect } from "@playwright/test";
+
+// ══ WARUM ES DIESE DATEI GIBT ═══════════════════════════════════════════════
+//
+// Zwei Gate-Runden hintereinander kamen dieselben zwei Regressionen zurück,
+// obwohl die Suite beide Male vollständig grün war. Der Grund ist strukturell
+// und wurde von Kai und Tobias unabhängig genannt:
+//
+//   **Kein einziger Test lud „/".**
+//
+// Die Startseite war bewusst ausgespart, damit die Scroll-Bühne nicht
+// mitspielt (siehe navbar-suche.spec.mjs). Die Folge: Über die gesamte
+// Ball-Choreografie sagte eine grüne Suite nichts aus. `ball-sequenz.spec.mjs`
+// schließt einen Teil davon, prüft aber nur Quelltext und Dateisystem – keine
+// einzige Laufzeitaussage.
+//
+// Die zwei Zusicherungen hier stammen wörtlich von Tobias (Browser-Gate,
+// 15.08.2026) und sind genau die, die seine beiden hohen Befunde beim
+// Vergrößern des Balls sofort rot gezeigt hätten:
+//
+//   A) Der Ball muss am Ruhepunkt VOLLSTÄNDIG SICHTBAR sein. Befund A war ein
+//      CLIPPING-Problem: Die Bühne ist `overflow-hidden`, und der Ball ragte
+//      mit Radius 52 über die rechte Kante hinaus – am Ruhepunkt waren noch
+//      3 % zu sehen. Eine Geometrieprüfung ohne den Beschnitt findet das NICHT.
+//
+//   B) Über jeder Schaltfläche in der Bühne muss die Balldeckkraft ≤
+//      TEXT_DIM_FLOOR bleiben. Befund B war eine Kontrastregression: Der Ball
+//      lief bei VOLLER Deckkraft über „Teams entdecken", Kontrast 1,67:1 statt
+//      4,5:1. Diese Zusicherung schützt zusätzlich die eingeloggte Variante,
+//      die den Bezugsrahmen erneut ändert.
+//
+// ⚠️ MEHRERE FENSTERBREITEN SIND PFLICHT, NICHT KÜR. Befund A trat NUR unter
+// 640px auf, Befund B NUR ab 768px. Ein Test auf einer Breite hätte je einen
+// von beiden übersehen – und das Vorzeichen des Übergabe-Fehlers hängt sogar
+// an der Fensterhöhe. Das ist die Roadmap-15-(7)-Falle in Reinform: eine
+// Gegenprobe, die nur eine Lage trifft, ist grün ohne Fix.
+
+const BREITEN = [320, 375, 430, 768, 1024, 1440];
+
+// Muss mit TEXT_DIM_FLOOR in components/landing/HeroScrollStage.js
+// übereinstimmen. Kleine Toleranz, weil die Deckkraft als String mit drei
+// Nachkommastellen geschrieben wird.
+const DIM_FLOOR = 0.2;
+const TOLERANZ = 0.02;
+
+// ⚠️ MUSS ASYNCHRON SEIN, mit einer echten Bildpause je Schritt.
+// Der erste Entwurf scrollte und las im selben synchronen Block – dazwischen
+// läuft kein `requestAnimationFrame`, der Controller kommt also nie zum Zug.
+// Ergebnis: alle Deckkraft-Werte 0, alle zwölf Fälle rot, ohne dass am Produkt
+// irgendetwas kaputt war. Dieselbe Klasse wie die rAF-Falle in CLAUDE.md
+// (ausgeblendete Vorschaufläche = eingefrorene Messung): Wer Scroll-Effekte
+// misst, muss dem Browser Zeit zum Zeichnen geben.
+/** Tastet die Hero-Strecke ab und liefert je Schritt Ball- und Schaltflächenlage.
+ *  ⚠️ Als ECHTE FUNKTION, nicht als String: `page.evaluate("...", arg)` wertet
+ *  einen String nur als Ausdruck aus und IGNORIERT das Argument – zurück kam
+ *  die Funktion selbst, also `undefined`. Erneut alle zwölf Fälle rot, ohne
+ *  dass am Produkt etwas fehlte. */
+const abtasten = async (schritt) => {
+  const bild = () =>
+    new Promise((f) => requestAnimationFrame(() => requestAnimationFrame(f)));
+  const ergebnis = [];
+  const ball = document.querySelector(".hero-ball-sprite");
+  const buehne = ball && ball.parentElement;
+  if (!ball || !buehne) return null;
+  for (let y = 0; y <= 900; y += schritt) {
+    window.scrollTo(0, y);
+    await bild();
+    const b = ball.getBoundingClientRect();
+    const s = buehne.getBoundingClientRect();
+    const deck = Number(ball.style.opacity || 0);
+    // Sichtbarer Anteil NACH dem Beschnitt durch die overflow-hidden-Bühne.
+    const breiteDrin = Math.max(0, Math.min(b.right, s.right) - Math.max(b.left, s.left));
+    const hoeheDrin = Math.max(0, Math.min(b.bottom, s.bottom) - Math.max(b.top, s.top));
+    const anteil = b.width && b.height ? (breiteDrin * hoeheDrin) / (b.width * b.height) : 0;
+    // Schaltflächen INNERHALB der Bühne – nur die kann der Ball verdecken.
+    const tasten = [...buehne.querySelectorAll("a")]
+      .map((a) => ({
+        text: (a.textContent || "").trim().slice(0, 30),
+        r: a.getBoundingClientRect(),
+      }))
+      .filter((t) => t.r.width > 0 && t.r.top >= s.top - 1 && t.r.bottom <= s.bottom + 1)
+      .map((t) => ({
+        text: t.text,
+        ueberlappt:
+          Math.max(0, Math.min(b.right, t.r.right) - Math.max(b.left, t.r.left)) > 0 &&
+          Math.max(0, Math.min(b.bottom, t.r.bottom) - Math.max(b.top, t.r.top)) > 0,
+      }));
+    ergebnis.push({ y, deck, anteil, oben: Math.round(b.top), tasten });
+  }
+  return ergebnis;
+};
+
+test.describe("Hero-Ball – Laufzeit auf /", () => {
+  for (const breite of BREITEN) {
+    test(`${breite}px: der Ball ist am Ruhepunkt vollständig sichtbar`, async ({ page }) => {
+      await page.setViewportSize({ width: breite, height: 812 });
+      await page.goto("/", { waitUntil: "networkidle" });
+
+      const proben = await page.evaluate(abtasten, 12);
+      expect(proben, ".hero-ball-sprite nicht gefunden – rendert der Hero-Ball?").not.toBeNull();
+
+      const sichtbar = proben.filter((p) => p.deck > 0.02);
+      expect(sichtbar.length, "der Ball war auf der ganzen Strecke unsichtbar").toBeGreaterThan(5);
+
+      // Der Ruhepunkt ist die tiefste Lage, die der Ball erreicht: Danach ändert
+      // das Ausrollen nur noch x, nicht mehr y.
+      const tiefste = Math.max(...sichtbar.map((p) => p.oben));
+      const amRuhepunkt = sichtbar.filter((p) => p.oben === tiefste);
+
+      for (const p of amRuhepunkt) {
+        expect(
+          p.anteil,
+          `scrollY ${p.y}: nur ${(p.anteil * 100).toFixed(0)} % des Balls liegen in der Bühne. ` +
+            `Die Bühne ist overflow-hidden – der Rest ist abgeschnitten und wird nie gesehen.`
+        ).toBeGreaterThan(0.99);
+      }
+    });
+
+    test(`${breite}px: über keiner Schaltfläche läuft der Ball heller als der Bodenwert`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: breite, height: 812 });
+      await page.goto("/", { waitUntil: "networkidle" });
+
+      const proben = await page.evaluate(abtasten, 12);
+      expect(proben).not.toBeNull();
+
+      const verstoesse = proben
+        .filter((p) => p.deck > DIM_FLOOR + TOLERANZ && p.tasten.some((t) => t.ueberlappt))
+        .map((p) => ({
+          y: p.y,
+          deck: p.deck,
+          tasten: p.tasten.filter((t) => t.ueberlappt).map((t) => t.text),
+        }));
+
+      expect(
+        verstoesse,
+        `Der Ball verdeckt Schaltflächen mit mehr als ${DIM_FLOOR} Deckkraft. ` +
+          `Genau so entstand die Kontrastregression (1,67:1 statt 4,5:1): ` +
+          `Der Abdunkelungs-Bezug (inhaltRef) muss ALLE Flächen umfassen, über die der Ball zieht.\n` +
+          JSON.stringify(verstoesse.slice(0, 5), null, 2)
+      ).toEqual([]);
+    });
+  }
+});

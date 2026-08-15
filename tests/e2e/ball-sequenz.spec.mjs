@@ -126,13 +126,13 @@ test.describe("Hero-Ball-Sequenz – die drei Kopplungsstellen", () => {
     expect(
       stage,
       "Die Bildwahl muss in Prozent rechnen – Pixel wären an die Anzeigegröße gebunden"
-    ).toMatch(/backgroundPositionX = `\$\{\(bild \/ \(BALL_SPRITE_FRAMES - 1\)\) \* 100\}%`/);
+    ).toMatch(/backgroundPositionX\s*=\s*`\$\{\(bild\s*\/\s*\(BALL_SPRITE_FRAMES - 1\)\)\s*\*\s*100\}%`/);
 
     const glyphs = lies("components/landing/HeroGlyphs.js");
     expect(
       glyphs,
       "backgroundSize muss aus BALL_SPRITE_FRAMES abgeleitet sein, nicht fest verdrahtet"
-    ).toMatch(/backgroundSize: `\$\{BALL_SPRITE_FRAMES \* 100\}% 100%`/);
+    ).toMatch(/backgroundSize:\s*`\$\{BALL_SPRITE_FRAMES\s*\*\s*100\}% 100%`/);
   });
 
   test("der Drehpunkt des Streckenballs ist nicht von außen überschreibbar", () => {
