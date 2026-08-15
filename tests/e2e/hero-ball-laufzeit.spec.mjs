@@ -224,6 +224,62 @@ test.describe("Hero-Ball – Laufzeit auf /", () => {
       }
     });
 
+    test(`${breite}x${hoehe}: die Ruhelage ändert sich beim ersten Scrollen nicht`, async ({
+      page,
+    }) => {
+      // ⚠️ DER TEST, DER B1 GEFUNDEN HÄTTE (Vorschlag Tobias, fünfte Runde).
+      // Die Kästen wurden gegen ein Layout gemessen, in dem `Reveal` die
+      // Headline noch 20px nach unten versetzt hatte. Die mobile Ruhelage saß
+      // dadurch 20px zu tief – der Ball ÜBERLAPPTE die erste Zeile um 10px –
+      // und sprang beim ersten Scrollereignis nach oben, sobald der Neubau die
+      // echten Kästen sah.
+      // ⚠️ EIN TEST, DER VORHER SCROLLT, IST GRÜN UND ÜBERSIEHT GENAU DAS:
+      // Das Scrollen erzwingt die Neuberechnung, die der Fehler vermissen ließ.
+      // Deshalb wird hier zuerst der geladene Zustand gemessen – und erst
+      // danach gescrollt.
+      await page.setViewportSize({ width: breite, height: hoehe });
+      await page.goto("/", { waitUntil: "networkidle" });
+
+      // Auf das Ereignis warten, nicht auf eine Zeitspanne: `Reveal` staffelt
+      // seine Verzögerungen, und die ändern sich mit dem Inhalt.
+      await page
+        .waitForFunction(
+          () => {
+            const h1 = document.querySelector("h1");
+            if (!h1) return false;
+            const t = getComputedStyle(h1).transform;
+            return t === "none" || t === "matrix(1, 0, 0, 1, 0, 0)";
+          },
+          { timeout: 5000 },
+        )
+        .catch(() => {});
+      await page.waitForTimeout(900); // Einflug abwarten
+
+      const lage = () =>
+        page.evaluate(() => {
+          const ball = document.querySelector(".hero-ball-sprite");
+          if (!ball) return null;
+          const r = ball.getBoundingClientRect();
+          return { oben: r.top, unten: r.bottom };
+        });
+
+      const geladen = await lage();
+      expect(geladen, ".hero-ball-sprite nicht gefunden").not.toBeNull();
+      await page.mouse.wheel(0, 1);
+      await page.waitForTimeout(350);
+      const nachScroll = await lage();
+
+      // 1px Rad = höchstens 1px Versatz. Alles darüber ist eine Korrektur, die
+      // vor dem Scrollen hätte stattfinden müssen.
+      const sprung = Math.abs(nachScroll.oben - geladen.oben);
+      expect(
+        sprung,
+        `Die Ruhelage springt beim ersten Scrollen um ${Math.round(sprung)}px. ` +
+          `Sie wurde gegen ein Layout gerechnet, das noch nicht fertig war – ` +
+          `wahrscheinlich vor dem Ende der Reveal-Übergänge.`,
+      ).toBeLessThanOrEqual(3);
+    });
+
     test(`${breite}x${hoehe}: in der Ruhelage ist der Ball voll deckend`, async ({
       page,
     }) => {

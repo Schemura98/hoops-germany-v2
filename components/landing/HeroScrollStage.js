@@ -332,6 +332,29 @@ export default function HeroScrollStage({
     };
     kaestenBauen();
 
+    // ⚠️ NOCH EINMAL, WENN `Reveal` FERTIG IST (Befund Tobias B1, fünfte Runde).
+    // Die Kästen wurden gegen ein Layout gemessen, in dem `Reveal` die Headline
+    // noch um 20px nach unten versetzt hatte (`translate-y-5`, am `h1` als
+    // `matrix(1,0,0,1,0,20)` messbar). Die mobile Ruhelage saß dadurch 20px zu
+    // tief – gemessen ÜBERLAPPTE der Ball die erste Headline-Zeile um 10px –
+    // und sprang beim ersten Scrollereignis in einem einzigen Bild nach oben,
+    // sobald der Neubau die echten Kästen sah. Reproduziert in 28 von 28
+    // Läufen, auch unter 4facher und 6facher CPU-Drosselung.
+    // ⚠️ AUF DAS EREIGNIS WARTEN, NICHT AUF EINE ZEITSPANNE: Die Verzögerungen
+    // der einzelnen `Reveal`-Elemente sind gestaffelt und ändern sich mit dem
+    // Inhalt. Eine Wartezeit wäre genau die Sorte Zahl, die später still nicht
+    // mehr passt.
+    const nachReveal = (ereignis) => {
+      if (ereignis && ereignis.propertyName !== "transform") return;
+      kaestenBauen();
+      onScrollOrResize();
+    };
+    const inhalt = inhaltRef?.current;
+    inhalt?.addEventListener("transitionend", nachReveal);
+    // Rückfall, falls keine Transition läuft (reduzierte Bewegung, Cache,
+    // bereits abgeschlossene Animation): einmal nachmessen, wenn alles steht.
+    const nachRevealTimer = window.setTimeout(nachReveal, 1200);
+
     const apply = () => {
       tickingRef.current = false;
       const rect = stage.getBoundingClientRect();
@@ -706,13 +729,24 @@ export default function HeroScrollStage({
           // easeOutQuint – praktisch deckungsgleich mit der bisherigen
           // cubic-bezier(0.23, 1, 0.32, 1), nur in JS auswertbar.
           const e = 1 - Math.pow(1 - t2, 5);
-          // ⚠️ DERSELBE AUFSETZER WIE IM SCROLL-PFAD (`SETTLE_FROM`), bewusst
-          // dieselbe Rechnung: Reines Ausklingen auf null liest sich als
-          // Schweben – ein Gegenstand mit Masse driftet nicht die letzten
-          // Pixel. So teilen sich die beiden Momente, in denen der Ball zur
-          // Ruhe kommt, eine Bewegungssignatur.
-          const ueber = Math.sin(e * Math.PI) * 4 * (1 - e);
-          const yJetzt = startY + weg * e - ueber;
+          // ⚠️ DERSELBE AUFSETZER WIE IM SCROLL-PFAD – UND DIESMAL AUCH IM
+          // SELBEN PARAMETERBEREICH (Befund Tobias B2, fünfte Runde).
+          // Die erste Fassung legte `Math.sin(settle·π)·4·(1−settle)` über den
+          // GANZEN Flug. Der Term ist auf [0,1] nie negativ und wird
+          // subtrahiert – der Ball näherte sich dem Ziel also immer von oben
+          // und unterschritt es nie. Sein Maximum lag bei 2,32px (nicht 4) und
+          // bei e ≈ 0,354, mit easeOutQuint also **44 von 520 ms**: im Anflug,
+          // wenn der Ball noch 60 % vom Ziel entfernt ist.
+          // Ich hatte die Formel übernommen, aber nicht ihren Bereich: Im
+          // Scroll-Pfad läuft sie über `settle`, und das deckt nur die letzten
+          // 18 % der Bahn ab (`SETTLE_FROM`). Genau dort gehört sie hin.
+          // Ohne diese Korrektur war „die beiden Momente teilen eine
+          // Bewegungssignatur" eine Zusage, welche die Zeichnung nicht trug.
+          let yJetzt = startY + weg * e;
+          if (e > SETTLE_FROM) {
+            const settle = (e - SETTLE_FROM) / (1 - SETTLE_FROM);
+            yJetzt -= Math.sin(settle * Math.PI) * 4 * (1 - settle);
+          }
           el.style.transform = `translate3d(${(x - BALL_R).toFixed(1)}px, ${yJetzt.toFixed(1)}px, 0)`;
           const bildJetzt =
             ((Math.round((gesamtWinkel * e * BALL_SPRITE_FRAMES) / 360) %
@@ -752,6 +786,8 @@ export default function HeroScrollStage({
     return () => {
       if (raf) cancelAnimationFrame(raf);
       tickingRef.current = false;
+      window.clearTimeout(nachRevealTimer);
+      inhalt?.removeEventListener("transitionend", nachReveal);
       window.removeEventListener("load", onScrollOrResize);
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);
