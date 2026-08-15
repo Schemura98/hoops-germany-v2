@@ -69,10 +69,7 @@ const HERO_W = "w-full sm:w-52";
 // Konzept docs/HERO-KONZEPT-2026-08-11.md). Der Inhalt hier bleibt unverändert –
 // bis auf `ctaRef` an der primären Schaltfläche: Dort landet der Ball, und der
 // Zielpunkt wird zur Laufzeit an genau diesem Element gemessen.
-// `foto` (PLATZHALTER-VERSUCH 13.08.2026): nur die Versuchsroute /versuch-fotos
-// setzt diese Prop. Ohne sie ist der Hero unveraendert – app/page.js uebergibt
-// nichts. Faellt beim Rueckbau des Versuchs mit weg.
-export default function LandingHero({ foto = null }) {
+export default function LandingHero() {
   const [player, setPlayer] = useState(null); // null = lädt / ausgeloggt
   const [checked, setChecked] = useState(false);
   const [signal, setSignal] = useState(null); // offene Sache für Wiederkehrer
@@ -114,7 +111,7 @@ export default function LandingHero({ foto = null }) {
   const teamSlug = player?.team?.slug || null;
 
   return (
-    <HeroScrollStage ctaRef={ctaRef} textRef={textRef} foto={foto}>
+    <HeroScrollStage ctaRef={ctaRef} textRef={textRef}>
       <>
         {checked && player ? (
           <>

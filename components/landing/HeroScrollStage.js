@@ -100,12 +100,7 @@ function ballOpacityNearText(ballCenterY, textRect) {
   return 1;
 }
 
-// PLATZHALTER-VERSUCH 13.08.2026 (task-material-eignungspruefung, Vivien):
-// `foto` ist ausschliesslich fuer die Versuchsroute /versuch-fotos da und
-// standardmaessig null – ohne die Prop rendert die Buehne Byte-fuer-Byte wie
-// vorher, die Live-Landing ist unberuehrt. Faellt beim Rueckbau der
-// Versuchsroute in einem Commit mit weg. Erwartet { avif, webp, overlay }.
-export default function HeroScrollStage({ ctaRef, textRef, className = "", foto = null, children }) {
+export default function HeroScrollStage({ ctaRef, textRef, className = "", children }) {
   const stageRef = useRef(null);
   const arcRef = useRef(null);
   // Einmal beim Aufsetzen eingesammelt statt pro Frame abgefragt: querySelectorAll
@@ -283,27 +278,6 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", foto 
       className={`relative flex items-center justify-center overflow-hidden bg-navy-950 text-paper-50 ${className}`}
       style={{ minHeight: "calc(100vh - 4rem)" }}
     >
-      {/* PLATZHALTER-VERSUCH – nur aktiv, wenn `foto` gesetzt ist (s. o.). */}
-      {foto && (
-        <div className="absolute inset-0" aria-hidden="true">
-          <picture>
-            <source srcSet={foto.avif} type="image/avif" />
-            <img
-              src={foto.webp}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          </picture>
-          {/* Genau das Overlay, das die Richtung eigentlich abgeschafft hat.
-              Der Wert ist nicht geschmeckt, sondern am gerenderten Bild
-              gemessen (siehe docs/MATERIAL-EIGNUNGSPRUEFUNG-2026-08-13.md). */}
-          <div
-            className="absolute inset-0 bg-navy-950"
-            style={{ opacity: foto.overlay ?? 0.7 }}
-          />
-        </div>
-      )}
-
       <PlayDiagram
         ref={arcRef}
         gezeichnet={!animated}
