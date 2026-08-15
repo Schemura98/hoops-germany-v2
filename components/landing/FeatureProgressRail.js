@@ -61,10 +61,20 @@ const ARRIVE_T = 0.96;
 //
 // In der Taktiktafel-Notation hat jede Linienform eine feste Bedeutung –
 // durchgezogen = Laufweg, gestrichelt = Pass, **Zickzack = Dribbling**. Unser
-// Ball dribbelt die Strecke entlang, also ist die Zickzack-Linie die einzige
-// notationsrichtige Form. Eine gerade Linie hieße „der Ball wurde getragen",
-// eine gestrichelte „er wurde gepasst". Dieselbe Konvention benutzt
+// Ball dribbelt die Strecke entlang; eine gerade Linie hieße „der Ball wurde
+// getragen", eine gestrichelte „er wurde gepasst". Dieselbe Konvention benutzt
 // PlayDiagram.js für Laufweg und Pass.
+//
+// ⚠️ WAS HIER TATSÄCHLICH GERENDERT WIRD, IST EINE WEICHE WELLE, KEIN ZICKZACK
+// (Befund Tobias, 15.08.2026). Grund sind die quadratischen Bézier-Segmente
+// unten: Sie erzeugen runde Bögen, keine Ecken. Der Absatz darüber beschrieb
+// bis dahin die Notation, nicht die Zeichnung – also genau der Fall aus
+// docs/MUSTER-ZAHLEN-DIE-LUEGEN: im Sinne des Codes richtig, im Sinne des
+// Lesers falsch.
+// Es bleibt vorerst die Welle, weil sie am Produkt geprüft und für gut befunden
+// ist. **Ob daraus ein echter Zickzack wird (Q- durch L-Segmente ersetzen, ein
+// Zweizeiler), ist eine Gestaltungsentscheidung und gehört Vivien** – die
+// Notationsbegründung trägt streng genommen erst dann wieder.
 //
 // Technik wie dort: `pathLength="1"` normiert die Pfadlänge auf 1, danach
 // zeichnet `strokeDashoffset` von 1 auf 0 den Pfad exakt von Anfang bis Ende –
@@ -129,7 +139,9 @@ export default function FeatureProgressRail({ labels = [] }) {
     const section = wrap?.closest("section");
     if (!section || labels.length === 0) return;
 
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     // Bei reduzierter Bewegung füllt sich der Balken nicht scroll-synchron mit –
     // er würde sonst dauerhaft auf 0 % stehenbleiben und wie ein Fehler wirken.
     // Stattdessen wird er zur neutralen Linie; Beschriftung und Punkte tragen
@@ -147,7 +159,8 @@ export default function FeatureProgressRail({ labels = [] }) {
       if (ballMobileRef.current && trackRef.current) {
         const trackW = trackRef.current.getBoundingClientRect().width;
         if (animiert) {
-          ballMobileRef.current.style.transition = "transform 320ms cubic-bezier(0.34,1.56,0.64,1)";
+          ballMobileRef.current.style.transition =
+            "transform 320ms cubic-bezier(0.34,1.56,0.64,1)";
         }
         // Endstand MIT Drehwinkel: Ohne ihn schnappte der Ball bei der Ankunft
         // auf 0deg zurück – er wäre die ganze Strecke gerollt und am Ziel
@@ -160,7 +173,12 @@ export default function FeatureProgressRail({ labels = [] }) {
       if (goalMobileRef.current) goalMobileRef.current.style.opacity = "1";
 
       const letzterDot = dotsRef.current[labels.length - 1];
-      if (ballDesktopRef.current && goalDesktopRef.current && railColRef.current && letzterDot) {
+      if (
+        ballDesktopRef.current &&
+        goalDesktopRef.current &&
+        railColRef.current &&
+        letzterDot
+      ) {
         const colRect = railColRef.current.getBoundingClientRect();
         const zielRect = goalDesktopRef.current.getBoundingClientRect();
         const zielY = zielRect.top + zielRect.height / 2 - colRect.top;
@@ -170,7 +188,8 @@ export default function FeatureProgressRail({ labels = [] }) {
           // kein Teleport. Dieselbe Kurve wie beim mobilen Ball oben.
           ballDesktopRef.current.style.transition =
             "transform 420ms cubic-bezier(0.34,1.56,0.64,1), opacity 260ms ease-out";
-          if (goalRingRef.current) goalRingRef.current.classList.add("rail-goal-flash-ring");
+          if (goalRingRef.current)
+            goalRingRef.current.classList.add("rail-goal-flash-ring");
         }
         // Auch hier der Drehwinkel des Endstands (s. mobil oben). Bezug ist der
         // erste Punkt, damit er zur laufenden Drehung passt und nicht springt.
@@ -178,8 +197,12 @@ export default function FeatureProgressRail({ labels = [] }) {
         const ersterYZiel = ersterRectZiel
           ? ersterRectZiel.top + ersterRectZiel.height / 2 - colRect.top
           : 0;
-        ballDesktopRef.current.style.transform = `translate3d(-50%, ${zielY.toFixed(
-          1
+        // Wie im Scroll-Pfad: die Ballmitte sitzt auf zielY (der Mitte des
+        // Korb-Emblems), nicht seine Oberkante.
+        ballDesktopRef.current.style.transform = `translate3d(-50%, ${(
+          zielY - RAIL_BALL_R
+        ).toFixed(
+          1,
         )}px, 0) rotate(${rollwinkel(zielY - ersterYZiel).toFixed(1)}deg)`;
         ballDesktopRef.current.style.opacity = "1";
         goalDesktopRef.current.style.opacity = "1";
@@ -194,7 +217,39 @@ export default function FeatureProgressRail({ labels = [] }) {
       // 0 = Sektion beginnt gerade unter der Navbar, 1 = ihr Ende ist erreicht.
       const t = clamp01((NAVBAR_HEIGHT - rect.top) / rect.height);
 
-      if (!reduced && barRef.current) barRef.current.style.transform = `scaleX(${t.toFixed(3)})`;
+      // ⚠️ DER BALL EXISTIERT ERST, WENN DIE STRECKE BEGONNEN HAT
+      // (Befund Tobias B2, 15.08.2026). Vorher stand seine Deckkraft fest auf 1,
+      // sobald der Controller lief – unabhängig davon, ob die Sektion überhaupt
+      // erreicht war. Gemessen: Am Desktop stand der Streckenball schon bei
+      // scrollY 0 im Bild, während der Hero-Ball dort noch auf Deckkraft 0,00
+      // stand. An 158 von 226 Messpunkten waren ZWEI Bälle gleichzeitig zu sehen
+      // – bei einer Choreografie, deren ganzer Zweck "ein Motiv, eine Reise" ist.
+      // Die kurze Einblendung verhindert, dass er stattdessen aufpoppt.
+      //
+      // ⚠️ IN PIXELN, NICHT IN PROZENT DER SEKTION. Der erste Versuch nahm
+      // `t / 0.03` – bei einer über 3000px hohen Sektion sind das über 90px
+      // Scrollweg, und genau dort klaffte weiter eine Lücke ohne jeden Ball
+      // (gemessen 6–13 Messpunkte je Fenstergröße). Ein Anteil an einer Höhe,
+      // die sich mit dem Inhalt ändert, taugt nicht als Zeitmaß für eine
+      // Übergabe.
+      // Der Vorlauf ist Absicht: Die Einblendung beginnt, BEVOR die Sektion die
+      // Navbar erreicht – also während der Hero-Ball noch ausrollt. So entsteht
+      // eine echte Überblendung statt eines Staffelstabs, der kurz auf dem Boden
+      // liegt.
+      // Bezug ist die Oberkante der Sektion im Verhältnis zur Fensterhöhe, denn
+      // genau dort übergibt der Hero-Ball: Er rollt aus der Bühne, während diese
+      // Kante nach oben wandert. Anteile der FENSTERhöhe (nicht der Sektions-
+      // höhe) – die Fensterhöhe ist die Größe, die beide Seiten teilen.
+      const sichtHoehe = window.innerHeight || 1;
+      const EINBLEND_VON = 0.42; // Sektionskante bei 42 % der Fensterhöhe
+      const EINBLEND_BIS = 0.28; // vollständig da bei 28 %
+      const einblendung = clamp01(
+        (EINBLEND_VON * sichtHoehe - rect.top) /
+          ((EINBLEND_VON - EINBLEND_BIS) * sichtHoehe),
+      );
+
+      if (!reduced && barRef.current)
+        barRef.current.style.transform = `scaleX(${t.toFixed(3)})`;
 
       const index = Math.min(labels.length - 1, Math.floor(t * labels.length));
       if (index !== activeRef.current) {
@@ -223,27 +278,60 @@ export default function FeatureProgressRail({ labels = [] }) {
       // Lande-Animation samt Farbblitz.
       if (reduced) return;
 
+      // ⚠️ DIE LANDE-TRANSITION WIRD HIER WIEDER ENTFERNT (Befund Kai B2).
+      // `ballZielSetzen` setzt bei der Ankunft eine überschwingende Transition
+      // (320/420ms, cubic-bezier mit y=1.56). Sie wurde an KEINER Stelle wieder
+      // gelöscht: Ab der ersten Ankunft lief danach jeder Frame durch sie
+      // hindurch, und weil jedes neue `transform` die Transition neu startet,
+      // kam keine je an – der Ball hing dauerhaft hinter der Scroll-Position.
+      //
+      // Vor diesem Umbau war das ein Nachlaufen von wenigen Pixeln. Seit im
+      // `transform` zusätzlich ein `rotate()` steckt (Desktop 573°, mobil ~1965°
+      // über die Strecke), entkoppelt eine überschwingende Kurve die Drehung vom
+      // Weg – also genau die Kopplung, um die es bei diesem Umbau geht.
+      //
+      // Dieselbe Fehlerklasse steht schon im Kommentar oben (Befund Tobias
+      // 12.08.2026): Damals war es die eingefrorene Position, jetzt die
+      // eingefrorene Übergangsregel.
+      if (ballMobileRef.current) ballMobileRef.current.style.transition = "";
+      if (ballDesktopRef.current) ballDesktopRef.current.style.transition = "";
+
       // Mobil: Spitze des sich fuellenden Balkens – dieselbe Zahl t, die auch
       // den Balken fuellt, damit beide immer exakt uebereinstimmen.
       if (trackRef.current && ballMobileRef.current) {
         const trackW = trackRef.current.getBoundingClientRect().width;
-        // Der Ball ROLLT die Leiste entlang, er gleitet nicht: Die Drehung
-        // folgt der zurückgelegten Strecke (s. `rollwinkel` in HeroGlyphs).
-        const strecke = trackW * t;
-        ballMobileRef.current.style.transform = `translate3d(${(
-          strecke - RAIL_BALL_R
-        ).toFixed(1)}px, -50%, 0) rotate(${rollwinkel(strecke).toFixed(1)}deg)`;
-        ballMobileRef.current.style.opacity = "1";
+        // ⚠️ Der jeweils andere Zweig ist per `xl:hidden` / `hidden xl:block` auf
+        // `display:none` – seine Rechtecke sind dann lauter Nullen. Ohne diesen
+        // Wächter rechnete und schrieb der Controller pro Bild in einen
+        // unsichtbaren Teilbaum (Befund Kai B6). Kein Korrektheitsfehler,
+        // aber verschenkte Arbeit auf jedem einzelnen Frame.
+        if (trackW > 0) {
+          // Der Ball ROLLT die Leiste entlang, er gleitet nicht: Die Drehung
+          // folgt der zurückgelegten Strecke (s. `rollwinkel` in HeroGlyphs).
+          const strecke = trackW * t;
+          ballMobileRef.current.style.transform = `translate3d(${(
+            strecke - RAIL_BALL_R
+          ).toFixed(
+            1,
+          )}px, -50%, 0) rotate(${rollwinkel(strecke).toFixed(1)}deg)`;
+          ballMobileRef.current.style.opacity = einblendung.toFixed(3);
 
-        // Die Dribbel-Spur liegt auf voller Länge im Pfad und wird über den
-        // Strichversatz aufgedeckt – so bleibt sie exakt beim Ball, ohne dass
-        // der Pfad pro Bild neu gebaut werden müsste.
-        if (spurMobileRef.current) {
-          if (spurMobileRef.current.dataset.breite !== String(Math.round(trackW))) {
-            spurMobileRef.current.dataset.breite = String(Math.round(trackW));
-            spurMobileRef.current.setAttribute("d", dribbelPfad(0, trackW, () => 0, false));
+          // Die Dribbel-Spur liegt auf voller Länge im Pfad und wird über den
+          // Strichversatz aufgedeckt – so bleibt sie exakt beim Ball, ohne dass
+          // der Pfad pro Bild neu gebaut werden müsste.
+          if (spurMobileRef.current) {
+            if (
+              spurMobileRef.current.dataset.breite !==
+              String(Math.round(trackW))
+            ) {
+              spurMobileRef.current.dataset.breite = String(Math.round(trackW));
+              spurMobileRef.current.setAttribute(
+                "d",
+                dribbelPfad(0, trackW, () => 0, false),
+              );
+            }
+            spurMobileRef.current.style.strokeDashoffset = String(1 - t);
           }
-          spurMobileRef.current.style.strokeDashoffset = String(1 - t);
         }
       }
 
@@ -251,52 +339,78 @@ export default function FeatureProgressRail({ labels = [] }) {
       // Fluegel-Auslenkung an den zwei Szenen, deren Mock-Karte tatsaechlich
       // seitlich steht (Konzept Abschnitt 1).
       const letzterDot = dotsRef.current[labels.length - 1];
-      if (railColRef.current && dotsRef.current[0] && letzterDot && ballDesktopRef.current) {
+      if (
+        railColRef.current &&
+        dotsRef.current[0] &&
+        letzterDot &&
+        ballDesktopRef.current
+      ) {
         const colRect = railColRef.current.getBoundingClientRect();
-        const ersterRect = dotsRef.current[0].getBoundingClientRect();
-        const letzterRect = letzterDot.getBoundingClientRect();
-        const ersterY = ersterRect.top + ersterRect.height / 2 - colRect.top;
-        const letzterY = letzterRect.top + letzterRect.height / 2 - colRect.top;
-        const continuous = Math.min(labels.length - 1, t * labels.length);
-        const frac = labels.length > 1 ? continuous / (labels.length - 1) : 0;
-        const y = ersterY + (letzterY - ersterY) * frac;
-        const gewicht = (mitte) => Math.max(0, 1 - Math.abs(continuous - mitte));
-        const nudgeX = -WING_NUDGE * gewicht(WING_LEFT_INDEX) + WING_NUDGE * gewicht(WING_RIGHT_INDEX);
-        // Wie mobil: die Drehung folgt dem Weg. Gemessen wird ab dem ERSTEN
-        // Punkt, nicht ab 0 – sonst startet der Ball bereits verdreht, obwohl
-        // er noch keinen Millimeter zurückgelegt hat.
-        ballDesktopRef.current.style.transform = `translate3d(calc(-50% + ${nudgeX.toFixed(
-          1
-        )}px), ${y.toFixed(1)}px, 0) rotate(${rollwinkel(y - ersterY).toFixed(1)}deg)`;
-        ballDesktopRef.current.style.opacity = "1";
+        // ⚠️ Der jeweils andere Zweig ist per `xl:hidden` / `hidden xl:block` auf
+        // `display:none` – seine Rechtecke sind dann lauter Nullen. Ohne diesen
+        // Wächter rechnete und schrieb der Controller pro Bild in einen
+        // unsichtbaren Teilbaum (Befund Kai B6). Kein Korrektheitsfehler,
+        // aber verschenkte Arbeit auf jedem einzelnen Frame.
+        if (colRect.height > 0) {
+          const ersterRect = dotsRef.current[0].getBoundingClientRect();
+          const letzterRect = letzterDot.getBoundingClientRect();
+          const ersterY = ersterRect.top + ersterRect.height / 2 - colRect.top;
+          const letzterY =
+            letzterRect.top + letzterRect.height / 2 - colRect.top;
+          const continuous = Math.min(labels.length - 1, t * labels.length);
+          const frac = labels.length > 1 ? continuous / (labels.length - 1) : 0;
+          const y = ersterY + (letzterY - ersterY) * frac;
+          const gewicht = (mitte) =>
+            Math.max(0, 1 - Math.abs(continuous - mitte));
+          const nudgeX =
+            -WING_NUDGE * gewicht(WING_LEFT_INDEX) +
+            WING_NUDGE * gewicht(WING_RIGHT_INDEX);
+          // Wie mobil: die Drehung folgt dem Weg. Gemessen wird ab dem ERSTEN
+          // Punkt, nicht ab 0 – sonst startet der Ball bereits verdreht, obwohl
+          // er noch keinen Millimeter zurückgelegt hat.
+          // ⚠️ `- RAIL_BALL_R` positioniert die BALLMITTE auf y (Befund B3).
+          // Vorher stand dort die Oberkante: Der Ball hing damit einen Radius
+          // unter dem Punkt, den er gerade passieren sollte, und die Spur – die
+          // auf der Punkt-Mittellinie liegt – streifte seine Oberkante, statt aus
+          // ihm herauszulaufen. Bei 14px waren das 7px und niemandem aufgefallen;
+          // mit 20px und einer sichtbaren Spur ist es offensichtlich. Mobil war es
+          // immer richtig (`top-1/2` + `-50%`), also war auch das eine Asymmetrie
+          // zwischen den beiden Aufrufstellen.
+          ballDesktopRef.current.style.transform = `translate3d(calc(-50% + ${nudgeX.toFixed(
+            1,
+          )}px), ${(y - RAIL_BALL_R).toFixed(1)}px, 0) rotate(${rollwinkel(
+            y - ersterY,
+          ).toFixed(1)}deg)`;
+          ballDesktopRef.current.style.opacity = einblendung.toFixed(3);
 
-        // Dribbel-Spur: einmal je Layout gebaut, danach nur aufgedeckt. Die
-        // Mittellinie trägt dieselbe Flügel-Auslenkung wie der Ball – sonst
-        // liefe die Spur schnurgerade, während der Ball seitlich ausschert.
-        if (spurDesktopRef.current) {
-          const kennung = `${Math.round(ersterY)}-${Math.round(letzterY)}`;
-          if (spurDesktopRef.current.dataset.spanne !== kennung) {
-            spurDesktopRef.current.dataset.spanne = kennung;
-            const mitteBei = (f) => {
-              const c = f * (labels.length - 1);
-              return (
-                -WING_NUDGE * Math.max(0, 1 - Math.abs(c - WING_LEFT_INDEX)) +
-                WING_NUDGE * Math.max(0, 1 - Math.abs(c - WING_RIGHT_INDEX))
+          // Dribbel-Spur: einmal je Layout gebaut, danach nur aufgedeckt. Die
+          // Mittellinie trägt dieselbe Flügel-Auslenkung wie der Ball – sonst
+          // liefe die Spur schnurgerade, während der Ball seitlich ausschert.
+          if (spurDesktopRef.current) {
+            const kennung = `${Math.round(ersterY)}-${Math.round(letzterY)}`;
+            if (spurDesktopRef.current.dataset.spanne !== kennung) {
+              spurDesktopRef.current.dataset.spanne = kennung;
+              const mitteBei = (f) => {
+                const c = f * (labels.length - 1);
+                return (
+                  -WING_NUDGE * Math.max(0, 1 - Math.abs(c - WING_LEFT_INDEX)) +
+                  WING_NUDGE * Math.max(0, 1 - Math.abs(c - WING_RIGHT_INDEX))
+                );
+              };
+              spurDesktopRef.current.setAttribute(
+                "d",
+                dribbelPfad(ersterY, letzterY, mitteBei, true),
               );
-            };
-            spurDesktopRef.current.setAttribute(
-              "d",
-              dribbelPfad(ersterY, letzterY, mitteBei, true)
-            );
+            }
+            spurDesktopRef.current.style.strokeDashoffset = String(1 - frac);
           }
-          spurDesktopRef.current.style.strokeDashoffset = String(1 - frac);
-        }
 
-        if (goalDesktopRef.current) {
-          // Das Korb-Emblem daemmert schon auf, waehrend sich der Ball dem
-          // letzten Punkt naehert – volle Helligkeit erst bei der Ankunft.
-          const naeher = clamp01(continuous - (labels.length - 2));
-          goalDesktopRef.current.style.opacity = (naeher * 0.5).toFixed(2);
+          if (goalDesktopRef.current) {
+            // Das Korb-Emblem daemmert schon auf, waehrend sich der Ball dem
+            // letzten Punkt naehert – volle Helligkeit erst bei der Ankunft.
+            const naeher = clamp01(continuous - (labels.length - 2));
+            goalDesktopRef.current.style.opacity = (naeher * 0.5).toFixed(2);
+          }
         }
       }
 
@@ -375,7 +489,10 @@ export default function FeatureProgressRail({ labels = [] }) {
           >
             {/* Native Groesse des Emblems (20x14) statt Skalierung – keine
                 Verzerrung, kein zusaetzlicher Rechenwert. */}
-            <HoopEmblem className="pointer-events-none block h-3.5 w-5" style={{}} />
+            <HoopEmblem
+              className="pointer-events-none block h-3.5 w-5"
+              style={{}}
+            />
           </span>
         </div>
         <div ref={trackRef} className="relative h-1 w-full">
@@ -409,7 +526,12 @@ export default function FeatureProgressRail({ labels = [] }) {
               />
             </g>
           </svg>
-          <RailBallGlyph ref={ballMobileRef} />
+          {/* Positionierung liegt seit dem 15.08.2026 beim Aufrufer, s. Kommentar
+              an RailBallGlyph. Mobil: auf der Mitte des waagerechten Balkens. */}
+          <RailBallGlyph
+            ref={ballMobileRef}
+            className="absolute left-0 top-1/2"
+          />
         </div>
       </div>
 
@@ -457,13 +579,22 @@ export default function FeatureProgressRail({ labels = [] }) {
               className="h-2 w-2 rounded-full bg-navy-700 transition-transform duration-300 motion-reduce:transition-none"
             />
           ))}
-          <span ref={goalDesktopRef} className="mt-1 h-3.5 w-5 flex-shrink-0 opacity-0" title="Ziel: Nachspielzeit">
-            <HoopEmblem ringRef={goalRingRef} className="pointer-events-none block h-full w-full" style={{}} />
+          <span
+            ref={goalDesktopRef}
+            className="mt-1 h-3.5 w-5 flex-shrink-0 opacity-0"
+            title="Ziel: Nachspielzeit"
+          >
+            <HoopEmblem
+              ringRef={goalRingRef}
+              className="pointer-events-none block h-full w-full"
+              style={{}}
+            />
           </span>
+          {/* Desktop: senkrechte Leiste. KEIN `style` mehr – der Drehpunkt
+              gehört der Komponente (Befund Kai B1). */}
           <RailBallGlyph
             ref={ballDesktopRef}
-            className="pointer-events-none absolute left-1/2 top-0 opacity-0 will-change-transform"
-            style={{ transformOrigin: "7px 7px" }}
+            className="absolute left-1/2 top-0"
           />
         </div>
       </div>

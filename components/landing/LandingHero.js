@@ -74,10 +74,15 @@ export default function LandingHero() {
   const [checked, setChecked] = useState(false);
   const [signal, setSignal] = useState(null); // offene Sache für Wiederkehrer
   const ctaRef = useRef(null);
-  // Textblock (Badge + Headline + Subline): Der fallende Ball blendet aus, solange er
-  // auf dieser Hoehe ist – sonst kreuzt er je nach Zeilenumbruch den Fliesstext
-  // (Befund Tobias bei 430px, Entscheid Vivien 11.08.2026).
-  const textRef = useRef(null);
+  // Inhaltsblock: Badge + Headline + Subline UND die Schaltflaechenreihe. Der
+  // fallende Ball dunkelt ab, solange er auf dieser Hoehe ist.
+  // ⚠️ Die Schaltflaechen kamen am 15.08.2026 dazu (Befund Tobias B): Vorher
+  // umfasste der Bezug nur den Text, und der auf 176px vergroesserte Ball lief
+  // bei VOLLER Deckkraft ueber "Teams entdecken" – Kontrast der Beschriftung
+  // 1,67:1 statt der geforderten 4,5:1. Beim 28px-Ball war das folgenlos.
+  // Deshalb heisst er auch nicht mehr `textRef`: Ein Name, der nur "Text" sagt,
+  // laedt genau dazu ein, die naechste Flaeche wieder zu vergessen.
+  const inhaltRef = useRef(null);
 
   useEffect(() => {
     const token = getPlayerToken();
@@ -111,11 +116,11 @@ export default function LandingHero() {
   const teamSlug = player?.team?.slug || null;
 
   return (
-    <HeroScrollStage ctaRef={ctaRef} textRef={textRef}>
+    <HeroScrollStage ctaRef={ctaRef} inhaltRef={inhaltRef}>
       <>
         {checked && player ? (
           <>
-            <div ref={textRef}>
+            <div ref={inhaltRef}>
             <Reveal as="div" delay={0} className="mb-6">
               <span className="font-display bg-brand-500 text-navy-950 text-sm font-bold px-4 py-1.5 rounded-sm uppercase tracking-[0.2em]">
                 Willkommen zurück
@@ -154,7 +159,6 @@ export default function LandingHero() {
                 </p>
               )}
             </Reveal>
-            </div>
             <Reveal as="div" delay={270} className="space-y-3 max-w-2xl mx-auto">
               {/* Obere Reihe: 3 Buttons – primärer „Zum Feed" mittig */}
               <div className="flex flex-col sm:flex-row justify-center gap-3">
@@ -192,10 +196,11 @@ export default function LandingHero() {
                 </Link>
               </div>
             </Reveal>
+            </div>
           </>
         ) : (
           <>
-            <div ref={textRef}>
+            <div ref={inhaltRef}>
             <Reveal as="div" delay={0} className="mb-6">
               <span className="font-display bg-brand-500 text-navy-950 text-sm font-bold px-4 py-1.5 rounded-sm uppercase tracking-[0.2em]">
                 Amateur-Basketball in NRW
@@ -220,7 +225,6 @@ export default function LandingHero() {
               Finde Spieler, tritt Vereinen bei und verfolge Ligen in deiner Region. Die
               Plattform für Amateur-Basketball – von Spielern, für Spieler.
             </Reveal>
-            </div>
             <Reveal as="div" delay={270} className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 ref={ctaRef}
@@ -242,6 +246,7 @@ export default function LandingHero() {
                 <PiUsersBold /> Teams entdecken
               </Link>
             </Reveal>
+            </div>
           </>
         )}
       </>

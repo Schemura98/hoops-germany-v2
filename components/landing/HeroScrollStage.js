@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BallSprite, BALL_SPRITE_FRAMES } from "@/components/landing/HeroGlyphs";
+import {
+  BallSprite,
+  BALL_SPRITE_FRAMES,
+} from "@/components/landing/HeroGlyphs";
 import PlayDiagram from "@/components/landing/PlayDiagram";
 
 // Scroll-gesteuerte Hero-Bühne „Sprungball" – Stufe 1 (mobil zuerst).
@@ -95,11 +98,12 @@ const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 // Wird zur Laufzeit gemessen und ist damit breitenunabhängig: Zeilenumbrüche lassen
 // sich nicht verlässlich vorhersagen, deshalb kein Sonderwert je Breakpoint.
 // Entscheid Vivien 11.08.2026 auf Tobias' Befund bei 430px.
-function ballOpacityNearText(ballCenterY, textRect) {
+function ballDeckkraftUeberInhalt(ballCenterY, textRect) {
   if (!textRect) return 1;
   if (ballCenterY < textRect.top - TEXT_FADE_MARGIN) return 1;
   if (ballCenterY < textRect.top) {
-    const t = (ballCenterY - (textRect.top - TEXT_FADE_MARGIN)) / TEXT_FADE_MARGIN;
+    const t =
+      (ballCenterY - (textRect.top - TEXT_FADE_MARGIN)) / TEXT_FADE_MARGIN;
     return 1 - t * (1 - TEXT_DIM_FLOOR);
   }
   if (ballCenterY <= textRect.bottom) return TEXT_DIM_FLOOR;
@@ -110,7 +114,12 @@ function ballOpacityNearText(ballCenterY, textRect) {
   return 1;
 }
 
-export default function HeroScrollStage({ ctaRef, textRef, className = "", children }) {
+export default function HeroScrollStage({
+  ctaRef,
+  inhaltRef,
+  className = "",
+  children,
+}) {
   const stageRef = useRef(null);
   const arcRef = useRef(null);
   // Einmal beim Aufsetzen eingesammelt statt pro Frame abgefragt: querySelectorAll
@@ -157,9 +166,14 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", child
       const rect = stage.getBoundingClientRect();
       if (rect.height <= 0) return;
 
-      const t = clamp((NAVBAR_HEIGHT - rect.top) / (rect.height * PROGRESS_SPAN), 0, 1);
+      const t = clamp(
+        (NAVBAR_HEIGHT - rect.top) / (rect.height * PROGRESS_SPAN),
+        0,
+        1,
+      );
 
-      if (arcRef.current) arcRef.current.style.opacity = (t * ARC_MAX).toFixed(3);
+      if (arcRef.current)
+        arcRef.current.style.opacity = (t * ARC_MAX).toFixed(3);
 
       // Spielzug zeichnen: jede Linie hat ihr eigenes Zeitfenster, damit der Zug
       // eine Reihenfolge hat (erst das Feld, dann der Laufweg, dann der Pass)
@@ -184,7 +198,21 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", child
       // wie ein Abzeichen, nie über der Beschriftung. Hier setzt der Ball jetzt
       // nur noch AUF, statt zu landen (s. Kommentar oben).
       const cta_ = cta.getBoundingClientRect();
-      const targetX = cta_.right - rect.left;
+      // ⚠️ IN DIE BÜHNE HINEINGEZOGEN (Befund Tobias A, 15.08.2026).
+      // Der Zielpunkt ist die RECHTE Kante der Schaltfläche. Beim 14px-Glyph war
+      // das folgenlos; mit Radius 52 (mobil) ragte der Ball dort über den Rand –
+      // die Bühne ist `overflow-hidden`, also wurde er beschnitten. Gemessen auf
+      // 375px: am Ruhepunkt noch **3 %** sichtbare Fläche, kurz darauf 0 %. Der
+      // zentrale Beat der Choreografie fand statt, ohne dass man ihn sah.
+      // Der Ball darf deshalb nicht näher als seinen Radius (plus etwas Luft) an
+      // den Rand – wo Platz ist, bleibt der Zielpunkt exakt die Ecke.
+      const RAND_LUFT = 6;
+      const grenze = BALL_R + RAND_LUFT;
+      const targetX = clamp(
+        cta_.right - rect.left,
+        grenze,
+        Math.max(grenze, rect.width - grenze),
+      );
       const targetY = cta_.top - rect.top;
 
       // Ball: reine Fallbewegung mit leichtem Wackeln – läuft mit der
@@ -223,12 +251,24 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", child
       // des Heros, NICHT `t`: `t` ist nach 45 % der Hero-Höhe fertig, also lange
       // bevor die Bühne wirklich weg ist. Der Ball würde sonst mitten im Bild
       // verschwinden.
+      // ⚠️ ZWEI BEDINGUNGEN, NICHT EINE (Befund Tobias A, 15.08.2026).
+      // Die erste Fassung hing nur an der Hero-Unterkante – und die bewegt sich
+      // ab dem ersten Pixel Scroll. Gemessen setzte das Ausrollen dadurch schon
+      // bei scrollY 90 ein, also mitten im Fall: Der Ball driftete nach rechts,
+      // WÄHREND er noch fiel, und war am Ruhepunkt fast aus dem Bild.
+      // Jetzt muss beides zutreffen: Der Ball ist angekommen (`tb === 1`) UND
+      // der Hero ist zu einem guten Teil ausgezogen. Erst dann rollt er weiter.
+      const HANDOFF_START = 0.45;
       const sichtHoehe = window.innerHeight || 1;
-      const tu = clamp(
+      const auszug = clamp(
         (sichtHoehe - rect.bottom) / Math.max(1, sichtHoehe - NAVBAR_HEIGHT),
         0,
-        1
+        1,
       );
+      const tu =
+        tb < 1
+          ? 0
+          : clamp((auszug - HANDOFF_START) / (1 - HANDOFF_START), 0, 1);
       if (tu > 0) {
         // Der Ball rollt in Laufrichtung aus dem Bild – die Drehung folgt dabei
         // der zurückgelegten Strecke (Weg/Radius), wie auf der Leiste auch.
@@ -245,23 +285,31 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", child
 
       // Textblock-Ausblendung mit der Bahn-Deckkraft verrechnen (beide Ursachen
       // multiplizieren sich, damit das Einblenden nicht überschrieben wird).
-      const textRect = textRef?.current?.getBoundingClientRect();
-      ballOpacity *= ballOpacityNearText(rect.top + y, textRect);
+      const inhaltRect = inhaltRef?.current?.getBoundingClientRect();
+      ballOpacity *= ballDeckkraftUeberInhalt(rect.top + y, inhaltRect);
 
-      // Ausblenden der Übergabe erst in deren zweiter Hälfte: Wer den Hero zügig
-      // durchscrollt, soll das Weiterrollen noch sehen, nicht nur ein
-      // Verschwinden. Steht bewusst NACH der Deklaration von `ballOpacity` –
-      // die erste Fassung rechnete oben im `tu`-Block damit und wäre in die
-      // temporale Totzone gelaufen (ReferenceError bei jedem Frame).
-      if (tu > 0) ballOpacity *= 1 - clamp((tu - 0.5) / 0.5, 0, 1);
+      // ⚠️ DAS AUSBLENDEN FOLGT DEM ECHTEN AUSTRITT, NICHT EINER KONSTANTEN.
+      // Die erste Fassung blendete über `tu` aus – gemessen war der Ball damit
+      // bei scrollY 600 längst aus der (overflow-hidden) Bühne gerollt, seine
+      // Deckkraft erreichte 0 aber erst bei 850. Zwischen 600 und 800 war
+      // schlicht kein Ball da, obwohl rechnerisch noch einer "sichtbar" war.
+      // Jetzt ist der Faktor der Anteil des Balls, der noch in der Bühne steht:
+      // Er verschwindet exakt, während er hinausrollt – und der Übergabepunkt
+      // ist damit eine gemessene Größe statt einer geschätzten.
+      // Steht bewusst NACH der Deklaration von `ballOpacity` – die erste Fassung
+      // rechnete im `tu`-Block damit und wäre in die temporale Totzone gelaufen.
+      if (tu > 0) {
+        const linkeKante = x - BALL_R;
+        ballOpacity *= clamp((rect.width - linkeKante) / (BALL_R * 2), 0, 1);
+      }
 
       // KEIN `rotate()` mehr: Die Drehung steckt in der Bildsequenz. Eine
       // zusätzliche Flächendrehung würde die echte Kugelrotation überlagern
       // und den ganzen Zweck der Sequenz aufheben – der Ball sähe aus, als
       // taumele er.
-      ball.style.transform = `translate3d(${(x - BALL_R).toFixed(1)}px, ${(y - BALL_R).toFixed(
-        1
-      )}px, 0)`;
+      ball.style.transform = `translate3d(${(x - BALL_R).toFixed(1)}px, ${(
+        y - BALL_R
+      ).toFixed(1)}px, 0)`;
       // Bildwahl aus dem Drehwinkel. Der Streifen deckt EINE volle Umdrehung
       // ab, deshalb modulo 360 – `angle` läuft während der Übergabe auf
       // mehrere tausend Grad hoch.
@@ -287,17 +335,22 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", child
     apply();
     // Nach dem Laden von Bild/Schrift einmal nachmessen – bis dahin können sich
     // die Rechtecke noch verschieben.
-    window.addEventListener("load", apply);
+    // ⚠️ Über `onScrollOrResize`, NICHT direkt über `apply` (Befund Kai B7):
+    // `apply` setzt `tickingRef` auf false. Feuert `load`, während bereits ein
+    // Frame geplant ist, wird die Sperre gelöst, ohne den Frame zu stornieren –
+    // ein folgendes Scroll-Event überschreibt dann die gemerkte ID, und genau
+    // die wollte das Aufräumen stornieren können.
+    window.addEventListener("load", onScrollOrResize);
     window.addEventListener("scroll", onScrollOrResize, { passive: true });
     window.addEventListener("resize", onScrollOrResize);
     return () => {
       if (raf) cancelAnimationFrame(raf);
       tickingRef.current = false;
-      window.removeEventListener("load", apply);
+      window.removeEventListener("load", onScrollOrResize);
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);
     };
-  }, [animated, ctaRef, textRef]);
+  }, [animated, ctaRef, inhaltRef]);
 
   return (
     <div
@@ -314,10 +367,15 @@ export default function HeroScrollStage({ ctaRef, textRef, className = "", child
       {/* Ball nur bei erlaubter Bewegung – das Korb-Emblem sitzt seit A10 nicht
           mehr hier, sondern am Ende der Fortschritts-Leiste. */}
       {animated && (
-        <BallSprite ref={ballRef} className="h-[104px] w-[104px] md:h-[176px] md:w-[176px]" />
+        <BallSprite
+          ref={ballRef}
+          className="h-[104px] w-[104px] md:h-[176px] md:w-[176px]"
+        />
       )}
 
-      <div className="relative z-10 mx-auto max-w-4xl px-6 py-24 text-center">{children}</div>
+      <div className="relative z-10 mx-auto max-w-4xl px-6 py-24 text-center">
+        {children}
+      </div>
     </div>
   );
 }

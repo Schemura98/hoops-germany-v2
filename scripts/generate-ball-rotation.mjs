@@ -31,9 +31,13 @@
 // Build. Es kommt aus dem Werkzeug-Ordner (Muster wie
 // scripts/generate-swish-sequence.js).
 //
-// Aufruf:  node scripts/generate-ball-rotation.mjs [--frames 48] [--groesse 160] [--out tmp]
+// Aufruf:  node scripts/generate-ball-rotation.mjs [--frames 32] [--groesse 200]
+//                                                 [--muster basketball] [--out tmp]
+// Die Vorgabewerte erzeugen GENAU das ausgelieferte Asset (Befund Kai B4:
+// vorher standen sie auf 48x160 und erzeugten damit eine Datei, die nirgends
+// verwendet wird - der reproduzierende Aufruf stand nirgends).
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, statSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
@@ -60,8 +64,8 @@ const arg = (name, vorgabe) => {
   const i = process.argv.indexOf(`--${name}`);
   return i > -1 && process.argv[i + 1] ? process.argv[i + 1] : vorgabe;
 };
-const FRAMES = Number(arg("frames", 48));
-const GROESSE = Number(arg("groesse", 160)); // Kantenlänge eines Einzelbildes
+const FRAMES = Number(arg("frames", 32));
+const GROESSE = Number(arg("groesse", 200)); // Kantenlänge eines Einzelbildes
 const OUT = arg("out", "tmp");
 const MUSTER = arg("muster", "basketball"); // basketball | wasserball
 
@@ -258,12 +262,24 @@ for (const i of [0, Math.floor(FRAMES / 4), Math.floor(FRAMES / 2)]) {
   writeFileSync(path.join(OUT, `ball-frame-${i}.svg`), frameSvg((i / FRAMES) * Math.PI * 2));
 }
 
-const { size } = await sharp(`${basis}.webp`).metadata().then(async (m) => ({
-  size: (await sharp(`${basis}.webp`).toBuffer()).length,
-  ...m,
-}));
+// ⚠️ Größen kommen aus dem DATEISYSTEM, nicht aus einer erneuten Kodierung
+// (Befund Kai B5, 15.08.2026). Die erste Fassung maß mit
+// `sharp(datei).toBuffer()` – das re-encodiert ohne Formatangabe mit sharps
+// Standardqualität 80, während die Datei mit 90 geschrieben wurde. Gemeldet
+// wurde also die Größe einer Datei, die es gar nicht gibt. Ausgerechnet ein
+// Skript, dessen Zahlen anschließend als Begründung in Kommentare wandern.
+const kb = (datei) => (statSync(datei).size / 1024).toFixed(1);
 
-console.log(`Frames:   ${FRAMES} à ${GROESSE}px`);
-console.log(`Streifen: ${basis}.png / .webp`);
-console.log(`WebP:     ${(size / 1024).toFixed(1)} KB`);
+console.log(`Frames:   ${FRAMES} à ${GROESSE}px  (Muster: ${MUSTER})`);
+console.log(`Streifen: ${basis}.png / .webp / .avif`);
+console.log(`PNG:      ${kb(`${basis}.png`)} KB`);
+console.log(`WebP:     ${kb(`${basis}.webp`)} KB`);
+console.log(`AVIF:     ${kb(`${basis}.avif`)} KB`);
 console.log(`Einzelbilder zur Sichtpruefung: ${OUT}/ball-frame-*.svg`);
+console.log(
+  `\nAusgeliefert wird derzeit: public/images/ball-basketball-32x200.{webp,avif}\n` +
+    `Reproduzierbar mit:  node scripts/generate-ball-rotation.mjs --frames 32 --groesse 200 --muster basketball --out public/images\n` +
+    `⚠️ Bei geaenderter Bildzahl MUESSEN mitgezogen werden: BALL_SPRITE_FRAMES in\n` +
+    `   components/landing/HeroGlyphs.js UND beide Dateinamen in app/globals.css.\n` +
+    `   tests/e2e/ball-sequenz.spec.mjs prueft genau diese Kopplung.`
+);
