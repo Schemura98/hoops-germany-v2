@@ -3430,3 +3430,84 @@ Prädikat selbst in beide Richtungen, inklusive des Admin-Falls.
   das Kernversprechen damit nicht eingelöst (Kai B5).
 - Leeres Register in der Schiene während des Ladens (Kai B8), `PostCard`-Rang B wirkt auf fünf
   Flächen statt nur im Feed (Kai B7).
+
+---
+
+## 15.08.2026 (später Nachmittag) — Die Agenten auf den Mac gestellt: vier Aussagen, die niemand gegen die Welt gehalten hatte
+
+Nachlauf zum Umzugs-Commit `1a00846` (der die **Projekt**-Pfade geradezog). Dieser Durchgang
+betraf die **Agenten- und Skill-Definitionen** — also das, was jeder Mitarbeiter liest, bevor er
+etwas tut. Auftrag Patrick, alle Freigaben erteilt.
+
+Der Ausgangspunkt war eine unangenehme Beobachtung: Die Agenten-Definitionen trugen bereits
+durchgängig `/Users/patrickschemura/…`. Sie **sahen** migriert aus. Vier davon zeigten trotzdem
+ins Leere — der Unterschied zwischen „umgeschrieben" und „nachgemessen".
+
+### Was tatsächlich kaputt war
+
+1. **Malik greift in seine eigene Methodik ins Leere.** `team-coach.md` verwies für die
+   Pflicht-Skill `team-ausstattung` auf `…/General Backoffice/.claude/skills/team-ausstattung/`.
+   Sie liegt unter `~/.claude/skills/`. Zwei Fundstellen. Malik hätte vor jedem Scouting-Lauf
+   seine verbindliche Checkliste nicht gefunden.
+2. **Fünf Zwitter-Pfade** der Form `~\.claude\skills\` — macOS-Tilde, Windows-Backslashes,
+   auf **keinem** System auflösbar. Fundort: ausgerechnet `team-ausstattung` selbst
+   (`SKILL.md` 2×, `transfer-register.md` 2×, `befund-register.md` 1×) — der Methodik-Skill
+   fürs Werkzeug-Einrichten.
+3. **`setx` als einzige Anleitung** für die API-Schlüssel der Stock-Suche
+   (`Hoops-Marketing/_werkzeuge/README.md`). Ein Windows-Befehl; auf zsh umgestellt. Die alte
+   Begründung („liegt unter OneDrive") wurde nicht übersetzt, sondern **nachgemessen ersetzt**:
+   `~/Projekte` liegt außerhalb des iCloud-Umfangs, `~/Desktop` und `~/Documents` sind hier
+   echte Ordner. Die Regel bleibt — mit ehrlichem Grund statt geerbtem.
+4. **Der `watch`-Skill log über sich selbst.** `~/.config/watch/.env` existierte auf dem Mac
+   nicht, obwohl der INSTALL-VERMERK die Einrichtung als abgeschlossen führte. `is_first_run()`
+   prüft genau auf `SETUP_COMPLETE=true` in dieser Datei — der Skill wäre stumm in die
+   Ersteinrichtung gelaufen, ohne dass irgendwo etwas rot wird. Wiederhergestellt mit dem
+   protokollierten Stand (weiterhin **kein** API-Key, also kein Datenabfluss an Groq/OpenAI).
+
+### Nebenbefunde
+
+- **Der ffmpeg-9-Patch hat den Umzug überlebt** (`-fps_mode vfr` statt `-vsync vfr`,
+  `watch/scripts/frames.py` Z. 258/619) — und die Gegenprobe zeigt, dass er hier **nötig** ist:
+  `-vsync vfr` bricht auf dem Homebrew-ffmpeg 9.0.1 mit „Unrecognized option" ab und erzeugt
+  **keine** Datei, während der Skill trotzdem Bildpfade druckt. Lehrbuchfall für
+  `MUSTER-ZAHLEN-DIE-LUEGEN`.
+- **Ein als „blockiert" geführter Befund war längst erledigt:** `qa-reviewer.md` ohne
+  `permissionMode: plan`. Beide Fassungen tragen die Sperre. Im Register geschlossen — ein
+  offener Scheinbefund hätte Maliks nächsten Sweep gekostet.
+- **Homebrew als Quelle eingestuft** (A) im `quellen-register`, an die Stelle von winget.
+
+### Nachgemessen, nicht behauptet
+
+| Probe | Ergebnis |
+|---|---|
+| Pfade aus Agenten + Skills gegen das Dateisystem | 42 geprüft, **0 fehlen** |
+| Zwitter-Pfade nach der Runde | keine |
+| Windows-Idiome in Agenten-Definitionen | keine |
+| Milos Werkzeuge | ffmpeg/ffprobe 9.0.1, poppler 26.08.0, yt-dlp 2026.7.4, sharp 0.35.3 (libvips 8.18.3), svgo 4.0.2 |
+| `port-frei.sh` frei / belegt | Exit 0 / Exit 1 mit PID — **beide Richtungen** geprüft |
+| Frame-Kette `watch` | 2 Frames erwartet, **2 Dateien existieren** (nachgezählt) |
+
+### CLAUDE.md nachgezogen (Entscheidung Patrick)
+
+Die `netstat`/`ABHÖREN`-Anleitung (Z. 177–181, 554) war eine reine Windows-Eigenheit und
+stand im Widerspruch zu dem, was die Agenten-Definitionen ab jetzt sagen. Ersetzt durch
+`sh scripts/port-frei.sh` bzw. `lsof -tiTCP:3000 -sTCP:LISTEN`; die Windows-Fassung bleibt als
+datierter Nachsatz stehen. ⚠️ **Der GRUND für die Prüfung ist plattformunabhängig und bleibt:**
+`preview_stop` beendet den Dev-Server nicht.
+
+### Zwei Sessions, ein Arbeitsbaum
+
+Der Umzugs-Commit stammte aus einer **parallel laufenden Session**. Erst deren Rückmeldung
+klärte, dass sie fertig war und weder `~/.claude/` noch `.claude/` angefasst hatte. Ihr Hinweis
+auf die Zwitter-Pfad-Klasse führte direkt zu Befund 2.
+⚠️ **Eigener Fehler in dieser Runde:** Ich meldete, der Commit sei „während meines Blicks"
+entstanden. Reflog und Commit-Datum sagen 12:09 — gut drei Stunden vorher. Mein erster
+`git log` hatte einen veralteten Stand gezeigt. **Maßgeblich ist der Reflog, nicht der erste
+Blick.**
+
+### Lehre
+
+Ein Install-Vermerk beschreibt auch Zustand **außerhalb** seines eigenen Ordners. Was dort steht,
+gilt nach einem Rechnerwechsel erst wieder, wenn es nachgemessen ist — und eine Inventur nach
+Textmuster findet nur, was man ohnehin vermutet. Beide Male derselbe Fehlertyp: eine Aussage über
+die Welt, die niemand mehr gegen die Welt gehalten hat.

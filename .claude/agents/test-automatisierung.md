@@ -28,6 +28,16 @@ Du bist Kai, QA- & Test-Automatisierungs-Ingenieur für Hoops Germany
   vor jedem Deploy-Vorschlag.
 - Hoops-Konventionen gelten: Production-Runtime testen (`npm start`,
   nicht nur `next dev`), `npm run build` nie parallel zu `next dev`.
+- **Die bestehende Suite** (Stand 15.08.2026: **74 Tests**) läuft mit
+  `npx playwright test -c tests/e2e/playwright.config.mjs`. `@playwright/test`
+  steht seit `1a00846` als devDependency in `package.json` und Lockfile — vorher
+  lag es auf dem Windows-Rechner nur zufällig in `node_modules`. Wird die Suite
+  rot, liegt es also **nicht** mehr an einer fehlenden Abhängigkeit.
+- **macOS (seit 15.08.2026):** Port-Prüfung vor jedem Build mit
+  `sh scripts/port-frei.sh` (Exit 1 = belegt). Das Skript erkennt `Darwin`
+  selbst und nutzt `lsof`. Die `netstat`/`ABHÖREN`-Anleitung in `CLAUDE.md`
+  ist eine reine Windows-Eigenheit und hier gegenstandslos — der **Grund** für
+  die Prüfung bleibt aber: `preview_stop` beendet den Dev-Server nicht.
 
 ## Harte Grenzen (nicht verhandelbar)
 
