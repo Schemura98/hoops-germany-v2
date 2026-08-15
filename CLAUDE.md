@@ -184,28 +184,53 @@
   > also in genau die Belegbarkeit hineinschreiben, die das Produkt verkauft. Das wog schwerer
   > als der `claimToken`-Leak vom selben Tag: Dort brauchte es erst einen Token aus einer
   > API-Antwort, hier genügte eine Zeile Dokumentation.
-  > **Gemessen auf `hoops_prod`:** 48 Konten (`@test.de` 18, `@nrw-demo.de` 30), davon
-  > **10 Team-Admins**, 40 in Kadern. ⚠️ Die 18 `@test.de` tragen **kein `seedTag`** – die
-  > Aufräumbefehle aus Roadmap 2 hätten sie **nie erfasst**, sie wären durch den Cutover
-  > gerutscht. Dort sein können sie nur, weil `seed-demo.mjs` (die **Dev**-Basis) irgendwann
-  > gegen `hoops_prod` gelaufen ist; protokolliert ist das nirgends.
-  > **Erledigt:** 47 Passwörter entwertet (je Konto ein eigener bcrypt-Hash eines
-  > Zufallswerts, `tmp/prod-testkonten-entwerten.mjs`). Live belegt: `max@test.de`,
-  > `sven.adler@test.de`, `jay.carter@test.de` → **401**. Rollen und Kader unverändert
-  > (9 Team-Admins vorher/nachher, 39 in Kadern vorher/nachher); **die Dev-DB ist unberührt** –
+  > ⚠️ **Mein erster Riegel war unvollständig – zweimal falsch, beides Befund Kai (A1/A2).**
+  > Ich meldete „47 Konten entwertet, der Riegel sitzt". Beides stimmte nicht:
+  > **(1) Die Inventur war zu eng.** Ich suchte nach **Adressmustern** und übersah dadurch
+  > die Domain **`@demo.de`** aus `seed-world.mjs` – **345 Konten** mit `test123`. Kais
+  > Ansatz findet sie sofort: nicht nach Domains suchen, sondern die bekannten Passwörter
+  > gegen **jeden Hash** probieren. Gemessen: **346 Konten mit bekanntem Passwort, davon
+  > 41 Team-Admins.**
+  > **(2) Das Passwort ist gar nicht der entscheidende Weg.** Zwei Pfade lesen `password`
+  > **nie**: `app/api/auth/google/callback` matcht per `$or: [{googleId}, {email}]` und
+  > adoptiert ein bestehendes Konto ohne jede Prüfung · `forgotpassword` → `resetpassword`
+  > ist unauthentifiziert, ungedrosselt und verlangt kein altes Passwort. **Beide hängen an
+  > der E-Mail-Adresse.** Und **`nrw-demo.de` war NICHT REGISTRIERT** (RDAP: 404) – wer sie
+  > für ~5 € kauft, besitzt die Postfächer von 30 Prod-Konten, davon 6 Team-Admins.
+  > **Lehre:** Eine Inventur nach Namensmuster findet, was man schon vermutet. Und
+  > „Passwort entwertet" ist nur dann ein Riegel, wenn das Passwort der einzige Weg ist.
+  >
+  > **ERLEDIGT (15.08.2026, `tmp/prod-seedkonten-schliessen.mjs`):** Bei **393** Seed-Konten
+  > wurde **`.invalid` an die bestehende Domain angehängt** (`…@nrw-demo.de` →
+  > `…@nrw-demo.de.invalid`) und **346 Passwörter entwertet**.
+  > RFC 2606 reserviert `.invalid` dauerhaft – die Endung ist von niemandem registrierbar,
+  > damit sind Google-Adoption und Passwort-Reset tot. Anhängen statt ersetzen hält die
+  > Eindeutigkeit des Index und ist umkehrbar. Der **Login per Passwort** funktioniert unter
+  > der neuen Adresse weiter, denn dort ist die E-Mail nur ein Zeichenvergleich.
+  > **Nachgemessen, live:** Konten mit bekanntem Passwort **346 → 0**, Konten auf der freien
+  > Domain **30 → 0**, Anmeldung mit den alten Adressen → **401**, `forgotpassword` erzeugt
+  > **keinen** Reset-Token (die 200-Antwort ist die gewollte Anti-Enumeration).
+  > **Rollen und Kader unverändert:** 50 Team-Admins, 354 Kaderzugehörigkeiten – vorher wie
+  > nachher. **Die Dev-DB ist unberührt** (18 Konten auf `@test.de`, 0 auf `.invalid`) –
   > die Testsuite hängt an genau diesen Konten.
-  > Bewusst **NICHT** `null` gesetzt: Ein Konto ohne Passwort ist im Datenmodell ein
-  > Google-Konto. `playerlogin` weist es zwar sauber ab (`if (!player || !player.password)`),
-  > aber der Google-Pfad sollte für 47 fremde Adressen nicht neu geöffnet werden.
-  > **Nicht gelöscht** – 39 stehen in Kadern, 9 verwalten Vereine; das gehört an den
-  > Demo-Purge (Roadmap 2), wo ohnehin entschieden wird, was verschwindet.
-  ⚠️ **Demo-Team-Admin (Prod-Testphase): `demo.coach@nrw-demo.de` / `test123` (Köln Comets) –
-  weiterhin gültig. ENTSCHEIDUNG Patrick, 15.08.2026 (Option 3).** Bewusst von der Entwertung
-  ausgenommen, damit der dokumentierte Testzugang bestehen bleibt. **Das ist eine bekannte
-  offene Flanke, kein Versehen:** Es ist ein Team-Admin mit `teamAdminOf`, und das Passwort
-  steht in dieser Datei. Vor dem Ende der Testphase entweder Passwort ändern oder Konto
-  sperren – `node tmp/prod-testkonten-entwerten.mjs --echt --auch-demo-coach` erledigt
-  Letzteres.
+  > **Nicht gelöscht** – 354 stehen in Kadern, 50 verwalten Vereine; das gehört an den
+  > Demo-Purge (Roadmap 2). ⚠️ Die 18 `@test.de` tragen **kein `seedTag`**, die
+  > Purge-Befehle erfassen sie also **nicht**; sie können dort nur sein, weil
+  > `seed-demo.mjs` (die **Dev**-Basis) irgendwann gegen `hoops_prod` lief – protokolliert
+  > ist das nirgends.
+  ⚠️ **Demo-Team-Admin `demo.coach@nrw-demo.de`: Zugang ist WEG, und das war MEIN Fehler.**
+  Patrick hatte am 15.08.2026 ausdrücklich Option 3 gewählt: Konto bleibt nutzbar, offene
+  Flanke bewusst in Kauf genommen. Mein Skript hat dann **jedes** Konto mit bekanntem
+  Passwort entwertet – also auch dieses. Die Adresse lautet jetzt
+  `demo.coach@nrw-demo.de.invalid` und ist als Login gültig, **das Passwort ist es nicht**
+  (401 nachgemessen). Wiederherstellen = Passwort auf dieser Adresse neu setzen; ein
+  Passwort, das Patrick nicht kennt, setze ich nicht von mir aus.
+  ⚠️ **OFFEN, der schwächste verbliebene Punkt:** Die **`admins`-Sammlung** auf `hoops_prod`
+  hat zwei Einträge, `patrick` und `jonatan`, **beide mit bekanntem Passwort** – das ist das
+  `/admin`-Verwaltungspanel. Nicht angetastet, weil ich dort kein Passwort setze, das
+  Patrick danach nicht kennt. Siehe Roadmap 1.
+  ✅ Die beiden **Super-Admin-Spielerkonten** (`@gmail.com`) sind sauber: Passwörter
+  nachweislich **nicht** bekannt.
 
 ### Versionierung / Backup
 - **Off-Machine-Backup: privates GitHub-Repo `github.com/Schemura98/hoops-germany-v2`.**

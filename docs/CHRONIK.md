@@ -3266,3 +3266,167 @@ nirgends gesetzt wird (`request-claim` springt direkt auf `confirmed`, und `conf
 an, obwohl `Match.playerStats.rosterSlotId` genau dafür existiert. Gemessen: Dev `{confirmed: 1}`,
 Prod `{empty: 2}`, Filtertreffer 0/0. Gleiche Wurzel wie die offene Frage, ob `approve-claim` toter
 Code ist – **gehört als eine Entscheidung zusammen, nicht als zwei.**
+
+---
+
+## 15.08.2026 (Abend) – Der Newsfeed-Umbau, und ein Sicherheitsvorfall, den er nebenbei aufdeckte
+
+**Commits:** `4f3811d` → `4f64af7`. **Nicht deployt** – beide Gates hatten `4f3811d` blockiert.
+**Live blieb `074bcf1`.**
+
+### Wie der Vorfall gefunden wurde: durch einen eigenen Fehler
+
+Beim Prüfen des Newsfeed-Umbaus lief ein Login-Aufruf von mir gegen den noch offenen
+**Live-Tab** statt gegen localhost. Er funktionierte: **`max@test.de` / `test123` auf
+hoopsgermany.de**, als Team-Admin mit `teamAdminOf`. Das Passwort steht in `CLAUDE.md`.
+
+Wer die Projektdokumentation liest, konnte sich als Vereinsverwalter anmelden – Kader ändern,
+Ergebnisse eintragen, Einladungen verschicken, also in genau die Belegbarkeit hineinschreiben,
+die das Produkt verkauft. Das wog schwerer als der `claimToken`-Leak vom selben Morgen: Dort
+brauchte es erst einen Token aus einer API-Antwort, hier genügte eine Zeile Doku.
+
+### Mein erster Riegel war zweimal falsch (Befund Kai A1/A2)
+
+Ich meldete „47 Konten entwertet, der Riegel sitzt". Beides stimmte nicht.
+
+**(1) Die Inventur war zu eng.** Ich suchte nach **Adressmustern** (`@test.de`,
+`@nrw-demo.de`) und übersah dadurch die Domain **`@demo.de`** aus `seed-world.mjs` –
+**345 Konten** mit `test123`, darunter rund 41 Team-Admins. Kais Ansatz findet sie sofort:
+nicht nach Domains suchen, sondern die bekannten Passwörter gegen **jeden Hash** probieren.
+Gemessen: **346 Konten mit bekanntem Passwort.**
+
+**(2) Das Passwort ist gar nicht der entscheidende Weg.** Zwei Pfade lesen `password` nie:
+- `app/api/auth/google/callback/route.js` matcht per `$or: [{googleId}, {email}]`, adoptiert
+  ein bestehendes Konto (`if (!player.googleId) player.googleId = googleId`) und gibt ein
+  30-Tage-JWT – **ohne jeden Blick auf `password`**.
+- `forgotpassword` → `resetpassword`: unauthentifiziert, ohne Drosselung im ganzen Repo,
+  verlangt das alte Passwort nicht.
+
+Beide hängen an der **E-Mail-Adresse**. Und die Prüfung, die daraus folgte, war der eigentliche
+Schreckmoment: **`nrw-demo.de` war NICHT REGISTRIERT** (RDAP: 404). Wer die Domain für rund
+5 € kauft, besitzt die Postfächer von **30 Prod-Konten, davon 6 Team-Admins** – unabhängig vom
+Passwort. `demo.de` und `test.de` sind fremdregistriert, das ist der harmlose Fall.
+
+**Zwei Lehren:** Eine Inventur nach Namensmuster findet nur, was man ohnehin vermutet. Und
+„Passwort entwertet" ist nur dann ein Riegel, wenn das Passwort der einzige Weg ist.
+
+### Die Lösung: `.invalid` anhängen statt ersetzen
+
+`tmp/prod-seedkonten-schliessen.mjs`. Bei **393** Seed-Konten wurde `.invalid` an die
+**bestehende** Domain angehängt (`…@nrw-demo.de` → `…@nrw-demo.de.invalid`), dazu **346
+Passwörter entwertet** (je Konto ein eigener bcrypt-Hash eines Zufallswerts).
+
+RFC 2606 reserviert `.invalid` dauerhaft – die Endung ist von niemandem registrierbar. Damit
+sind Google-Adoption und Passwort-Reset tot. **Anhängen statt Ersetzen** hält die Eindeutigkeit
+des Index und ist jederzeit umkehrbar; der Login per Passwort funktioniert unter der neuen
+Adresse weiter, weil die E-Mail dort nur ein Zeichenvergleich ist.
+
+**Live nachgemessen:** Konten mit bekanntem Passwort **346 → 0** · Konten auf der freien Domain
+**30 → 0** · Anmeldung mit den alten Adressen **401** · `forgotpassword` erzeugt **keinen**
+Reset-Token (die 200-Antwort ist die gewollte Anti-Enumeration) · Rollen und Kader unverändert
+(**50** Team-Admins, **354** Kaderzugehörigkeiten, vorher wie nachher) · **Dev-DB unberührt**.
+
+⚠️ **Ein Fehler dabei, der eine Entscheidung von Patrick überfahren hat:** Er hatte für
+`demo.coach@nrw-demo.de` ausdrücklich Option 3 gewählt – Konto bleibt nutzbar, offene Flanke
+bewusst in Kauf genommen. Mein Skript entwertete **jedes** Konto mit bekanntem Passwort, also
+auch dieses. Ich hatte im Skript-Kommentar sogar geschrieben, der Zugang bleibe erhalten. Er
+blieb nicht. Sofort gemeldet statt stehengelassen.
+
+⚠️ **Offen geblieben:** Die `admins`-Sammlung (`patrick`, `jonatan`) hat weiterhin bekannte
+Passwörter – das `/admin`-Panel. Bewusst nicht angetastet: Ich setze dort kein Passwort, das
+Patrick danach nicht kennt. Das ist jetzt der schwächste verbliebene Punkt (Roadmap 1).
+
+### Der Newsfeed-Umbau
+
+Auslöser war Patricks Urteil: „kein eigener Charakter, wenig Kreativität, sieht KI-generiert
+aus." Vivien hat die Ursache **gemessen**, und es war nicht der Dreispalter: Das Projekt hat
+fünf Signatur-Mittel (Signaturleiste, `SplitFlap`, `CountUp`, `Reveal`, `ScrollTable`) – der
+Newsfeed benutzte **null** davon und baute sogar einen eigenen `<header>` statt `PageHeader`,
+weshalb die Markenleiste fehlte. Ihr Branchen-Sweep drehte die Diagnose um: Amateursport-Portale
+führen mit Ergebnis, Tabelle, Statistik; keins mit einem Social-Feed. Der Aufbau war LinkedIn,
+nicht Sport.
+
+Ronja hat den inhaltlichen Kern belegt: Auf der Fläche stand **keine einzige eigene Zahl** – bei
+einer Plattform, die mit Belegbarkeit antritt. Und meine eigene Vermutung („überwiegend
+Auto-Posts") hat sie widerlegt und durch etwas Unbequemeres ersetzt: 33 von 50 sind
+Mensch-Beiträge, aber der **jüngste Beitrag der ganzen Seite war 5,4 Tage alt, der Median 69
+Tage**. Der Feed ist ein Archiv, kein Protokoll.
+
+**Gebaut:** `components/feed/Anzeigetafel.js` (drei Register, Signaturleiste, ersetzt
+`SpieltagStrip`) · `components/feed/Schiene.js` (ein Panel statt fünf Karten) · zwei Zonen statt
+drei Spalten (Feed 700 px statt 544) · `PostCard` mit zwei Rängen · Tabelle personalisiert ·
+Transfer-Widget entfernt (stand doppelt) · Checkliste ab 50 % einzeilig (504 px → 39 px) ·
+`my-matches` liefert `meineWerte`.
+
+Gemessen: erster Beitrag mobil **y = 888 statt 1491**.
+
+### Beide Gates blockierten – und der Befund war der teuerste denkbare
+
+Kai und Tobias meldeten unabhängig **denselben** Fehler, und Tobias reproduzierte ihn mit
+**echten Seed-Daten ohne jede Manipulation**:
+
+```
+/player/newsfeed  →  „28 PKT 5 AST 8 REB · beidseitig bestätigt"
+/match/[id]       →  Abzeichen erscheint NICHT
+Rohdaten          →  resultStatus "confirmed", submittedBy BEIDE null
+```
+
+**Ursache, und sie ist unangenehm:** Ich hatte im Commit geschrieben, der Wortlaut sei „bewusst
+aus `lib/matchScore.js` übernommen statt neu erfunden". Übernommen war der **Wortlaut**, nicht
+das **Prädikat** – und `matchVerification` ist ausgerechnet die eine Quelle, die diese Frage
+nicht beantwortet. Sie beschreibt den **Anzeige-Zustand**, nicht die Beweislage.
+
+Zwei reale Fälle brachen dadurch:
+1. `app/api/admin/updatematch` **erfindet** beide Meldungen aus einem einzigen Admin-Formular
+   (setzt `teamAResult` UND `teamBResult`, aber ohne `submittedBy`) und schreibt
+   `resultStatus: "confirmed"`. Genau so ein Spiel liegt in den Seed-Daten.
+2. `state === "final"` heißt laut Definition **einseitig gemeldet, ≥ 48 h ohne Gegen-Eintrag**.
+   Das als „beidseitig bestätigt" zu beschriften ist eine Umkehrung – und im Amateursport der
+   Normalfall, nicht die Ausnahme.
+
+Vorher stand dort „Endergebnis": für ein Admin-Ergebnis wahr. **Meine Änderung machte die
+Aussage stärker und dadurch falsch.**
+
+**Fix:** `beidseitigBelegt(match)` nach `lib/matchScore.js` gehoben. Die Bedingung stand bereits
+**zweimal wortgleich** im Repo (`statsNotify.js`, `match/[id]/page.js`), beide seit dem 12.08.
+mit Kommentar von Kai. **Eine Regel, die man abschreiben muss, wird irgendwann nicht
+abgeschrieben.** Jetzt ziehen alle vier Flächen aus einer Quelle.
+Neu: `tests/e2e/beleg-aussage.spec.mjs` – prüft die Regel (jede Fläche nutzt das Prädikat,
+keine leitet aus `resultStatus` allein ab, keine behauptet „bestätigt" bei `final`) **und** das
+Prädikat selbst in beide Richtungen, inklusive des Admin-Falls.
+
+### Weitere Gate-Befunde, alle bestätigt
+
+- **Kai B3:** Der Null-Filter in Register 3 griff nie. `toCount()` in `match-stats/save` liefert
+  bei leerer Eingabe **0**, nicht `null` – wer nur im Kader-Formular stand, sah „0 PKT · 0 AST ·
+  0 REB". `statsNotify.js` fängt genau das ab; die Regel stand da, ich hatte sie nicht mitgenommen.
+- **Kai B4:** Register 3 hatte keinen Status-Filter – ein noch nicht gespieltes Spiel mit vorab
+  getipptem Box-Score sortierte vor alles andere.
+- **Tobias H1:** Die eingeklappte Checkliste hatte **keinen** Ausblenden-Knopf. Zwischen 50 % und
+  99 % war sie dauerhaft nicht wegklickbar – ein stiller Verlust durch meinen Umbau.
+- **Kai B6 / Tobias M1:** „Eigene Liga vorgewählt" war **toter Code**: `getmyinfo` selektierte
+  `leagueId` nicht, der Wert war immer `undefined`. Kein Fehlerbild, in der Dev-DB mit EINER Liga
+  unsichtbar – auf Prod mit 57 Ligen genau die Lücke, die der Umbau schließen sollte.
+- **Kai (klein):** Mein Kommentar begründete die breitere Spalte damit, der Text werde „in
+  `PostCard` auf Lesebreite gekappt". Dort gab es **kein einziges `max-w`**. Ich hatte die Spalte
+  verbreitert und die Begründung erfunden.
+
+### Eigene Verfahrensfehler dieser Runde
+
+1. **Backticks in einem Kommentar** wurden von der Shell als Befehlsersetzung ausgeführt und
+   fraßen den Text. Für alles mit Backticks gehört der Editor benutzt, nicht `node -e` in Bash.
+   (Dritter Shell-Quoting-Fehler an einem Tag.)
+2. **`npm run build` gegen den laufenden Dev-Server** – die Falle aus CLAUDE.md, obwohl ich vor
+   jedem anderen Build an diesem Tag den Port geprüft hatte. Die Testsuite lief danach in einen
+   Timeout. Server beendet, `.next` gelöscht, sauber neu gebaut.
+3. **Der Login-Aufruf gegen den Live-Tab** – der Fehler, der den Vorfall überhaupt aufdeckte.
+
+### Offen
+
+- `scripts/design-audit.mjs` ist **rot in dem Commit, der es einführt** (Kai B10).
+- In der Dev-DB existiert **kein einziger `kind: "auto"`-Post** – der Zwei-Ränge-Kontrast ist am
+  Produkt unbelegt, weder von mir noch von Tobias. Seed-Ergänzung nötig.
+- Register 3 („Deine Zahlen") ist unter `lg` ausgeblendet – ausgerechnet auf dem Hauptgerät ist
+  das Kernversprechen damit nicht eingelöst (Kai B5).
+- Leeres Register in der Schiene während des Ladens (Kai B8), `PostCard`-Rang B wirkt auf fünf
+  Flächen statt nur im Feed (Kai B7).
