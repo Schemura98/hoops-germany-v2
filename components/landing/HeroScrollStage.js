@@ -98,37 +98,35 @@ const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 // Wird zur Laufzeit gemessen und ist damit breitenunabhängig: Zeilenumbrüche lassen
 // sich nicht verlässlich vorhersagen, deshalb kein Sonderwert je Breakpoint.
 // Entscheid Vivien 11.08.2026 auf Tobias' Befund bei 430px.
-// ⚠️ PRÜFT SEIT DEM 15.08.2026 AUCH X (Entscheidung Vivien, Roadmap 20 a).
-// Vorher verglich diese Funktion ausschließlich `ballCenterY` gegen
-// `top/bottom` – die waagerechte Lage kam nie vor. Vivien hat nachgemessen,
-// was das kostet: Bei 1280/scrollY 585 steht der Ball auf x = 1141 und
-// überlappt nachweislich KEINE Inhaltszeile, ist aber trotzdem auf 0,20
-// gedimmt. Der gesamte Ausroll-Weg – also genau die Bewegung, die man sehen
-// soll – fand ohne jeden Kontrastgrund bei ≤ 20 % statt.
-// Seit der neuen Bahn ist diese Funktion nicht mehr der Kontrastschutz (den
-// leistet der Weg selbst), sondern ein NETZ: Ändert sich eine Zeilenlänge und
-// überlappt der Ball doch einmal, greift sie weiterhin.
-function ballDeckkraftUeberInhalt(ballCenterY, textRect, ballLinks, ballRechts) {
-  if (!textRect) return 1;
-  // Keine waagerechte Überschneidung ⇒ kein Grund abzudunkeln.
-  if (
-    typeof ballRechts === "number" &&
-    (ballRechts < textRect.left || ballLinks > textRect.right)
-  ) {
-    return 1;
+// ⚠️ PRÜFT SEIT DEM 15.08.2026 AUCH X, UND ZEILENGENAU (Vivien, Roadmap 20 a).
+// Zwei Korrekturen an derselben Funktion, beide von ihr:
+//  1. Sie verglich ausschließlich `ballCenterY` – die waagerechte Lage kam nie
+//     vor. Gemessen: Bei 1280/scrollY 585 stand der Ball auf x = 1141, überlappte
+//     KEINE Inhaltszeile und war trotzdem auf 0,20 gedimmt.
+//  2. Sie prüfte gegen die HÜLLBOX des Inhaltsblocks statt gegen die echten
+//     Zeilen. Bei 768 überlappte das Ball-Band die Hüllbox fast die ganze Reise,
+//     obwohl an dieser x-Position keine einzige Zeile stand – daher die 28 %
+//     heller Messpunkte.
+// Jetzt läuft sie über alle Kästen (Textzeilen + ganze Bedienelemente) und nimmt
+// das Minimum: Es zählt der ungünstigste Kasten, nicht der erste.
+function ballDeckkraftUeberKaesten(ballMitteY, kaesten, ballLinks, ballRechts) {
+  let kleinste = 1;
+  for (const k of kaesten) {
+    // Keine waagerechte Überschneidung ⇒ dieser Kasten ist kein Grund.
+    if (ballRechts < k.left || ballLinks > k.right) continue;
+    let d = 1;
+    if (ballMitteY < k.top - TEXT_FADE_MARGIN) d = 1;
+    else if (ballMitteY < k.top) {
+      const f = (ballMitteY - (k.top - TEXT_FADE_MARGIN)) / TEXT_FADE_MARGIN;
+      d = 1 - f * (1 - TEXT_DIM_FLOOR);
+    } else if (ballMitteY <= k.bottom) d = TEXT_DIM_FLOOR;
+    else if (ballMitteY <= k.bottom + TEXT_FADE_MARGIN) {
+      const f = (ballMitteY - k.bottom) / TEXT_FADE_MARGIN;
+      d = TEXT_DIM_FLOOR + f * (1 - TEXT_DIM_FLOOR);
+    }
+    if (d < kleinste) kleinste = d;
   }
-  if (ballCenterY < textRect.top - TEXT_FADE_MARGIN) return 1;
-  if (ballCenterY < textRect.top) {
-    const t =
-      (ballCenterY - (textRect.top - TEXT_FADE_MARGIN)) / TEXT_FADE_MARGIN;
-    return 1 - t * (1 - TEXT_DIM_FLOOR);
-  }
-  if (ballCenterY <= textRect.bottom) return TEXT_DIM_FLOOR;
-  if (ballCenterY <= textRect.bottom + TEXT_FADE_MARGIN) {
-    const t = (ballCenterY - textRect.bottom) / TEXT_FADE_MARGIN;
-    return TEXT_DIM_FLOOR + t * (1 - TEXT_DIM_FLOOR);
-  }
-  return 1;
+  return kleinste;
 }
 
 export default function HeroScrollStage({
@@ -144,6 +142,7 @@ export default function HeroScrollStage({
   const linienRef = useRef([]);
   const punkteRef = useRef([]);
   const ballRef = useRef(null);
+  const kaestenRef = useRef([]); // Zeilen-/Elementkaesten des Inhalts, s. kaestenBauen
   const tickingRef = useRef(false);
 
   // null = noch nicht geprüft (erster Render, auch serverseitig): dann wird der
@@ -177,6 +176,63 @@ export default function HeroScrollStage({
           ab: parseFloat(el.dataset.at),
         }))
       : [];
+
+    // ══ INHALTSKÄSTEN: ZEILENGENAU, NICHT ALS HÜLLBOX ═══════════════════════
+    // Korrektur Vivien vom 15.08.2026, zweite Runde – und ihr eigener Befund:
+    // Die erste Fassung rechnete gegen das UMSCHLIESSENDE RECHTECK des
+    // Inhaltsblocks und argumentierte, als wäre es die erste Textzeile. Das ist
+    // nicht dasselbe. Der Block ist die Hüllbox über mittig gesetzte Zeilen sehr
+    // unterschiedlicher Länge – bei 375 reicht er von x 24 bis 351 und von
+    // y 96 bis 671, die Tinte darin steht ganz woanders.
+    //
+    // Die Folge war messbar: Bei 768 überlappte das Ball-Band (x 627–803) die
+    // HÜLLBOX auf 627–744 über deren gesamte Höhe. Der Ball galt damit fast die
+    // ganze Reise als „über Inhalt" und wurde abgedunkelt – obwohl an seiner
+    // x-Position die erste echte Zeile erst bei y 246 beginnt und er bei y 150
+    // stehen bleibt. Genau daher kamen die 28 % heller Messpunkte bei 768.
+    //
+    // ⚠️ ZWEI ARTEN VON KÄSTEN, und der Unterschied ist keine Bequemlichkeit:
+    //   • Text → ZEILENkästen (`Range.getClientRects()`). Eine Zeile ist so
+    //     breit wie ihre Tinte, nicht wie ihr Container.
+    //   • Bedienelemente → GANZE Elementkästen. Eine Schaltfläche ist eine
+    //     gefüllte Fläche; der Ball hinter der orangen Pille ist ein
+    //     Kontrastproblem über die ganze Fläche, nicht nur über der Schrift.
+    //
+    // Einmal beim Aufsetzen und bei `load`/`resize` gebaut, NIE pro Bild:
+    // `getClientRects()` ist ein Layout-Zugriff.
+    const kaestenBauen = () => {
+      const inhalt = inhaltRef?.current;
+      if (!inhalt) {
+        kaestenRef.current = [];
+        return;
+      }
+      const kaesten = [];
+      const bedienelemente = new Set(inhalt.querySelectorAll("a, button"));
+      for (const el of bedienelemente) {
+        const r = el.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) kaesten.push(r);
+      }
+      // Textknoten außerhalb der Bedienelemente – deren Fläche ist schon erfasst.
+      const lauf = document.createTreeWalker(inhalt, NodeFilter.SHOW_TEXT);
+      for (let k = lauf.nextNode(); k; k = lauf.nextNode()) {
+        if (!k.nodeValue || !k.nodeValue.trim()) continue;
+        let drin = false;
+        for (const el of bedienelemente) {
+          if (el.contains(k)) {
+            drin = true;
+            break;
+          }
+        }
+        if (drin) continue;
+        const bereich = document.createRange();
+        bereich.selectNodeContents(k);
+        for (const r of bereich.getClientRects()) {
+          if (r.width > 0 && r.height > 0) kaesten.push(r);
+        }
+      }
+      kaestenRef.current = kaesten;
+    };
+    kaestenBauen();
 
     const apply = () => {
       tickingRef.current = false;
@@ -235,38 +291,43 @@ export default function HeroScrollStage({
       // Umschalter fällt dadurch von selbst auf ~1280px, also genau auf `xl`;
       // das ist kein Zufall, sondern der Breakpoint der Fortschritts-Leiste
       // (s. Übergabe weiter unten).
-      const inhaltRect = inhaltRef?.current?.getBoundingClientRect();
-
       // ⚠️ 20 % ANSCHNITT SIND ABSICHT, KEIN MANGEL (Vivien, Roadmap 20 c).
       // Ein Kreis, der vollständig im Rahmen liegt, liest sich als Grafik. Ein
       // Kreis, den der Rahmen schneidet, liest sich als Körper, der zufällig
       // gerade da ist – der Rahmen wird zum Fenster. Die 3 % Restsichtbarkeit
       // von vorher waren kein Anschnitt, das war ein Verschwinden.
-      // Die frühere Klammer (`RAND_LUFT`/`grenze`/`clamp`) entfällt damit
-      // ersatzlos: Sie hielt den Ball von einer Kante fern, an die er jetzt
-      // ausdrücklich gehört.
       const targetX = rect.width - 0.6 * BALL_R;
 
-      const freiRechts = inhaltRect ? rect.width - (inhaltRect.right - rect.left) : rect.width;
-      const obereBahn = inhaltRect ? inhaltRect.top - rect.top : rect.height * 0.3;
-      const targetY =
-        freiRechts >= 1.6 * BALL_R
-          ? // Seitliche Bahn: Es ist echter Platz neben dem Inhalt (ab ~1280).
-            rect.height * 0.42
-          : // Obere Bahn: möglichst weit oben, aber nicht über den Bühnenrand.
-            // ⚠️ ABWEICHUNG VON VIVIENS FORMEL, gemessen begründet (15.08.2026):
-            // Sie schreibt `inhaltRect.top - BALL_R - 8` und ging von freiem
-            // Raum ÜBER dem Inhalt aus. Den gibt es nicht – der Inhaltsblock
-            // beginnt buehnenrelativ bei y = 0 (375px) bzw. 19 (ab 768). Ihre
-            // Formel ergibt damit targetY = -60 bis -91, der Ball stünde also
-            // oberhalb der Bühne und wäre zu 34–59 % beschnitten statt zu 20 %.
-            // Die untere Klammer hält ihn vollständig im Bild; der waagerechte
-            // 20-%-Anschnitt bleibt der einzige Beschnitt. Dass er dabei
-            // rechnerisch über dem Inhalt liegen KANN, fängt die X-Bedingung in
-            // `ballDeckkraftUeberInhalt` ab – das Netz, das sie ausdrücklich
-            // für genau diesen Fall eingezogen hat.
-            // ⚠️ AN VIVIEN ZURÜCKGEMELDET, nicht eigenmächtig umentschieden.
-            Math.max(BALL_R + 8, obereBahn - BALL_R - 8);
+      // ══ EIN BEGRIFF STATT ZWEI BAHNEN (Vivien, zweite Runde) ═══════════════
+      // Die erste Fassung teilte in „seitliche" und „obere Bahn" und entschied
+      // über `freiRechts` – einen Breitenvergleich gegen die Hüllbox. Das ist
+      // ersetzt: „Schneidet ein Inhaltskasten das Ball-Band in x?" IST der Test
+      // auf die seitliche Bahn, und er ist strikt besser, weil er die echten
+      // Zeilen kennt statt eines Rechtecks über alle Zeilen.
+      // Ohne Kollision fällt `kollisionT` auf Infinity und der 0.42-Deckel
+      // greift – daher braucht es keine Fallunterscheidung mehr.
+      const bandLinks = rect.left + targetX - BALL_R;
+      const bandRechts = rect.left + targetX + BALL_R;
+      let kollisionT = Infinity;
+      for (const k of kaestenRef.current) {
+        if (k.right < bandLinks || k.left > bandRechts) continue;
+        const oben = k.top - rect.top; // bühnenrelativ, wie targetY
+        if (oben < kollisionT) kollisionT = oben;
+      }
+
+      // ⚠️ DER 0.42-DECKEL IST NICHT KOSMETIK (Vivien): Ohne ihn ruht der Ball
+      // bei 1024 auf y = 456 und bei 768 auf 150 – ein Sprung über eine kleine
+      // Breitenänderung. Mit Deckel läuft targetY monoton 77/84/150/298/309/351
+      // über 375→1440 und ist an die Bühnenhöhe gebunden, also ruhig beim
+      // Ziehen des Fensters.
+      // Die untere Klammer bleibt als Sicherung: Mit der korrigierten Eingabe
+      // feuert sie auf keiner der sieben Breiten – genau so soll sich eine
+      // Sicherung verhalten.
+      const targetY = clamp(
+        Math.min(rect.height * 0.42, kollisionT - BALL_R - 8),
+        BALL_R + 8,
+        rect.height - BALL_R - 8,
+      );
 
       // Ball: reine Fallbewegung mit leichtem Wackeln – läuft mit der
       // Scrollrichtung statt gegen sie und braucht keine seitliche Fläche.
@@ -361,12 +422,11 @@ export default function HeroScrollStage({
 
       // Textblock-Ausblendung mit der Bahn-Deckkraft verrechnen (beide Ursachen
       // multiplizieren sich, damit das Einblenden nicht überschrieben wird).
-      // `inhaltRect` ist oben schon gemessen (Bahnwahl) – eine zweite Messung
-      // im selben Frame wäre ein zusätzlicher Layout-Zugriff und könnte bei
-      // einer Zwischenänderung sogar abweichen.
-      ballOpacity *= ballDeckkraftUeberInhalt(
+      // Die Kästen sind beim Aufsetzen und bei `resize` vermessen, NICHT hier –
+      // `getClientRects()` pro Bild wäre ein Layout-Zugriff je Frame.
+      ballOpacity *= ballDeckkraftUeberKaesten(
         rect.top + y,
-        inhaltRect,
+        kaestenRef.current,
         rect.left + x - BALL_R,
         rect.left + x + BALL_R,
       );
@@ -410,6 +470,9 @@ export default function HeroScrollStage({
     // entfernte Nodes läuft (Deploy-Gate-Befund Kai, 10.08.2026).
     let raf = 0;
     const onScrollOrResize = () => {
+      // Kästen bei Größenänderung neu vermessen – Zeilenumbrüche verschieben
+      // sich mit der Breite, und danach stimmt jede Kollisionsprüfung nicht mehr.
+      kaestenBauen();
       if (tickingRef.current) return;
       tickingRef.current = true;
       raf = requestAnimationFrame(apply);
