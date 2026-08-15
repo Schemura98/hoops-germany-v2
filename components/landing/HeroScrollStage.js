@@ -97,7 +97,7 @@ const EINFLUG_MS = 520; // Vivien: Vorlauf vor der Headline nicht verspielen
 // ist überhaupt zu sehen, dass die Nähte über eine Kugel wandern.
 // Mobil kleiner, weil der Ball sonst mehr als ein Drittel der Breite belegt und
 // die Headline erdrückt, die er eigentlich begleiten soll.
-// Die Größe steht als Tailwind-Klasse an der Komponente (mobil 104px, ab md
+// Die Größe steht als Tailwind-Klasse an der Komponente (mobil 88px (h-[88px]), ab md
 // 176px), NICHT hier – der Controller MISST sie am Element (`offsetWidth`).
 // Grund: Der Radius steckt an drei Stellen (Positionierung ab Mittelpunkt,
 // Startlage über dem Bildrand, Rollwinkel). Eine zweite Quelle für dieselbe
@@ -177,7 +177,7 @@ function ballDeckkraftUeberKaesten(
     // ⚠️ SCHALTFLÄCHEN DIMMEN SOFORT VOLL, TEXTZEILEN RAMPEN.
     // Beides sind Entscheidungen von Vivien, die einander an dieser Stelle
     // widersprachen: „nur echte Überlappung dunkelt ab" (fünfte Runde) gegen
-    // „eine Schaltfläche ist eine GEFÜLLTE Fläche, der Ball dahinter ist ein
+    // „eine Schaltfläche wird ANGESTEUERT, nicht gelesen — ⚠️ KORREKTUR Kai: NICHT „gefüllte Fläche“. Gemessen ist nur „Als Spieler registrieren“ deckend (rgb(240,122,39)); dahinter ist der Ball ohnehin unsichtbar. „Team gründen“ und „Teams entdecken“ sind rgba(0,0,0,0) — DORT entsteht das Kontrastproblem, und dort ist Tobias’ Befund entstanden. Die Regel wirkt richtig; wer aber aus der alten Begründung heraus den nächsten Kasten einordnet, ordnet ihn falsch ein, der Ball dahinter ist ein
     // Kontrastproblem über die ganze Pille" (zweite Runde). Mit der reinen
     // Eindringtiefen-Rampe stand der Ball bei 1px Überlappung noch auf 0,97 –
     // und genau darüber ist die Kontrastregression entstanden, gegen die diese
@@ -204,6 +204,22 @@ export default function HeroScrollStage({
   const punkteRef = useRef([]);
   const ballRef = useRef(null);
   const eingeflogenRef = useRef(false); // mobiler Ladeauftritt: nur einmal
+  // ⚠️ ZWEI SCHREIBER AUF EINEM ELEMENT BRAUCHEN EINEN SCHIEDSRICHTER
+  // (Befund Kai, fünfte Runde). `schritt` (Einflug) und `apply` (Scroll)
+  // schrieben beide `style.transform`, ohne voneinander zu wissen. Ein Scroll
+  // oder Resize während der 520ms ließ `apply` mitten in den Flug schreiben:
+  // gemessen zwei verschiedene y-Werte IN EINEM FRAME, unter Dauerscroll ein
+  // Vorwärtssprung von 110px auf die Endlage und Rückwärtssprünge bis 19,5px.
+  // Die mobile URL-Leiste löst beim Scrollen selbst ein `resize` aus – es
+  // braucht dafür keine ungewöhnliche Bedienung.
+  // Solange `einflugAktivRef` steht, gehört der Ball dem Einflug allein.
+  const einflugAktivRef = useRef(false);
+  // ⚠️ UND DER EINFLUG DARF ERST STARTEN, WENN DIE KÄSTEN ENDGÜLTIG SIND.
+  // Er friert `zielY` beim Start ein. Startete er während der Reveal-Übergänge,
+  // fröre er die um 20px verschobene Lage ein – genau Tobias' B1. Mein erster
+  // Fix hat nur nachgemessen und damit aus der stillen Fehlplatzierung einen
+  // SICHTBAREN Satz gemacht: Ball landet, steht 300ms, springt 20px (Kai).
+  const kaestenFinalRef = useRef(false);
   const kaestenRef = useRef([]); // Zeilen-/Elementkaesten des Inhalts, s. kaestenBauen
   const tickingRef = useRef(false);
 
@@ -344,16 +360,32 @@ export default function HeroScrollStage({
     // der einzelnen `Reveal`-Elemente sind gestaffelt und ändern sich mit dem
     // Inhalt. Eine Wartezeit wäre genau die Sorte Zahl, die später still nicht
     // mehr passt.
-    const nachReveal = (ereignis) => {
-      if (ereignis && ereignis.propertyName !== "transform") return;
-      kaestenBauen();
-      onScrollOrResize();
+    // ⚠️ WARUM EIN rAF-ABTASTEN UND KEIN `transitionend`: Das Ereignis feuert
+    // pro Eigenschaft und pro Element, es feuert GAR NICHT, wenn keine
+    // Übergänge laufen (reduzierte Bewegung, Wiederkehr aus dem Cache), und es
+    // sagt nichts über die GESCHWISTER. Ein erster Entwurf hörte darauf und
+    // brauchte trotzdem einen 1200-ms-Rückfall daneben – zwei Wege für eine
+    // Frage. Hier wird stattdessen der Zustand selbst geprüft, den wir meinen:
+    // Steht der Inhalt still? Das ist in allen drei Fällen dieselbe Antwort.
+    const AUFGEBEN_MS = 1500;
+    const beginnWarten = performance.now();
+    let warteRaf = 0;
+    const stehtStill = () => {
+      const h1 = stage.querySelector("h1");
+      if (!h1) return true;
+      const t = getComputedStyle(h1).transform;
+      return t === "none" || t === "matrix(1, 0, 0, 1, 0, 0)";
     };
-    const inhalt = inhaltRef?.current;
-    inhalt?.addEventListener("transitionend", nachReveal);
-    // Rückfall, falls keine Transition läuft (reduzierte Bewegung, Cache,
-    // bereits abgeschlossene Animation): einmal nachmessen, wenn alles steht.
-    const nachRevealTimer = window.setTimeout(nachReveal, 1200);
+    const kaestenFinalisieren = () => {
+      if (!stehtStill() && performance.now() - beginnWarten < AUFGEBEN_MS) {
+        warteRaf = requestAnimationFrame(kaestenFinalisieren);
+        return;
+      }
+      kaestenBauen();
+      kaestenFinalRef.current = true;
+      onScrollOrResize(); // startet damit auch den mobilen Einflug
+    };
+    warteRaf = requestAnimationFrame(kaestenFinalisieren);
 
     const apply = () => {
       tickingRef.current = false;
@@ -670,28 +702,52 @@ export default function HeroScrollStage({
       // zusätzliche Flächendrehung würde die echte Kugelrotation überlagern
       // und den ganzen Zweck der Sequenz aufheben – der Ball sähe aus, als
       // taumele er.
-      ball.style.transform = `translate3d(${(x - BALL_R).toFixed(1)}px, ${(
-        y - BALL_R
-      ).toFixed(1)}px, 0)`;
-      // Bildwahl aus dem Drehwinkel. Der Streifen deckt EINE volle Umdrehung
-      // ab, deshalb modulo 360 – `angle` läuft während der Übergabe auf
-      // mehrere tausend Grad hoch.
-      const bild =
-        ((Math.round((angle / 360) * BALL_SPRITE_FRAMES) % BALL_SPRITE_FRAMES) +
-          BALL_SPRITE_FRAMES) %
-        BALL_SPRITE_FRAMES;
-      // Prozent statt Pixel: dadurch ist die Bildwahl von der Anzeigegröße
-      // unabhängig und stimmt mobil wie am Desktop ohne Umrechnung.
-      ball.style.backgroundPositionX = `${(bild / (BALL_SPRITE_FRAMES - 1)) * 100}%`;
-      ball.style.opacity = clamp(ballOpacity, 0, 1).toFixed(3);
+      // ⚠️ WÄHREND DES EINFLUGS GEHÖRT DER BALL `schritt`, NICHT `apply`.
+      // Ohne diese Sperre schreiben beide in denselben Frame (Befund Kai).
+      if (!einflugAktivRef.current) {
+        ball.style.transform = `translate3d(${(x - BALL_R).toFixed(1)}px, ${(
+          y - BALL_R
+        ).toFixed(1)}px, 0)`;
+        // Bildwahl aus dem Drehwinkel. Der Streifen deckt EINE volle Umdrehung
+        // ab, deshalb modulo 360 – `angle` läuft während der Übergabe auf
+        // mehrere tausend Grad hoch.
+        const bild =
+          ((Math.round((angle / 360) * BALL_SPRITE_FRAMES) %
+            BALL_SPRITE_FRAMES) +
+            BALL_SPRITE_FRAMES) %
+          BALL_SPRITE_FRAMES;
+        // Prozent statt Pixel: dadurch ist die Bildwahl von der Anzeigegröße
+        // unabhängig und stimmt mobil wie am Desktop ohne Umrechnung.
+        ball.style.backgroundPositionX = `${(bild / (BALL_SPRITE_FRAMES - 1)) * 100}%`;
+        // Mobil bleibt der Ball unsichtbar, BIS der Einflug ihn holt. Sonst
+        // stünde er erst an seinem Platz und flöge dann von oben noch einmal
+        // dorthin – ein Auftritt für einen Ball, der schon da war.
+        // ⚠️ NUR AM SEITENANFANG VERSTECKEN. Der erste Entwurf blendete den
+        // Ball aus, bis der Einflug ihn holt – und koppelte damit seine
+        // SICHTBARKEIT an ein Ladeereignis. Wer scrollte, bevor die Kästen
+        // endgültig waren, sah ihn nie: drei rote Tests, und zwar genau der,
+        // der fragt „ist der Ball überhaupt irgendwann zu sehen".
+        // Ein Auftritt darf ein Auftritt sein; er darf nichts verstecken.
+        ball.style.opacity =
+          mobil && !eingeflogenRef.current && window.scrollY <= 0
+            ? "0"
+            : clamp(ballOpacity, 0, 1).toFixed(3);
+      }
 
       // Mobiler Ladeauftritt: Der Ball steht schon an seinem Platz (s. oben).
       // Er wird EINMAL von oben dorthin geführt, indem der erste Frame ihn
       // oberhalb absetzt und der zweite die Übergangszeit setzt. Danach nie
       // wieder – ein Übergang, der bei jedem Scroll neu startet, käme nie an
       // (dieselbe Falle wie bei der Lande-Animation der Leiste, Befund Kai K2).
-      if (mobil && !eingeflogenRef.current) {
+      if (mobil && !eingeflogenRef.current && kaestenFinalRef.current) {
         eingeflogenRef.current = true;
+        // Wer schon gescrollt hat, hat den Auftritt verpasst – dann führt
+        // `apply` direkt weiter, statt den Ball nachträglich hereinfliegen zu
+        // lassen. Ein Einflug in eine Seite, die der Leser bereits verlassen
+        // hat, wäre eine Bewegung ohne Anlass.
+        if (window.scrollY > 0) return;
+        einflugAktivRef.current = true;
+        ball.style.opacity = clamp(ballOpacity, 0, 1).toFixed(3);
         // ══ DER EINFLUG NIMMT DIE SEQUENZ MIT ═══════════════════════════════
         // Entscheidung Vivien (fünfte Runde). Vorher fiel der Ball mobil als
         // STANDBILD herein: `tb` ist mobil fest 1, der Drehwinkel damit
@@ -754,7 +810,12 @@ export default function HeroScrollStage({
               BALL_SPRITE_FRAMES) %
             BALL_SPRITE_FRAMES;
           el.style.backgroundPositionX = `${(bildJetzt / (BALL_SPRITE_FRAMES - 1)) * 100}%`;
-          if (t2 < 1) requestAnimationFrame(schritt);
+          if (t2 < 1) {
+            requestAnimationFrame(schritt);
+          } else {
+            // Ball zurück an `apply` übergeben – ab hier führt wieder der Scroll.
+            einflugAktivRef.current = false;
+          }
         };
         requestAnimationFrame(schritt);
       }
@@ -786,8 +847,15 @@ export default function HeroScrollStage({
     return () => {
       if (raf) cancelAnimationFrame(raf);
       tickingRef.current = false;
-      window.clearTimeout(nachRevealTimer);
-      inhalt?.removeEventListener("transitionend", nachReveal);
+      cancelAnimationFrame(warteRaf);
+      // ⚠️ ZURÜCKSETZEN, SONST ENTFÄLLT DER EINFLUG DAUERHAFT (Befund Kai):
+      // Nach einem `prefers-reduced-motion`-Wechsel hin und zurück baut React
+      // den Effekt neu auf, `eingeflogenRef` bliebe aber true – der Auftritt
+      // fände nie wieder statt. Das ist genau der Zustand, den Kais Mutation
+      // M9 simuliert, und M9 war grün.
+      eingeflogenRef.current = false;
+      einflugAktivRef.current = false;
+      kaestenFinalRef.current = false;
       window.removeEventListener("load", onScrollOrResize);
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);

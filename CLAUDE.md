@@ -575,6 +575,17 @@
     – **aber nur bei echter Änderung**, sonst wäre ein Konto mit Altwert unbedienbar (dasselbe
     Muster wie beim Geburtsdatum). **Lehre:** „kann nicht passieren" nur schreiben, wenn der Code
     es erzwingt, nicht wenn die Oberfläche es nicht anbietet.
+    ⚠️ **(0) DIE REGEL AUS (1) WURDE AM 15.08. VIERMAL IN EINER RUNDE GEBROCHEN —
+    von mir, und sie steht seit dem 14.08. hier.** Kai fand seinen Arbeitsbaum
+    dreimal verändert vor, seine erste vollständige Mutationsmatrix lief dadurch
+    gegen einen Stand von **zwei Commits vor der Prüfbasis** und meldete Befunde,
+    die reine Artefakte waren. Er hat sie selbst als solche erkannt und alles in
+    einem isolierten `git worktree` auf eigenem Port wiederholt — die Runde war
+    nur deshalb verwertbar. **Die Konsequenz ist nicht „besser aufpassen":
+    Wer ein Gate startet, arbeitet bis zu dessen Ende NICHT im selben Baum.**
+    Entweder man wartet, oder man baut selbst in einem Worktree. Ein Prüfer, der
+    sein eigenes Messwerkzeug gegen fremde Bewegung absichern muss, prüft nicht
+    mehr das Produkt.
     ⚠️ **Methodik-Lehren aus den Gates vom 14.08.:** (1) Während ein Browser-Gate gegen `next dev`
     läuft, darf im selben Arbeitsbaum **nicht weitergebaut** werden – der Prüfer sieht sonst Code,
     der nicht im geprüften Commit ist. (2) **`preview_stop` beendet den Dev-Server nicht**, es löst
@@ -707,10 +718,16 @@
     Dazu offen: Zickzack statt Sinuswelle für die Dribbel-Spur (die Notationsbegründung im Code
     trägt erst dann wieder), und der `drop-shadow` auf dem Hero-Ball – Patricks Freigabe deckt
     ihn, die Abweichung von `docs/VISUELLE-RICHTUNG` sollte aber bei Vivien liegen.
-20b. **Ball-Choreografie: EINGEFROREN am 15.08.2026 (Entscheidung Patrick).**
-    Roadmap 20 (a)–(d) ist umgesetzt, sechs Runden mit Vivien, drei Gate-Runden.
-    Die Defekte sind behoben; was bleibt, sind bewusst akzeptierte Abweichungen –
-    **kein Regressionsverdacht, sondern Entscheidungen:**
+20b. **Ball-Choreografie — die GESTALTUNG ist eingefroren, der Code war es nicht.**
+    Roadmap 20 (a)–(d) ist umgesetzt, sechs Runden mit Vivien, fünf Gate-Runden.
+    ⚠️ **Diese Überschrift log zwei Runden lang** (Befund Kai, fünfte Runde): Sie
+    sagte „EINGEFROREN", darunter stand „kein Regressionsverdacht, sondern
+    Entscheidungen" – und unmittelbar danach begann eine Liste behobener Defekte.
+    Wer die Überschrift überflog, las das Gegenteil des Inhalts. Eingefroren ist
+    seit dem 15.08. die **Gestaltungsrichtung** (keine weitere Vivien-Runde);
+    die **Umsetzung** trug danach noch zwei Befunde von Tobias und sieben von Kai.
+    Was hier als Abweichung steht, ist eine bewusste Entscheidung — **nicht als
+    Zusicherung lesen, dass nichts mehr offen ist.**
     (a) ⚠️ **ZUERST: WAS DIE ZAHL MISST** (Befund Kai, vierte Runde). Es gibt
     ZWEI Kennzahlen: **geometrisch** = Anteil des Balls im Sichtfeld abzüglich
     Navbar, **wirksam** = derselbe Wert **mal Deckkraft**. Sie wurden von mir
@@ -726,8 +743,12 @@
     greift: **Deckkraft in der Ruhelage 1,00 auf jedem Viewport**, wirksame
     Sichtbarkeit **80 % mobil / 83 % ab 768**. Prüfmaß erfüllt.
     (b) **320 px liegt außerhalb des Zielbereichs** (Entscheidung Vivien) – der
-    beginnt bei 375. Dort gilt nur „überhaupt sichtbar" (erfüllt: 43 %, ~138 px
-    Fenster), nicht die 150-px-Schwelle. Die war eine gegriffene runde Zahl.
+    beginnt bei 375. Dort gilt nur „überhaupt sichtbar" (erfüllt: **80 %**,
+    Fenster gemessen **132 px**), nicht die 150-px-Schwelle.
+    ⚠️ **Hier standen bis zum 15.08. abends „43 %, ~138 px"** (Befund Kai): Die
+    43 % stammten aus genau der Abdunkelung, die (a) zwei Zeilen weiter oben als
+    behoben feiert. Die Zahl, deren Beseitigung der Absatz meldet, stand darunter
+    noch als Beleg. **Eine korrigierte Aussage zieht ihre Belegzahlen mit.** Die war eine gegriffene runde Zahl.
     ⚠️ Diese Unterscheidung stand bis zur vierten Runde **nur hier und nicht im
     Test**: `ZIELBEREICH_AB`/`FENSTER_MIN` waren definiert und unbenutzt, weil
     meine Ergänzung am Suchmuster gescheitert war und ich die Fehlermeldung
