@@ -90,7 +90,21 @@ const TEXT_FADE_MARGIN = 24;
 // (Entscheid Vivien, docs/LANDING-KONZEPT-2026-08-11.md §17.2).
 const TEXT_DIM_FLOOR = 0.2;
 
-const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+// ⚠️ WIRFT bei invertierten Grenzen, statt still `max` zu liefern (Befund Kai,
+// dritte Runde). `Math.min(max, Math.max(min, v))` gibt bei `min > max`
+// wortlos `max` zurück – die Fehlerklasse aus CLAUDE.md Roadmap 15 (5):
+// „die Hilfsfunktion soll WERFEN statt still etwas Falsches zu liefern".
+// Real erreichbar an einem gezogenen Fenster: Die äußere Klammer der Bahnwahl
+// invertiert, sobald die Bühne niedriger als `2 * BALL_R + 16` wird.
+const clamp = (v, min, max) => {
+  if (min > max) {
+    throw new RangeError(
+      `clamp: untere Grenze ${min} liegt über der oberen ${max} – ` +
+        `das Ergebnis wäre stillschweigend falsch statt erkennbar kaputt.`,
+    );
+  }
+  return Math.min(max, Math.max(min, v));
+};
 
 // Deckkraft des Balls in Abhängigkeit vom Textblock: Auf Höhe von Badge/Headline/
 // Subline blendet er VOLLSTÄNDIG aus (nicht nur abgesenkt – eine reduzierte
@@ -130,7 +144,6 @@ function ballDeckkraftUeberKaesten(ballMitteY, kaesten, ballLinks, ballRechts) {
 }
 
 export default function HeroScrollStage({
-  ctaRef,
   inhaltRef,
   className = "",
   children,
@@ -199,8 +212,20 @@ export default function HeroScrollStage({
     //     gefüllte Fläche; der Ball hinter der orangen Pille ist ein
     //     Kontrastproblem über die ganze Fläche, nicht nur über der Schrift.
     //
-    // Einmal beim Aufsetzen und bei `load`/`resize` gebaut, NIE pro Bild:
-    // `getClientRects()` ist ein Layout-Zugriff.
+    // ⚠️ DIESER KOMMENTAR HAT FRÜHER GELOGEN (Befund Kai, dritte Runde).
+    // Hier stand „einmal beim Aufsetzen und bei load/resize gebaut". Tatsächlich
+    // läuft der Neubau bei JEDEM Scroll-Ereignis – und das ist nicht Verschwendung,
+    // sondern TRAGEND: `LandingHero` tauscht den Zweig, sobald die Auth-Prüfung
+    // auflöst (drei Schaltflächen in einer Reihe → fünf in zwei Reihen, anderer
+    // Headline-Text). Der Effekt läuft dabei nicht neu, weil seine Abhängigkeiten
+    // stabil sind. Ohne den Scroll-Neubau beschrieben die Kästen ab da dauerhaft
+    // das AUSGELOGGTE Layout – und zwar in genau der Variante, in der Tobias'
+    // Kontrastbefund entstand.
+    // Wer diesen Aufruf aus `onScrollOrResize` entfernt, bricht die eingeloggte
+    // Startseite, und kein Test merkt es (keiner lädt `/` eingeloggt).
+    // Kosten gemessen (Kai): 0,024ms je Ereignis, 0,3 % eines Kerns; mit 6facher
+    // CPU-Drosselung 1,6 %. Skaliert mit der Inhaltsgröße, nicht mit der
+    // Scrollfrequenz.
     const kaestenBauen = () => {
       const inhalt = inhaltRef?.current;
       if (!inhalt) {
@@ -233,8 +258,11 @@ export default function HeroScrollStage({
         if (r.width > 0 && r.height > 0) kaesten.push(relativ(r));
       }
       // Textknoten außerhalb der Bedienelemente – deren Fläche ist schon erfasst.
-      const lauf = document.createTreeWalker(inhalt, NodeFilter.SHOW_TEXT);
-      for (let k = lauf.nextNode(); k; k = lauf.nextNode()) {
+      const knotenLauf = document.createTreeWalker(
+        inhalt,
+        NodeFilter.SHOW_TEXT,
+      );
+      for (let k = knotenLauf.nextNode(); k; k = knotenLauf.nextNode()) {
         if (!k.nodeValue || !k.nodeValue.trim()) continue;
         let drin = false;
         for (const el of bedienelemente) {
@@ -281,12 +309,12 @@ export default function HeroScrollStage({
       }
 
       const ball = ballRef.current;
-      // ⚠️ `ctaRef` wird seit dem 15.08.2026 NICHT mehr gebraucht: Der Ball
-      // zielt nicht mehr auf die Schaltfläche (s. Bahn-Entscheidung unten). Die
-      // Prop bleibt vorerst in der Signatur, damit `LandingHero` unverändert
-      // bleibt – aber es wird nicht mehr darauf gewartet. Vorher stand hier
-      // `if (!cta || !ball) return;`: Ohne CTA hätte es gar keinen Ball gegeben,
-      // was jetzt eine willkürliche Kopplung wäre.
+      // ⚠️ KEIN `ctaRef` mehr (Befund Kai, dritte Runde). Der Ball zielt seit
+      // Viviens Bahn-Entscheidung nicht mehr auf die Schaltfläche; die Prop
+      // wurde noch durchgereicht und stand in der Abhängigkeitsliste, ohne je
+      // gelesen zu werden – sie hielt `LandingHero` im Glauben, sie sei nötig.
+      // Vorher stand hier zusätzlich `if (!cta || ...) return;`: Ohne CTA hätte
+      // es gar keinen Ball gegeben, was heute eine willkürliche Kopplung wäre.
       if (!ball) return;
 
       // Radius am Element gemessen, nicht angenommen – s. Kommentar oben.
@@ -336,7 +364,8 @@ export default function HeroScrollStage({
       //
       // Warum sie danach nötig ist: „Der Ball geht über den obersten Kasten"
       // scheitert, sobald über dem obersten Kasten kein Platz ist. Gemessen bei
-      // 768: erste Headline-Zeile bei y = 140, gebraucht werden 2·88 + 8 = 184.
+      // 768: erste Headline-Zeile bei y 140..254 (114px hoher Zeilenkasten,
+      // Display-Font mit leading-[0.9]), gebraucht werden `2 * BALL_R + 16` = 192.
       // Vorher fiel dann stillschweigend die untere Klammer ein, der Ball ruhte
       // ÜBERLAPPEND, und die Abdunkelung kaschierte es. Jetzt stellt der Code
       // die Frage „passt er da überhaupt hin?", statt sie zu übergehen.
@@ -368,17 +397,17 @@ export default function HeroScrollStage({
       // geklammert werden, nicht daneben.
       let lueckeOben = null;
       let lueckeUnten = null;
-      let lauf = 0;
+      let unterkante = 0; // Unterkante des zuletzt betrachteten belegten Bereichs
       for (const [oben, unten] of belegt) {
-        if (oben - lauf >= noetig) {
-          lueckeOben = lauf;
+        if (oben - unterkante >= noetig) {
+          lueckeOben = unterkante;
           lueckeUnten = oben;
           break;
         }
-        lauf = Math.max(lauf, unten);
+        unterkante = Math.max(unterkante, unten);
       }
-      if (lueckeUnten === null && rect.height - lauf >= noetig) {
-        lueckeOben = lauf;
+      if (lueckeUnten === null && rect.height - unterkante >= noetig) {
+        lueckeOben = unterkante;
         lueckeUnten = rect.height;
       }
 
@@ -520,8 +549,9 @@ export default function HeroScrollStage({
 
       // Textblock-Ausblendung mit der Bahn-Deckkraft verrechnen (beide Ursachen
       // multiplizieren sich, damit das Einblenden nicht überschrieben wird).
-      // Die Kästen sind beim Aufsetzen und bei `resize` vermessen, NICHT hier –
-      // `getClientRects()` pro Bild wäre ein Layout-Zugriff je Frame.
+      // Die Kästen werden im Scroll-Listener vermessen, nicht hier – pro BILD
+      // wäre `getClientRects()` ein Layout-Zugriff je Frame. Warum im Listener
+      // und nicht nur bei `resize`: s. Kommentar an `kaestenBauen`.
       // Ebenfalls bühnenrelativ: `x`/`y` sind es ohnehin, die Kästen jetzt auch.
       ballOpacity *= ballDeckkraftUeberKaesten(
         y,
@@ -595,7 +625,7 @@ export default function HeroScrollStage({
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);
     };
-  }, [animated, ctaRef, inhaltRef]);
+  }, [animated, inhaltRef]);
 
   return (
     <div

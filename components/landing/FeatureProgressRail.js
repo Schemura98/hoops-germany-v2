@@ -292,7 +292,8 @@ export default function FeatureProgressRail({ labels = [] }) {
       // sonst läuft wieder jeder Frame durch eine überschwingende Kurve.
       if (t < ARRIVE_T) {
         if (ballMobileRef.current) ballMobileRef.current.style.transition = "";
-        if (ballDesktopRef.current) ballDesktopRef.current.style.transition = "";
+        if (ballDesktopRef.current)
+          ballDesktopRef.current.style.transition = "";
       }
 
       // Mobil: Spitze des sich fuellenden Balkens – dieselbe Zahl t, die auch
@@ -314,8 +315,7 @@ export default function FeatureProgressRail({ labels = [] }) {
             1,
           )}px, -50%, 0) rotate(${rollwinkel(strecke).toFixed(1)}deg)`;
           ballMobileRef.current.style.opacity = einblendung.toFixed(3);
-
-          }
+        }
       }
 
       // Desktop: zwischen erstem und letztem Punkt interpolieren, mit

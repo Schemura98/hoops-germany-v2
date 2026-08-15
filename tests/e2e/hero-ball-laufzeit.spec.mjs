@@ -74,30 +74,49 @@ const abtasten = async (schritt) => {
     const s = buehne.getBoundingClientRect();
     const deck = Number(ball.style.opacity || 0);
     // Sichtbarer Anteil NACH dem Beschnitt durch die overflow-hidden-Bühne.
-    const breiteDrin = Math.max(0, Math.min(b.right, s.right) - Math.max(b.left, s.left));
-    const hoeheDrin = Math.max(0, Math.min(b.bottom, s.bottom) - Math.max(b.top, s.top));
-    const anteil = b.width && b.height ? (breiteDrin * hoeheDrin) / (b.width * b.height) : 0;
+    const breiteDrin = Math.max(
+      0,
+      Math.min(b.right, s.right) - Math.max(b.left, s.left),
+    );
+    const hoeheDrin = Math.max(
+      0,
+      Math.min(b.bottom, s.bottom) - Math.max(b.top, s.top),
+    );
+    const anteil =
+      b.width && b.height ? (breiteDrin * hoeheDrin) / (b.width * b.height) : 0;
     // Schaltflächen INNERHALB der Bühne – nur die kann der Ball verdecken.
     const tasten = [...buehne.querySelectorAll("a")]
       .map((a) => ({
         text: (a.textContent || "").trim().slice(0, 30),
         r: a.getBoundingClientRect(),
       }))
-      .filter((t) => t.r.width > 0 && t.r.top >= s.top - 1 && t.r.bottom <= s.bottom + 1)
+      .filter(
+        (t) =>
+          t.r.width > 0 && t.r.top >= s.top - 1 && t.r.bottom <= s.bottom + 1,
+      )
       .map((t) => ({
         text: t.text,
         ueberlappt:
-          Math.max(0, Math.min(b.right, t.r.right) - Math.max(b.left, t.r.left)) > 0 &&
-          Math.max(0, Math.min(b.bottom, t.r.bottom) - Math.max(b.top, t.r.top)) > 0,
+          Math.max(
+            0,
+            Math.min(b.right, t.r.right) - Math.max(b.left, t.r.left),
+          ) > 0 &&
+          Math.max(
+            0,
+            Math.min(b.bottom, t.r.bottom) - Math.max(b.top, t.r.top),
+          ) > 0,
       }));
-        // ⚠️ SICHTBARE FLÄCHE IM SICHTFELD, nicht in der Bühne (Befund Tobias,
+    // ⚠️ SICHTBARE FLÄCHE IM SICHTFELD, nicht in der Bühne (Befund Tobias,
     // dritte Runde). Die alte Rechnung schnitt den Ball nur gegen die
     // `overflow-hidden`-Bühne – ein Ball mit Deckkraft 1,00 mitten in einer
     // längst hochgescrollten Bühne war damit „sichtbar". Genau so blieb
     // unbemerkt, dass er auf 375/390/430 über den GESAMTEN Scrollweg 0 px²
     // im Bild hatte, in 176 gemessenen Positionen je Breite.
     // Die Navbar zählt dabei mit: Sie ist sticky und deckt die obersten 64px.
-    const sichtL = Math.max(0, Math.min(b.right, window.innerWidth) - Math.max(b.left, 0));
+    const sichtL = Math.max(
+      0,
+      Math.min(b.right, window.innerWidth) - Math.max(b.left, 0),
+    );
     const sichtH = Math.max(
       0,
       Math.min(b.bottom, window.innerHeight) - Math.max(b.top, NAVBAR),
@@ -139,7 +158,7 @@ test.describe("Hero-Ball – Laufzeit auf /", () => {
         beste,
         `Der Ball hat auf ${breite}px an KEINER Scrollposition sichtbare Fläche ` +
           `im Sichtfeld (unterhalb der Navbar). Er mag technisch in der Bühne ` +
-          `liegen, korrekt angeschnitten und voll deckend – gesehen wird er nie.`
+          `liegen, korrekt angeschnitten und voll deckend – gesehen wird er nie.`,
       ).toBeGreaterThan(0);
 
       // Und nicht nur ein Aufblitzen: mindestens ein Viertel des Balls muss
@@ -148,19 +167,27 @@ test.describe("Hero-Ball – Laufzeit auf /", () => {
       expect(
         beste,
         `Der Ball ist auf ${breite}px zwar nicht ganz unsichtbar, aber nie ` +
-          `nennenswert im Bild (beste Sichtbarkeit ${Math.round(beste)} px²).`
+          `nennenswert im Bild (beste Sichtbarkeit ${Math.round(beste)} px²).`,
       ).toBeGreaterThan(ballFlaeche * 0.25);
     });
 
-    test(`${breite}px: der Ball ist am Ruhepunkt zu genau 20 % angeschnitten`, async ({ page }) => {
+    test(`${breite}px: der Ball ist am Ruhepunkt zu genau 20 % angeschnitten`, async ({
+      page,
+    }) => {
       await page.setViewportSize({ width: breite, height: 812 });
       await page.goto("/", { waitUntil: "networkidle" });
 
       const proben = await page.evaluate(abtasten, 12);
-      expect(proben, ".hero-ball-sprite nicht gefunden – rendert der Hero-Ball?").not.toBeNull();
+      expect(
+        proben,
+        ".hero-ball-sprite nicht gefunden – rendert der Hero-Ball?",
+      ).not.toBeNull();
 
       const sichtbar = proben.filter((p) => p.deck > 0.02);
-      expect(sichtbar.length, "der Ball war auf der ganzen Strecke unsichtbar").toBeGreaterThan(5);
+      expect(
+        sichtbar.length,
+        "der Ball war auf der ganzen Strecke unsichtbar",
+      ).toBeGreaterThan(5);
 
       // ⚠️ DAS VERSPRECHEN HAT SICH AM 15.08.2026 GEÄNDERT (Entscheidung Vivien).
       // Bis dahin sicherte dieser Test zu, dass der Ball am Ruhepunkt
@@ -188,7 +215,7 @@ test.describe("Hero-Ball – Laufzeit auf /", () => {
           anschnitt,
           `scrollY ${p.y}: ${anschnitt.toFixed(1)} % des Balls sind abgeschnitten, ` +
             `erwartet sind 20 % ± 2 %. Zu wenig = er liest sich als Grafik statt als Körper; ` +
-            `zu viel = er verschwindet (vorher waren es 97 %).`
+            `zu viel = er verschwindet (vorher waren es 97 %).`,
         ).toBeGreaterThan(18);
         expect(anschnitt).toBeLessThan(22);
       }
@@ -204,7 +231,10 @@ test.describe("Hero-Ball – Laufzeit auf /", () => {
       expect(proben).not.toBeNull();
 
       const verstoesse = proben
-        .filter((p) => p.deck > DIM_FLOOR + TOLERANZ && p.tasten.some((t) => t.ueberlappt))
+        .filter(
+          (p) =>
+            p.deck > DIM_FLOOR + TOLERANZ && p.tasten.some((t) => t.ueberlappt),
+        )
         .map((p) => ({
           y: p.y,
           deck: p.deck,
@@ -216,7 +246,7 @@ test.describe("Hero-Ball – Laufzeit auf /", () => {
         `Der Ball verdeckt Schaltflächen mit mehr als ${DIM_FLOOR} Deckkraft. ` +
           `Genau so entstand die Kontrastregression (1,67:1 statt 4,5:1): ` +
           `Der Abdunkelungs-Bezug (inhaltRef) muss ALLE Flächen umfassen, über die der Ball zieht.\n` +
-          JSON.stringify(verstoesse.slice(0, 5), null, 2)
+          JSON.stringify(verstoesse.slice(0, 5), null, 2),
       ).toEqual([]);
     });
   }
