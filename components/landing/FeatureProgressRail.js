@@ -115,7 +115,8 @@ export default function FeatureProgressRail({ labels = [] }) {
   const goalMobileRef = useRef(null);
   const ballDesktopRef = useRef(null);
   const goalDesktopRef = useRef(null);
-  const goalRingRef = useRef(null); // nur der Ring des Korb-Emblems (fuer den Farbblitz)
+  const goalRingRef = useRef(null);
+  const goalMobileRingRef = useRef(null); // nur der Ring des Korb-Emblems (fuer den Farbblitz)
   const spurDesktopRef = useRef(null); // Laufweg-Spur der Desktop-Leiste
   const activeRef = useRef(-1);
   const arrivedRef = useRef(false); // einmalige Ankunft – danach eingefroren
@@ -158,6 +159,8 @@ export default function FeatureProgressRail({ labels = [] }) {
         ballMobileRef.current.style.opacity = "1";
       }
       if (goalMobileRef.current) goalMobileRef.current.style.opacity = "1";
+      if (goalMobileRingRef.current)
+        goalMobileRingRef.current.style.opacity = "1";
 
       const letzterDot = dotsRef.current[labels.length - 1];
       if (
@@ -168,7 +171,13 @@ export default function FeatureProgressRail({ labels = [] }) {
       ) {
         const colRect = railColRef.current.getBoundingClientRect();
         const zielRect = goalDesktopRef.current.getBoundingClientRect();
-        const zielY = zielRect.top + zielRect.height / 2 - colRect.top;
+        // ⚠️ NICHT MEHR DIE EMBLEM-MITTE (Entscheidung Vivien): Der Ball ruht
+        // UNTER dem Ring, bei 15 von 28px Emblemhöhe (viewBox-y ≈ 7,5). Erst
+        // dann kreuzt die vordere Ringkante die Ballkuppe – auf der Mitte lag
+        // er über dem Ring und deckte ihn zu.
+        const RUHE_ANTEIL = 15 / 28;
+        const zielY =
+          zielRect.top + zielRect.height * RUHE_ANTEIL - colRect.top;
         if (animiert) {
           // "back"-Easing statt linear: der Ball schwingt beim Einsetzen ganz
           // leicht über das Ziel hinaus und pendelt sich ein – ein Aufsetzer,
@@ -480,7 +489,10 @@ export default function FeatureProgressRail({ labels = [] }) {
             className="absolute bottom-full right-0 mb-1 opacity-0 transition-opacity duration-300 motion-reduce:transition-none"
             title="Ziel: Nachspielzeit"
           >
-            <HoopEmblem className="pointer-events-none block h-3.5 w-5" />
+            <HoopEmblem
+              teil="netz"
+              className="pointer-events-none block h-7 w-10"
+            />
           </span>
           <div className="absolute inset-0 overflow-hidden rounded-full bg-navy-700">
             <div
@@ -495,6 +507,15 @@ export default function FeatureProgressRail({ labels = [] }) {
             ref={ballMobileRef}
             className="absolute left-0 top-1/2"
           />
+          {/* Der Ring NACH dem Ball – gleiche Lage wie das Netz oben, dadurch
+              liegt er davor. Erst damit stimmt das Bild „im Netz". */}
+          <span
+            ref={goalMobileRingRef}
+            aria-hidden="true"
+            className="pointer-events-none absolute bottom-full right-0 mb-1 opacity-0 transition-opacity duration-300 motion-reduce:transition-none"
+          >
+            <HoopEmblem teil="ring" className="block h-7 w-10" />
+          </span>
         </div>
       </div>
 
@@ -544,11 +565,11 @@ export default function FeatureProgressRail({ labels = [] }) {
           ))}
           <span
             ref={goalDesktopRef}
-            className="mt-1 h-3.5 w-5 flex-shrink-0 opacity-0"
+            className="mt-1 h-7 w-10 flex-shrink-0 opacity-0"
             title="Ziel: Nachspielzeit"
           >
             <HoopEmblem
-              ringRef={goalRingRef}
+              teil="netz"
               className="pointer-events-none block h-full w-full"
             />
           </span>
@@ -558,6 +579,20 @@ export default function FeatureProgressRail({ labels = [] }) {
             ref={ballDesktopRef}
             className="absolute left-1/2 top-0"
           />
+          {/* Der Ring liegt VOR dem Ball. Das Netz-Emblem ist das letzte Kind
+              IM Fluss, also am Fuß der Spalte – diese Auflage deckt es exakt.
+              Der Farbblitz hängt an diesem Ring und wird dadurch überhaupt
+              erst gesehen (er lag bisher vollständig hinter dem Ball). */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute bottom-0 left-1/2 h-7 w-10 -translate-x-1/2"
+          >
+            <HoopEmblem
+              teil="ring"
+              ringRef={goalRingRef}
+              className="block h-full w-full"
+            />
+          </span>
         </div>
       </div>
     </div>

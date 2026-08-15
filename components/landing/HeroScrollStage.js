@@ -97,7 +97,7 @@ const EINFLUG_MS = 520; // Vivien: Vorlauf vor der Headline nicht verspielen
 // ist überhaupt zu sehen, dass die Nähte über eine Kugel wandern.
 // Mobil kleiner, weil der Ball sonst mehr als ein Drittel der Breite belegt und
 // die Headline erdrückt, die er eigentlich begleiten soll.
-// Die Größe steht als Tailwind-Klasse an der Komponente (mobil 88px (h-[88px]), ab md
+// Die Größe steht als Tailwind-Klasse an der Komponente (mobil 72px (h-[72px]) — Entscheidung Vivien 16.08.2026, s. u., ab md
 // 176px), NICHT hier – der Controller MISST sie am Element (`offsetWidth`).
 // Grund: Der Radius steckt an drei Stellen (Positionierung ab Mittelpunkt,
 // Startlage über dem Bildrand, Rollwinkel). Eine zweite Quelle für dieselbe
@@ -111,6 +111,32 @@ const TEXT_FADE_MARGIN = 24;
 // zur Schaltfläche). 20% halten die Bewegung durchgehend erkennbar, ohne das
 // scharfkantige Aufblitzen zwischen den Buchstaben, das der Grund für die 0 war
 // (Entscheid Vivien, docs/LANDING-KONZEPT-2026-08-11.md §17.2).
+// ══ WAS DIE ABDUNKELUNG ABSICHERT — UND WAS SIE NICHT IST ═══════════════════
+// Regel Vivien (16.08.2026), nachdem Kai gemessen hatte, dass die minimale
+// Ball-Deckkraft auf 320–430px über den GESAMTEN Scrollweg 1,00 beträgt:
+//
+//   Die Abdunkelung sichert die REISE des Balls ab, nicht seine RUHELAGE.
+//   Wo der Ball keine scroll-gesteuerte Strecke hat – heute unterhalb 768px –,
+//   MUSS die minimale Deckkraft über den gesamten Auftritt 1,00 messen. Ein
+//   Wert darunter ist dort kein Effekt, sondern der Nachweis einer fehlerhaften
+//   Platzierung.
+//
+// ⚠️ DIESE MECHANIK IST DESHALB NICHT TOT UND DARF NICHT ENTFERNT WERDEN.
+// Ab 768 fällt der Ball scroll-gesteuert durch die ganze Bühne und kreuzt
+// Zeilen und Flächen, die keine Platzierungslogik vorher wegräumen kann – dort
+// trägt sie. Mobil ist `tb` konstant 1: Der Ball kommt in 520 ms senkrecht in
+// eine Lage, welche die Streifenlogik per Konstruktion freihält. Es gibt schlicht
+// nichts zu überqueren. Sie ist breitenunabhängig geschrieben und wird in dem
+// Moment wieder tragend, in dem mobil je wieder eine Fallstrecke entsteht.
+//
+// ⚠️ UND DER SATZ, DER DIE VIER RUNDEN DAVOR ZUSAMMENFASST (Vivien):
+//   Ein gedimmter Ball ist eine misslungene Platzierung, kein Stilmittel.
+// Die gedämpfte Anwesenheit war nie die gewollte Wirkung – sie war der Preis
+// dafür, dass der Ball sich ein Rechteck mit Schrift teilen musste (Tobias:
+// „Barrierefreiheit gewonnen, Wirkung verloren", mittlere Deckkraft 0,66 → 0,36).
+// Lückensuche und Streifenlage existieren nur, um diesen Preis nicht mehr zu
+// zahlen. Ihn nach dem Erfolg freiwillig wieder zu zahlen, machte vier Runden
+// rückgängig.
 const TEXT_DIM_FLOOR = 0.2;
 
 // ⚠️ WIRFT bei invertierten Grenzen, statt still `max` zu liefern (Befund Kai,
@@ -184,7 +210,7 @@ function ballDeckkraftUeberKaesten(
     // Funktion gebaut wurde (1,67:1 statt 4,5:1 auf „Teams entdecken").
     // Bei einer Textzeile ist eine streifende Berührung dagegen kein
     // Kontrastproblem; dort trägt die Rampe.
-    const f = k.taste ? 1 : Math.min(1, eindringen / TEXT_FADE_MARGIN);
+    const f = k.flaeche ? 1 : Math.min(1, eindringen / TEXT_FADE_MARGIN);
     const d = 1 - f * (1 - TEXT_DIM_FLOOR);
     if (d < kleinste) kleinste = d;
   }
@@ -315,14 +341,45 @@ export default function HeroScrollStage({
         left: r.left - sr.left,
         right: r.right - sr.left,
       });
+      // ══ FLÄCHE ODER TINTE — NICHT „BEDIENBAR ODER TEXT" ═══════════════════
+      // Entscheidung Vivien (16.08.2026). Die alte Achse hieß `taste` und
+      // fragte nach BEDIENBARKEIT. Das war zweimal falsch:
+      //   · Kai maß nach, dass von den drei Schaltflächen nur „Als Spieler
+      //     registrieren" gefüllt ist (rgb(240,122,39)) – dahinter liegt der
+      //     Ball ohnehin unsichtbar. Die beiden anderen sind rgba(0,0,0,0),
+      //     und DORT entstand Tobias' Kontrastbefund von 1,67:1.
+      //   · Vivien maß nach, dass das orange Eyebrow-Badge – ein `span`, also
+      //     nach alter Achse gar kein Kasten – nur über seine TEXTZEILEN
+      //     einging. Die sind durch `px-4` beidseitig 16px schmaler als die
+      //     gezeichnete Fläche: gemessen 291, gezeichnet 307. Der Kastenbau
+      //     untertrieb eine gefüllte Fläche um 32px Breite, und der Hero-Ball
+      //     stand dadurch auf 375 nur **2,65px** neben ihr.
+      // Die richtige Achse ist deshalb, was Vivien so formuliert hat:
+      //
+      //   Ein Kasten wird als Ganzes geschützt, wenn seine Grenze eine Fläche
+      //   behauptet — eine Taste, ein Badge, ein Panel. Eine Textzeile ist nur
+      //   so breit wie ihre Tinte.
+      //
+      // Mitglieder sind daher `a`/`button` UND jedes Element mit einer nicht
+      // durchsichtigen Hintergrundfarbe.
       const kaesten = [];
-      const bedienelemente = new Set(inhalt.querySelectorAll("a, button"));
-      for (const el of bedienelemente) {
+      const flaechen = new Set(inhalt.querySelectorAll("a, button"));
+      for (const el of inhalt.querySelectorAll("*")) {
+        if (flaechen.has(el)) continue;
+        const bg = getComputedStyle(el).backgroundColor;
+        // `transparent` und `rgba(…, 0)` sind beide durchsichtig; alles andere
+        // zeichnet eine Fläche, hinter der der Ball nichts beiträgt.
+        if (!bg || bg === "transparent") continue;
+        const a = /^rgba?\([^)]*?,\s*([\d.]+)\s*\)$/.exec(bg);
+        if (a && Number(a[1]) === 0) continue;
+        flaechen.add(el);
+      }
+      for (const el of flaechen) {
         const r = el.getBoundingClientRect();
         if (r.width > 0 && r.height > 0)
-          kaesten.push({ ...relativ(r), taste: true });
+          kaesten.push({ ...relativ(r), flaeche: true });
       }
-      // Textknoten außerhalb der Bedienelemente – deren Fläche ist schon erfasst.
+      // Textknoten außerhalb der Flächen – deren Ausdehnung ist schon erfasst.
       const knotenLauf = document.createTreeWalker(
         inhalt,
         NodeFilter.SHOW_TEXT,
@@ -330,7 +387,7 @@ export default function HeroScrollStage({
       for (let k = knotenLauf.nextNode(); k; k = knotenLauf.nextNode()) {
         if (!k.nodeValue || !k.nodeValue.trim()) continue;
         let drin = false;
-        for (const el of bedienelemente) {
+        for (const el of flaechen) {
           if (el.contains(k)) {
             drin = true;
             break;
@@ -341,7 +398,7 @@ export default function HeroScrollStage({
         bereich.selectNodeContents(k);
         for (const r of bereich.getClientRects()) {
           if (r.width > 0 && r.height > 0)
-            kaesten.push({ ...relativ(r), taste: false });
+            kaesten.push({ ...relativ(r), flaeche: false });
         }
       }
       kaestenRef.current = kaesten;
@@ -776,7 +833,16 @@ export default function HeroScrollStage({
         const startY = y0 - BALL_R;
         const zielY = y - BALL_R;
         const weg = zielY - startY;
-        const gesamtWinkel = (weg / BALL_R) * (180 / Math.PI);
+        // ══ EINE VOLLE UMDREHUNG, VIEWPORT-UNABHÄNGIG ═══════════════════════
+        // Entscheidung Vivien (16.08.2026). Vorher `weg / BALL_R`, gemessen
+        // rund 223° – also nur ~20 der 32 Bilder, und der Betrag hing an der
+        // BALLGRÖSSE: ein größerer Ball drehte sich WENIGER. Das hat so nie
+        // jemand gemeint.
+        // 360° ist eine abgeschlossene Geste und nutzt die 104 KB, für die wir
+        // die Sequenz gebaut haben. Tempo zur Kontrolle: 360° in 520 ms sind
+        // 692 °/s – ein echter Freiwurf liegt bei 720–1080 °/s. Es wirbelt
+        // also nicht, es ist eher ruhiger als die Wirklichkeit.
+        const gesamtWinkel = 360;
         const beginn = performance.now();
         const schritt = () => {
           const el = ballRef.current;
@@ -804,8 +870,22 @@ export default function HeroScrollStage({
             yJetzt -= Math.sin(settle * Math.PI) * 4 * (1 - settle);
           }
           el.style.transform = `translate3d(${(x - BALL_R).toFixed(1)}px, ${yJetzt.toFixed(1)}px, 0)`;
+          // ⚠️ DIE BILDWAHL FOLGT EINER EIGENEN, FLACHEREN KURVE ALS DIE LAGE
+          // (Entscheidung Vivien). Vorher lief sie über `e` (easeOutQuint) –
+          // dieselbe stark verzögerte Kurve wie die Position. Folge, von
+          // Tobias gemessen: ab t = 283 ms von 520 ms kein Bildwechsel mehr,
+          // gezeigt wurden 14 statt 32 Bilder.
+          // Das ist schlimmer als „ein Ball, der zur Ruhe kommt": Der sichtbare
+          // Nachlauf von easeOutQuint liegt GENAU in diesen Millisekunden – der
+          // Ball kriecht also spürbar weiter, während seine Textur eingefroren
+          // ist. Genau der Defekt, der auf der Leiste schon behoben wurde.
+          // ⚠️ UND NICHT LINEAR: Dann drehte die Textur gleichförmig, während
+          // die Lage bremst – der Ball würde rutschen. Die Drehung muss
+          // mitbremsen, nur schwächer. easeOutQuad legt den letzten Bildwechsel
+          // rund 64 ms vor den Stillstand statt 225 ms.
+          const eBild = 1 - Math.pow(1 - t2, 2); // easeOutQuad
           const bildJetzt =
-            ((Math.round((gesamtWinkel * e * BALL_SPRITE_FRAMES) / 360) %
+            ((Math.round((gesamtWinkel * eBild * BALL_SPRITE_FRAMES) / 360) %
               BALL_SPRITE_FRAMES) +
               BALL_SPRITE_FRAMES) %
             BALL_SPRITE_FRAMES;
@@ -879,7 +959,7 @@ export default function HeroScrollStage({
       {animated && (
         <BallSprite
           ref={ballRef}
-          className="h-[88px] w-[88px] md:h-[176px] md:w-[176px]"
+          className="h-[72px] w-[72px] md:h-[176px] md:w-[176px]"
         />
       )}
 

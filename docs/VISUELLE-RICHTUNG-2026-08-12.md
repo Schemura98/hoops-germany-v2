@@ -174,6 +174,34 @@ dunklen), kein Glow/Blur-Schein hinter Headlines, kein Glassmorphism. Die
 gesamte Tiefe entsteht aus Flächenstufen (`ink-950` → `ink-800` → `ink-700`)
 und einer 1px-Haarlinie, nicht aus Schatten oder Leuchteffekten.
 
+**Die Grenze verläuft zwischen Oberfläche und Gegenstand.** *(Ergänzung Vivien,
+16.08.2026 — die Regel darüber galt bis dahin pauschal und beantwortete den
+Ball-Fall falsch.)* Das Verbot gilt den Flächen der Oberfläche selbst — Gründe,
+Panels, Karten, Tasten, Leisten, Kästen hinter Schrift. Sie bleiben flach; ihre
+Tiefe kommt aus der Flächenstufe und der 1px-Haarlinie, nie aus Verlauf,
+Schatten oder Glow.
+
+Es gilt **nicht** für einen dargestellten **Gegenstand** in einer Szene. Ein
+Basketball ist eine Kugel; Körperverlauf, Kantenabdunklung und Bouncelight sind
+dort **Modellierung**, nicht Dekoration — sie beschreiben eine Form, statt eine
+Fläche interessanter zu machen. Deshalb trägt der Hero-Ball (`BallSprite`)
+Verläufe **in** sich.
+
+Die Probe, wenn ein Fall unklar ist: *Beschreibt der Effekt die Form eines
+Dinges — oder schmückt er eine Fläche der Oberfläche?* Nur die erste Antwort ist
+zulässig.
+
+Der geworfene **Schatten** bleibt in beiden Fällen verboten, und das ist keine
+Inkonsequenz: Ein Verlauf im Ball beschreibt den **Ball**, ein Schlagschatten
+behauptet eine **Lichtquelle und eine Fläche dahinter** — also Eigenschaften der
+Oberfläche, die es hier nicht gibt. Genau deshalb ist der `drop-shadow` am
+Hero-Ball am 15.08.2026 entfallen; seine Tiefe kommt aus dem Anschnitt am
+Bühnenrand.
+
+Flache Geschwister derselben Familie sind ausdrücklich in Ordnung: Der
+Streckenball (`RailBallGlyph`, 20 px) bleibt reines `brand-500` ohne Verlauf —
+in dieser Größe ist Modellierung nicht lesbar und wäre nur Rauschen.
+
 ### 2.2 Typografie
 
 **Display: Big Shoulders** (Google Fonts, variabel, Gewichte „Thin" bis

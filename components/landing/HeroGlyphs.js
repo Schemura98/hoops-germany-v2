@@ -105,7 +105,7 @@ export const BallSprite = forwardRef(function BallSprite(
 // nichts das Emblem dreht. Genau der Zustand, in dem der Drehpunkt des
 // Streckenballs zwei Tage lang lag, bevor er beim ersten `rotate()` auffiel.
 export const HoopEmblem = forwardRef(function HoopEmblem(
-  { ringRef, className = "", style, ...props },
+  { ringRef, teil = "voll", className = "", style, ...props },
   ref,
 ) {
   return (
@@ -130,24 +130,42 @@ export const HoopEmblem = forwardRef(function HoopEmblem(
       style={{ ...style, transformOrigin: "10px 3px" }}
       {...props}
     >
-      <ellipse
-        ref={ringRef}
-        cx="10"
-        cy="3"
-        rx="8.5"
-        ry="2.4"
-        stroke="#F68C3E"
-        strokeWidth="1.6"
-      />
-      <g
-        stroke="#F5F7FA"
-        strokeOpacity=".55"
-        strokeWidth="0.9"
-        strokeLinecap="round"
-      >
-        <path d="M2.2 3.6Q3.4 9 6.6 12.4M17.8 3.6Q16.6 9 13.4 12.4M10 5.4V12.8" />
-        <path d="M4 6.6Q10 8.9 16 6.6M5.8 9.8Q10 11.6 14.2 9.8" />
-      </g>
+      {/* ══ DER BALL LANDET IM NETZ, NICHT AUF DEM EMBLEM ══════════════════
+          Entscheidung Vivien (16.08.2026) auf Tobias\' Befund. Der 20px-Ball
+          wurde mittig auf ein 20x14-Emblem gesetzt: gleiche Breite, 6px mehr
+          Höhe – er deckte es VOLLSTÄNDIG, Ring inklusive, und der Farbblitz
+          `rail-goal-flash-ring` lag zu 100 % dahinter.
+          Viviens Wort dafür: „Das ist keine Aussage, es ist ein Verschwinden."
+          Ein Ball im Netz liegt UNTER dem Ring und VOR dem Netz – man sieht den
+          Ring vor ihm. Ein Kreis, der ein Icon exakt überdeckt, liest sich als
+          Punkt, der auf einem Icon geparkt hat. Und dieses Emblem ist das ZIEL
+          der seitenlangen Reise: Löscht die Ankunft das Ziel aus, hat die Reise
+          kein sichtbares Ende.
+          Deshalb ist das Emblem in zwei Ebenen zerlegt. Der Aufrufer zeichnet
+          `netz` hinter den Ball und `ring` davor; `voll` bleibt für jede Stelle,
+          an der kein Ball ankommt. */}
+      {teil !== "netz" && (
+        <ellipse
+          ref={ringRef}
+          cx="10"
+          cy="3"
+          rx="8.5"
+          ry="2.4"
+          stroke="#F68C3E"
+          strokeWidth="1.6"
+        />
+      )}
+      {teil === "ring" ? null : (
+        <g
+          stroke="#F5F7FA"
+          strokeOpacity=".55"
+          strokeWidth="0.9"
+          strokeLinecap="round"
+        >
+          <path d="M2.2 3.6Q3.4 9 6.6 12.4M17.8 3.6Q16.6 9 13.4 12.4M10 5.4V12.8" />
+          <path d="M4 6.6Q10 8.9 16 6.6M5.8 9.8Q10 11.6 14.2 9.8" />
+        </g>
+      )}
     </svg>
   );
 });
