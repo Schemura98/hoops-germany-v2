@@ -3101,3 +3101,166 @@ Escape-Ebenen stapeln) · Tobias' N4 (die Profil-Oberfläche kann Positions-Kür
 wer speichert, migriert still von „SG" auf „Shooting Guard") · Neles Frage zum Leerzustand eines
 offenen Kaderplatzes ohne Position · Textreihenfolge auf `/team/create` (erst „Team gründen", dann
 die Korrektur) → Vivien/Nele.
+
+---
+
+## 15.08.2026 – Sechste und siebte Runde: ein öffentlich abrufbarer Einladungstoken, und drei Ausreden von mir
+
+**Commits:** `c65419d` → `48e8a16` → `074bcf1`. **Deployt:** `074bcf1`, am Server verifiziert
+(`git log --oneline -1` auf dem VPS, `pm2 restart hoops-v2`, Live-Seiten je HTTP 200).
+**Vorher live:** `da1abca`.
+
+### Der Sicherheitsbefund (Kai)
+
+`app/api/team/fetchsingleteaminfo/route.js` gab das **ganze** Slot-Subdokument heraus – also auch
+`claimToken`. Die Kette:
+
+1. Der Endpunkt ist **öffentlich**, ohne Auth – nur ein `slug` im Body.
+2. `add-slot` vergibt den `claimToken` schon beim **Anlegen**, nicht beim Versenden. Jeder benannte
+   offene Platz trug also einen gültigen.
+3. `roster/request-claim` prüft nichts weiter als einen gültigen Spieler-Token **plus** diesen
+   `claimToken` und setzt dann `teamId`, `claimedBy` und die Rückennummer.
+
+Damit konnte sich **jedes registrierte Konto ohne Einladung in jeden Verein eintragen**, dessen
+Kaderplätze offen sind. Auf `hoops_prod` nachgemessen (rein lesend, Werte nicht protokolliert):
+**zwei Token waren so abrufbar.**
+
+Behoben durch „erlauben statt verbieten" (Regel aus `docs/MUSTER-ZAHLEN-DIE-LUEGEN`): Die Antwort
+wird aus **benannten Feldern neu gebaut** statt das interne Objekt zu kürzen – ein neues
+Schema-Feld landet so nicht versehentlich in der Öffentlichkeit. `claimedBy` bleibt bewusst drin,
+denn genau davon lebt der Filter auf der Vereinsseite; hätte der Fix es mit weggeräumt, wären
+belegte Plätze doppelt und fälschlich als „Noch nicht bestätigt" erschienen (von Tobias empirisch
+gegengeprüft, nicht aus dem Code geschlossen).
+
+### Der Fix allein reichte nicht – der wichtigste Punkt dieses Tages
+
+Kai hat nachgelesen, dass der Codefix die **bereits geleakten** Token nicht entwertet:
+`send-invite-email` erneuert nur `if (!claimToken)`, rotiert also nie einen vorhandenen ·
+`slotsFreigeben` filtert auf `claimedBy` und trifft unbelegte Plätze nie · `request-claim`
+akzeptiert weiterhin Token + `status === "empty"`. Wer die Antwort **vor** dem Deploy einmal
+abgerufen hatte, kam danach unverändert in den Kader.
+
+Entscheidung Patrick: rotieren. Ausgeführt am 15.08. mit `tmp/prod-claimtoken-rotieren.mjs --echt`
+(vorher Probelauf). Beleg **ohne einen einzigen Tokenwert auszugeben**: `add-slot` erzeugt
+`randomBytes(16)` = 32 Hex-Zeichen, die Rotation `randomBytes(24)` = 48. Danach gemessen:
+**0 Token mit 32 Zeichen, 2 mit 48**, Kaderplätze unverändert (2 benannt, 2 mit Nummer, 0 belegt).
+
+⚠️ **Offene Folge:** Die bis dahin verschickten **legitimen** Einladungslinks dieser zwei Plätze
+sind tot. Der Team-Admin (Mönchengladbach Scorpions e. V.) muss sie im Panel neu verschicken –
+**benachrichtigt wurde er nicht** (eine Mail wäre eine Nachricht nach außen).
+
+### Drei Begründungen von mir, die nicht nachgemessen waren
+
+1. **Die Tabellen-Ausnahme (Kais Blocker B1).** Ich hatte `/topscorer` und `/ligen/[id]` vom
+   Platzhalter ausgenommen, weil der Gedankenstrich dort „Tabellensprache in einer Spalte mit
+   Kopfzeile" sei. Kai und Tobias haben **unabhängig voneinander** nachgemessen: `/topscorer` steht
+   zwar in einem `<table>`, aber die Position ist keine eigene Spalte – sie ist ein `div`
+   **innerhalb** der Namenszelle, zeichengleich mit `/transfermarkt`, das ich geändert hatte. Es
+   gab keine Kopfzeile, auf die sich der Strich hätte beziehen können. Ausnahmeliste ersatzlos weg.
+2. **„Kann nur entstehen, wenn jemand direkt in die DB schreibt"** (über Positions-Kürzel auf Prod).
+   Falsch, und in der gefährlichen Richtung falsch – es klang wie eine Garantie. `update-profile`
+   führte `position` nur in einer **Feld**-Weißliste, prüfte den **Wert** nie, `models/Player.js`
+   hat `position: String` ohne Enum. Dass das Formular ein `select` benutzt, ist eine Aussage über
+   den Browser, nicht über die API. Seit dem 15.08. gegen `ALL_ROLES` geprüft – **nur bei echter
+   Änderung**, sonst wäre ein Konto mit Altwert unbedienbar (Muster der Geburtsdatum-Korrektur).
+3. **„Sieben Fundstellen" (Tobias' Befund A).** `/spieler` war nie eine davon: Dort ist die Position
+   ein **Chip** in `brand-500`, keine Unterzeile. Statt den Platzhalter nachzurüsten wurde die
+   falsche Aussage korrigiert – ein Abzeichen „Keine Angabe" verbrauchte den EINEN Akzent für eine
+   Nicht-Information. Kai trägt die Begründung ausdrücklich und benennt den Unterschied zu (1):
+   Dort war die **Tatsachenprämisse** falsch, hier ist sie wahr und trägt ein Gestaltungsurteil.
+
+### Neles Korrektur an ihrem eigenen Text – am selben Tag
+
+`POSITION_FEHLT` hieß vormittags „Position nicht angegeben". Nele hat es nachmittags widerrufen,
+und der Grund ist **inhaltlich**: Der Satz benennt das fehlende Feld als POSITION – aber dasselbe
+Feld trägt auch `PLAYER_ROLES` (Coach, Manager, Sportliche Leitung, Fan). Neben einem Trainer
+behauptete er, es fehle eine Spielposition. Im Sinne des Codes richtig, im Sinne des Lesers falsch:
+**Der Text war selbst ein Fall des Musters, gegen das er geschrieben war.** Jetzt „Keine Angabe".
+
+Sie hat dabei den Auslöser widerlegt, der zu der Frage geführt hatte (Tobias' N2,
+Transfermarkt-Kompaktliste, 179 px): Mit echter Schrift gemessen verlieren dort **vier von fünf
+Spielpositionen** das Bundesland schon heute – `Point Guard · Nordrhein-Westfalen` = 188 px. Für
+den Platzhalter blieben 9 Zeichen. **Die Kachel ist zu eng, nicht der Text.** → Vivien, offen.
+
+### Tobias N1 – ein Regress, den mein eigener Fix erzeugt hat
+
+`/ligen/[id]` trug `truncate` auf der Unterzeile, `/topscorer` nicht. Mit dem längeren Platzhalter
+sprengte die Zeile mobil den 229-px-Container und der **Verein** fiel weg (278 px gegen vorher
+218 px). `truncate` entfernt. Der konkrete Auslöser ist durch Neles kürzeren Text inzwischen weg –
+die **Inkonsistenz** nicht: „Sportliche Leitung" plus langer Vereinsname überläuft weiterhin, und
+identischer Inhalt darf sich nicht auf zwei Seiten verschieden verhalten.
+
+### Newsfeed-Filter (Befund Patrick)
+
+Das Dropdown „Alle Ligen" im `TopTeamsWidget` ragte auf dem Desktop aus der Seitenspalte in die
+Feed-Spalte und verdeckte Inhalt. Ein natives `<select>` bemisst seine Breite an der **längsten
+`<option>`**, nicht am Container. `flex-wrap` half nicht – Umbrechen geht nur **zwischen**
+Elementen, nicht innerhalb eines zu breiten; und ohne `min-w-0` darf ein Flex-Element gar nicht
+unter seine Inhaltsbreite schrumpfen (`min-width: auto`). Jetzt `w-full min-w-0 flex-1 truncate`.
+**Live gegengeprüft** mit dem echten Auslöser „1. Kreisliga U18 männlich – Kreis Düsseldorf
+2025/26" (51 Zeichen): Feld bleibt bei 109 px, rechte Kante 279 gegen Kartenkante 413.
+
+### Testarbeit – sechs Schwächen, alle von Kai benannt
+
+`tests/e2e/positions-platzhalter.spec.mjs`: `lib/` wurde gar nicht durchsucht · Kommentare wurden
+mitgelesen (Warnhinweise, die den alten Wortlaut **zitieren**, schlugen an – und ein Kommentar, der
+`POSITION_FEHLT` nur **erwähnt**, machte die Positiv-Probe falsch grün: genau der Fall `/spieler`) ·
+der Regex fand nur meine eigene Schreibweise (keine einfachen Anführungszeichen, keine
+Template-Literale, keinen Ternär, keinen geschachtelten oder optionalen Aufruf) → ersetzt durch
+Klammerzählung, die bei Unausgeglichenheit **wirft** · es fehlte die Gegenprobe, dass die Flächen
+den Platzhalter überhaupt **zeigen** · diese Gegenprobe maß zuerst den `import` statt der
+Verwendung · die Ausnahmeliste griff pro Verzeichnis.
+
+Im **zweiten Review-Durchlauf** kam die siebte dazu: `ohneImport` filterte zeilenweise und übersah
+**mehrzeilige** Importe. In `app/transfermarkt/page.js` steht `POSITION_FEHLT,` allein auf seiner
+Zeile – wer beide Anzeigen löschte, kam grün durch. **Wieder dieselbe Fehlerklasse, die der
+Kommentar zwei Zeilen darüber als behoben beschrieb**, und ausgerechnet in der Datei, deren
+übersehene Fundstelle den Test ausgelöst hatte.
+
+Neue Regel gegen **rohes** Rendern (Kais F-2): Alle bisherigen Prüfungen hingen an
+`positionLabel(`-Aufrufstellen, ein roher Wert war unsichtbar – so sind drei Stellen durch denselben
+Commit gerutscht, der die Regel festschreiben sollte. `value={form.position}` ist ausgenommen, weil
+dort der **rohe** Wert stehen MUSS (Vergleich mit den `<option value>`); ein `positionLabel` davor
+zerstörte die Vorauswahl. Die **Grenze der Regel steht ausdrücklich im Test**: Sie erkennt die zwei
+real vorgekommenen Formen und ist kein JSX-Prüfer.
+
+### Zwei eigene Fehler beim Gegenprüfen
+
+1. Die erste Gegenprobe lief über `node -e`; die Shell zerlegte die einfachen Anführungszeichen,
+   **fünf Patches wurden nie angewandt – und meldeten „grün"**. Seitdem als Skriptdatei
+   (`tmp/gegenprobe-*.mjs`), die prüft, ob der Patch überhaupt gegriffen hat.
+2. Die Gegenprobe zur Werteprüfung lief absichtlich **ohne** die Prüfung – und schrieb den
+   ungültigen Wert damit echt in die Dev-DB. Der Test war beim nächsten Lauf rot, weil derselbe
+   Wert nun gespeichert war und das Setzen als „unverändert" durchging. Der Test stellt seinen
+   Ausgangszustand jetzt selbst her; drei Läufe hintereinander grün.
+
+### Weiteres in `074bcf1`
+
+`KaderTab:414` gab die Position roh aus **und** zeigte „Vereinslos" nur dann, wenn **auch** die
+Position fehlte – ein Spieler mit Position und ohne Verein wurde nie als vereinslos ausgewiesen,
+ausgerechnet in der Liste, in der ein Admin entscheidet, ob eine Einladung einen **Vereinswechsel**
+auslöst · `add-slot` prüft `position` gegen `ALL_ROLES` (hier **ohne** Altbestands-Ausnahme: ein
+Slot wird angelegt, nicht bearbeitet) · `models/Tryout.js` dokumentierte Kürzel, während
+`tryouts/create` gegen `POSITIONS` filtert – ein Kürzel wäre still verworfen worden (auch in
+CLAUDE.md und AGENTS.md korrigiert) · `seed-demo.mjs` schreibt kanonische Namen statt Kürzel und war
+die **einzige Quelle** der Kürzel, über die zwei Tage gerätselt wurde.
+
+### Bewusst NICHT angefasst
+
+`TEAM_PUBLIC_FIELDS = "-password"` (`lib/serverAuth.js:10`) ist eine **Verbotsliste**. Über
+`team/fetchinfo` geht damit das ganze Team-Dokument hinaus – **jeder** `rosterSlots[].claimToken`
+und der `inviteToken`. `getTeamFromToken` prüft nur `isTeamAdmin`, keine Einzelrechte, und
+`set-member-admin` gibt Co-Admins genau dieses Flag: Ein Co-Admin mit ausschließlich Tryout-Recht
+bekommt alle Einladungstoken. **Gleiche Fehlerklasse wie der geschlossene Leak, nur auf der
+angemeldeten Seite.** Nicht in dieser Runde behoben, weil `KaderTab` die Token genau von dort liest –
+ein Wegfiltern bräche die Einladungsoberfläche, und das ist der Bereich, dessen Regeln dreimal
+hintereinander unvollständig waren und wo zweimal der Fix das Folgeproblem erzeugte.
+
+### Still totes Feature, an echten Daten belegt
+
+`app/api/team/roster-players/route.js:43` filtert `status !== "empty" && !s.claimedBy`. Da `pending`
+nirgends gesetzt wird (`request-claim` springt direkt auf `confirmed`, und `confirmed` impliziert
+`claimedBy`), ist das Ergebnis **immer leer** – die Box-Score-Erfassung bietet nie Slot-Platzhalter
+an, obwohl `Match.playerStats.rosterSlotId` genau dafür existiert. Gemessen: Dev `{confirmed: 1}`,
+Prod `{empty: 2}`, Filtertreffer 0/0. Gleiche Wurzel wie die offene Frage, ob `approve-claim` toter
+Code ist – **gehört als eine Entscheidung zusammen, nicht als zwei.**

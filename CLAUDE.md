@@ -11,7 +11,23 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> **Zuletzt deployt: `cabb62d` (15.08.2026, am Server verifiziert)** – fünfte Runde: **alle elf
+> **Zuletzt deployt: `074bcf1` (15.08.2026, am Server verifiziert – `pm2 restart` gelaufen,
+> Live-Seiten je 200, Sicherheitsfix am echten Verein nachgemessen).** Sechste/siebte Runde:
+> **öffentlich abrufbare Einladungstoken geschlossen** (`app/api/team/fetchsingleteaminfo`) ·
+> Positions-Platzhalter vereinheitlicht · **Newsfeed-Filter ragte in den Feed**.
+> ⚠️ **Der Sicherheitsfix allein reichte nicht:** Er stoppt das Leck, entwertet aber nicht die
+> zwei bereits abrufbaren Token (`send-invite-email` erneuert nur `if (!claimToken)`,
+> `slotsFreigeben` fasst offene Plätze nie an). Die zwei Token auf `hoops_prod` wurden deshalb am
+> 15.08. **rotiert** (Entscheidung Patrick; `tmp/prod-claimtoken-rotieren.mjs`, Beleg über die
+> Tokenlänge: 0 alte / 2 neue, `add-slot` erzeugt 32 Hex-Zeichen, die Rotation 48).
+> ⚠️ **Folge, die jemand wissen muss:** Die bis dahin verschickten Einladungslinks dieser zwei
+> Kaderplätze sind tot. Der Team-Admin (Mönchengladbach Scorpions e. V.) muss sie im Panel neu
+> verschicken – **niemand hat ihn benachrichtigt.**
+> ⚠️ **Zur Zeile selbst:** Hier stand `cabb62d`, am Server lief `da1abca`. Das war diesmal
+> harmlos (`da1abca` ist ein reiner Doku-Commit direkt nach `cabb62d`, also derselbe Code) –
+> aber die Zeile soll ab jetzt den **Zeiger nennen, den `git log` AM SERVER ausgibt**, nicht den
+> Commit, den man für den letzten Codestand hält.
+> Davor: **`cabb62d`** – fünfte Runde: **alle elf
 > offenen Gate-Punkte** aus Roadmap 15 abgearbeitet. Kern: **`lib/scrollSperre.js`** (zwei Overlays
 > hinterließen bei falscher Schließreihenfolge eine **dauerhaft gesperrte Seite** – nur ein Reload
 > half) · Hinweis auf `/team/create` für alle, die dort landen, obwohl sie im Kader stehen (sonst
@@ -51,7 +67,8 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `551ab46` (vierte Runde 14.08.) → `2503433` (dritte) → `9f9fb77` (zweite) →
+> **Rollback-Kette:** `074bcf1` (aktuell live) → `48e8a16` → `c65419d` → `da1abca` (der Stand vom
+> 15.08. vor dieser Runde) → `cabb62d` (fünfte Runde) → `551ab46` (vierte Runde 14.08.) → `2503433` (dritte) → `9f9fb77` (zweite) →
 > `5b84f69` (erste) → `5197d2c` (der Stand, der bis zum 14.08. tatsächlich lief) → `3c38959` →
 > `5073951` → `560e1e6` → `27a04fe` → `e7a38ce` → `275f124` → `a8e4fd4` (vor der Nachtschicht) →
 > `562c629` (vor dem gesamten Redesign). Auf dem VPS per
@@ -244,14 +261,26 @@
   zusätzlich `components/team/tabs/TabAlert.js` (FormAlert-Wrapper für ihr `{type,text}`-Format).
   **Konvention:** neue/überarbeitete Seiten IMMER diese Primitive nutzen (keine Ad-hoc-Buttons/Tabs/
   Spinner, kein `window.confirm`). **Rollout abgeschlossen (Wellen 1–5 + Welle 2b für das
-  Team-Admin-Panel, Commits in der Chronik)** – **mit einer Ausnahme, gemessen am 12.08.2026:**
-  `Card` hat **0 Importe** und `cardClass` **0 Verwendungen**; stattdessen bauen **126 Stellen** die
-  Panel-Fläche von Hand (`bg-navy-800` + `border-navy-600`). Alle übrigen Primitive sind echt im
-  Einsatz (Button 23, Loading 18, EmptyState 15, Skeleton 11, Reveal 7, Tabs/FormAlert je 6,
+  Team-Admin-Panel, Commits in der Chronik)** – **mit einer Ausnahme, nachgemessen am 15.08.2026:**
+  `Card` hat **3 Importe** (`components/feed/SpieltagStrip.js`, `components/feed/FollowSuggestions.js`,
+  `components/posts/PostComposer.js`) und `cardClass` **0 Verwendungen** (nur die Definition in
+  `lib/ui.js:22`); stattdessen bauen **141 Stellen** die Panel-Fläche von Hand (`bg-navy-800` +
+  `border-navy-600`). Alle übrigen Primitive sind echt im Einsatz (Stand 12.08.2026, seitdem nicht
+  neu gezählt: Button 23, Loading 18, EmptyState 15, Skeleton 11, Reveal 7, Tabs/FormAlert je 6,
   CountUp 4, ConfirmAction/ScrollTable je 3). Folge: Eine Änderung an der Kartensprache wirkt
-  **nicht** zentral – sie muss an 126 Stellen nachgezogen werden. Das ist der größte offene
+  **nicht** zentral – sie muss an 141 Stellen nachgezogen werden. Das ist der größte offene
   Konsistenz-Posten des Designsystems (Umbau bewusst zurückgestellt: hohes Regressionsrisiko,
-  kein sichtbarer Gewinn). Bewusst belassen (custom/kompakt): lokale `inputClass` in
+  kein sichtbarer Gewinn). **Nebenbefund:** `components/feed/FollowSuggestions.js` importiert `Card`
+  und nutzt es im Leerzustand (Z. 92), baut dieselbe Fläche im Normalzustand aber von Hand (Z. 99) –
+  eine Fläche, zwei Wege, in einer Datei. Vollständiger Befund:
+  `docs/NEWSFEED-DESKTOP-2026-08-15.md` Abschnitt 1.4.
+  <!-- Mess-Befehle (aus C:\dev\hoops-germany-v2 ausführen), damit diese Zahlen nachprüfbar statt
+       nur behauptet sind – bei jeder Aktualisierung erneut laufen lassen und das Datum mitziehen:
+         grep -rln 'from "@/components/ui/Card"' --include=*.js app components
+         grep -rn "cardClass" --include=*.js app components lib
+         grep -rn "bg-navy-800" --include=*.js app components | grep -c "border-navy-600"
+       Der cardClass-Befehl zählt 0 Verwendungen, wenn er nur `lib/ui.js:22` (die Definition) zeigt. -->
+  Bewusst belassen (custom/kompakt): lokale `inputClass` in
   `team/claim`, `admin/leagues`, `admin/update-match`. Optionaler Restschliff: Super-Admin-Tabellen/
   „Lädt…"-Texte auf `<Loading>`/`EmptyState`.
 - **Geo-Suche:** Feld `bundesland` an Player/Team/League; `lib/geo.js` + `public/data/de-cities.json`
@@ -332,14 +361,30 @@
   Empfänger-Matrix mit info@-Bündelung via `lib/adminRecipients.js`).
 - **Seed-/Demo-Tooling** (alle additiv, getaggt, idempotent, `--purge`-fähig): `seed-demo` (Dev-Basis),
   `seed-nrw-leagues` (offizieller Katalog), `seed-nrw-demo`, `seed-kreisligen-demo` + `-niers`,
-  `seed-showcase-posts`, `seed-world` (**Prod: nicht ausgeführt**), `rollover-season` (**Prod: noch nie ausgeführt**).
+  `seed-showcase-posts`, `seed-world`, `rollover-season` (**Prod: noch nie ausgeführt**).
+  ⚠️ **KORREKTUR 15.08.2026 (Befund Ronja, von mir auf `hoops_prod` nachgemessen):** Hier stand
+  bei `seed-world` **„Prod: nicht ausgeführt"** – das ist **falsch**. Der Bestand liegt dort:
+  `seedTag: "world"` bei **40 Teams, 345 Spielern, 288 Beiträgen**. Zum Vergleich der echte
+  Bestand ohne Tag: **6 Teams, 31 Spieler, 15 Beiträge**. Also **85 % der Spieler auf der
+  Live-Seite sind Seed-Daten.** Folge: Die Aufräumliste in Roadmap 2 war unvollständig.
 
 ### 🔜 Noch offen (Roadmap)
 1. **`/admin`-Temp-Passwort** (`A1cGmhwN-1To`) auf ein eigenes ändern – oder den Legacy-`/admin`-Login ganz
    entfernen (Super-Admin-Spieler kommen ohnehin direkt rein).
 2. **Demo-Daten nach der Testphase durch echte ersetzen** (auf dem VPS): `node scripts/seed-nrw-demo.mjs
    --purge`, `node scripts/seed-kreisligen-demo.mjs --purge`, `node scripts/seed-kreisligen-demo-niers.mjs
-   --purge`, `node scripts/seed-showcase-posts.mjs --purge`; **danach beim Cutover die alte DB `test` löschen**.
+   --purge`, `node scripts/seed-showcase-posts.mjs --purge`, **`node scripts/seed-world.mjs --purge`**
+   (am 15.08.2026 ergänzt – der Bestand liegt entgegen der bisherigen Notiz sehr wohl auf Prod);
+   **danach beim Cutover die alte DB `test` löschen**.
+   ⚠️ **Vor dem Purge entscheiden (Patrick), es ist keine reine Aufräumfrage:** Die Seed-Beiträge
+   tragen **4.073 Likes** (höchster Einzelwert 40; **101 Beiträge mit 20+**). Der echte Bestand
+   trägt **16 Likes** bei 15 Beiträgen, höchster Wert 6 – das ist die Größenordnung, die zu rund
+   zehn externen Nutzern passt. Ein Leser liest „40" als **40 Personen**. Der Testphase-Banner
+   sagt „einige Inhalte sind Beispieldaten" und federt damit die *Inhalte* ab, aber **nicht die
+   Zustimmungszahlen**: Eine erfundene Reichweite ist etwas anderes als ein erfundener Verein.
+   Besonders heikel gegenüber Zielgruppe 5 (lokale Sponsoren) – **das gehört vor Nora**
+   (§ 5 UWG, irreführende Angabe), bevor jemand der Seite Zahlen glaubt. Siehe auch
+   `docs/MUSTER-ZAHLEN-DIE-LUEGEN-2026-08-13.md`.
 3. **Monetarisierung – BLOCKIERT bis Gewerbeanmeldung** des Users (Amazon-Affiliate + Sponsorfläche;
    AdSense erst bei genug Traffic + Consent-Banner; bei Dritt-Diensten Datenschutz/Consent nachziehen).
 4. **Analytics Phase 3 Teil 2** (Banner-Tracking je Werbefläche mit Impressionen/Klicks/CTR, Sponsor-Entität
