@@ -142,6 +142,7 @@ export default function HeroScrollStage({
   const linienRef = useRef([]);
   const punkteRef = useRef([]);
   const ballRef = useRef(null);
+  const ohneLueckeGemeldetRef = useRef(false); // Warnung nur einmal je Sitzung
   const kaestenRef = useRef([]); // Zeilen-/Elementkaesten des Inhalts, s. kaestenBauen
   const tickingRef = useRef(false);
 
@@ -206,11 +207,30 @@ export default function HeroScrollStage({
         kaestenRef.current = [];
         return;
       }
+      // ⚠️ SOFORT BÜHNENRELATIV ABLEGEN (Befund Vivien, dritte Runde).
+      // Die erste Fassung legte die rohen Viewport-Rechtecke ab und verrechnete
+      // sie in `apply()` gegen ein `rect`, das jeden Frame neu gemessen wird.
+      // Die Kästen waren damit auf den Aufsetz-Zeitpunkt EINGEFROREN, während
+      // ihr Bezugspunkt mitscrollte – der Versatz war also nicht einmal
+      // konstant, er wuchs mit dem Scrollweg.
+      // Sichtbar wurde er nur bei 768: Dort hat die `items-center`-Zentrierung
+      // 111px Spielraum. Bei 375/390/430 ist der Inhalt so hoch wie die Bühne
+      // (575 + 192 = 767), es gibt keinen Spielraum, und bühnenrelativ war
+      // zufällig dasselbe wie containerrelativ – deshalb stimmte dort alles.
+      // Bei 1024+ deckte der 0.42-Deckel den Fehler zu.
+      // Bühnenrelative Kästen sind scroll-invariant: einmal gemessen, immer gültig.
+      const sr = stage.getBoundingClientRect();
+      const relativ = (r) => ({
+        top: r.top - sr.top,
+        bottom: r.bottom - sr.top,
+        left: r.left - sr.left,
+        right: r.right - sr.left,
+      });
       const kaesten = [];
       const bedienelemente = new Set(inhalt.querySelectorAll("a, button"));
       for (const el of bedienelemente) {
         const r = el.getBoundingClientRect();
-        if (r.width > 0 && r.height > 0) kaesten.push(r);
+        if (r.width > 0 && r.height > 0) kaesten.push(relativ(r));
       }
       // Textknoten außerhalb der Bedienelemente – deren Fläche ist schon erfasst.
       const lauf = document.createTreeWalker(inhalt, NodeFilter.SHOW_TEXT);
@@ -227,7 +247,7 @@ export default function HeroScrollStage({
         const bereich = document.createRange();
         bereich.selectNodeContents(k);
         for (const r of bereich.getClientRects()) {
-          if (r.width > 0 && r.height > 0) kaesten.push(r);
+          if (r.width > 0 && r.height > 0) kaesten.push(relativ(r));
         }
       }
       kaestenRef.current = kaesten;
@@ -306,13 +326,74 @@ export default function HeroScrollStage({
       // Zeilen kennt statt eines Rechtecks über alle Zeilen.
       // Ohne Kollision fällt `kollisionT` auf Infinity und der 0.42-Deckel
       // greift – daher braucht es keine Fallunterscheidung mehr.
-      const bandLinks = rect.left + targetX - BALL_R;
-      const bandRechts = rect.left + targetX + BALL_R;
-      let kollisionT = Infinity;
-      for (const k of kaestenRef.current) {
-        if (k.right < bandLinks || k.left > bandRechts) continue;
-        const oben = k.top - rect.top; // bühnenrelativ, wie targetY
-        if (oben < kollisionT) kollisionT = oben;
+      // ══ LÜCKENSUCHE STATT „ÜBER DEN OBERSTEN KASTEN" ══════════════════════
+      // Freigegeben von Vivien (dritte Runde) unter einer Bedingung, die
+      // eingehalten ist: erst der Ursprungsfehler, dann die Lückensuche. Ihre
+      // Begründung dafür ist der interessanteste Teil – die Lückensuche hätte
+      // den Ursprungsfehler ZUGEDECKT: Sie hätte mit den versetzten Kästen eine
+      // Lücke gefunden, „frei" gemeldet und den Ball an die falsche Stelle
+      // gesetzt. Grün, und trotzdem falsch.
+      //
+      // Warum sie danach nötig ist: „Der Ball geht über den obersten Kasten"
+      // scheitert, sobald über dem obersten Kasten kein Platz ist. Gemessen bei
+      // 768: erste Headline-Zeile bei y = 140, gebraucht werden 2·88 + 8 = 184.
+      // Vorher fiel dann stillschweigend die untere Klammer ein, der Ball ruhte
+      // ÜBERLAPPEND, und die Abdunkelung kaschierte es. Jetzt stellt der Code
+      // die Frage „passt er da überhaupt hin?", statt sie zu übergehen.
+      //
+      // Band und Kästen sind beide bühnenrelativ – kein `rect.left`/`rect.top`
+      // in der Rechnung, und damit keine Mischung zweier Bezugssysteme.
+      const bandLinks = targetX - BALL_R;
+      const bandRechts = targetX + BALL_R;
+
+      // Belegte y-Intervalle im Band, sortiert und verschmolzen.
+      const belegt = [];
+      for (const k of kaestenRef.current
+        .filter((k) => !(k.right < bandLinks || k.left > bandRechts))
+        .map((k) => [k.top, k.bottom])
+        .sort((a, b) => a[0] - b[0])) {
+        const letzte = belegt[belegt.length - 1];
+        if (letzte && k[0] <= letzte[1]) letzte[1] = Math.max(letzte[1], k[1]);
+        else belegt.push([k[0], k[1]]);
+      }
+
+      // Erste Lücke von oben, in die der Ball samt Luft passt.
+      const noetig = 2 * BALL_R + 16;
+      // ⚠️ BEIDE KANTEN DER LÜCKE, nicht nur die untere. Viviens Formel nennt
+      // nur `passend.bottom` und klammert nach außen – das reicht nicht, weil
+      // der 0.42-Deckel den Ball wieder NACH OBEN zieht, unter Umständen aus
+      // der Lücke heraus. Gemessen bei 768: Lücke 254..462, Deckel 314, Ball
+      // damit auf 226..402 – also 30px zurück in die Headline-Zeile, obwohl die
+      // Lückensuche korrekt gearbeitet hatte. Der Deckel muss IN die Lücke
+      // geklammert werden, nicht daneben.
+      let lueckeOben = null;
+      let lueckeUnten = null;
+      let lauf = 0;
+      for (const [oben, unten] of belegt) {
+        if (oben - lauf >= noetig) {
+          lueckeOben = lauf;
+          lueckeUnten = oben;
+          break;
+        }
+        lauf = Math.max(lauf, unten);
+      }
+      if (lueckeUnten === null && rect.height - lauf >= noetig) {
+        lueckeOben = lauf;
+        lueckeUnten = rect.height;
+      }
+
+      // ⚠️ KEINE PASSENDE LÜCKE = DER EINE FALL, IN DEM DIE ABDUNKELUNG TRAGEND
+      // IST. Vivien besteht darauf, dass das protokolliert wird statt still zu
+      // geschehen – es ist die Stelle, an der die Ruhelage überlappt und der
+      // Kontrast nur noch am Dimmen hängt.
+      if (lueckeUnten === null && !ohneLueckeGemeldetRef.current) {
+        ohneLueckeGemeldetRef.current = true;
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[HeroScrollStage] Keine Lücke ≥ ${noetig}px im Ball-Band (Breite ${Math.round(
+            rect.width,
+          )}px). Die Ruhelage überlappt Inhalt; der Kontrast hängt jetzt an der Abdunkelung.`,
+        );
       }
 
       // ⚠️ DER 0.42-DECKEL IST NICHT KOSMETIK (Vivien): Ohne ihn ruht der Ball
@@ -323,11 +404,28 @@ export default function HeroScrollStage({
       // Die untere Klammer bleibt als Sicherung: Mit der korrigierten Eingabe
       // feuert sie auf keiner der sieben Breiten – genau so soll sich eine
       // Sicherung verhalten.
-      const targetY = clamp(
-        Math.min(rect.height * 0.42, kollisionT - BALL_R - 8),
-        BALL_R + 8,
-        rect.height - BALL_R - 8,
-      );
+      const targetY =
+        lueckeUnten !== null
+          ? // In die Lücke hinein geklammert: Der Deckel wirkt nur, soweit die
+            // Lücke ihn zulässt.
+            clamp(
+              clamp(
+                rect.height * 0.42,
+                lueckeOben + 8 + BALL_R,
+                lueckeUnten - 8 - BALL_R,
+              ),
+              BALL_R + 8,
+              rect.height - BALL_R - 8,
+            )
+          : // Keine passende Lücke – bisheriges Verhalten, s. Warnung oben.
+            clamp(
+              Math.min(
+                rect.height * 0.42,
+                (belegt.length ? belegt[0][0] : rect.height) - BALL_R - 8,
+              ),
+              BALL_R + 8,
+              rect.height - BALL_R - 8,
+            );
 
       // Ball: reine Fallbewegung mit leichtem Wackeln – läuft mit der
       // Scrollrichtung statt gegen sie und braucht keine seitliche Fläche.
@@ -424,11 +522,12 @@ export default function HeroScrollStage({
       // multiplizieren sich, damit das Einblenden nicht überschrieben wird).
       // Die Kästen sind beim Aufsetzen und bei `resize` vermessen, NICHT hier –
       // `getClientRects()` pro Bild wäre ein Layout-Zugriff je Frame.
+      // Ebenfalls bühnenrelativ: `x`/`y` sind es ohnehin, die Kästen jetzt auch.
       ballOpacity *= ballDeckkraftUeberKaesten(
-        rect.top + y,
+        y,
         kaestenRef.current,
-        rect.left + x - BALL_R,
-        rect.left + x + BALL_R,
+        x - BALL_R,
+        x + BALL_R,
       );
 
       // ⚠️ DAS AUSBLENDEN FOLGT DEM ECHTEN AUSTRITT, NICHT EINER KONSTANTEN.
