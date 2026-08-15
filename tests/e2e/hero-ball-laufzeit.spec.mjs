@@ -56,6 +56,11 @@ const TOLERANZ = 0.02;
  *  die Funktion selbst, also `undefined`. Erneut alle zwölf Fälle rot, ohne
  *  dass am Produkt etwas fehlte. */
 const abtasten = async (schritt) => {
+  // ⚠️ INNERHALB der Funktion, nicht im Modul: `page.evaluate` serialisiert nur
+  // den Funktionsrumpf – Closure-Variablen aus dem Node-Modul existieren im
+  // Browser nicht. Ein Verweis darauf wirft dort und faerbt ALLE Faelle rot,
+  // ohne dass am Produkt etwas fehlt.
+  const NAVBAR = 64; // h-16 der stickyen Navbar
   const bild = () =>
     new Promise((f) => requestAnimationFrame(() => requestAnimationFrame(f)));
   const ergebnis = [];
@@ -85,13 +90,68 @@ const abtasten = async (schritt) => {
           Math.max(0, Math.min(b.right, t.r.right) - Math.max(b.left, t.r.left)) > 0 &&
           Math.max(0, Math.min(b.bottom, t.r.bottom) - Math.max(b.top, t.r.top)) > 0,
       }));
-    ergebnis.push({ y, deck, anteil, imRahmen: Math.round(b.top - s.top), tasten });
+        // ⚠️ SICHTBARE FLÄCHE IM SICHTFELD, nicht in der Bühne (Befund Tobias,
+    // dritte Runde). Die alte Rechnung schnitt den Ball nur gegen die
+    // `overflow-hidden`-Bühne – ein Ball mit Deckkraft 1,00 mitten in einer
+    // längst hochgescrollten Bühne war damit „sichtbar". Genau so blieb
+    // unbemerkt, dass er auf 375/390/430 über den GESAMTEN Scrollweg 0 px²
+    // im Bild hatte, in 176 gemessenen Positionen je Breite.
+    // Die Navbar zählt dabei mit: Sie ist sticky und deckt die obersten 64px.
+    const sichtL = Math.max(0, Math.min(b.right, window.innerWidth) - Math.max(b.left, 0));
+    const sichtH = Math.max(
+      0,
+      Math.min(b.bottom, window.innerHeight) - Math.max(b.top, NAVBAR),
+    );
+    const sichtbareFlaeche = sichtL * sichtH * deck;
+    ergebnis.push({
+      y,
+      deck,
+      anteil,
+      sichtbareFlaeche,
+      imRahmen: Math.round(b.top - s.top),
+      tasten,
+    });
   }
   return ergebnis;
 };
 
 test.describe("Hero-Ball – Laufzeit auf /", () => {
   for (const breite of BREITEN) {
+    test(`${breite}px: der Ball ist überhaupt irgendwann zu sehen`, async ({
+      page,
+    }) => {
+      // ⚠️ DIE ZUSICHERUNG, DIE ZWEI RUNDEN GEFEHLT HAT (Vorschlag Tobias).
+      // Alle bisherigen Prüfungen waren am Ruhepunkt richtig UND aussagelos:
+      // 20 % Anschnitt, keine Überlappung, Deckkraft 1,00 – für einen
+      // Gegenstand, der auf drei von sieben Breiten nie im Bild war. Genau die
+      // Klasse aus docs/MUSTER-ZAHLEN-DIE-LUEGEN: im Sinne des Codes wahr, im
+      // Sinne des Lesers falsch.
+      // Diese hier ist absichtlich die schwächste denkbare Aussage – und
+      // trotzdem die einzige, die den Ausfall gefunden hätte.
+      await page.setViewportSize({ width: breite, height: 812 });
+      await page.goto("/", { waitUntil: "networkidle" });
+
+      const proben = await page.evaluate(abtasten, 12);
+      expect(proben).not.toBeNull();
+
+      const beste = Math.max(...proben.map((p) => p.sichtbareFlaeche));
+      expect(
+        beste,
+        `Der Ball hat auf ${breite}px an KEINER Scrollposition sichtbare Fläche ` +
+          `im Sichtfeld (unterhalb der Navbar). Er mag technisch in der Bühne ` +
+          `liegen, korrekt angeschnitten und voll deckend – gesehen wird er nie.`
+      ).toBeGreaterThan(0);
+
+      // Und nicht nur ein Aufblitzen: mindestens ein Viertel des Balls muss
+      // einmal gleichzeitig sichtbar und deckend sein.
+      const ballFlaeche = 104 * 104; // mobil; ab md ist er größer, also strenger
+      expect(
+        beste,
+        `Der Ball ist auf ${breite}px zwar nicht ganz unsichtbar, aber nie ` +
+          `nennenswert im Bild (beste Sichtbarkeit ${Math.round(beste)} px²).`
+      ).toBeGreaterThan(ballFlaeche * 0.25);
+    });
+
     test(`${breite}px: der Ball ist am Ruhepunkt zu genau 20 % angeschnitten`, async ({ page }) => {
       await page.setViewportSize({ width: breite, height: 812 });
       await page.goto("/", { waitUntil: "networkidle" });
