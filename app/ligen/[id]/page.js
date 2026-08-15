@@ -18,7 +18,7 @@ import PageHeader from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import Reveal from "@/components/ui/Reveal";
 import { teamScores } from "@/lib/matchScore";
-import { positionLabel } from "@/lib/constants";
+import { positionLabel, POSITION_FEHLT } from "@/lib/constants";
 import { getPlayerToken, getStoredPlayer, setStoredPlayer } from "@/lib/clientAuth";
 
 // Ein Abschnitt der Liga-Seite: Überschrift links, der Weg in die Tiefe rechts.
@@ -425,7 +425,7 @@ export default function LigaDetailPage({ params }) {
                     {s.firstName} {s.lastName}
                   </Link>
                   <p className="truncate text-xs text-mist-400">
-                    {positionLabel(s.position) || "—"}
+                    {positionLabel(s.position) || POSITION_FEHLT}
                     {s.teamName ? ` · ${s.teamName}` : ""}
                   </p>
                 </div>

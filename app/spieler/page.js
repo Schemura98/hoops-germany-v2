@@ -214,6 +214,19 @@ export default function SpielerPage() {
                   <p className="text-sm font-bold text-paper-50 group-hover:text-brand-400 transition-colors leading-tight truncate">
                     {p.firstName} {p.lastName}
                   </p>
+                  {/* ⚠️ Hier bewusst KEIN `POSITION_FEHLT` (Befund Tobias,
+                      15.08.2026 – er hat zu Recht gemeldet, dass die Fläche in
+                      Commit und Doku fälschlich als erledigt geführt war).
+                      Diese Liste zeigt die Position als CHIP, nicht als
+                      Unterzeile: eine orange Fläche in `brand-500`. Ein
+                      Abzeichen mit „Position nicht angegeben" verbraucht den
+                      EINEN Akzent der Anzeigetafel-Sprache für eine
+                      Nicht-Information – dieselbe Begründung, mit der Vivien
+                      das Positions-Chip von der Kaderkarte entfernt hat.
+                      Und ein fehlendes Abzeichen ist nicht mehrdeutig: Die
+                      Karte zeigt schlicht keins. Mehrdeutig war der
+                      Gedankenstrich in einer Unterzeile, nicht das Weglassen
+                      einer Auszeichnung. */}
                   {p.position && (
                     <span className="inline-block text-xs font-semibold text-brand-400 bg-brand-500/10 px-1.5 py-0.5 rounded-md mt-1">
                       {positionLabel(p.position)}

@@ -409,9 +409,16 @@
     ausgeführt (19 Positionen, Idempotenz belegt). **Auf `hoops_prod` gibt es nichts zu
     migrieren** – gemessen: 392 kanonische Positionen, 0 Kürzel, und auch 0 Varianten in
     Groß-/Kleinschreibung oder mit Leerzeichen (also nichts, was das Skript übersehen hätte).
-    Grund ist Tobias' N4 in sein Gegenteil verkehrt: Das `select` im Profil **kann** Kürzel gar
-    nicht schreiben, sie waren ein reines Seed-Artefakt der Dev-DB. Ein Konto mit Kürzel kann auf
-    Prod nur entstehen, wenn jemand direkt in die DB schreibt.
+    Grund: Sie waren ein reines Seed-Artefakt der Dev-DB, das Profil-`select` bietet sie nicht an.
+    ⚠️ **Korrektur (Kai, 15.08.2026):** Hier stand, ein Kürzel könne auf Prod „nur entstehen, wenn
+    jemand direkt in die DB schreibt". Das war falsch und in der gefährlichen Richtung falsch –
+    es klang nach einer Garantie. `update-profile` führte `position` nur in einer **Feld**-Weißliste,
+    prüfte den **Wert** nie, und `models/Player.js` hat `position: String` ohne Enum: Jeder Aufruf
+    mit gültigem Token schrieb jede Zeichenkette. Dass das Formular ein `select` benutzt, ist eine
+    Aussage über den Browser, nicht über die API. Seit dem 15.08. prüft die Route gegen `ALL_ROLES`
+    – **aber nur bei echter Änderung**, sonst wäre ein Konto mit Altwert unbedienbar (dasselbe
+    Muster wie beim Geburtsdatum). **Lehre:** „kann nicht passieren" nur schreiben, wenn der Code
+    es erzwingt, nicht wenn die Oberfläche es nicht anbietet.
     ⚠️ **Methodik-Lehren aus den Gates vom 14.08.:** (1) Während ein Browser-Gate gegen `next dev`
     läuft, darf im selben Arbeitsbaum **nicht weitergebaut** werden – der Prüfer sieht sonst Code,
     der nicht im geprüften Commit ist. (2) **`preview_stop` beendet den Dev-Server nicht**, es löst

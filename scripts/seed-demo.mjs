@@ -85,7 +85,20 @@ await Teams.insertMany(teams);
 console.log(`🏀 ${teams.length} Teams`);
 
 // ----- Spieler -----
-const POS = ["PG", "SG", "SF", "PF", "C"];
+// ⚠️ Kanonische Namen, KEINE Kürzel (15.08.2026).
+//
+// Hier stand `["PG","SG","SF","PF","C"]` – und dieser Seed war die einzige
+// Quelle der Kürzel, über die am 14./15.08. lange gerätselt wurde: Tobias' N4
+// („Alt-Kürzel wählen in der Tour keinen Chip vor"), das Migrations-Skript
+// `migrate-positions.mjs`, der Prod-Abgleich (der 0 Kürzel fand, weil es sie
+// dort nie gab). Alles ein Artefakt der Dev-Daten.
+//
+// Seit dem 15.08. lehnt `update-profile` ungültige Werte ab. Ein Kürzel im
+// Seed hieße: Ein frisch geseedetes Konto trägt einen Wert, den die eigene API
+// nicht mehr annimmt – die Auswahl im Profil zeigte nichts Passendes an, und
+// die Tour wählte keinen Chip vor. Genau deshalb muss der Seed schreiben, was
+// die Anwendung auch akzeptiert.
+const POS = ["Point Guard", "Shooting Guard", "Small Forward", "Power Forward", "Center"];
 const NAT = ["Deutschland", "Deutschland", "Deutschland", "USA", "Serbien", "Frankreich", "Spanien"];
 const firstNames = ["Max", "Leon", "Jonas", "Noah", "Elias", "Ben", "Paul", "Luca", "Finn", "Tim", "Jan", "Nico", "David", "Marco", "Tom", "Felix"];
 const lastNames = ["Mustermann", "Schneider", "Wagner", "Becker", "Hoffmann", "Schulz", "Koch", "Richter", "Klein", "Wolf", "Neumann", "Schwarz", "Krause", "Lang", "Berg", "Frank"];

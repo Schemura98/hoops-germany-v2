@@ -105,11 +105,42 @@ async function handler(req) {
       // Antwort enthielt es aber nie (beim Kennzeichnen der Seed-Teams am
       // 12.08.2026 aufgefallen - die Abfrage selektierte das Feld bereits).
       isDemo: !!team.isDemo,
-      // Belegte (pending/confirmed) UND vom Admin benannte Plätze öffentlich zeigen
-      // (benannte „empty"-Slots erscheinen als „eingeladen"); nur namenlose Leer-Slots ausblenden.
-      rosterSlots: (team.rosterSlots || []).filter(
-        (s) => s.status !== "empty" || (s.name && s.name.trim())
-      ),
+      // Belegte (pending/confirmed) UND vom Admin benannte Plätze öffentlich
+      // zeigen; nur namenlose Leer-Slots ausblenden.
+      //
+      // ⚠️⚠️ NUR benannte Felder herausgeben, NIEMALS das Subdokument
+      // (Sicherheitsbefund Kai, 15.08.2026 – auf Prod nachgemessen: zwei
+      // Einladungstoken waren so abrufbar).
+      //
+      // Vorher ging das ganze Slot-Objekt hinaus, also auch `claimToken` und
+      // `claimedBy`. Die Kette:
+      //   1. Dieser Endpunkt ist ÖFFENTLICH, ohne Auth – nur ein `slug` im Body.
+      //   2. `add-slot` vergibt den `claimToken` schon beim ANLEGEN, nicht beim
+      //      Versenden – jeder benannte offene Platz trug also einen gültigen.
+      //   3. `roster/request-claim` prüft nichts weiter als einen gültigen
+      //      Spieler-Token PLUS diesen `claimToken` und setzt dann `teamId`,
+      //      `claimedBy` und die Rückennummer.
+      // Damit konnte sich jedes registrierte Konto ohne Einladung in jeden
+      // Verein eintragen, dessen Kaderplätze offen sind. Der Einladungslink ist
+      // laut `91d429e` ausdrücklich DIE Autorisierung – das trägt nur, solange
+      // er geheim ist.
+      //
+      // Deshalb hier „erlauben statt verbieten" (Regel aus
+      // docs/MUSTER-ZAHLEN-DIE-LUEGEN): Die Antwort wird aus benannten Feldern
+      // NEU gebaut, statt das interne Objekt zu kürzen. Ein neues Feld im
+      // Schema landet so nicht versehentlich in der öffentlichen Antwort.
+      rosterSlots: (team.rosterSlots || [])
+        .filter((s) => s.status !== "empty" || (s.name && s.name.trim()))
+        .map((s) => ({
+          _id: s._id,
+          name: s.name,
+          position: s.position,
+          number: s.number,
+          status: s.status,
+          // `claimedBy` bleibt drin – die Seite filtert damit belegte Plätze
+          // aus der Liste. Nur die ID, kein Token.
+          claimedBy: s.claimedBy,
+        })),
     },
     league,
     members,

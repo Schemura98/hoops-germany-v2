@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Player from "@/models/Player";
 import { PLAYER_PUBLIC_FIELDS } from "@/lib/serverAuth";
 import { ageFromBirthdate } from "@/lib/age";
+import { ALL_ROLES } from "@/lib/constants";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 // Nur diese Felder dürfen vom Spieler selbst geändert werden.
@@ -79,6 +80,32 @@ async function handler(req) {
           "Hoops Germany ist erst ab 16 Jahren. Bitte prüfe dein Geburtsdatum.",
           400
         );
+      }
+    }
+  }
+
+  // Position gegen die Liste prüfen (Befund Kai, 15.08.2026).
+  //
+  // Die Doku behauptete, ein Kürzel wie „SF" könne auf Prod „nur entstehen,
+  // wenn jemand direkt in die DB schreibt". Das stimmte nicht: `position` stand
+  // hier in der Feld-Weißliste, der WERT wurde nirgends geprüft, und
+  // `models/Player.js` hat `position: String` ohne Enum. Dass das Profilformular
+  // ein `select` benutzt, ist eine Aussage über den Browser, nicht über die API –
+  // ein beliebiger Aufruf mit gültigem Token schrieb jede Zeichenkette.
+  // Das ist der Unterschied zwischen „kann nicht passieren" und „ist im
+  // Formular nicht vorgesehen"; nur das Zweite war je wahr.
+  //
+  // ⚠️ Ablehnen NUR bei echter Änderung – dasselbe Muster wie beim
+  // Geburtsdatum darüber, und aus demselben Grund: Das Formular schickt beim
+  // Speichern immer alle Felder mit. Ein Bestandskonto mit einem Altwert
+  // (z. B. aus einem früheren Seed) könnte sonst kein einziges Feld mehr
+  // speichern – Regel verengt, Altbestand unbedienbar. Der Altwert darf
+  // bleiben, ein NEUER ungültiger kommt nicht mehr hinein.
+  if (updates.position !== undefined && updates.position !== "") {
+    if (!ALL_ROLES.includes(updates.position)) {
+      const bisher = await Player.findById(id).select("position").lean();
+      if (updates.position !== (bisher?.position || "")) {
+        return fail("Diese Position gibt es nicht zur Auswahl.", 400);
       }
     }
   }

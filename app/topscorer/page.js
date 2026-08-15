@@ -11,7 +11,7 @@ import PageHeader from "@/components/layout/PageHeader";
 import BestenlistenWechsel from "@/components/layout/BestenlistenWechsel";
 import EmptyState from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { positionLabel } from "@/lib/constants";
+import { positionLabel, POSITION_FEHLT } from "@/lib/constants";
 import { inputClassSm } from "@/lib/ui";
 import { getPlayerToken } from "@/lib/clientAuth";
 import DemoBadge from "@/components/DemoBadge";
@@ -338,7 +338,7 @@ function TopscorerInhalt() {
                             )}
                             {s.isDemo && <DemoBadge className="ml-2 align-middle" />}
                             <div className="text-xs text-mist-400">
-                              {positionLabel(s.position) || "—"}
+                              {positionLabel(s.position) || POSITION_FEHLT}
                               {s.teamName ? " · " : ""}
                               {/* Der Verein war bisher toter Text – dabei ist
                                   „wer ist das eigentlich?" die zweite Frage
