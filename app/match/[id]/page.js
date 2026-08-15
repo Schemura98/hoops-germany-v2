@@ -19,7 +19,7 @@ import Footer from "@/components/layout/Footer";
 import Avatar from "@/components/Avatar";
 import SplitFlap from "@/components/ui/SplitFlap";
 import Reveal from "@/components/ui/Reveal";
-import { teamScores, matchVerification } from "@/lib/matchScore";
+import { teamScores, matchVerification, beidseitigBelegt } from "@/lib/matchScore";
 
 function formatDate(d) {
   try {
@@ -209,10 +209,10 @@ export default function MatchIdPage({ params }) {
   //
   // `submittedBy` ist das belastbare Merkmal: Es wird ausschließlich im echten
   // Meldeweg gesetzt (app/api/team/submit-match-result), nie im Admin-Pfad.
-  const bestaetigt =
-    match.resultStatus === "confirmed" &&
-    !!match.teamAResult?.submittedBy &&
-    !!match.teamBResult?.submittedBy;
+  // Seit dem 15.08.2026 aus `lib/matchScore.js` (s. Kommentar dort). Die
+  // Bedingung war hier richtig – sie stand nur an drei Stellen abgeschrieben,
+  // und die vierte Fläche hat sie deshalb nicht mitbekommen.
+  const bestaetigt = beidseitigBelegt(match);
   const verify = matchVerification(match);
   const statsA = (match.playerStats || []).filter(
     (s) => String(s.team) === String(match.teamA?._id)

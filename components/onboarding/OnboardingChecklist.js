@@ -197,13 +197,33 @@ export default function OnboardingChecklist({ player, onDismiss }) {
           {doneCount}/{steps.length}
         </span>
         {offen && (
+          // ⚠️ `py-2 -my-2` vergrößert die Klickfläche, ohne die Zeile höher zu
+          // machen (Befund Tobias M2): Der Link maß 117 × 16 px und war der
+          // einzige Weg aus der Checkliste heraus – 16 px unterschreiten jede
+          // brauchbare Schwelle, und das auf dem Hauptgerät.
           <Link
             href={offen.href}
-            className="text-xs font-semibold text-brand-400 hover:text-brand-300 whitespace-nowrap truncate"
+            className="truncate whitespace-nowrap py-2 -my-2 text-xs font-semibold text-brand-400 hover:text-brand-300"
           >
             {offen.label}
           </Link>
         )}
+        {/* ⚠️ Der Ausblenden-Knopf MUSS hier stehen (Befund Tobias H1).
+            Die erste Fassung dieser Zeile hatte keinen – er existierte nur im
+            Panel-Zweig unter 50 %. Folge: Wer zwischen 50 % und 99 % steht,
+            also fast jeder nach dem Einstieg, konnte die Checkliste dauerhaft
+            nicht mehr wegklicken; `dismiss()` samt `dismiss-onboarding` und
+            dem Analytics-Ereignis war für diese Gruppe tote Funktion.
+            Vorher war der Knopf immer da – das war ein stiller Verlust durch
+            meinen Umbau, keine Entwurfsentscheidung. */}
+        <button
+          type="button"
+          onClick={dismiss}
+          aria-label="Ausblenden"
+          className="-m-1 flex-shrink-0 p-1 text-mist-600 transition-colors hover:text-mist-300"
+        >
+          <PiXBold className="text-xs" />
+        </button>
       </div>
     );
   }

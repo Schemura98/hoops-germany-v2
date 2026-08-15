@@ -5,7 +5,6 @@ import axios from "axios";
 import {
   PiBasketballBold,
   PiTrophyBold,
-  PiArrowsLeftRightBold,
   PiNewspaperBold,
   PiUsersThreeBold,
 } from "react-icons/pi";
@@ -19,7 +18,6 @@ import Anzeigetafel from "@/components/feed/Anzeigetafel";
 import Schiene, { SchienenAbschnitt } from "@/components/feed/Schiene";
 import TeamMatchesWidget from "@/components/feed/TeamMatchesWidget";
 import TopTeamsWidget from "@/components/feed/TopTeamsWidget";
-import TransferFeedWidget from "@/components/feed/TransferFeedWidget";
 import FollowSuggestions from "@/components/feed/FollowSuggestions";
 import CollapsibleWidget from "@/components/feed/CollapsibleWidget";
 import NewsWidget from "@/components/NewsWidget";

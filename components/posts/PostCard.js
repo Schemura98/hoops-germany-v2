@@ -407,8 +407,16 @@ export default function PostCard({ post, currentPlayerId }) {
           )}
 
           {/* Inhalt */}
+          {/* ⚠️ `max-w-[68ch]` (Entwurf Vivien §3.4, nachgetragen 15.08.2026).
+              Der Kommentar auf der Newsfeed-Seite behauptete diese Kappung
+              bereits, während es hier KEIN `max-w` gab (Befund Kai): Die
+              Spalte wuchs von 544 auf 700 px, und die Begründung dafür war
+              erfunden. Jetzt stimmt sie.
+              Gekappt wird der TEXT, nicht die Spalte – Ergebniszeilen und
+              Bilder dürfen die volle Breite nutzen, Fließtext bleibt bei
+              45–75 Zeichen lesbar. */}
           {post.content && (
-            <p className="mt-3 text-paper-50 whitespace-pre-line">
+            <p className="mt-3 max-w-[68ch] text-paper-50 whitespace-pre-line">
               <RichText text={post.content} mentions={post.mentions} />
             </p>
           )}

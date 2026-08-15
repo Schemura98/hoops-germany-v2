@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Avatar from "@/components/Avatar";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { teamScores, matchVerification } from "@/lib/matchScore";
+import { teamScores, matchVerification, beidseitigBelegt } from "@/lib/matchScore";
 
 // Die Anzeigetafel am Kopf des Newsfeeds (15.08.2026).
 //
@@ -139,9 +139,28 @@ export default function Anzeigetafel({ data, loading, player }) {
   // ⚠️ Nicht zwingend dasselbe Spiel wie `last`: Ein Ergebnis kann eingetragen
   // sein, ohne dass jemand den Box-Score gepflegt hat. Deshalb eigene Suche –
   // sonst zeigte die Tafel „keine Zahlen", obwohl welche vorliegen.
+  // ⚠️ Zwei Bedingungen, jede aus einem Gate-Befund (Kai B3/B4):
+  //
+  //  1. `status === "completed"` – Register 2 filterte danach, Register 3
+  //     nicht. `match-stats/save` hat keine Status-Sperre; ein noch nicht
+  //     gespieltes Spiel mit vorab getipptem Box-Score sortierte per Datum
+  //     VOR alles andere und erschien als „Deine Zahlen".
+  //
+  //  2. Summe > 0 statt `!= null`. `toCount()` in `match-stats/save` liefert
+  //     bei leerer Eingabe **0**, nicht null – der alte Filter griff also nie.
+  //     Wer nur im Kader-Formular aufgeführt wurde, ohne dass jemand Zahlen
+  //     eintrug, sah „0 PKT · 0 AST · 0 REB". `lib/statsNotify.js` fängt genau
+  //     das ab („summe <= 0 → continue", Leerzeile aus dem Kader-Formular) –
+  //     die Regel stand da, ich hatte sie beim Bauen nicht mitgenommen.
   const letztesMitWerten =
     mine
-      .filter((m) => m.meineWerte && m.meineWerte.points != null)
+      .filter((m) => {
+        if (m.status !== "completed") return false;
+        const w = m.meineWerte;
+        if (!w) return false;
+        const summe = (w.points || 0) + (w.assists || 0) + (w.rebounds || 0);
+        return summe > 0;
+      })
       .sort((a, b) => new Date(b.date) - new Date(a.date))[0] || null;
 
   if (!next && !last && !letztesMitWerten) return null;
@@ -278,17 +297,25 @@ export default function Anzeigetafel({ data, loading, player }) {
                 ))}
             </div>
             {/* Der Beleg-Stand gehört an die eigene Zahl, nicht nur an das
-                Team-Ergebnis – das IST das Versprechen der Plattform. Wortlaut
-                bewusst zurückhaltend: „bestätigt" nur, wenn beide Seiten
-                gemeldet haben. */}
+                Team-Ergebnis – das IST das Versprechen der Plattform.
+                ⚠️ Quelle ist `beidseitigBelegt`, NICHT `matchVerification`.
+                Die erste Fassung fragte `state === "confirmed" || "final"` und
+                behauptete damit „beidseitig bestätigt" für ein einseitig
+                gemeldetes Ergebnis nach 48 Stunden UND für jedes vom Admin
+                eingetragene. Beide Gates haben das unabhängig als blockierend
+                gemeldet; Tobias hat es mit echten Seed-Daten reproduziert.
+                ⚠️ Und: Das Ergebnis ist beidseitig bestätigt, der BOX-SCORE
+                nicht – den trägt EIN Team-Admin ein. Der Satz sagt deshalb,
+                worauf sich die Bestätigung bezieht. Derselbe Fehler war am
+                14.08. schon einmal in Tour-Schritt 1. */}
             <p className="mt-1.5 text-xs text-mist-400 truncate">
               {dayLabel(letztesMitWerten.date)} ·{" "}
               {(() => {
                 const v = matchVerification(letztesMitWerten);
-                if (v?.state === "confirmed" || v?.state === "final")
-                  return "beidseitig bestätigt";
                 if (v?.state === "mismatch") return "Ergebnis strittig";
-                return "noch nicht bestätigt";
+                if (beidseitigBelegt(letztesMitWerten))
+                  return "Ergebnis von beiden Teams bestätigt";
+                return "Ergebnis noch nicht beidseitig bestätigt";
               })()}
             </p>
           </Register>
