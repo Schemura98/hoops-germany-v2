@@ -73,9 +73,18 @@ export const BallSprite = forwardRef(function BallSprite(
       ref={ref}
       aria-hidden="true"
       className={`hero-ball-sprite pointer-events-none absolute left-0 top-0 opacity-0 will-change-transform ${className}`}
+      // ⚠️ KEIN `drop-shadow` (Entscheidung Vivien, 15.08.2026). Ein GEWORFENER
+      // Schatten behauptet eine Lichtquelle und eine Fläche hinter dem Ball –
+      // beides gibt es hier nicht, der Ball steht vor einer leeren Navy-Fläche.
+      // Er machte aus dem Körper einen Aufkleber über der Seite. Die Tiefe kommt
+      // jetzt aus dem Anschnitt am Bühnenrand: physikalisch und kostenlos.
+      // Die Verläufe IM Ball (Körperverlauf, Kantenabdunklung, Bouncelight)
+      // bleiben – sie sind Modellierung, keine Dekoration, und genau das ist die
+      // Grenze, die `docs/VISUELLE-RICHTUNG` zieht: keine Verläufe auf FLÄCHEN
+      // DER OBERFLÄCHE (Panels, Tasten, Gründe), sehr wohl auf einem
+      // dargestellten Gegenstand.
       style={{
         backgroundRepeat: "no-repeat",
-        filter: "drop-shadow(0 6px 16px rgba(0,0,0,.45))",
         ...style,
         backgroundSize: `${BALL_SPRITE_FRAMES * 100}% 100%`,
       }}

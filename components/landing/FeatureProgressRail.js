@@ -50,66 +50,54 @@ const WING_RIGHT_INDEX = 4;
 const WING_NUDGE = 9; // px
 
 // Ab diesem Anteil t der GANZEN Sektion macht der Ball den letzten Sprung ins
-// Ziel, statt weiter dem Fortschritt zu folgen (Konzept Abschnitt 3: "zeitlich
-// exakt wenn Szene 6 in den Fokus rueckt" – das faellt mit dem Ende der
-// Sektion zusammen, deutlich nach dem Moment, in dem der letzte Punkt aktiv wird).
-const ARRIVE_T = 0.96;
+// Ziel, statt weiter dem Fortschritt zu folgen.
+//
+// ⚠️ 0.96 → 0.86 (Entscheidung Vivien, 15.08.2026, Roadmap 20 d). Sie hat das
+// Korb-Emblem über `t` verfolgt: Es steht von t≈0,70 bis 0,96 gut sichtbar
+// mitten im Bild. 0.96 feuerte am ALLERLETZTEN Punkt dieses Fensters – 15px
+// unter der Navbar –, und danach blieben bei 1280 noch ganze **62px
+// Scrollweg**, bis alles verschwunden war. Eine 420ms-Landeanimation in einem
+// 62px-Fenster sieht bei normalem Wischen niemand. Deshalb war Tobias' Befund
+// „die Landung ist auf keinem Viewport sichtbar" richtig, obwohl sie
+// rechnerisch im Bild lag.
+// Dazu kam ein toter Abschnitt: Der Ball erreicht den letzten Punkt schon bei
+// t = 5/6 ≈ 0,833 (`continuous` klemmt dort) und stand dann 314px still.
+// 0.86 setzt die Landung direkt dahinter: letzter Punkt erreicht → Landung.
+// Das sichtbare Fenster wächst von 62px auf ~250px.
+const ARRIVE_T = 0.86;
 
-// ── Dribbel-Spur (Punkt 3, 15.08.2026, Auftrag Patrick) ────────────────────
-// Der Ball hinterlässt seinen Weg, wie ihn ein Trainer auf die Taktiktafel
-// malen würde. Das ist KEINE frei gewählte Deko-Linie:
+// ── Laufweg-Spur der Desktop-Leiste ───────────────────────────────────────
+// ⚠️ WAR EINE DRIBBEL-SPUR (Zickzack/Welle), IST JETZT EIN LAUFWEG
+// (Entscheidung Vivien, 15.08.2026). Die Begründung ist nicht ästhetisch:
+// Der Ball auf der Leiste **rollt** – `rollwinkel()` = Weg/Radius, das ist der
+// bewusst gebaute Kern dieses Umbaus. Ein rollender Ball dribbelt nicht. Eine
+// Zickzack-Linie hätte nach der Taktiktafel-Notation also eine Bewegung
+// behauptet, die der Code an derselben Stelle widerlegt – dasselbe Muster wie
+// in `docs/MUSTER-ZAHLEN-DIE-LUEGEN`, nur in Grafik statt in Text.
+// Durchgezogen = Laufweg ist die Notation, die zum Rollen passt, und sie trägt
+// hier echte Information, weil die Fortschritts-Punkte diskret sind: Die Linie
+// zeigt, wie weit der Ball zwischen ihnen gekommen ist.
 //
-// In der Taktiktafel-Notation hat jede Linienform eine feste Bedeutung –
-// durchgezogen = Laufweg, gestrichelt = Pass, **Zickzack = Dribbling**. Unser
-// Ball dribbelt die Strecke entlang; eine gerade Linie hieße „der Ball wurde
-// getragen", eine gestrichelte „er wurde gepasst". Dieselbe Konvention benutzt
-// PlayDiagram.js für Laufweg und Pass.
+// ⚠️ MOBIL GIBT ES SIE NICHT MEHR. Der sich füllende Balken IST die Spur,
+// buchstäblich und exakt – eine zweite Linie daneben sagte dasselbe ein
+// zweites Mal. `dribbelPfad`, `SPUR_AMPLITUDE` und `SPUR_WELLE` sind damit
+// ersatzlos entfallen.
 //
-// ⚠️ WAS HIER TATSÄCHLICH GERENDERT WIRD, IST EINE WEICHE WELLE, KEIN ZICKZACK
-// (Befund Tobias, 15.08.2026). Grund sind die quadratischen Bézier-Segmente
-// unten: Sie erzeugen runde Bögen, keine Ecken. Der Absatz darüber beschrieb
-// bis dahin die Notation, nicht die Zeichnung – also genau der Fall aus
-// docs/MUSTER-ZAHLEN-DIE-LUEGEN: im Sinne des Codes richtig, im Sinne des
-// Lesers falsch.
-// Es bleibt vorerst die Welle, weil sie am Produkt geprüft und für gut befunden
-// ist. **Ob daraus ein echter Zickzack wird (Q- durch L-Segmente ersetzen, ein
-// Zweizeiler), ist eine Gestaltungsentscheidung und gehört Vivien** – die
-// Notationsbegründung trägt streng genommen erst dann wieder.
-//
-// Technik wie dort: `pathLength="1"` normiert die Pfadlänge auf 1, danach
-// zeichnet `strokeDashoffset` von 1 auf 0 den Pfad exakt von Anfang bis Ende –
-// ohne `getTotalLength()`, also ohne Layout-Zugriff pro Bild.
-const SPUR_AMPLITUDE = 4.5; // px seitlicher Ausschlag der Zickzack-Linie
-const SPUR_WELLE = 15; // px Länge einer halben Welle
+// Technik unverändert: `pathLength="1"` normiert die Pfadlänge, danach zeichnet
+// `strokeDashoffset` von 1 auf 0 – ohne `getTotalLength()`, also ohne
+// Layout-Zugriff pro Bild.
 
-// Baut den Zickzack-Pfad einer Dribbel-Strecke. `mitteBei(fortschritt)` liefert
-// die seitliche Mittellinie an dieser Stelle – dadurch trägt die Spur die
-// Flügel-Auslenkung des Balls mit und läuft nicht stur geradeaus.
-// `senkrecht`: true = Strecke verläuft in y (Desktop-Leiste), false = in x.
-function dribbelPfad(von, bis, mitteBei, senkrecht) {
+// Gerader Laufweg von `von` nach `bis`, mit der Flügel-Auslenkung des Balls als
+// Stützpunkten – sonst liefe die Linie schnurgerade, während der Ball seitlich
+// ausschert.
+function laufwegPfad(von, bis, mitteBei) {
   const laenge = bis - von;
   if (laenge <= 0) return "";
-  const schritte = Math.max(2, Math.round(laenge / SPUR_WELLE));
-  // ⚠️ Faktor 2 am Steuerpunkt, und der ist nicht willkürlich: Eine quadratische
-  // Bézierkurve erreicht ihren Steuerpunkt NICHT – ihr Scheitel liegt auf halbem
-  // Weg dorthin. Ohne den Faktor wäre die sichtbare Amplitude nur halb so groß
-  // wie `SPUR_AMPLITUDE` behauptet (nachgemessen: 5px statt 9px Bandhöhe).
-  // Eine Konstante, die das Doppelte ihres Wertes bedeutet, ist eine Falle für
-  // den Nächsten, der sie justiert.
-  const punkt = (l, seite) => {
-    const f = laenge === 0 ? 0 : l / laenge;
-    const mitte = mitteBei(f);
-    const quer = mitte + seite * SPUR_AMPLITUDE * 2;
-    return senkrecht ? [quer, von + l] : [von + l, quer];
-  };
-  const [sx, sy] = punkt(0, 0);
-  let d = `M${sx.toFixed(1)} ${sy.toFixed(1)}`;
-  for (let i = 0; i < schritte; i++) {
-    const l0 = (laenge * i) / schritte;
-    const l1 = (laenge * (i + 1)) / schritte;
-    const [kx, ky] = punkt((l0 + l1) / 2, i % 2 === 0 ? 1 : -1);
-    const [ex, ey] = punkt(l1, 0);
-    d += ` Q${kx.toFixed(1)} ${ky.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`;
+  const schritte = 12;
+  let d = `M${mitteBei(0).toFixed(1)} ${von.toFixed(1)}`;
+  for (let i = 1; i <= schritte; i++) {
+    const f = i / schritte;
+    d += ` L${mitteBei(f).toFixed(1)} ${(von + laenge * f).toFixed(1)}`;
   }
   return d;
 }
@@ -128,8 +116,7 @@ export default function FeatureProgressRail({ labels = [] }) {
   const ballDesktopRef = useRef(null);
   const goalDesktopRef = useRef(null);
   const goalRingRef = useRef(null); // nur der Ring des Korb-Emblems (fuer den Farbblitz)
-  const spurMobileRef = useRef(null); // Dribbel-Spur, waagerecht
-  const spurDesktopRef = useRef(null); // Dribbel-Spur, senkrecht
+  const spurDesktopRef = useRef(null); // Laufweg-Spur der Desktop-Leiste
   const activeRef = useRef(-1);
   const arrivedRef = useRef(false); // einmalige Ankunft – danach eingefroren
   const tickingRef = useRef(false);
@@ -328,23 +315,7 @@ export default function FeatureProgressRail({ labels = [] }) {
           )}px, -50%, 0) rotate(${rollwinkel(strecke).toFixed(1)}deg)`;
           ballMobileRef.current.style.opacity = einblendung.toFixed(3);
 
-          // Die Dribbel-Spur liegt auf voller Länge im Pfad und wird über den
-          // Strichversatz aufgedeckt – so bleibt sie exakt beim Ball, ohne dass
-          // der Pfad pro Bild neu gebaut werden müsste.
-          if (spurMobileRef.current) {
-            if (
-              spurMobileRef.current.dataset.breite !==
-              String(Math.round(trackW))
-            ) {
-              spurMobileRef.current.dataset.breite = String(Math.round(trackW));
-              spurMobileRef.current.setAttribute(
-                "d",
-                dribbelPfad(0, trackW, () => 0, false),
-              );
-            }
-            spurMobileRef.current.style.strokeDashoffset = String(1 - t);
           }
-        }
       }
 
       // Desktop: zwischen erstem und letztem Punkt interpolieren, mit
@@ -411,7 +382,7 @@ export default function FeatureProgressRail({ labels = [] }) {
               };
               spurDesktopRef.current.setAttribute(
                 "d",
-                dribbelPfad(ersterY, letzterY, mitteBei, true),
+                laufwegPfad(ersterY, letzterY, mitteBei),
               );
             }
             spurDesktopRef.current.style.strokeDashoffset = String(1 - frac);
@@ -481,11 +452,16 @@ export default function FeatureProgressRail({ labels = [] }) {
     // Spielraum keine Strecke zum Kleben (Befund Tobias, 12.08.2026).
     <div ref={wrapRef} aria-hidden="true" style={{ display: "contents" }}>
       {/* Mobil/Tablet: dünner Balken unter der Navbar + Kurz-Beschriftung.
-          Der Ball reitet auf der Balkenspitze mit, das Korb-Ziel sitzt
-          kompakt neben der Beschriftung (A10) – eine bewusst einfachere
-          Geometrie als am Desktop, s. Konzept Abschnitt 4: eine absolute
-          Positionierung des Ziels HINTER dem vollen Balken würde entweder
-          über den 16px-Seitenrand hinauslaufen oder den Balken schmälern. */}
+          Der Ball reitet auf der Balkenspitze mit.
+          ⚠️ DAS KORB-ZIEL SASS BIS ZUM 15.08.2026 NEBEN DER BESCHRIFTUNG, also
+          LINKS – während der Ball am rechten Balkenende ankommt. Gemessen bei
+          375: Emblem bei x=150, Ball-Endposition bei x=349. Der Ball bewegte
+          sich über die ganze Strecke VOM ZIEL WEG (Entscheidung Vivien).
+          Es sitzt jetzt am rechten Ende, unmittelbar über der Balkenspitze.
+          Die alte Begründung („würde über den 16px-Seitenrand hinauslaufen
+          oder den Balken schmälern") trifft für diese Positionierung nicht zu:
+          Das Emblem ist 20x14px, liegt ÜBER dem Balken statt in ihm, und der
+          Balken behält seine volle Breite. */}
       <div className="sticky top-16 z-20 -mx-4 mb-10 bg-navy-950/90 px-4 pb-2 pt-2 backdrop-blur-sm xl:hidden">
         <div className="mb-1.5 flex items-center gap-1.5">
           <p
@@ -494,17 +470,18 @@ export default function FeatureProgressRail({ labels = [] }) {
           >
             {`1 / ${labels.length} · ${labels[0] || ""}`}
           </p>
-          <span
-            ref={goalMobileRef}
-            className="opacity-0 transition-opacity duration-300 motion-reduce:transition-none"
-            title="Ziel: Nachspielzeit"
-          >
-            {/* Native Groesse des Emblems (20x14) statt Skalierung – keine
-                Verzerrung, kein zusaetzlicher Rechenwert. */}
-            <HoopEmblem className="pointer-events-none block h-3.5 w-5" />
-          </span>
         </div>
         <div ref={trackRef} className="relative h-1 w-full">
+          {/* Das Ziel sitzt über der Balkenspitze – dort, wo der Fortschritt
+              endet und der Ball ankommt. Native Größe (20x14), keine
+              Skalierung: keine Verzerrung, kein zusätzlicher Rechenwert. */}
+          <span
+            ref={goalMobileRef}
+            className="absolute bottom-full right-0 mb-1 opacity-0 transition-opacity duration-300 motion-reduce:transition-none"
+            title="Ziel: Nachspielzeit"
+          >
+            <HoopEmblem className="pointer-events-none block h-3.5 w-5" />
+          </span>
           <div className="absolute inset-0 overflow-hidden rounded-full bg-navy-700">
             <div
               ref={barRef}
@@ -512,29 +489,6 @@ export default function FeatureProgressRail({ labels = [] }) {
               style={{ transform: "scaleX(0)" }}
             />
           </div>
-          {/* Dribbel-Spur, waagerecht. `overflow-visible` ist nötig, weil der
-              Zickzack über die 4px des Balkens hinausschwingt; der innere
-              Versatz legt y=0 auf die Balkenmitte. */}
-          <svg
-            aria-hidden="true"
-            className="pointer-events-none absolute left-0 top-1/2 h-8 w-full -translate-y-1/2 overflow-visible"
-            fill="none"
-          >
-            <g transform="translate(0,16)">
-              <path
-                ref={spurMobileRef}
-                data-spur="mobil"
-                d=""
-                pathLength="1"
-                strokeDasharray="1"
-                style={{ strokeDashoffset: 1 }}
-                stroke={FARBE_AKTIV}
-                strokeOpacity="0.45"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </g>
-          </svg>
           {/* Positionierung liegt seit dem 15.08.2026 beim Aufrufer, s. Kommentar
               an RailBallGlyph. Mobil: auf der Mitte des waagerechten Balkens. */}
           <RailBallGlyph

@@ -98,8 +98,25 @@ const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 // Wird zur Laufzeit gemessen und ist damit breitenunabhängig: Zeilenumbrüche lassen
 // sich nicht verlässlich vorhersagen, deshalb kein Sonderwert je Breakpoint.
 // Entscheid Vivien 11.08.2026 auf Tobias' Befund bei 430px.
-function ballDeckkraftUeberInhalt(ballCenterY, textRect) {
+// ⚠️ PRÜFT SEIT DEM 15.08.2026 AUCH X (Entscheidung Vivien, Roadmap 20 a).
+// Vorher verglich diese Funktion ausschließlich `ballCenterY` gegen
+// `top/bottom` – die waagerechte Lage kam nie vor. Vivien hat nachgemessen,
+// was das kostet: Bei 1280/scrollY 585 steht der Ball auf x = 1141 und
+// überlappt nachweislich KEINE Inhaltszeile, ist aber trotzdem auf 0,20
+// gedimmt. Der gesamte Ausroll-Weg – also genau die Bewegung, die man sehen
+// soll – fand ohne jeden Kontrastgrund bei ≤ 20 % statt.
+// Seit der neuen Bahn ist diese Funktion nicht mehr der Kontrastschutz (den
+// leistet der Weg selbst), sondern ein NETZ: Ändert sich eine Zeilenlänge und
+// überlappt der Ball doch einmal, greift sie weiterhin.
+function ballDeckkraftUeberInhalt(ballCenterY, textRect, ballLinks, ballRechts) {
   if (!textRect) return 1;
+  // Keine waagerechte Überschneidung ⇒ kein Grund abzudunkeln.
+  if (
+    typeof ballRechts === "number" &&
+    (ballRechts < textRect.left || ballLinks > textRect.right)
+  ) {
+    return 1;
+  }
   if (ballCenterY < textRect.top - TEXT_FADE_MARGIN) return 1;
   if (ballCenterY < textRect.top) {
     const t =
@@ -187,33 +204,69 @@ export default function HeroScrollStage({
         el.style.opacity = tp >= ab ? "1" : "0";
       }
 
-      const cta = ctaRef?.current;
       const ball = ballRef.current;
-      if (!cta || !ball) return;
+      // ⚠️ `ctaRef` wird seit dem 15.08.2026 NICHT mehr gebraucht: Der Ball
+      // zielt nicht mehr auf die Schaltfläche (s. Bahn-Entscheidung unten). Die
+      // Prop bleibt vorerst in der Signatur, damit `LandingHero` unverändert
+      // bleibt – aber es wird nicht mehr darauf gewartet. Vorher stand hier
+      // `if (!cta || !ball) return;`: Ohne CTA hätte es gar keinen Ball gegeben,
+      // was jetzt eine willkürliche Kopplung wäre.
+      if (!ball) return;
 
       // Radius am Element gemessen, nicht angenommen – s. Kommentar oben.
       const BALL_R = ball.offsetWidth / 2 || 1;
 
-      // Zielpunkt: obere Ecke der primären Schaltfläche, halb über deren Kante –
-      // wie ein Abzeichen, nie über der Beschriftung. Hier setzt der Ball jetzt
-      // nur noch AUF, statt zu landen (s. Kommentar oben).
-      const cta_ = cta.getBoundingClientRect();
-      // ⚠️ IN DIE BÜHNE HINEINGEZOGEN (Befund Tobias A, 15.08.2026).
-      // Der Zielpunkt ist die RECHTE Kante der Schaltfläche. Beim 14px-Glyph war
-      // das folgenlos; mit Radius 52 (mobil) ragte der Ball dort über den Rand –
-      // die Bühne ist `overflow-hidden`, also wurde er beschnitten. Gemessen auf
-      // 375px: am Ruhepunkt noch **3 %** sichtbare Fläche, kurz darauf 0 %. Der
-      // zentrale Beat der Choreografie fand statt, ohne dass man ihn sah.
-      // Der Ball darf deshalb nicht näher als seinen Radius (plus etwas Luft) an
-      // den Rand – wo Platz ist, bleibt der Zielpunkt exakt die Ecke.
-      const RAND_LUFT = 6;
-      const grenze = BALL_R + RAND_LUFT;
-      const targetX = clamp(
-        cta_.right - rect.left,
-        grenze,
-        Math.max(grenze, rect.width - grenze),
-      );
-      const targetY = cta_.top - rect.top;
+      // ══ DER BALL VERLÄSST DIE TEXTSPALTE ══════════════════════════════════
+      // Entscheidung Vivien, 15.08.2026 (Roadmap 20 a/c). Sie hat drei Befunde
+      // auf EINE Ursache zurückgeführt: Der Ball zielte auf die primäre
+      // Schaltfläche. Für einen 14px-Glyph war das ein Abzeichen mit Witz – bei
+      // 104–176px ist es ein Gegenstand auf der wichtigsten Taste der Seite.
+      // Gemessen: Bei 375 ruhte der Ball auf y 401–505, die Taste liegt auf
+      // 455–515 – die untere Ballhälfte deckte 50 der 60px Tastenhöhe.
+      //
+      // Und es gibt keinen Deckkraftwert, der das löst: hoch = Kontrast kaputt,
+      // niedrig = der texturierte Körper liest sich hinter weißer Display-Type
+      // nicht als Ball, sondern als Fleck. Material und Grund sind im selben
+      // Rechteck unvereinbar.
+      //
+      // Deshalb ruht er jetzt im FREIEN FELD, am rechten Bühnenrand, bewusst
+      // angeschnitten. Welche Bahn, entscheidet die gemessene Geometrie – kein
+      // Breakpoint, sondern der tatsächliche Platz neben dem Inhalt. Der
+      // Umschalter fällt dadurch von selbst auf ~1280px, also genau auf `xl`;
+      // das ist kein Zufall, sondern der Breakpoint der Fortschritts-Leiste
+      // (s. Übergabe weiter unten).
+      const inhaltRect = inhaltRef?.current?.getBoundingClientRect();
+
+      // ⚠️ 20 % ANSCHNITT SIND ABSICHT, KEIN MANGEL (Vivien, Roadmap 20 c).
+      // Ein Kreis, der vollständig im Rahmen liegt, liest sich als Grafik. Ein
+      // Kreis, den der Rahmen schneidet, liest sich als Körper, der zufällig
+      // gerade da ist – der Rahmen wird zum Fenster. Die 3 % Restsichtbarkeit
+      // von vorher waren kein Anschnitt, das war ein Verschwinden.
+      // Die frühere Klammer (`RAND_LUFT`/`grenze`/`clamp`) entfällt damit
+      // ersatzlos: Sie hielt den Ball von einer Kante fern, an die er jetzt
+      // ausdrücklich gehört.
+      const targetX = rect.width - 0.6 * BALL_R;
+
+      const freiRechts = inhaltRect ? rect.width - (inhaltRect.right - rect.left) : rect.width;
+      const obereBahn = inhaltRect ? inhaltRect.top - rect.top : rect.height * 0.3;
+      const targetY =
+        freiRechts >= 1.6 * BALL_R
+          ? // Seitliche Bahn: Es ist echter Platz neben dem Inhalt (ab ~1280).
+            rect.height * 0.42
+          : // Obere Bahn: möglichst weit oben, aber nicht über den Bühnenrand.
+            // ⚠️ ABWEICHUNG VON VIVIENS FORMEL, gemessen begründet (15.08.2026):
+            // Sie schreibt `inhaltRect.top - BALL_R - 8` und ging von freiem
+            // Raum ÜBER dem Inhalt aus. Den gibt es nicht – der Inhaltsblock
+            // beginnt buehnenrelativ bei y = 0 (375px) bzw. 19 (ab 768). Ihre
+            // Formel ergibt damit targetY = -60 bis -91, der Ball stünde also
+            // oberhalb der Bühne und wäre zu 34–59 % beschnitten statt zu 20 %.
+            // Die untere Klammer hält ihn vollständig im Bild; der waagerechte
+            // 20-%-Anschnitt bleibt der einzige Beschnitt. Dass er dabei
+            // rechnerisch über dem Inhalt liegen KANN, fängt die X-Bedingung in
+            // `ballDeckkraftUeberInhalt` ab – das Netz, das sie ausdrücklich
+            // für genau diesen Fall eingezogen hat.
+            // ⚠️ AN VIVIEN ZURÜCKGEMELDET, nicht eigenmächtig umentschieden.
+            Math.max(BALL_R + 8, obereBahn - BALL_R - 8);
 
       // Ball: reine Fallbewegung mit leichtem Wackeln – läuft mit der
       // Scrollrichtung statt gegen sie und braucht keine seitliche Fläche.
@@ -258,15 +311,38 @@ export default function HeroScrollStage({
       // WÄHREND er noch fiel, und war am Ruhepunkt fast aus dem Bild.
       // Jetzt muss beides zutreffen: Der Ball ist angekommen (`tb === 1`) UND
       // der Hero ist zu einem guten Teil ausgezogen. Erst dann rollt er weiter.
+      // ⚠️ DRITTE BEDINGUNG: ES MUSS EINE LEISTE GEBEN, AN DIE ÜBERGEBEN WIRD
+      // (Entscheidung Vivien, Roadmap 20 b). `FeatureProgressRail` schaltet mit
+      // `xl:hidden` / `hidden xl:block`, also bei 1280px. OBERHALB ist die
+      // Leiste eine senkrechte Spalte am RECHTEN Rand – der Hero-Ball rollt
+      // nach rechts raus, die Spalte übernimmt rechts. DARUNTER ist sie ein
+      // waagerechter Balken, der LINKS beginnt: Ein Ball, der rechts rausrollt
+      // und links wieder auftaucht, ist kein Stabwechsel, sondern zwei
+      // Auftritte an entgegengesetzten Ecken.
+      //
+      // Dazu kam eine Bewegung, die für sich schon falsch war: Bei 375 wanderte
+      // der Ball beim Ausrollen von x=349 auf x=583, WÄHREND die Seite nach oben
+      // scrollt – weder Schwerkraft noch Pass, sondern seitliches Wegrutschen.
+      //
+      // Unterhalb von `xl` bleibt er deshalb an seinem Ruhepunkt stehen und
+      // scrollt mit der Bühne oben aus dem Bild. Das ist der physikalisch
+      // richtige Abgang für ein Objekt in einem scrollenden Rahmen – und der
+      // Leisten-Ball erscheint danach als ehrlicher zweiter Auftritt.
+      // Bewusst KEIN Spiegeln der Bahn für mobil: Dafür müsste der Ball oben
+      // LINKS abgehen, entgegen der Desktop-Richtung und entgegen dem Ruhepunkt
+      // aus der Bahn-Entscheidung. Zwei gegenläufige Choreografien für dieselbe
+      // Erzählung sind teurer als ein zweiter Auftritt.
+      const RAIL_BREAKPOINT = 1280; // = Tailwind `xl`, muss mit FeatureProgressRail übereinstimmen
       const HANDOFF_START = 0.45;
       const sichtHoehe = window.innerHeight || 1;
+      const gibtLeiste = window.innerWidth >= RAIL_BREAKPOINT;
       const auszug = clamp(
         (sichtHoehe - rect.bottom) / Math.max(1, sichtHoehe - NAVBAR_HEIGHT),
         0,
         1,
       );
       const tu =
-        tb < 1
+        !gibtLeiste || tb < 1
           ? 0
           : clamp((auszug - HANDOFF_START) / (1 - HANDOFF_START), 0, 1);
       if (tu > 0) {
@@ -285,8 +361,15 @@ export default function HeroScrollStage({
 
       // Textblock-Ausblendung mit der Bahn-Deckkraft verrechnen (beide Ursachen
       // multiplizieren sich, damit das Einblenden nicht überschrieben wird).
-      const inhaltRect = inhaltRef?.current?.getBoundingClientRect();
-      ballOpacity *= ballDeckkraftUeberInhalt(rect.top + y, inhaltRect);
+      // `inhaltRect` ist oben schon gemessen (Bahnwahl) – eine zweite Messung
+      // im selben Frame wäre ein zusätzlicher Layout-Zugriff und könnte bei
+      // einer Zwischenänderung sogar abweichen.
+      ballOpacity *= ballDeckkraftUeberInhalt(
+        rect.top + y,
+        inhaltRect,
+        rect.left + x - BALL_R,
+        rect.left + x + BALL_R,
+      );
 
       // ⚠️ DAS AUSBLENDEN FOLGT DEM ECHTEN AUSTRITT, NICHT EINER KONSTANTEN.
       // Die erste Fassung blendete über `tu` aus – gemessen war der Ball damit

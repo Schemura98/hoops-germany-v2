@@ -85,14 +85,14 @@ const abtasten = async (schritt) => {
           Math.max(0, Math.min(b.right, t.r.right) - Math.max(b.left, t.r.left)) > 0 &&
           Math.max(0, Math.min(b.bottom, t.r.bottom) - Math.max(b.top, t.r.top)) > 0,
       }));
-    ergebnis.push({ y, deck, anteil, oben: Math.round(b.top), tasten });
+    ergebnis.push({ y, deck, anteil, imRahmen: Math.round(b.top - s.top), tasten });
   }
   return ergebnis;
 };
 
 test.describe("Hero-Ball – Laufzeit auf /", () => {
   for (const breite of BREITEN) {
-    test(`${breite}px: der Ball ist am Ruhepunkt vollständig sichtbar`, async ({ page }) => {
+    test(`${breite}px: der Ball ist am Ruhepunkt zu genau 20 % angeschnitten`, async ({ page }) => {
       await page.setViewportSize({ width: breite, height: 812 });
       await page.goto("/", { waitUntil: "networkidle" });
 
@@ -102,17 +102,35 @@ test.describe("Hero-Ball – Laufzeit auf /", () => {
       const sichtbar = proben.filter((p) => p.deck > 0.02);
       expect(sichtbar.length, "der Ball war auf der ganzen Strecke unsichtbar").toBeGreaterThan(5);
 
-      // Der Ruhepunkt ist die tiefste Lage, die der Ball erreicht: Danach ändert
-      // das Ausrollen nur noch x, nicht mehr y.
-      const tiefste = Math.max(...sichtbar.map((p) => p.oben));
-      const amRuhepunkt = sichtbar.filter((p) => p.oben === tiefste);
+      // ⚠️ DAS VERSPRECHEN HAT SICH AM 15.08.2026 GEÄNDERT (Entscheidung Vivien).
+      // Bis dahin sicherte dieser Test zu, dass der Ball am Ruhepunkt
+      // VOLLSTÄNDIG sichtbar ist. Jetzt ist er dort ABSICHTLICH zu 20 %
+      // angeschnitten: Ein Kreis, der vollständig im Rahmen liegt, liest sich
+      // als Grafik – einer, den der Rahmen schneidet, als Körper, der zufällig
+      // gerade da ist. Der Rahmen wird zum Fenster.
+      // Ein grüner Test auf ein Versprechen, das nicht mehr gilt, wäre
+      // schlimmer als kein Test, deshalb prüft er jetzt den Anschnitt selbst.
+      //
+      // Der Ruhepunkt ist die Lage RELATIV ZUR BÜHNE, die sich nicht mehr
+      // ändert. Die Bildschirmlage taugt dafür nicht – sie wandert beim
+      // Scrollen ohnehin, und genau daran ist meine erste Messung gescheitert.
+      const tiefste = Math.max(...sichtbar.map((p) => p.imRahmen));
+      // ⚠️ Das ERSTE Erreichen, nicht alle Proben mit diesem Wert. Beim
+      // Ausrollen (ab xl) ändert sich nur x, die senkrechte Lage bleibt auf
+      // dem Maximum – ein `filter` liefert deshalb auch alle Ausroll-Punkte,
+      // und dort ist der Ball naturgemäß stärker angeschnitten (gemessen 28 %
+      // statt 20 %). Der Ruhepunkt ist der Moment der Ankunft.
+      const amRuhepunkt = [sichtbar.find((p) => p.imRahmen === tiefste)];
 
       for (const p of amRuhepunkt) {
+        const anschnitt = (1 - p.anteil) * 100;
         expect(
-          p.anteil,
-          `scrollY ${p.y}: nur ${(p.anteil * 100).toFixed(0)} % des Balls liegen in der Bühne. ` +
-            `Die Bühne ist overflow-hidden – der Rest ist abgeschnitten und wird nie gesehen.`
-        ).toBeGreaterThan(0.99);
+          anschnitt,
+          `scrollY ${p.y}: ${anschnitt.toFixed(1)} % des Balls sind abgeschnitten, ` +
+            `erwartet sind 20 % ± 2 %. Zu wenig = er liest sich als Grafik statt als Körper; ` +
+            `zu viel = er verschwindet (vorher waren es 97 %).`
+        ).toBeGreaterThan(18);
+        expect(anschnitt).toBeLessThan(22);
       }
     });
 
