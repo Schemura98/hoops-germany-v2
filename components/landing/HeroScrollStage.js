@@ -1030,6 +1030,18 @@ export default function HeroScrollStage({
       if (raf) cancelAnimationFrame(raf);
       tickingRef.current = false;
       cancelAnimationFrame(warteRaf);
+      // ⚠️ UND DEN BEOBACHTER TRENNEN (Befund Kai, siebte Runde). `disconnect()`
+      // kam in dieser Datei **gar nicht vor** – meine Ergänzung zielte auf eine
+      // Zeile, die ich beim Neuschreiben des Blocks selbst gelöscht hatte.
+      // Gemessen über einen `prefers-reduced-motion`-Umlauf: hin 1 aktiv, zurück
+      // **2 aktiv**, und EINE Mutation löste zwei Rückrufe aus.
+      // Der überlebende Beobachter trägt die Closure des ABGEBAUTEN Effekts –
+      // sein `kaestenFinalisieren` ruft am Ende das **alte** `apply`, das den
+      // Ball schreibt. Zwei `apply` auf einem Element: dieselbe
+      // Doppelschreiber-Klasse wie in Runde fünf, diesmal auf Effekt-Ebene.
+      // Der Kommentarblock direkt darunter behandelt genau dieses Szenario
+      // bereits für vier Refs – der Beobachter fehlte in derselben Aufzählung.
+      if (inhaltBeobachter) inhaltBeobachter.disconnect();
       // ⚠️ ZURÜCKSETZEN, SONST ENTFÄLLT DER EINFLUG DAUERHAFT (Befund Kai):
       // Nach einem `prefers-reduced-motion`-Wechsel hin und zurück baut React
       // den Effekt neu auf, `eingeflogenRef` bliebe aber true – der Auftritt

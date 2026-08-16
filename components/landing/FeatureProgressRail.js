@@ -183,7 +183,23 @@ export default function FeatureProgressRail({ labels = [] }) {
         // im Browser, kein Test; die Erreichbarkeit ist gering, die Fehlerform
         // die teure.
         // Deshalb: erneut versuchen statt still danebenlegen.
-        if (!zielM || zielM.width === 0) {
+        // ⚠️ NUR DORT MELDEN, WO DIESER ZWEIG ÜBERHAUPT GILT (Befund Kai,
+        // siebte Runde). Ohne diese Schranke feuerte die Diagnose auf jedem
+        // Desktop-Besuch: `goalMobileRef` liegt in `xl:hidden` und hat ab 1280
+        // Breite 0 – gemessen **13 Fehler auf 1280, 12 auf 1440, 10 auf 1920**,
+        // dazu 30 rAF-Wiederholungen je Aufruf. Die Meldung „Der Ball wird
+        // neben dem Korb abgelegt" ist dort schlicht FALSCH; der Desktop-Zweig
+        // platziert korrekt (`rail-ankunft` ist ab 1280 grün).
+        // ⚠️ Und das ist exakt derselbe Befund wie Kais `console.error`-Punkt
+        // aus Runde sechs – eine Diagnose, die dort feuert, wo ihr Zweig nicht
+        // benutzt wird – **wiedereingeführt durch die Korrektur eines anderen
+        // Befunds**. Vierte Wiederholung dieses Musters in dieser Serie.
+        // Praktische Folge, die schwerer wiegt als das Rauschen: Ein echter
+        // mobiler Ausfall ginge darin unter.
+        // Die Schranke ist die Anzeige selbst, kein Breitenvergleich: Ist die
+        // mobile Leiste ausgeblendet, hat ihr Balken Breite 0.
+        const mobileLeisteSichtbar = trackRect.width > 0;
+        if (mobileLeisteSichtbar && (!zielM || zielM.width === 0)) {
           if (zielMessVersucheRef.current < 30) {
             zielMessVersucheRef.current += 1;
             requestAnimationFrame(() => ballZielSetzen(animiert));
