@@ -11,14 +11,18 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> ⚠️ **Auf `redesign` liegen 24 Commits, die NICHT deployt sind** (`950f23b` → `76aa289`,
+> ⚠️ **Auf `redesign` liegen 28 Commits, die NICHT deployt sind** (`950f23b` → `HEAD`,
 > 15./16.08.2026): der macOS-Umzug, die Ball-Choreografie der Startseite, der gerenderte
 > Hero-Ball und **fünf** Gate-Runden Nacharbeit. Live läuft unverändert `164c784`.
 > ⚠️ **Diese Zeile stand tagelang auf „fünf Commits" und war damit um den Faktor fünf falsch** –
 > es wurde committet und die Zeile gepflegt, ohne den Abstand zum Deploy neu zu zählen. Genau
 > die Fehlerform, die weiter unten schon zweimal für den Rollback-Zeiger protokolliert ist.
 > **Nicht schätzen, zählen:** `git rev-list --count 164c784..HEAD`.
-> Stand nach Runde fünf: Build durch, Playwright **146/146** (gegen `--list` abgeglichen).
+> Stand nach Runde **sechs**: Build durch, Playwright **160/160** (gegen `--list` abgeglichen).
+> ⚠️ **Die zwei Zahlen in diesem Absatz waren beim letzten Mal beide falsch** (Befund Kai:
+> „24" statt 27, „146/146" statt 150/150) – und sie stehen unmittelbar unter der
+> Anweisung „Nicht schätzen, zählen". **Die Regel hat sich selbst eingeholt.** Beide Zahlen
+> sind messbar: `git rev-list --count 164c784..HEAD` und `npx playwright test --list`.
 > Kais Deploy-Empfehlung war „noch nicht", begründet mit einem 20-px-Satz nach der Landung auf
 > jedem mobilen Laden – der ist behoben und durch drei neue Tests gedeckt. **Offen sind fünf
 > Gestaltungspunkte bei Vivien** (s. Roadmap 20c) sowie zwei bewusst zurückgestellte

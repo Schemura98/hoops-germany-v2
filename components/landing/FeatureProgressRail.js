@@ -104,6 +104,12 @@ function laufwegPfad(von, bis, mitteBei) {
 
 const clamp01 = (v) => Math.min(1, Math.max(0, v));
 
+// ⚠️ EINE Konstante für BEIDE Zweige (Befund Tobias B-b): Sie stand nur im
+// Desktop-Zweig, und genau deshalb landete der mobile Ball neben dem Korb.
+// Der Ball ruht UNTER dem Ring, bei 15 von 28px Emblemhöhe – auf der Mitte
+// läge er über dem Ring und deckte ihn zu (Entscheidung Vivien).
+const RUHE_ANTEIL = 15 / 28;
+
 export default function FeatureProgressRail({ labels = [] }) {
   const wrapRef = useRef(null);
   const barRef = useRef(null);
@@ -116,7 +122,9 @@ export default function FeatureProgressRail({ labels = [] }) {
   const ballDesktopRef = useRef(null);
   const goalDesktopRef = useRef(null);
   const goalRingRef = useRef(null);
-  const goalMobileRingRef = useRef(null); // nur der Ring des Korb-Emblems (fuer den Farbblitz)
+  const goalMobileRingRef = useRef(null);
+  // Der mobile Ring-Pfad selbst – Träger des Farbblitzes (Befund Tobias B-a).
+  const goalMobileFlashRef = useRef(null); // nur der Ring des Korb-Emblems (fuer den Farbblitz)
   const spurDesktopRef = useRef(null); // Laufweg-Spur der Desktop-Leiste
   const activeRef = useRef(-1);
   const arrivedRef = useRef(false); // einmalige Ankunft – danach eingefroren
@@ -150,13 +158,41 @@ export default function FeatureProgressRail({ labels = [] }) {
           ballMobileRef.current.style.transition =
             "transform 320ms cubic-bezier(0.34,1.56,0.64,1)";
         }
+        // ══ DER MOBILE BALL LANDET IM NETZ, NICHT DANEBEN ═══════════════════
+        // Befund Tobias B-b (sechste Runde), von Kai am Code bestätigt und
+        // nachgerechnet. `RUHE_ANTEIL` existierte NUR im Desktop-Zweig; der
+        // mobile Ball hing unverändert an `top-1/2` des 4px-Balkens.
+        // Gemessen auf 375x812: Ballmitte y = 95 statt 76 – **6px UNTERHALB der
+        // Emblem-Unterkante** – und x genau auf der rechten Emblemkante, 12,2px
+        // darüber hinaus. Die Ebenen-Trennung netz/ring war mobil im Markup
+        // vorhanden und lief ins Leere, weil der Ball den Ring nie erreichte.
+        // Kai maß den Anteil unabhängig als 34/28 = 1,2143 nach.
+        // ⚠️ Damit trug der ganze Umbau aus `4d03ba2` auf dem HAUPTGERÄT nicht.
+        const ballR = ballMobileRef.current.getBoundingClientRect();
+        const trackRect = trackRef.current.getBoundingClientRect();
+        const zielM = goalMobileRef.current?.getBoundingClientRect();
+        let versatzX = trackW - RAIL_BALL_R;
+        let versatzY = "-50%";
+        if (zielM && zielM.width > 0) {
+          // Dieselbe Rechnung wie am Desktop: Mitte des Balls auf 15 von 28
+          // Emblemhöhe, waagerecht auf die Emblem-MITTE statt auf seine Kante.
+          versatzX =
+            zielM.left + zielM.width / 2 - trackRect.left - RAIL_BALL_R;
+          versatzY = `${(
+            zielM.top +
+            zielM.height * RUHE_ANTEIL -
+            trackRect.top -
+            RAIL_BALL_R
+          ).toFixed(1)}px`;
+        }
         // Endstand MIT Drehwinkel: Ohne ihn schnappte der Ball bei der Ankunft
         // auf 0deg zurück – er wäre die ganze Strecke gerollt und am Ziel
         // plötzlich wieder unverdreht.
-        ballMobileRef.current.style.transform = `translate3d(${(
-          trackW - RAIL_BALL_R
-        ).toFixed(1)}px, -50%, 0) rotate(${rollwinkel(trackW).toFixed(1)}deg)`;
+        ballMobileRef.current.style.transform = `translate3d(${versatzX.toFixed(
+          1,
+        )}px, ${versatzY}, 0) rotate(${rollwinkel(trackW).toFixed(1)}deg)`;
         ballMobileRef.current.style.opacity = "1";
+        void ballR;
       }
       if (goalMobileRef.current) goalMobileRef.current.style.opacity = "1";
       if (goalMobileRingRef.current)
@@ -175,7 +211,6 @@ export default function FeatureProgressRail({ labels = [] }) {
         // UNTER dem Ring, bei 15 von 28px Emblemhöhe (viewBox-y ≈ 7,5). Erst
         // dann kreuzt die vordere Ringkante die Ballkuppe – auf der Mitte lag
         // er über dem Ring und deckte ihn zu.
-        const RUHE_ANTEIL = 15 / 28;
         const zielY =
           zielRect.top + zielRect.height * RUHE_ANTEIL - colRect.top;
         if (animiert) {
@@ -184,8 +219,11 @@ export default function FeatureProgressRail({ labels = [] }) {
           // kein Teleport. Dieselbe Kurve wie beim mobilen Ball oben.
           ballDesktopRef.current.style.transition =
             "transform 420ms cubic-bezier(0.34,1.56,0.64,1), opacity 260ms ease-out";
-          if (goalRingRef.current)
-            goalRingRef.current.classList.add("rail-goal-flash-ring");
+          // BEIDE Ringe – der sichtbare hängt am Breakpoint, und welcher das
+          // ist, weiß diese Stelle nicht. Der unsichtbare stört nicht.
+          for (const r of [goalRingRef.current, goalMobileFlashRef.current]) {
+            if (r) r.classList.add("rail-goal-flash-ring");
+          }
         }
         // Auch hier der Drehwinkel des Endstands (s. mobil oben). Bezug ist der
         // erste Punkt, damit er zur laufenden Drehung passt und nicht springt.
@@ -508,13 +546,29 @@ export default function FeatureProgressRail({ labels = [] }) {
             className="absolute left-0 top-1/2"
           />
           {/* Der Ring NACH dem Ball – gleiche Lage wie das Netz oben, dadurch
-              liegt er davor. Erst damit stimmt das Bild „im Netz". */}
+              liegt er davor. Erst damit stimmt das Bild „im Netz".
+              ⚠️ Diese Ref steuert NUR die Deckkraft; den Farbblitz trägt
+              `goalMobileFlashRef` am Pfad darin (Korrektur Kai – der Kommentar
+              stand vorher hier und beschrieb etwas, das diese Ref nicht tut). */}
           <span
             ref={goalMobileRingRef}
             aria-hidden="true"
             className="pointer-events-none absolute bottom-full right-0 mb-1 opacity-0 transition-opacity duration-300 motion-reduce:transition-none"
           >
-            <HoopEmblem teil="ring" className="block h-7 w-10" />
+            {/* ⚠️ DER FARBBLITZ HÄNGT JETZT AUCH HIER (Befund Tobias B-a).
+                `ringRef={goalRingRef}` stand nur am Desktop-Emblem – der
+                mobile Ring bekam die Klasse `rail-goal-flash-ring` nie.
+                Tobias' Messung ist der eigentliche Lehrsatz: Sein
+                MutationObserver MELDETE die Klasse auch mobil – sie landete
+                auf dem per `hidden xl:block` ausgeblendeten Desktop-Ring,
+                `getBoundingClientRect().width === 0`. Eine Prüfung auf „ist
+                die Klasse gesetzt" wäre grün gewesen.
+                Betroffen war JEDE Breite unter 1280, nicht nur Telefone. */}
+            <HoopEmblem
+              teil="ring"
+              ringRef={goalMobileFlashRef}
+              className="block h-7 w-10"
+            />
           </span>
         </div>
       </div>

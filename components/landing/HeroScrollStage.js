@@ -372,8 +372,17 @@ export default function HeroScrollStage({
         // `transparent` und `rgba(…, 0)` sind beide durchsichtig; alles andere
         // zeichnet eine Fläche, hinter der der Ball nichts beiträgt.
         if (!bg || bg === "transparent") continue;
-        const a = /^rgba?\([^)]*?,\s*([\d.]+)\s*\)$/.exec(bg);
-        if (a && Number(a[1]) === 0) continue;
+        // ⚠️ NUR `rgba(…)` MIT VIER TEILEN HAT EIN ALPHA (Befund Kai).
+        // Die erste Fassung `/^rgba?\([^)]*?,\s*([\d.]+)\s*\)$/` griff bei
+        // `rgb(r,g,b)` den **Blau-Kanal** als Alpha ab: `rgb(0,0,0)` und jedes
+        // `rgb(x,y,0)` galt damit als durchsichtig und verlor seinen
+        // Flächen-Schutz. Heute latent – kein Landing-Farbwert hat Blau 0 –,
+        // aber ein einziges `bg-black` hätte genügt.
+        const a =
+          /^rgba\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+\s*,\s*([\d.]+)\s*\)$/.exec(
+            bg,
+          ) || /^rgba?\([^/)]*\/\s*([\d.%]+)\s*\)$/.exec(bg); // moderne Schreibweise
+        if (a && parseFloat(a[1]) === 0) continue;
         flaechen.add(el);
       }
       for (const el of flaechen) {
@@ -427,7 +436,7 @@ export default function HeroScrollStage({
     // Frage. Hier wird stattdessen der Zustand selbst geprüft, den wir meinen:
     // Steht der Inhalt still? Das ist in allen drei Fällen dieselbe Antwort.
     const AUFGEBEN_MS = 1500;
-    const beginnWarten = performance.now();
+    const beginnWartenRef = { current: performance.now() };
     let warteRaf = 0;
     const stehtStill = () => {
       const h1 = stage.querySelector("h1");
@@ -436,8 +445,32 @@ export default function HeroScrollStage({
       return t === "none" || t === "matrix(1, 0, 0, 1, 0, 0)";
     };
     const kaestenFinalisieren = () => {
-      if (!stehtStill() && performance.now() - beginnWarten < AUFGEBEN_MS) {
+      if (
+        !stehtStill() &&
+        performance.now() - beginnWartenRef.current < AUFGEBEN_MS
+      ) {
         warteRaf = requestAnimationFrame(kaestenFinalisieren);
+
+        // ⚠️ UND NOCH EINMAL, WENN DER INHALT AUSGETAUSCHT WIRD (Befund Kai,
+        // sechste Runde). `kaestenFinalisieren` lief EINMAL. Tauscht `LandingHero`
+        // danach auf den eingeloggten Zweig, montiert ein neues `h1` mit frischer
+        // `Reveal`-Übergangszeit – und die Kästen würden mitten in diese Zeit
+        // hinein neu gebaut. Das ist exakt Tobias' B1 aus Runde fünf, nur in dem
+        // Zweig, den KEIN TEST LÄDT: Die Startseite entscheidet erst nach dem
+        // Token-Abgleich, welchen Hero sie zeigt.
+        const inhaltBeobachter = new MutationObserver(() => {
+          kaestenFinalRef.current = false;
+          cancelAnimationFrame(warteRaf);
+          inhaltBeobachter.disconnect();
+          beginnWartenRef.current = performance.now();
+          warteRaf = requestAnimationFrame(kaestenFinalisieren);
+        });
+        if (inhaltRef?.current) {
+          inhaltBeobachter.observe(inhaltRef.current, {
+            childList: true,
+            subtree: true,
+          });
+        }
         return;
       }
       kaestenBauen();
@@ -482,7 +515,13 @@ export default function HeroScrollStage({
       if (!ball) return;
 
       // Radius am Element gemessen, nicht angenommen – s. Kommentar oben.
-      const BALL_R = ball.offsetWidth / 2 || 1;
+      // ⚠️ KEIN STILLER ERSATZWERT (Befund Kai): `|| 1` lieferte bei fehlender
+      // Größe einen Radius von 1px und rechnete damit die ganze Bahn falsch –
+      // dieselbe Klasse, die `clamp` seit Runde drei durch einen Wurf ersetzt.
+      // Hier ist Aussetzen richtig statt Werfen: Vor dem ersten Layout hat das
+      // Element legitim keine Breite, und der nächste Frame hat sie.
+      if (!ball.offsetWidth) return;
+      const BALL_R = ball.offsetWidth / 2;
 
       // ══ DER BALL VERLÄSST DIE TEXTSPALTE ══════════════════════════════════
       // Entscheidung Vivien, 15.08.2026 (Roadmap 20 a/c). Sie hat drei Befunde
@@ -628,15 +667,37 @@ export default function HeroScrollStage({
       // nicht hin, fing die untere Klammer das bisher STILLSCHWEIGEND ab und
       // legte ihn überlappend hin – genau die Fehlerklasse, gegen welche die
       // Lückensuche gebaut wurde, im mobilen Zweig überlebt.
-      // Wie knapp das ist: Auf 375 liegt die Ist-Lage bei 49, die Klammer bei
-      // 44. **Fünf Pixel.** Das ist kein Sicherheitsabstand, das ist ein
-      // Zufall – ein anderer Zeilenumbruch, eine andere Schriftmetrik nach
+      // Wie knapp das ist – ⚠️ MIT DER RICHTIGEN BREITE (Korrektur Kai,
+      // sechste Runde): Die Werte 49/44 stammen von **320×568**, nicht von 375.
+      // Bei **375** liegt die Ist-Lage bei 93 und die Reserve bei **49px** –
+      // Faktor zehn. Und 320 liegt laut Roadmap 20b (b) ausdrücklich AUSSERHALB
+      // des Zielbereichs. Der Kommentar ließ die Lage im unterstützten Bereich
+      // zehnmal dringlicher aussehen, als sie ist.
+      // Auf 320 sind es also fünf Pixel, und das ist dort kein Sicherheitsabstand,
+      // sondern ein Zufall – ein anderer Zeilenumbruch, eine andere Schriftmetrik nach
       // einem Font-Update oder ein zusätzliches Wort im Eyebrow genügen, und
       // der Ball liegt still auf dem Badge, von der Abdunkelung kaschiert.
       // Dasselbe Register wie `clamp`, das seit der dritten Runde wirft statt
       // still `max` zu liefern.
       const noetigOben = 2 * BALL_R + 16;
-      if (obersterKasten < noetigOben && !streifenGemeldetRef.current) {
+      const imStreifen = clamp(
+        obersterKasten - BALL_R - 8,
+        BALL_R + 8,
+        Math.max(BALL_R + 8, rect.height - BALL_R - 8),
+      );
+      // ⚠️ DIE WARNUNG ERST HIER, UND NUR WENN `imStreifen` WIRKLICH GILT
+      // (Befund Kai, sechste Runde). Sie stand vorher vor der Zielwahl und
+      // feuerte damit auch am Desktop – wo bei vorhandener Lücke `imStreifen`
+      // gar nicht benutzt wird. Die Meldung „Der Ball wird überlappend
+      // platziert" wäre dort schlicht FALSCH gewesen: eine Diagnose, die einen
+      // Fehler behauptet, den es nicht gibt, ist so schädlich wie eine, die
+      // schweigt.
+      const nutztStreifen = mobil || !gewaehlt;
+      if (
+        nutztStreifen &&
+        obersterKasten < noetigOben &&
+        !streifenGemeldetRef.current
+      ) {
         streifenGemeldetRef.current = true;
         // Kein Wurf: Das hier läuft im Scroll-Pfad einer Live-Seite, ein
         // Ausnahmefehler nähme dem Leser die Startseite. Aber es schweigt nicht.
@@ -649,11 +710,6 @@ export default function HeroScrollStage({
             `mobile Durchmesser sinkt oder die Badge-Zeile rückt nach unten.`,
         );
       }
-      const imStreifen = clamp(
-        obersterKasten - BALL_R - 8,
-        BALL_R + 8,
-        Math.max(BALL_R + 8, rect.height - BALL_R - 8),
-      );
       const targetY = mobil
         ? imStreifen
         : gewaehlt
@@ -924,6 +980,17 @@ export default function HeroScrollStage({
           } else {
             // Ball zurück an `apply` übergeben – ab hier führt wieder der Scroll.
             einflugAktivRef.current = false;
+            // ⚠️ UND DAS VERWORFENE EREIGNIS NACHHOLEN (Befund Kai, sechste
+            // Runde). Der Schiedsrichter war dicht – `apply` schrieb während
+            // des Flugs nachweislich nicht mit –, aber es wurde VERWORFEN statt
+            // aufgeschoben, und `schritt` friert `zielY` beim Start ein.
+            // Ein Resize im Flugfenster ließ den Ball deshalb auf der alten
+            // Lage liegen, bis irgendein Ereignis `apply` auslöste: gemessen
+            // 165 statt 371,8 (375→360), 165 statt 333,9 (430→500), 193,6
+            // statt 519,3 (600→700).
+            // Dieselbe Klasse wie B1 – ich hatte die Hälfte „zwei Schreiber"
+            // geschlossen und die Hälfte „verworfenes Ereignis" offen gelassen.
+            apply();
           }
         };
         requestAnimationFrame(schritt);
@@ -965,6 +1032,10 @@ export default function HeroScrollStage({
       eingeflogenRef.current = false;
       einflugAktivRef.current = false;
       kaestenFinalRef.current = false;
+      // ⚠️ Auch diese – sie war als EINZIGE der vier nicht dabei (Befund Kai),
+      // wodurch die Diagnose nach einem `reduced-motion`-Wechsel dauerhaft
+      // geschwiegen hätte.
+      streifenGemeldetRef.current = false;
       window.removeEventListener("load", onScrollOrResize);
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);

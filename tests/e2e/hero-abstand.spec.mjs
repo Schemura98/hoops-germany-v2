@@ -58,9 +58,14 @@ test.describe("Hero-Ball – Abstand zu den Inhaltskästen", () => {
         const kaesten = [];
         for (const el of wurzel.querySelectorAll("*")) {
           const bg = getComputedStyle(el).backgroundColor;
-          const a = /^rgba?\([^)]*?,\s*([\d.]+)\s*\)$/.exec(bg);
+          // ⚠️ Dieselbe Korrektur wie in der Komponente (Befund Kai): Die
+          // erste Fassung griff bei `rgb(r,g,b)` den BLAU-Kanal als Alpha ab.
+          const a =
+            /^rgba\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+\s*,\s*([\d.]+)\s*\)$/.exec(
+              bg,
+            );
           const gefuellt =
-            bg && bg !== "transparent" && !(a && Number(a[1]) === 0);
+            bg && bg !== "transparent" && !(a && parseFloat(a[1]) === 0);
           if (!gefuellt && el.tagName !== "A" && el.tagName !== "BUTTON")
             continue;
           const r = el.getBoundingClientRect();
