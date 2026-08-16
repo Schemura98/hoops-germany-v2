@@ -124,7 +124,9 @@ export default function FeatureProgressRail({ labels = [] }) {
   const goalRingRef = useRef(null);
   const goalMobileRingRef = useRef(null);
   // Der mobile Ring-Pfad selbst – Träger des Farbblitzes (Befund Tobias B-a).
-  const goalMobileFlashRef = useRef(null); // nur der Ring des Korb-Emblems (fuer den Farbblitz)
+  const goalMobileFlashRef = useRef(null);
+  // Begrenzt die Wiederholung der Emblem-Messung (Befund Kai).
+  const zielMessVersucheRef = useRef(0); // nur der Ring des Korb-Emblems (fuer den Farbblitz)
   const spurDesktopRef = useRef(null); // Laufweg-Spur der Desktop-Leiste
   const activeRef = useRef(-1);
   const arrivedRef = useRef(false); // einmalige Ankunft – danach eingefroren
@@ -168,9 +170,32 @@ export default function FeatureProgressRail({ labels = [] }) {
         // vorhanden und lief ins Leere, weil der Ball den Ring nie erreichte.
         // Kai maß den Anteil unabhängig als 34/28 = 1,2143 nach.
         // ⚠️ Damit trug der ganze Umbau aus `4d03ba2` auf dem HAUPTGERÄT nicht.
-        const ballR = ballMobileRef.current.getBoundingClientRect();
         const trackRect = trackRef.current.getBoundingClientRect();
         const zielM = goalMobileRef.current?.getBoundingClientRect();
+        // ⚠️ DER RÜCKFALL IST EXAKT DER DEFEKT, DEN DIESE STELLE BEHEBT
+        // (Befund Kai, siebte Runde). `trackW - RAIL_BALL_R` / `-50%` ist kein
+        // neutraler Vorgabewert – es ist B-b, Ball neben statt im Korb.
+        // Und anders als bei `clamp` (wirft) oder `offsetWidth` (steigt aus und
+        // misst im nächsten Bild neu) gibt es hier KEINEN zweiten Versuch:
+        // `ballZielSetzen` läuft bei der Ankunft genau einmal (`arrivedRef`).
+        // Ein einziges Bild mit ungemessenem Emblem hieße dauerhaft falsche
+        // Endlage – schweigend. Gefunden hat diesen Zustand zuletzt ein Mensch
+        // im Browser, kein Test; die Erreichbarkeit ist gering, die Fehlerform
+        // die teure.
+        // Deshalb: erneut versuchen statt still danebenlegen.
+        if (!zielM || zielM.width === 0) {
+          if (zielMessVersucheRef.current < 30) {
+            zielMessVersucheRef.current += 1;
+            requestAnimationFrame(() => ballZielSetzen(animiert));
+            return;
+          }
+          console.error(
+            "[FeatureProgressRail] Das mobile Korb-Emblem hat nach 30 Bildern " +
+              "keine Größe. Der Ball wird neben dem Korb abgelegt statt darin " +
+              "(Befund B-b). Prüfen, ob `goalMobileRef` noch am gezeichneten " +
+              "Emblem hängt.",
+          );
+        }
         let versatzX = trackW - RAIL_BALL_R;
         let versatzY = "-50%";
         if (zielM && zielM.width > 0) {
@@ -192,7 +217,6 @@ export default function FeatureProgressRail({ labels = [] }) {
           1,
         )}px, ${versatzY}, 0) rotate(${rollwinkel(trackW).toFixed(1)}deg)`;
         ballMobileRef.current.style.opacity = "1";
-        void ballR;
       }
       if (goalMobileRef.current) goalMobileRef.current.style.opacity = "1";
       if (goalMobileRingRef.current)

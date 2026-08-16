@@ -444,38 +444,44 @@ export default function HeroScrollStage({
       const t = getComputedStyle(h1).transform;
       return t === "none" || t === "matrix(1, 0, 0, 1, 0, 0)";
     };
+    // ⚠️ GENAU EIN BEOBACHTER, UND ZWAR NACH DER FINALISIERUNG
+    // (Befund Kai, siebte Runde — mein erster Entwurf war dreifach falsch).
+    // Er stand INNERHALB des Warte-Zweigs, vor dessen `return`: Er entstand
+    // also nur, solange `Reveal` noch lief, und dort **in jedem Bild neu**.
+    // Kai hat es gezählt: **48 erzeugt, 48 `observe()`, 0 `disconnect()`** je
+    // Ladevorgang — und nach der Finalisierung existierte **gar keiner**, weil
+    // der Zweig nie wieder betreten wird. Trennen konnte ihn auch niemand: Die
+    // Konstante war für die Aufräumfunktion unerreichbar.
+    // Für den Fall, für den ich ihn gebaut habe — den Auth-Tausch —, waren
+    // damit BEIDE Ausgänge falsch: 48-fach (Knoten wiederverwendet) oder null
+    // (Knoten ersetzt).
+    // ⚠️ UND ER BEOBACHTET DIE BÜHNE, NICHT DEN GETAUSCHTEN KNOTEN. Hinge er an
+    // `inhaltRef`, wäre dessen eigene Entfernung für ihn unsichtbar — genau der
+    // Fall, den er melden soll.
+    // Entwarnung aus derselben Messung: `Reveal`-Klassenwechsel und
+    // Textänderungen (`CountUp`) lösen ihn NICHT aus, nur `childList`.
+    let inhaltBeobachter = null;
     const kaestenFinalisieren = () => {
       if (
         !stehtStill() &&
         performance.now() - beginnWartenRef.current < AUFGEBEN_MS
       ) {
         warteRaf = requestAnimationFrame(kaestenFinalisieren);
-
-        // ⚠️ UND NOCH EINMAL, WENN DER INHALT AUSGETAUSCHT WIRD (Befund Kai,
-        // sechste Runde). `kaestenFinalisieren` lief EINMAL. Tauscht `LandingHero`
-        // danach auf den eingeloggten Zweig, montiert ein neues `h1` mit frischer
-        // `Reveal`-Übergangszeit – und die Kästen würden mitten in diese Zeit
-        // hinein neu gebaut. Das ist exakt Tobias' B1 aus Runde fünf, nur in dem
-        // Zweig, den KEIN TEST LÄDT: Die Startseite entscheidet erst nach dem
-        // Token-Abgleich, welchen Hero sie zeigt.
-        const inhaltBeobachter = new MutationObserver(() => {
-          kaestenFinalRef.current = false;
-          cancelAnimationFrame(warteRaf);
-          inhaltBeobachter.disconnect();
-          beginnWartenRef.current = performance.now();
-          warteRaf = requestAnimationFrame(kaestenFinalisieren);
-        });
-        if (inhaltRef?.current) {
-          inhaltBeobachter.observe(inhaltRef.current, {
-            childList: true,
-            subtree: true,
-          });
-        }
         return;
       }
       kaestenBauen();
       kaestenFinalRef.current = true;
       onScrollOrResize(); // startet damit auch den mobilen Einflug
+      if (!inhaltBeobachter) {
+        inhaltBeobachter = new MutationObserver(() => {
+          // NICHT beim Feuern trennen – der Zweig kann mehr als einmal wechseln.
+          kaestenFinalRef.current = false;
+          beginnWartenRef.current = performance.now();
+          cancelAnimationFrame(warteRaf);
+          warteRaf = requestAnimationFrame(kaestenFinalisieren);
+        });
+        inhaltBeobachter.observe(stage, { childList: true, subtree: true });
+      }
     };
     warteRaf = requestAnimationFrame(kaestenFinalisieren);
 
