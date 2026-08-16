@@ -126,7 +126,9 @@ export default function FeatureProgressRail({ labels = [] }) {
   // Der mobile Ring-Pfad selbst – Träger des Farbblitzes (Befund Tobias B-a).
   const goalMobileFlashRef = useRef(null);
   // Begrenzt die Wiederholung der Emblem-Messung (Befund Kai).
-  const zielMessVersucheRef = useRef(0); // nur der Ring des Korb-Emblems (fuer den Farbblitz)
+  const zielMessVersucheRef = useRef(0);
+  // Einmal-Sperre, wie `streifenGemeldetRef` im Hero (Empfehlung Kai).
+  const diagnoseGemeldetRef = useRef(false); // nur der Ring des Korb-Emblems (fuer den Farbblitz)
   const spurDesktopRef = useRef(null); // Laufweg-Spur der Desktop-Leiste
   const activeRef = useRef(-1);
   const arrivedRef = useRef(false); // einmalige Ankunft – danach eingefroren
@@ -205,12 +207,20 @@ export default function FeatureProgressRail({ labels = [] }) {
             requestAnimationFrame(() => ballZielSetzen(animiert));
             return;
           }
-          console.error(
-            "[FeatureProgressRail] Das mobile Korb-Emblem hat nach 30 Bildern " +
-              "keine Größe. Der Ball wird neben dem Korb abgelegt statt darin " +
-              "(Befund B-b). Prüfen, ob `goalMobileRef` noch am gezeichneten " +
-              "Emblem hängt.",
-          );
+          // ⚠️ EINMAL, WIE DAS GESCHWISTER IM HERO (Empfehlung Kai). Ohne
+          // Sperre standen im Defektfall 19 identische Zeilen da – zwei
+          // Diagnosen desselben Bauwerks mit zwei Verhalten. Die Anlaufzahl
+          // wandert dafür IN die Meldung, damit die Information nicht verloren
+          // geht, die vorher in der Wiederholung steckte.
+          if (!diagnoseGemeldetRef.current) {
+            diagnoseGemeldetRef.current = true;
+            console.error(
+              `[FeatureProgressRail] Das mobile Korb-Emblem hat nach 30 Bildern ` +
+                `keine Größe (${zielMessVersucheRef.current} Anläufe). Der Ball ` +
+                `wird neben dem Korb abgelegt statt darin (Befund B-b). Prüfen, ` +
+                `ob \`goalMobileRef\` noch am gezeichneten Emblem hängt.`,
+            );
+          }
         }
         let versatzX = trackW - RAIL_BALL_R;
         let versatzY = "-50%";
@@ -219,11 +229,21 @@ export default function FeatureProgressRail({ labels = [] }) {
           // Emblemhöhe, waagerecht auf die Emblem-MITTE statt auf seine Kante.
           versatzX =
             zielM.left + zielM.width / 2 - trackRect.left - RAIL_BALL_R;
+          // ⚠️ DEN `top-1/2`-VERSATZ ABZIEHEN (Befund Tobias N1, Gate auf
+          // 75f2c3a). Der mobile Ball trägt `top-1/2` auf einem Balken der Höhe
+          // 4px – das sind 2px, auf die sich `translate3d` zusätzlich addiert.
+          // Diese Rechnung ist absolut und wusste davon nichts: Erwartet
+          // Ballmitte y = 76, beobachtet 78 (375×812). Am Desktop tritt es nicht
+          // auf, dort gibt es kein `top-1/2`.
+          // Visuell unauffällig – der Ball liegt sauber im Netz –, aber es ist
+          // genau die Sorte stiller Ungenauigkeit, die beim nächsten Umbau als
+          // „war schon immer so" durchgereicht wird.
           versatzY = `${(
             zielM.top +
             zielM.height * RUHE_ANTEIL -
             trackRect.top -
-            RAIL_BALL_R
+            RAIL_BALL_R -
+            trackRect.height / 2
           ).toFixed(1)}px`;
         }
         // Endstand MIT Drehwinkel: Ohne ihn schnappte der Ball bei der Ankunft
