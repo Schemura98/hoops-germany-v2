@@ -11,7 +11,7 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> ✅ **DEPLOYT: `f27736a`** (17.08.2026 abends) – am Server verifiziert, Abstand
+> ✅ **DEPLOYT: `cc128ed`** (17.08.2026 nachts; davor `f27736a`, `40dff48`, `f46a783`, `84cb7ba`) – am Server verifiziert, Abstand
 > zu `origin` 0, `pm2 restart` gelaufen, Prozess `online`.
 > ✅ **Production-Runtime VOR dem Deploy geprüft** (`npm start` auf frischem Build,
 > `BUILD_ID` kontrolliert): 16 Routen je 200, Skip-Link und `<main>` vorhanden,
@@ -21,6 +21,16 @@
 > 10,23 (368) / 13,17 (375) / 30,91 (412) / 39,66 (430) · Ball auf keiner Breite im
 > Textblock · wirksame Sichtbarkeit 0,80 · Skip-Link und `<main>` da · 0 Fehler ·
 > Cache-Vorgabe unverändert.
+> ⚠️ **BEIM LIVE-NACHMESSEN FAST EINEN FEHLALARM GEMELDET (17.08.2026):** Meine
+> Sonde fand `.hero-ball-sprite` nach 2 s nicht und meldete „der Ball fehlt auf
+> der Live-Seite". Er fehlt nicht – er **erscheint nur spät**: gemessen nach
+> **2,5–4,5 s**, und Tobias hatte das in Runde sieben längst protokolliert
+> („der Ball bei dcl+3611 ms"). Ich hatte eine Wartezeit gewählt statt auf das
+> Element zu warten – dieselbe Konstanten-Fehlerklasse, die Kai in derselben
+> Runde an meinem Test gefunden hat. **Live immer mit `waitForSelector` messen,
+> nie mit `waitForTimeout`:** Der Erstaufbau ist dort deutlich langsamer als
+> lokal, und das ist ein bekannter, offener Nutzenpunkt (bei Ronja/Lina), kein
+> Defekt.
 > ⚠️ **ZUM DRITTEN MAL STIMMTE DIESE ZEILE NICHT — diesmal aus einem neuen Grund:**
 > Sie führte `f46a783` als live, der Server stand aber schon auf `40dff48`. Eine
 > **andere Sitzung** (Skip-Link) hatte selbst deployt. Vorher lag es zweimal daran,
@@ -144,7 +154,7 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `f27736a` (aktuell live) → `40dff48` → `f5b1b3f` → `f46a783` → `84cb7ba` → `75f2c3a` → `bc7ccad` → `6e2fbe1` → `1bcf854` →
+> **Rollback-Kette:** `cc128ed` (aktuell live) → `dba7baa` → `f4c2d15` → `e00b64a` → `f27736a` → `40dff48` → `f5b1b3f` → `f46a783` → `84cb7ba` → `75f2c3a` → `bc7ccad` → `6e2fbe1` → `1bcf854` →
 > `4d03ba2` → `76aa289` → `1d2e3ae` → `1dc617f` → `d07c475` → `2be664e` → `cd51c92` →
 > `164c784` (der Stand vor dieser Serie, bis 17.08. live) → `66f9000` → `4f64af7` → `4f3811d` (Newsfeed-Umbau,
 > von beiden Gates blockiert – NICHT dorthin zurück) → `f23757b` → `074bcf1` (letzter Stand vor
