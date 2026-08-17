@@ -856,10 +856,20 @@
     Dort steht pauschal „keine Verläufe, keine Schatten, kein Glow"; Viviens
     Unterscheidung (keine Verläufe auf **Flächen der Oberfläche**, sehr wohl auf
     einem **dargestellten Gegenstand**) steht bisher nur in CLAUDE.md.
-21. **`/images/` hat keine Cache-Vorgabe** (Befund Kai, 15.08.2026). `deploy/nginx-hoopsgermany.conf`
-    setzt `expires 30d` nur für die Upload-Verzeichnisse; `/images/` läuft über `location /` in den
-    Next-Prozess, und `next.config.mjs` setzt kein `headers()`. Die 104 KB der Ball-Sequenz sind
-    damit **keine Einmalkosten** – auf der Einstiegsseite jedes Erstbesuchers. Entscheidung Patrick.
+21. ✅ **ERLEDIGT (17.08.2026): Cache-Vorgabe für `/images/` und `/fonts/`.** Gesetzt in
+    `next.config.mjs` über `headers()` – **nicht** in Nginx, damit die Vorgabe versioniert ist und
+    mit jedem Deploy mitgeht statt am Server zu leben. Wert:
+    `public, max-age=2592000, stale-while-revalidate=86400` (30 Tage, wie die Konvention für die
+    Upload-Verzeichnisse). Auf der Production-Runtime nachgemessen, dann live.
+    ⚠️ **Bewusst KEIN `immutable` und kein Jahr:** Die Dateinamen sind **nicht inhaltsadressiert**.
+    `ball-basketball-32x200.webp` nennt Bildzahl und Kantenlänge, aber nichts über den Inhalt – wird
+    die Sequenz mit denselben Parametern neu erzeugt (etwa mit anderem Nahtmuster), heißt die Datei
+    gleich. Ein Jahr mit `immutable` hielte Wiederkehrer dauerhaft auf dem alten Ball, **und niemand
+    könnte es sehen**, weil die Seite bei Erstbesuchern korrekt aussieht.
+    ⚠️ **Regel daraus: Wer den Inhalt einer Datei unter gleichem Namen ändert, muss den Namen
+    ändern.** Für die Ball-Sequenz ist das über drei Stellen gekoppelt und durch
+    `tests/e2e/ball-sequenz.spec.mjs` abgesichert; für `logo.svg` und die Auth-Motive gibt es diese
+    Absicherung **nicht**.
 
 ### Bekannte Einschränkungen (lokale Dev-Umgebung)
 - SMTP-/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS (hoops_prod) live
