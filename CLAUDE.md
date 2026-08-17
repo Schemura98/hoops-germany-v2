@@ -3,7 +3,7 @@
 
 ---
 
-## 0. AKTUELLER STAND (Überblick · Stand 14.08.2026)
+## 0. AKTUELLER STAND (Überblick · Stand 17.08.2026)
 
 > 🟢 **v2 IST LIVE auf https://hoopsgermany.de** (seit 24.06.2026). Hostinger-VPS `92.113.25.249`
 > (Ubuntu 24.04), Code in `/root/hoops-v2` (Branch **`redesign`**), PM2-Prozess **`hoops-v2` auf Port 3001**,
@@ -881,9 +881,23 @@
     (g) **Klickfläche im Testphase-Banner 16 → 24,5 px**, Bandhöhe unverändert 45,
     eigener Fokusring. ⚠️ **Kein WCAG-Verstoß** (SC 2.5.8 hat eine Inline-Ausnahme
     für Ziele im Satzfluss) – es ist eine Wahl, keine Pflicht.
-    ⚠️ **OFFEN und größer:** Es gibt **keinen Skip-Link und kein `<main>`** –
-    SC 2.4.1 *Bypass Blocks*, **Level A**. Von Vivien als eigene Aufgabe
-    hinterlegt, Entscheidung Patrick.
+    ✅ **ERLEDIGT 17.08.2026 (`72a4fe9`):** Skip-Link + `main`-Landmarke stehen,
+    SC 2.4.1 *Bypass Blocks* (A) und 1.3.1 sind bedient. **Zwei Fallen, die ein
+    späterer Umbau kennen muss:**
+    (1) Ein Wurzel-`main` um `<PageTransition>{children}</PageTransition>` in
+    `app/layout.js` – der naheliegende Griff – ist **falsch**: Jede Seite bringt
+    ihre eigene `Navbar`/`main`/`Footer` als Geschwister mit. Das hätte ~55
+    vorhandene `main` ineinander verschachtelt und Navigation + Footer **in** den
+    Inhalt gezogen; die Sprungmarke wäre **vor** der Navigation gelandet. Der
+    Messwert `main.length === 0` galt für `/`, das tatsächlich eine der wenigen
+    Seiten **ohne** `main` war – nicht für die Seite als Ganzes.
+    (2) `sr-only` + `focus-visible:not-sr-only` ist die **falsche** Tailwind-
+    Lösung: `not-sr-only` setzt `position: static`, das Element stünde im Fluss
+    und würde den Testphase-Banner verschieben – genau die 45 px, auf die
+    `Navbar.js`/`PlayerNav.js` mit ihren 7rem-Offsets rechnen. Deshalb
+    `position: fixed`, das den Fluss **nie** beeinflusst.
+    Ziel ist `main#hauptinhalt` mit `tabindex="-1"` (sonst wandert nur der
+    Bildlauf, nicht der Fokus); Ring unterdrückt in `app/globals.css`.
 
 20c. **Fünf Gestaltungspunkte liegen bei Vivien** (vorgelegt 16.08.2026, aus den
     Gate-Runden vier und fünf). Nichts davon ist ein Defekt – es sind Abwägungen,

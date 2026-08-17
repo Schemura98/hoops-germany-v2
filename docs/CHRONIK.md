@@ -3608,3 +3608,90 @@ rückstandslos entfernt. Viviens vier dokumentierte Ausbaustellen stimmten volls
 
 Vier **Gestaltungsentscheidungen** für Vivien (Roadmap 20) und die fehlende Cache-Vorgabe für
 `/images/` (Roadmap 21). Eine dritte Gate-Runde steht aus.
+
+---
+
+## 17.08.2026 — Die Sprungmarke zum Inhalt, und ein vorgezeichneter Weg, der nicht baubar war
+
+**Commit `72a4fe9`** (Branch `claude/nifty-shirley-173a4c`, 40 Dateien). Nicht deployt.
+
+### Befund
+
+Tobias, live gegen `hoopsgermany.de` bei 375×812 gemessen: `document.querySelectorAll("main").length`
+war **0**, kein Skip-Link, als einzige Landmarken `nav` und `footer`. Die erste Tab-Station jeder
+Seite war „Feedback geben" im Testphase-Banner, danach Logo, Feedback-Symbol, Suche, Menü. Ein
+Tastaturnutzer kam an den auf jeder Seite wiederholten Blöcken **auf keiner Seite** vorbei —
+SC 2.4.1 *Bypass Blocks* (Level A) und 1.3.1 *Info and Relationships*.
+
+### Der vorgezeichnete Weg war falsch — und der Prüfpunkt hat es gefangen
+
+Der Auftrag sah ein `<main id="hauptinhalt">` um `<PageTransition>{children}</PageTransition>` in
+`app/layout.js` vor, mit dem ausdrücklichen Prüfauftrag „gibt es schon eigene `main`?". Die Antwort
+war **ja, ~55 Stück in ~40 Dateien** — und damit fiel der Entwurf:
+
+- `main` darf **nicht Nachfahre von `main`** sein. Ein Wurzel-`main` hätte alle 55 verschachtelt.
+- Jede Seite bringt ihre **eigene `Navbar` und `Footer` als Geschwister** des `main` mit
+  (`<div class="min-h-screen flex flex-col"><Navbar/><PageHeader/><main/><Footer/></div>`).
+  Ein Wurzel-`main` hätte beide **in** den Inhalt gezogen: `footer` verliert seine
+  `contentinfo`-Landmarke, und die Sprungmarke wäre **vor** der Navigation gelandet — das genaue
+  Gegenteil des Ziels.
+- `main.length === 0` war für `/` korrekt gemessen. `app/page.js` war tatsächlich eine der wenigen
+  Seiten ohne `main` — der Messwert galt **nicht** für die Seite als Ganzes.
+
+Entscheidung Patrick: `id` auf das jeweilige Seiten-`main`, Skip-Link wie spezifiziert im Layout.
+
+### Umgesetzt
+
+- **`app/layout.js`**: Skip-Link als erste Tab-Station **vor** `<TestPhaseBanner />`.
+  ⚠️ Bewusst `position: fixed`, **nicht** `sr-only` + `focus-visible:not-sr-only`: `not-sr-only`
+  setzt `position: static` — das Element stünde im Fluss und würde den Banner nach unten schieben.
+  Genau darauf rechnen `components/layout/Navbar.js` und `components/layout/PlayerNav.js` mit ihren
+  festen Offsets (die 7rem fürs Mobil-Menü enthalten die 45 px des Banners). Ob am Ende `static`
+  oder das zusätzliche `fixed` gewinnt, hinge an der Reihenfolge in Tailwinds erzeugtem CSS — eine
+  Wette, die man nicht eingehen muss. `fixed` beeinflusst den Fluss **nie**.
+  Gestaltung = Primärbutton der Anzeigetafel: `brand-500`-Fläche, dunkler Text `navy-950` (7,1:1),
+  1px-Haarlinie, kein Verlauf, kein Schatten; Fokusring `paper-50`, weil Orange auf Orange kaum
+  sichtbar wäre. `z-[100]`, weil beide Leisten auf `z-50` sitzen.
+- **`id="hauptinhalt" tabIndex={-1}` auf allen 57 vorhandenen `main`** (u. a. `components/layout/
+  AdminShell.js`, `components/layout/LegalShell.js` und ~30 Seiten). Vorher geprüft: alle
+  Mehrfach-`main` einer Datei sind **getrennte `return`-Zweige**, keine Verschachtelung.
+- **Neue `main`**: `app/page.js` (`flex-1` wandert an das `main`, damit der Footer unten bleibt),
+  `components/layout/AuthShell.js` (deckt `/login`, `/signup`, `/reset-password`; das Motiv rechts
+  ist Dekoration und bleibt **außerhalb**), `app/admin/sponsor-report/page.js` (inkl. der Zustände
+  „denied"/„error" — dort bleibt ein Nutzer stehen), `app/sponsor-report/[token]/page.js` (beide
+  Zweige), `app/post/[id]/page.js`, `app/feed/tag/[tag]/page.js`.
+  Die drei Redirect-Stubs `/home`, `/team/dashboard`, `/team/edit-team` brauchen keins.
+- **`app/globals.css`**: `#hauptinhalt:focus { outline: none }`. Das `tabindex="-1"` ist nötig,
+  weil sonst etliche Browser/Screenreader-Paarungen nur den **Bildlauf** bewegen, nicht den Fokus —
+  die nächste Tab-Taste führte dann zurück in die Navigation. Der Ring wird unterdrückt, weil
+  `tabindex="-1"` das Element nicht in die Tabreihenfolge nimmt (also keine per Tastatur bedienbare
+  Fläche im Sinne von SC 2.4.7) und ein Rahmen um den ganzen Inhaltsbereich wie ein
+  Darstellungsfehler aussähe.
+
+### Verifikation (Dev-Server auf Port 3100, 375×812)
+
+- **Tab-Reihenfolge** auf `/` **und eingeloggt** auf `/player/newsfeed`: Skip-Link ist Position 0,
+  vor „Feedback geben". Keine positiven `tabindex` im Dokument, DOM-Reihenfolge = Tab-Reihenfolge.
+- **Fokus nach Enter** landet auf `main#hauptinhalt`; das **nächste Tab** trifft den ersten
+  Inhalts-Link (`/`: „Als Spieler registrieren", Newsfeed: „Nächstes Spiel") — `insideNav: false`.
+- **Offsets unberührt**: Banner weiter `top: 0`, Höhe **45 px**; der Link liegt `fixed` bei
+  `top: -83` und belegt keinen Platz im Fluss.
+- **Farben im Fokus** gemessen: `rgb(240,122,39)` auf `rgb(11,18,32)` = `brand-500` auf `navy-950`.
+- **22 Routen inkl. 404**: überall genau `main=1`, `id=1`, `skip=1`.
+- `npm run build` erfolgreich, **166 Seiten**; einzige Warnung aus `libheif-js` (vorbestehend).
+
+### Zwei Anmerkungen zum Vorgehen
+
+⚠️ **Der Worktree stand auf dem Baseline-Commit `79ccd75`** — keine der genannten Dateien existierte
+dort. Erst nach `git merge --ff-only redesign` war überhaupt der richtige Code im Blick. **Vor der
+ersten Zeile prüfen, ob der Arbeitsstand der ist, von dem der Auftrag spricht.**
+
+⚠️ **`sh scripts/port-frei.sh` meldete belegt** (Dev-Server aus der Hauptkopie). Der Build lief
+ohne den Wächter: Er hängt am globalen Port, die eigentliche Gefahr — ein Dev-Server auf demselben
+`.next` — bestand nicht, weil der Worktree sein eigenes `.next` hat. Die Kette
+`port-frei.sh && npm run build` ist also **nicht** grün durchgelaufen, nur der Build für sich.
+
+### Nicht Teil dieser Arbeit
+
+Die Klickfläche des Banner-Links (95×16 px). Sie fällt unter die **Inline-Ausnahme von SC 2.5.8**
+und ist als Gestaltungsentscheidung separat bei Vivien entschieden (Roadmap 20 (g)).
