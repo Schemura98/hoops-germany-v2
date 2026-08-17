@@ -26,8 +26,25 @@ import { test, expect } from "@playwright/test";
 // also eine Sonde ohne Trennschärfe. Ein grünes Ergebnis daraus hätte nichts
 // bedeutet (Lehre Kai, siebte Runde).
 
+// ⚠️ DIE TRENNSCHÄRFE LIEGT BEI DREI FÄLLEN, NICHT BEI VIER (Befund Kai K3).
+// Der 375-px-Fall bleibt auch bei abgeklemmtem Fix grün – dort sind die Anker der
+// beiden Hero-Zweige deckungsgleich, es gibt also nichts zu federn. Er
+// DOKUMENTIERT den Zufallsfall korrekt (und hält fest, dass die häufigste
+// iPhone-Breite unauffällig ist), aber er DECKT nichts ab. Wer ihn für Abdeckung
+// hält, überschätzt diesen Test um ein Viertel.
 const BREITEN = [320, 375, 600, 640];
 const AUTH_VERZUG_MS = 2600; // schiebt den Zweigtausch sicher hinter die Landung
+// ⚠️ ABGELEITET, NICHT GEGRIFFEN (Befund Kai K2, achte Runde). Hier stand eine
+// feste `2500` im Filter, während `AUTH_VERZUG_MS` 2600 war – zwei Zahlen, die
+// zusammengehören und nicht verbunden waren.
+// Kai hat nachgestellt, was das kostet: Fix abgeklemmt UND `AUTH_VERZUG_MS` auf
+// 1200 gesenkt (was jemand tut, der die Suite beschleunigt) → **nur noch 1 von 4
+// rot statt 3 von 4**. Die Fälle 600 und 640, die die eigentliche Fehlergröße
+// tragen, wurden grün bei entferntem Fix. Der Test hätte dann genau das
+// durchgelassen, wogegen er gebaut ist.
+const AB_MS = AUTH_VERZUG_MS - 100;
+// Wartezeit nach dem Laden: Verzug plus Landung plus Federung plus Reserve.
+const RUHE_MS = 3500;
 const ERLAUBT_UNGEFEDERT = 2; // px
 
 test.describe("Hero-Ball – späte Anmeldung", () => {
@@ -81,7 +98,7 @@ test.describe("Hero-Ball – späte Anmeldung", () => {
       }, token);
 
       await page.goto("/", { waitUntil: "domcontentloaded" });
-      await page.waitForTimeout(AUTH_VERZUG_MS + 3500);
+      await page.waitForTimeout(AUTH_VERZUG_MS + RUHE_MS);
 
       // Der Zweig MUSS getauscht haben, sonst prüft der Test nichts.
       const eyebrow = await page.evaluate(
@@ -107,7 +124,7 @@ test.describe("Hero-Ball – späte Anmeldung", () => {
       for (let i = 1; i < spur.length; i += 1) {
         // Nur SICHTBARE Bewegung, und nur nach der Landung.
         if (spur[i - 1].deck <= 0.05 || spur[i].deck <= 0.05) continue;
-        if (spur[i].t <= 2500) continue;
+        if (spur[i].t <= AB_MS) continue;
         const d = Math.abs(spur[i].y - spur[i - 1].y);
         if (d > groesster) {
           groesster = d;
