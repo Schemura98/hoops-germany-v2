@@ -11,15 +11,29 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> ✅ **DEPLOYT am 17.08.2026: `f46a783`** (davor am selben Tag `84cb7ba`) – am Server verifiziert (`git log` dort zeigt `84cb7ba`,
-> Abstand zu `origin` 0, `pm2 restart` gelaufen, Prozess `online`). **31 Commits** gingen auf
-> einmal live: macOS-Umzug, Ball-Choreografie der Startseite, gerenderter Hero-Ball und **sieben
-> Gate-Runden**.
-> ✅ **Live nachgemessen über die DOMAIN**, nicht am Server: 16 Routen je 200 · Hero-Ball fliegt
-> mobil 159 px über 24 Bilder · Ball landet mit **dx = 0** im Korb-Emblem · **0 Konsolenfehler** ·
-> Sprite-Sequenz ausgeliefert (AVIF 107 KB / WebP 164 KB).
-> ⚠️ Die 0 px Bewegung auf 1440 sind **kein Fehler**: Der Einflug ist bewusst mobil-only, die
-> Desktop-Ausbaustufe des Hero ist zurückgestellt (Roadmap 11).
+> ✅ **DEPLOYT: `f27736a`** (17.08.2026 abends) – am Server verifiziert, Abstand
+> zu `origin` 0, `pm2 restart` gelaufen, Prozess `online`.
+> ✅ **Production-Runtime VOR dem Deploy geprüft** (`npm start` auf frischem Build,
+> `BUILD_ID` kontrolliert): 16 Routen je 200, Skip-Link und `<main>` vorhanden,
+> Konturkanal ≥ 10 auf allen mobilen Breiten, **0 Laufzeitfehler**. Das war Kais
+> offene Auflage aus Runde sieben.
+> ✅ **Live über die DOMAIN nachgemessen:** 16 Routen je 200 · Kanal 10,18 (360) /
+> 10,23 (368) / 13,17 (375) / 30,91 (412) / 39,66 (430) · Ball auf keiner Breite im
+> Textblock · wirksame Sichtbarkeit 0,80 · Skip-Link und `<main>` da · 0 Fehler ·
+> Cache-Vorgabe unverändert.
+> ⚠️ **ZUM DRITTEN MAL STIMMTE DIESE ZEILE NICHT — diesmal aus einem neuen Grund:**
+> Sie führte `f46a783` als live, der Server stand aber schon auf `40dff48`. Eine
+> **andere Sitzung** (Skip-Link) hatte selbst deployt. Vorher lag es zweimal daran,
+> dass committet und die Zeile gepflegt wurde, ohne zu deployen; jetzt kann auch
+> das Gegenteil passieren. **Der Befehl bleibt maßgeblich, nie die Zeile:**
+> `ssh … "cd /root/hoops-v2 && git log --oneline -1"`
+> ⚠️ **Und die Prüfbasis hat sich unter beiden Gates bewegt:** Die Skip-Link-Arbeit
+> landete per Fast-Forward auf `redesign`, während Kai und Tobias `f5b1b3f`
+> prüften. Kai hat gewarnt, weil sie `app/page.js`, `app/layout.js` und
+> `app/globals.css` berührt – die Flächen, die Bühnenhöhe und Eyebrow-Lage
+> bestimmen. **Nachgemessen: das Fundament hielt** (elf Breiten, identische Werte).
+> Es ging gut aus; die Regel bleibt trotzdem, dass parallele Sitzungen einen
+> eigenen Worktree brauchen (Methodik-Lehre 0).
 > ⚠️ **Zwei Dinge, die dieser Deploy über das Vorgehen gelehrt hat:**
 > (1) Der Server trug eine **lokale Änderung an `package-lock.json`** (nur entfernte
 > `libc`-Metadatenfelder, Artefakt einer älteren npm-Version – **keine Paketversionen betroffen**).
@@ -130,7 +144,7 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `f46a783` (aktuell live) → `84cb7ba` → `75f2c3a` → `bc7ccad` → `6e2fbe1` → `1bcf854` →
+> **Rollback-Kette:** `f27736a` (aktuell live) → `40dff48` → `f5b1b3f` → `f46a783` → `84cb7ba` → `75f2c3a` → `bc7ccad` → `6e2fbe1` → `1bcf854` →
 > `4d03ba2` → `76aa289` → `1d2e3ae` → `1dc617f` → `d07c475` → `2be664e` → `cd51c92` →
 > `164c784` (der Stand vor dieser Serie, bis 17.08. live) → `66f9000` → `4f64af7` → `4f3811d` (Newsfeed-Umbau,
 > von beiden Gates blockiert – NICHT dorthin zurück) → `f23757b` → `074bcf1` (letzter Stand vor
