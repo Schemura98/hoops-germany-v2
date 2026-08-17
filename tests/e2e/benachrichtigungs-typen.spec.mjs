@@ -37,7 +37,10 @@ function lies(...teile) {
 // und sie wirft, statt still etwas Falsches zu liefern.
 function blockAb(quelle, startIndex, auf = "{", zu = "}") {
   const start = quelle.indexOf(auf, startIndex);
-  expect(start, `öffnende ${auf} nach Index ${startIndex} nicht gefunden`).toBeGreaterThan(-1);
+  expect(
+    start,
+    `öffnende ${auf} nach Index ${startIndex} nicht gefunden`,
+  ).toBeGreaterThan(-1);
   let tiefe = 0;
   for (let i = start; i < quelle.length; i++) {
     if (quelle[i] === auf) tiefe++;
@@ -49,7 +52,9 @@ function blockAb(quelle, startIndex, auf = "{", zu = "}") {
   // Bewusst hart: Ein unbalancierter Block heißt, dass die Annahme über die
   // Datei nicht mehr stimmt. Stillschweigend „den Rest nehmen" hat genau die
   // großzügige Ausfallrichtung, die hier schon einmal drin war.
-  throw new Error(`Block ab Index ${start} ist nicht geschlossen – Suchmuster prüfen`);
+  throw new Error(
+    `Block ab Index ${start} ist nicht geschlossen – Suchmuster prüfen`,
+  );
 }
 
 // Typen aus dem Enum in models/Player.js.
@@ -63,7 +68,9 @@ function blockAb(quelle, startIndex, auf = "{", zu = "}") {
 function typenAusModell() {
   const quelle = lies("models", "Player.js");
   const ab = quelle.indexOf("enum: [");
-  expect(ab, "enum-Block in models/Player.js nicht gefunden").toBeGreaterThan(-1);
+  expect(ab, "enum-Block in models/Player.js nicht gefunden").toBeGreaterThan(
+    -1,
+  );
 
   // Dieselbe Helferfunktion wie überall sonst in dieser Datei, nur mit eckigen
   // Klammern – vier Varianten derselben Abgrenzung waren genau das Problem.
@@ -76,7 +83,10 @@ function typenAusModell() {
 
   // Wächter direkt in der Quelle, nicht in jedem einzelnen Test: Ohne ihn
   // wäre eine leere Liste in JEDEM Test still grün (A7b).
-  expect(typen.length, "keine Typen gelesen – Suchmuster prüfen").toBeGreaterThan(5);
+  expect(
+    typen.length,
+    "keine Typen gelesen – Suchmuster prüfen",
+  ).toBeGreaterThan(5);
   return typen;
 }
 
@@ -100,12 +110,14 @@ test.describe("Benachrichtigungstypen sind vollständig gepflegt", () => {
     expect(ab, "NOTIF_ICON-Tabelle nicht gefunden").toBeGreaterThan(-1);
     const iconBlock = blockAb(tabelle, ab);
 
-    const ohne = typen.filter((t) => !new RegExp(`\\b${t}\\s*:`).test(iconBlock));
+    const ohne = typen.filter(
+      (t) => !new RegExp(`\\b${t}\\s*:`).test(iconBlock),
+    );
     expect(
       ohne,
       `Typen ohne Symbol in NOTIF_ICON: ${ohne.join(", ")}\n` +
         `→ Eintrag in lib/notifications.js ergänzen. Ohne ihn rendert die ` +
-        `Benachrichtigung mit dem generischen Glocken-Symbol, und zwar in beiden Glocken.`
+        `Benachrichtigung mit dem generischen Glocken-Symbol, und zwar in beiden Glocken.`,
     ).toEqual([]);
   });
 
@@ -125,7 +137,7 @@ test.describe("Benachrichtigungstypen sind vollständig gepflegt", () => {
       const quelle = lies(...datei);
       expect(
         /NOTIF_ICON\[\s*n\.type\s*\]/.test(quelle),
-        `${datei.join("/")} schlägt das Symbol nicht in der gemeinsamen Tabelle nach`
+        `${datei.join("/")} schlägt das Symbol nicht in der gemeinsamen Tabelle nach`,
       ).toBe(true);
     }
   });
@@ -154,7 +166,7 @@ test.describe("Benachrichtigungstypen sind vollständig gepflegt", () => {
     expect(
       echteLuecken,
       `Typen ohne eigenes Ziel in notificationHref: ${echteLuecken.join(", ")}\n` +
-        `→ Entweder in notificationHref aufnehmen oder oben als bewusst generisch eintragen.`
+        `→ Entweder in notificationHref aufnehmen oder oben als bewusst generisch eintragen.`,
     ).toEqual([]);
   });
 
@@ -167,22 +179,27 @@ test.describe("Benachrichtigungstypen sind vollständig gepflegt", () => {
     // nicht still wegfällt (eine ausbleibende Notiz wirft keinen Fehler).
     const quelle = lies("app", "api", "admin", "setteamadmin", "route.js");
 
-    expect(quelle, "die Bedingung `zuordnungGeaendert` fehlt").toContain("zuordnungGeaendert");
+    expect(quelle, "die Bedingung `zuordnungGeaendert` fehlt").toContain(
+      "zuordnungGeaendert",
+    );
     // Sie muss den Aufruf tatsächlich bewachen, nicht nur irgendwo stehen.
     // ⚠️ Klammerzählung statt `{0,200}` (Befund Kai): Das feste Fenster war
     // heute unkritisch, weil der Block kurz ist – aber ein Kommentar darin
     // hätte den Aufruf hinausgeschoben und den Test falsch rot gemacht. Genau
     // der Mechanismus, der mir an diesem Tag viermal untergekommen ist.
     const beiWaechter = quelle.indexOf("if (zuordnungGeaendert)");
-    expect(beiWaechter, "kein `if (zuordnungGeaendert)` gefunden").toBeGreaterThan(-1);
+    expect(
+      beiWaechter,
+      "kein `if (zuordnungGeaendert)` gefunden",
+    ).toBeGreaterThan(-1);
     expect(
       blockAb(quelle, beiWaechter),
-      "benachrichtigeZuordnung wird nicht von zuordnungGeaendert bewacht"
+      "benachrichtigeZuordnung wird nicht von zuordnungGeaendert bewacht",
     ).toContain("benachrichtigeZuordnung");
     // Und sie muss den Vorher-Wert vergleichen, nicht bloß auf Existenz prüfen.
     expect(
       /zuordnungGeaendert\s*=\s*String\(/.test(quelle),
-      "zuordnungGeaendert vergleicht nicht das vorherige Team"
+      "zuordnungGeaendert vergleicht nicht das vorherige Team",
     ).toBe(true);
   });
 
@@ -212,18 +229,18 @@ test.describe("Benachrichtigungstypen sind vollständig gepflegt", () => {
       const pfad = datei.join("/");
 
       expect(quelle, `${pfad} ruft notifyTeamAdminRevoked nicht auf`).toContain(
-        "notifyTeamAdminRevoked("
+        "notifyTeamAdminRevoked(",
       );
       // Der Wächter im Filter – ohne ihn würde einem Fremdverein-Admin die
       // Rolle entzogen.
       expect(
         /teamAdminOf:\s*team\._id/.test(quelle),
-        `${pfad}: der Entzug filtert nicht auf teamAdminOf`
+        `${pfad}: der Entzug filtert nicht auf teamAdminOf`,
       ).toBe(true);
       // Und die Notiz muss an das Ergebnis des Updates gebunden sein.
       expect(
         /modifiedCount/.test(quelle),
-        `${pfad}: die Notiz hängt nicht an modifiedCount`
+        `${pfad}: die Notiz hängt nicht an modifiedCount`,
       ).toBe(true);
     }
   });
@@ -235,7 +252,10 @@ test.describe("Benachrichtigungstypen sind vollständig gepflegt", () => {
     // gehört er auf die Vereinsseite.
     const quelle = lies("lib", "notifications.js");
     const ab = quelle.indexOf('n.type === "team_admin_revoked"');
-    expect(ab, "team_admin_revoked kommt in notificationHref nicht vor").toBeGreaterThan(-1);
+    expect(
+      ab,
+      "team_admin_revoked kommt in notificationHref nicht vor",
+    ).toBeGreaterThan(-1);
 
     // ⚠️ Über `blockAb` abgrenzen, NICHT über ein festes Zeichenfenster. Ein
     // erster Versuch nahm 300 Zeichen ab der Fundstelle – die reichten bis in
@@ -248,12 +268,13 @@ test.describe("Benachrichtigungstypen sind vollständig gepflegt", () => {
     // stattdessen.
     const zweig = blockAb(quelle, ab);
 
-    expect(zweig, "der Rechteentzug führt nicht auf die Vereinsseite").toContain(
-      "/team/team-detail/"
-    );
+    expect(
+      zweig,
+      "der Rechteentzug führt nicht auf die Vereinsseite",
+    ).toContain("/team/team-detail/");
     expect(
       /["'`]\/team\/admin["'`]/.test(zweig),
-      "der Rechteentzug zeigt auf /team/admin – dort wird der Empfänger abgewiesen"
+      "der Rechteentzug zeigt auf /team/admin – dort wird der Empfänger abgewiesen",
     ).toBe(false);
   });
 });

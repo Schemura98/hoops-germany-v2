@@ -22,25 +22,34 @@ async function anmelden(request) {
   const antwort = await request.post("/api/player/playerlogin", {
     data: { email: KONTO.email, password: KONTO.password },
   });
-  expect(antwort.ok(), "Seed-Konto max@test.de fehlt – seed-demo.mjs laufen lassen").toBe(true);
+  expect(
+    antwort.ok(),
+    "Seed-Konto max@test.de fehlt – seed-demo.mjs laufen lassen",
+  ).toBe(true);
   const koerper = await antwort.json();
   return koerper.data?.token || koerper.token;
 }
 
 async function positionLesen(request, token) {
-  const antwort = await request.post("/api/player/getmyinfo", { data: { token } });
+  const antwort = await request.post("/api/player/getmyinfo", {
+    data: { token },
+  });
   const koerper = await antwort.json();
   return (koerper.data?.player || koerper.player)?.position || "";
 }
 
 async function ortLesen(request, token) {
-  const antwort = await request.post("/api/player/getmyinfo", { data: { token } });
+  const antwort = await request.post("/api/player/getmyinfo", {
+    data: { token },
+  });
   const koerper = await antwort.json();
   return (koerper.data?.player || koerper.player)?.hometown || "";
 }
 
 async function positionSetzen(request, token, position) {
-  return request.post("/api/player/update-profile", { data: { token, position } });
+  return request.post("/api/player/update-profile", {
+    data: { token, position },
+  });
 }
 
 // ⚠️ Jeder Test stellt seinen Ausgangszustand SELBST her.
@@ -64,21 +73,23 @@ async function startZustand(request) {
   expect(
     antwort.status(),
     `Ausgangszustand ${START} ließ sich nicht setzen – steht im Konto ein ` +
-      `ungültiger Altwert? (tmp/dev-position-pruefen.mjs zeigt ihn an)`
+      `ungültiger Altwert? (tmp/dev-position-pruefen.mjs zeigt ihn an)`,
   ).toBe(200);
   expect(await positionLesen(request, token)).toBe(START);
   return token;
 }
 
 test.describe("Position: Werteprüfung in update-profile", () => {
-  test("ein Kürzel wird abgewiesen und NICHT gespeichert", async ({ request }) => {
+  test("ein Kürzel wird abgewiesen und NICHT gespeichert", async ({
+    request,
+  }) => {
     const token = await startZustand(request);
     const vorher = START;
 
     const antwort = await positionSetzen(request, token, "SF");
     expect(
       antwort.status(),
-      "SF ist kein Wert aus ALL_ROLES und muss abgelehnt werden"
+      "SF ist kein Wert aus ALL_ROLES und muss abgelehnt werden",
     ).toBe(400);
 
     // ⚠️ Der eigentliche Punkt: nicht nur die Antwort prüfen, sondern den
@@ -86,13 +97,15 @@ test.describe("Position: Werteprüfung in update-profile", () => {
     // geschrieben haben.
     expect(
       await positionLesen(request, token),
-      "abgelehnt, aber trotzdem gespeichert – das wäre schlimmer als gar keine Prüfung"
+      "abgelehnt, aber trotzdem gespeichert – das wäre schlimmer als gar keine Prüfung",
     ).toBe(vorher);
   });
 
   test("beliebiger Text wird abgewiesen", async ({ request }) => {
     const token = await startZustand(request);
-    expect((await positionSetzen(request, token, "Kapitän der Herzen")).status()).toBe(400);
+    expect(
+      (await positionSetzen(request, token, "Kapitän der Herzen")).status(),
+    ).toBe(400);
     expect(await positionLesen(request, token)).toBe(START);
   });
 
@@ -101,7 +114,9 @@ test.describe("Position: Werteprüfung in update-profile", () => {
     // ebenfalls grün – und das Profil praktisch kaputt.
     const token = await startZustand(request);
 
-    expect((await positionSetzen(request, token, "Small Forward")).status()).toBe(200);
+    expect(
+      (await positionSetzen(request, token, "Small Forward")).status(),
+    ).toBe(200);
     expect(await positionLesen(request, token)).toBe("Small Forward");
 
     // Auch eine Funktion aus PLAYER_ROLES ist gültig, nicht nur eine Spielposition.
@@ -109,12 +124,15 @@ test.describe("Position: Werteprüfung in update-profile", () => {
     expect(await positionLesen(request, token)).toBe("Coach");
 
     await positionSetzen(request, token, START);
-    expect(await positionLesen(request, token), "Ausgangszustand nicht wiederhergestellt").toBe(
-      START
-    );
+    expect(
+      await positionLesen(request, token),
+      "Ausgangszustand nicht wiederhergestellt",
+    ).toBe(START);
   });
 
-  test("ein unveränderter Wert blockiert das Profil nicht", async ({ request }) => {
+  test("ein unveränderter Wert blockiert das Profil nicht", async ({
+    request,
+  }) => {
     // ⚠️ Das ist die Falle, in die die erste Fassung der Altersprüfung gelaufen
     // ist (Fund von Kai): Das Formular schickt beim Speichern IMMER alle Felder
     // mit, auch unveränderte. Eine strenge Prüfung hätte jedes Bestandskonto
@@ -145,7 +163,7 @@ test.describe("Position: Werteprüfung in update-profile", () => {
     });
     expect(
       antwort.status(),
-      "unveränderte Position + anderes Feld muss speicherbar bleiben"
+      "unveränderte Position + anderes Feld muss speicherbar bleiben",
     ).toBe(200);
 
     // Zweitfeld zurückstellen und das auch nachweisen – ein Aufräumschritt,
@@ -153,6 +171,8 @@ test.describe("Position: Werteprüfung in update-profile", () => {
     await request.post("/api/player/update-profile", {
       data: { token, position: START, hometown: vorherOrt },
     });
-    expect(await ortLesen(request, token), "Wohnort nicht zurückgestellt").toBe(vorherOrt);
+    expect(await ortLesen(request, token), "Wohnort nicht zurückgestellt").toBe(
+      vorherOrt,
+    );
   });
 });

@@ -128,7 +128,7 @@ export default function FeatureProgressRail({ labels = [] }) {
   // Begrenzt die Wiederholung der Emblem-Messung (Befund Kai).
   const zielMessVersucheRef = useRef(0);
   // Einmal-Sperre, wie `streifenGemeldetRef` im Hero (Empfehlung Kai).
-  const diagnoseGemeldetRef = useRef(false); // nur der Ring des Korb-Emblems (fuer den Farbblitz)
+  const diagnoseGemeldetRef = useRef(false); // Einmal-Sperre der Rail-Diagnose
   const spurDesktopRef = useRef(null); // Laufweg-Spur der Desktop-Leiste
   const activeRef = useRef(-1);
   const arrivedRef = useRef(false); // einmalige Ankunft – danach eingefroren

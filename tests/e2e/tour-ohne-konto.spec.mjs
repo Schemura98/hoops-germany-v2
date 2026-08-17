@@ -60,28 +60,40 @@ async function bisZumSchluss(tour) {
       .isVisible()
       .catch(() => false);
     if (amEnde) return;
-    const ohneAngabe = tour.getByRole("button", { name: /Ohne Angabe weiter/i });
+    const ohneAngabe = tour.getByRole("button", {
+      name: /Ohne Angabe weiter/i,
+    });
     const weiter = tour.getByRole("button", { name: /^Weiter/ });
-    if (await ohneAngabe.isVisible().catch(() => false)) await ohneAngabe.click();
+    if (await ohneAngabe.isVisible().catch(() => false))
+      await ohneAngabe.click();
     else if (await weiter.isVisible().catch(() => false)) await weiter.click();
     else break;
   }
 }
 
 test.describe("Plattform-Tour ohne Konto", () => {
-  test("meldet keinen Speicherfehler, wenn eine Position gewählt wird", async ({ page }) => {
+  test("meldet keinen Speicherfehler, wenn eine Position gewählt wird", async ({
+    page,
+  }) => {
     const tour = await tourOeffnenOhneKonto(page);
 
     // Schritt 1 → 2 (Wegfrage) → 3 (Position)
     await tour.getByRole("button", { name: /^Weiter/ }).click();
-    await tour.getByRole("button", { name: /Ich spiele in einem Verein/i }).click();
+    await tour
+      .getByRole("button", { name: /Ich spiele in einem Verein/i })
+      .click();
 
-    const position = tour.getByRole("button", { name: "Point Guard", exact: true });
+    const position = tour.getByRole("button", {
+      name: "Point Guard",
+      exact: true,
+    });
     await expect(position).toBeVisible();
     await position.click();
 
     // Das ist der Kern: KEINE Fehlermeldung …
-    await expect(tour.getByText(/Konnte gerade nicht gespeichert werden/i)).toHaveCount(0);
+    await expect(
+      tour.getByText(/Konnte gerade nicht gespeichert werden/i),
+    ).toHaveCount(0);
     // … aber auch KEINE falsche Erfolgsmeldung. „Steht in deinem Profil" über
     // einem Profil, das es nicht gibt, wäre der schlechtere Tausch: aus einer
     // sichtbaren Fehlermeldung eine unsichtbare Unwahrheit.
@@ -91,11 +103,13 @@ test.describe("Plattform-Tour ohne Konto", () => {
       // wird es, sobald du ein Konto hast" ließ sich lesen als „der Wert kommt
       // bei der Registrierung mit" – das tut er nicht. Jetzt sagt die Zeile
       // nur, was fehlt.
-      tour.getByText(/dafür brauchst du ein Konto/i)
+      tour.getByText(/dafür brauchst du ein Konto/i),
     ).toBeVisible();
   });
 
-  test("Schlussfolie zeigt keinen Fortschritt und führt zur Registrierung", async ({ page }) => {
+  test("Schlussfolie zeigt keinen Fortschritt und führt zur Registrierung", async ({
+    page,
+  }) => {
     const tour = await tourOeffnenOhneKonto(page);
     await bisZumSchluss(tour);
 
@@ -117,7 +131,9 @@ test.describe("Plattform-Tour ohne Konto", () => {
     // Weg „Ich organisiere ein Team" ist der heikle Fall: Sein reguläres Ziel
     // /team/create verlangt einen Login, der Ausgang muss ausgeloggt auf /teams
     // umbiegen.
-    await tour.getByRole("button", { name: /Ich organisiere ein Team/i }).click();
+    await tour
+      .getByRole("button", { name: /Ich organisiere ein Team/i })
+      .click();
     await bisZumSchluss(tour);
 
     const zweit = tour.getByRole("link", { name: /Erst mal umsehen/i });
@@ -152,7 +168,10 @@ test.describe("Profil-Avatar als Bezugspunkt der Tour", () => {
     expect(token).toBeTruthy();
 
     await page.goto(SEITE);
-    await page.evaluate((t) => localStorage.setItem("playerAuthToken", t), token);
+    await page.evaluate(
+      (t) => localStorage.setItem("playerAuthToken", t),
+      token,
+    );
     await page.goto("/player/player-detail");
 
     const marker = page.locator("[data-profil-avatar]");
@@ -168,7 +187,10 @@ test.describe("Profil-Avatar als Bezugspunkt der Tour", () => {
 // begann bei x=285). Gemessen von Tobias — kein Test konnte das fangen, denn
 // zerfallenes Layout wirft keinen Fehler. Prüfkriterium von Kai.
 test.describe("Avatar-Zitat sitzt im Satz (mobil)", () => {
-  test("Zitat und Satzende teilen dieselbe Zeile", async ({ page, request }) => {
+  test("Zitat und Satzende teilen dieselbe Zeile", async ({
+    page,
+    request,
+  }) => {
     await page.setViewportSize({ width: 390, height: 844 });
 
     const res = await request.post("/api/player/playerlogin", {
@@ -187,7 +209,10 @@ test.describe("Avatar-Zitat sitzt im Satz (mobil)", () => {
     await request.post("/api/player/mark-welcome-seen", { data: { token } });
 
     await page.goto("/spieler");
-    await page.evaluate((t) => localStorage.setItem("playerAuthToken", t), token);
+    await page.evaluate(
+      (t) => localStorage.setItem("playerAuthToken", t),
+      token,
+    );
     // ⚠️ Seite MIT Spieler-Leiste – nur dort zeigt die Quittung das Zitat.
     // Bewusst `/player/update-password` und nicht `/player/player-detail`:
     // Beide tragen `PlayerNav`, aber das Profil lädt Karriere, Statistiken und
@@ -228,13 +253,19 @@ test.describe("Avatar-Zitat sitzt im Satz (mobil)", () => {
     // war er beim ERSTEN Lauf grün und beim zweiten rot: Er hinterließ genau
     // den Zustand, an dem er scheitert. Dieselbe Klasse Problem wie beim
     // Tour-Auto-Start – ein Test, der seinen eigenen Ausgangszustand verändert.
-    const irgendeinChip = tour.getByRole("button", { name: "Point Guard", exact: true });
+    const irgendeinChip = tour.getByRole("button", {
+      name: "Point Guard",
+      exact: true,
+    });
     for (let i = 0; i < 6; i++) {
       if (await irgendeinChip.isVisible().catch(() => false)) break;
-      const weg = tour.getByRole("button", { name: /Ich spiele in einem Verein/i });
+      const weg = tour.getByRole("button", {
+        name: /Ich spiele in einem Verein/i,
+      });
       const weiter = tour.getByRole("button", { name: /^Weiter/ });
       if (await weg.isVisible().catch(() => false)) await weg.click();
-      else if (await weiter.isVisible().catch(() => false)) await weiter.click();
+      else if (await weiter.isVisible().catch(() => false))
+        await weiter.click();
       else break;
       // ⚠️ Der Tour-Dialog blendet Schritte mit einem Übergang ein. Ohne diese
       // Pause prüft die Schleife den nächsten Schritt, während er noch
@@ -244,7 +275,13 @@ test.describe("Avatar-Zitat sitzt im Satz (mobil)", () => {
     await expect(irgendeinChip).toBeVisible({ timeout: 15_000 });
 
     // Einen Chip wählen, der NICHT bereits aktiv ist – sonst wählt der Klick ab.
-    const alle = ["Point Guard", "Shooting Guard", "Small Forward", "Power Forward", "Center"];
+    const alle = [
+      "Point Guard",
+      "Shooting Guard",
+      "Small Forward",
+      "Power Forward",
+      "Center",
+    ];
     let chip = null;
     for (const name of alle) {
       const k = tour.getByRole("button", { name, exact: true });
@@ -318,7 +355,8 @@ test.describe("Avatar-Zitat sitzt im Satz (mobil)", () => {
 
     // „Gleiche Zeile" = die Oberkanten liegen enger beieinander als eine halbe
     // Zeilenhöhe. Der Span enthält den Avatar und darf etwas höher sein.
-    const gleicheZeile = Math.abs(masse.spanTop - masse.davorTop) < masse.zeilenhoehe * 0.75;
+    const gleicheZeile =
+      Math.abs(masse.spanTop - masse.davorTop) < masse.zeilenhoehe * 0.75;
     const luecke = masse.spanLinks - masse.davorRechts;
     // „Nur ein Wortabstand" = höchstens drei Leerzeichen breit.
     const maxLuecke = masse.leerzeichen * 3;
@@ -327,19 +365,23 @@ test.describe("Avatar-Zitat sitzt im Satz (mobil)", () => {
     // (dann darf die Lücke nur ein Leerzeichen breit sein), ODER er beginnt
     // eine neue Zeile (dann steht er links). Unzulässig ist genau der Fall,
     // den Tobias gemessen hat: gleiche Zeile, aber 169 px Loch dazwischen.
-    const inOrdnung = gleicheZeile ? luecke < maxLuecke : masse.spanLinks < masse.davorRechts;
+    const inOrdnung = gleicheZeile
+      ? luecke < maxLuecke
+      : masse.spanLinks < masse.davorRechts;
     expect(
       inOrdnung,
       `Der Satz zerfällt: Span ${gleicheZeile ? "in derselben Zeile" : "in neuer Zeile"}, ` +
         `Lücke ${Math.round(luecke)} px (erlaubt ${Math.round(maxLuecke)}, ` +
         `davorRechts=${Math.round(masse.davorRechts)}, spanLinks=${Math.round(masse.spanLinks)}, ` +
-        `Zeilenhöhe ${Math.round(masse.zeilenhoehe)})`
+        `Zeilenhöhe ${Math.round(masse.zeilenhoehe)})`,
     ).toBe(true);
   });
 });
 
 test.describe("Plattform-Tour – Beleg-Aussage", () => {
-  test("verspricht keine doppelte Bestätigung der eigenen Zahlen", async ({ page }) => {
+  test("verspricht keine doppelte Bestätigung der eigenen Zahlen", async ({
+    page,
+  }) => {
     const tour = await tourOeffnenOhneKonto(page);
     const text = await tour.innerText();
 
@@ -350,6 +392,8 @@ test.describe("Plattform-Tour – Beleg-Aussage", () => {
     // eigenen Punkte nicht gibt. Siehe docs/MUSTER-ZAHLEN-DIE-LUEGEN.
     expect(text).not.toMatch(/Zahlen, die beide Seiten bestätigen/i);
     expect(text).not.toMatch(/deinen Statistiken nicht glauben/i);
-    expect(text).toMatch(/Beide Teams melden das Ergebnis unabhängig voneinander/i);
+    expect(text).toMatch(
+      /Beide Teams melden das Ergebnis unabhängig voneinander/i,
+    );
   });
 });

@@ -259,6 +259,8 @@ export default function HeroScrollStage({
   const kaestenFinalRef = useRef(false);
   // Meldet den unmöglichen Streifen EINMAL, nicht in jedem Frame.
   const streifenGemeldetRef = useRef(false);
+  // Einmal-Sperre der Auffangregel-Diagnose (Befund Kai K2).
+  const auffangGemeldetRef = useRef(false);
   const kaestenRef = useRef([]); // Zeilen-/Elementkaesten des Inhalts, s. kaestenBauen
   const tickingRef = useRef(false);
 
@@ -564,7 +566,18 @@ export default function HeroScrollStage({
       // Kreis, den der Rahmen schneidet, liest sich als Körper, der zufällig
       // gerade da ist – der Rahmen wird zum Fenster. Die 3 % Restsichtbarkeit
       // von vorher waren kein Anschnitt, das war ein Verschwinden.
-      const targetX = rect.width - 0.6 * BALL_R;
+      // ⚠️ EINE Definition der waagerechten Ballmitte für Kanalrechnung UND
+      // Platzierung (Befund Kai K3, siebte Runde). Vorher stand dieselbe Formel
+      // zweimal — eine Fläche, zwei Wege.
+      // ⚠️ UND SIE STEHT HIER OBEN, NICHT UNTEN: Mein erster Versuch legte sie
+      // neben `noetigOben` (Z. 701) und damit HINTER diesen Gebrauch — temporale
+      // Totzone, Startseite leer. **Dritter Fehler dieser Art in dieser Datei**
+      // (vorher `ballOpacity`, dann `x`). Gefangen hat es diesmal sofort die
+      // Messsonde, weil sie nach der Änderung gelaufen ist — genau die
+      // Reihenfolge, die Vivien empfohlen hat.
+      // 0,6·R lässt exakt 20 % Anschnitt am rechten Bühnenrand stehen.
+      const ballMitteX = rect.width - 0.6 * BALL_R;
+      const targetX = ballMitteX;
 
       // ══ EIN BEGRIFF STATT ZWEI BAHNEN (Vivien, zweite Runde) ═══════════════
       // Die erste Fassung teilte in „seitliche" und „obere Bahn" und entschied
@@ -709,24 +722,6 @@ export default function HeroScrollStage({
       // platziert" wäre dort schlicht FALSCH gewesen: eine Diagnose, die einen
       // Fehler behauptet, den es nicht gibt, ist so schädlich wie eine, die
       // schweigt.
-      const nutztStreifen = mobil || !gewaehlt;
-      if (
-        nutztStreifen &&
-        obersterKasten < noetigOben &&
-        !streifenGemeldetRef.current
-      ) {
-        streifenGemeldetRef.current = true;
-        // Kein Wurf: Das hier läuft im Scroll-Pfad einer Live-Seite, ein
-        // Ausnahmefehler nähme dem Leser die Startseite. Aber es schweigt nicht.
-        // ⚠️ Die Meldung nennt BEIDE Stellschrauben, nicht nur den Defekt –
-        // sonst findet der nächste Leser eine Fehlermeldung ohne Ausweg.
-        console.error(
-          `[HeroScrollStage] Der obere Streifen fasst den Ball nicht: ` +
-            `verfügbar ${Math.round(obersterKasten)}px, nötig ${noetigOben}px ` +
-            `(2·R + 16). Der Ball wird überlappend platziert. Entweder der ` +
-            `mobile Durchmesser sinkt oder die Badge-Zeile rückt nach unten.`,
-        );
-      }
       // ══ MOBIL WIRD DIE RUHELAGE VERANKERT, NICHT GESUCHT ═══════════════════
       // Entscheidung Vivien (17.08.2026), nachdem sie einen Befund gefunden hat,
       // den niemand gesucht hatte – und der die Frage entwertet, die ich ihr
@@ -802,15 +797,26 @@ export default function HeroScrollStage({
           // hier schon zweimal eine Runde gekostet hat.
           const rho =
             parseFloat(getComputedStyle(eyebrow).borderTopRightRadius) || 0;
-          const mitteX = rect.width - 0.6 * BALL_R;
+          // ⚠️ `targetX`, NICHT EINE ZWEITE RECHNUNG (Befund Kai K3, siebte
+          // Runde). Hier stand `rect.width - 0.6 * BALL_R` — dieselbe Formel wie
+          // bei `targetX` weiter unten, also eine Fläche mit zwei Wegen: Wer
+          // `targetX` ändert, rechnet den Kanal für ein x, das der Ball nicht
+          // benutzt. Kein Test würde es sehen. Genau das Muster, das im
+          // Designsystem 141 handgebaute Panels erzeugt hat.
+          const mitteX = ballMitteX;
           // Abstand eines äußeren Punktes zu einem gerundeten Rechteck, exakt und
           // OHNE Fallunterscheidung zwischen Kante und Ecke: auf das um ρ
           // eingerückte Kernrechteck klemmen, dann ρ abziehen (Formel Vivien).
           const konturKanal = (cy) => {
             // ⚠️ VORAUSSETZUNG PRÜFEN, NICHT ANNEHMEN: Der Ausdruck gilt nur für
             // Ballmitten AUSSERHALB des Badges – innen liefert er stillschweigend
-            // Unsinn. Dasselbe Register wie `clamp`, das seit Runde drei wirft
-            // statt still `max` zu liefern.
+            // Unsinn.
+            // ⚠️ EHRLICHE EINORDNUNG (Korrektur Kai K4, siebte Runde): Dieser
+            // Zweig ist derzeit TOT. `ballMitteX = Breite − 21,6` liegt auf jeder
+            // gemessenen Breite rechts vom Badge (bei 320: 298,4 gegen 279,8).
+            // Er ist Vorsichtsmaßnahme, nicht Wächter — und anders als `clamp`,
+            // mit dem der frühere Kommentar ihn in eine Reihe stellte, WIRFT er
+            // nie. Wer ihn für einen aktiven Schutz hält, überschätzt ihn.
             if (mitteX >= bL && mitteX <= bR && cy >= bT && cy <= bB) {
               return Number.NEGATIVE_INFINITY;
             }
@@ -825,15 +831,66 @@ export default function HeroScrollStage({
               break;
             }
           }
-          mobilZiel =
-            gewaehltD !== null
-              ? bT - gewaehltD
-              : // Auffangregel: Ball ganz über das Badge. Vivien: außerhalb des
-                // Zielbereichs zu erwarten, INNERHALB ein Fehlersignal – bei
-                // 320 px ist die Überlappung echt (−9,0), dort gehört sie hin.
-                bT - BALL_R - MIN_SENKRECHT;
+          if (gewaehltD !== null) {
+            mobilZiel = bT - gewaehltD;
+          } else {
+            // Auffangregel: Ball ganz über das Badge. Vivien: außerhalb des
+            // Zielbereichs zu erwarten, INNERHALB ein Fehlersignal – bei 320 px
+            // ist die Überlappung echt (−9,0), dort gehört sie hin.
+            // ⚠️ MIT KLAMMER UND MELDUNG (Befund Kai K2, siebte Runde). Über
+            // `imStreifen` steht ein langer Kommentar, dass die Klammer den
+            // unmöglichen Fall NICHT glätten darf – und `imStreifen` hat deshalb
+            // `clamp` UND eine Diagnose. Dieser Zweig hatte **keines von beidem**:
+            // Balloberkante `bT - 80`, gemessen `bT = 93` bei 320 → **13 px
+            // Reserve**, danach stand der Ball über der Bühnenkante,
+            // ungeklammert und unbemeldet. Dieselbe Fehlerklasse, ein Zweig
+            // weiter – und sie ist genau deshalb entstanden, weil ich den Zweig
+            // neu gebaut und die Absicherung des Nachbarn nicht mitgenommen habe.
+            const gewuenscht = bT - BALL_R - MIN_SENKRECHT;
+            if (gewuenscht < BALL_R + 8 && !auffangGemeldetRef.current) {
+              auffangGemeldetRef.current = true;
+              console.error(
+                `[HeroScrollStage] Über dem Eyebrow ist kein Platz für den Ball: ` +
+                  `verfügbar ${Math.round(bT)}px, nötig ${2 * BALL_R + MIN_SENKRECHT}px. ` +
+                  `Er wird an die Bühnenkante geklammert und überlappt dadurch ` +
+                  `möglicherweise. Entweder der mobile Durchmesser sinkt oder die ` +
+                  `Eyebrow-Zeile rückt nach unten.`,
+              );
+            }
+            mobilZiel = Math.max(gewuenscht, BALL_R + 8);
+          }
         }
       }
+      // ⚠️ ZUM DRITTEN MAL DIESELBE FEHLERFORM (Befund Kai K1, siebte Runde),
+      // und zum ZWEITEN Mal von mir wiedereingeführt: Eine Diagnose, die dort
+      // feuert, wo ihr Zweig nicht läuft.
+      // `mobil || !gewaehlt` stimmte, solange mobil immer `imStreifen` galt.
+      // Seit der Verankerung gilt `imStreifen` mobil nur noch, wenn das Eyebrow
+      // FEHLT oder Höhe 0 hat. Existiert es, meldete die Bedingung trotzdem
+      // „Der Ball wird überlappend platziert" – eine Aussage über einen Zweig,
+      // der nicht läuft. Feuerte heute nicht (oberster Kasten ≈ 93 gegen
+      // Schwelle 88), aber die Reserve sind FÜNF Pixel.
+      // Jetzt wird gefragt, was tatsächlich gilt, statt es aus `mobil`
+      // abzuleiten.
+      const nutztStreifen = mobil ? mobilZiel === imStreifen : !gewaehlt;
+      if (
+        nutztStreifen &&
+        obersterKasten < noetigOben &&
+        !streifenGemeldetRef.current
+      ) {
+        streifenGemeldetRef.current = true;
+        // Kein Wurf: Das hier läuft im Scroll-Pfad einer Live-Seite, ein
+        // Ausnahmefehler nähme dem Leser die Startseite. Aber es schweigt nicht.
+        // ⚠️ Die Meldung nennt BEIDE Stellschrauben, nicht nur den Defekt –
+        // sonst findet der nächste Leser eine Fehlermeldung ohne Ausweg.
+        console.error(
+          `[HeroScrollStage] Der obere Streifen fasst den Ball nicht: ` +
+            `verfügbar ${Math.round(obersterKasten)}px, nötig ${noetigOben}px ` +
+            `(2·R + 16). Der Ball wird überlappend platziert. Entweder der ` +
+            `mobile Durchmesser sinkt oder die Badge-Zeile rückt nach unten.`,
+        );
+      }
+
       const targetY = mobil
         ? mobilZiel
         : gewaehlt
@@ -1185,6 +1242,7 @@ export default function HeroScrollStage({
       // wodurch die Diagnose nach einem `reduced-motion`-Wechsel dauerhaft
       // geschwiegen hätte.
       streifenGemeldetRef.current = false;
+      auffangGemeldetRef.current = false;
       window.removeEventListener("load", onScrollOrResize);
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);

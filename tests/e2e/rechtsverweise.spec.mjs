@@ -49,7 +49,10 @@ function seitenMitRegistrierung() {
 // Der Verweis kann direkt in der Seite stehen ODER über eine gemeinsame Hülle
 // kommen. Beides ist in Ordnung – geprüft wird das Ergebnis, nicht der Weg.
 const HUELLEN_MIT_VERWEIS = [
-  { name: "RechtsLinks", datei: join("components", "layout", "RechtsLinks.js") },
+  {
+    name: "RechtsLinks",
+    datei: join("components", "layout", "RechtsLinks.js"),
+  },
   { name: "AuthShell", datei: join("components", "layout", "AuthShell.js") },
   { name: "Footer", datei: join("components", "layout", "Footer.js") },
 ];
@@ -64,9 +67,13 @@ function huelleTraegt(zielPfad, tiefe = 0) {
   if (tiefe > 3) return false; // Schutz gegen zirkuläre Importe
   try {
     const inhalt = readFileSync(zielPfad, "utf8");
-    if (inhalt.includes("/datenschutz") && inhalt.includes("/impressum")) return true;
+    if (inhalt.includes("/datenschutz") && inhalt.includes("/impressum"))
+      return true;
     return HUELLEN_MIT_VERWEIS.some(
-      (h) => h.datei !== zielPfad && inhalt.includes(h.name) && huelleTraegt(h.datei, tiefe + 1)
+      (h) =>
+        h.datei !== zielPfad &&
+        inhalt.includes(h.name) &&
+        huelleTraegt(h.datei, tiefe + 1),
     );
   } catch {
     return false;
@@ -78,23 +85,28 @@ test.describe("Rechtsverweise auf kontoerzeugenden Seiten (Art. 13 DSGVO, § 5 D
     const seiten = seitenMitRegistrierung();
     expect(
       seiten.length,
-      "keine kontoerzeugende Seite gefunden – Suchmuster prüfen"
+      "keine kontoerzeugende Seite gefunden – Suchmuster prüfen",
     ).toBeGreaterThan(0);
 
-    const traegerHuellen = HUELLEN_MIT_VERWEIS.filter((h) => huelleTraegt(h.datei));
+    const traegerHuellen = HUELLEN_MIT_VERWEIS.filter((h) =>
+      huelleTraegt(h.datei),
+    );
 
     const ohne = [];
     for (const seite of seiten) {
       const direkt =
-        seite.inhalt.includes("/datenschutz") && seite.inhalt.includes("/impressum");
-      const ueberHuelle = traegerHuellen.some((h) => seite.inhalt.includes(h.name));
+        seite.inhalt.includes("/datenschutz") &&
+        seite.inhalt.includes("/impressum");
+      const ueberHuelle = traegerHuellen.some((h) =>
+        seite.inhalt.includes(h.name),
+      );
       if (!direkt && !ueberHuelle) ohne.push(seite.pfad);
     }
 
     expect(
       ohne,
       `Diese Seiten legen ein Konto an, verweisen aber weder selbst noch über eine ` +
-        `Hülle auf /datenschutz und /impressum: ${ohne.join(", ")}`
+        `Hülle auf /datenschutz und /impressum: ${ohne.join(", ")}`,
     ).toEqual([]);
   });
 
@@ -105,25 +117,34 @@ test.describe("Rechtsverweise auf kontoerzeugenden Seiten (Art. 13 DSGVO, § 5 D
     // anzuklicken (Wortlaut Nele, Prüfhinweis Kai A8). Bricht der Weg dorthin
     // weg, wird aus einem Ausweg eine Sackgasse, ohne dass irgendetwas rot
     // wird. Dieselbe Klasse Zusage wie die Rechtsverweise oben, deshalb hier.
-    const footer = readFileSync(join(PROJECT_ROOT, "components", "layout", "Footer.js"), "utf8");
+    const footer = readFileSync(
+      join(PROJECT_ROOT, "components", "layout", "Footer.js"),
+      "utf8",
+    );
     expect(footer, "Footer verlinkt /kontakt nicht mehr").toContain("/kontakt");
 
     const route = join(PROJECT_ROOT, "app", "kontakt", "page.js");
-    expect(() => readFileSync(route, "utf8"), "app/kontakt/page.js fehlt").not.toThrow();
+    expect(
+      () => readFileSync(route, "utf8"),
+      "app/kontakt/page.js fehlt",
+    ).not.toThrow();
 
     // Und beide Nachrichten müssen weiter auf genau diesen Weg zeigen.
     // ⚠️ Sie nennen das Wort „Kontakt", nicht „Kontaktformular" (Angleichung
     // Nele): Der Footer-Eintrag und die `h1` auf /kontakt heißen so, und wer
     // ein Wort genannt bekommt, sucht auf der Seite danach.
     for (const [datei, wofuer] of [
-      [join("app", "api", "admin", "setteamadmin", "route.js"), "team_assigned"],
+      [
+        join("app", "api", "admin", "setteamadmin", "route.js"),
+        "team_assigned",
+      ],
       [join("lib", "notifyTeamAdminRevoked.js"), "team_admin_revoked"],
     ]) {
       const quelle = readFileSync(join(PROJECT_ROOT, datei), "utf8");
       expect(
         /schreib uns über [„"]Kontakt/.test(quelle),
         `die ${wofuer}-Nachricht verweist nicht mehr auf „Kontakt" – ` +
-          `dann diesen Test anpassen oder entfernen`
+          `dann diesen Test anpassen oder entfernen`,
       ).toBe(true);
     }
   });
@@ -135,7 +156,7 @@ test.describe("Rechtsverweise auf kontoerzeugenden Seiten (Art. 13 DSGVO, § 5 D
     const traeger = HUELLEN_MIT_VERWEIS.filter((h) => huelleTraegt(h.datei));
     expect(
       traeger.map((t) => t.name),
-      "keine der bekannten Hüllen trägt noch beide Verweise"
+      "keine der bekannten Hüllen trägt noch beide Verweise",
     ).not.toEqual([]);
   });
 });

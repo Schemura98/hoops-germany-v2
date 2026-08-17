@@ -4,7 +4,12 @@
 // launch.json` ist versioniert und kennt nur 3000; Tobias hat bewusst keine
 // Schreibwerkzeuge und konnte deshalb nicht ausweichen.
 // Zwei parallele Gates brauchen zwei Ports – diese Datei ist meiner.
-// ⚠️ Bewusst NICHT eingecheckt: Sie liegt nur im Gate-Worktree.
+// ⚠️ KORREKTUR (Kai, 17.08.2026): Diese Datei IST inzwischen eingecheckt.
+// Hier stand „Bewusst NICHT eingecheckt: Sie liegt nur im Gate-Worktree." – der
+// Satz war falsch, und zwar auf der Datei, die dem nächsten Gate-Läufer als
+// Vorbild dient. Sie ist der EINZIGE zulässige Weg, Playwright zu starten,
+// solange ein anderer Prüfer Port 3000 hat: Die Standardkonfiguration zeigt mit
+// `reuseExistingServer: true` selbst auf 3000 und kapert ihn.
 import { defineConfig } from "@playwright/test";
 import { PROJECT_ROOT } from "./helpers/env.mjs";
 

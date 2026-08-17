@@ -4,7 +4,10 @@
 // Voraussetzung: Seed-Daten via `node scripts/seed-demo.mjs`
 // (max@test.de = Team-Admin "Test Baskets", sven.adler@test.de = Free Agent).
 import { test, expect } from "@playwright/test";
-import { newDisposableEmail, recordCreatedEmail } from "./helpers/created-users.mjs";
+import {
+  newDisposableEmail,
+  recordCreatedEmail,
+} from "./helpers/created-users.mjs";
 
 const SEED_ADMIN = { email: "max@test.de", password: "test123" };
 const SEED_FREE_AGENT = { email: "sven.adler@test.de", password: "test123" };
@@ -21,16 +24,22 @@ function getPlayerToken(page) {
 }
 
 test.describe("Login", () => {
-  test("gültige Anmeldedaten → Newsfeed + playerAuthToken gesetzt", async ({ page }) => {
+  test("gültige Anmeldedaten → Newsfeed + playerAuthToken gesetzt", async ({
+    page,
+  }) => {
     await uiLogin(page, SEED_ADMIN.email, SEED_ADMIN.password);
     await page.waitForURL("**/player/newsfeed", { timeout: 60_000 });
     expect(await getPlayerToken(page)).toBeTruthy();
-    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem("player")));
+    const stored = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem("player")),
+    );
     expect(stored?.email).toBe(SEED_ADMIN.email);
     expect(stored?.isTeamAdmin).toBe(true);
   });
 
-  test("falsches Passwort → Fehlermeldung, kein Token, bleibt auf /login", async ({ page }) => {
+  test("falsches Passwort → Fehlermeldung, kein Token, bleibt auf /login", async ({
+    page,
+  }) => {
     await uiLogin(page, SEED_ADMIN.email, "definitiv-falsch");
     await expect(page.getByText("Ungültige Anmeldedaten")).toBeVisible();
     expect(page.url()).toContain("/login");
@@ -87,16 +96,28 @@ test.describe("Signup", () => {
     };
     durchsuchen("app");
 
-    expect(treffer.length, "keine Aufrufer gefunden – Suchmuster prüfen").toBeGreaterThan(0);
+    expect(
+      treffer.length,
+      "keine Aufrufer gefunden – Suchmuster prüfen",
+    ).toBeGreaterThan(0);
     const ohne = treffer.filter((t) => !t.hatFeld).map((t) => t.pfad);
-    expect(ohne, `Diese Seiten rufen die Registrierung ohne minAgeConfirmed auf: ${ohne.join(", ")}`)
-      .toEqual([]);
+    expect(
+      ohne,
+      `Diese Seiten rufen die Registrierung ohne minAgeConfirmed auf: ${ohne.join(", ")}`,
+    ).toEqual([]);
   });
 
-  test("Registrierung ohne Mindestalter-Bestätigung → 400, kein Account", async ({ request }) => {
+  test("Registrierung ohne Mindestalter-Bestätigung → 400, kein Account", async ({
+    request,
+  }) => {
     const email = newDisposableEmail("minage");
     const res = await request.post("/api/player/playerregister", {
-      data: { firstName: "Kai", lastName: "Minderjaehrig", email, password: "test1234" },
+      data: {
+        firstName: "Kai",
+        lastName: "Minderjaehrig",
+        email,
+        password: "test1234",
+      },
     });
     expect(res.status()).toBe(400);
     expect((await res.json()).message).toContain("16 Jahre");
@@ -109,7 +130,9 @@ test.describe("Signup", () => {
     expect(login.ok()).toBeFalsy();
   });
 
-  test("neuer Account mit Wegwerf-Mail → eingeloggt im Newsfeed", async ({ page }) => {
+  test("neuer Account mit Wegwerf-Mail → eingeloggt im Newsfeed", async ({
+    page,
+  }) => {
     const email = recordCreatedEmail(newDisposableEmail("signup")); // Intent VOR Anlage aufzeichnen
     await page.goto("/signup");
     await page.fill('input[name="firstName"]', "Kai");
@@ -122,11 +145,16 @@ test.describe("Signup", () => {
     await page.click('button[type="submit"]');
     await page.waitForURL("**/player/newsfeed", { timeout: 60_000 });
     expect(await getPlayerToken(page)).toBeTruthy();
-    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem("player")));
+    const stored = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem("player")),
+    );
     expect(stored?.email).toBe(email);
   });
 
-  test("Duplikat-Mail → 409-Fehlermeldung, kein zweiter Account", async ({ page, request }) => {
+  test("Duplikat-Mail → 409-Fehlermeldung, kein zweiter Account", async ({
+    page,
+    request,
+  }) => {
     // Eigenen Wegwerf-Account per API anlegen (nicht den Seed-Bestand benutzen) …
     const email = recordCreatedEmail(newDisposableEmail("dup"));
     const create = await request.post("/api/player/playerregister", {
@@ -150,7 +178,9 @@ test.describe("Signup", () => {
     // Mindestalter-Selbstauskunft ist seit 13.08.2026 Pflicht (ab 16 Jahren).
     await page.check('input[type="checkbox"]');
     await page.click('button[type="submit"]');
-    await expect(page.getByText("Diese E-Mail-Adresse ist bereits registriert")).toBeVisible();
+    await expect(
+      page.getByText("Diese E-Mail-Adresse ist bereits registriert"),
+    ).toBeVisible();
     expect(page.url()).toContain("/signup");
     expect(await getPlayerToken(page)).toBeNull();
   });
@@ -166,7 +196,9 @@ test.describe("Dual-Auth (Spieler-Token für Team-Admin-Zugriff)", () => {
     return body.token;
   }
 
-  test("Team-Admin-Spieler-Token → /api/team/fetchinfo liefert sein Team", async ({ request }) => {
+  test("Team-Admin-Spieler-Token → /api/team/fetchinfo liefert sein Team", async ({
+    request,
+  }) => {
     const token = await apiLogin(request, SEED_ADMIN);
     const res = await request.post("/api/team/fetchinfo", {
       headers: { Authorization: `Bearer ${token}` },
@@ -180,7 +212,9 @@ test.describe("Dual-Auth (Spieler-Token für Team-Admin-Zugriff)", () => {
     expect(body.team?.password).toBeUndefined();
   });
 
-  test("Spieler OHNE Team-Admin-Rolle → 401 (kein Team-Zugriff)", async ({ request }) => {
+  test("Spieler OHNE Team-Admin-Rolle → 401 (kein Team-Zugriff)", async ({
+    request,
+  }) => {
     const token = await apiLogin(request, SEED_FREE_AGENT);
     const res = await request.post("/api/team/fetchinfo", {
       headers: { Authorization: `Bearer ${token}` },

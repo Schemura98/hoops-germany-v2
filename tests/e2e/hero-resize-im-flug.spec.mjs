@@ -100,6 +100,16 @@ async function ruhelage(page, breite, resizeVon = null) {
     await page.waitForTimeout(NACH_FLUGSTART_MS);
     await page.setViewportSize({ width: breite, height: HOEHE });
   }
+  // ⚠️ AUF DAS ELEMENT WARTEN, NICHT AUF EINE DAUER (Befund Kai, siebte Runde).
+  // `NACHLAUF_MS` war eine feste Zahl, und `.hero-ball-sprite` wird
+  // CLIENTSEITIG erzeugt (nicht im SSR-HTML). Unter Last lag die Messung
+  // gelegentlich vor der Hydration → „.hero-ball-sprite nicht gefunden",
+  // einmal in ~10 Läufen. Zwei Dinge daran waren schlecht: Die Meldung nannte
+  // eine FALSCHE Ursache (klang nach Produktdefekt), und der Kopf dieser
+  // Datei warnt selbst ausführlich vor genau dieser Konstanten-Klasse –
+  // `NACH_FLUGSTART_MS` wurde deshalb durch eine Bedingung ersetzt,
+  // `NACHLAUF_MS` blieb eine Zahl.
+  await page.waitForSelector(".hero-ball-sprite", { timeout: 10000 });
   await page.waitForTimeout(NACHLAUF_MS);
   return page.evaluate(() => {
     const b = document.querySelector(".hero-ball-sprite");

@@ -5,7 +5,11 @@
 // Seed-Accounts (max@test.de usw.) werden nie angefasst.
 import mongoose from "mongoose";
 import { requireDevDbUri } from "./helpers/env.mjs";
-import { listCreatedEmails, clearRegistry, E2E_EMAIL_RE } from "./helpers/created-users.mjs";
+import {
+  listCreatedEmails,
+  clearRegistry,
+  E2E_EMAIL_RE,
+} from "./helpers/created-users.mjs";
 
 export default async function globalTeardown() {
   const emails = listCreatedEmails();
@@ -19,13 +23,17 @@ export default async function globalTeardown() {
   try {
     const db = mongoose.connection;
     if (db.name !== "hoopsgermany") {
-      throw new Error(`ABBRUCH: verbunden mit DB "${db.name}" statt hoopsgermany`);
+      throw new Error(
+        `ABBRUCH: verbunden mit DB "${db.name}" statt hoopsgermany`,
+      );
     }
     const safe = emails.filter((e) => E2E_EMAIL_RE.test(e));
-    const res = await db.collection("players").deleteMany({ email: { $in: safe } });
+    const res = await db
+      .collection("players")
+      .deleteMany({ email: { $in: safe } });
     console.log(
       `[e2e] Teardown: ${res.deletedCount}/${safe.length} Wegwerf-Account(s) aus Dev-DB entfernt:`,
-      safe.join(", ")
+      safe.join(", "),
     );
     clearRegistry();
   } finally {

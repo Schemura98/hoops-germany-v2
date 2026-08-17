@@ -24,13 +24,17 @@ async function apiLogin(request, creds) {
 }
 
 async function findTeamByName(request, adminToken, name) {
-  const res = await request.post("/api/admin/fetchallteams", { data: { token: adminToken } });
+  const res = await request.post("/api/admin/fetchallteams", {
+    data: { token: adminToken },
+  });
   const body = await res.json();
   return body.teams.find((t) => t.teamName === name);
 }
 
 async function findPlayerByEmail(request, adminToken, email) {
-  const res = await request.post("/api/admin/fetchallplayers", { data: { token: adminToken } });
+  const res = await request.post("/api/admin/fetchallplayers", {
+    data: { token: adminToken },
+  });
   const body = await res.json();
   return body.players.find((p) => p.email === email);
 }
@@ -44,7 +48,9 @@ test.describe("POST /api/admin/set-internal – Auth", () => {
     expect((await res.json()).success).toBe(false);
   });
 
-  test("normaler Spieler-Token (kein Super-Admin) → 401, keine Änderung", async ({ request }) => {
+  test("normaler Spieler-Token (kein Super-Admin) → 401, keine Änderung", async ({
+    request,
+  }) => {
     const adminToken = await apiLogin(request, SUPER_ADMIN);
     const team = await findTeamByName(request, adminToken, "Test Baskets");
     expect(team.isInternal).toBe(false);
@@ -63,16 +69,23 @@ test.describe("POST /api/admin/set-internal – Auth", () => {
   test("gültiger Team-Token (kryptografisch valide, aber kein Admin) → 401", async ({
     request,
   }) => {
-    expect(SECRET_KEY, ".env SECRET_KEY nicht lesbar – Testvoraussetzung fehlt").toBeTruthy();
+    expect(
+      SECRET_KEY,
+      ".env SECRET_KEY nicht lesbar – Testvoraussetzung fehlt",
+    ).toBeTruthy();
     const adminToken = await apiLogin(request, SUPER_ADMIN);
     const team = await findTeamByName(request, adminToken, "Test Baskets");
 
     // Team-Token selbst geschmiedet (wie signTeamToken in lib/auth.js), um zu
     // prüfen, dass getAdminFromToken einen echten Team-Token nicht durchlässt –
     // unabhängig davon, ob gerade ein Team mit Login-Passwort existiert.
-    const craftedTeamToken = jwt.sign({ teamId: team._id, type: "team" }, SECRET_KEY, {
-      expiresIn: "1h",
-    });
+    const craftedTeamToken = jwt.sign(
+      { teamId: team._id, type: "team" },
+      SECRET_KEY,
+      {
+        expiresIn: "1h",
+      },
+    );
     const res = await request.post("/api/admin/set-internal", {
       headers: { Authorization: `Bearer ${craftedTeamToken}` },
       data: { art: "team", id: team._id, isInternal: true },
@@ -80,14 +93,21 @@ test.describe("POST /api/admin/set-internal – Auth", () => {
     expect(res.status()).toBe(401);
   });
 
-  test("Super-Admin-Spieler-Token → 200, Feld wird gesetzt", async ({ request }) => {
+  test("Super-Admin-Spieler-Token → 200, Feld wird gesetzt", async ({
+    request,
+  }) => {
     const adminToken = await apiLogin(request, SUPER_ADMIN);
     const team = await findTeamByName(request, adminToken, "Test Baskets");
     expect(team.isInternal).toBe(false);
 
     try {
       const res = await request.post("/api/admin/set-internal", {
-        data: { token: adminToken, art: "team", id: team._id, isInternal: true },
+        data: {
+          token: adminToken,
+          art: "team",
+          id: team._id,
+          isInternal: true,
+        },
       });
       expect(res.status()).toBe(200);
       const body = await res.json();
@@ -100,9 +120,18 @@ test.describe("POST /api/admin/set-internal – Auth", () => {
     } finally {
       // Ursprungszustand wiederherstellen.
       await request.post("/api/admin/set-internal", {
-        data: { token: adminToken, art: "team", id: team._id, isInternal: false },
+        data: {
+          token: adminToken,
+          art: "team",
+          id: team._id,
+          isInternal: false,
+        },
       });
-      const restored = await findTeamByName(request, adminToken, "Test Baskets");
+      const restored = await findTeamByName(
+        request,
+        adminToken,
+        "Test Baskets",
+      );
       expect(restored.isInternal).toBe(false);
     }
   });
@@ -112,7 +141,12 @@ test.describe("POST /api/admin/set-internal – Eingabevalidierung", () => {
   test("ungültiger 'art'-Wert → 400, keine 500", async ({ request }) => {
     const adminToken = await apiLogin(request, SUPER_ADMIN);
     const res = await request.post("/api/admin/set-internal", {
-      data: { token: adminToken, art: "verein", id: "000000000000000000000000", isInternal: true },
+      data: {
+        token: adminToken,
+        art: "verein",
+        id: "000000000000000000000000",
+        isInternal: true,
+      },
     });
     expect(res.status()).toBe(400);
     expect((await res.json()).success).toBe(false);
@@ -126,10 +160,17 @@ test.describe("POST /api/admin/set-internal – Eingabevalidierung", () => {
     expect(res.status()).toBe(400);
   });
 
-  test("gültige, aber nicht existierende ObjectId → 404", async ({ request }) => {
+  test("gültige, aber nicht existierende ObjectId → 404", async ({
+    request,
+  }) => {
     const adminToken = await apiLogin(request, SUPER_ADMIN);
     const res = await request.post("/api/admin/set-internal", {
-      data: { token: adminToken, art: "team", id: "000000000000000000000000", isInternal: true },
+      data: {
+        token: adminToken,
+        art: "team",
+        id: "000000000000000000000000",
+        isInternal: true,
+      },
     });
     expect(res.status()).toBe(404);
   });
@@ -146,7 +187,12 @@ test.describe("POST /api/admin/set-internal – Eingabevalidierung", () => {
   }) => {
     const adminToken = await apiLogin(request, SUPER_ADMIN);
     const res = await request.post("/api/admin/set-internal", {
-      data: { token: adminToken, art: "team", id: "not-a-valid-object-id", isInternal: true },
+      data: {
+        token: adminToken,
+        art: "team",
+        id: "not-a-valid-object-id",
+        isInternal: true,
+      },
     });
     expect(res.status()).toBe(400);
     const body = await res.json();
@@ -184,7 +230,12 @@ test.describe("POST /api/admin/set-internal – Mass Assignment", () => {
       expect(after.isInternal).toBe(true); // nur DIESES Feld geändert
     } finally {
       await request.post("/api/admin/set-internal", {
-        data: { token: adminToken, art: "team", id: team._id, isInternal: false },
+        data: {
+          token: adminToken,
+          art: "team",
+          id: team._id,
+          isInternal: false,
+        },
       });
     }
   });
@@ -193,7 +244,11 @@ test.describe("POST /api/admin/set-internal – Mass Assignment", () => {
     request,
   }) => {
     const adminToken = await apiLogin(request, SUPER_ADMIN);
-    const player = await findPlayerByEmail(request, adminToken, REGULAR_PLAYER.email);
+    const player = await findPlayerByEmail(
+      request,
+      adminToken,
+      REGULAR_PLAYER.email,
+    );
     expect(player.isInternal).toBe(false);
 
     try {
@@ -212,13 +267,22 @@ test.describe("POST /api/admin/set-internal – Mass Assignment", () => {
       expect(body.isInternal).toBe(true);
       expect(body.name).toBe("Sven Adler");
 
-      const after = await findPlayerByEmail(request, adminToken, REGULAR_PLAYER.email);
+      const after = await findPlayerByEmail(
+        request,
+        adminToken,
+        REGULAR_PLAYER.email,
+      );
       expect(after.isInternal).toBe(true);
       expect(after.isSuperAdmin).toBe(false); // NICHT eskaliert
       expect(after.email).toBe(REGULAR_PLAYER.email); // unverändert
     } finally {
       await request.post("/api/admin/set-internal", {
-        data: { token: adminToken, art: "spieler", id: player._id, isInternal: false },
+        data: {
+          token: adminToken,
+          art: "spieler",
+          id: player._id,
+          isInternal: false,
+        },
       });
     }
   });

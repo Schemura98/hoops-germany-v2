@@ -295,7 +295,16 @@ test.describe("Hero-Ball – Laufzeit auf /", () => {
       // weggedimmter Ball im Bild sind beide ‚nicht gesehen'."
       // ⚠️ NUR MOBIL. Am Desktop fällt der Ball scroll-gesteuert und steht bei
       // scrollY 0 bewusst über dem Bild — dort wäre 0 % richtig, nicht falsch.
-      if (breite < MD_BREAKPOINT) {
+      // ⚠️ `ZIELBEREICH_AB` MUSS HIER MIT (Befund Kai, siebte Runde): Die
+      // Schranke hieß nur `breite < MD_BREAKPOINT` und galt damit auch bei 320 px,
+      // das laut Roadmap 20b (b) ausdrücklich AUSSERHALB des Zielbereichs liegt.
+      // Folge: Die Konstante steuerte nichts – Kai hat sie auf **9999** gesetzt,
+      // 18/18 grün. Das ist sein K4-Befund aus Runde vier zum ZWEITEN Mal:
+      // damals definiert und unbenutzt, dann wirksam, jetzt wieder inert.
+      // Und der Kommentar darüber behauptete „Wer 375 wieder einträgt, nimmt die
+      // häufigste Zielbreite aus der Prüfung heraus" – man konnte 375 eintragen,
+      // ohne dass sich etwas änderte.
+      if (breite >= ZIELBEREICH_AB && breite < MD_BREAKPOINT) {
         const wirksam = await page.evaluate((navbar) => {
           const el = document.querySelector(".hero-ball-sprite");
           if (!el) return null;

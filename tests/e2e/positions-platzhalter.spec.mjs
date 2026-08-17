@@ -86,19 +86,22 @@ test.describe("Positions-Platzhalter", () => {
     // Auch hier nach Kommentar-Abzug: Die Begründung in `lib/constants.js`
     // zitiert den alten Wortlaut absichtlich.
     const schuldige = dateienSammeln().filter((p) =>
-      /["'`]Position offen["'`]/.test(ohneKommentare(readFileSync(p, "utf8")))
+      /["'`]Position offen["'`]/.test(ohneKommentare(readFileSync(p, "utf8"))),
     );
     expect(
       schuldige.map((p) => p.replace(PROJECT_ROOT, "")),
       `„Position offen" behauptet eine ausgeschriebene Stelle. Für eine Person ` +
-        `ohne hinterlegte Position POSITION_FEHLT aus lib/constants.js nutzen.`
+        `ohne hinterlegte Position POSITION_FEHLT aus lib/constants.js nutzen.`,
     ).toEqual([]);
   });
 
   test("keine Fläche erfindet einen eigenen Platzhalter", async () => {
-    const quelle = readFileSync(join(PROJECT_ROOT, "lib", "constants.js"), "utf8");
+    const quelle = readFileSync(
+      join(PROJECT_ROOT, "lib", "constants.js"),
+      "utf8",
+    );
     expect(quelle, "POSITION_FEHLT fehlt in lib/constants.js").toContain(
-      "export const POSITION_FEHLT"
+      "export const POSITION_FEHLT",
     );
 
     // ⚠️ KEINE Ausnahmeliste mehr.
@@ -142,10 +145,10 @@ test.describe("Positions-Platzhalter", () => {
           throw new Error(
             `Unausgeglichene Klammern nach positionLabel( in ${pfad.replace(
               PROJECT_ROOT,
-              ""
+              "",
             )} – der Test kann die Stelle nicht beurteilen und schweigt hier ` +
               `bewusst NICHT. (Ein stiller Rückfall ist genau die Fehlerklasse, ` +
-              `die an einem Tag viermal zugeschlagen hat.)`
+              `die an einem Tag viermal zugeschlagen hat.)`,
           );
         }
         // Was direkt danach kommt: `|| <etwas>` oder `? <etwas> :`.
@@ -158,7 +161,7 @@ test.describe("Positions-Platzhalter", () => {
         const literal = rest.match(/^\s*(?:\|\||\?)\s*(["'`])(.*?)\1/);
         if (literal && literal[2].trim() !== "") {
           eigenerText.push(
-            `${pfad.replace(PROJECT_ROOT, "")}: positionLabel(…) ${literal[0].trim()}`
+            `${pfad.replace(PROJECT_ROOT, "")}: positionLabel(…) ${literal[0].trim()}`,
           );
         }
       }
@@ -166,7 +169,7 @@ test.describe("Positions-Platzhalter", () => {
     expect(
       eigenerText,
       `Diese Stellen setzen einen eigenen Platzhalter statt POSITION_FEHLT – ` +
-        `genau so sind die neun Fundstellen auseinandergelaufen:\n${eigenerText.join("\n")}`
+        `genau so sind die neun Fundstellen auseinandergelaufen:\n${eigenerText.join("\n")}`,
     ).toEqual([]);
   });
 
@@ -204,7 +207,10 @@ test.describe("Positions-Platzhalter", () => {
         if (imImport) {
           // Ende der Anweisung: die Zeile trägt die Quelle (`from "…"`) oder
           // es ist ein Seiteneffekt-Import (`import "./x.css"`).
-          if (/\bfrom\s+["'][^"']+["']/.test(z) || /^\s*import\s+["'][^"']+["']/.test(z)) {
+          if (
+            /\bfrom\s+["'][^"']+["']/.test(z) ||
+            /^\s*import\s+["'][^"']+["']/.test(z)
+          ) {
             imImport = false;
           }
           continue;
@@ -216,7 +222,7 @@ test.describe("Positions-Platzhalter", () => {
 
     const ohne = PFLICHTFLAECHEN.filter((rel) => {
       const inhalt = ohneImport(
-        ohneKommentare(readFileSync(join(PROJECT_ROOT, rel), "utf8"))
+        ohneKommentare(readFileSync(join(PROJECT_ROOT, rel), "utf8")),
       );
       return !inhalt.includes("POSITION_FEHLT");
     });
@@ -224,7 +230,7 @@ test.describe("Positions-Platzhalter", () => {
       ohne,
       `Diese Flächen zeigen eine Person ohne Position, rendern dafür aber ` +
         `keinen Platzhalter mehr. Ersatzloses Löschen ist kein Fix: Ein Leerfeld ` +
-        `ist für einen Fremden nicht von einem Ladefehler zu unterscheiden.`
+        `ist für einen Fremden nicht von einem Ladefehler zu unterscheiden.`,
     ).toEqual([]);
 
     // ⚠️ `app/spieler/page.js` steht bewusst NICHT in der Pflichtliste.
@@ -235,12 +241,12 @@ test.describe("Positions-Platzhalter", () => {
     // Der Test hält die Entscheidung fest, damit sie nicht als Versehen
     // durchgeht – Tobias hat sie zu Recht als offene Flanke gemeldet.
     const spieler = ohneKommentare(
-      readFileSync(join(PROJECT_ROOT, "app", "spieler", "page.js"), "utf8")
+      readFileSync(join(PROJECT_ROOT, "app", "spieler", "page.js"), "utf8"),
     );
     expect(
       spieler.includes("POSITION_FEHLT"),
       "Wenn /spieler den Platzhalter jetzt doch rendert, ist die Begründung im " +
-        "Kommentar dort und in lib/constants.js überholt – beide mitziehen."
+        "Kommentar dort und in lib/constants.js überholt – beide mitziehen.",
     ).toBe(false);
   });
 
@@ -288,7 +294,7 @@ test.describe("Positions-Platzhalter", () => {
     }
     expect(
       roh,
-      `Diese Stellen geben die Position roh aus, ohne positionLabel():\n${roh.join("\n")}`
+      `Diese Stellen geben die Position roh aus, ohne positionLabel():\n${roh.join("\n")}`,
     ).toEqual([]);
   });
 
@@ -298,13 +304,13 @@ test.describe("Positions-Platzhalter", () => {
     // nirgends gesetzt wird – `request-claim` springt direkt auf `confirmed`.
     const seite = readFileSync(
       join(PROJECT_ROOT, "app", "team", "team-detail", "[slug]", "page.js"),
-      "utf8"
+      "utf8",
     );
     expect(seite).toContain("Noch nicht bestätigt");
     expect(
       /slot\.status === "pending" \? "Ausstehend" : "eingeladen"/.test(seite),
       "das alte Statuspaar ist zurück – „eingeladen“ behauptet eine Einladung, " +
-        "die kein Feld belegt"
+        "die kein Feld belegt",
     ).toBe(false);
   });
 });

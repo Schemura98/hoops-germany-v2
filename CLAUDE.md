@@ -36,10 +36,21 @@
 > es wurde committet und die Zeile gepflegt, ohne den Abstand zum Deploy neu zu zählen. Genau
 > die Fehlerform, die weiter unten schon zweimal für den Rollback-Zeiger protokolliert ist.
 > **Nicht schätzen, zählen:** `git rev-list --count 164c784..HEAD`.
-> ✅ **Stand nach Runde SIEBEN: BEIDE GATES AUF FREIGABEFÄHIG** – erstmals in dieser Serie.
-> Build durch, Playwright **173/173**, Production-Runtime (`npm start`) geprüft: 16 Routen je
-> 200, Konsole leer. Tobias' letzte Auflage ist damit eingelöst; Kais Bedingung war sein
-> Urteil. **Der Deploy ist eine Entscheidung, kein offener Punkt mehr.**
+> ✅ **Stand nach Runde SIEBEN: beide Gates freigabefähig mit Auflagen** – die
+> Auflagen sind umgesetzt. Build durch, Playwright **221/221** (gegen `--list`
+> abgeglichen). Live ist `f46a783`; auf `redesign` liegt der Stand danach.
+> ⚠️ **Der Hauptbefund der Runde war eine Zusicherung, die es nicht gab:** Der
+> Kommentar, mit dem ich das Streichen der Bildzahl-Schwelle begründet habe,
+> verwies auf ein „≤ 80 ms"-Stillstands-Maß im Laufzeit-Test – **das existierte
+> nicht.** Kai und Tobias haben es **unabhängig** gefunden. Kais Einordnung: sein
+> K4-Muster eine Ebene höher, *nicht eine Konstante ohne Verwendung, sondern eine
+> **Übergabe an nichts***. Es ist jetzt gebaut, mit Tobias' Bewegungsvorbehalt.
+> ⚠️ **Und die Regressionslücke war groß:** Kais Matrix zeigte **13 von 14**
+> Umkehrungen dieses Mechanismus stumm, darunter die Verankerung selbst.
+> Ursachen: 360/368 px kamen in **keiner** Viewport-Liste vor, „wirksam sichtbar"
+> bleibt auch bei kaputter Lage 80 %, und **niemand prüfte den Kanal**, den
+> Vivien zur Vorgabe gemacht hatte. Geschlossen durch
+> `tests/e2e/hero-konturkanal.spec.mjs`.
 > ⚠️ **Die zwei Zahlen in diesem Absatz waren beim letzten Mal beide falsch** (Befund Kai:
 > „24" statt 27, „146/146" statt 150/150) – und sie stehen unmittelbar unter der
 > Anweisung „Nicht schätzen, zählen". **Die Regel hat sich selbst eingeholt.** Beide Zahlen

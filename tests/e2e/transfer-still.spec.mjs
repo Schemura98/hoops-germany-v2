@@ -95,16 +95,22 @@ function aufruferSammeln() {
 test.describe("Transfer-Post nur bei echten Wechseln", () => {
   test("der Verwaltungspfad schickt still:true mit", async () => {
     const aufrufer = aufruferSammeln();
-    expect(aufrufer.length, "keine Aufrufer gefunden – Suchmuster prüfen").toBeGreaterThan(0);
+    expect(
+      aufrufer.length,
+      "keine Aufrufer gefunden – Suchmuster prüfen",
+    ).toBeGreaterThan(0);
 
     for (const pfadTeil of VERWALTUNG) {
       const treffer = aufrufer.filter((a) => a.pfad.includes(pfadTeil));
-      expect(treffer.length, `kein recordTransfer-Aufruf in ${pfadTeil}`).toBeGreaterThan(0);
+      expect(
+        treffer.length,
+        `kein recordTransfer-Aufruf in ${pfadTeil}`,
+      ).toBeGreaterThan(0);
       const laut = treffer.filter((t) => !t.still).map((t) => t.pfad);
       expect(
         laut,
         `Verwaltungspfad ohne still:true – eine Admin-Korrektur würde einen ` +
-          `öffentlichen Post und Follower-Benachrichtigungen auslösen: ${laut.join(", ")}`
+          `öffentlichen Post und Follower-Benachrichtigungen auslösen: ${laut.join(", ")}`,
       ).toEqual([]);
     }
   });
@@ -114,9 +120,12 @@ test.describe("Transfer-Post nur bei echten Wechseln", () => {
     // Vorsicht überall ergänzen, verschwände der Transfer aus dem Feed – ohne
     // dass irgendein Test rot würde, denn „kein Post" wirft keinen Fehler.
     const aufrufer = aufruferSammeln().filter(
-      (a) => !VERWALTUNG.some((v) => a.pfad.includes(v))
+      (a) => !VERWALTUNG.some((v) => a.pfad.includes(v)),
     );
-    expect(aufrufer.length, "keine echten Wechselwege gefunden").toBeGreaterThan(0);
+    expect(
+      aufrufer.length,
+      "keine echten Wechselwege gefunden",
+    ).toBeGreaterThan(0);
 
     const stumm = aufrufer.filter((a) => a.still).map((a) => a.pfad);
     // ⚠️ Der Meldungstext ist hier Teil des Tests (Befund A2 von Kai): Kommt
@@ -132,7 +141,7 @@ test.describe("Transfer-Post nur bei echten Wechseln", () => {
         `→ Ist das ein ECHTER Wechsel? Dann muss still:true weg, sonst fehlt der ` +
         `Transfer im Feed.\n` +
         `→ Ist es ein VERWALTUNGSPFAD (Korrekturwerkzeug, es wechselt niemand)? ` +
-        `Dann gehört er oben in die Liste VERWALTUNG.`
+        `Dann gehört er oben in die Liste VERWALTUNG.`,
     ).toEqual([]);
   });
 
@@ -147,7 +156,10 @@ test.describe("Transfer-Post nur bei echten Wechseln", () => {
     // Sie trägt die ganze Entscheidung: Erst `TransferEvent.create`, dann der
     // Ausstieg, dann alles Öffentliche. Steht der Ausstieg zu früh, fehlt die
     // Karriere-Station – genau die Lücke, die dieser Aufruf schließen sollte.
-    const quelle = readFileSync(join(PROJECT_ROOT, "lib", "recordTransfer.js"), "utf8");
+    const quelle = readFileSync(
+      join(PROJECT_ROOT, "lib", "recordTransfer.js"),
+      "utf8",
+    );
 
     const beiEvent = quelle.indexOf("TransferEvent.create");
     const beiAusstieg = quelle.indexOf("if (still) return");
@@ -159,11 +171,18 @@ test.describe("Transfer-Post nur bei echten Wechseln", () => {
 
     expect(beiEvent, "TransferEvent.create nicht gefunden").toBeGreaterThan(-1);
     expect(beiAusstieg, "stiller Ausstieg nicht gefunden").toBeGreaterThan(-1);
-    expect(beiAusstieg, "der stille Ausstieg liegt VOR TransferEvent.create – " +
-      "dann entsteht keine Karriere-Station").toBeGreaterThan(beiEvent);
-    expect(beiPost, "der Feed-Post liegt vor dem stillen Ausstieg").toBeGreaterThan(beiAusstieg);
-    expect(beiNotify, "die Benachrichtigung liegt vor dem stillen Ausstieg").toBeGreaterThan(
-      beiAusstieg
-    );
+    expect(
+      beiAusstieg,
+      "der stille Ausstieg liegt VOR TransferEvent.create – " +
+        "dann entsteht keine Karriere-Station",
+    ).toBeGreaterThan(beiEvent);
+    expect(
+      beiPost,
+      "der Feed-Post liegt vor dem stillen Ausstieg",
+    ).toBeGreaterThan(beiAusstieg);
+    expect(
+      beiNotify,
+      "die Benachrichtigung liegt vor dem stillen Ausstieg",
+    ).toBeGreaterThan(beiAusstieg);
   });
 });

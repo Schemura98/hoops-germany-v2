@@ -75,7 +75,7 @@ test.describe("Beleg-Aussage", () => {
   test("das Prädikat steht an EINER Stelle", async () => {
     const quelle = lies("lib", "matchScore.js");
     expect(quelle, "beidseitigBelegt fehlt in lib/matchScore.js").toContain(
-      "export function beidseitigBelegt"
+      "export function beidseitigBelegt",
     );
     // Es muss wirklich auf BEIDE submittedBy prüfen, nicht nur auf eines.
     //
@@ -99,17 +99,19 @@ test.describe("Beleg-Aussage", () => {
       }
       throw new Error(
         "Unausgeglichene Klammern in beidseitigBelegt – der Test kann die " +
-          "Funktion nicht abgrenzen und schweigt hier bewusst NICHT."
+          "Funktion nicht abgrenzen und schweigt hier bewusst NICHT.",
       );
     })();
-    expect(block, "beidseitigBelegt prüft teamAResult.submittedBy nicht").toContain(
-      "teamAResult?.submittedBy"
-    );
-    expect(block, "beidseitigBelegt prüft teamBResult.submittedBy nicht").toContain(
-      "teamBResult?.submittedBy"
-    );
+    expect(
+      block,
+      "beidseitigBelegt prüft teamAResult.submittedBy nicht",
+    ).toContain("teamAResult?.submittedBy");
+    expect(
+      block,
+      "beidseitigBelegt prüft teamBResult.submittedBy nicht",
+    ).toContain("teamBResult?.submittedBy");
     expect(block, "beidseitigBelegt prüft resultStatus nicht").toContain(
-      'resultStatus === "confirmed"'
+      'resultStatus === "confirmed"',
     );
   });
 
@@ -122,7 +124,7 @@ test.describe("Beleg-Aussage", () => {
     expect(
       ohne,
       `Diese Flächen treffen eine Beleg-Aussage, ohne das gemeinsame Prädikat zu ` +
-        `benutzen. Genau so ist die Anzeigetafel entstanden:\n${ohne.join("\n")}`
+        `benutzen. Genau so ist die Anzeigetafel entstanden:\n${ohne.join("\n")}`,
     ).toEqual([]);
   });
 
@@ -156,7 +158,9 @@ test.describe("Beleg-Aussage", () => {
         else if (/\.(js|jsx)$/.test(eintrag)) {
           const inhalt = ohneKommentare(readFileSync(pfad, "utf8"));
           const behauptet =
-            /beiden Teams bestätigt|beidseitig bestätigt|doppelt bestätigt/.test(inhalt);
+            /beiden Teams bestätigt|beidseitig bestätigt|doppelt bestätigt/.test(
+              inhalt,
+            );
           if (behauptet && !/beidseitigBelegt/.test(inhalt)) {
             treffer.push(pfad.replace(PROJECT_ROOT, ""));
           }
@@ -167,7 +171,7 @@ test.describe("Beleg-Aussage", () => {
     expect(
       treffer,
       `Diese Dateien behaupten eine beidseitige Bestätigung, importieren aber das ` +
-        `Prädikat nicht:\n${treffer.join("\n")}`
+        `Prädikat nicht:\n${treffer.join("\n")}`,
     ).toEqual([]);
   });
 
@@ -188,8 +192,12 @@ test.describe("Beleg-Aussage", () => {
         else if (/\.(js|jsx)$/.test(eintrag)) {
           const inhalt = ohneKommentare(readFileSync(pfad, "utf8"));
           if (
-            /state\s*===\s*"confirmed"\s*\|\|\s*\S*\.?state\s*===\s*"final"/.test(inhalt) ||
-            /state\s*===\s*"final"\s*\|\|\s*\S*\.?state\s*===\s*"confirmed"/.test(inhalt)
+            /state\s*===\s*"confirmed"\s*\|\|\s*\S*\.?state\s*===\s*"final"/.test(
+              inhalt,
+            ) ||
+            /state\s*===\s*"final"\s*\|\|\s*\S*\.?state\s*===\s*"confirmed"/.test(
+              inhalt,
+            )
           ) {
             treffer.push(pfad.replace(PROJECT_ROOT, ""));
           }
@@ -201,7 +209,7 @@ test.describe("Beleg-Aussage", () => {
       treffer,
       `„confirmed || final" behandelt ein EINSEITIG gemeldetes Ergebnis wie ein ` +
         `bestätigtes. Für eine Beleg-Aussage (Wort ODER Farbe) gehört ` +
-        `beidseitigBelegt hierher:\n${treffer.join("\n")}`
+        `beidseitigBelegt hierher:\n${treffer.join("\n")}`,
     ).toEqual([]);
   });
 
@@ -220,7 +228,9 @@ test.describe("Beleg-Aussage", () => {
         // fest" für den Admin-Fall), keine Ableitung der Bestätigung.
         if (/beidseitigBelegt/.test(a)) continue;
         if (/resultStatus\s*===\s*"confirmed"/.test(a)) {
-          schuldige.push(`${pfad}: ${a.trim().replace(/\s+/g, " ").slice(0, 120)}`);
+          schuldige.push(
+            `${pfad}: ${a.trim().replace(/\s+/g, " ").slice(0, 120)}`,
+          );
         }
       }
     }
@@ -259,10 +269,12 @@ test.describe("Beleg-Aussage", () => {
       teamAResult: { submittedBy: "a" },
       teamBResult: { submittedBy: "b" },
     };
-    expect(beidseitigBelegt(echt), "zwei echte Meldungen müssen zählen").toBe(true);
+    expect(beidseitigBelegt(echt), "zwei echte Meldungen müssen zählen").toBe(
+      true,
+    );
     expect(
       beidseitigBelegt({ ...echt, teamBResult: {} }),
-      "eine fehlende Meldung darf nicht als bestätigt gelten"
+      "eine fehlende Meldung darf nicht als bestätigt gelten",
     ).toBe(false);
     expect(
       beidseitigBelegt({
@@ -271,7 +283,7 @@ test.describe("Beleg-Aussage", () => {
         teamAResult: { ownPoints: 80 },
         teamBResult: { ownPoints: 94 },
       }),
-      "ein vom Admin eingetragenes Ergebnis darf nicht als bestätigt gelten"
+      "ein vom Admin eingetragenes Ergebnis darf nicht als bestätigt gelten",
     ).toBe(false);
     expect(beidseitigBelegt({ resultStatus: "mismatch" })).toBe(false);
     expect(beidseitigBelegt(null)).toBe(false);
