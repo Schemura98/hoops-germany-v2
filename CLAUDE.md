@@ -11,8 +11,7 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> ⚠️ **NICHT DEPLOYT: die Commits nach `cc128ed`** (`326b81f` und die neunte
-> Gate-Runde). Befund Kai, neunte Runde: Diese Warnzeile war ganz verschwunden,
+> ⚠️ **NICHT DEPLOYT: 3 Commits nach `cc128ed`** (`326b81f`, `cc7f2e0` und dieser). Befund Kai, neunte Runde: Diese Warnzeile war ganz verschwunden,
 > und `326b81f` kam in der Datei überhaupt nicht vor – **genau die Zeile, die
 > laut eigener Chronik schon dreimal gelogen hat.** Zählen, nicht schätzen:
 > `git rev-list --count cc128ed..HEAD`, und der Server-Stand kommt aus
@@ -1038,27 +1037,6 @@
     eingeloggten Zweig anders sitzen?
     ⚠️ **Und die Einflug-Abhilfe ist eine sichtbare Bewegungsänderung**, also
     gate-pflichtig bei Tobias, mobil zuerst (Hinweis Kai).
-
-20h. ⚠️ **OFFEN, Entscheidung: H1 war nur zur HÄLFTE behoben — und die unbehobene
-    Hälfte ist die größere** (Befund Kai K1, achte Runde). `eingeflogenRef` wird
-    ausschließlich im `mobil`-Zweig gesetzt, die Federung ist über 768 px also
-    **per Konstruktion unerreichbar**. Gemessen mit sichtbarem Ball:
-    | Breite | 700 | **768** | **820** | **900** | **1000** | 1100+ |
-    |---|---|---|---|---|---|---|
-    | Sprung | 5,6 gefedert | **231 px** | **245 px** | **255 px** | **151 px** | 0 |
-    Die 255 px bei 900 sind **6,4×** die 39,8 px, die diese Arbeit ausgelöst haben.
-    **768×1024 ist iPad-Hochformat** und steht in Viviens Prüfmatrix.
-    ⚠️ **Keine Regression:** Dort laufen null Übergangs-Frames, das Verhalten ist
-    mit dem Live-Stand identisch. Kai stuft es als kosmetisch und nicht
-    blockierend ein — **aber wer es behebt, fasst den Desktop-Hero-Pfad an, und
-    dann ist ein Browser-Gate fällig.**
-    Zuständig: Tobias (Erweiterung seines H1), Vivien (Bewegungsentscheidung).
-    ⚠️ **Und ein zweiter Punkt aus derselben Runde, der später scharf wird:** Das
-    Abräumen der Übergangszeit ist heute folgenlos, **weil** der Ball mobil
-    `dy/dScroll = 0` hat. Kommt die Desktop-Ausbaustufe (Roadmap 11), bei der der
-    Ball dem Scroll folgt, wird es in derselben Stunde tragend. Der Kommentar im
-    Code („Das Abräumen ist der Punkt") beschreibt also ein Risiko, das derzeit
-    nicht existiert — und genau dann existiert, wenn jemand Roadmap 11 baut.
 
 21. ✅ **ERLEDIGT (17.08.2026): Cache-Vorgabe für `/images/` und `/fonts/`.** Gesetzt in
     `next.config.mjs` über `headers()` – **nicht** in Nginx, damit die Vorgabe versioniert ist und
