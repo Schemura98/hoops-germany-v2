@@ -11,7 +11,7 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> ✅ **DEPLOYT am 17.08.2026: `84cb7ba`** – am Server verifiziert (`git log` dort zeigt `84cb7ba`,
+> ✅ **DEPLOYT am 17.08.2026: `f46a783`** (davor am selben Tag `84cb7ba`) – am Server verifiziert (`git log` dort zeigt `84cb7ba`,
 > Abstand zu `origin` 0, `pm2 restart` gelaufen, Prozess `online`). **31 Commits** gingen auf
 > einmal live: macOS-Umzug, Ball-Choreografie der Startseite, gerenderter Hero-Ball und **sieben
 > Gate-Runden**.
@@ -119,7 +119,7 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `84cb7ba` (aktuell live) → `75f2c3a` → `bc7ccad` → `6e2fbe1` → `1bcf854` →
+> **Rollback-Kette:** `f46a783` (aktuell live) → `84cb7ba` → `75f2c3a` → `bc7ccad` → `6e2fbe1` → `1bcf854` →
 > `4d03ba2` → `76aa289` → `1d2e3ae` → `1dc617f` → `d07c475` → `2be664e` → `cd51c92` →
 > `164c784` (der Stand vor dieser Serie, bis 17.08. live) → `66f9000` → `4f64af7` → `4f3811d` (Newsfeed-Umbau,
 > von beiden Gates blockiert – NICHT dorthin zurück) → `f23757b` → `074bcf1` (letzter Stand vor
