@@ -11,9 +11,27 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> ⚠️ **Auf `redesign` liegen 31 Commits, die NICHT deployt sind** (`950f23b` → `HEAD`,
-> 15./16.08.2026): der macOS-Umzug, die Ball-Choreografie der Startseite, der gerenderte
-> Hero-Ball und **fünf** Gate-Runden Nacharbeit. Live läuft unverändert `164c784`.
+> ✅ **DEPLOYT am 17.08.2026: `84cb7ba`** – am Server verifiziert (`git log` dort zeigt `84cb7ba`,
+> Abstand zu `origin` 0, `pm2 restart` gelaufen, Prozess `online`). **31 Commits** gingen auf
+> einmal live: macOS-Umzug, Ball-Choreografie der Startseite, gerenderter Hero-Ball und **sieben
+> Gate-Runden**.
+> ✅ **Live nachgemessen über die DOMAIN**, nicht am Server: 16 Routen je 200 · Hero-Ball fliegt
+> mobil 159 px über 24 Bilder · Ball landet mit **dx = 0** im Korb-Emblem · **0 Konsolenfehler** ·
+> Sprite-Sequenz ausgeliefert (AVIF 107 KB / WebP 164 KB).
+> ⚠️ Die 0 px Bewegung auf 1440 sind **kein Fehler**: Der Einflug ist bewusst mobil-only, die
+> Desktop-Ausbaustufe des Hero ist zurückgestellt (Roadmap 11).
+> ⚠️ **Zwei Dinge, die dieser Deploy über das Vorgehen gelehrt hat:**
+> (1) Der Server trug eine **lokale Änderung an `package-lock.json`** (nur entfernte
+> `libc`-Metadatenfelder, Artefakt einer älteren npm-Version – **keine Paketversionen betroffen**).
+> `git pull` wäre kollidiert; verworfen mit `git checkout -- package-lock.json`, nachdem der Diff
+> angesehen war. **Vor dem Verwerfen hinsehen, nicht danach.**
+> (2) **`npm install` war NICHT nötig** – in den 31 Commits änderte sich nur eine *devDependency*
+> (`@playwright/test`), der `dependencies`-Block ist unverändert. Ein `npm install` hätte Playwright
+> samt Browsern auf den VPS gezogen. **Also prüfen:**
+> `git diff <live>..HEAD -- package.json` – und nur bei echten `dependencies` installieren.
+> ⚠️ **Roadmap 21 ist mit diesem Deploy scharf geworden:** Die Ball-Sequenz (107 KB AVIF) liegt
+> unter `/images/` und hat **keine Cache-Vorgabe** – auf der Einstiegsseite jedes Erstbesuchers,
+> bei jedem Aufruf neu.
 > ⚠️ **Diese Zeile stand tagelang auf „fünf Commits" und war damit um den Faktor fünf falsch** –
 > es wurde committet und die Zeile gepflegt, ohne den Abstand zum Deploy neu zu zählen. Genau
 > die Fehlerform, die weiter unten schon zweimal für den Rollback-Zeiger protokolliert ist.
@@ -101,7 +119,9 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `164c784` (aktuell live) → `66f9000` → `4f64af7` → `4f3811d` (Newsfeed-Umbau,
+> **Rollback-Kette:** `84cb7ba` (aktuell live) → `75f2c3a` → `bc7ccad` → `6e2fbe1` → `1bcf854` →
+> `4d03ba2` → `76aa289` → `1d2e3ae` → `1dc617f` → `d07c475` → `2be664e` → `cd51c92` →
+> `164c784` (der Stand vor dieser Serie, bis 17.08. live) → `66f9000` → `4f64af7` → `4f3811d` (Newsfeed-Umbau,
 > von beiden Gates blockiert – NICHT dorthin zurück) → `f23757b` → `074bcf1` (letzter Stand vor
 > dem Newsfeed-Umbau) → `48e8a16` → `c65419d` → `da1abca` (der Stand vom
 > 15.08. vor dieser Runde) → `cabb62d` (fünfte Runde) → `551ab46` (vierte Runde 14.08.) → `2503433` (dritte) → `9f9fb77` (zweite) →

@@ -1,30 +1,33 @@
 import { chromium } from "@playwright/test";
-const browser = await chromium.launch();
-const ctx = await browser.newContext({ viewport: { width: 375, height: 812 }, deviceScaleFactor: 2 });
-const page = await ctx.newPage();
-const fehler = [];
-page.on("console", (m) => m.type() === "error" && fehler.push(m.text()));
-page.on("pageerror", (e) => fehler.push("pageerror: " + e.message));
-const bilder = [];
-page.on("request", (r) => /\.(jpg|jpeg|avif|webp|png)$/i.test(new URL(r.url()).pathname) && bilder.push(new URL(r.url()).pathname.split("/").pop()));
-await page.goto("https://hoopsgermany.de/", { waitUntil: "networkidle" });
-await page.waitForTimeout(800);
-const probe = `(() => {
-  const ball = document.querySelector('svg[viewBox="0 0 28 28"]');
-  const emblem = document.querySelector('svg[viewBox="0 0 20 14"]');
-  const cta = [...document.querySelectorAll('a[href="/signup"]')].find(a => a.getBoundingClientRect().height > 40);
-  const r = el => { const b = el.getBoundingClientRect(); return [Math.round(b.left), Math.round(b.top)]; };
-  return { ball: ball ? r(ball) : null, ballOp: ball?.style.opacity, emblemOp: emblem?.style.opacity, cta: cta ? r(cta) : null };
-})()`;
-for (const y of [0, 180, 300, 380]) {
-  await page.evaluate((v) => window.scrollTo(0, v), y);
-  await page.waitForTimeout(250);
-  const d = await page.evaluate(probe);
-  console.log(`scroll ${String(y).padStart(3)} | ball ${JSON.stringify(d.ball)} op=${d.ballOp} | emblem op=${d.emblemOp} | cta ${JSON.stringify(d.cta)}`);
+const b = await chromium.launch();
+console.log("Viewport  | Ball fliegt | Bilder | Ball dx zum Korb | Konsolenfehler");
+for (const [w,h] of [[375,812],[1440,900]]) {
+  const p = await b.newPage({ viewport:{width:w,height:h} });
+  const fehler=[];
+  p.on("console", m => { if(m.type()==="error") fehler.push(m.text().slice(0,70)); });
+  p.on("pageerror", e => fehler.push("pageerror: "+e.message.slice(0,70)));
+  await p.addInitScript(`document.addEventListener("DOMContentLoaded",()=>{window.__s=[];
+    new MutationObserver(()=>{const e=document.querySelector(".hero-ball-sprite");if(!e)return;
+      const m=/translate3d\\([^,]+,\\s*([-\\d.]+)px/.exec(e.style.transform);
+      if(m) window.__s.push({y:Number(m[1]),b:e.style.backgroundPositionX});
+    }).observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:["style"]});});`);
+  await p.goto("https://hoopsgermany.de/", { waitUntil:"domcontentloaded" });
+  await p.waitForTimeout(3200);
+  const s = await p.evaluate("window.__s || []");
+  const weg = s.length ? Math.max(...s.map(x=>x.y))-Math.min(...s.map(x=>x.y)) : 0;
+  const bilder = new Set(s.map(x=>x.b).filter(Boolean)).size;
+  await p.evaluate("window.scrollTo(0, document.body.scrollHeight*0.92)");
+  await p.waitForTimeout(2600);
+  const dx = await p.evaluate(() => {
+    const netz=[...document.querySelectorAll('svg[viewBox="0 0 20 14"]')]
+      .filter(s=>s.getBoundingClientRect().width>0).find(s=>s.querySelector("g"));
+    const ball=[...document.querySelectorAll('svg[width="20"]')]
+      .map(e=>e.getBoundingClientRect()).find(r=>r.width>0);
+    if(!netz||!ball) return null;
+    const n=netz.getBoundingClientRect();
+    return +(ball.left+ball.width/2-(n.left+n.width/2)).toFixed(1);
+  });
+  console.log(`${String(w+"x"+h).padStart(9)} | ${String(weg.toFixed(0)+"px").padStart(11)} | ${String(bilder).padStart(6)} | ${String(dx).padStart(16)} | ${fehler.length}${fehler.length?" -> "+fehler[0]:""}`);
+  await p.close();
 }
-await page.screenshot({ path: process.argv[2] + "/live-hero-mobil.png" });
-await page.goto("https://hoopsgermany.de/signup", { waitUntil: "networkidle" });
-await page.waitForTimeout(500);
-console.log("Bildanfragen mobil auf /signup:", bilder.filter((b) => /signup|login/i.test(b)));
-console.log("Konsolenfehler:", fehler.length ? fehler : "keine");
-await browser.close();
+await b.close();
