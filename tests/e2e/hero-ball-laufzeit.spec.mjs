@@ -56,8 +56,23 @@ const VIEWPORTS = [
 // Der Zielbereich beginnt bei 375 (Entscheidung Vivien). Bei 320 gilt nur
 // „überhaupt sichtbar"; die 150px-Schwelle war dort eine geratene runde Zahl
 // und wäre den Abstand zur Eyebrow nicht wert.
-const ZIELBEREICH_AB = 375;
-const FENSTER_MIN = 150;
+// ⚠️ 360, NICHT 375 (Korrektur Vivien, 17.08.2026): „Ich habe den Zielbereich
+// bei 375 beginnen lassen, weil das die kleinste iPhone-Breite ist. Das war eine
+// Apple-Brille." 360 px ist die verbreitetste Android-Breite in Deutschland —
+// und genau dort stand der auffälligste Fehler (der Ball parkte im Textblock).
+// Wer 375 wieder einträgt, nimmt die häufigste Zielbreite aus der Prüfung heraus.
+const ZIELBEREICH_AB = 360;
+// ⚠️ EIGENE Konstante für den Node-Geltungsbereich. Die `NAVBAR` im Prüfskript
+// liegt INNERHALB von `page.evaluate` – ein Verweis darauf von hier aus wirft im
+// Node-Kontext, und der Kommentar dort warnt ausdrücklich davor. Ich war beim
+// Bauen dieser Prüfung genau dabei, ihn zu machen.
+const NAVBAR_PX = 64;
+// Spiegelt `MD_BREAKPOINT` in components/landing/HeroScrollStage.js. Unterhalb
+// steht der Ball verankert still, ab hier fällt er scroll-gesteuert.
+const MD_BREAKPOINT = 768;
+// `FENSTER_MIN` ist am 17.08.2026 entfallen – die Begründung steht unten an der
+// Prüfung. Absichtlich KEINE Konstante mit neuem Wert: Eine Zahl, die dreimal
+// nachgibt, hat noch nie gemessen, was sie messen sollte.
 
 // Muss mit TEXT_DIM_FLOOR in components/landing/HeroScrollStage.js
 // übereinstimmen. Kleine Toleranz, weil die Deckkraft als String mit drei
@@ -205,23 +220,30 @@ test.describe("Hero-Ball – Laufzeit auf /", () => {
           `nennenswert im Bild (beste Sichtbarkeit ${Math.round(beste)} px²).`,
       ).toBeGreaterThan(ballFlaeche * 0.25);
 
-      // ⚠️ DIE REGEL, DIE BISHER NUR IN DER DOKU STAND (Befund Kai K4).
-      // `ZIELBEREICH_AB` und `FENSTER_MIN` waren definiert und NIRGENDS
-      // verwendet – meine Ergänzung war damals am Suchmuster gescheitert, ich
-      // habe die Fehlermeldung gesehen und nicht nachgezogen. In `CLAUDE.md`
-      // stand die Unterscheidung trotzdem als geltende Regel. Jetzt gilt sie.
-      if (breite >= ZIELBEREICH_AB) {
-        const sichtbar = proben.filter((p) => p.sichtbareFlaeche > 0);
-        const fenster =
-          sichtbar.length > 1
-            ? sichtbar[sichtbar.length - 1].y - sichtbar[0].y
-            : 0;
-        expect(
-          fenster,
-          `Auf ${breite}x${hoehe} ist der Ball nur über ${fenster}px Scrollweg zu ` +
-            `sehen; gefordert sind ${FENSTER_MIN}px. Ein Aufblitzen ist kein Auftritt.`,
-        ).toBeGreaterThanOrEqual(FENSTER_MIN);
-      }
+      // ⚠️ DAS SCHEIN-FENSTER IST HIER ENTFALLEN (Entscheidung Vivien,
+      // 17.08.2026). Hier stand „der Ball muss über mindestens 150 px Scrollweg
+      // zu sehen sein — ein Aufblitzen ist kein Auftritt". Nach der Verankerung
+      // der mobilen Ruhelage am Eyebrow fiel der Wert bei 375 px auf 144 px.
+      // ⚠️ ER WURDE NICHT GESENKT, sondern gestrichen — die 150 hatte Vivien
+      // selbst als „gegriffene runde Zahl" bezeichnet und hätte hier zum DRITTEN
+      // Mal nachgegeben. Ihre Begründung:
+      //   · Das Fenster war ein Ersatzmaß für „erscheint der Ball überhaupt" —
+      //     richtig, solange die Ruhelage ein SUCHERGEBNIS war. Seit sie relativ
+      //     zu einem Element liegt, das auf jeder Breite im ersten Bild steht,
+      //     ist die Sichtbarkeit per Konstruktion zugesichert; sie über den
+      //     Scrollweg nachzuprüfen heißt, hinter einer Garantie zu messen.
+      //   · Mobil ist der Auftritt des Balls nicht der Scrollweg, sondern die
+      //     Ruhe davor. Der Scrollweg ist sein ABGANG, und ein Abgang braucht
+      //     keine Mindestdauer.
+      //   · Scroll-Pixel sind kein Wahrnehmungsmaß: 144 px sind bei langsamem
+      //     Lesescrollen Sekunden, bei einem Wisch 50 ms.
+      // Ersatz ist Viviens Maß (1) — wirksame Sichtbarkeit der Ruhelage ≥ 55 %.
+      // ⚠️ Es steht im NÄCHSTEN Test, nicht hier: Diese Abtastung nimmt ihre
+      // erste Probe sofort beim Laden, also bevor der mobile Einflug fertig ist
+      // (der Ball steht dort noch auf Deckkraft 0), und am Desktop liegt er bei
+      // scrollY 0 absichtlich über dem Bild. Hier gemessen ergab das 0 % auf
+      // JEDEM Viewport — ein Maß am falschen Ort, nicht ein Produktfehler.
+      // ⚠️ WER DIE 150 WIEDER EINTRÄGT, MUSS ZUERST DIESEN ABSATZ WIDERLEGEN.
     });
 
     test(`${breite}x${hoehe}: die Ruhelage ändert sich beim ersten Scrollen nicht`, async ({
@@ -265,6 +287,39 @@ test.describe("Hero-Ball – Laufzeit auf /", () => {
 
       const geladen = await lage();
       expect(geladen, ".hero-ball-sprite nicht gefunden").not.toBeNull();
+
+      // ══ VIVIENS MASS (1): DIE RUHELAGE IST WIRKSAM SICHTBAR ════════════════
+      // Ersatz für das gestrichene Scroll-Fenster (s. voriger Test). Kennzahl
+      // aus Roadmap 20b (a): Geometrie im Sichtfeld ABZÜGLICH NAVBAR, mal
+      // Deckkraft. Vivien: „Ein voll deckender Ball hinter der Navbar und ein
+      // weggedimmter Ball im Bild sind beide ‚nicht gesehen'."
+      // ⚠️ NUR MOBIL. Am Desktop fällt der Ball scroll-gesteuert und steht bei
+      // scrollY 0 bewusst über dem Bild — dort wäre 0 % richtig, nicht falsch.
+      if (breite < MD_BREAKPOINT) {
+        const wirksam = await page.evaluate((navbar) => {
+          const el = document.querySelector(".hero-ball-sprite");
+          if (!el) return null;
+          const b = el.getBoundingClientRect();
+          const deck = Number(getComputedStyle(el).opacity);
+          const sichtL = Math.max(
+            0,
+            Math.min(b.right, window.innerWidth) - Math.max(b.left, 0),
+          );
+          const sichtH = Math.max(
+            0,
+            Math.min(b.bottom, window.innerHeight) - Math.max(b.top, navbar),
+          );
+          // Schon die WIRKSAME Größe – nicht noch einmal mit `deck` multiplizieren.
+          return (sichtL * sichtH * deck) / (b.width * b.width);
+        }, NAVBAR_PX);
+        expect(
+          wirksam,
+          `Auf ${breite}x${hoehe} ist der Ball in der Ruhelage nur zu ` +
+            `${Math.round((wirksam ?? 0) * 100)} % wirksam sichtbar; gefordert ` +
+            `sind 55 %. Vivien hat 80 % gemessen, es ist also Reserve da – ein ` +
+            `Wert darunter heißt, dass die Verankerung nicht mehr greift.`,
+        ).toBeGreaterThanOrEqual(0.55);
+      }
       await page.mouse.wheel(0, 1);
       await page.waitForTimeout(350);
       const nachScroll = await lage();

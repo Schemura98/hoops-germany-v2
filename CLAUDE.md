@@ -825,6 +825,66 @@
     > korrekt messen und trotzdem zu gegensätzlichen Ergebnissen kommen.
     Der Laufzeit-Test `tests/e2e/hero-ball-laufzeit.spec.mjs` prüft deshalb jetzt
     **neun Viewports mit Höhenachse**, jeder ein reales Gerät.
+20d. ✅ **Viviens vier Punkte vom 17.08.2026 sind entschieden und umgesetzt** –
+    und der wichtigste war keiner der vier, sondern ein Befund, den sie ungefragt
+    dazu gefunden hat:
+    (a) ⚠️ **Auf 360 px parkte der Ball im Textblock.** Weil die mobile Ruhelage
+    am „obersten Kasten im x-Band" hing, hing sie am **ausgefransten rechten Rand
+    der Display-Headline** – und der ist nicht monoton in der Breite. 360, 368,
+    440, 480, 560 und 640 px trafen alle daneben; 360 px ist die verbreitetste
+    Android-Breite Deutschlands. **Der Kanal zum Badge betrug dort genau 2,65 px –
+    exakt der Wert, den Vivien zwei Runden früher als Defekt gemeldet hatte.**
+    Er war nie behoben, nur auf eine Breite gewandert, wo er unsichtbar blieb.
+    **Behoben:** Mobil ist die Ruhelage jetzt am Eyebrow **verankert** statt
+    gesucht (`[data-hero-eyebrow]`).
+    (b) ⚠️ **DIE REGEL, DIE DARAUS FOLGT — vierter Einheitenfehler dieser Arbeit,
+    diesmal meiner:** Ich hatte „waagerechter Kanal ≥ 8 px" gebaut. Das Wort
+    **waagerecht** schmuggelt eine ACHSE in ein Kriterium, das eine **diagonale**
+    Beziehung beschreibt. Der Kanal zwischen Kreis und gerundetem Rechteck
+    verläuft diagonal; achsenweise gemessen meldet er Kollision, wo Luft ist
+    (bei 360 px: Hüllkörper 2,65 – echter Konturkanal **7,8–9,7**).
+    **Geltendes Maß: kürzester Abstand der KONTUREN ≥ 10 px** (Eckenradius zählt
+    mit, gemessen per `getComputedStyle`, nicht aus dem Tailwind-Mapping
+    geschlossen). Der senkrechte Mittenabstand ist die **freie** Größe und wird
+    als kleinster Wert in [12, 24] gelöst, der das erreicht.
+    ⚠️ **Der eigentliche Gewinn:** Die Regel überlebt eine **Textänderung** am
+    Eyebrow. In jeder früheren Zahl steckte die Badgebreite von 239,5 px – ein
+    Wort mehr, und alle brachen.
+    (c) **Die Schwelle „26 von 32 Bildern" ist GESTRICHEN**, nicht justiert:
+    analytisch durchläuft die Kurve per Konstruktion alle 32, gezeigt ist die Zahl
+    eine Eigenschaft der **Hardware** (30 Hz → 14, 60 Hz → 24, 120 Hz → 32), und
+    Tobias' 26 gegen exakt 24 bei 60 Hz ist Frame-Jitter. Vivien: *„Eine Kennzahl,
+    die zwischen zwei Läufen um zwei wandert, während die Schwelle auf der Kante
+    liegt, ist kein Prüfmaß, sondern ein Münzwurf mit Fehlerbericht."*
+    Es gilt **Bildstillstand ≤ 80 ms** – bindende Stelle ist der **Auslauf**
+    (~66 ms von 520), also nur ~14 ms Reserve.
+    (d) **Das 150-px-Scrollfenster ist GESTRICHEN**, nicht gesenkt (es wäre die
+    dritte Nachgabe derselben Zahl). Begründung: Es war ein Ersatzmaß für
+    „erscheint der Ball überhaupt" – richtig, solange die Ruhelage ein
+    **Suchergebnis** war. Seit sie relativ zu einem Element liegt, das auf jeder
+    Breite im ersten Bild steht, ist die Sichtbarkeit **per Konstruktion**
+    zugesichert; sie über den Scrollweg nachzuprüfen heißt, hinter einer Garantie
+    zu messen. Dazu: **Mobil ist der Auftritt nicht der Scrollweg, sondern die
+    Ruhe davor** – der Scrollweg ist der **Abgang**, und der braucht keine
+    Mindestdauer. Ersatz ist das bestehende Maß: wirksame Sichtbarkeit der
+    Ruhelage **≥ 55 %**.
+    (e) **`ZIELBEREICH_AB` 375 → 360.** Viviens Selbstkorrektur: *„Ich habe den
+    Zielbereich bei 375 beginnen lassen, weil das die kleinste iPhone-Breite ist.
+    Das war eine Apple-Brille."*
+    (f) **72 px bleiben; die Erzählung wird korrigiert.** „Ein Motiv trägt die
+    ganze Seite" war mobil **nie wahr** – ein 176-px-Ball neben einer dreizeiligen
+    Headline war Konkurrenz zum `h1`, daraus der Kontrast 1,67:1, daraus die
+    Abdunkelung, daraus der Wirkungsverlust aus Roadmap 20 (a). **Es wurde viermal
+    am Symptom gearbeitet.** Mobil ist der Ball ein **wiederkehrender Akzent**;
+    was ihn zum Motiv macht, ist Wiedererkennbarkeit an jeder Station, nicht
+    Größe. Steht in `docs/VISUELLE-RICHTUNG-2026-08-12.md`.
+    (g) **Klickfläche im Testphase-Banner 16 → 24,5 px**, Bandhöhe unverändert 45,
+    eigener Fokusring. ⚠️ **Kein WCAG-Verstoß** (SC 2.5.8 hat eine Inline-Ausnahme
+    für Ziele im Satzfluss) – es ist eine Wahl, keine Pflicht.
+    ⚠️ **OFFEN und größer:** Es gibt **keinen Skip-Link und kein `<main>`** –
+    SC 2.4.1 *Bypass Blocks*, **Level A**. Von Vivien als eigene Aufgabe
+    hinterlegt, Entscheidung Patrick.
+
 20c. **Fünf Gestaltungspunkte liegen bei Vivien** (vorgelegt 16.08.2026, aus den
     Gate-Runden vier und fünf). Nichts davon ist ein Defekt – es sind Abwägungen,
     die beide Prüfer ausdrücklich ihr zuweisen und nicht der Entwicklung:

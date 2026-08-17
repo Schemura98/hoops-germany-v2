@@ -49,9 +49,32 @@ const TOLERANZ_PX = 3;
 
 // [Startbreite, Zielbreite] – beide mobil, beide unter `md`, damit der
 // Ladeauftritt überhaupt stattfindet.
+// ⚠️ `[430, 500]` MUSSTE WEICHEN, und der Grund ist ein Erfolg des Tests:
+// Seit die mobile Ruhelage am Eyebrow-Badge VERANKERT ist (Entscheidung Vivien,
+// 17.08.2026) statt gesucht zu werden, hängt sie nicht mehr am ausgefransten
+// Rand der Headline — und 430 und 500 ergeben dieselbe Lage (154,3).
+// Kais Trennschärfe-Prüfung hat das gemeldet, statt grün durchzulaufen:
+//   „430 und 500 ergeben dieselbe Ruhelage. Dieses Paar ist für den Test blind
+//    – ein grünes Ergebnis hieße hier nichts."
+// Genau dafür ist sie gebaut. Ersetzt durch `[375, 640]` (149 gegen 214, also
+// 65px Unterschied), gemessen am Stand nach der Verankerung.
+// ⚠️ BEIDE PAARE MUSSTEN WEICHEN, UND ZWEIMAL WAR DER GRUND EIN ERFOLG DIESES
+// TESTS. Seit die mobile Ruhelage am Eyebrow verankert ist und der senkrechte
+// Mittenabstand aus dem Konturkanal gelöst wird (Entscheidung Vivien,
+// 17.08.2026), liegen benachbarte Breiten sehr nah beieinander:
+//   `[430, 500]` → identische Lage (154,3)
+//   `[375, 360]` → 9 px auseinander, Schwelle ist > 10
+// Beides hat die Trennschärfe-Prüfung gemeldet, statt grün durchzulaufen:
+//   „Dieses Paar ist für den Test blind – ein grünes Ergebnis hieße hier nichts."
+// Genau dafür ist sie gebaut, und sie hat sich zweimal bezahlt.
+// Gewählt sind jetzt Paare, die einen REGIMEWECHSEL kreuzen und dadurch weit
+// auseinanderliegen — gemessen am Stand nach der Verankerung:
+//   `[375, 320]` → 155 gegen 123 (32 px): kreuzt in die Auffangregel, weil bei
+//                  320 px die Überlappung mit dem Badge echt ist (Kanal −9,0)
+//   `[375, 640]` → 155 gegen 220 (65 px)
 const PAARE = [
-  [375, 360],
-  [430, 500],
+  [375, 320],
+  [375, 640],
   [600, 700],
 ];
 const HOEHE = 812;

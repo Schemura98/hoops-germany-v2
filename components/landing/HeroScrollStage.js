@@ -137,6 +137,17 @@ const TEXT_FADE_MARGIN = 24;
 // Lückensuche und Streifenlage existieren nur, um diesen Preis nicht mehr zu
 // zahlen. Ihn nach dem Erfolg freiwillig wieder zu zahlen, machte vier Runden
 // rückgängig.
+// Senkrechter Mittenabstand des Balls über der Eyebrow-Oberkante, mobil: der
+// KLEINSTE Wert in diesem Bereich, der `MIN_KONTURKANAL` erreicht (Vivien).
+const MOBIL_D_MIN = 12;
+const MOBIL_D_MAX = 24;
+// ⚠️ KÜRZESTER ABSTAND DER KONTUREN, nicht Hüllkörper und nicht achsenweise.
+// 10 statt 8, weil bei 360 px und d = 20 der Kanal 9,7 beträgt – eine 8er-
+// Schwelle läge dort 1,7 px über der Kante, und Schwellen an der Kante sind
+// Münzwürfe (dieselbe Begründung, mit der Vivien die Bildzahl gestrichen hat).
+const MIN_KONTURKANAL = 10;
+// Senkrechte Luft, wenn der Ball ganz über das Badge gehoben werden muss.
+const MIN_SENKRECHT = 8;
 const TEXT_DIM_FLOOR = 0.2;
 
 // ⚠️ WIRFT bei invertierten Grenzen, statt still `max` zu liefern (Befund Kai,
@@ -716,8 +727,115 @@ export default function HeroScrollStage({
             `mobile Durchmesser sinkt oder die Badge-Zeile rückt nach unten.`,
         );
       }
+      // ══ MOBIL WIRD DIE RUHELAGE VERANKERT, NICHT GESUCHT ═══════════════════
+      // Entscheidung Vivien (17.08.2026), nachdem sie einen Befund gefunden hat,
+      // den niemand gesucht hatte – und der die Frage entwertet, die ich ihr
+      // gestellt hatte.
+      // Weil die mobile Ruhelage am „obersten Kasten, der mein x-Band schneidet"
+      // hing, hing sie am **ausgefransten rechten Rand der Display-Headline** –
+      // und der ist nicht monoton in der Breite. Nachgemessen bei Höhe 812:
+      //   320 → Ball 121..193, über dem Badge          (richtig)
+      //   360 → Ball 372..444, **MITTEN IM TEXTBLOCK**  ⚠️
+      //   368 → Ball 372..444, **MITTEN IM TEXTBLOCK**  ⚠️
+      //   375 → Ball 165..237, über dem Badge          (richtig)
+      //   440/480/560/640 → **MITTEN IM TEXTBLOCK**     ⚠️
+      // ⚠️ 360px ist die verbreitetste Android-Breite in Deutschland. Dort
+      // begann die „Reise durch die Seite" also in der Mitte des Textes.
+      // Verdeckt wurde nichts – das leistet die Lückensuche zuverlässig –, aber
+      // die Lage liest sich beliebig und widerspricht der Erzählung frontal.
+      // ⚠️ UND: Der Kanal zum Badge beträgt bei 360 genau **2,65px** – exakt der
+      // Wert, den Vivien zwei Runden früher als Defekt gemeldet hat. Er war nie
+      // behoben, er war auf eine andere Breite gewandert und dort unsichtbar,
+      // weil der Ball zufällig ganz woanders parkte.
+      //
+      // Viviens Begründung für die Verankerung: Die Lückensuche ist am DESKTOP
+      // richtig – dort ist unbekannt, wo Platz ist. Mobil ist die Komposition
+      // bekannt und festgelegt: Der Ball tritt oben rechts ein, oberhalb des
+      // Textblocks, in Beziehung zum Eyebrow. Das ist eine Entscheidung, die
+      // nichts zu suchen hat.
+      // Bezug ist deshalb `[data-hero-eyebrow]` – ausdrücklich UNABHÄNGIG davon,
+      // ob es das x-Band des Balls schneidet.
+      // ⚠️ `inhaltRef.current` und `rect`, NICHT `inhalt` und `sr`: Die beiden
+      // sind lokal in `kaestenBauen` und hier nicht im Geltungsbereich. Mein
+      // erster Entwurf benutzte sie trotzdem – `npm run build` lief GRÜN durch
+      // und die Startseite war zur Laufzeit LEER („inhalt is not defined", kein
+      // h1, kein Ball, HTTP 200). Ein Scope-Fehler in JavaScript ist für den
+      // Build unsichtbar; nur ein Seitenaufruf findet ihn.
+      // ══ DER KANAL ZWISCHEN KREIS UND RECHTECK VERLÄUFT DIAGONAL ═══════════
+      // Korrektur Vivien (17.08.2026) an MEINER Fassung – und es ist der vierte
+      // Einheitenfehler dieser Arbeit, diesmal meiner:
+      // Ich hatte „waagerechter Kanal ≥ 8 px" gebaut. Das Wort **waagerecht**
+      // schmuggelt eine ACHSE in ein Kriterium, das eine diagonale Beziehung
+      // beschreibt. Der Kanal zwischen Ballkontur und Badge-Kontur ist weder der
+      // waagerechte noch der senkrechte Hüllkörper-Abstand, sondern der
+      // **kürzeste Abstand der beiden Konturen** – der Eckenradius zählt mit.
+      // Achsenweise gemessen meldet er Kollision, wo Luft ist:
+      //   Breite 360, d=16 → waagerechter Hüllkörper 2,65 · **echter Kanal 7,8**
+      //   Breite 360, d=20 → waagerechter Hüllkörper 2,65 · **echter Kanal 9,7**
+      //   Breite 320, d=16 → **echter Kanal −9,0**, dort ist die Überlappung ECHT
+      // Meine Auffangregel feuerte deshalb bei 360 für eine Kollision, die es
+      // nicht gibt, und erzeugte einen Regimewechsel mitten im Zielbereich.
+      //
+      // Viviens Vorgabe spezifiziert jetzt die BEZIEHUNG, nicht die Position –
+      // der Code löst nach der Position auf:
+      //   Kürzester Konturabstand ≥ MIN_KONTURKANAL. Der senkrechte
+      //   Mittenabstand ist die freie Größe und wird als der KLEINSTE Wert im
+      //   Bereich [MOBIL_D_MIN, MOBIL_D_MAX] gewählt, der diesen Kanal erreicht.
+      // „Kleinster, der reicht", weil der Ball sich auf das Eyebrow BEZIEHEN
+      // soll, nicht davon wegdriften: Nähe erzeugt die Spannung, der Kanal
+      // verhindert die Berührung.
+      // ⚠️ Und der eigentliche Gewinn: Diese Regel überlebt eine TEXTÄNDERUNG am
+      // Eyebrow. In jeder früheren Zahl steckte die Badgebreite von 239,5 px –
+      // ein Wort mehr, und alle brachen. Hier rechnet sie sich neu.
+      const eyebrow = inhaltRef?.current?.querySelector("[data-hero-eyebrow]");
+      let mobilZiel = imStreifen;
+      if (eyebrow) {
+        const re = eyebrow.getBoundingClientRect();
+        if (re.height > 0) {
+          const bL = re.left - rect.left;
+          const bT = re.top - rect.top;
+          const bR = re.right - rect.left;
+          const bB = re.bottom - rect.top;
+          // ⚠️ GEMESSEN, NICHT AUS DEM TAILWIND-MAPPING GESCHLOSSEN: Viviens
+          // Tabelle rechnet mit ρ = 6 („rounded-sm"), aber sie hat ausdrücklich
+          // verlangt, den Wert am Browser zu holen. Genau die Sorte Annahme, die
+          // hier schon zweimal eine Runde gekostet hat.
+          const rho =
+            parseFloat(getComputedStyle(eyebrow).borderTopRightRadius) || 0;
+          const mitteX = rect.width - 0.6 * BALL_R;
+          // Abstand eines äußeren Punktes zu einem gerundeten Rechteck, exakt und
+          // OHNE Fallunterscheidung zwischen Kante und Ecke: auf das um ρ
+          // eingerückte Kernrechteck klemmen, dann ρ abziehen (Formel Vivien).
+          const konturKanal = (cy) => {
+            // ⚠️ VORAUSSETZUNG PRÜFEN, NICHT ANNEHMEN: Der Ausdruck gilt nur für
+            // Ballmitten AUSSERHALB des Badges – innen liefert er stillschweigend
+            // Unsinn. Dasselbe Register wie `clamp`, das seit Runde drei wirft
+            // statt still `max` zu liefern.
+            if (mitteX >= bL && mitteX <= bR && cy >= bT && cy <= bB) {
+              return Number.NEGATIVE_INFINITY;
+            }
+            const qx = Math.min(Math.max(mitteX, bL + rho), bR - rho);
+            const qy = Math.min(Math.max(cy, bT + rho), bB - rho);
+            return Math.hypot(mitteX - qx, cy - qy) - rho - BALL_R;
+          };
+          let gewaehltD = null;
+          for (let d = MOBIL_D_MIN; d <= MOBIL_D_MAX; d += 1) {
+            if (konturKanal(bT - d) >= MIN_KONTURKANAL) {
+              gewaehltD = d;
+              break;
+            }
+          }
+          mobilZiel =
+            gewaehltD !== null
+              ? bT - gewaehltD
+              : // Auffangregel: Ball ganz über das Badge. Vivien: außerhalb des
+                // Zielbereichs zu erwarten, INNERHALB ein Fehlersignal – bei
+                // 320 px ist die Überlappung echt (−9,0), dort gehört sie hin.
+                bT - BALL_R - MIN_SENKRECHT;
+        }
+      }
       const targetY = mobil
-        ? imStreifen
+        ? mobilZiel
         : gewaehlt
           ? clamp(sichtMitte, gewaehlt.von, gewaehlt.bis)
           : // Keine taugliche Lücke – s. Warnung oben.
@@ -730,7 +848,20 @@ export default function HeroScrollStage({
       // den Einflug übernimmt eine CSS-Übergangszeit beim Laden.
       const tb = mobil ? 1 : clamp(t / BALL_SPAN, 0, 1);
       const y0 = -BALL_R * 2;
-      const y1 = targetY - 2;
+      // ⚠️ DAS `- 2` GILT NUR NOCH AM DESKTOP, und es ist ein Fund am Rande:
+      // Es stand hier ohne Kommentar und ohne Herleitung – ein kosmetischer
+      // Anstoß auf eine GESUCHTE Lage, wo zwei Pixel nichts bedeuten.
+      // Mobil ist die Lage seit dem 17.08.2026 aber exakt aufgelöst: Die
+      // Schleife wählt den kleinsten Mittenabstand, der `MIN_KONTURKANAL`
+      // erreicht. Ein stiller Versatz danach verschiebt genau das Ergebnis,
+      // das gerade berechnet wurde.
+      // Nachgemessen ist der Effekt eindeutig: Die Schleife wählte 24/21/13/12
+      // bei 356/360/368/375 – am Ball gemessen kamen 26/23/15/14 an. Viviens
+      // Vorhersagen (d ≈ 21 bei 360, d ≈ 12 bei 375) trafen also die BERECHNUNG
+      // und nicht die Darstellung, und die Differenz war dieses `- 2`.
+      // Es verschob nach oben, also in die harmlose Richtung – der Kanal wurde
+      // dadurch größer, nicht kleiner. Still falsch ist es trotzdem.
+      const y1 = mobil ? targetY : targetY - 2;
       let y = mobil ? y1 : y0 + (y1 - y0) * tb;
 
       // Wackeln/Drehung klingen zum Aufsetzer hin aus, statt bis zum letzten

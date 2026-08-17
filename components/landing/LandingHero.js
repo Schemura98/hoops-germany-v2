@@ -134,7 +134,10 @@ export default function LandingHero() {
           <>
             <div ref={inhaltRef}>
               <Reveal as="div" delay={0} className="mb-6">
-                <span className="font-display bg-brand-500 text-navy-950 text-sm font-bold px-4 py-1.5 rounded-sm uppercase tracking-[0.2em]">
+                <span
+                  data-hero-eyebrow
+                  className="font-display bg-brand-500 text-navy-950 text-sm font-bold px-4 py-1.5 rounded-sm uppercase tracking-[0.2em]"
+                >
                   Willkommen zurück
                 </span>
               </Reveal>
@@ -225,7 +228,10 @@ export default function LandingHero() {
           <>
             <div ref={inhaltRef}>
               <Reveal as="div" delay={0} className="mb-6">
-                <span className="font-display bg-brand-500 text-navy-950 text-sm font-bold px-4 py-1.5 rounded-sm uppercase tracking-[0.2em]">
+                <span
+                  data-hero-eyebrow
+                  className="font-display bg-brand-500 text-navy-950 text-sm font-bold px-4 py-1.5 rounded-sm uppercase tracking-[0.2em]"
+                >
                   Amateur-Basketball in NRW
                 </span>
               </Reveal>

@@ -85,6 +85,23 @@ test.describe("Hero-Einflug (mobil)", () => {
       // Gegen M5: Einflug als Standbild. Es gibt 32 Bilder; ein Flug, der eines
       // davon zeigt, macht die ganze Sequenz zu 104 KB ohne Zweck.
       const spur = await spurAufnehmen(page, breite, hoehe);
+      // ⚠️ HIER STAND EINMAL EINE SCHWELLE „≥ 26 VON 32 BILDERN" — Vivien hat
+      // sie am 17.08.2026 selbst gestrichen, und ihre Begründung ist der
+      // eigentliche Inhalt dieses Kommentars:
+      //   · **Analytisch** durchläuft die Kurve per Konstruktion ALLE 32
+      //     (`round(32 · eBild)` mit monoton steigendem `eBild` trifft jeden
+      //     Index genau einmal). Eine Schwelle von 26 gegen einen Wert, der
+      //     strukturell immer 32 ist, prüft nichts.
+      //   · **Gezeigt** ist die Zahl keine Eigenschaft des Entwurfs, sondern der
+      //     Hardware: 30 Hz → 14, 60 Hz → 24, 90 Hz → 30, 120 Hz → 32.
+      //   · Und der Punkt, der es entscheidet: Tobias hat **26** gemessen, exakt
+      //     60 Hz ergibt **24**. Die Differenz ist Frame-Jitter. Eine Kennzahl,
+      //     die zwischen zwei Läufen auf derselben Maschine um zwei wandert,
+      //     während die Schwelle genau auf der Kante liegt, ist kein Prüfmaß,
+      //     sondern „ein Münzwurf mit Fehlerbericht" (Vivien) — genau die Klasse
+      //     sporadisch roter Tests aus CLAUDE.md Methodik-Lehre (3).
+      // Was bleibt, ist der Standbild-Riegel unten (> 5 verschiedene Bilder) und
+      // das Stillstands-Maß im Laufzeit-Test (≤ 80 ms).
       const bilder = new Set(spur.map((s) => s.bild).filter(Boolean));
       expect(
         bilder.size,

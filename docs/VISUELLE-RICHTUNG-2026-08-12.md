@@ -202,6 +202,37 @@ Flache Geschwister derselben Familie sind ausdrücklich in Ordnung: Der
 Streckenball (`RailBallGlyph`, 20 px) bleibt reines `brand-500` ohne Verlauf —
 in dieser Größe ist Modellierung nicht lesbar und wäre nur Rauschen.
 
+**Der Rang des Hero-Balls ist mobil und am Desktop verschieden.** *(Entscheidung
+Vivien, 17.08.2026 — nachdem Tobias gefragt hatte, ob die Erzählung „ein Motiv
+trägt die ganze Seite" mit einem 72-px-Ball noch aufgeht.)*
+
+Am **Desktop** (176 px) trägt der Satz. Die gepinnte Hero-Bühne ist dort noch
+offen (Roadmap 11), und der Ball ist die Hauptfigur.
+
+**Mobil (72 px) gilt er nicht — und er war dort nie wahr.** Ein 176-px-Ball neben
+einer dreizeiligen Display-Headline auf 375 px war kein Protagonist, sondern eine
+**Konkurrenz zum `h1`**; genau daraus entstand der gemessene Kontrast von 1,67:1,
+der die Abdunkelung nach sich zog und damit den Wirkungsverlust, den Roadmap
+20 (a) protokolliert. Die Kette war: zu großer Ball → Text unlesbar →
+Abdunkelung → Ball unsichtbar. Es wurde viermal am Symptom gearbeitet.
+
+Auf 375 px hat die **Headline den Vortritt.** Das ist keine Niederlage, sondern
+die richtige Hierarchie. Der Ball ist mobil ein **wiederkehrender Akzent**: Er
+tritt oben rechts angeschnitten ein, verschwindet, kommt auf der Feature-Strecke
+wieder, landet im Korb. Was einen wiederkehrenden Akzent zum Motiv macht, ist
+nicht seine Größe — es ist **Wiedererkennbarkeit an jeder Station**. Deshalb ist
+die verankerte Ruhelage (statt der gesuchten) Teil derselben Entscheidung: Fände
+der Auftritt bei 360 px im Textblock und bei 375 px in der Ecke statt, wäre es
+zweimal etwas anderes.
+
+Der **Anschnitt** (80 % sichtbar bei 375) bleibt ausdrücklich: Ein angeschnittener
+Gegenstand liest sich als „kommt von außen herein", ein vollständiger als „liegt
+hier". Für einen Ball, der gerade hereingeflogen ist, ist der Anschnitt das
+richtige Tiefenmittel.
+
+⚠️ **Wer die 72 px als Fehler liest und zurückdreht, dreht diese Entscheidung
+zurück** — und mit ihr die Kette oben.
+
 ### 2.2 Typografie
 
 **Display: Big Shoulders** (Google Fonts, variabel, Gewichte „Thin" bis
