@@ -51,7 +51,7 @@
 > die Fehlerform, die weiter unten schon zweimal für den Rollback-Zeiger protokolliert ist.
 > **Nicht schätzen, zählen:** `git rev-list --count 164c784..HEAD`.
 > ✅ **Stand nach Runde SIEBEN: beide Gates freigabefähig mit Auflagen** – die
-> Auflagen sind umgesetzt. Build durch, Playwright **221/221** (gegen `--list`
+> Auflagen sind umgesetzt, ebenso Tobias' H1. Build durch, Playwright **225/225** (gegen `--list`
 > abgeglichen). Live ist `f46a783`; auf `redesign` liegt der Stand danach.
 > ⚠️ **Der Hauptbefund der Runde war eine Zusicherung, die es nicht gab:** Der
 > Kommentar, mit dem ich das Streichen der Bildzahl-Schwelle begründet habe,
@@ -955,6 +955,29 @@
     Dort steht pauschal „keine Verläufe, keine Schatten, kein Glow"; Viviens
     Unterscheidung (keine Verläufe auf **Flächen der Oberfläche**, sehr wohl auf
     einem **dargestellten Gegenstand**) steht bisher nur in CLAUDE.md.
+20e. ✅ **ERLEDIGT: Tobias' H1 – der Ball sprang bis 39,8 px, wenn die Anmeldung
+    spät auflöste.** Die beiden Hero-Zweige haben verschiedene Ruhelagen (das
+    eingeloggte Eyebrow ist 179,8 px breit, das ausgeloggte 239,5 – und die
+    Verankerung folgt dem Eyebrow). Löste `getmyinfo` nach der Landung auf, landete
+    der Ball auf dem **ausgeloggten** Anker und `apply` schrieb die neue Lage
+    danach ohne Übergang: 320 → 32,0 px · **600 → 39,8 px** · 640 → 25,2 px, je in
+    EINEM Frame. ⚠️ Dass 375–412 px unauffällig waren, war **Zufall** – dort sind
+    beide Anker deckungsgleich.
+    Behoben: Die Korrektur wird **gefahren** (320 ms), und die Übergangszeit wird
+    einmal gesetzt und danach abgeräumt – eine, die bei jedem Scroll neu startet,
+    kommt nie an (Fehlerklasse Kai, dritte Runde).
+    Bewacht durch `tests/e2e/hero-auth-tausch.spec.mjs` (4 Fälle); der Test prüft
+    **vorab, dass der Zweig wirklich getauscht hat**, sonst wäre er grün und würde
+    nichts messen.
+    ⚠️ **Die Lehre steckt in der Messung, nicht im Fix** – gehört zu
+    `docs/MUSTER-ZAHLEN-DIE-LUEGEN`: Meine Sonde war **zweimal wertlos**. Erst mit
+    erfundenem Token (kein Zweigtausch; gemessen 20,0 px auf allen Breiten
+    identisch – das waren `Reveal`s 20 px bei unsichtbarem Ball, und die Identität
+    über alle Breiten war das Signal). Dann mit echtem Token und 0,0 px – **auch
+    mit abgeklemmtem Fix 0,0 px**, weil sie eine Pause von >100 ms zwischen den
+    Proben verlangte und die Korrektur 14 ms dauert. Entschieden hat erst die
+    **Rohspur**, nicht die Kennzahl.
+
 21. ✅ **ERLEDIGT (17.08.2026): Cache-Vorgabe für `/images/` und `/fonts/`.** Gesetzt in
     `next.config.mjs` über `headers()` – **nicht** in Nginx, damit die Vorgabe versioniert ist und
     mit jedem Deploy mitgeht statt am Server zu leben. Wert:

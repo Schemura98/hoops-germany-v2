@@ -139,6 +139,10 @@ const TEXT_FADE_MARGIN = 24;
 // rückgängig.
 // Senkrechter Mittenabstand des Balls über der Eyebrow-Oberkante, mobil: der
 // KLEINSTE Wert in diesem Bereich, der `MIN_KONTURKANAL` erreicht (Vivien).
+// Dauer der Lagekorrektur nach einem Inhaltstausch (Befund Tobias H1).
+// Dieselbe Größenordnung wie die Landekurve der Leiste (320 ms), damit sich die
+// beiden Bewegungen nicht widersprechen.
+const KORREKTUR_MS = 320;
 const MOBIL_D_MIN = 12;
 const MOBIL_D_MAX = 24;
 // ⚠️ KÜRZESTER ABSTAND DER KONTUREN, nicht Hüllkörper und nicht achsenweise.
@@ -261,6 +265,10 @@ export default function HeroScrollStage({
   const streifenGemeldetRef = useRef(false);
   // Einmal-Sperre der Auffangregel-Diagnose (Befund Kai K2).
   const auffangGemeldetRef = useRef(false);
+  // ⚠️ Wird gesetzt, wenn der Inhalt NACH der Landung getauscht wird – dann wird
+  // die Lagekorrektur gefahren statt gesprungen (Befund Tobias H1, Runde sieben).
+  const korrekturLaeuftRef = useRef(false);
+  const korrekturTimerRef = useRef(0);
   const kaestenRef = useRef([]); // Zeilen-/Elementkaesten des Inhalts, s. kaestenBauen
   const tickingRef = useRef(false);
 
@@ -489,6 +497,17 @@ export default function HeroScrollStage({
         inhaltBeobachter = new MutationObserver(() => {
           // NICHT beim Feuern trennen – der Zweig kann mehr als einmal wechseln.
           kaestenFinalRef.current = false;
+          // ⚠️ IST DER BALL SCHON GELANDET, WIRD KORRIGIERT UND NICHT GESPRUNGEN
+          // (Befund Tobias H1, siebte Runde). Löst der Auth-Zweig erst NACH der
+          // Landung auf – ab rund 1600 ms Zusatzlatenz –, dann landet der Ball auf
+          // dem AUSGELOGGTEN Anker, und `apply` schrieb die neue Lage danach
+          // direkt: gemessen **39,8 px in einem Frame** bei 600 px, 32,0 bei 320,
+          // 25,2 bei 640. Bei 375–412 ist der Versatz 0,0 – dass dort nichts
+          // sprang, war Zufall, nicht Absicherung.
+          // Unter natürlichen Bedingungen hat Tobias es nicht gesehen; der
+          // Mechanismus ist älter als der Verankerungs-Commit, neu waren nur die
+          // Beträge, weil sie jetzt dem Eyebrow folgen.
+          if (eingeflogenRef.current) korrekturLaeuftRef.current = true;
           beginnWartenRef.current = performance.now();
           cancelAnimationFrame(warteRaf);
           warteRaf = requestAnimationFrame(kaestenFinalisieren);
@@ -1038,6 +1057,21 @@ export default function HeroScrollStage({
       // zusätzliche Flächendrehung würde die echte Kugelrotation überlagern
       // und den ganzen Zweck der Sequenz aufheben – der Ball sähe aus, als
       // taumele er.
+      // Lagekorrektur nach einem Inhaltstausch: EINMAL eine Übergangszeit setzen
+      // und sie danach wieder abräumen.
+      // ⚠️ DAS ABRÄUMEN IST DER PUNKT (Fehlerklasse Kai K2, dritte Runde): Eine
+      // Übergangszeit, die bei jedem Scroll neu gesetzt wird, kommt nie an – der
+      // Ball würde dem Scrollen dauerhaft nachlaufen. Deshalb wird das Flag
+      // sofort verbraucht und die Zeit nach `KORREKTUR_MS` entfernt.
+      if (korrekturLaeuftRef.current && !einflugAktivRef.current) {
+        korrekturLaeuftRef.current = false;
+        ball.style.transition = `transform ${KORREKTUR_MS}ms cubic-bezier(0.22,1,0.36,1)`;
+        window.clearTimeout(korrekturTimerRef.current);
+        korrekturTimerRef.current = window.setTimeout(() => {
+          if (ballRef.current) ballRef.current.style.transition = "";
+        }, KORREKTUR_MS + 60);
+      }
+
       // ⚠️ WÄHREND DES EINFLUGS GEHÖRT DER BALL `schritt`, NICHT `apply`.
       // Ohne diese Sperre schreiben beide in denselben Frame (Befund Kai).
       if (!einflugAktivRef.current) {
@@ -1243,6 +1277,9 @@ export default function HeroScrollStage({
       // geschwiegen hätte.
       streifenGemeldetRef.current = false;
       auffangGemeldetRef.current = false;
+      korrekturLaeuftRef.current = false;
+      window.clearTimeout(korrekturTimerRef.current);
+      if (ballRef.current) ballRef.current.style.transition = "";
       window.removeEventListener("load", onScrollOrResize);
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);
