@@ -138,7 +138,10 @@ export default function PlayerNewsfeedPage() {
           <div className="grid lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_380px] gap-x-10 gap-y-6 items-start">
             <PostFeed player={player} />
 
-            <Schiene className="lg:sticky lg:top-24">
+            {/* `haftend` setzt Haftkante UND Höhendeckel zusammen – siehe
+                Kommentar in `Schiene.js`. Ein blankes `lg:sticky` hier hat den
+                unteren Teil der Schiene auf jedem Desktop unerreichbar gemacht. */}
+            <Schiene haftend>
               <SchienenAbschnitt label="Spiele">
                 <TeamMatchesWidget
                   preloaded={matchData}

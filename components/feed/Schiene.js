@@ -33,10 +33,43 @@ export function SchienenAbschnitt({ label, aktion, children }) {
   );
 }
 
-export default function Schiene({ children, className = "" }) {
+// ⚠️ HAFTEN UND HÖHE GEHÖREN ZUSAMMEN (Befund Patrick, 18.08.2026).
+//
+// Die Schiene stand als `lg:sticky lg:top-24` in `page.js` – ohne jede
+// Höhenbegrenzung. Gemessen ist sie aber **1088 px** hoch, während unter ihrer
+// Haftkante nur 624–804 px Platz sind:
+//
+//   1440x900 → 804 px Platz → 284 px unerreichbar
+//   1280x800 → 704 px Platz → 384 px unerreichbar
+//   1280x720 → 624 px Platz → 464 px unerreichbar
+//   1024x768 → 672 px Platz → 416 px unerreichbar
+//
+// Ein Element, das oben festklebt und höher als das Fenster ist, kann seinen
+// unteren Teil NIE zeigen – Scrollen bewegt es ja gerade nicht mehr. Betroffen
+// waren „Folgen" und das Ende von „Tabelle": auf keinem Desktop-Bildschirm
+// erreichbar, auf keinem eine Fehlermeldung.
+//
+// Deshalb ist `haftend` EIN Schalter, der beides setzt. Wer künftig nur
+// `sticky` dazuschreibt, ohne die Höhe zu deckeln, baut denselben Fehler neu –
+// und er ist von außen unsichtbar, weil nichts kaputtgeht, nur etwas fehlt.
+// Bewacht durch `tests/e2e/newsfeed-schiene.spec.mjs`.
+const HAFTEND = [
+  "lg:sticky lg:top-24",
+  // 7rem = Haftkante (6rem) + 1rem Luft nach unten.
+  "lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto",
+  // Sonst springt das Scrollen am Ende der Schiene auf die Seite über.
+  "lg:overscroll-contain",
+  // Dünne, dunkle Leiste statt der hellen Standardleiste (color-scheme: dark
+  // allein reicht hier nicht, weil der Grund navy-800 ist).
+  "lg:[scrollbar-width:thin] lg:[scrollbar-color:theme(colors.navy.600)_transparent]",
+].join(" ");
+
+export default function Schiene({ children, className = "", haftend = false }) {
   return (
     <div
-      className={`overflow-hidden rounded-md border border-navy-600 bg-navy-800 divide-y divide-navy-600 ${className}`}
+      className={`rounded-md border border-navy-600 bg-navy-800 divide-y divide-navy-600 ${
+        haftend ? HAFTEND : "overflow-hidden"
+      } ${className}`}
     >
       {children}
     </div>

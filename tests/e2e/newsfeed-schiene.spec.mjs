@@ -1,0 +1,176 @@
+// Die rechte Schiene im Newsfeed darf keinen Teil ihres Inhalts verstecken.
+//
+// BEFUND (Patrick, 18.08.2026): Sie stand als blankes `lg:sticky lg:top-24`
+// ohne Höhenbegrenzung. Gemessen war sie 1088 px hoch, unter der Haftkante
+// lagen aber nur 624–804 px. Ein Element, das oben festklebt und höher als das
+// Fenster ist, kann seinen unteren Teil NIE zeigen – Scrollen bewegt es ja
+// gerade nicht mehr. Betroffen: „Folgen" und das Ende von „Tabelle", auf
+// KEINEM Desktop erreichbar. Und es gab keine Fehlermeldung: Es ging nichts
+// kaputt, es fehlte nur etwas.
+//
+// ⚠️ ZWEI FALLEN, DIE DIESER TEST SELBST HAT (beide beim Bauen aufgetreten):
+//
+// (1) REIHENFOLGE. `position: sticky` heftet erst, wenn die Seite gescrollt
+//     ist. Wer sofort nach dem Laden misst, misst die natürliche Lage der
+//     Schiene – die ragt unten aus dem Bild, und der Test wird rot, obwohl
+//     alles stimmt. Erst scrollen, dann messen.
+//
+// (2) LEERLAUF. Passt die Schiene zufällig ins Fenster (wenige Widgets, hohes
+//     Fenster), ist der Test grün, ohne irgendetwas geprüft zu haben – genau
+//     das Muster „grüner Test mit null Messframes" aus Roadmap 20f. Deshalb
+//     die Schranke unten: Der Inhalt MUSS höher sein als der Platz, sonst
+//     schlägt der Test mit einer Erklärung fehl statt still durchzuwinken.
+import { test, expect } from "@playwright/test";
+
+// Vier reale Desktop-Formate. 1280×720 ist der engste Fall (nur 624 px Platz),
+// 1024×768 der schmalste, auf dem das Zweispalten-Layout überhaupt greift.
+const GROESSEN = [
+  { breite: 1440, hoehe: 900 },
+  { breite: 1280, hoehe: 800 },
+  { breite: 1280, hoehe: 720 },
+  { breite: 1024, hoehe: 768 },
+];
+
+test.describe("Newsfeed – die rechte Schiene versteckt nichts", () => {
+  for (const { breite, hoehe } of GROESSEN) {
+    test(`${breite}x${hoehe}: jeder Abschnitt der Schiene ist erreichbar`, async ({
+      page,
+      request,
+    }) => {
+      const res = await request.post("/api/player/playerlogin", {
+        data: { email: "max@test.de", password: "test123" },
+      });
+      const j = await res.json().catch(() => ({}));
+      const token = j?.data?.token || j?.token;
+      expect(
+        typeof token === "string" && token.length > 20,
+        `Kein Token erhalten – ohne Anmeldung gibt es keinen Desktop-Newsfeed ` +
+          `und dieser Test prüft nichts. Antwort: ${JSON.stringify(j).slice(0, 160)}`,
+      ).toBe(true);
+
+      await page.setViewportSize({ width: breite, height: hoehe });
+      await page.addInitScript((t) => localStorage.setItem("playerAuthToken", t), token);
+      await page.goto("/player/newsfeed", { waitUntil: "domcontentloaded" });
+
+      // Auf die Schiene warten – NICHT auf einen einzelnen Abschnitt: der
+      // unterste („Basketball-News") hängt an einem externen RSS-Abruf und
+      // kommt manchmal spät. Ein Test, der darauf wartet, ist zufällig rot.
+      await page.waitForFunction(
+        () =>
+          [...document.querySelectorAll("main *")].some(
+            (e) => getComputedStyle(e).position === "sticky",
+          ),
+        { timeout: 30_000 },
+      );
+      // ⚠️ Die Schiene WÄCHST NACH. Der unterste Abschnitt hängt an einem
+      // externen RSS-Abruf; misst man zu früh, ist sie ~658 statt ~1086 px hoch
+      // – und dann passt sie zufällig ins Fenster, der Test prüft nichts, und
+      // die Schranke unten schlägt (zu Recht) fehl. Beim Bauen genau so
+      // passiert, auf zwei von vier Größen.
+      // Deshalb: DREI aufeinanderfolgende gleiche Messungen, nicht zwei.
+      await page.waitForFunction(
+        () => {
+          const el = [...document.querySelectorAll("main *")].find(
+            (e) => getComputedStyle(e).position === "sticky",
+          );
+          if (!el) return false;
+          const jetzt = el.scrollHeight;
+          if (jetzt <= 0) return false;
+          const spur = (window.__schienenSpur = window.__schienenSpur || []);
+          spur.push(jetzt);
+          if (spur.length > 3) spur.shift();
+          return spur.length === 3 && spur[0] === spur[1] && spur[1] === spur[2];
+        },
+        { timeout: 30_000, polling: 600 },
+      );
+
+      const mess = await page.evaluate(async () => {
+        const schiene = () =>
+          [...document.querySelectorAll("main *")].find(
+            (e) => getComputedStyle(e).position === "sticky",
+          );
+        const warte = () =>
+          new Promise((f) => requestAnimationFrame(() => requestAnimationFrame(f)));
+
+        const haftkante = parseInt(getComputedStyle(schiene()).top) || 0;
+
+        // Falle (1): erst scrollen, damit `sticky` überhaupt greift.
+        let versuche = 0;
+        while (
+          versuche++ < 40 &&
+          Math.round(schiene().getBoundingClientRect().top) > haftkante
+        ) {
+          window.scrollBy(0, 200);
+          await warte();
+        }
+
+        const el = schiene();
+        const vorScroll = el.getBoundingClientRect();
+
+        // In der Schiene ans Ende – die Bewegung, die ein Mensch macht, wenn er
+        // den untersten Abschnitt sehen will. Mehrfach, denn wenn zwischen zwei
+        // Frames noch etwas nachlädt, ist `scrollTop` von eben schon veraltet
+        // und der letzte Abschnitt steht wieder unterhalb der Kante.
+        for (let i = 0; i < 5; i++) {
+          el.scrollTop = el.scrollHeight;
+          await warte();
+          if (el.scrollTop >= el.scrollHeight - el.clientHeight - 1) break;
+        }
+
+        const r = el.getBoundingClientRect();
+        const letzter = el.lastElementChild;
+        const l = letzter.getBoundingClientRect();
+
+        return {
+          haftkante,
+          angeheftet: Math.round(vorScroll.top) <= haftkante + 1,
+          schieneUnten: Math.round(r.bottom),
+          schieneOben: Math.round(r.top),
+          sichtbareHoehe: Math.round(r.height),
+          inhaltsHoehe: el.scrollHeight,
+          fensterHoehe: window.innerHeight,
+          letzterLabel: letzter.querySelector("h3")?.textContent?.trim() || "(ohne Label)",
+          letzterOben: Math.round(l.top),
+          letzterUnten: Math.round(l.bottom),
+          anzahlAbschnitte: el.children.length,
+        };
+      });
+
+      // ── Ehrlichkeitsschranke (Falle 2) ────────────────────────────────────
+      expect(
+        mess.angeheftet,
+        `Die Schiene hat nie an ihrer Haftkante (${mess.haftkante}px) angedockt – ` +
+          `der Test hat den geprüften Zustand gar nicht erreicht.`,
+      ).toBe(true);
+      expect(
+        mess.anzahlAbschnitte >= 3,
+        `Nur ${mess.anzahlAbschnitte} Abschnitt(e) in der Schiene – zu wenig, ` +
+          `um den Fall überhaupt zu erzeugen. Der Test würde blind grün.`,
+      ).toBe(true);
+      expect(
+        mess.inhaltsHoehe > mess.sichtbareHoehe,
+        `Die Schiene passt hier vollständig ins Bild (${mess.inhaltsHoehe}px Inhalt, ` +
+          `${mess.sichtbareHoehe}px Platz). Dann prüft dieser Test NICHTS. Entweder ist ` +
+          `die Schiene kürzer geworden – dann diesen Test anpassen – oder die Messung ` +
+          `ist zu früh gelaufen.`,
+      ).toBe(true);
+
+      // ── Die eigentlichen Zusicherungen ────────────────────────────────────
+      expect(
+        mess.schieneUnten <= mess.fensterHoehe + 1,
+        `Die Schiene ragt unten aus dem Fenster: Unterkante ${mess.schieneUnten}px ` +
+          `bei ${mess.fensterHoehe}px Fensterhöhe. Genau ${mess.schieneUnten - mess.fensterHoehe}px ` +
+          `sind dann unerreichbar, weil ein angeheftetes Element nicht mitscrollt.`,
+      ).toBe(true);
+
+      expect(
+        mess.letzterOben >= mess.schieneOben - 1 &&
+          mess.letzterUnten <= Math.min(mess.fensterHoehe, mess.schieneUnten) + 1,
+        `Der unterste Abschnitt „${mess.letzterLabel}" ist nicht vollständig sichtbar, ` +
+          `obwohl in der Schiene ganz nach unten gescrollt wurde: ` +
+          `Abschnitt ${mess.letzterOben}–${mess.letzterUnten}, ` +
+          `Schiene ${mess.schieneOben}–${mess.schieneUnten}, Fenster 0–${mess.fensterHoehe}.`,
+      ).toBe(true);
+    });
+  }
+});
