@@ -507,7 +507,21 @@ export default function HeroScrollStage({
           // Unter natürlichen Bedingungen hat Tobias es nicht gesehen; der
           // Mechanismus ist älter als der Verankerungs-Commit, neu waren nur die
           // Beträge, weil sie jetzt dem Eyebrow folgen.
-          if (eingeflogenRef.current) korrekturLaeuftRef.current = true;
+          // ⚠️ KEINE `eingeflogenRef`-BEDINGUNG MEHR (Befund Kai K1, achte
+          // Runde). Sie wird AUSSCHLIESSLICH im `mobil`-Zweig gesetzt – die
+          // Federung war über 768 px damit **per Konstruktion unerreichbar**,
+          // und dort ist der Sprung GRÖSSER. Kai hat es mit sichtbarem Ball
+          // (vorgescrollt) gemessen:
+          //     768 → 231 px · 820 → 245 px · 900 → **255 px** · 1000 → 151 px
+          // Das sind bis zu **6,4×** die 39,8 px, gegen die dieser Mechanismus
+          // überhaupt gebaut wurde. 768×1024 ist iPad-Hochformat.
+          // ⚠️ Und die Bedingung war auch sachlich überflüssig: Dieser Beobachter
+          // wird ERST NACH der ersten Finalisierung erzeugt. Jedes Feuern ist
+          // damit per Konstruktion eine Korrektur und nie der Erstaufbau – genau
+          // das, was `eingeflogenRef` ausdrücken sollte, nur richtig.
+          // Den laufenden Einflug hält weiterhin `!einflugAktivRef.current` in
+          // `apply` ab; dafür braucht es hier nichts.
+          korrekturLaeuftRef.current = true;
           beginnWartenRef.current = performance.now();
           cancelAnimationFrame(warteRaf);
           warteRaf = requestAnimationFrame(kaestenFinalisieren);
