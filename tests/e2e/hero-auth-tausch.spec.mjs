@@ -32,7 +32,7 @@ import { test, expect } from "@playwright/test";
 // DOKUMENTIERT den Zufallsfall korrekt (und hält fest, dass die häufigste
 // iPhone-Breite unauffällig ist), aber er DECKT nichts ab. Wer ihn für Abdeckung
 // hält, überschätzt diesen Test um ein Viertel.
-const BREITEN = [320, 375, 600, 640];
+const BREITEN = [320, 375, 600, 640, 768, 900];
 const AUTH_VERZUG_MS = 2600; // schiebt den Zweigtausch sicher hinter die Landung
 // ⚠️ ABGELEITET, NICHT GEGRIFFEN (Befund Kai K2, achte Runde). Hier stand eine
 // feste `2500` im Filter, während `AUTH_VERZUG_MS` 2600 war – zwei Zahlen, die
@@ -98,7 +98,13 @@ test.describe("Hero-Ball – späte Anmeldung", () => {
       }, token);
 
       await page.goto("/", { waitUntil: "domcontentloaded" });
-      await page.waitForTimeout(AUTH_VERZUG_MS + RUHE_MS);
+      if (breite >= 768) {
+        await page.waitForTimeout(900);
+        await page.evaluate(() => window.scrollTo(0, 400));
+        await page.waitForTimeout(AUTH_VERZUG_MS + RUHE_MS - 900);
+      } else {
+        await page.waitForTimeout(AUTH_VERZUG_MS + RUHE_MS);
+      }
 
       // Der Zweig MUSS getauscht haben, sonst prüft der Test nichts.
       const eyebrow = await page.evaluate(

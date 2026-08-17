@@ -11,6 +11,12 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
+> ⚠️ **NICHT DEPLOYT: die Commits nach `cc128ed`** (`326b81f` und die neunte
+> Gate-Runde). Befund Kai, neunte Runde: Diese Warnzeile war ganz verschwunden,
+> und `326b81f` kam in der Datei überhaupt nicht vor – **genau die Zeile, die
+> laut eigener Chronik schon dreimal gelogen hat.** Zählen, nicht schätzen:
+> `git rev-list --count cc128ed..HEAD`, und der Server-Stand kommt aus
+> `ssh … "cd /root/hoops-v2 && git log --oneline -1"`.
 > ✅ **DEPLOYT: `cc128ed`** (17.08.2026 nachts; davor `f27736a`, `40dff48`, `f46a783`, `84cb7ba`) – am Server verifiziert, Abstand
 > zu `origin` 0, `pm2 restart` gelaufen, Prozess `online`.
 > ✅ **Production-Runtime VOR dem Deploy geprüft** (`npm start` auf frischem Build,
@@ -61,7 +67,7 @@
 > die Fehlerform, die weiter unten schon zweimal für den Rollback-Zeiger protokolliert ist.
 > **Nicht schätzen, zählen:** `git rev-list --count 164c784..HEAD`.
 > ✅ **Stand nach Runde SIEBEN: beide Gates freigabefähig mit Auflagen** – die
-> Auflagen sind umgesetzt, ebenso Tobias' H1. Build durch, Playwright **225/225** (gegen `--list`
+> Auflagen sind umgesetzt, ebenso Tobias' H1 und Kais K1. Build durch, Playwright **227/227** (gegen `--list`
 > abgeglichen). Live ist `f46a783`; auf `redesign` liegt der Stand danach.
 > ⚠️ **Der Hauptbefund der Runde war eine Zusicherung, die es nicht gab:** Der
 > Kommentar, mit dem ich das Streichen der Bildzahl-Schwelle begründet habe,
@@ -988,7 +994,52 @@
     Proben verlangte und die Korrektur 14 ms dauert. Entschieden hat erst die
     **Rohspur**, nicht die Kennzahl.
 
-20f. ⚠️ **OFFEN, Entscheidung: H1 ist nur zur HÄLFTE behoben — und die unbehobene
+20f. ✅ **ERLEDIGT: H1 gilt jetzt auch über 768 px** (war Kais K1). Die Federung
+    hing an `eingeflogenRef`, das nur im `mobil`-Zweig gesetzt wird – über 768 px
+    war sie **per Konstruktion unerreichbar**, und dort ist der Sprung GRÖSSER:
+    768 → 231 px · 820 → 245 px · 900 → **255 px** · 1000 → 151 px.
+    ⚠️ **Der Betrag hängt an der FENSTERHÖHE, nicht an der Breite** – bei Höhe
+    1024 misst derselbe Fall 31 px. Die Zahlen im Code tragen deshalb jetzt ihre
+    Bedingungen (Höhe 812, Vorscroll 400); ohne sie hält der nächste Prüfer den
+    Kommentar für falsch. Dieselbe Achse wie in Roadmap 20b.
+    ⚠️ **Warum es acht Runden überlebt hat:** `tests/e2e/hero-auth-tausch.spec.mjs`
+    ist die einzige Stelle, an der Auth-Tausch und `transitionDuration` zusammen
+    geprüft werden – und `BREITEN` lag **komplett unter 768**. Dort ist
+    `eingeflogenRef` immer gesetzt, der Defekt also unsichtbar. Jetzt mit 768/900.
+    ⚠️ **Und mein Fix hatte ein Rennen, das es vorher nicht gab** (Befund Kai):
+    Trifft die Anmeldung den EINEN Frame vor `einflugAktivRef = true`, fuhr der
+    mobile Einflug 24–26 Frames unter einer aktiven 320-ms-Übergangszeit.
+    Behoben – der Einflug löscht Flag, Timer und Übergangszeit, bevor er startet:
+    **er fährt selbst und darf keine fremde Übergangszeit erben.**
+    ⚠️ **Der wichtigste Satz der Runde** (Kai, gehört in
+    `docs/MUSTER-ZAHLEN-DIE-LUEGEN`): Sein naheliegender Testnachtrag wäre GRÜN
+    geworden – mit **null Messframes**. Gefangen hat es die Ehrlichkeitsschranke
+    im Test („Nur 7 Schreibvorgänge – die Sonde hat nicht gemessen").
+    *„Ohne diese Schranke wäre daraus ein grüner Test mit null Messframes
+    geworden — der Fehler aus deinem ersten Anlauf, diesmal eingecheckt."*
+    ⚠️ **Warum drei eigene Sonden von mir blind waren** – zwei Hälften einer
+    Antwort: `style.transform` ist der **Inline-Stil** und springt bei einer
+    Übergangszeit immer in einem Frame (interpoliert wird die **gerenderte** Lage,
+    `getBoundingClientRect` pro rAF-Frame) · und bei `scrollY = 0` steht der Ball
+    auf Desktop-Breiten auf **Deckkraft 0,000**, eine Sonde mit
+    Sichtbarkeitsfilter verwirft dort jeden Messpunkt.
+    **Tobias' Gegenprobe ist der bessere Weg:** Federung browserseitig abklemmen
+    (`addStyleTag` mit `transition:none`) – echtes Vorher/Nachher ohne Eingriff
+    in den Quelltext.
+
+20g. ⚠️ **OFFEN bei Vivien (Befund Tobias M1, Altbestand):** Im **eingeloggten**
+    Hero steht der Ball bei 768–820 px Breite und Fensterhöhe 700–800 komplett
+    **hinter der Navbar** (`top −149,6` bei 176 px Höhe). Deshalb ist die
+    Lagekorrektur dort überhaupt so groß. Tobias: *„ein 104-KB-Ball, den ein
+    eingeloggter Nutzer auf dem iPad nie sieht, ist ein bezahlter Auftritt ohne
+    Publikum."* ⚠️ Die Sichtbarkeit wurde in Roadmap 20b bisher **nur ausgeloggt**
+    gemessen. Frage an sie: Soll der Hero-Ball eingeloggt bei niedrigen
+    Fensterhöhen überhaupt einen Auftritt haben – und wenn ja, muss der Anker im
+    eingeloggten Zweig anders sitzen?
+    ⚠️ **Und die Einflug-Abhilfe ist eine sichtbare Bewegungsänderung**, also
+    gate-pflichtig bei Tobias, mobil zuerst (Hinweis Kai).
+
+20h. ⚠️ **OFFEN, Entscheidung: H1 war nur zur HÄLFTE behoben — und die unbehobene
     Hälfte ist die größere** (Befund Kai K1, achte Runde). `eingeflogenRef` wird
     ausschließlich im `mobil`-Zweig gesetzt, die Federung ist über 768 px also
     **per Konstruktion unerreichbar**. Gemessen mit sichtbarem Ball:

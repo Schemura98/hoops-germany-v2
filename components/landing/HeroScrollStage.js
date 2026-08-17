@@ -513,6 +513,12 @@ export default function HeroScrollStage({
           // und dort ist der Sprung GRÖSSER. Kai hat es mit sichtbarem Ball
           // (vorgescrollt) gemessen:
           //     768 → 231 px · 820 → 245 px · 900 → **255 px** · 1000 → 151 px
+          // ⚠️ DIESE ZAHLEN GELTEN NUR MIT IHREN BEDINGUNGEN (Auflage Kai,
+          // neunte Runde): **Fensterhöhe 812, vorgescrollt auf 400.** Der Betrag
+          // hängt nicht an der Breite, sondern an der HÖHE – bei Höhe 1024
+          // misst derselbe Fall nur 31 px. Ohne die Bedingungen hält der nächste
+          // Prüfer den Kommentar für falsch. Dieselbe Achse, die in Roadmap 20b
+          // schon vier Runden gekostet hat.
           // Das sind bis zu **6,4×** die 39,8 px, gegen die dieser Mechanismus
           // überhaupt gebaut wurde. 768×1024 ist iPad-Hochformat.
           // ⚠️ Und die Bedingung war auch sachlich überflüssig: Dieser Beobachter
@@ -520,7 +526,9 @@ export default function HeroScrollStage({
           // damit per Konstruktion eine Korrektur und nie der Erstaufbau – genau
           // das, was `eingeflogenRef` ausdrücken sollte, nur richtig.
           // Den laufenden Einflug hält weiterhin `!einflugAktivRef.current` in
-          // `apply` ab; dafür braucht es hier nichts.
+          // `apply` ab. ⚠️ KORREKTUR (Kai, neunte Runde): Der Zusatz „dafür
+          // braucht es hier nichts" war zu stark. Es braucht etwas – nur an
+          // einer anderen Stelle, siehe die Abhilfe am Einflugstart.
           korrekturLaeuftRef.current = true;
           beginnWartenRef.current = performance.now();
           cancelAnimationFrame(warteRaf);
@@ -1131,6 +1139,17 @@ export default function HeroScrollStage({
         // hat, wäre eine Bewegung ohne Anlass.
         if (window.scrollY > 0) return;
         einflugAktivRef.current = true;
+        // ⚠️ DER EINFLUG NIMMT DEN BALL MIT SAUBEREM ZUSTAND (Befund Kai,
+        // neunte Runde). Seit die Federung nicht mehr an `eingeflogenRef`
+        // hängt, kann der Auth-Tausch sie in dem EINEN Frame zwischen
+        // `kaestenFinalRef = true` und dieser Zeile scharf machen. Dann fährt
+        // der Einflug per rAF unter einer aktiven 320-ms-Übergangszeit –
+        // gemessen 24–26 Frames – und die Darstellung läuft dem
+        // geschriebenen Wert nach. Der Einflug fährt selbst; er darf keine
+        // fremde Übergangszeit erben.
+        korrekturLaeuftRef.current = false;
+        window.clearTimeout(korrekturTimerRef.current);
+        ball.style.transition = "";
         ball.style.opacity = clamp(ballOpacity, 0, 1).toFixed(3);
         // ══ DER EINFLUG NIMMT DIE SEQUENZ MIT ═══════════════════════════════
         // Entscheidung Vivien (fünfte Runde). Vorher fiel der Ball mobil als
