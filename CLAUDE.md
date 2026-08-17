@@ -13,8 +13,15 @@
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
 > ✅ **DEPLOYT: `787d760`** (18.08.2026; davor `cc128ed`, `f27736a`, `40dff48`, `f46a783`, `84cb7ba`) – am Server
 > verifiziert (`git log` AM SERVER, nicht dieser Zeile geglaubt), Abstand zu `origin` 0,
-> `pm2 restart` gelaufen, Prozess `online`. **Nichts Offenes:**
-> `git rev-list --count 787d760..HEAD` = 0.
+> `pm2 restart` gelaufen, Prozess `online`. **Der ausgelieferte Code ist der aktuelle** –
+> was danach liegt, sind reine Doku-Commits. Prüfen mit **zwei** Befehlen, nicht mit einem:
+> ```bash
+> git rev-list --count 787d760..HEAD    # wie viele Commits offen
+> git diff 787d760..HEAD --stat -- . ':(exclude)docs' ':(exclude)CLAUDE.md'   # davon Code?
+> ```
+> ⚠️ Die zweite Zeile ist die wichtigere. Eine Zahl allein („5 offen") sagt nicht, ob ein Deploy
+> **nötig** ist – dieselbe Zahl bedeutet bei fünf Doku-Commits „nichts zu tun" und bei einem
+> Code-Commit „die Seite läuft veraltet".
 > ⚠️ **Diese Zeile hat sich beim VIERTEN Mal geirrt** – sie sagte „NICHT DEPLOYT: 3 Commits
 > nach `cc128ed`" und zählte `6750a78` nicht mit; bis zum Deploy waren es **5**. Immer
 > zählen, nie schätzen: `git rev-list --count <live>..HEAD`, Server-Stand aus
