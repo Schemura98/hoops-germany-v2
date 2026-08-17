@@ -3,7 +3,7 @@
 
 ---
 
-## 0. AKTUELLER STAND (Überblick · Stand 17.08.2026)
+## 0. AKTUELLER STAND (Überblick · Stand 18.08.2026)
 
 > 🟢 **v2 IST LIVE auf https://hoopsgermany.de** (seit 24.06.2026). Hostinger-VPS `92.113.25.249`
 > (Ubuntu 24.04), Code in `/root/hoops-v2` (Branch **`redesign`**), PM2-Prozess **`hoops-v2` auf Port 3001**,
@@ -11,31 +11,36 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> ⚠️ **NICHT DEPLOYT: 3 Commits nach `cc128ed`** (`326b81f`, `cc7f2e0` und dieser). Befund Kai, neunte Runde: Diese Warnzeile war ganz verschwunden,
-> und `326b81f` kam in der Datei überhaupt nicht vor – **genau die Zeile, die
-> laut eigener Chronik schon dreimal gelogen hat.** Zählen, nicht schätzen:
-> `git rev-list --count cc128ed..HEAD`, und der Server-Stand kommt aus
+> ✅ **DEPLOYT: `787d760`** (18.08.2026; davor `cc128ed`, `f27736a`, `40dff48`, `f46a783`, `84cb7ba`) – am Server
+> verifiziert (`git log` AM SERVER, nicht dieser Zeile geglaubt), Abstand zu `origin` 0,
+> `pm2 restart` gelaufen, Prozess `online`. **Nichts Offenes:**
+> `git rev-list --count 787d760..HEAD` = 0.
+> ⚠️ **Diese Zeile hat sich beim VIERTEN Mal geirrt** – sie sagte „NICHT DEPLOYT: 3 Commits
+> nach `cc128ed`" und zählte `6750a78` nicht mit; bis zum Deploy waren es **5**. Immer
+> zählen, nie schätzen: `git rev-list --count <live>..HEAD`, Server-Stand aus
 > `ssh … "cd /root/hoops-v2 && git log --oneline -1"`.
-> ✅ **DEPLOYT: `cc128ed`** (17.08.2026 nachts; davor `f27736a`, `40dff48`, `f46a783`, `84cb7ba`) – am Server verifiziert, Abstand
-> zu `origin` 0, `pm2 restart` gelaufen, Prozess `online`.
-> ✅ **Production-Runtime VOR dem Deploy geprüft** (`npm start` auf frischem Build,
-> `BUILD_ID` kontrolliert): 16 Routen je 200, Skip-Link und `<main>` vorhanden,
-> Konturkanal ≥ 10 auf allen mobilen Breiten, **0 Laufzeitfehler**. Das war Kais
-> offene Auflage aus Runde sieben.
-> ✅ **Live über die DOMAIN nachgemessen:** 16 Routen je 200 · Kanal 10,18 (360) /
-> 10,23 (368) / 13,17 (375) / 30,91 (412) / 39,66 (430) · Ball auf keiner Breite im
-> Textblock · wirksame Sichtbarkeit 0,80 · Skip-Link und `<main>` da · 0 Fehler ·
-> Cache-Vorgabe unverändert.
-> ⚠️ **BEIM LIVE-NACHMESSEN FAST EINEN FEHLALARM GEMELDET (17.08.2026):** Meine
-> Sonde fand `.hero-ball-sprite` nach 2 s nicht und meldete „der Ball fehlt auf
-> der Live-Seite". Er fehlt nicht – er **erscheint nur spät**: gemessen nach
-> **2,5–4,5 s**, und Tobias hatte das in Runde sieben längst protokolliert
-> („der Ball bei dcl+3611 ms"). Ich hatte eine Wartezeit gewählt statt auf das
-> Element zu warten – dieselbe Konstanten-Fehlerklasse, die Kai in derselben
-> Runde an meinem Test gefunden hat. **Live immer mit `waitForSelector` messen,
-> nie mit `waitForTimeout`:** Der Erstaufbau ist dort deutlich langsamer als
-> lokal, und das ist ein bekannter, offener Nutzenpunkt (bei Ronja/Lina), kein
-> Defekt.
+> ✅ **Vor dem Deploy geprüft:** Build durch · Playwright **227/227** (gegen `--list`
+> abgeglichen) · Production-Runtime (`npm start`, `BUILD_ID` kontrolliert) · **Tobias-Gate
+> freigabefähig** (Gegenprobe mit abgeklemmter Federung: 231 px bzw. 255 px in EINEM Frame
+> ohne Fix → 14–15 Frames mit Fix).
+> ✅ **Live über die DOMAIN nachgemessen (18.08.2026):** 16 Routen je 200 · Konturkanal
+> 13,84 (320) / **10,18 (360)** / **10,23 (368)** / 13,17 (375) / 30,91 (412) / 39,66 (430) ·
+> wirksame Sichtbarkeit 0,80 mobil · ab 768 mit Vorscroll 400 sichtbar (39–54 %) ·
+> Skip-Link und `<main>` da · **0 Laufzeitfehler** · Cache-Vorgabe `max-age=2592000` steht.
+> ⚠️ **DIE FEHLALARM-FALLE HAT SICH WIEDERHOLT – IN NEUER FORM (18.08.2026).** Beim letzten
+> Deploy war der Fehler eine feste Wartezeit statt `waitForSelector`. Diesmal habe ich
+> korrekt auf das Element gewartet – und **trotzdem zu früh gemessen**: Der Ball ist im
+> Seitengerüst vorhanden, bevor er auf seiner Ruhelage steht. Ergebnis: Deckkraft 0,00 auf
+> **allen** Breiten und ein Konturkanal von 3,29 px bei 360 – hätte ich das gemeldet, wäre
+> es ein Fehlalarm über genau den Defekt gewesen, der zwei Runden vorher behoben wurde.
+> **Regel: auf das Element warten reicht nicht, es muss zur RUHE gekommen sein** – auf
+> Deckkraft > 0,5 UND fünf Frames Lageänderung < 0,5 px warten (Muster:
+> `scratchpad/live-nachmessen.mjs`). Danach stimmten die Werte auf zwei Nachkommastellen
+> mit den protokollierten überein.
+> ⚠️ **Und die zweite Hälfte derselben Falle:** Bei 768/900/1280 meldete dieselbe Sonde
+> „Ball FEHLT". Auch das ist kein Defekt – ab 768 px steht der Ball bei `scrollY = 0` auf
+> Deckkraft 0,000 (in Roadmap 20f protokolliert). **Eine Sichtbarkeitssonde ohne Vorscroll
+> verwirft auf Desktop-Breiten per Konstruktion jeden Messpunkt.**
 > ⚠️ **ZUM DRITTEN MAL STIMMTE DIESE ZEILE NICHT — diesmal aus einem neuen Grund:**
 > Sie führte `f46a783` als live, der Server stand aber schon auf `40dff48`. Eine
 > **andere Sitzung** (Skip-Link) hatte selbst deployt. Vorher lag es zweimal daran,
@@ -1063,8 +1068,31 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     gemessen. Frage an sie: Soll der Hero-Ball eingeloggt bei niedrigen
     Fensterhöhen überhaupt einen Auftritt haben – und wenn ja, muss der Anker im
     eingeloggten Zweig anders sitzen?
-    ⚠️ **Und die Einflug-Abhilfe ist eine sichtbare Bewegungsänderung**, also
-    gate-pflichtig bei Tobias, mobil zuerst (Hinweis Kai).
+    ✅ **Das Gate ist gelaufen (18.08.2026, freigabefähig)** – die Einflug-Abhilfe
+    war als sichtbare Bewegungsänderung gate-pflichtig (Hinweis Kai), Tobias hat
+    sie mobil zuerst geprüft. **Neue Zahlen zu diesem Punkt:** auf **768×812
+    eingeloggt** ist der Ball über den gesamten Scrollweg 0–700 px **0 % wirksam
+    sichtbar**; derselbe Viewport ausgeloggt erreicht **86 %**, und 768×1024
+    eingeloggt ebenfalls 86 %. Es hängt also an der **Fensterhöhe**, nicht an der
+    Breite – dieselbe Achse wie in Roadmap 20b.
+    ⚠️ Tobias hat **nicht** gegen den Live-Stand `cc128ed` gegengemessen (das hätte
+    einen zweiten Build gebraucht, der im Gate ausgeschlossen war). „Vorbestehend"
+    ist aus dem Diff **hergeleitet**, nicht gemessen.
+
+20h. ⚠️ **OFFEN bei Kai (Befund Tobias B2, 18.08.2026): Der Wettlauf-Teil des
+    K1-Fixes hat keine Testabdeckung.** `tests/e2e/hero-auth-tausch.spec.mjs`
+    arbeitet mit `AUTH_VERZUG_MS = 2600`; der Zweigtausch fällt damit rund 1,6 s
+    **nach** den Einflug. Der Moment, gegen den die zweite Änderung gebaut wurde
+    (Anmeldung trifft den einen Frame **vor** dem Einflug), liegt bei **820–940 ms**
+    – also außerhalb dessen, was irgendein Test berührt. **Wer den Fix wieder
+    entfernt, bekommt eine grüne Suite.**
+    Tobias' Vorschlag: Fall bei **320 px** – dort unterscheiden sich die Anker um
+    32 px, bei 375 px sind sie deckungsgleich und der Fall wäre **blind**. Prüfmaß:
+    `transitionDuration === "0s"` in **jedem** Frame des Einflugs, Endlage 155 px.
+    ⚠️ Mit Ehrlichkeitsschranke „Einflug überhaupt erkannt?" – Tobias' eigener
+    erster Detektor meldete „0 von 29 Läufen auffällig" und hatte dabei die
+    **falsche Bewegungsphase** erfasst (t ≈ 70 ms statt t ≈ 940 ms). Das wäre ein
+    grünes Ergebnis mit null Messframes gewesen – exakt das Muster aus Roadmap 20f.
 
 21. ✅ **ERLEDIGT (17.08.2026): Cache-Vorgabe für `/images/` und `/fonts/`.** Gesetzt in
     `next.config.mjs` über `headers()` – **nicht** in Nginx, damit die Vorgabe versioniert ist und

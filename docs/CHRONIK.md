@@ -3695,3 +3695,98 @@ ohne den Wächter: Er hängt am globalen Port, die eigentliche Gefahr — ein De
 
 Die Klickfläche des Banner-Links (95×16 px). Sie fällt unter die **Inline-Ausnahme von SC 2.5.8**
 und ist als Gestaltungsentscheidung separat bei Vivien entschieden (Roadmap 20 (g)).
+
+---
+
+## 18.08.2026 – Deploy `787d760`: die Hero-Federung gilt endlich auf allen Breiten
+
+**Live-Stand vorher `cc128ed`, jetzt `787d760`.** Am Server verifiziert (`git log` AM SERVER),
+`pm2 restart hoops-v2` gelaufen, Prozess `online`, Abstand zu `origin` 0.
+
+### Was auf der Seite anders ist
+
+Genau **eine Produktivdatei**: `components/landing/HeroScrollStage.js` (+35 Zeilen), dazu
+`tests/e2e/hero-auth-tausch.spec.mjs`. Alles andere im Diff war Dokumentation.
+
+Sachverhalt: Auf der Startseite sprang der Basketball, wenn die Anmeldeauskunft (`getmyinfo`)
+erst **nach** der Landung des Balls auflöste – der Anker wechselt dann vom ausgeloggten Eyebrow
+(239,5 px breit) auf den eingeloggten (179,8 px). Unter 768 px war dafür schon eine weiche
+Korrektur eingebaut; darüber galt sie **per Konstruktion nie**, weil sie an `eingeflogenRef`
+hing, das nur im mobilen Zweig gesetzt wird. Dort war der Sprung sogar **größer**.
+
+### Gates
+
+- `npm run build` durch · **Playwright 227/227** (gegen `npx playwright test --list` abgeglichen,
+  9,3 min) · Production-Runtime (`npm start`, `BUILD_ID` gegen `.next/BUILD_ID` kontrolliert).
+- **`git diff cc128ed..HEAD -- package.json` leer** → kein `npm install` auf dem VPS. Der Server
+  trug diesmal **keine** lokale Änderung an `package-lock.json` (anders als beim Deploy davor).
+- **Tobias-Gate: freigabefähig.** Er hat den Fall auf sechs Viewports nachgemessen und – das ist
+  der belastbare Teil – eine **Gegenprobe mit browserseitig abgeklemmter Federung** gefahren
+  (`addStyleTag` mit `transition: none`, ohne Eingriff in den Quelltext):
+
+  | Viewport | mit Fix | ohne Fix |
+  |---|---|---|
+  | 768×812 | 51,7 px über 14 Frames | **231 px in EINEM Frame** |
+  | 900×800 | 60,0 px über 15 Frames | **255 px in EINEM Frame** |
+  | 360×800 | 2,0 px über 6 Frames | 9 px in einem Frame |
+
+  Der Zweigtausch war **belegt, nicht angenommen** (Eyebrow-Breite 239,5 → 179,8 auf allen sechs
+  Viewports). Übergangszeit `0,32 s`, Kurve `cubic-bezier(0.22, 1, 0.36, 1)`, danach wird
+  `transitionDuration` wieder auf `0s` abgeräumt.
+  Den Wettlauf-Teil hat er in **23 Läufen** je Viewport (Anmeldeverzögerung 640–1080 ms in
+  20-ms-Schritten, engster Treffer 0 Frames Abstand) geprüft: Einflug durchgehend ohne fremde
+  Übergangszeit. `prefers-reduced-motion`: auf 11 Viewports × 2 Anmeldezustände **gar kein Ball**
+  im Seitengerüst.
+
+### Live nachgemessen (über die Domain, nicht am Server von innen)
+
+16 Routen je **200** · Cache-Vorgabe `public, max-age=2592000, stale-while-revalidate=86400`
+steht · Skip-Link und genau **ein** `<main>` im Server-HTML · **0 Laufzeitfehler** auf 9 Breiten.
+
+Konturkanal zum Eyebrow-Badge (Vorgabe ≥ 10 px): 13,84 (320) · **10,18 (360)** · **10,23 (368)** ·
+13,17 (375) · 30,91 (412) · 39,66 (430). Wirksame Sichtbarkeit mobil **0,80**. Die Werte stimmen
+auf zwei Nachkommastellen mit den am 17.08. protokollierten überein.
+
+### ⚠️ Die Fehlalarm-Falle hat sich wiederholt – in NEUER Form
+
+Beim Deploy am 17.08. war der Fehler eine **feste Wartezeit** statt `waitForSelector`. Diesmal
+habe ich korrekt auf das Element gewartet – und **trotzdem zu früh gemessen**. Das Element ist
+im Seitengerüst vorhanden, *bevor* es auf seiner Ruhelage steht. Die erste Messung meldete:
+
+- Deckkraft **0,00 auf allen neun Breiten**
+- Konturkanal **3,29 px bei 360** → „Vorgabe VERLETZT"
+
+Hätte ich das gemeldet, wäre es ein Fehlalarm über **genau den Defekt gewesen, den Vivien zwei
+Runden vorher gefunden und der behoben wurde** (die 2,65 px bei 360 px). Der einzige Grund, warum
+es aufgefallen ist: Deckkraft 0,00 auf **allen** Breiten gleichzeitig ist kein plausibler
+Produktzustand – dieselbe Signatur wie die „20,0 px auf allen Breiten identisch" aus Roadmap 20e.
+
+**Regel: Auf das Element warten reicht nicht – es muss zur RUHE gekommen sein.** Die korrigierte
+Sonde wartet auf Deckkraft > 0,5 UND fünf aufeinanderfolgende Frames mit Lageänderung < 0,5 px.
+
+**Zweite Hälfte derselben Falle:** Bei 768/900/1280 meldete die Sonde „Ball FEHLT". Auch kein
+Defekt – ab 768 px steht der Ball bei `scrollY = 0` auf Deckkraft 0,000 (Roadmap 20f). Eine
+Sichtbarkeitssonde **ohne Vorscroll** verwirft auf Desktop-Breiten per Konstruktion jeden
+Messpunkt. Mit Vorscroll 400: 39,3 % (768) · 53,6 % (900) · 39,7 % (1280).
+
+### ⚠️ Die Warnzeile in Abschnitt 0 hat sich zum VIERTEN Mal geirrt
+
+Sie sagte „NICHT DEPLOYT: 3 Commits nach `cc128ed`" und zählte `6750a78` nicht mit – es waren
+schon damals 4, bis zum Deploy 5. Neu daran ist nur der Grund: diesmal keine vergessene Pflege,
+sondern eine **Aufzählung von Hand statt eines Zählbefehls**, in derselben Zeile, die
+`git rev-list --count` vorschreibt.
+
+### Offen geblieben (Übergaben aus dem Gate, nichts davon blockierend)
+
+- **An Vivien:** Tobias' **B1** – auf **768×812 eingeloggt** ist der Ball über den gesamten
+  Scrollweg 0–700 px **0 % wirksam sichtbar** (ausgeloggt derselbe Viewport: bis 86 %; 768×1024
+  eingeloggt: 86 %). Das ist Roadmap 20g, jetzt mit Zahlen. ⚠️ Tobias hat **nicht** gegen
+  `cc128ed` gegengemessen – „vorbestehend" ist aus dem Diff hergeleitet, nicht gemessen.
+- **An Kai:** Tobias' **B2** – der Wettlauf-Teil des Fixes hat **keine Testabdeckung**.
+  `tests/e2e/hero-auth-tausch.spec.mjs` nutzt `AUTH_VERZUG_MS = 2600`; der kritische Moment liegt
+  bei **820–940 ms**. Wer den Fix entfernt, bekommt eine grüne Suite. Vorschlag: Fall bei
+  **320 px** (dort unterscheiden sich die Anker um 32 px; bei 375 px sind sie deckungsgleich und
+  der Fall wäre blind), Prüfmaß `transitionDuration === "0s"` in jedem Frame des Einflugs,
+  Endlage 155 px – mit Ehrlichkeitsschranke „Einflug überhaupt erkannt?".
+
+**Commit `787d760`** (Deploy), Doku-Nachtrag im Commit danach.
