@@ -970,6 +970,24 @@
     `tests/e2e/ball-sequenz.spec.mjs` abgesichert; für `logo.svg` und die Auth-Motive gibt es diese
     Absicherung **nicht**.
 
+22. **`/signup` liefert ohne JavaScript eine leere Seite — liegt bei Vivien UND Nora.**
+    Befund 17.08.2026, Nebenbefund der Sprungmarken-Arbeit, **vorbestehend**, kein Blocker:
+    `docs/SIGNUP-OHNE-JS-2026-08-17.md`. Im rohen Server-HTML von `/signup` stehen **0**
+    Formularfelder, **0** `<main>`, **0** Verweise auf Datenschutz und Impressum — ausgeliefert
+    werden nur Banner und Sprungmarke. Ursache: `useSearchParams()` (Z. 32) auf einer statisch
+    vorgerenderten Seite lässt Next die nächste `<Suspense>`-Grenze auf ihren Fallback
+    zurückfallen, und der ist **leer** (Z. 291 ff.). `/login` hat dieselbe fallback-lose Grenze,
+    nutzt aber kein `useSearchParams()` → rendert vollständig. Im Browser ist nach der Hydration
+    alles korrekt.
+    ⚠️ **Der Punkt für Nora ist der unangenehmere:** Der Datenschutzverweis, den sie am 13.08.
+    für `/signup` gefordert hat (`docs/RECHT-LEISTUNGSKARTE-2026-08-13.md`), wurde in
+    `AuthShell.js` eingebaut — und erreicht auf **genau dieser Seite** das Server-HTML nicht.
+    Die damalige Abhilfe greift dort nur mit JavaScript. Entschärfen könnte es, dass ohne
+    JavaScript auch kein Formular existiert, also nichts erhoben wird — das zu beurteilen ist
+    ihre Sache, nicht meine.
+    Für Vivien: `<Suspense>` ohne `fallback` heißt **kein gestalteter Ladezustand** auf dem
+    QR-Landepunkt. Nicht gemessen und offen: **wie lang** die Lücke auf echten Geräten ist.
+
 ### Bekannte Einschränkungen (lokale Dev-Umgebung)
 - SMTP-/Google-Keys fehlen in der lokalen `.env` → Mails/Google-Login nur auf dem VPS (hoops_prod) live
   testbar; lokal über In-App-Notifs + Trigger-Logs verifizieren.
