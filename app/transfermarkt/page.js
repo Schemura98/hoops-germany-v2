@@ -214,7 +214,7 @@ export default function TransfermarktPage() {
         subtitle="Finde einen Verein – oder die passende Verstärkung."
       />
 
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
+      <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
         {/* Passende Treffer (personalisiert) */}
         {(matchTeams.length > 0 || matchPlayers.length > 0) && (
           <div className="mb-6 rounded-md border border-brand-500/50 bg-brand-500/50 p-5">

@@ -172,7 +172,7 @@ export default function MatchIdPage({ params }) {
 
   if (state === "loading") {
     return (
-      <main className="min-h-screen flex items-center justify-center">
+      <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex items-center justify-center">
         <Loading />
       </main>
     );
@@ -182,7 +182,7 @@ export default function MatchIdPage({ params }) {
     return (
       <div className="min-h-screen bg-navy-950 flex flex-col">
         <Navbar />
-        <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+        <main id="hauptinhalt" tabIndex={-1} className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <h1 className="text-xl font-bold text-paper-50">Spiel nicht gefunden</h1>
           <Link href="/spiele" className="mt-4 text-brand-400 hover:underline">
             Zurück zur Spielübersicht
@@ -323,7 +323,7 @@ export default function MatchIdPage({ params }) {
         </div>
       </div>
 
-      <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
+      <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
         {/* MVP / Zuschauer / Spielbericht (optional) */}
         {completed && (match.mvp || match.attendance || match.report) && (
           <div className="bg-navy-800 rounded-md border border-navy-600 p-5">

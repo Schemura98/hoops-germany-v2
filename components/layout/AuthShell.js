@@ -59,7 +59,14 @@ export default function AuthShell({
         <span className="hidden sm:inline">Zur Startseite</span>
       </Link>
 
-      <div className="lg:w-1/2 w-full flex items-center justify-center px-6 py-10 sm:py-16">
+      {/* Die Formularspalte ist der Inhalt der Auth-Seiten – das Motiv rechts
+          ist reine Dekoration und steht deshalb bewusst AUSSERHALB des <main>.
+          Landepunkt der Sprungmarke aus app/layout.js (17.08.2026). */}
+      <main
+        id="hauptinhalt"
+        tabIndex={-1}
+        className="lg:w-1/2 w-full flex items-center justify-center px-6 py-10 sm:py-16"
+      >
         <div className="w-full max-w-sm">
           <div className="text-center mb-5 sm:mb-8">
             <Link href="/">
@@ -86,7 +93,7 @@ export default function AuthShell({
               Rechtsgrundlagen stehen dort. */}
           <RechtsLinks className="mt-6" />
         </div>
-      </div>
+      </main>
 
       <div className="hidden lg:block lg:w-1/2 relative">
         {/* Das Motiv ist unter lg gar nicht sichtbar. Über `media` an den <source>-

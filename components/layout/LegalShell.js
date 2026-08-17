@@ -49,7 +49,7 @@ export default function LegalShell({ title, eyebrow = "Rechtliches", children })
     <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
       <PageHeader eyebrow={eyebrow} title={title} />
-      <main className="flex-1 max-w-xl mx-auto w-full px-4 py-10">
+      <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-xl mx-auto w-full px-4 py-10">
         {abschnitte.length > 5 && (
           <nav
             aria-label="Abschnitte dieser Seite"

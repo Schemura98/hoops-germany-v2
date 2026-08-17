@@ -15,7 +15,7 @@ import Button from "@/components/ui/Button";
 // Auth-Seiten und einen sichtbaren Weg zurück zur Anmeldung.
 function Rahmen({ children }) {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-6 px-6 py-12 text-center">
+    <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex flex-col items-center justify-center gap-6 px-6 py-12 text-center">
       <Link href="/">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/images/logo.svg" alt="Hoops Germany" className="mx-auto h-auto w-40 sm:w-48" />

@@ -59,7 +59,7 @@ function TeamDetailSkeleton() {
           </div>
         </div>
       </div>
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+      <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
         <div className="flex gap-2 mb-5">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-9 w-24 rounded-full" />
@@ -148,7 +148,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
     return (
       <div className="min-h-screen bg-navy-950 flex flex-col">
         <Navbar />
-        <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+        <main id="hauptinhalt" tabIndex={-1} className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <h1 className="text-xl font-bold text-paper-50">Team nicht gefunden</h1>
           <Link href="/teams" className="mt-4 text-brand-400 hover:underline">
             Zurück zur Team-Übersicht
@@ -220,7 +220,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
         </div>
       </div>
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+      <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
         {joinMsg && (
           <div
             className={`mb-4 rounded-sm border px-4 py-3 text-sm ${

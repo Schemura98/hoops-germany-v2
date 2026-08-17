@@ -31,7 +31,7 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6 py-12 bg-navy-900">
+    <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex items-center justify-center px-6 py-12 bg-navy-900">
       <div className="w-full max-w-sm">
         <div className="flex items-center justify-center gap-2 font-bold text-paper-50 mb-8">
           <PiShieldCheckBold className="text-brand-400 text-xl" />

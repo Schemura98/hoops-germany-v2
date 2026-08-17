@@ -84,7 +84,7 @@ export default function TryoutsPage() {
           Seite dieselbe Außenkante wie ihr Kopf (und wie /transfermarkt,
           /teams, /spieler), und die Lesespalte sitzt links darin verankert
           statt mittig – Zeilenlänge bleibt bei max-w-3xl. */}
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
+      <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
         <div className="max-w-3xl">
 
         {loading ? (

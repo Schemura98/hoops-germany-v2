@@ -216,7 +216,7 @@ export default function LigaDetailPage({ params }) {
       <div className="min-h-screen bg-navy-950 flex flex-col">
         <Navbar />
         <PageHeader eyebrow="Liga-Tabelle" title="Liga" />
-        <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+        <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
           <StandingsSkeleton />
         </main>
         <Footer />
@@ -228,7 +228,7 @@ export default function LigaDetailPage({ params }) {
     return (
       <div className="min-h-screen bg-navy-950 flex flex-col">
         <Navbar />
-        <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+        <main id="hauptinhalt" tabIndex={-1} className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <h1 className="text-xl font-bold text-paper-50">Liga nicht gefunden</h1>
           <Link href="/ligen" className="mt-4 text-brand-400 hover:underline">
             Zurück zur Liga-Übersicht
@@ -268,7 +268,7 @@ export default function LigaDetailPage({ params }) {
         back={{ href: "/ligen", label: "Alle Ligen" }}
       />
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+      <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
         {league.finished && (
           <div className="mb-4 flex items-center gap-3 rounded-md border border-signal-wait/50 bg-gradient-to-r from-signal-wait/10 to-signal-wait/5 px-5 py-4">
             <PiTrophyBold className="text-signal-wait text-2xl shrink-0" />

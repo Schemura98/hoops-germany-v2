@@ -100,7 +100,7 @@ export default function FeedbackPage() {
         subtitle="Hilf uns, Hoops Germany vor dem Launch perfekt zu machen. Je konkreter, desto besser."
       />
 
-      <main className="flex-1 max-w-xl mx-auto w-full px-4 py-8">
+      <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-xl mx-auto w-full px-4 py-8">
         {done ? (
           <div className="bg-navy-800 rounded-md border border-navy-600 p-8 text-center">
             <PiSmileyBold className="text-brand-400 text-4xl mx-auto mb-3" />

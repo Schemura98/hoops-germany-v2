@@ -310,7 +310,7 @@ function SpieleInhalt() {
         }
       />
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+      <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
         {loading ? (
           <SpielePageSkeleton />
         ) : error ? (
@@ -428,7 +428,7 @@ export default function SpielePage() {
             title="Spiele"
             subtitle="Anstehende Partien und aktuelle Ergebnisse."
           />
-          <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+          <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
             <SpielePageSkeleton />
           </main>
           <Footer />

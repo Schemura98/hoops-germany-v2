@@ -88,7 +88,7 @@ export default function TeamAdminPage() {
 
   if (status === "loading") {
     return (
-      <main className="min-h-screen flex items-center justify-center">
+      <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex items-center justify-center">
         <Loading />
       </main>
     );
@@ -96,7 +96,7 @@ export default function TeamAdminPage() {
 
   if (status === "error") {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
+      <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
         <p className="text-mist-300">Team-Daten konnten nicht geladen werden.</p>
         <Button onClick={() => window.location.reload()} className="mt-4">
           Erneut versuchen
@@ -111,7 +111,7 @@ export default function TeamAdminPage() {
     <div className="min-h-screen bg-navy-950">
       <TeamNav team={team} />
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main id="hauptinhalt" tabIndex={-1} className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="font-display uppercase tracking-tight text-2xl font-black text-paper-50">Team-Verwaltung</h1>
           <p className="text-sm text-mist-400">

@@ -108,7 +108,7 @@ export default function RanglistePage() {
         subtitle="Teams nach Siegen und Korbdifferenz – über alle Ligen oder gefiltert."
       />
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+      <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
         <BestenlistenWechsel className="mb-5" />
 
         {/* Filter */}

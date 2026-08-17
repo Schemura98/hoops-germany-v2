@@ -61,7 +61,7 @@ export default function HashtagFeedPage() {
   return (
     <div className="min-h-screen bg-navy-950">
       <PlayerNav player={player} />
-      <div className="max-w-xl mx-auto px-4 py-8">
+      <main id="hauptinhalt" tabIndex={-1} className="max-w-xl mx-auto px-4 py-8">
         <Link
           href="/player/newsfeed"
           className="inline-flex items-center gap-2 text-sm text-mist-400 hover:text-brand-400 mb-4"
@@ -98,7 +98,7 @@ export default function HashtagFeedPage() {
             )}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

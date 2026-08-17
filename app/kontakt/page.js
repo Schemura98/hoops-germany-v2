@@ -35,7 +35,7 @@ export default function KontaktPage() {
     <div className="min-h-screen bg-navy-950 flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-lg mx-auto w-full px-4 py-12">
+      <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-lg mx-auto w-full px-4 py-12">
         <div className="bg-navy-800 rounded-md border border-navy-600 p-8">
           <h1 className="font-display uppercase tracking-tight text-2xl font-black text-paper-50 flex items-center gap-2">
             <PiEnvelopeSimpleBold className="text-brand-400" /> Kontakt

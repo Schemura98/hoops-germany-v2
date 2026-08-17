@@ -33,15 +33,18 @@ function ReportInner() {
     })();
   }, [period]);
 
+  // Auch die Zwischenzustände tragen das <main>: „denied" und „error" sind
+  // keine Momentaufnahmen, hier bleibt ein Nutzer stehen — und die
+  // Sprungmarke aus app/layout.js braucht auf JEDEM Zustand ihr Ziel.
   if (status === "loading")
-    return <div className="min-h-screen flex items-center justify-center"><PiBasketballBold className="text-brand-400 text-3xl animate-bounce" /></div>;
+    return <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex items-center justify-center"><PiBasketballBold className="text-brand-400 text-3xl animate-bounce" /></main>;
   if (status === "denied")
-    return <div className="min-h-screen flex items-center justify-center p-8 text-mist-400">Kein Zugriff – bitte als Admin anmelden.</div>;
+    return <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex items-center justify-center p-8 text-mist-400">Kein Zugriff – bitte als Admin anmelden.</main>;
   if (status === "error" || !summary)
-    return <div className="min-h-screen flex items-center justify-center p-8 text-mist-400">Report konnte nicht geladen werden.</div>;
+    return <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex items-center justify-center p-8 text-mist-400">Report konnte nicht geladen werden.</main>;
 
   return (
-    <div className="min-h-screen bg-navy-700 print:bg-navy-800 py-8 print:py-0">
+    <main id="hauptinhalt" tabIndex={-1} className="min-h-screen bg-navy-700 print:bg-navy-800 py-8 print:py-0">
       <div className="max-w-3xl mx-auto px-4 mb-4 flex items-center justify-between print:hidden">
         <Link href="/admin/analytics" className="inline-flex items-center gap-1.5 text-sm text-mist-400 hover:text-paper-50">
           <PiArrowLeftBold className="text-xs" /> Zurück
@@ -54,7 +57,7 @@ function ReportInner() {
         </button>
       </div>
       <SponsorReportView summary={summary} period={period} generatedAt={generatedAt} />
-    </div>
+    </main>
   );
 }
 

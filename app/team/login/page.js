@@ -13,7 +13,7 @@ export default function TeamLoginRedirect() {
     router.replace(getPlayerToken() ? "/team/admin" : "/login");
   }, [router]);
   return (
-    <main className="min-h-screen flex items-center justify-center">
+    <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex items-center justify-center">
       <PiBasketballBold className="text-brand-400 text-3xl animate-bounce" />
     </main>
   );

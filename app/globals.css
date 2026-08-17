@@ -22,6 +22,20 @@ body {
   background: var(--background);
 }
 
+/* Ziel der Sprungmarke „Zum Inhalt springen" (app/layout.js).
+   Das <main> trägt `tabindex="-1"`, damit der Fokus nach dem Sprung wirklich
+   IM Inhalt landet und nicht am Dokumentanfang stehen bleibt — ohne das
+   Attribut bewegen etliche Browser/Screenreader-Paarungen nur den Bildlauf,
+   nicht den Fokus, und die nächste Tab-Taste führte zurück in die Navigation.
+   Der Ring wird unterdrückt, weil `tabindex="-1"` das Element NICHT in die
+   Tabreihenfolge nimmt (es ist also keine per Tastatur bedienbare Fläche im
+   Sinne von SC 2.4.7) und ein Rahmen um den gesamten Inhaltsbereich nur wie
+   ein Darstellungsfehler aussähe. Die Rückmeldung an den Nutzer ist der
+   Sprung selbst. */
+#hauptinhalt:focus {
+  outline: none;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

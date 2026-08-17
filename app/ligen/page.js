@@ -476,7 +476,7 @@ export default function LigenPage() {
       <Navbar />
       <PageHeader eyebrow="Wettbewerb" title="Ligen" subtitle="Tabellen und Wettbewerbe." />
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+      <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
         {loading ? (
           <LigenPageSkeleton />
         ) : error ? (

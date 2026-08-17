@@ -68,7 +68,7 @@ export default function PlayerNewsfeedPage() {
 
   if (status === "loading") {
     return (
-      <main className="min-h-screen flex items-center justify-center">
+      <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex items-center justify-center">
         <Loading />
       </main>
     );
@@ -76,7 +76,7 @@ export default function PlayerNewsfeedPage() {
 
   if (status === "error") {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
+      <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
         <p className="text-mist-300">Profil konnte nicht geladen werden.</p>
         <Button onClick={() => window.location.reload()} className="mt-4">
           Erneut versuchen
@@ -95,7 +95,7 @@ export default function PlayerNewsfeedPage() {
     <div className="min-h-screen bg-navy-950 flex flex-col">
       <PlayerNav player={player} />
 
-      <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-6 sm:py-8">
+      <main id="hauptinhalt" tabIndex={-1} className="flex-1 w-full max-w-6xl mx-auto px-4 py-6 sm:py-8">
         {/* ⚠️ ABWEICHUNG von Viviens Entwurf, bewusst: Sie will den Seitenkopf
             ganz durch die Tafel ersetzen. Der Kopf bleibt – aber schlank –,
             weil er die einzige `h1` der Seite trägt. Ohne sie fiele Tobias'

@@ -82,7 +82,7 @@ export default function TeamCreatePage() {
 
   if (status === "loading") {
     return (
-      <main className="min-h-screen flex items-center justify-center">
+      <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex items-center justify-center">
         <Loading />
       </main>
     );
@@ -92,7 +92,7 @@ export default function TeamCreatePage() {
     <div className="min-h-screen bg-navy-950">
       <PlayerNav player={player} />
 
-      <main className="max-w-lg mx-auto px-4 py-10">
+      <main id="hauptinhalt" tabIndex={-1} className="max-w-lg mx-auto px-4 py-10">
         <div className="text-center mb-6">
           <span className="inline-flex h-14 w-14 rounded-md bg-brand-500/15 text-brand-400 items-center justify-center mb-3">
             <PiUsersBold className="text-2xl" />

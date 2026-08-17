@@ -170,7 +170,7 @@ export default function ResetPasswordPage() {
 
   if (token === undefined) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
+      <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex items-center justify-center">
         <Loading />
       </main>
     );

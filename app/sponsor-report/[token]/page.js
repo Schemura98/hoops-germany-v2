@@ -56,7 +56,7 @@ export default function PublicSponsorReportPage() {
   // Passwort-Gate
   if (!unlocked) {
     return (
-      <div className="min-h-screen bg-navy-900 flex items-center justify-center p-4">
+      <main id="hauptinhalt" tabIndex={-1} className="min-h-screen bg-navy-900 flex items-center justify-center p-4">
         <form onSubmit={onSubmit} className="w-full max-w-sm bg-navy-800 rounded-md p-8">
           <div className="flex items-center gap-2 text-paper-50 mb-1">
             <span className="h-9 w-9 rounded-md bg-brand-500 flex items-center justify-center text-navy-950">
@@ -88,13 +88,13 @@ export default function PublicSponsorReportPage() {
             {loading ? <PiBasketballBold className="animate-bounce" /> : "Report ansehen"}
           </button>
         </form>
-      </div>
+      </main>
     );
   }
 
   // Entsperrt → Report
   return (
-    <div className="min-h-screen bg-navy-700 print:bg-navy-800 py-8 print:py-0">
+    <main id="hauptinhalt" tabIndex={-1} className="min-h-screen bg-navy-700 print:bg-navy-800 py-8 print:py-0">
       <div className="max-w-3xl mx-auto px-4 mb-4 flex flex-wrap items-center gap-2 justify-between print:hidden">
         <div className="flex items-center gap-1">
           {PERIODS.map((p) => (
@@ -117,6 +117,6 @@ export default function PublicSponsorReportPage() {
         </button>
       </div>
       <SponsorReportView summary={summary} period={period} generatedAt={generatedAt} label={label} />
-    </div>
+    </main>
   );
 }

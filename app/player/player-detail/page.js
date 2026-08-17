@@ -14,7 +14,7 @@ export default function PlayerPlayerDetailPage() {
 
   if (status === "loading") {
     return (
-      <main className="min-h-screen flex items-center justify-center">
+      <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex items-center justify-center">
         <Loading />
       </main>
     );
@@ -22,7 +22,7 @@ export default function PlayerPlayerDetailPage() {
 
   if (status === "error") {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
+      <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
         <p className="text-mist-300">Profil konnte nicht geladen werden.</p>
         <Button onClick={() => window.location.reload()} className="mt-4">
           Erneut versuchen

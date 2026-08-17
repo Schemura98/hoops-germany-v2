@@ -102,7 +102,7 @@ export default function SpielerPage() {
         subtitle="Finde Spieler, folge ihnen und bleib vernetzt."
       />
 
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
+      <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
         {/* Filter */}
         {/* Filterleiste: auf dem Handy zweispaltig statt fünf gestapelter
             Zeilen – gleiches Muster wie auf /spiele (Design-Review Welle 3). */}

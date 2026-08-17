@@ -10,7 +10,7 @@ import { MINDESTALTER_HINWEIS } from "@/lib/constants";
 
 function Shell({ children }) {
   return (
-    <main className="min-h-screen flex items-center justify-center px-6 py-12">
+    <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
         <Link
           href="/"
@@ -132,7 +132,7 @@ export default function TeamJoinTokenPage({ params }) {
 
   if (state === "loading") {
     return (
-      <main className="min-h-screen flex items-center justify-center">
+      <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex items-center justify-center">
         <PiBasketballBold className="text-brand-400 text-3xl animate-bounce" />
       </main>
     );

@@ -10,7 +10,7 @@ export default function AdminShell({ title, children }) {
 
   if (status === "loading") {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-navy-950">
+      <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex items-center justify-center bg-navy-950">
         <PiBasketballBold className="text-brand-400 text-3xl animate-bounce" />
       </main>
     );
@@ -18,7 +18,7 @@ export default function AdminShell({ title, children }) {
 
   if (status === "error") {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center bg-navy-950 p-8 text-center">
+      <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex flex-col items-center justify-center bg-navy-950 p-8 text-center">
         <p className="text-mist-300">Konnte nicht geladen werden.</p>
         <button
           onClick={() => window.location.reload()}
@@ -33,7 +33,7 @@ export default function AdminShell({ title, children }) {
   return (
     <div className="min-h-screen bg-navy-950">
       <AdminNav />
-      <main className="max-w-5xl mx-auto px-4 py-8">
+      <main id="hauptinhalt" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-8">
         {title && <h1 className="font-display uppercase tracking-tight text-2xl font-black text-paper-50 mb-6">{title}</h1>}
         {children}
       </main>

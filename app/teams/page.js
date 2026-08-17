@@ -104,7 +104,7 @@ export default function TeamsPage() {
         </div>
       </PageHeader>
 
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
+      <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
         {/* Filterleiste: siehe /spieler – ein Muster für alle Listenseiten. */}
         <div className="mb-6 space-y-3">
           <div className="relative">

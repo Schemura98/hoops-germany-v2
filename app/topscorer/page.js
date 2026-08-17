@@ -219,7 +219,7 @@ function TopscorerInhalt() {
         }
       />
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+      <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
         <BestenlistenWechsel className="mb-5" />
 
         {(leagues.length > 0 || seasons.length > 0) && (
@@ -415,7 +415,7 @@ export default function TopscorerPage() {
             title="Topscorer"
             subtitle="Rangliste nach erzielten Punkten (gewertete Spiele)."
           />
-          <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+          <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
             <BestenlistenWechsel className="mb-5" />
             <TopscorerSkeleton />
           </main>

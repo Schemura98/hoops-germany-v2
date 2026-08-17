@@ -110,7 +110,7 @@ export default function InstallierenPage() {
         subtitle="Installiere Hoops Germany wie eine echte App – im Vollbild, mit eigenem Icon. Auf Handy, Tablet und Desktop."
       />
 
-      <main className="flex-1 w-full max-w-2xl mx-auto px-4 py-8 space-y-6">
+      <main id="hauptinhalt" tabIndex={-1} className="flex-1 w-full max-w-2xl mx-auto px-4 py-8 space-y-6">
         {/* Vorteile */}
         <div className="grid grid-cols-3 gap-3">
           {[
