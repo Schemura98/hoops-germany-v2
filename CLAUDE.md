@@ -278,6 +278,34 @@
   Upload-Verzeichnisse `/var/www/hoops-uploads/{players,team,posts}` + Symlinks aus `public/…`
   (chown root:www-data, chmod a+rX) neu anlegen – sonst sind Bild-Uploads kaputt (Details: Chronik, 26.06./27.06.).
 
+### 📣 Verständlich schreiben – Patrick ist kein Programmierer
+
+*Angeordnet von Patrick am 17.08.2026, projektübergreifend. Wortgleiche Regel im General
+Backoffice (Arbeitsregel 9) und in HomeGrow Homie (§11).*
+
+Patrick ist studierter Marketier und seit fünf Jahren im Vertrieb. **Alle Erklärungen –
+Befunde, Gate-Berichte, Deploy-Zwischenstände, Optionen – müssen so formuliert sein, dass
+ein Informatik-Laie sie versteht.**
+
+Das ist keine Höflichkeitsregel. Er trifft jede Entscheidung; wer ihm den Sachverhalt in
+Fachsprache vorlegt, verlagert die Beweislast auf den, der entscheidet. **In diesem Projekt
+wiegt das schwerer als anderswo**, weil hier eine Live-Plattform mit echten Nutzern hängt.
+
+- **Reihenfolge umdrehen:** erst was es für die Plattform und ihre Nutzer bedeutet, dann der
+  technische Mechanismus. Nicht „PM2-Prozess neu gestartet", sondern „die Seite läuft wieder
+  mit dem neuen Stand – technisch: PM2 neu gestartet".
+- **Jeden Fachbegriff bei erster Nennung übersetzen** – nicht streichen. Commit, Push und
+  Deploy benutzt er selbst.
+- **Bilder aus seiner Welt nutzen.** Er denkt in Rollen, Zuständigkeiten und Abläufen.
+- **Nichts weglassen.** Verständlich heißt nicht dünner. Gerade hier: Ein Befund, den er nicht
+  versteht, ist praktisch verschwiegen – auch wenn er dasteht. Die Deploy-Warnzeile oben war
+  laut eigener Chronik schon dreimal falsch; solche Dinge müssen ankommen.
+- **Auf Zuruf tiefer:** Sagt er „technisch", kommt die Detailebene.
+- Kein Ton von oben herab. Ihm fehlt Vokabular, nicht Urteilsvermögen.
+
+**Gilt nicht für nutzersichtbare Texte.** Diese Regel betrifft die Kommunikation MIT Patrick.
+Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles Tonalität.
+
 ### Projektort & Umgebung
 - **Lokaler Pfad: `~/Projekte/hoops-germany-v2`** auf macOS (Umzug von Windows am 15.08.2026,
   Hintergrund: `docs/UMZUG-WINDOWS-MAC.md`). **Nicht in einen synchronisierten Ordner verschieben** –
