@@ -50,6 +50,39 @@ test.describe("Newsfeed – die rechte Schiene versteckt nichts", () => {
 
       await page.setViewportSize({ width: breite, height: hoehe });
       await page.addInitScript((t) => localStorage.setItem("playerAuthToken", t), token);
+
+      // ⚠️ DIE EXTERNE QUELLE MUSS RAUS, SONST IST DER TEST EIN MÜNZWURF.
+      // Der unterste Abschnitt der Schiene („Basketball-News") hängt an einem
+      // fremden RSS-Feed. Kommt der nicht, ist die Schiene ~658 statt ~1086 px
+      // hoch – dann passt sie ins Fenster, der Fall existiert nicht mehr, und
+      // die Ehrlichkeitsschranke unten schlägt zu Recht fehl. Genau so im
+      // vollen Suite-Lauf am 18.08.2026 passiert: 230 grün, dieser eine rot,
+      // ohne dass am Produkt etwas war.
+      // Feste Antwort ⇒ feste Schienenhöhe ⇒ der Test misst das, was er soll.
+      await page.route("**/api/news/rss", (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            success: true,
+            // ⚠️ Die Titel sind bewusst LANG. Ein erster Anlauf mit kurzen
+            // Testtiteln machte den Abschnitt einzeilig, die Schiene damit
+            // ~780 statt ~1086 px – und auf 1440x900 (788 px Platz) passte sie
+            // dann hinein, sodass der Test dort nichts mehr prüfen konnte.
+            // Echte Schlagzeilen dieses Feeds sind zweizeilig; die Testdaten
+            // müssen die reale Höhe erzeugen, nicht nur reale Felder haben.
+            news: Array.from({ length: 5 }, (_, i) => ({
+              title:
+                `DBB ${i + 1}: Nationalspieler fraglich für Supercup und ` +
+                `WM-Qualifikation, Basketball – Basketball-World | News`,
+              link: `https://example.invalid/${i + 1}`,
+              pubDate: "Mon, 18 Aug 2026 08:00:00 GMT",
+              source: "Test",
+            })),
+          }),
+        }),
+      );
+
       await page.goto("/player/newsfeed", { waitUntil: "domcontentloaded" });
 
       // Auf die Schiene warten – NICHT auf einen einzelnen Abschnitt: der
