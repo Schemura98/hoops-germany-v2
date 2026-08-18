@@ -11,7 +11,34 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> ✅ **DEPLOYT: `96eba14`** (18.08.2026, vierter Deploy des Tages) – Newsfeed-Umbau Teil 2,
+> ✅ **DEPLOYT: `7da3905`** (18.08.2026, fünfter Deploy des Tages) – Silbentrennung ohne Stummel
+> (Vivien) + Backoffice-Kennzahl, die nur wachsen konnte. Live: 16 Routen je 200, Trennregel im
+> ausgelieferten CSS belegt (`hyphenate-limit-chars: 8 5 4` **und** die `-webkit-`-Variante –
+> ohne die fiele Safari zurück). Playwright 260/260 + 1 übersprungen.
+>
+> ⚠️ **ZWEI OFFENE PUNKTE, DIE NIEMAND VERGESSEN DARF:**
+>
+> **(1) KEIN PDF AUS `/admin/sponsor-report` NACH AUSSEN GEBEN** (Auflage Tobias). Der Report
+> sichert oben zu, keine personenbezogenen Daten zu enthalten – und listet vier Absätze weiter
+> **fünf Klarnamen**. Der teilbare Link ist sauber gefiltert (Positivliste in
+> `app/api/analytics/public-report/route.js`, Spielernamen ausdrücklich ausgeschlossen, u. a.
+> weil 16-/17-Jährige darunter sein können); der **PDF-Weg ist es nicht**. Zwei Wege nach
+> draußen, nur einer geschützt – und der ungeschützte trägt den PDF-Knopf. **Vorbestehend.**
+> Gehört zu **Nora**.
+>
+> **(2) Der Sponsor-Report zieht „Regionale Stärke" und „Beliebteste Inhalte" aus dem
+> GESAMTBESTAND** – auf `hoops_prod` gemessen **406 Spieler, davon 375 Seed (92 %)**; Teams
+> 66/60, Beiträge 310/296. Zwei Abschnitte tiefer steht gedruckt, Nutzer- und Teamzahlen seien um
+> Testkonten bereinigt – das gilt aber nur für einen Teil der Seite. Derselbe Gegenstand wie die
+> 4.073 Seed-Likes aus Roadmap 2, **§ 5 UWG**. Solange kein Link draußen ist, ist es nicht akut;
+> ab dem ersten verschickten Link sofort.
+>
+> ⚠️ **UND EIN TEST IST GEBAUT, ABER NICHT BEWIESEN:** Die Ellipsen-Regel in
+> `kein-abgeschnittener-text.spec.mjs` (gewollte Kürzung mit „…" ist kein Befund) – meine
+> Gegenprobe mit einem hart beschnittenen Satz OHNE „…" wurde **nicht gefangen**, und der Grund
+> ist ungeklärt. Wer die Regel anfasst, fängt bei dieser Gegenprobe an.
+>
+> ✅ **Davor: `96eba14`** (18.08.2026, vierter Deploy des Tages) – Newsfeed-Umbau Teil 2,
 > Viviens drei Gestaltungspunkte, Patricks abgeschnittene Überschrift. Am Server verifiziert.
 > Live nachgemessen: 16 Routen je 200 · Kontaktseite trägt „Kontakt", **3 Eingabefelder, 1
 > Absenden-Knopf** · Überschrift der Startseite auf 390 px vollständig im Bild (96 % randfüllend)
