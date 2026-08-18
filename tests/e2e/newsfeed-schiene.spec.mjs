@@ -166,6 +166,8 @@ test.describe("Newsfeed – die rechte Schiene versteckt nichts", () => {
           letzterOben: Math.round(l.top),
           letzterUnten: Math.round(l.bottom),
           anzahlAbschnitte: el.children.length,
+          schieneMitteX: r.x + r.width / 2,
+          overscroll: getComputedStyle(el).overscrollBehaviorY,
         };
       });
 
@@ -203,6 +205,40 @@ test.describe("Newsfeed – die rechte Schiene versteckt nichts", () => {
           `obwohl in der Schiene ganz nach unten gescrollt wurde: ` +
           `Abschnitt ${mess.letzterOben}–${mess.letzterUnten}, ` +
           `Schiene ${mess.schieneOben}–${mess.schieneUnten}, Fenster 0–${mess.fensterHoehe}.`,
+      ).toBe(true);
+
+      // ── Die Schiene darf die Seite nicht festhalten ───────────────────────
+      // ⚠️ WOFÜR DIESE PRÜFUNG DA IST (Befund Tobias, Gate 18.08.2026):
+      // Der erste Anlauf des Fixes setzte zusätzlich `overscroll-contain`.
+      // Folge: Stand der Mauszeiger über der Schiene, ließ sich die SEITE mit
+      // dem Rad überhaupt nicht mehr bewegen, sobald die Schiene an ihrem Ende
+      // war – eine tote Fläche über rund einem Drittel der Bildbreite, ohne
+      // jede Rückmeldung. In Chromium und WebKit reproduziert, in Firefox
+      // nicht. Der Test war dabei grün, weil er nur Sichtbarkeit prüfte.
+      //
+      // ⚠️ WARUM HIER DIE EIGENSCHAFT GEPRÜFT WIRD UND NICHT DAS VERHALTEN –
+      // ehrlich, weil es eine echte Schwäche ist:
+      // Ein Test, der das Mausrad simuliert (`page.mouse.wheel`), war hier
+      // NICHT stabil zu bekommen. Dieselbe Abfolge lief außerhalb der
+      // Testumgebung sauber durch (Seite 400 → 1344), im Test blieb sie bei
+      // 400 stehen – bei nachweislich korrektem `overscroll-behavior: auto`.
+      // Ein Test, der bei gesundem Produkt rot meldet, ist schlimmer als
+      // keiner: Er wird nach dem zweiten Mal ignoriert. Deshalb prüfen wir die
+      // URSACHE statt der Wirkung.
+      // GRENZE: Das fängt die konkrete Regression (`contain` kommt zurück),
+      // aber keine andere denkbare Ursache für eine tote Scrollfläche. Wer die
+      // Verhaltensprüfung stabil hinbekommt, sollte sie ergänzen.
+      expect(
+        mess.overscroll !== "contain" && mess.overscroll !== "none",
+        `Die Schiene hat \`overscroll-behavior-y: ${mess.overscroll}\`. Damit ` +
+          `hält sie das Mausrad fest: Steht der Zeiger über ihr und ist sie am ` +
+          `Ende, lässt sich die Seite nicht mehr scrollen (Chromium und WebKit; ` +
+          `Firefox verhält sich anders). Das war der Befund aus dem Gate vom ` +
+          `18.08.2026 und ein Rückschritt gegenüber dem Stand davor. ` +
+          `Der erwünschte Effekt – erst die Schiene zu Ende rollen, Seite bleibt ` +
+          `stehen – tritt in allen drei Browsern auch mit "auto" ein; die ` +
+          `Eigenschaft hat hier also keinen Nutzen und einen Preis. ` +
+          `Begründung samt Messwerten steht im Kopf von components/feed/Schiene.js.`,
       ).toBe(true);
     });
   }

@@ -45,20 +45,44 @@ export function SchienenAbschnitt({ label, aktion, children }) {
 //   1024x768 → 672 px Platz → 416 px unerreichbar
 //
 // Ein Element, das oben festklebt und höher als das Fenster ist, kann seinen
-// unteren Teil NIE zeigen – Scrollen bewegt es ja gerade nicht mehr. Betroffen
-// waren „Folgen" und das Ende von „Tabelle": auf keinem Desktop-Bildschirm
-// erreichbar, auf keinem eine Fehlermeldung.
+// unteren Teil NIE zeigen – Scrollen bewegt es ja gerade nicht mehr. Auf keinem
+// Desktop-Bildschirm erreichbar, und auf keinem eine Fehlermeldung.
+//
+// ⚠️ Welcher Abschnitt genau fehlte, hing an der Fensterhöhe – hier stand
+// zuerst „Folgen und das Ende von Tabelle", das war meine Annahme, nicht meine
+// Messung (korrigiert nach Gegenmessung durch Tobias, 18.08.2026):
+//   1440x900, 1280x800 → „Basketball-News" fehlte, „Folgen" war noch ganz da
+//   1280x720, 1024x768 → „Folgen" UND „Basketball-News" fehlten
+//   „Tabelle" war auf keiner der vier Größen angeschnitten.
 //
 // Deshalb ist `haftend` EIN Schalter, der beides setzt. Wer künftig nur
 // `sticky` dazuschreibt, ohne die Höhe zu deckeln, baut denselben Fehler neu –
 // und er ist von außen unsichtbar, weil nichts kaputtgeht, nur etwas fehlt.
 // Bewacht durch `tests/e2e/newsfeed-schiene.spec.mjs`.
+//
+// ⚠️ KEIN `overscroll-contain` HIER – das war der erste Anlauf und ein
+// Rückschritt gegenüber dem Stand davor (Befund Tobias, Gate 18.08.2026).
+// Stand der Zeiger über der Schiene, ließ sich die SEITE mit dem Mausrad
+// überhaupt nicht mehr scrollen, sobald die Schiene an ihrem Ende war –
+// eine tote Fläche von rund einem Drittel der Bildbreite, ohne jede
+// Rückmeldung an den Nutzer.
+// In allen drei Browsern nachgemessen (je 9 Radstöße, 1440x900):
+//
+//   Browser   | mit contain   | mit auto (jetzt)
+//   Chromium  | tote Fläche   | Seite läuft weiter
+//   Firefox   | läuft weiter  | Seite läuft weiter
+//   WebKit    | tote Fläche   | Seite läuft weiter
+//
+// Und der Grund, warum die Zeile ersatzlos entfallen kann: Das Verhalten,
+// für das sie eingebaut war – erst die Schiene zu Ende rollen, die Seite
+// bleibt stehen – tritt in ALLEN drei Browsern auch mit `auto` ein
+// (erster Radstoß: Schiene 0→293…300, Seite unverändert). Die Browser
+// „rasten" eine Radbewegung auf dem Element ein, unter dem sie beginnt.
+// Die Zeile hatte also keinen Nutzen und einen Preis.
 const HAFTEND = [
   "lg:sticky lg:top-24",
   // 7rem = Haftkante (6rem) + 1rem Luft nach unten.
   "lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto",
-  // Sonst springt das Scrollen am Ende der Schiene auf die Seite über.
-  "lg:overscroll-contain",
   // Dünne, dunkle Leiste statt der hellen Standardleiste (color-scheme: dark
   // allein reicht hier nicht, weil der Grund navy-800 ist).
   "lg:[scrollbar-width:thin] lg:[scrollbar-color:theme(colors.navy.600)_transparent]",
