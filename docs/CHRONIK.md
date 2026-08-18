@@ -4022,3 +4022,30 @@ gegen genau diesen Stand liefen.
   ohne Abdeckung (`newsfeed-schiene.spec.mjs` prüft nur Desktop).
 
 **Commit `da7756b`.**
+
+### Nachtrag 18.08.2026 – die zwei Testlücken aus den Gates (`26be1c9`)
+
+Beide Prüfer hatten dieselbe Formulierung benutzt: *heute korrekt, aber nichts hält es fest.*
+
+**`tests/e2e/eigene-zahlen.spec.mjs`** – vier Fälle: zwei Spieler sehen im selben Beitrag
+**verschiedene** Zahlen · wer nicht mitgespielt hat, sieht keine · ohne Anmeldung sieht niemand
+welche · das zweite Feed-Register verhält sich gleich. Die Sollwerte werden **pro Konto aus der
+API gelesen**, nicht fest eingetragen – feste Zahlen wären beim nächsten Seed-Lauf falsch.
+Gegenproben: Werte am Beitrag statt am Betrachter · ausgeloggt nicht abgeschaltet · Aufruf im
+zweiten Register entfernt. Alle drei rot.
+
+**`tests/e2e/newsfeed-mobil.spec.mjs`** – 360/375/390/430 px plus ein eigener Fall gegen die
+Rückkehr der Aufklapp-Kästen. Die Tippziel-Größe wird **gemessen**, nicht aus der CSS-Klasse
+gelesen (Kai: *„behaupten und messen sind zweierlei"*); Gegenprobe mit entfernter Klasse ergibt
+22 statt 44 px → rot.
+
+⚠️ **Zwei eigene Fehler beim Bauen – beide gehören ins Muster dieses Tages:**
+1. Falsch rot: Der Suchlauf ging über das ganze Dokument und fand die **Navigationsleiste**
+   (Menü, Glocke, Suche), die ebenfalls `aria-expanded` trägt. Jetzt auf `main` beschränkt.
+2. **Die wichtigere Lehre:** Eine Gegenprobe lief **glatt durch**. Ich hatte nur auf
+   `aria-expanded` geprüft – ein natives `<details>` trägt den Zustand implizit und hat das
+   Attribut **nicht**. Der Test wäre gegen die halbe Fehlerklasse blind gewesen, und zwar
+   unbemerkt, weil er ja grün war. **Eine Gegenprobe, die durchläuft, ist ein Befund am Test,
+   nicht am Code.**
+
+Volle Suite **241/241** (gegen `--list` abgeglichen, 23 Dateien). Reine Testdateien, kein Deploy.

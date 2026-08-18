@@ -27,6 +27,17 @@
 > jedem dieser Beiträge den Klickweg zum Spiel genommen – ohne dass es kaputt ausgesehen hätte.
 > ✅ Nachgeprüft mit einem eigens erzeugten Altbeitrag am identischen Code: Verweis vorhanden,
 > Ziel korrekt, Mauszeiger klickbar, 0 Fehler.
+> ✅ **NACHTRAG 18.08.2026: Die zwei offenen Testlücken sind geschlossen** (`26be1c9`).
+> `tests/e2e/eigene-zahlen.spec.mjs` – vier Fälle gegen den Datenschutzfall („sieht jemand fremde
+> Zahlen als *deine*"), Sollwerte pro Konto aus der API gelesen statt fest eingetragen.
+> `tests/e2e/newsfeed-mobil.spec.mjs` – 360/375/390/430 px, Tippziele **gemessen statt aus der
+> Klasse gelesen** (Kai: „behaupten und messen sind zweierlei"), plus ein Fall gegen die Rückkehr
+> der Aufklapp-Kästen. Alle Gegenproben gefangen. Suite **241/241**, 23 Dateien.
+> ⚠️ Beim Bauen zwei eigene Fehler: Der erste Anlauf war falsch rot (suchte im ganzen Dokument
+> statt in `main` und fand die Navigationsleiste), und eine Gegenprobe lief **glatt durch** – ein
+> natives `<details>` trägt kein `aria-expanded`, der Test war gegen die halbe Fehlerklasse blind.
+> **Eine Gegenprobe, die durchläuft, ist ein Befund am Test, nicht am Code.**
+>
 > ⚠️ **Live NICHT angemeldet nachgemessen** – `/post/[id]` verlangt Anmeldung, die Testkonten auf
 > `hoops_prod` sind seit dem 15.08. bewusst entwertet. Die Aussage stützt sich auf den identischen
 > Code lokal, nicht auf eine Live-Sichtung.
