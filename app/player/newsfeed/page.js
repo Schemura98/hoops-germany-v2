@@ -1,11 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import {
   PiBasketballBold,
   PiTrophyBold,
-  PiNewspaperBold,
   PiUsersThreeBold,
 } from "react-icons/pi";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
@@ -19,7 +19,6 @@ import Schiene, { SchienenAbschnitt } from "@/components/feed/Schiene";
 import TeamMatchesWidget from "@/components/feed/TeamMatchesWidget";
 import TopTeamsWidget from "@/components/feed/TopTeamsWidget";
 import FollowSuggestions from "@/components/feed/FollowSuggestions";
-import CollapsibleWidget from "@/components/feed/CollapsibleWidget";
 import NewsWidget from "@/components/NewsWidget";
 import OnboardingChecklist from "@/components/onboarding/OnboardingChecklist";
 import Button from "@/components/ui/Button";
@@ -191,45 +190,78 @@ export default function PlayerNewsfeedPage() {
             </Schiene>
           </div>
         ) : (
-          // Mobil: Widgets als eingeklappte Akkordeons über dem Feed (hinter dem
-          // Infinite Scroll wären sie unerreichbar) – aber ALLE geschlossen,
-          // damit der erste Beitrag nah am Seitenanfang bleibt. Das Nötigste
-          // aus „Spiele" trägt bereits die Spieltag-Leiste oben.
-          <div className="space-y-6">
-            <div className="space-y-3">
-              <CollapsibleWidget
-                icon={<PiBasketballBold className="text-brand-400" />}
-                title="Spiele"
-              >
-                <TeamMatchesWidget preloaded={matchData} preloadedLoading={matchesLoading} />
-              </CollapsibleWidget>
-              <CollapsibleWidget
-                icon={<PiUsersThreeBold className="text-brand-400" />}
-                title="Vorschläge für dich"
-              >
-                <FollowSuggestions fallbackText="Gerade keine Vorschläge – schau bei Spielern und Teams vorbei." />
-              </CollapsibleWidget>
-              <CollapsibleWidget
-                icon={<PiTrophyBold className="text-brand-400" />}
-                title="Tabelle"
-              >
-                <TopTeamsWidget
-                  meinTeamId={player?.teamId}
-                  meineLigaId={player?.team?.leagueId}
-                />
-              </CollapsibleWidget>
-              {/* ⚠️ „Transfers" auch mobil entfernt. Die Doppelung ist keine
-                  Desktop-Eigenheit: `recordTransfer` schreibt Widget-Eintrag
-                  UND Feed-Beitrag, hier stünde dieselbe Nachricht zweimal auf
-                  einer Seite – nur untereinander statt nebeneinander. */}
-              <CollapsibleWidget
-                icon={<PiNewspaperBold className="text-brand-400" />}
-                title="Basketball-News"
-              >
-                <NewsWidget compact />
-              </CollapsibleWidget>
-            </div>
+          // MOBIL – neu geordnet am 18.08.2026 (Gestaltungsvorschlag „Der Feed
+          // als Anzeigetafel", Befund Patrick).
+          //
+          // VORHER standen hier VIER optisch identische Akkordeon-Kästen
+          // (Spiele · Vorschläge · Tabelle · News) VOR dem Feed. Zwei Probleme:
+          //
+          // (1) Sekundäres vor Primärem. Der erste Beitrag begann dadurch erst
+          //     bei y ≈ 888 – auf dem Gerät, das der Hauptfall ist.
+          // (2) Viermal dieselbe Geste. Genau diese Gleichförmigkeit war am
+          //     15.08. die Hauptbegründung für den Desktop-Umbau; mobil ist sie
+          //     nie angekommen. Dazu sitzt der Aufklapp-Pfeil oben rechts – aus
+          //     der Recherche: „two thumbs of stretch away from where any human
+          //     actually holds a phone".
+          //
+          // JETZT eine Zeile Wegweiser statt vier Blöcken. Das ist kein
+          // Weglassen: Alle vier Inhalte existieren vollständig woanders und
+          // sind von hier aus einen Fingertipp entfernt.
+          //
+          // ⚠️ WARUM DIE INHALTE NICHT EINFACH UNTER DEN FEED WANDERN:
+          // Der Feed lädt endlos nach. Alles darunter ist praktisch
+          // unerreichbar – das stand schon im alten Kommentar an dieser Stelle
+          // und ist der Grund, warum die Kästen überhaupt oben lagen. Die
+          // Wegweiser lösen das, das Verschieben hätte es nur umgedreht.
+          //
+          // ⚠️ WARUM KEINE FILTERLEISTE (Abweichung vom Entwurf, bewusst):
+          // Der Entwurf zeigte hier Chips „Alles / Ergebnisse / Wechsel / Team".
+          // `PostFeed` hat aber bereits einen Umschalter („Für dich" / „Folge
+          // ich"). Zwei Umschaltleisten direkt übereinander sind zwei
+          // Bedienebenen für dieselbe Liste – der Nutzer müsste raten, welche
+          // welche schlägt. Die Filterung ist eine eigene Entscheidung und
+          // gehört nicht in diesen Umbau.
+          <div className="space-y-5">
+            <nav aria-label="Weitere Bereiche">
+              <ul className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {[
+                  { href: "/spiele", label: "Spiele", Icon: PiBasketballBold },
+                  { href: "/rangliste", label: "Tabelle", Icon: PiTrophyBold },
+                  { href: "/spieler", label: "Spieler", Icon: PiUsersThreeBold },
+                ].map(({ href, label, Icon }) => (
+                  <li key={href}>
+                    {/* min-h-11 ≈ 44px: Tippziel nach WCAG 2.5.8, statt der
+                        20-px-Pfeile von vorher. */}
+                    <Link
+                      href={href}
+                      className="inline-flex items-center gap-1.5 min-h-11 rounded-full border border-navy-600 bg-navy-800 px-3.5 text-sm text-mist-300 whitespace-nowrap hover:border-brand-500 hover:text-paper-50"
+                    >
+                      <Icon className="text-brand-400" aria-hidden="true" />
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
             <PostFeed player={player} compactComposer />
+
+            {/* Nach dem Feed bewusst nur EINE Sache, und die richtige:
+                Folge-Vorschläge sind das Mittel gegen einen leeren Feed – sie
+                gehören genau dorthin, wo jemand ankommt, der nichts mehr zu
+                lesen hat. Tabelle und News stehen oben als Wegweiser; sie hier
+                zu wiederholen wäre die Doppelung, die auf dem Desktop schon
+                einmal entfernt wurde. */}
+            <div className="pt-2 border-t border-navy-600">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-mist-400 mb-2.5">
+                Folgen
+              </p>
+              <FollowSuggestions
+                maxAnzahl={3}
+                nackt
+                fallbackText="Gerade keine Vorschläge – schau bei Spielern und Teams vorbei."
+              />
+            </div>
           </div>
         )}
       </main>

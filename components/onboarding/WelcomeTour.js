@@ -7,7 +7,7 @@ import { PiXBold, PiArrowLeftBold, PiArrowRightBold } from "react-icons/pi";
 import Button from "@/components/ui/Button";
 import SplitFlap from "@/components/ui/SplitFlap";
 import TourProofBoard from "@/components/onboarding/TourProofBoard";
-import { StepWeg, StepPosition, StepStadt, StepUebergabe } from "@/components/onboarding/TourSteps";
+import { StepWeg, StepPosition, StepStadt, StepUebergabe, StepFeed } from "@/components/onboarding/TourSteps";
 import { computeSteps } from "@/components/onboarding/OnboardingChecklist";
 import { getPlayerToken } from "@/lib/clientAuth";
 import { positionLabel } from "@/lib/constants";
@@ -66,6 +66,31 @@ const SCHRITTE = [
     // vorführt; der Schlusssatz behauptet nur noch, was `beidseitigBelegt` prüft.
     titel: "Beide melden. Dann zählt es.",
     text: "Beide Teams melden das Ergebnis unabhängig voneinander – erst wenn beide dasselbe sagen, zählt es. Deshalb steht hinter deinen Zahlen ein Spiel, das beide Seiten so gemeldet haben.",
+  },
+  {
+    // Neu am 18.08.2026 (Auftrag Patrick): Der Newsfeed ist die Seite, auf der
+    // jeder eingeloggte Nutzer landet – die Tour erwähnte ihn bis dahin nur im
+    // Schlusssatz und erklärte ihn nie.
+    //
+    // Er steht bewusst HIER und nicht am Ende: Der Schritt davor erklärt das
+    // Prinzip („beide melden unabhängig"), dieser zeigt, wo man es wiedersieht.
+    // Am Ende wäre es eine Zusatzinformation; hier ist es die Antwort auf die
+    // Frage, die der vorige Schritt gerade aufgemacht hat.
+    //
+    // ⚠️ Der Titel sagt bewusst NICHT „dein persönlicher Feed" o. Ä. Der Feed
+    // zeigt Ereignisse aus dem eigenen Umfeld, aber er ist keine Zeitung über
+    // einen selbst – und die eigenen Zahlen erscheinen nur, wenn man im
+    // Box-Score steht. Ein Versprechen auf ständige Eigenpräsenz wäre genau
+    // die Sorte Zusage, die das Produkt nicht hält.
+    key: "feed",
+    marke: "Dein Feed",
+    titel: "Und so siehst du es wieder",
+    text: "Nach jedem Spieltag steht das Ergebnis in deinem Feed – mit dem Vermerk, ob beide Vereine dasselbe gemeldet haben. Standest du im Box-Score, stehen deine Zahlen gleich daneben.",
+    // Ohne Konto gibt es keinen eigenen Feed und keinen Box-Score-Eintrag.
+    // Die Fassung nimmt genau die zwei Zusagen zurück und lässt den Rest
+    // stehen – der Feed selbst ist ja auch ohne Konto sichtbar.
+    textOhneKonto:
+      "Nach jedem Spieltag steht das Ergebnis im Feed – mit dem Vermerk, ob beide Vereine dasselbe gemeldet haben. Sobald du selbst spielst, stehen deine Zahlen gleich daneben.",
   },
   {
     key: "weg",
@@ -552,6 +577,7 @@ export default function WelcomeTour() {
 
             <div className="mt-4">
               {schritt.key === "beweis" && <TourProofBoard />}
+              {schritt.key === "feed" && <StepFeed />}
               {schritt.key === "weg" && <StepWeg weg={weg} onWeg={wegWaehlen} />}
               {schritt.key === "position" && (
                 <StepPosition

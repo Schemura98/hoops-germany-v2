@@ -10,6 +10,7 @@ import {
   PiCheckCircleBold,
   PiCircleBold,
   PiArrowRightBold,
+  PiSealCheckBold,
 } from "react-icons/pi";
 import CityInput from "@/components/CityInput";
 import FormAlert from "@/components/ui/FormAlert";
@@ -523,6 +524,85 @@ export function StepUebergabe({
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+// Schritt „Dein Feed" – die einzige Folie ohne Eingabe.
+//
+// WARUM ES DIESEN SCHRITT GIBT (Auftrag Patrick, 18.08.2026)
+// Der Newsfeed ist die Seite, auf der jeder eingeloggte Nutzer landet – und
+// die Tour erwähnte ihn bis heute nur beiläufig im Schlusssatz („Der Rest
+// wartet als Checkliste in deinem Feed"). Erklärt wurde er nie.
+//
+// Er steht direkt hinter „Beide melden. Dann zählt es." und ist dessen
+// Fortsetzung: Der Schritt davor erklärt das PRINZIP, dieser zeigt, WO man es
+// wiedersieht. Deshalb greift die Karte unten exakt die Form auf, die seit dem
+// 18.08.2026 im Feed steht (`components/posts/ErgebnisInhalt.js`).
+//
+// ⚠️ DIE ZAHLEN HIER SIND EIN BEISPIEL UND MÜSSEN ALS SOLCHES ERKENNBAR SEIN.
+// Eine Tour-Folie mit erfundenen Vereinsnamen, die aussieht wie ein echter
+// Beitrag, ist ein Muster-Fall aus `docs/MUSTER-ZAHLEN-DIE-LUEGEN`: im Sinne
+// des Codes eine Illustration, im Sinne des Lesers ein Spielergebnis. Deshalb
+// die Kennzeichnung „Beispiel" im Band – genauso wie `TourProofBoard` es hält.
+//
+// ⚠️ KEIN `speichern()` – dieser Schritt schreibt nichts. Damit entfällt die
+// Dreiteilung OK/FEHLER/ANONYM, und die Folie ist ausgeloggt wortgleich
+// richtig: Sie verspricht nichts, was ein Konto voraussetzt.
+export function StepFeed() {
+  return (
+    <div className="rounded-md border border-navy-600 bg-navy-800 overflow-hidden">
+      <div className="flex items-center justify-between gap-3 border-b border-navy-600 bg-navy-900 px-3 py-1.5">
+        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-mist-400">
+          Beispiel · Endstand
+        </span>
+        <span className="font-mono text-[10px] text-mist-500">Bezirksliga</span>
+      </div>
+      <div className="px-3 py-2.5">
+        <div className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-0.5">
+          <span className="font-display text-base font-bold uppercase leading-tight tracking-wide text-paper-50">
+            Rheinbach Ravens
+          </span>
+          <span className="text-right font-display text-2xl font-black leading-none tabular-nums text-brand-400">
+            78
+          </span>
+          <span className="font-display text-base font-bold uppercase leading-tight tracking-wide text-mist-400">
+            Köln Comets
+          </span>
+          <span className="text-right font-display text-2xl font-black leading-none tabular-nums text-mist-400">
+            71
+          </span>
+        </div>
+        <p className="mt-2.5 flex items-center gap-1.5 border-t border-navy-600 pt-2 text-xs text-signal-ok">
+          <PiSealCheckBold aria-hidden="true" />
+          Von beiden Vereinen bestätigt
+        </p>
+        <div className="mt-2.5 border-t border-navy-600 pt-2.5">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-mist-400">
+            Deine Zahlen
+          </p>
+          <div className="mt-1 flex items-end gap-3">
+            <div>
+              <span className="font-display text-3xl font-black leading-none tabular-nums text-brand-400">
+                14
+              </span>
+              <span className="mt-0.5 block font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-mist-400">
+                Punkte
+              </span>
+            </div>
+            <div className="flex gap-2.5 pb-0.5">
+              <div>
+                <span className="font-display text-lg font-bold leading-none tabular-nums text-mist-300">5</span>
+                <span className="mt-0.5 block font-mono text-[8px] font-semibold uppercase tracking-[0.12em] text-mist-500">AST</span>
+              </div>
+              <div>
+                <span className="font-display text-lg font-bold leading-none tabular-nums text-mist-300">2</span>
+                <span className="mt-0.5 block font-mono text-[8px] font-semibold uppercase tracking-[0.12em] text-mist-500">REB</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
