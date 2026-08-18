@@ -13,16 +13,6 @@ const AD_PLACEMENTS = [
   "Transfermarkt-Banner",
 ];
 
-function Growth({ v }) {
-  if (v === null || v === undefined) return null;
-  const up = v >= 0;
-  return (
-    <span className={`text-xs font-semibold ${up ? "text-signal-ok" : "text-signal-error"}`}>
-      {up ? "+" : ""}
-      {v}%
-    </span>
-  );
-}
 
 function Section({ title, children }) {
   return (
@@ -40,14 +30,21 @@ function Section({ title, children }) {
 // „Besucher 18.350" misst Verschiedenes, und ohne Erklärzeile nahm der Leser
 // an, von 18.350 seien 3 aktiv (Befund Tobias).
 function Zahl({ label, value, growth, zusatz, erklaerung }) {
-  const nebenzahl = zusatz || wachstumsText(growth);
+  const w = wachstumsText(growth);
+  const nebenzahl = zusatz ? { text: zusatz, gut: true } : w;
   return (
     <div className="break-inside-avoid">
       <p className="text-xs font-semibold uppercase tracking-wider text-mist-400">{label}</p>
       <p className="mt-1 flex items-baseline gap-2">
         <span className="text-3xl font-black text-paper-50 tabular-nums">{value}</span>
         {nebenzahl && (
-          <span className="text-xs font-semibold text-signal-ok">{nebenzahl}</span>
+          <span
+            className={`text-xs font-semibold ${
+              nebenzahl.gut ? "text-signal-ok" : "text-signal-error"
+            }`}
+          >
+            {nebenzahl.text}
+          </span>
         )}
       </p>
       <p className="mt-1 text-xs text-mist-400 leading-snug">{erklaerung}</p>
@@ -68,15 +65,33 @@ function Zahl({ label, value, growth, zusatz, erklaerung }) {
 // „letztes Jahr“ gewählt ist – ein Prozentwert ohne erkennbaren Zeitraum.
 // Deshalb tragen Bestandszahlen `zusatz` mit ausgeschriebenem Zeitraum.
 
+// ⚠️ EIN RÜCKGANG MUSS GENAUSO SICHTBAR SEIN WIE EIN ANSTIEG
+// (Befund Kai H1, 19.08.2026 – Fehler aus meinem eigenen ersten Anlauf.)
+// Die erste Fassung gab bei `growth <= 0` schlicht `null` zurück, also gar
+// kein Abzeichen. Ein Minus war damit optisch nicht von „unverändert“ zu
+// unterscheiden, und ein Hinweis erschien NUR bei guten Nachrichten – in
+// einem Dokument, das an Sponsoren geht.
+// Das war heute real, nicht theoretisch: auf Prod über 30 Tage
+// Seitenaufrufe −34 %, Besucher −39 %. Beide standen ohne jedes Abzeichen da.
+// Die entfernte `Growth`-Komponente konnte das noch (Rückgang in Rot); die
+// Fähigkeit ging beim Umbau verloren. Genau die Fehlerklasse, gegen die
+// dieser Umbau angetreten ist – `docs/MUSTER-ZAHLEN-DIE-LUEGEN-2026-08-13.md`.
+// ⚠️ OFFEN bei Vivien/Nele: ob ein Rückgang beziffert (−34 %) oder benannt
+// werden soll. Bis dahin gilt die ehrliche Voreinstellung: beziffert.
 // ⚠️ WACHSTUM WIRD GEDECKELT (Befund Tobias, 18.08.2026).
 // Im alten Report standen „+4476 %" und „+76358 %" — groß, grün, ohne Deckel.
 // Solche Zahlen bedeuten nur „vorher war fast nichts da". Ein Sponsor hält sie
 // für einen Fehler oder für Angeberei; beides schadet. Ab 300 % sagen wir, was
 // wirklich gemeint ist, statt eine Zahl zu zeigen, die niemand glaubt.
 function wachstumsText(growth) {
-  if (growth == null || !Number.isFinite(growth) || growth <= 0) return null;
-  if (growth > 300) return "stark gewachsen";
-  return `+${Math.round(growth)} %`;
+  const g = Number(growth);
+  if (growth == null || !Number.isFinite(g) || g === 0) return null;
+  // Betraege ueber 300 % sagen nur „vorher war fast nichts da“ – als Zahl
+  // wirken sie wie ein Fehler oder wie Angeberei.
+  if (g > 300) return { text: "stark gewachsen", gut: true };
+  if (g < -300) return { text: "stark zurückgegangen", gut: false };
+  if (g > 0) return { text: `+${Math.round(g)} %`, gut: true };
+  return { text: `${Math.round(g)} %`, gut: false };
 }
 
 

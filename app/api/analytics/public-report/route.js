@@ -27,8 +27,9 @@ import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 //                                     Nach außen schlicht falsch (Faktor ~70
 //                                     bzw. ~45) – der Report zeigt deshalb die
 //                                     externen Zahlen.
-//   platform.*.newLast30 / prevLast30 / newThisMonth
+//   platform.*.prevLast30 / newThisMonth
 //                                     interne Wachstumsrohdaten
+//                                     (`newLast30` geht mit – s. u.)
 //   signupSources                     Wirksamkeit der Akquise-Kanäle
 //                                     (Flyer-QR usw.) – Geschäftsinterna
 //   onboarding                        Abbruchkurve des Einstiegs, reine
@@ -47,7 +48,21 @@ import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 // Kleine Helfer – halten die Positivliste unten lesbar und garantieren, dass
 // jedes Feld existiert (die Anzeige ruft .slice() direkt auf den Listen auf).
 const kpi = (m = {}) => ({ current: m.current ?? 0, growth: m.growth ?? 0 });
-const bestand = (e = {}) => ({ total: e.total ?? 0, growth: e.growth ?? 0 });
+// ⚠️ `newLast30` MUSS mit hinaus (Befund Kai H2 / Tobias H-1, 19.08.2026).
+// Es stand als „interne Wachstumsrohdaten" auf der Ausschlussliste. Folge: Das
+// Backoffice zeigte „Spieler mit Profil 9 · davon 1 neu in 30 Tagen", der
+// Sponsor auf seinem eigenen Link nur „9" – ohne Fehler, ohne Meldung, weil
+// `neuText(undefined)` still `null` liefert. Zwei Fassungen desselben
+// Dokuments; wer sie nebeneinanderlegt, hält eine für frisiert.
+// Schlimmer: Über den Zahlen steht „Zeitraum: letzte 7 Tage", und die Zeile,
+// die den Bestand als Bestand ausweist, fehlte ausgerechnet DORT.
+// `newLast30` ist eine Anzahl neuer Vereine bzw. Spieler – aggregiert, ohne
+// Namen. `prevLast30`/`newThisMonth` bleiben draußen, die zeigt der Report nicht.
+const bestand = (e = {}) => ({
+  total: e.total ?? 0,
+  growth: e.growth ?? 0,
+  newLast30: e.newLast30 ?? 0,
+});
 const beschriftet = (arr, n) =>
   (arr || []).slice(0, n).map((x) => ({ label: x.label, value: x.value }));
 const gezaehlt = (arr, n) =>
