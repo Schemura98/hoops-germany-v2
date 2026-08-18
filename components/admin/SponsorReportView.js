@@ -2,11 +2,6 @@ import { PiBasketballBold } from "react-icons/pi";
 import LineChart from "@/components/admin/LineChart";
 
 const nf = (n) => (n ?? 0).toLocaleString("de-DE");
-const fmtDur = (sec) => {
-  const m = Math.floor((sec || 0) / 60);
-  const s = (sec || 0) % 60;
-  return m > 0 ? `${m} min ${s} s` : `${s} s`;
-};
 const PERIOD_LABEL = { 7: "letzte 7 Tage", 30: "letzte 30 Tage", 90: "letzte 90 Tage", 365: "letztes Jahr" };
 
 const AD_PLACEMENTS = [
@@ -29,34 +24,6 @@ function Growth({ v }) {
   );
 }
 
-function Kpi({ label, value, growth }) {
-  return (
-    <div className="rounded-md border border-navy-600 p-4">
-      <p className="text-xs text-mist-400">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-paper-50">{typeof value === "number" ? nf(value) : value}</p>
-      {growth !== undefined && <Growth v={growth} />}
-    </div>
-  );
-}
-
-function Bars({ items }) {
-  const max = items.reduce((m, i) => Math.max(m, i.value), 0) || 1;
-  if (!items.length) return <p className="text-sm text-mist-400">Keine Daten.</p>;
-  return (
-    <div className="space-y-2">
-      {items.map((it) => (
-        <div key={it.label} className="flex items-center gap-3">
-          <span className="w-40 text-xs text-mist-400 truncate">{it.label}</span>
-          <div className="flex-1 bg-navy-700 rounded-full h-2.5 overflow-hidden">
-            <div className="bg-brand-500 h-full rounded-full" style={{ width: `${(it.value / max) * 100}%` }} />
-          </div>
-          <span className="w-12 text-right text-xs font-semibold text-paper-50">{nf(it.value)}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function Section({ title, children }) {
   return (
     <section className="break-inside-avoid">
@@ -68,9 +35,69 @@ function Section({ title, children }) {
 
 // Präsentationsfertiges Report-Blatt (aggregierte Zahlen). Wird vom Admin-Report
 // UND von der öffentlichen, passwortgeschützten Sponsor-Seite genutzt.
+// Eine Zahl mit ihrem Satz. Der Satz ist Pflicht, nicht Schmuck: Genau sein
+// Fehlen hat den alten Report unlesbar gemacht — „Aktive Nutzer 3" neben
+// „Besucher 18.350" misst Verschiedenes, und ohne Erklärzeile nahm der Leser
+// an, von 18.350 seien 3 aktiv (Befund Tobias).
+function Zahl({ label, value, growth, zusatz, erklaerung }) {
+  const nebenzahl = zusatz || wachstumsText(growth);
+  return (
+    <div className="break-inside-avoid">
+      <p className="text-xs font-semibold uppercase tracking-wider text-mist-400">{label}</p>
+      <p className="mt-1 flex items-baseline gap-2">
+        <span className="text-3xl font-black text-paper-50 tabular-nums">{value}</span>
+        {nebenzahl && (
+          <span className="text-xs font-semibold text-signal-ok">{nebenzahl}</span>
+        )}
+      </p>
+      <p className="mt-1 text-xs text-mist-400 leading-snug">{erklaerung}</p>
+    </div>
+  );
+}
+
+// ⚠️ WACHSTUM NUR AUF FLUSSGRÖSSEN – NIE auf einem Bestand.
+// Seitenaufrufe und Besucher sind Größen, die IM Zeitraum entstehen; ihr
+// Vorher/Nachher-Vergleich misst dieselbe Sache. Vereine und Spieler sind ein
+// aufgelaufener Bestand, aber `entityStats` rechnet das Wachstum aus den NEUEN
+// Anmeldungen der letzten 30 Tage gegen die 30 davor. Beides nebeneinander
+// gestellt heißt für den Leser: „Die Zahl der Vereine hat sich verdoppelt.“
+// Gemeint war: „Im Vormonat kam keiner dazu, in diesem einer.“
+// Auf Prod steht dieser Fall heute nicht (0 neue Vereine → kein Abzeichen),
+// er entsteht aber beim nächsten ruhigen Monat von selbst.
+// Zweiter Grund: `entityStats` rechnet IMMER mit 30 Tagen, auch wenn oben
+// „letztes Jahr“ gewählt ist – ein Prozentwert ohne erkennbaren Zeitraum.
+// Deshalb tragen Bestandszahlen `zusatz` mit ausgeschriebenem Zeitraum.
+
+// ⚠️ WACHSTUM WIRD GEDECKELT (Befund Tobias, 18.08.2026).
+// Im alten Report standen „+4476 %" und „+76358 %" — groß, grün, ohne Deckel.
+// Solche Zahlen bedeuten nur „vorher war fast nichts da". Ein Sponsor hält sie
+// für einen Fehler oder für Angeberei; beides schadet. Ab 300 % sagen wir, was
+// wirklich gemeint ist, statt eine Zahl zu zeigen, die niemand glaubt.
+function wachstumsText(growth) {
+  if (growth == null || !Number.isFinite(growth) || growth <= 0) return null;
+  if (growth > 300) return "stark gewachsen";
+  return `+${Math.round(growth)} %`;
+}
+
+
+// „davon 1 neu in 30 Tagen" ist wahr, hat einen benannten Zeitraum und ist für
+// einen Sponsor die nützlichere Angabe als ein Prozentwert: Sie zeigt Bewegung,
+// ohne einen Bestand als Wachstumsrate zu verkleiden. Bei 0 steht nichts – eine
+// aufgeschriebene Null ist eine Aussage, die hier niemand treffen will.
+function neuText(neu) {
+  const n = Number(neu);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return `davon ${n} neu in 30 Tagen`;
+}
+
 export default function SponsorReportView({ summary, period, generatedAt, label }) {
   if (!summary) return null;
   const p = summary.platform;
+  const d = summary.devices || {};
+  const geraeteGesamt = (d.mobile || 0) + (d.desktop || 0) + (d.tablet || 0);
+  // Kein Anteil ohne Grundgesamtheit — sonst steht dort „0 %“, was etwas
+  // anderes behauptet als „wir wissen es nicht“.
+  const mobilAnteil = geraeteGesamt ? Math.round(((d.mobile || 0) / geraeteGesamt) * 100) : null;
   return (
     <div className="max-w-3xl mx-auto bg-navy-800 print:shadow-none rounded-md print:rounded-none border border-navy-600 print:border-0 p-8 space-y-7">
       <header className="flex items-start justify-between gap-4 border-b border-navy-600 pb-4">
@@ -91,117 +118,102 @@ export default function SponsorReportView({ summary, period, generatedAt, label 
       </header>
 
       <p className="text-sm text-mist-400">
-        Hoops Germany ist die Community-Plattform für Amateur-Basketball in NRW. Dieser Report fasst
-        Reichweite, Wachstum, Zielgruppe und beliebteste Inhalte zusammen – alle Angaben sind aggregiert
-        (keine personenbezogenen Daten).
+        Hoops Germany ist die Community-Plattform für Amateur-Basketball in NRW. Dieser Report zeigt
+        sechs Zahlen zu Reichweite und Bestand – bewusst wenige, dafür jede mit ihrer Herkunft.
+        Alle Angaben sind aggregiert; es werden keine Namen und keine personenbezogenen Daten genannt.
       </p>
 
-      <Section title="Reichweite">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Kpi label="Seitenaufrufe" value={summary.reach.views.current} growth={summary.reach.views.growth} />
-          <Kpi label="Besucher" value={summary.reach.visitors.current} growth={summary.reach.visitors.growth} />
-          <Kpi label="Neue Besucher" value={summary.reach.newVisitors} />
-          <Kpi label="Wiederkehrende" value={summary.reach.returningVisitors} />
-          <Kpi label="Aktive Nutzer (30T)" value={summary.activeUsers.d30} />
-          <Kpi label="Sitzungen" value={summary.engagement.sessions} />
-          <Kpi label="Seiten / Sitzung" value={summary.engagement.pagesPerSession} />
-          <Kpi label="Ø Sitzungsdauer" value={fmtDur(summary.engagement.avgDurationSec)} />
+      {/* ⚠️ SECHS ZAHLEN, NICHT DREISSIG (Auftrag Patrick nach Tobias' Gate,
+          18.08.2026). Sein Satz war die Vorgabe: „Ein Sponsorendokument
+          braucht sechs starke Zahlen mit je einem erklärenden Satz, nicht
+          dreißig."
+
+          Vorher standen hier acht Abschnitte mit rund dreißig Kennzahlen. Sein
+          Urteil auf die Frage, ob er den Report einem Sponsor zeigen würde:
+          „in dieser Form nein" – nicht wegen eines Fehlers, sondern weil er
+          gegen sich selbst arbeitete.
+
+          ⚠️ WAS ENTFERNT WURDE UND WARUM – jede Zeile hat einen Grund:
+
+          · „Beliebteste Inhalte · Spielerprofile" — enthielt FÜNF KLARNAMEN,
+            vier Absätze unter der Zusage, der Report enthalte keine
+            personenbezogenen Daten. Der teilbare Link filterte sie bereits
+            aus; der PDF-Weg aus dem Backoffice nicht. Zwei Wege nach draußen,
+            nur einer geschützt (Befund Tobias). Damit ist der Widerspruch an
+            der Wurzel weg statt nur an einem der beiden Wege.
+
+          · „Regionale Stärke" — rechnete über ALLE Spieler ohne Echtheits-
+            filter. Auf hoops_prod sind das 406 Spieler, davon 375 Seed (92 %).
+            „Nutzer nach Bundesland: NRW" liest sich wie Marktanteil und wäre
+            zu über neun Zehnteln erfunden (§ 5 UWG, s. Roadmap 2).
+
+          · „Wiederkehrende: 0" neben „Neue Besucher: 18.350" — ein Sponsor
+            liest: niemand kommt zurück. Die Null ist ein Datenartefakt, stand
+            aber ohne jede Einordnung in einem Dokument, das Reichweite
+            verkaufen soll.
+
+          · „Ø Sitzungsdauer 4 s" neben „Seiten/Sitzung 2,3" — zwei Seiten in
+            vier Sekunden ist Maschinenverkehr. Für einen Sponsor das Argument
+            GEGEN ein Sponsoring.
+
+          · „Aktive Nutzer (30T)" — ungefiltert, stand aber neben gefilterten
+            Zahlen und unter einem Satz, der Bereinigung zusichert.
+
+          · „Beliebteste Seiten" — rohe Adressen, darunter
+            `/player/update-password`. Gehört nicht in ein Außendokument.
+
+          · „Spiele inkl. Beispieldaten" — die Beschriftung sagt selbst, dass
+            die Zahl nicht trägt.
+
+          ⚠️ WAS BLEIBT, ist genau das, was ohne Einschränkung belastbar ist:
+          Reichweite und Geräte kommen aus echten Seitenaufrufen, Vereine und
+          Spieler aus der bereits gefilterten Zählung, Ligen aus dem offiziellen
+          Katalog. Wer hier etwas ergänzt, muss sagen können, aus welcher
+          Grundgesamtheit es stammt. */}
+      <Section title="Die Plattform in sechs Zahlen">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+          <Zahl
+            label="Seitenaufrufe"
+            value={nf(summary.reach.views.current)}
+            growth={summary.reach.views.growth}
+            erklaerung={`Alle Aufrufe im Zeitraum ${PERIOD_LABEL[period] || `${period} Tage`}.`}
+          />
+          <Zahl
+            label="Besucher"
+            value={nf(summary.reach.visitors.current)}
+            growth={summary.reach.visitors.growth}
+            erklaerung="Unterschiedliche Geräte, nicht Aufrufe."
+          />
+          <Zahl
+            label="Vereine auf der Plattform"
+            value={nf(p.externeTeams.total)}
+            zusatz={neuText(p.externeTeams.newLast30)}
+            erklaerung="Echte Vereine — Beispieldaten und interne Testkonten sind herausgerechnet."
+          />
+          <Zahl
+            label="Spieler mit Profil"
+            value={nf(p.externeUsers.total)}
+            zusatz={neuText(p.externeUsers.newLast30)}
+            erklaerung="Ebenfalls ohne Beispieldaten und Testkonten."
+          />
+          <Zahl
+            label="Ligen im Katalog"
+            value={nf(p.leagues.total)}
+            erklaerung="Offizieller WBV-Katalog Nordrhein-Westfalen."
+          />
+          <Zahl
+            label="Anteil Mobil"
+            value={mobilAnteil == null ? "—" : `${mobilAnteil} %`}
+            erklaerung="Aufrufe von Telefonen, gemessen am Gerät."
+          />
         </div>
       </Section>
 
       <Section title="Verlauf">
         <LineChart data={summary.timeseries} height={180} />
-      </Section>
-
-      <div className="grid sm:grid-cols-2 gap-6">
-        <Section title="Zielgruppe · Geräte">
-          <Bars
-            items={[
-              { label: "Mobil", value: summary.devices.mobile },
-              { label: "Desktop", value: summary.devices.desktop },
-              { label: "Tablet", value: summary.devices.tablet },
-            ]}
-          />
-        </Section>
-        <Section title="Beliebteste Bereiche">
-          <Bars items={summary.sections.slice(0, 6).map((s) => ({ label: s.section, value: s.count }))} />
-        </Section>
-      </div>
-
-      <Section title="Regionale Stärke">
-        <div className="grid sm:grid-cols-2 gap-x-6 gap-y-4">
-          <div>
-            <p className="text-xs font-semibold text-mist-300 mb-2">Nutzer nach Bundesland</p>
-            <Bars items={summary.region.usersByState.slice(0, 8)} />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-mist-300 mb-2">Teams / Vereine nach Stadt</p>
-            <Bars items={summary.region.teamsByCity.slice(0, 8)} />
-          </div>
-        </div>
-      </Section>
-
-      <Section title="Beliebteste Inhalte">
-        <div className="grid sm:grid-cols-3 gap-x-6 gap-y-4">
-          {/* „Spielerprofile" nur, wenn die Daten überhaupt mitkommen. Der
-              öffentliche Endpunkt liefert sie seit dem 13.08.2026 nicht mehr —
-              es sind Klarnamen echter Personen, und ein Sponsor ist kein
-              Auftragsverarbeiter. Intern (/admin/sponsor-report) kommt das volle
-              Summary an, dort bleibt die Spalte sichtbar. */}
-          {[
-            summary.content.topPlayers && {
-              t: "Spielerprofile",
-              items: summary.content.topPlayers,
-            },
-            { t: "Teams", items: summary.content.topTeams },
-            { t: "Ligen", items: summary.content.topLeagues },
-          ].filter(Boolean).map((c) => (
-            <div key={c.t}>
-              <p className="text-xs font-semibold text-mist-300 mb-2">{c.t}</p>
-              <Bars items={c.items.slice(0, 5).map((i) => ({ label: i.label, value: i.count }))} />
-            </div>
-          ))}
-        </div>
-      </Section>
-
-      {/* KORREKTUR 13.08.2026 — vorher standen hier `p.users.total` und
-          `p.teams.total`. Das sind `countDocuments({})` OHNE Basisfilter
-          (`lib/analyticsSummary.js` Z. 134/135), also inklusive Demo-Fixtures
-          und interner Testkonten. In einem Dokument, das das Haus verlaesst,
-          war das eine Falschaussage um etwa den Faktor 70 (Teams) bzw. 45
-          (Nutzer). `lib/analyticsSummary.js` Z. 137 sagt ueber die gefilterten
-          Zahlen woertlich, sie seien "die einzige Zahl, die man nach aussen
-          zeigen duerfte" — der Report benutzte die anderen.
-
-          ACHTUNG, noch nicht sauber: Fuer Spiele gibt es keine gefilterte
-          Entsprechung, `p.matches` enthaelt sehr wahrscheinlich Demo-Spiele.
-          "Offizielle Ligen" ist der Katalog (57), nicht die Zahl der Ligen mit
-          echten Teams. Beide sind unten deshalb als das benannt, was sie sind,
-          statt als Beteiligung ausgegeben zu werden. Endgueltige Fassung
-          braucht Nele (Aussage) und einen `NUR_ECHT`-Filter fuer Matches.
-          Vollstaendiger Befund: docs/RETENTION-BEFUND-2026-08-13.md */}
-      <Section title="Plattform-Stärke">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Kpi label="Registrierte Nutzer" value={p.externeUsers.total} growth={p.externeUsers.growth} />
-          <Kpi label="Teams / Vereine" value={p.externeTeams.total} growth={p.externeTeams.growth} />
-          <Kpi label="Ligen im Katalog" value={p.leagues.total} />
-          <Kpi label="Spiele inkl. Beispieldaten" value={p.matches.total} growth={p.matches.growth} />
-        </div>
-        <p className="mt-3 text-xs text-mist-400">
-          Nutzer und Teams zählen ausschließlich externe Konten — Beispieldaten und
-          interne Testkonten sind herausgerechnet.
+        <p className="mt-2 text-xs text-mist-400">
+          Seitenaufrufe je Tag im gewählten Zeitraum.
         </p>
-      </Section>
-
-      <Section title="Beliebteste Seiten">
-        <ul className="divide-y divide-navy-600">
-          {summary.topPaths.slice(0, 8).map((x) => (
-            <li key={x.path} className="flex items-center justify-between py-1.5">
-              <span className="text-sm text-mist-300 truncate">{x.path}</span>
-              <span className="text-sm font-semibold text-paper-50">{nf(x.count)}</span>
-            </li>
-          ))}
-        </ul>
       </Section>
 
       <Section title="Werbemöglichkeiten">
