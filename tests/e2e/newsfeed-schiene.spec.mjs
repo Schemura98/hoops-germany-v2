@@ -102,6 +102,7 @@ test.describe("Newsfeed – die rechte Schiene versteckt nichts", () => {
           [...document.querySelectorAll("main *")].some(
             (e) => getComputedStyle(e).position === "sticky",
           ),
+        null,
         { timeout: 30_000 },
       );
       // ⚠️ Die Schiene WÄCHST NACH (Widgets laden). Misst man zu früh, ist sie
@@ -123,6 +124,7 @@ test.describe("Newsfeed – die rechte Schiene versteckt nichts", () => {
           if (spur.length > 3) spur.shift();
           return spur.length === 3 && spur[0] === spur[1] && spur[1] === spur[2];
         },
+        null,
         { timeout: 30_000, polling: 600 },
       );
 
@@ -319,7 +321,8 @@ test.describe("Newsfeed – die rechte Schiene versteckt nichts", () => {
     await page.goto("/player/newsfeed", { waitUntil: "domcontentloaded" });
     await page.waitForFunction(
       () => [...document.querySelectorAll("main *")].some((e) => getComputedStyle(e).position === "sticky"),
-      { timeout: 30_000 },
+      null,
+        { timeout: 30_000 },
     );
     await page.waitForTimeout(3500);
 

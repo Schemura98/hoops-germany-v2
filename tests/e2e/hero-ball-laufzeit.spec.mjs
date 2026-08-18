@@ -272,7 +272,8 @@ test.describe("Hero-Ball – Laufzeit auf /", () => {
             const t = getComputedStyle(h1).transform;
             return t === "none" || t === "matrix(1, 0, 0, 1, 0, 0)";
           },
-          { timeout: 5000 },
+          null,
+        { timeout: 5000 },
         )
         .catch(() => {});
       await page.waitForTimeout(900); // Einflug abwarten

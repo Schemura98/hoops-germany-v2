@@ -236,9 +236,11 @@ test.describe("Newsfeed mobil", () => {
       sessionStorage.setItem("hg_welcome_token", t);
     }, token);
     await page.goto("/player/newsfeed", { waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => document.body.innerText.includes("Für dich"), {
-      timeout: 30_000,
-    });
+    await page.waitForFunction(
+      () => document.body.innerText.includes("Für dich"),
+      null,
+      { timeout: 30_000 },
+    );
     // Auf einen Beitrag mit Aktionsleiste warten – nicht auf eine feste Zeit.
     await page.waitForSelector("main button[aria-pressed]", { timeout: 30_000 });
 

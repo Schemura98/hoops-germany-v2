@@ -168,6 +168,17 @@ async function laden(page, pfad, breite) {
   // aufgebautes Layout und meldet Fehler, die es nicht gibt (die Fehlerklasse
   // dieses Tages, fünfmal aufgetreten).
   await page.waitForSelector("main, h1", { timeout: 30_000 }).catch(() => {});
+  // ⚠️ `null` ALS ZWEITES ARGUMENT IST PFLICHT (Befund Kai, Nachprüfung 18.08.2026).
+  //
+  // Playwright erwartet `waitForFunction(fn, arg, options)`. Stand hier – und an
+  // sieben weiteren Stellen der Suite – nur `(fn, { timeout, polling })`, dann
+  // landete das Objekt als ARGUMENT FÜR DIE FUNKTION und verfiel stillschweigend.
+  // Keine Warnung, kein Fehler.
+  //
+  // Gemessen: Vorgabe 400 ms Abstand, tatsächlich 6–18 ms. „Die Höhe hat sich
+  // nicht geändert" hieß damit nur „nicht innerhalb von 17 Millisekunden" –
+  // dieser Test prüfte in 7 von 8 Läufen eine Seite mit 0 Einträgen und 41
+  // grauen Platzhaltern. Ein Test, der nichts sieht, ist grün.
   await page.waitForFunction(
     () => {
       const h = document.body.scrollHeight;
@@ -175,7 +186,8 @@ async function laden(page, pfad, breite) {
       window.__hoeheVorher = h;
       return vorher === h && h > 0;
     },
-    { timeout: 20_000, polling: 400 },
+    null,
+        { timeout: 20_000, polling: 400 },
   ).catch(() => {});
 }
 

@@ -55,7 +55,8 @@ test.describe("Hero-Ball – Konturkanal zum Eyebrow", () => {
               const t = getComputedStyle(h).transform;
               return t === "none" || t === "matrix(1, 0, 0, 1, 0, 0)";
             },
-            { timeout: 5000 },
+            null,
+        { timeout: 5000 },
           )
           .catch(() => {});
         await page.waitForTimeout(900);

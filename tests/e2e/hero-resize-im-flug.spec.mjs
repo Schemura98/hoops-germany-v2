@@ -95,7 +95,8 @@ async function ruhelage(page, breite, resizeVon = null) {
         const t = getComputedStyle(h1).transform;
         return t === "none" || t === "matrix(1, 0, 0, 1, 0, 0)";
       },
-      { timeout: 15000 },
+      null,
+        { timeout: 15000 },
     );
     await page.waitForTimeout(NACH_FLUGSTART_MS);
     await page.setViewportSize({ width: breite, height: HOEHE });
