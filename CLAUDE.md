@@ -11,7 +11,24 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> ✅ **DEPLOYT: `787d760`** (18.08.2026; davor `cc128ed`, `f27736a`, `40dff48`, `f46a783`, `84cb7ba`) – am Server
+> ✅ **DEPLOYT: `aff17e6`** (18.08.2026, zweiter Deploy des Tages) – Newsfeed: die rechte Schiene
+> versteckte bis zu 464 px ihres Inhalts auf **jedem** Desktop (Befund Patrick). Haftkante und
+> Höhendeckel hängen jetzt an EINEM Schalter (`haftend` in `components/feed/Schiene.js`).
+> ⚠️ **Der erste Anlauf war ein Rückschritt** (Befund Tobias im Gate): Mit zusätzlichem
+> `overscroll-contain` ließ sich die SEITE nicht mehr scrollen, solange der Mauszeiger über der
+> Schiene stand – eine tote Fläche über rund einem Drittel der Bildbreite, ohne Rückmeldung.
+> In Chromium und WebKit reproduziert, in Firefox nicht. Zeile ersatzlos entfernt: Das
+> gewünschte Verhalten (erst die Schiene zu Ende rollen) tritt in **allen drei** Browsern auch
+> mit `auto` ein – die Eigenschaft hatte keinen Nutzen und einen Preis.
+> Live nachgemessen: 16 Routen je 200 · im ausgelieferten CSS steht `max-height:calc(100vh - 7rem)`
+> und **keine** `overscroll`-Regel in einem Desktop-Block (die eine `.overscroll-contain`-Klasse
+> gehört den mobilen Menüs in `Navbar.js`/`PlayerNav.js`, dort ist sie richtig).
+> ⚠️ **Nicht geprüft, ehrlich benannt:** Die Schiene selbst ist live **nicht angemeldet
+> nachgemessen** – die Testkonten auf `hoops_prod` sind seit dem 15.08. bewusst entwertet. Die
+> Live-Aussage stützt sich auf das ausgelieferte CSS, die Verhaltensmessung auf die lokale
+> Production-Runtime desselben Commits.
+>
+> ✅ **Davor deployt: `787d760`** (18.08.2026; davor `cc128ed`, `f27736a`, `40dff48`, `f46a783`, `84cb7ba`) – am Server
 > verifiziert (`git log` AM SERVER, nicht dieser Zeile geglaubt), Abstand zu `origin` 0,
 > `pm2 restart` gelaufen, Prozess `online`. **Der ausgelieferte Code ist der aktuelle** –
 > was danach liegt, sind reine Doku-Commits. Prüfen mit **zwei** Befehlen, nicht mit einem:

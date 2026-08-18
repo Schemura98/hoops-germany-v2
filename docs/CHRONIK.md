@@ -3790,3 +3790,113 @@ sondern eine **Aufzählung von Hand statt eines Zählbefehls**, in derselben Zei
   Endlage 155 px – mit Ehrlichkeitsschranke „Einflug überhaupt erkannt?".
 
 **Commit `787d760`** (Deploy), Doku-Nachtrag im Commit danach.
+
+---
+
+## 18.08.2026 (2) – Deploy `aff17e6`: die rechte Schiene versteckte bis zu 464 px
+
+**Live-Stand vorher `787d760`, jetzt `aff17e6`.** Am Server verifiziert, `pm2 restart` gelaufen,
+Prozess `online`. Kein `npm install` (kein `dependencies`-Diff).
+
+### Der Befund (Patrick)
+
+Die rechte Schiene im Desktop-Newsfeed stand als blankes `lg:sticky lg:top-24` – oben
+festgeheftet, **ohne Höhenbegrenzung**. Gemessen 1088 px hoch, unter der Haftkante aber nur
+624–804 px Platz:
+
+| Viewport | Platz | unerreichbar |
+|---|---|---|
+| 1440×900 | 804 px | 284 px |
+| 1280×800 | 704 px | 384 px |
+| 1280×720 | 624 px | **464 px** |
+| 1024×768 | 672 px | 416 px |
+
+Ein oben festgeklebtes Element, das höher als das Fenster ist, kann seinen unteren Teil **nie**
+zeigen – Scrollen bewegt es ja gerade nicht mehr. Es ging dabei nichts kaputt, es fehlte nur
+etwas; deshalb hat es nie jemand als Fehler gemeldet.
+
+**Fix:** Haftkante und Höhendeckel hängen an EINEM Schalter (`haftend` in
+`components/feed/Schiene.js`), damit niemand das eine ohne das andere setzt.
+
+### ⚠️ Der erste Anlauf war ein Rückschritt (Befund Tobias, Gate)
+
+Ich hatte zusätzlich `overscroll-contain` gesetzt. Folge: Stand der Mauszeiger über der Schiene,
+ließ sich die **Seite** mit dem Rad überhaupt nicht mehr bewegen, sobald die Schiene an ihrem
+Ende war – eine tote Fläche über **26–30 % der Bildbreite und 84–88 % der Höhe**, ohne jede
+Rückmeldung. Gegenüber dem Live-Stand davor ein Rückschritt: dort lief das Rad korrekt durch.
+
+Tobias hat es auf die eine Zeile eingegrenzt und **Firefox/Safari ausdrücklich als ungeprüft
+offengelegt**. Nachgemessen (je 9 Radstöße, 1440×900):
+
+| Browser | mit `contain` | mit `auto` |
+|---|---|---|
+| Chromium | tote Fläche | Seite läuft weiter |
+| Firefox | läuft weiter | Seite läuft weiter |
+| WebKit/Safari | tote Fläche | Seite läuft weiter |
+
+**Warum die Zeile ersatzlos entfallen konnte:** Das Verhalten, für das sie eingebaut war – erst
+die Schiene zu Ende rollen, die Seite bleibt stehen – tritt in **allen drei** Browsern auch mit
+`auto` ein (erster Radstoß: Schiene 0 → 293…300, Seite unverändert). Die Browser „rasten" eine
+Radbewegung auf dem Element ein, unter dem sie beginnt. Die Eigenschaft hatte hier **keinen
+Nutzen und einen Preis**.
+
+### Weitere Gate-Korrekturen
+
+- **Kommentar korrigiert.** Ich hatte „Folgen und das Ende von Tabelle" geschrieben – das war
+  Annahme, nicht Messung. Tatsächlich fehlte je nach Fensterhöhe „Basketball-News" bzw.
+  „Folgen" **und** „Basketball-News"; „Tabelle" war auf keiner Größe angeschnitten.
+- **Test erweitert.** Tobias' Punkt: Die tote Fläche wäre durch meinen Test grün durchgelaufen.
+
+### ⚠️ Drei eigene Fehlmessungen beim Bauen – alle protokolliert
+
+1. **Falsches Rot durch veraltetes CSS.** Der Test war rot bei nachweislich korrektem Quelltext.
+   Ursache: Ein `next dev` lief auf dem `.next` eines vorherigen **Production-Builds** und
+   lieferte altes Tailwind-CSS (`overscroll: contain` im Browser gemessen, obwohl im Code weg).
+   Das ist die in CLAUDE.md dokumentierte Falle **in umgekehrter Richtung** – dort steht „build
+   nie parallel zu dev"; hier war es „dev auf dem .next eines Builds". Abhilfe: `.next` löschen.
+2. **Falsches Rot durch zu frühe Messung.** Die erste Gegenprobe maß, **bevor** die Seite
+   gescrollt war – `position: sticky` heftet aber erst dann. Ergebnis: „kaputt" auf allen vier
+   Größen, obwohl der Fix saß. Dieselbe Fehlerform wie bei der Live-Messung am Vormittag.
+3. **Ein Test, der ein Münzwurf war.** Im ersten vollen Suite-Lauf: 230 grün, dieser eine rot,
+   ohne dass am Produkt etwas war. Der unterste Schienen-Abschnitt hängt an einem **externen
+   RSS-Feed**; kommt der nicht, ist die Schiene ~658 statt ~1086 px hoch, passt ins Fenster, und
+   der zu prüfende Fall existiert nicht mehr. Aufgefallen ist es **nur** durch die
+   Ehrlichkeitsschranke „dieser Test prüft gerade nichts". Behoben mit fester Antwort
+   (`page.route`). ⚠️ Und die Testdaten mussten **realistisch lang** sein: Mit kurzen Titeln
+   wurde der Abschnitt einzeilig, die Schiene ~780 px – auf 1440×900 (788 px Platz) passte sie
+   dann hinein und der Test war dort blind. **Testdaten müssen die reale Geometrie erzeugen,
+   nicht nur reale Felder haben.**
+
+### ⚠️ Eine Schwäche, die im Test steht statt versteckt zu werden
+
+Eine echte **Verhaltensprüfung** per `page.mouse.wheel` war nicht stabil zu bekommen: Dieselbe
+Abfolge lief außerhalb der Testumgebung sauber durch (Seite 400 → 1344), im Test blieb sie bei
+400 – bei nachweislich korrektem `overscroll-behavior: auto`. Statt einen Test einzuchecken, der
+bei gesundem Produkt rot meldet (und deshalb nach dem zweiten Mal ignoriert wird), prüft der Test
+die **Ursache**: `overscroll-behavior-y` darf nicht `contain`/`none` sein. Die Grenze steht
+wörtlich im Test – wer die Verhaltensprüfung stabil hinbekommt, soll sie ergänzen.
+
+### Verifikation
+
+Build durch · **Playwright 231/231** · Gegenprobe in **beide** Richtungen (Höhendeckel raus → 4
+rot; `contain` zurück → 4 rot; Fix drin → 4 grün) · Production-Runtime nachgemessen (Seite läuft
+weiter: 400 → 1344) · **Tobias-Gate freigabefähig mit Auflage**, Auflage umgesetzt.
+
+Live: 16 Routen je 200 · im ausgelieferten CSS steht `max-height:calc(100vh - 7rem)` und **keine**
+`overscroll`-Regel in einem Block ab 1024 px (die eine `.overscroll-contain`-Klasse gehört den
+mobilen Menüs in `Navbar.js`/`PlayerNav.js`).
+
+⚠️ **Nicht geprüft:** Die Schiene live **angemeldet** – die Testkonten auf `hoops_prod` sind seit
+dem 15.08. bewusst entwertet. Die Live-Aussage stützt sich auf das ausgelieferte CSS, die
+Verhaltensmessung auf die lokale Production-Runtime desselben Commits.
+
+### Offen (Übergaben aus dem Gate)
+
+- **An Vivien:** Die innere Bildlaufleiste ist nur **während** des Scrollens sichtbar (macOS
+  „Automatisch"), Kontrast Griff/Grund **1,92:1** (Richtwert für Bedienelemente 3:1). Soll die
+  Schiene im Ruhezustand zeigen, dass sie weitergeht?
+- **Vorbestehend, nicht aus diesem Diff:** Like- und Kommentarknopf in
+  `components/posts/PostCard.js` (Z. 437–449) messen **29 × 20 px** (AA-Mindestmaß 24 × 24) und
+  ihr vorgelesener Name ist nur die Zahl, ohne Beschriftung.
+
+**Commit `aff17e6`.**
