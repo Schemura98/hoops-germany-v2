@@ -76,7 +76,10 @@ const BAUSTELLEN = [];
 async function abgeschnitten(page) {
   return page.evaluate(() => {
     const funde = [];
-    const auswahl = "h1,h2,h3,h4,h5,p,span,a,button,li,td,th,label,strong,em";
+    // `select` ergänzt (Befund Vivien): Auf /spieler wird „Alle Positionen &
+    // Rollen" HART um 8 px beschnitten – `text-overflow: clip`, kein „…",
+    // also ohne jeden Hinweis. Genau der Fall, für den der Test da ist.
+    const auswahl = "h1,h2,h3,h4,h5,p,span,a,button,li,td,th,label,strong,em,select,option";
     for (const el of document.querySelectorAll(auswahl)) {
       const b = el.getBoundingClientRect();
       if (b.width === 0 || b.height === 0) continue;
@@ -97,6 +100,7 @@ async function abgeschnitten(page) {
       // wirkungslos gehalten – tatsächlich war der TEST blind, nicht die
       // Gegenprobe. Wieder: eine Gegenprobe, die durchläuft, ist ein Befund am
       // Test.
+      const st = getComputedStyle(el);
       const kastenRagt = b.left < -1 || b.right > window.innerWidth + 1;
       const inhaltQuillt = el.scrollWidth > el.clientWidth + 1;
       if (!kastenRagt && !inhaltQuillt) continue;
@@ -128,12 +132,37 @@ async function abgeschnitten(page) {
         }
       }
       if (erreichbar) continue;
+
+      // ⚠️ EINE GEWOLLTE KÜRZUNG MIT „…" IST KEIN BEFUND (Entscheidung Vivien,
+      // 18.08.2026; sichtbar geworden durch Kais Gate).
+      //
+      // Seit die Wartelogik repariert ist, sieht dieser Test erstmals echten
+      // Inhalt – und meldete sofort drei Stellen mit `truncate`
+      // („Hamburg Towers Uni…", „Jonatan Baena Vi…"). Das ist NICHT der Fehler,
+      // für den er gebaut wurde.
+      //
+      // Viviens Unterscheidung: Eine Ellipse ist kein Verlust, sondern ein
+      // VERSPRECHEN – „hier steht mehr, du kommst dran". Ein harter Schnitt
+      // ohne „…" sagt dem Leser nicht einmal, dass etwas fehlt. Genau das ist
+      // der Unterschied, den dieser Test abbilden soll.
+      //
+      // ⚠️ Das Versprechen zählt nur, wenn es EINLÖSBAR ist – deshalb drei
+      // Bedingungen zusammen. Und die Falle, die Vivien nachgemessen hat:
+      // `text-overflow: ellipsis` ALLEIN malt kein „…". Ohne `nowrap` bricht
+      // der Text um, ohne `hidden` läuft er sichtbar heraus – der berechnete
+      // Wert steht trotzdem auf `ellipsis`. Wer nur darauf prüft, entschuldigt
+      // genau die Fälle, die er fangen soll.
+      const einzeilig = /nowrap|^pre$/.test(st.whiteSpace) || st.webkitLineClamp !== "none";
+      const sichtbarGekuerzt =
+        st.textOverflow === "ellipsis" && einzeilig && /hidden|clip/.test(st.overflowX);
+      const einloesbar =
+        !!el.closest("a") || !!el.getAttribute("title") || !!el.getAttribute("aria-label");
+      if (sichtbarGekuerzt && einloesbar) continue;
       // Nur BLÄTTER melden. Sonst meldet jede Hülle um einen zu breiten Text
       // ebenfalls, und aus einem Fund werden fünf.
       if ([...el.children].some((k) => k.textContent.trim())) continue;
       // Absichtlich außerhalb geparkte Elemente sind kein Befund: Das ist die
       // übliche Bauweise für Text, den nur Vorleseprogramme hören sollen.
-      const st = getComputedStyle(el);
       if (st.position === "absolute" && (b.width <= 1 || b.height <= 1)) continue;
       if (st.clipPath === "inset(50%)") continue;
       funde.push({

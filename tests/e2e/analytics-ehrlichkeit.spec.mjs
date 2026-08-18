@@ -89,12 +89,33 @@ test.describe("Backoffice-Kennzahlen sind in sich stimmig", () => {
     // Der Abschnitt „Echte Beteiligung (ohne Beispieldaten)" zieht Testdaten ab.
     // Das Ergebnis muss zwangsläufig kleiner oder gleich dem Gesamtbestand sein.
     const s = await summary(request);
+    // ⚠️ DIE FELDER HEISSEN DEUTSCH (Befund Kai, Gate 18.08.2026).
+    // Hier stand `externalUsers`/`externalTeams` – die Auswertung liefert aber
+    // `externeUsers`/`externeTeams`. Beide Nachschlagevorgänge ergaben
+    // `undefined`, die Schleife sprang über BEIDE Paare hinweg, und der Test
+    // meldete Grün, ohne eine einzige Behauptung aufzustellen.
+    //
+    // Kais Einordnung, und sie sitzt: „Sie ist nicht schwächer als ihr Titel,
+    // sie ist gar keine." Genau das Muster aus Roadmap 20f – ein grüner Test
+    // mit null Messpunkten –, diesmal ohne Schranke, die es abfängt.
+    //
+    // ⚠️ Verschärfend: `externeUsers`/`externeTeams` sind die EINZIGEN
+    // Bestandszahlen, die der öffentliche Sponsor-Report ausgibt. Der Test
+    // sollte also genau die Zahlen bewachen, die das Haus verlassen.
     const paare = [
-      ["Externe Teams", s.platform?.externalTeams?.total, s.platform?.teams?.total],
-      ["Externe Nutzer", s.platform?.externalUsers?.total, s.platform?.users?.total],
+      ["Externe Teams", s.platform?.externeTeams?.total, s.platform?.teams?.total],
+      ["Externe Nutzer", s.platform?.externeUsers?.total, s.platform?.users?.total],
     ];
+    // Ehrlichkeitsschranke: Fehlt ein Feld, ist das ein Befund – kein Grund
+    // zum Überspringen. Genau daran ist die erste Fassung gescheitert.
     for (const [name, extern, gesamt] of paare) {
-      if (typeof extern !== "number" || typeof gesamt !== "number") continue;
+      expect(
+        typeof extern === "number" && typeof gesamt === "number",
+        `Für „${name}" fehlt eine der beiden Zahlen (extern=${extern}, ` +
+          `gesamt=${gesamt}). Wurden die Felder umbenannt? Dann prüft dieser ` +
+          `Test nichts mehr – vorhandene Felder: ` +
+          `${JSON.stringify(Object.keys(s.platform || {}))}`,
+      ).toBe(true);
       expect(
         extern,
         `„${name}" = ${extern} liegt über dem Gesamtbestand (${gesamt}). ` +
