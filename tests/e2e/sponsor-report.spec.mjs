@@ -97,14 +97,38 @@ test.describe("Sponsor-Report", () => {
       ).toBe("number");
     }
 
-    // Die Positivliste des öffentlichen Wegs muss das Feld durchlassen.
-    const fs = await import("node:fs/promises");
-    const route = await fs.readFile("app/api/analytics/public-report/route.js", "utf8");
+    // ⚠️ NICHT DEN QUELLTEXT ABSUCHEN (Befund Kai, zwei Mutationen).
+    // Mein erster Anlauf prüfte per Textsuche, ob `newLast30: e.newLast30` in
+    // der Datei steht. Das war gleichzeitig zu streng und zu locker: Eine reine
+    // Umbenennung des Parameters machte den Test rot, und wer den Helfer für
+    // die beiden angezeigten Felder schlicht NICHT MEHR AUFRIEF, blieb grün –
+    // also genau die Regression, gegen die dieser Test antritt.
+    // Deshalb wird die Umformung selbst ausgeführt und ihr Ergebnis geprüft.
+    const fsMod = await import("node:fs/promises");
+    const routeQuelle = await fsMod.readFile("app/api/analytics/public-report/route.js", "utf8");
+    const ab = routeQuelle.indexOf("const kpi =");
+    const bis = routeQuelle.indexOf("\n}", routeQuelle.indexOf("function buildSponsorView"));
+    expect(ab, "Helferblock nicht gefunden – Test misst nichts").toBeGreaterThan(-1);
+    expect(bis, "buildSponsorView nicht gefunden – Test misst nichts").toBeGreaterThan(ab);
+    // eslint-disable-next-line no-new-func
+    const bauen = new Function(
+      `${routeQuelle.slice(ab, bis + 2)}; return buildSponsorView;`
+    )();
+
+    const oeffentlich = bauen(s);
+    for (const feld of ["externeTeams", "externeUsers"]) {
+      expect(
+        oeffentlich?.platform?.[feld]?.newLast30,
+        `Der Sponsorenlink liefert bei ${feld} kein \`newLast30\` – er zeigt ` +
+          "damit Bestandszahlen ohne Zeitbezug unter einer Zeitraum-Überschrift, " +
+          "während das Backoffice die Zeile „davon N neu in 30 Tagen“ zeigt"
+      ).toBe(s.platform[feld].newLast30);
+    }
+    // Und die Gegenrichtung: Was draußen bleiben soll, bleibt draußen.
     expect(
-      /newLast30:\s*e\.newLast30/.test(route),
-      "Die Positivliste des Sponsorenlinks gibt `newLast30` nicht weiter – " +
-        "der Sponsor sieht Bestandszahlen ohne Zeitbezug unter einer Zeitraum-Überschrift"
-    ).toBeTruthy();
+      oeffentlich?.content?.topPlayers,
+      "Spielernamen sind wieder im Datenpaket des Sponsorenlinks"
+    ).toBeUndefined();
   });
 
   test("im Dokument steht kein Klarname und kein roher Pfad", async ({ page, request }) => {
@@ -129,6 +153,15 @@ test.describe("Sponsor-Report", () => {
     const namen = (((sumJson?.summary || sumJson?.data)?.content?.topPlayers) || [])
       .map((x) => x?.label)
       .filter(Boolean);
+    // ⚠️ EHRLICHKEITSSCHRANKE (Befund Kai, Mutation „Namensliste leeren“):
+    // Ohne sie lief dieser Fall bei leerer Liste ins Nichts und blieb grün –
+    // ein Test, der seine eigene Vorbedingung nicht prüft, prüft gar nichts.
+    expect(
+      namen.length,
+      "Keine Spielernamen in der Antwort – dieser Fall misst nichts. " +
+        "Analytics-Daten fehlen oder die Struktur hat sich geändert."
+    ).toBeGreaterThan(0);
+
     for (const n of namen) {
       expect(txt, `Klarname „${n}" steht im Sponsorendokument`).not.toContain(n);
     }

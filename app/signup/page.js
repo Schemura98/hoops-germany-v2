@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { PiGoogleLogoBold } from "react-icons/pi";
@@ -29,7 +29,17 @@ import {
 
 function SignupForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  // KEIN Adresszeilen-Haken (useSearchParams) AUF DIESER SEITE - er machte
+  // die ausgelieferte Seite LEER (Roadmap 22, behoben 19.08.2026).
+  // Next rendert /signup statisch vor. Sobald der Haken irgendwo steht, faellt
+  // beim Vorrendern die naechste Suspense-Grenze auf ihren Ersatzinhalt
+  // zurueck - und der war hier leer. Ergebnis: Das ausgelieferte HTML trug
+  // 0 Eingabefelder, 0 <main> und 0 Verweise auf Datenschutz und Impressum -
+  // letztere hatte Nora am 13.08. fuer genau diese Seite verlangt.
+  // Im Browser war nach dem Nachladen alles da, deshalb fiel es nie auf.
+  // Beide Auswertungen unten laufen ohnehin erst im Browser und lesen die
+  // Adresszeile jetzt direkt - so, wie es der Google-Effekt hier immer tat.
+  // Bewacht durch tests/e2e/signup-ohne-js.spec.mjs.
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -59,22 +69,26 @@ function SignupForm() {
   // Flyer-Link landet auf /signup?src=flyer-koeln, Nutzer wechselt kurz zu /login
   // und zurück zu /signup ohne Query-Param).
   useEffect(() => {
-    const src = searchParams.get("src")?.toLowerCase().trim();
+    const src = new URLSearchParams(window.location.search)
+      .get("src")
+      ?.toLowerCase()
+      .trim();
     if (src && SRC_RE.test(src)) {
       window.sessionStorage.setItem(SIGNUP_SOURCE_KEY, src);
     }
-  }, [searchParams]);
+  }, []);
 
   // Rückmeldung vom Google-Weg: Der Callback schickt hierher zurück, wenn die
   // Mindestalter-Bestätigung fehlte. Ohne diese Auswertung wäre der Abbruch
   // stumm und der Nutzer stünde ohne Erklärung wieder am Anfang.
   useEffect(() => {
-    if (searchParams.get("error") === "min_age_required") {
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("error") === "min_age_required") {
       setError(
         MINDESTALTER_HINWEIS_GOOGLE,
       );
     }
-  }, [searchParams]);
+  }, []);
 
   const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
@@ -287,10 +301,9 @@ function SignupForm() {
   );
 }
 
+// Die Suspense-Grenze ist entfallen: Sie umschloss die GANZE Seite und hatte
+// keinen Ersatzinhalt. Ohne den Adresszeilen-Haken gibt es nichts mehr, worauf
+// sie warten muesste.
 export default function SignupPage() {
-  return (
-    <Suspense>
-      <SignupForm />
-    </Suspense>
-  );
+  return <SignupForm />;
 }
