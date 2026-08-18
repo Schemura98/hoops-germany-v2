@@ -40,6 +40,42 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Deutsche Silbentrennung mit Hausregel gegen Stummel (Vivien, 18.08.2026).
+     Ersetzt das nackte `hyphens-auto` – die beiden Teile gehören zusammen und
+     sind einzeln sinnlos, deshalb EINE Klasse statt zwei nebeneinander.
+
+     WOZU: `hyphens: auto` allein trennt an JEDER gültigen Stelle, auch nach
+     drei Buchstaben. In einer großen Versal-Überschrift wird daraus ein
+     Stummel: „TRYOUT BEI DEMO MÖN-" / „CHENGLADBACH METEORS" (gemessen auf
+     375 px, der häufigsten iPhone-Breite). Formal korrekt – für den Leser eine
+     Panne. Bei „RECK-" (Recklinghausen) kommt hinzu, dass der Stummel als
+     eigenes Wort gelesen werden kann; davor warnt der Duden ausdrücklich.
+
+     DIE ZAHLEN: 8 = kürzer als acht Zeichen wird gar nicht getrennt.
+     5 = mindestens fünf Zeichen vor dem Strich. 4 = mindestens vier danach.
+     Die 4 ist bewusst nicht höher: Sie hält „MÖNCHENGLAD-" / „BACH" am Leben –
+     eine echte Wortfuge, die flüssig liest.
+
+     WARUM EINE REGEL UND KEINE AUSNAHMELISTE FÜR EIGENNAMEN: Was „MÖN-" wie
+     einen Fehler aussehen lässt, ist die KÜRZE, nicht die Tatsache, dass ein
+     Ortsname darin steckt – „MÖNCHENGLAD-" stört niemanden. Die Zeichenzahl
+     ist also das, was man ohnehin meint. Eine Liste müsste dagegen an jeder
+     aufrufenden Stelle gepflegt werden und verrottet dort (siehe die 141 von
+     Hand gebauten Panels neben `cardClass`).
+
+     ⚠️ ZWEI EIGENSCHAFTEN, WEIL KEINE MASCHINE BEIDE KENNT (gemessen 18.08.2026):
+     Chromium 151 und Firefox 153 verstehen `hyphenate-limit-chars`, WebKit 26.5
+     nicht – dort wirken nur die `-webkit-`-Eigenschaften. Beide Schreibweisen
+     sind Pflicht, sonst fällt Safari (iPhone!) auf das alte Verhalten zurück.
+     In allen drei Maschinen nachgemessen: Der Stummel verschwindet. */
+  .trennung-schonend {
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -webkit-hyphenate-limit-before: 5;
+    -webkit-hyphenate-limit-after: 4;
+    hyphenate-limit-chars: 8 5 4;
+  }
 }
 
 /* Seitenwechsel über die native View-Transitions-API (Wow-Konzept C.3).

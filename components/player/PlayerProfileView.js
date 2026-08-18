@@ -164,7 +164,7 @@ function StatCell({ label, value, sub, small }) {
       <p
         className={`${
           small ? "text-sm" : "text-lg"
-        } font-bold text-paper-50 leading-tight mt-0.5 break-words hyphens-auto`}
+        } font-bold text-paper-50 leading-tight mt-0.5 break-words trennung-schonend`}
       >
         {value ?? "–"}
       </p>

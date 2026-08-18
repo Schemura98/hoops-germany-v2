@@ -27,17 +27,28 @@ export default function PageHeader({ eyebrow, title, subtitle, back, children })
             {eyebrow}
           </p>
         )}
-        {/* ⚠️ `hyphens-auto` + `break-words` neu am 18.08.2026.
-            Gefunden vom neuen Test `kein-abgeschnittener-text.spec.mjs`:
+        {/* ⚠️ Silbentrennung neu am 18.08.2026, nachgeschärft am selben Tag.
+            Gefunden vom Test `kein-abgeschnittener-text.spec.mjs`:
             „DATENSCHUTZERKLÄRUNG" quoll auf 360 px um 6 px über den Rand –
             ein einzelnes langes Wort, das in keiner Zeilenbreite Platz findet.
             Es scrollte nichts und es sah nicht kaputt aus; das letzte Zeichen
             war schlicht weg.
-            `hyphens-auto` trennt nach deutschen Regeln (die Sprache steht in
-            `app/layout.js` am `<html lang="de">`, sonst wirkt es nicht),
-            `break-words` ist das Sicherheitsnetz für Wörter ohne gültige
-            Trennstelle. Beides ändert an kürzeren Überschriften nichts. */}
-          <h1 className="font-display text-paper-50 font-black uppercase tracking-tight text-4xl sm:text-6xl leading-[0.95] text-balance hyphens-auto break-words">
+
+            Die Trennung greift aber nicht nur bei festen Wörtern der Plattform,
+            sondern auch bei VEREINS- UND ORTSNAMEN, die hier eingesetzt werden
+            (`/tryouts/[id]`, `/ligen/[id]`). Das nackte `hyphens-auto` trennte
+            dort nach drei Buchstaben: „TRYOUT BEI DEMO MÖN-" / „CHENGLADBACH
+            METEORS" (Befund Tobias, auf 375 px in echtem Chrome nachgestellt).
+            Deshalb `trennung-schonend` statt `hyphens-auto` – die Hausregel
+            samt Begründung und Messwerten steht in `app/globals.css`.
+
+            `break-words` bleibt daneben stehen und ist bewusst NICHT Teil der
+            Klasse: Es beantwortet eine andere Frage – was passiert, wenn auch
+            eine Trennung nicht mehr reicht. Ohne dieses Netz quillt der Text
+            wieder über den Rand; ohne die Trennung bricht es mitten im Wort
+            OHNE Strich („MÖNCHENGLADB" / „ACH"), was schlechter aussieht als
+            jede Trennung. Beides gemessen, beides gewollt. */}
+          <h1 className="font-display text-paper-50 font-black uppercase tracking-tight text-4xl sm:text-6xl leading-[0.95] text-balance trennung-schonend break-words">
           {title}
         </h1>
         {subtitle && <p className="text-mist-400 text-sm mt-3 max-w-2xl">{subtitle}</p>}
