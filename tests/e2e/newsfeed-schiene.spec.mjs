@@ -178,6 +178,7 @@ test.describe("Newsfeed – die rechte Schiene versteckt nichts", () => {
           schieneMitteX: r.x + r.width / 2,
           radiusUnten: getComputedStyle(el).borderBottomLeftRadius,
           rahmenUnten: getComputedStyle(el).borderBottomWidth,
+          rahmenFarbe: getComputedStyle(el).borderBottomColor,
           overscroll: getComputedStyle(el).overscrollBehaviorY,
         };
       });
@@ -205,21 +206,36 @@ test.describe("Newsfeed – die rechte Schiene versteckt nichts", () => {
       // etwas verborgen ist. BEIDE Richtungen, denn ein fehlender Anschnitt
       // wirft keinen Fehler – er fehlt nur.
       const laeuftUeber = mess.inhaltsHoehe > mess.sichtbareHoehe + 1;
+      // ⚠️ GEPRÜFT WIRD SICHTBARKEIT, NICHT BREITE (nachgezogen 18.08.2026).
+      //
+      // Die erste Umsetzung schaltete die Rahmen-BREITE ab (`border-b-0`) –
+      // und genau daran hing eine Endlosschleife: Der 1-px-Rahmen ist Teil der
+      // Höhe, die gemessen wird, also veränderte die Reaktion ihre eigene
+      // Messgröße (Befund Kai B1, von Tobias mit einer Bildfolge belegt).
+      // Jetzt bleibt die Breite stehen und nur die FARBE wird durchsichtig.
+      //
+      // Dieser Test hat den Wechsel korrekt bemerkt und ist rot geworden – die
+      // Umsetzung war geändert, die Prüfung nicht. Er fragt jetzt nach dem, was
+      // ein Mensch sieht: Ist unten eine Linie zu SEHEN? Damit ist er
+      // gleichzeitig unabhängig davon, mit welchem Mittel sie verschwindet.
+      const linieSichtbar =
+        mess.rahmenUnten !== "0px" && !/rgba\(0, 0, 0, 0\)|transparent/.test(mess.rahmenFarbe);
+
       if (laeuftUeber) {
         expect(
-          mess.radiusUnten === "0px" && mess.rahmenUnten === "0px",
+          mess.radiusUnten === "0px" && !linieSichtbar,
           `Die Schiene verbirgt ${mess.inhaltsHoehe - mess.sichtbareHoehe}px Inhalt, ` +
             `zeichnet unten aber weiter einen Abschluss (Radius ${mess.radiusUnten}, ` +
-            `Rahmen ${mess.rahmenUnten}). Die Form behauptet „hier ist Schluss", ` +
-            `während es weitergeht.`,
+            `Rahmen ${mess.rahmenUnten} in ${mess.rahmenFarbe}). Die Form behauptet ` +
+            `„hier ist Schluss", während es weitergeht.`,
         ).toBe(true);
       } else {
         expect(
-          mess.radiusUnten !== "0px" && mess.rahmenUnten !== "0px",
+          mess.radiusUnten !== "0px" && linieSichtbar,
           `Es ist nichts verborgen, die Schiene ist unten trotzdem angeschnitten ` +
-            `(Radius ${mess.radiusUnten}, Rahmen ${mess.rahmenUnten}). Dann behauptet ` +
-            `der Anschnitt seinerseits etwas Falsches: „hier geht es weiter", obwohl ` +
-            `alles zu sehen ist.`,
+            `(Radius ${mess.radiusUnten}, Rahmen ${mess.rahmenUnten} in ` +
+            `${mess.rahmenFarbe}). Dann behauptet der Anschnitt seinerseits etwas ` +
+            `Falsches: „hier geht es weiter", obwohl alles zu sehen ist.`,
         ).toBe(true);
       }
 
@@ -274,4 +290,102 @@ test.describe("Newsfeed – die rechte Schiene versteckt nichts", () => {
       ).toBe(true);
     });
   }
+
+  test("die Unterkante flackert nicht", async ({ page, request }) => {
+    // ⚠️ DER TEST ZUM SCHWERSTEN BEFUND DIESES GATES (Kai B1, Tobias B2).
+    //
+    // Die erste Umsetzung schaltete die Rahmen-BREITE ab. Der Rahmen ist 1 px
+    // hoch und damit Teil der Höhe, die gemessen wird: Abschalten machte den
+    // Innenbereich um genau diesen Pixel größer, die Antwort kippte, der Rahmen
+    // kam zurück – und das in jedem Bild. Gemessen 120 Wechsel pro Sekunde,
+    // ohne Ende, bei genau einer Fensterhöhe. Tobias hat es mit einer echten
+    // Bildfolge belegt: 150 Bilder, zwei Zustände, streng abwechselnd.
+    //
+    // ⚠️ Der Sichtbarkeits-Test oben fängt das NICHT – er prüft den Endzustand,
+    // nicht die Unruhe. Und ein Rückfall auf `border-b-0` sähe dort korrekt aus
+    // (0 px ist ebenfalls unsichtbar). Deshalb dieser eigene Fall.
+    //
+    // ⚠️ Der Sprung muss DIREKT erfolgen. Schrittweises Verkleinern verdeckt den
+    // Fehler – dann bleibt es ruhig, aber in der falschen Stellung (Tobias).
+    const res = await request.post("/api/player/playerlogin", {
+      data: { email: "max@test.de", password: "test123" },
+    });
+    const j = await res.json().catch(() => ({}));
+    const token = j?.data?.token || j?.token;
+    expect(typeof token === "string" && token.length > 20, "Kein Token").toBe(true);
+
+    await page.addInitScript((t) => localStorage.setItem("playerAuthToken", t), token);
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto("/player/newsfeed", { waitUntil: "domcontentloaded" });
+    await page.waitForFunction(
+      () => [...document.querySelectorAll("main *")].some((e) => getComputedStyle(e).position === "sticky"),
+      { timeout: 30_000 },
+    );
+    await page.waitForTimeout(3500);
+
+    // Die kritische Höhe zur Laufzeit rechnen: Sie hängt am Inhalt und liegt
+    // deshalb pro Konto woanders. Eine feste Zahl wäre morgen falsch.
+    const inhalt = await page.evaluate(() => {
+      const el = [...document.querySelectorAll("main *")].find(
+        (e) => getComputedStyle(e).position === "sticky",
+      );
+      return { hoehe: el.scrollHeight, haftkante: parseInt(getComputedStyle(el).top) || 0 };
+    });
+    // ⚠️ Der Kipppunkt liegt bei Inhalt + Haftkante – nachgemessen, nicht
+    // hergeleitet. Dort sind genau 2 px verborgen: die 1-px-Toleranz plus den
+    // 1-px-Rahmen, den die alte Umsetzung wegschaltete. Ein erster Anlauf
+    // rechnete „minus 2" und traf 4 px verborgenen Rest – dort flackert nichts,
+    // und die Gegenprobe lief grün durch, obwohl der Fehler wieder eingebaut
+    // war. Wer die Formel ändert, muss die Gegenprobe wiederholen.
+    const kritisch = inhalt.hoehe + inhalt.haftkante;
+
+    await page.setViewportSize({ width: 1280, height: kritisch });
+    await page.evaluate(() => window.scrollTo(0, 900));
+    await page.waitForTimeout(400);
+
+    const r = await page.evaluate(
+      () =>
+        new Promise((fertig) => {
+          const el = [...document.querySelectorAll("main *")].find(
+            (e) => getComputedStyle(e).position === "sticky",
+          );
+          let wechsel = 0,
+            bilder = 0,
+            vorher = el.className;
+          const start = performance.now();
+          const tick = () => {
+            bilder++;
+            if (el.className !== vorher) {
+              wechsel++;
+              vorher = el.className;
+            }
+            if (performance.now() - start < 1200) requestAnimationFrame(tick);
+            else fertig({ wechsel, bilder, verborgen: el.scrollHeight - el.clientHeight });
+          };
+          requestAnimationFrame(tick);
+        }),
+    );
+
+    // Ehrlichkeitsschranken: ohne Überlauf und ohne Bilder misst der Test nichts.
+    expect(
+      r.verborgen,
+      `Bei der berechneten Fensterhöhe (${kritisch}px) ist nichts verborgen – ` +
+        `dann kann der Kipppunkt gar nicht auftreten und dieser Test prüft nichts. ` +
+        `Vermutlich ist die Schiene kürzer geworden.`,
+    ).toBeGreaterThan(0);
+    expect(
+      r.bilder,
+      `Nur ${r.bilder} Bilder gemessen – die Sonde lief nicht. Ein Ergebnis ` +
+        `daraus wäre bedeutungslos, nicht grün.`,
+    ).toBeGreaterThan(20);
+
+    expect(
+      r.wechsel,
+      `Die Unterkante hat in 1,2 s ${r.wechsel}-mal ihren Zustand gewechselt ` +
+        `(${r.bilder} Bilder, ${r.verborgen}px verborgen). Das ist die ` +
+        `Endlosschleife aus dem Gate vom 18.08.2026: Die Messung verändert ihre ` +
+        `eigene Stellgröße. Fast sicher wurde wieder die Rahmen-BREITE ` +
+        `abgeschaltet (\`border-b-0\`) statt nur die Farbe durchsichtig zu machen.`,
+    ).toBeLessThanOrEqual(1);
+  });
 });

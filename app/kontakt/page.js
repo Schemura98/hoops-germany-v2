@@ -1,54 +1,106 @@
-import LegalShell, { LegalHeading } from "@/components/layout/LegalShell";
+"use client";
 
-export const metadata = { title: "Über uns – Hoops Germany" };
+import { useState } from "react";
+import axios from "axios";
+import { PiCheckCircleBold, PiEnvelopeSimpleBold } from "react-icons/pi";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import Button from "@/components/ui/Button";
+import FormAlert from "@/components/ui/FormAlert";
+import { inputClass } from "@/lib/ui";
 
-export default function AboutPage() {
+export default function KontaktPage() {
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+  async function submit(e) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      await axios.post("/api/kontakt", form);
+      setDone(true);
+    } catch (err) {
+      setError(err.response?.data?.message || "Senden fehlgeschlagen.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <LegalShell title="Über uns">
-      <p>
-        <strong>Hoops Germany</strong> ist die Community-Plattform für Amateur-Basketball
-        in NRW. Wir bringen Spielerinnen und Spieler, Teams und Ligen an einem Ort
-        zusammen – abseits des Profibetriebs, mitten im Herz des deutschen Breitensports.
-      </p>
+    <div className="min-h-screen bg-navy-950 flex flex-col">
+      <Navbar />
 
-      <LegalHeading>Was wir bieten</LegalHeading>
-      <p>
-        Erstelle dein Spielerprofil, zeige deine Statistiken und finde Anschluss an ein
-        Team. Vereine verwalten ihren Kader, schreiben Tryouts aus und tragen Spiele sowie
-        Ergebnisse ein. Über den Transfermarkt finden Spieler und Teams zueinander.
-        {/* Die Altersgrenze und ihr Grund, seit 14.08.2026 (Befund Lina: /about
-            enthielt „16" nicht, gemessen; Wortlaut Nele). Die Grenze ist eine
-            Bedingung des Angebots und steht deshalb hier, nicht als eigener
-            Abschnitt – sonst wäre sie eines von vier Dingen, die diese Seite
-            über uns sagt.
-            Der Schlusssatz sagt dem Jüngeren, dass er nichts verpasst, ohne
-            zuzusagen, dass es die Plattform in zwei Jahren noch gibt oder die
-            Grenze dann noch bei 16 liegt. Mehr geht hier ehrlich nicht. */}{" "}
-        Mitmachen kannst du ab 16 Jahren. Der Grund ist die Öffentlichkeit der Profile:
-        Name, Verein und Statistiken kann hier jeder sehen, auch ohne Konto – und diese
-        Entscheidung wollen wir niemandem unter 16 abverlangen. Bist du jünger: Der
-        Basketball läuft dir nicht weg.
-      </p>
+      <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-lg mx-auto w-full px-4 py-12">
+        <div className="bg-navy-800 rounded-md border border-navy-600 p-8">
+          <h1 className="font-display uppercase tracking-tight text-2xl font-black text-paper-50 flex items-center gap-2">
+            <PiEnvelopeSimpleBold className="text-brand-400" /> Kontakt
+          </h1>
+          <p className="mt-1 text-sm text-mist-400">
+            Fragen, Anregungen oder Kooperationen? Schreib uns.
+          </p>
 
-      <LegalHeading>Unsere Mission</LegalHeading>
-      <p>
-        Amateur-Basketball lebt von seiner Community. Wir wollen es so einfach wie möglich
-        machen, sich zu vernetzen, Spiele zu organisieren und die eigene Entwicklung
-        sichtbar zu machen – vom ersten Tryout bis zur Topscorer-Liste.
-      </p>
+          {done ? (
+            <FormAlert type="success" className="mt-6 flex items-center gap-2 py-4">
+              <PiCheckCircleBold className="flex-shrink-0" />
+              <span>Danke! Wir melden uns bei dir.</span>
+            </FormAlert>
+          ) : (
+            <form onSubmit={submit} className="mt-6 space-y-4">
+              {error && <FormAlert>{error}</FormAlert>}
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-mist-300 mb-1">Name</label>
+                  <input name="name" required value={form.name} onChange={onChange} className={inputClass} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-mist-300 mb-1">E-Mail</label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    value={form.email}
+                    onChange={onChange}
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-mist-300 mb-1">Nachricht</label>
+                <textarea
+                  name="message"
+                  required
+                  rows={5}
+                  value={form.message}
+                  onChange={onChange}
+                  className={`${inputClass} resize-none`}
+                  placeholder="Deine Nachricht…"
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={loading || !form.name.trim() || !form.email.trim() || !form.message.trim()}
+                className="w-full"
+              >
+                {loading ? "Senden…" : "Nachricht senden"}
+              </Button>
+            </form>
+          )}
 
-      <LegalHeading>Kontakt</LegalHeading>
-      <p>
-        Fragen, Ideen oder Feedback? Schreib uns über das{" "}
-        <a href="/kontakt" className="text-brand-400 hover:underline">
-          Kontaktformular
-        </a>{" "}
-        oder per E-Mail an{" "}
-        <a href="mailto:info@hoopsgermany.de" className="text-brand-400 hover:underline">
-          info@hoopsgermany.de
-        </a>
-        .
-      </p>
-    </LegalShell>
+          <p className="mt-6 text-center text-xs text-mist-400">
+            Oder direkt:{" "}
+            <a href="mailto:info@hoopsgermany.de" className="text-brand-400 hover:underline">
+              info@hoopsgermany.de
+            </a>
+          </p>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
   );
 }

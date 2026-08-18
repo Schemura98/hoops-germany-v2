@@ -123,9 +123,29 @@ export default function Schiene({ children, className = "", haftend = false }) {
     const pruefen = () => {
       raf = 0;
       // 1 px Toleranz gegen Rundung bei gebrochenen Bildschirmauflösungen.
+      // ⚠️ DIE MESSUNG DARF IHRE EIGENE STELLGRÖSSE NICHT VERÄNDERN.
+      //
+      // Der erste Anlauf schaltete den unteren Rahmen ab (`border-b-0`) – und
+      // genau daran hing eine Endlosschleife (Befund Kai B1, von Tobias mit
+      // einer Bildfolge belegt: 150 Bilder, zwei Zustände, streng abwechselnd).
+      //
+      // Der Rahmen ist 1 px hoch. Schaltet man ihn ab, wächst der Innenbereich
+      // um genau diesen Pixel – also um die Größe, die gerade gemessen wurde.
+      // Bei 2 px verborgenem Rest kippt die Antwort dadurch in jedem Bild:
+      // Rahmen weg → „passt doch" → Rahmen zurück → „passt nicht". Gemessen
+      // 120 Wechsel pro Sekunde, ohne Ende, bei Fensterhöhe 804 px.
+      //
+      // ⚠️ Die Toleranz zu erhöhen hilft NICHT – sie verschiebt das Fenster nur
+      // um einen Pixel. Die Rückkopplung muss aus der Messung heraus.
+      //
+      // Deshalb bleibt die Rahmen-BREITE unverändert und nur seine FARBE wird
+      // durchsichtig. Die Geometrie ändert sich damit nie, `clientHeight` ist
+      // von der eigenen Reaktion unabhängig, und optisch ist das Ergebnis
+      // dasselbe: Die Kante ist weg, der Inhalt läuft aus dem Bild.
+      // Der Eckenradius darf bleiben – er ändert keine Höhe.
       const laeuftUeber = el.scrollHeight - el.clientHeight > 1;
       el.classList.toggle("rounded-b-none", laeuftUeber);
-      el.classList.toggle("border-b-0", laeuftUeber);
+      el.classList.toggle("border-b-transparent", laeuftUeber);
     };
     const anstossen = () => {
       if (!raf) raf = requestAnimationFrame(pruefen);

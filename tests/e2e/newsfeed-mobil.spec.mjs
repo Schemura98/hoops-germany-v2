@@ -144,12 +144,23 @@ test.describe("Newsfeed mobil", () => {
         mess.umschalterY,
         `Der Feed-Umschalter („Für dich") wurde nicht gefunden.`,
       ).not.toBeNull();
+      // ⚠️ SCHWELLE KORRIGIERT (Befund Kai, Gate 18.08.2026).
+      // Hier stand `toBeLessThan(900)` – und die Fehlermeldung nannte „~888px"
+      // als den kaputten Zustand. 888 ist kleiner als 900: Der Test wäre im
+      // ausdrücklich benannten Fehlerfall GRÜN gewesen. Kai hat es gegengeprobt
+      // und zusätzlich gezeigt, dass selbst 334 px zusätzlicher Vorbau
+      // durchgingen – mehr als die vier Kästen überhaupt kosteten.
+      //
+      // Der Ist-Wert liegt bei ~554 px. Die Schwelle 650 lässt Raum für
+      // Textänderungen und wachsende Anzeigetafel, greift aber lange bevor
+      // wieder ein Kastenblock davorpasst (die kosteten ~192 px).
       expect(
         mess.umschalterY,
-        `Der Feed beginnt erst bei y=${mess.umschalterY}px. Vor dem Umbau vom ` +
-          `18.08.2026 waren es ~888px, weil vier Akkordeon-Kästen davor standen. ` +
-          `Sind sie zurück?`,
-      ).toBeLessThan(900);
+        `Der Feed beginnt erst bei y=${mess.umschalterY}px (Ist-Wert nach dem ` +
+          `Umbau: ~554px). Vor dem 18.08.2026 stand hier ein Block aus vier ` +
+          `Akkordeon-Kästen, der ~192px kostete. Sind sie zurück – oder ist ` +
+          `oberhalb des Feeds etwas anderes dazugekommen?`,
+      ).toBeLessThan(650);
     });
   }
 
@@ -278,6 +289,21 @@ test.describe("Newsfeed mobil", () => {
       `Die Aktionsleiste ist ${m.zeileH}px hoch statt 33. Der negative ` +
         `Außenabstand fehlt – die größeren Ziele strecken jetzt jeden Beitrag.`,
     ).toBeLessThanOrEqual(34);
+
+    // ⚠️ DIE ZUSAGE, UM DIE ES GEHT – und sie fehlte (Befund Kai, Gate 18.08.).
+    // Der Kommentar oben sagt „genau diese Zusage kann später still gebrochen
+    // werden – deshalb steht sie hier". `karteH` wurde erhoben und danach NIE
+    // geprüft: eine Übergabe an nichts, in dem Test, der sie sichern soll.
+    // Gemessen sind 155 px; die Grenze lässt Raum für unterschiedlich lange
+    // Beiträge, greift aber sofort, wenn der negative Außenabstand fehlt
+    // (dann 167 px, von Kai gegengeprobt).
+    expect(
+      m.karteH,
+      `Der Beitrag ist ${m.karteH}px hoch. Die größeren Klickziele dürfen die ` +
+        `Karte NICHT strecken – das ist der ganze Kniff (Innenabstand vergrößert ` +
+        `das Ziel, ein gleich großer negativer Außenabstand zieht das Layout ` +
+        `zurück). Fehlt der negative Außenabstand, wächst jeder Beitrag um 12px.`,
+    ).toBeLessThanOrEqual(160);
 
     // Vorleseprogramme: die Zahl allein ist keine Information.
     expect(
