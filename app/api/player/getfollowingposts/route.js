@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Post from "@/models/Post";
 import Player from "@/models/Player";
 import { getPlayerFromToken } from "@/lib/serverAuth";
+import { mitEigenenZahlen } from "@/lib/eigeneZahlen";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
 
 const DEFAULT_LIMIT = 10;
@@ -64,7 +65,9 @@ async function handler(req) {
     .populate("comments.replies.player", "firstName lastName slug profileImage");
 
   const hasMore = fetched.length > limit;
-  const posts = hasMore ? fetched.slice(0, limit) : fetched;
+  // Auch hier anreichern – sonst sähe derselbe Beitrag im Register „Folge ich"
+  // anders aus als in „Für dich", und niemand käme auf die Idee, das zu suchen.
+  const posts = await mitEigenenZahlen(hasMore ? fetched.slice(0, limit) : fetched, me);
 
   return ok({ posts, hasMore });
 }

@@ -4,6 +4,7 @@ import Post from "@/models/Post";
 import Team from "@/models/Team";
 import { getPlayerFromToken } from "@/lib/serverAuth";
 import { rankPosts } from "@/lib/feedRanking";
+import { mitEigenenZahlen } from "@/lib/eigeneZahlen";
 import { ok, withErrorHandling } from "@/lib/apiResponse";
 
 const DEFAULT_LIMIT = 10;
@@ -66,7 +67,7 @@ async function handler(req) {
   };
 
   const ranked = rankPosts(candidates, ctx);
-  const posts = ranked.slice(offset, offset + limit);
+  const posts = await mitEigenenZahlen(ranked.slice(offset, offset + limit), me);
   const hasMore = offset + limit < ranked.length;
 
   return ok({ posts, hasMore });

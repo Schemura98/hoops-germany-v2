@@ -21,6 +21,7 @@ import BaseAvatar from "@/components/Avatar";
 import RichText from "./RichText";
 import PostEmbed from "./PostEmbed";
 import MentionTextarea from "./MentionTextarea";
+import ErgebnisInhalt from "./ErgebnisInhalt";
 
 // Darstellung der automatischen Ereignis-Beiträge (Icon + Badge je Typ).
 const AUTO = {
@@ -345,8 +346,15 @@ export default function PostCard({ post, currentPlayerId }) {
             </div>
           </div>
 
-          {/* Inhalt (verlinkt aufs Ereignis) */}
-          {post.meta?.href ? (
+          {/* Inhalt (verlinkt aufs Ereignis).
+              Ergebnisse bekommen seit dem 18.08.2026 eine eigene Form: der
+              Punktestand führt, der Beleg ist eine eigene Zeile, und wer im
+              Box-Score steht, sieht seine eigenen Zahlen dazu. Alles andere
+              bleibt die Satzform – sie trägt dort, wo es nichts zu beziffern
+              gibt (Tryout, Vereinssuche, Neues Team). */}
+          {post.autoType === "match_result" ? (
+            <ErgebnisInhalt post={post} />
+          ) : post.meta?.href ? (
             <Link href={post.meta.href} className="block mt-3 group">
               <p className="font-semibold text-paper-50 group-hover:text-brand-400">
                 {post.content}
