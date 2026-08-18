@@ -149,7 +149,34 @@ export default function LandingFeatures() {
           <Reveal
             as="h2"
             className="block whitespace-nowrap font-display uppercase tracking-tight font-black text-paper-50"
-            style={{ fontSize: "clamp(3rem, 9vw, 7rem)" }}
+            // ⚠️ UNTERGRENZE 2rem STATT 3rem (Entscheidung Vivien, 18.08.2026,
+            // gemeldet von Patrick mit Foto seines Telefons).
+            //
+            // Der Überstand war NIE Gestaltung – er ist angefallen. Vivien hat
+            // live über 15 Breiten gemessen: Diese Zeile ist immer das
+            // 10,617-fache ihrer Schriftgröße breit. Bei `9vw` ergibt das
+            // 95,5 % der Bildschirmbreite – die Zeile kann rechnerisch NIE
+            // überstehen. Ab 560 px ist der Überstand exakt 0, auf jedem
+            // Desktop. Was überstand, war allein die Untergrenze von 48 px,
+            // und die greift nur auf schmalen Geräten. Ein Effekt, den es auf
+            // dem Desktop nie gibt und der auf dem Handy den Satz zerlegt
+            // (auf 360 px blieb „SAISON, SECHS SPIELZ"), ist kein Gestaltungs-
+            // mittel, sondern ein Zufall.
+            //
+            // ⚠️ Dieselbe Fehlerklasse wie der Ball-Abstand in Roadmap 20b:
+            // eine Stellschraube (die Untergrenze) und ein Restbetrag (die aus
+            // dem vw-Faktor folgende Breite) wurden als dieselbe Größe
+            // behandelt. Und: Ein wortlaut-UNABHÄNGIGER vw-Wert ist grundsätzlich
+            // unmöglich – der Faktor 10,617 kodiert die Textlänge.
+            //
+            // ⚠️ FOLGE FÜR DEN TEXT (Auflage an Nele): Diese Überschrift kann
+            // nicht mehr umformuliert werden, ohne die Geometrie neu zu messen.
+            // Bewacht durch `tests/e2e/landing-ueberschrift.spec.mjs`.
+            //
+            // Nebenwirkung, die niemand gemeldet hatte: Mit 48 px war diese
+            // Abschnitts-Überschrift auf dem Handy exakt so groß wie die
+            // Hauptüberschrift des Heros. Das ist jetzt auch behoben.
+            style={{ fontSize: "clamp(2rem, 9vw, 7rem)" }}
           >
             Eine Saison, sechs Spielzüge
           </Reveal>

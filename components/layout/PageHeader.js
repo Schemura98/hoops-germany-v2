@@ -27,7 +27,17 @@ export default function PageHeader({ eyebrow, title, subtitle, back, children })
             {eyebrow}
           </p>
         )}
-        <h1 className="font-display text-paper-50 font-black uppercase tracking-tight text-4xl sm:text-6xl leading-[0.95] text-balance">
+        {/* ⚠️ `hyphens-auto` + `break-words` neu am 18.08.2026.
+            Gefunden vom neuen Test `kein-abgeschnittener-text.spec.mjs`:
+            „DATENSCHUTZERKLÄRUNG" quoll auf 360 px um 6 px über den Rand –
+            ein einzelnes langes Wort, das in keiner Zeilenbreite Platz findet.
+            Es scrollte nichts und es sah nicht kaputt aus; das letzte Zeichen
+            war schlicht weg.
+            `hyphens-auto` trennt nach deutschen Regeln (die Sprache steht in
+            `app/layout.js` am `<html lang="de">`, sonst wirkt es nicht),
+            `break-words` ist das Sicherheitsnetz für Wörter ohne gültige
+            Trennstelle. Beides ändert an kürzeren Überschriften nichts. */}
+          <h1 className="font-display text-paper-50 font-black uppercase tracking-tight text-4xl sm:text-6xl leading-[0.95] text-balance hyphens-auto break-words">
           {title}
         </h1>
         {subtitle && <p className="text-mist-400 text-sm mt-3 max-w-2xl">{subtitle}</p>}
