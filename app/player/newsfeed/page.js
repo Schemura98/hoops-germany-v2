@@ -249,9 +249,22 @@ export default function PlayerNewsfeedPage() {
             {/* Nach dem Feed bewusst nur EINE Sache, und die richtige:
                 Folge-Vorschläge sind das Mittel gegen einen leeren Feed – sie
                 gehören genau dorthin, wo jemand ankommt, der nichts mehr zu
-                lesen hat. Tabelle und News stehen oben als Wegweiser; sie hier
-                zu wiederholen wäre die Doppelung, die auf dem Desktop schon
-                einmal entfernt wurde. */}
+                lesen hat.
+
+                ⚠️ KORREKTUR (Befund Tobias, Gate 18.08.2026): Hier stand
+                „Tabelle und News stehen oben als Wegweiser". Tabelle ja –
+                NEWS NICHT. Die drei Wegweiser sind Spiele, Tabelle, Spieler;
+                eine Seite `/news` gibt es nicht. „Basketball-News" ist damit
+                vom Newsfeed aus mobil nicht mehr erreichbar (weiterhin über die
+                Startseite und die rechte Schiene am Desktop).
+                Sachlich ist das vertretbar – News hatte die geringste
+                Priorität. Aber die Begründung beschrieb einen anderen Zustand
+                als der Code, und daran wäre die nächste Entscheidung
+                gescheitert: „News nach Klickmessung behalten oder streichen"
+                lässt sich nicht messen, wenn auf dem Hauptgerät gar keine
+                Klicks mehr entstehen können.
+                ⚠️ OFFEN bei Vivien (Gewichtung) und Ronja (hat die Fläche
+                überhaupt Publikum?). */}
             <div className="pt-2 border-t border-navy-600">
               <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-mist-400 mb-2.5">
                 Folgen

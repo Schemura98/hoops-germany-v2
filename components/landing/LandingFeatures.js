@@ -27,6 +27,15 @@ import {
 // spielen beim Ins-Bild-Scrollen einmal ihre echte Funktion vor ("Ein Spielzug
 // in sechs Szenen", docs/LANDING-KONZEPT-2026-08-11.md, Stufe 1).
 
+// BELEG-AUSSAGE-PRINZIP – geprüft von tests/e2e/beleg-aussage.spec.mjs.
+// Die Karte „Spielplan & Ergebnisse" beschreibt das VERFAHREN der doppelten
+// Bestätigung, sie behauptet es nicht für ein konkretes Spiel. `beidseitigBelegt`
+// ist hier nicht anwendbar, weil es kein Spiel gibt.
+//
+// ⚠️ Diese Fläche war bis zum 18.08.2026 UNGEPRÜFT, obwohl sie seit jeher eine
+// Beleg-Aussage trifft: Der Wächter suchte nach „doppelt bestätigt" in
+// Kleinschreibung, hier steht „Doppelt bestätigt". Ein Test, der an einer
+// Vokabel hängt, hängt auch an ihrer Schreibweise.
 const FEATURES = [
   {
     icon: PiChartBarBold,

@@ -540,6 +540,12 @@ export function StepUebergabe({
 // wiedersieht. Deshalb greift die Karte unten exakt die Form auf, die seit dem
 // 18.08.2026 im Feed steht (`components/posts/ErgebnisInhalt.js`).
 //
+// BELEG-AUSSAGE-PRINZIP – geprüft von tests/e2e/beleg-aussage.spec.mjs.
+// Diese Folie erklärt das VERFAHREN und zeigt kein echtes Spiel; sie kann
+// `beidseitigBelegt` gar nicht anwenden, weil es hier kein Spiel gibt. Genau
+// deshalb muss das Kopfband „Beispiel" tragen und darf keinen reservierten
+// Zustandsbegriff wie „Endstand" benutzen (s. Korrektur oben).
+//
 // ⚠️ DIE ZAHLEN HIER SIND EIN BEISPIEL UND MÜSSEN ALS SOLCHES ERKENNBAR SEIN.
 // Eine Tour-Folie mit erfundenen Vereinsnamen, die aussieht wie ein echter
 // Beitrag, ist ein Muster-Fall aus `docs/MUSTER-ZAHLEN-DIE-LUEGEN`: im Sinne
@@ -552,11 +558,23 @@ export function StepUebergabe({
 export function StepFeed() {
   return (
     <div className="rounded-md border border-navy-600 bg-navy-800 overflow-hidden">
+      {/* ⚠️ HIER STAND „Beispiel · Endstand" – ein Widerspruch in sich
+          (Befund Kai, Gate 18.08.2026). „Endstand" ist im Produkt ein
+          RESERVIERTER Begriff: `lib/matchScore.js` vergibt ihn für
+          `state: "final"` = einseitig gemeldet, Gegner hat binnen Frist nicht
+          widersprochen. Also für das GEGENTEIL dessen, was zwei Zeilen tiefer
+          grün behauptet wird. Ausgerechnet auf der Folie, deren Zweck es ist,
+          genau dieses Vokabular zu erklären.
+          Der Wächter `tests/e2e/beleg-aussage.spec.mjs` hat es nicht gefangen,
+          weil er im Code nach `state === "final"` sucht – hier war es fester
+          Text. Jetzt „Spielergebnis", wörtlich das Etikett, das die echte
+          Karte im Feed trägt (`AUTO.match_result.label` in PostCard.js).
+          Die erfundene Liga ist ersatzlos entfallen: Der Kommentar unten sagt,
+          die Karte greife die Form aus dem Feed auf – dort steht keine. */}
       <div className="flex items-center justify-between gap-3 border-b border-navy-600 bg-navy-900 px-3 py-1.5">
         <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-mist-400">
-          Beispiel · Endstand
+          Beispiel · Spielergebnis
         </span>
-        <span className="font-mono text-[10px] text-mist-500">Bezirksliga</span>
       </div>
       <div className="px-3 py-2.5">
         <div className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-0.5">

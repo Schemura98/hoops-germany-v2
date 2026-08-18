@@ -64,11 +64,19 @@ function anweisungen(inhalt) {
 }
 
 // Die Flächen, die eine Beleg-Aussage treffen.
+//
+// Dritte Spalte = woraus die Fläche ihre Aussage ziehen MUSS:
+//   "praedikat" – sie entscheidet selbst, also `beidseitigBelegt`.
+//   "belegStufe" – sie zeigt nur an, was `lib/autoPost.js` entschieden hat.
+//     Diese Flächen haben gar kein Spiel-Objekt und KÖNNEN das Prädikat nicht
+//     anwenden; sie dürfen aber auch nichts anderes benutzen als das eine Feld,
+//     das nachweislich daraus stammt. (Neu am 18.08.2026 mit der Ergebnis-Karte.)
 const FLAECHEN = [
-  ["lib/autoPost.js", "Ergebnis-Beitrag im Feed (öffentlich teilbar)"],
-  ["components/feed/Anzeigetafel.js", "Anzeigetafel auf dem Newsfeed"],
-  ["lib/statsNotify.js", "Benachrichtigung „Deine Zahlen stehen“"],
-  [join("app", "match", "[id]", "page.js"), "Spiel-Detailseite"],
+  ["lib/autoPost.js", "Ergebnis-Beitrag im Feed (öffentlich teilbar)", "praedikat"],
+  ["components/feed/Anzeigetafel.js", "Anzeigetafel auf dem Newsfeed", "praedikat"],
+  ["lib/statsNotify.js", "Benachrichtigung „Deine Zahlen stehen“", "praedikat"],
+  [join("app", "match", "[id]", "page.js"), "Spiel-Detailseite", "praedikat"],
+  [join("components", "posts", "ErgebnisInhalt.js"), "Ergebnis-Karte im Feed", "belegStufe"],
 ];
 
 test.describe("Beleg-Aussage", () => {
@@ -117,9 +125,10 @@ test.describe("Beleg-Aussage", () => {
 
   test("jede Fläche zieht aus dieser einen Stelle", async () => {
     const ohne = [];
-    for (const [pfad, zweck] of FLAECHEN) {
+    for (const [pfad, zweck, quelle] of FLAECHEN) {
       const inhalt = ohneKommentare(lies(...pfad.split(/[\\/]/)));
-      if (!/beidseitigBelegt/.test(inhalt)) ohne.push(`${pfad} (${zweck})`);
+      const muster = quelle === "belegStufe" ? /belegStufe/ : /beidseitigBelegt/;
+      if (!muster.test(inhalt)) ohne.push(`${pfad} (${zweck}) – erwartet: ${quelle}`);
     }
     expect(
       ohne,
@@ -149,7 +158,9 @@ test.describe("Beleg-Aussage", () => {
     // die Anzeigetafel entstanden. Der Fall „zwei Aussagen in einer Datei" ist
     // NICHT abgedeckt. Das steht hier als Warnung, nicht als Zusicherung –
     // „der Test deckt das ab" war an diesen Tagen die teuerste Annahme.
-    const WURZELN = ["app", "components", "lib"];
+    // `scripts` ergänzt: Das Seed-Skript vom 18.08. trifft ebenfalls eine
+    // Beleg-Aussage und lag außerhalb jeder Suchwurzel.
+    const WURZELN = ["app", "components", "lib", "scripts"];
     const treffer = [];
     const durchsuchen = (verzeichnis) => {
       for (const eintrag of readdirSync(verzeichnis)) {
@@ -157,11 +168,40 @@ test.describe("Beleg-Aussage", () => {
         if (statSync(pfad).isDirectory()) durchsuchen(pfad);
         else if (/\.(js|jsx)$/.test(eintrag)) {
           const inhalt = ohneKommentare(readFileSync(pfad, "utf8"));
+          // ⚠️ NICHT nach festen Wortlauten suchen (Befund Kai, 18.08.2026).
+          //
+          // Hier stand eine Liste mit drei Formulierungen. Am 18.08. entstanden
+          // zwei neue Flächen mit „von beiden VEREINEN bestätigt" – Vereinen,
+          // nicht Teams – und der Wächter schwieg. Ein Synonym anzuhängen hätte
+          // dieselbe Falle für das nächste gestellt.
+          //
+          // Jetzt: ein Muster über die BEDEUTUNG. „beid…/beide… + bestätigt"
+          // in einem Fenster von 40 Zeichen fängt Teams, Vereine, Seiten,
+          // Mannschaften und jede Umstellung davon.
           const behauptet =
-            /beiden Teams bestätigt|beidseitig bestätigt|doppelt bestätigt/.test(
+            /(beide[nr]?|beidseitig|doppelt)[^;{}]{0,40}best(ä|ae)tigt/i.test(
               inhalt,
             );
-          if (behauptet && !/beidseitigBelegt/.test(inhalt)) {
+          // Drei zulaessige Nachweise – mehr nicht:
+          // (1) `beidseitigBelegt` direkt: die Datei entscheidet selbst.
+          // (2) `belegStufe`: die Datei ZEIGT nur, was `lib/autoPost.js`
+          //     entschieden hat, und das zieht aus (1). Reine Darstellung ohne
+          //     Zugriff auf das Spiel – z. B. eine Karte im Feed.
+          // (3) Marker `BELEG-AUSSAGE-PRINZIP`: die Fläche spricht über das
+          //     VERFAHREN, nicht über ein konkretes Spiel (Startseite, Tour).
+          //     Der Marker steht im Kommentar, deshalb gegen den ROHTEXT
+          //     geprüft – `ohneKommentare` hat ihn oben entfernt.
+          //
+          // ⚠️ Das ist bewusst KEINE Ausnahmeliste im Test. Eine solche Liste
+          // wächst still; der Marker zwingt dagegen jeden, der eine neue
+          // Beleg-Fläche baut, die Einordnung IN DIE DATEI zu schreiben – dort,
+          // wo der nächste Leser sie braucht.
+          const roh = readFileSync(pfad, "utf8");
+          const nachweis =
+            /beidseitigBelegt/.test(inhalt) ||
+            /belegStufe/.test(inhalt) ||
+            /BELEG-AUSSAGE-PRINZIP/.test(roh);
+          if (behauptet && !nachweis) {
             treffer.push(pfad.replace(PROJECT_ROOT, ""));
           }
         }
@@ -170,8 +210,9 @@ test.describe("Beleg-Aussage", () => {
     for (const w of WURZELN) durchsuchen(join(PROJECT_ROOT, w));
     expect(
       treffer,
-      `Diese Dateien behaupten eine beidseitige Bestätigung, importieren aber das ` +
-        `Prädikat nicht:\n${treffer.join("\n")}`,
+      `Diese Dateien behaupten eine beidseitige Bestätigung ohne zulässigen ` +
+        `Nachweis (beidseitigBelegt / belegStufe / Marker BELEG-AUSSAGE-PRINZIP):\n` +
+        `${treffer.join("\n")}`,
     ).toEqual([]);
   });
 
@@ -288,5 +329,78 @@ test.describe("Beleg-Aussage", () => {
     expect(beidseitigBelegt({ resultStatus: "mismatch" })).toBe(false);
     expect(beidseitigBelegt(null)).toBe(false);
     expect(beidseitigBelegt(undefined)).toBe(false);
+  });
+
+  // -------------------------------------------------------------------------
+  test("die drei Beleg-Stufen sagen, was sie bedeuten", async () => {
+    // ⚠️ WARUM ES DIESEN TEST BRAUCHT (Befund Kai + eigene Gegenprobe, 18.08.2026)
+    //
+    // Die Prüfungen oben stellen sicher, dass eine Fläche aus der RICHTIGEN
+    // QUELLE zieht. Sie sagen nichts darüber, ob sie die Werte richtig
+    // ZUORDNET. Gegenprobe gemacht: „fest" auf „Von beiden Vereinen bestätigt"
+    // umgebogen – also exakt die Falschaussage vom 15.08.2026 neu eingebaut –
+    // und die Suite blieb GRÜN. Ein Wächter, der die Quelle prüft und die
+    // Zuordnung nicht, deckt die gefährlichste Hälfte nicht ab.
+    //
+    // Der Fall ist nicht theoretisch: Auf `hoops_prod` tragen 137 von 137
+    // abgeschlossenen Spielen `resultStatus: "confirmed"` OHNE beidseitiges
+    // `submittedBy` – sie landen also alle auf „fest". Wäre diese Stufe als
+    // beidseitige Bestätigung ausgewiesen, stünde auf der meistbesuchten Seite
+    // eine Falschaussage über genau das, was das Produkt verkauft.
+    const quelle = lies("components", "posts", "ErgebnisInhalt.js");
+
+    const stufe = (name) => {
+      // Den Textwert der Stufe aus dem BELEG-Wörterbuch holen. Klammern werden
+      // gezählt statt ein festes Zeichenfenster zu schneiden (Fehlerklasse aus
+      // CLAUDE.md Roadmap 15 (5)); die Hilfsfunktion wirft, wenn sie den Block
+      // nicht findet, statt still etwas Falsches zu liefern.
+      const ab = quelle.indexOf(`${name}: {`);
+      if (ab === -1) throw new Error(`Stufe "${name}" fehlt in BELEG – wurde sie umbenannt?`);
+      let tiefe = 0, i = quelle.indexOf("{", ab);
+      const start = i;
+      do {
+        if (quelle[i] === "{") tiefe++;
+        else if (quelle[i] === "}") tiefe--;
+        i++;
+      } while (tiefe > 0 && i < quelle.length);
+      if (tiefe !== 0) throw new Error(`Block der Stufe "${name}" ist nicht geschlossen.`);
+      return quelle.slice(start, i);
+    };
+
+    const beidseitig = stufe("beidseitig");
+    const fest = stufe("fest");
+    const vorlaeufig = stufe("vorlaeufig");
+
+    // NUR die beidseitige Stufe darf von „beiden" sprechen.
+    expect(
+      /beiden/i.test(beidseitig),
+      `Die Stufe "beidseitig" sagt nicht, dass BEIDE bestätigt haben: ${beidseitig}`,
+    ).toBe(true);
+    for (const [name, block] of [["fest", fest], ["vorlaeufig", vorlaeufig]]) {
+      expect(
+        /(beide[nr]?|beidseitig|doppelt)/i.test(block),
+        `Die Stufe "${name}" behauptet eine beidseitige Bestätigung. Sie bedeutet ` +
+          `aber gerade NICHT, dass beide Vereine gemeldet haben – "fest" heißt ` +
+          `„ein Super-Admin hat es gesetzt", "vorlaeufig" heißt „einer fehlt noch". ` +
+          `Genau diese Verwechslung hat am 15.08.2026 beide Gates blockiert.\n${block}`,
+      ).toBe(false);
+    }
+
+    // Die unbekannte Stufe muss auf die VORSICHTIGE Seite fallen.
+    expect(
+      /BELEG\[[^\]]+\]\s*\|\|\s*BELEG\.vorlaeufig/.test(quelle),
+      `Eine unbekannte Beleg-Stufe muss auf "vorlaeufig" fallen, nie auf ` +
+        `"beidseitig" – im Zweifel lieber zu wenig behaupten als zu viel.`,
+    ).toBe(true);
+
+    // Und die Stufen müssen dieselben sein, die `lib/autoPost.js` vergibt.
+    const erzeuger = ohneKommentare(lies("lib", "autoPost.js"));
+    for (const name of ["beidseitig", "fest", "vorlaeufig"]) {
+      expect(
+        new RegExp(`["']${name}["']`).test(erzeuger),
+        `"${name}" wird in ErgebnisInhalt.js erwartet, aber von lib/autoPost.js ` +
+          `nicht mehr vergeben – die beiden Wörterbücher sind auseinandergelaufen.`,
+      ).toBe(true);
+    }
   });
 });

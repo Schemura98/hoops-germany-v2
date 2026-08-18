@@ -92,11 +92,35 @@ export default function ErgebnisInhalt({ post }) {
     m.heim != null && m.gast != null && m.heimPunkte != null && m.gastPunkte != null;
 
   if (!strukturiert) {
-    return (
-      <div className="mt-3">
-        <p className="font-semibold text-paper-50">{post.content}</p>
+    // ⚠️ DER VERWEIS MUSS AUCH HIER GESETZT WERDEN (Befund Kai, Gate 18.08.2026).
+    //
+    // Die erste Fassung gab hier ein blankes `<div>` zurück. Folge: Jeder
+    // Ergebnis-Beitrag, der vor diesem Umbau entstanden ist, hätte seinen
+    // Klickweg zum Spiel verloren – der Text wäre tot gewesen. Es sieht nicht
+    // kaputt aus, es reagiert nur nicht mehr, und genau das meldet niemand.
+    //
+    // ⚠️ WARUM DAS LOKAL UNSICHTBAR IST – der eigentliche Lehrsatz:
+    // Auf der Dev-DB haben 4 von 4 Ergebnis-Beiträgen die neuen Felder, auf
+    // `hoops_prod` hat KEIN EINZIGER sie (sie entstehen nur bei einer
+    // Ergebnisänderung, und die 137 abgeschlossenen Spiele ändern sich nicht
+    // mehr). Der Zustand, den 100 % der Live-Beiträge haben, ist der eine, den
+    // weder ein Entwickler noch ein Browser-Gate lokal auslösen kann.
+    // Wer diesen Zweig anfasst, kann sich auf die eigene Anschauung NICHT
+    // verlassen.
+    const schlicht = (
+      <>
+        <p className="font-semibold text-paper-50 group-hover:text-brand-400">
+          {post.content}
+        </p>
         {m.note && <p className="text-xs text-mist-400 mt-0.5">{m.note}</p>}
-      </div>
+      </>
+    );
+    return m.href ? (
+      <Link href={m.href} className="block mt-3 group">
+        {schlicht}
+      </Link>
+    ) : (
+      <div className="mt-3">{schlicht}</div>
     );
   }
 

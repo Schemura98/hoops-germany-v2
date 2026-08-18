@@ -23,6 +23,11 @@
 // `.env` (lokal: `hoopsgermany`). Die DB wird vor dem Schreiben angezeigt.
 import { readFileSync } from "fs";
 import mongoose from "mongoose";
+// Die EINE Quelle fuer jede Aussage mit dem Wort „bestaetigt". Bewusst das
+// echte Produkt-Praedikat importiert statt die Regel hier nachzubauen: Eine
+// zweite Umsetzung derselben Regel laeuft irgendwann auseinander, und die
+// Testdaten waeren dann genau dort falsch, wo sie geprueft werden sollen.
+import { beidseitigBelegt } from "../lib/matchScore.js";
 
 function readEnv(key) {
   const txt = readFileSync(new URL("../.env", import.meta.url), "utf8");
@@ -51,6 +56,14 @@ const SPIELE = [
   { heim: 2, gast: 0, hp: 64, gp: 69, tageZurueck: 5, beidseitig: true },
   { heim: 1, gast: 3, hp: 91, gp: 88, tageZurueck: 9, beidseitig: true },
   { heim: 3, gast: 2, hp: 55, gp: 72, tageZurueck: 13, beidseitig: false },
+  // ⚠️ DER HÄUFIGSTE ZUSTAND DER LIVE-SEITE – und er fehlte hier (Befund Kai,
+  // Gate 18.08.2026). Auf `hoops_prod` tragen 137 von 137 abgeschlossenen
+  // Spielen `resultStatus: "confirmed"` OHNE beidseitiges `submittedBy`: ein
+  // Super-Admin hat das Ergebnis gesetzt. Im Feed ist das die Stufe „fest"
+  // („Ergebnis steht fest"), NICHT „von beiden bestätigt".
+  // Ohne dieses Datum konnte niemand – weder ich noch ein Browser-Gate – sehen,
+  // wie die häufigste Stufe überhaupt aussieht.
+  { heim: 0, gast: 3, hp: 83, gp: 79, tageZurueck: 17, adminGesetzt: true },
 ];
 
 // Box-Score-Zeilen je Spiel: [punkte, assists, rebounds] pro Spieler-Index.
@@ -69,9 +82,38 @@ if (!uri) { console.error("❌ MONGODB_URI fehlt"); process.exit(1); }
 await mongoose.connect(uri);
 const db = mongoose.connection.db;
 console.log(`Datenbank: ${db.databaseName}`);
-if (db.databaseName === "test") {
-  console.error("❌ Das ist die PRODUKTIV-DB der ALTEN Seite. Abbruch.");
+
+// ⚠️ POSITIVER RIEGEL, nicht negativer (Befund Kai, Gate 18.08.2026).
+//
+// Hier stand `if (databaseName === "test") abbrechen`. Das ist die
+// Produktiv-DB der ALTEN Seite – die der AKTUELLEN heißt `hoops_prod` und
+// wäre ungehindert durchgelaufen. Ein Riegel, der die falsche Tür zuhält.
+//
+// Die Reichweite ist größer als bei den bestehenden Seed-Skripten: Dieses hier
+// schreibt SPIELE mit `leagueId` und BOX-SCORES. Beide werden von öffentlichen
+// Flächen unabhängig vom Feed eingesammelt – `computeStandings` für die
+// Liga-Tabelle, und die Topscorer-Liste filtert nur auf `status: "completed"`.
+// Ein Fehlgriff erfände also Tabellenstände und Bestenlisten, nicht bloß
+// Feed-Kosmetik.
+//
+// Deshalb: nur die Dev-DB ist erlaubt. Alles andere braucht ein ausdrückliches
+// `--ich-weiss-was-ich-tue` UND steht dann noch im Protokoll. Laut CLAUDE.md
+// ist `seed-demo.mjs` irgendwann tatsächlich gegen `hoops_prod` gelaufen und
+// „protokolliert ist das nirgends" – der Weg ist real begangen worden.
+const ERLAUBTE_DB = "hoopsgermany";
+const FREIGABE = process.argv.includes("--ich-weiss-was-ich-tue");
+if (db.databaseName !== ERLAUBTE_DB && !FREIGABE) {
+  console.error(
+    `❌ Abbruch: Dieses Skript ist für die Dev-DB "${ERLAUBTE_DB}" gedacht, ` +
+      `verbunden ist aber "${db.databaseName}".\n` +
+      `   Es schreibt Spiele und Box-Scores – die landen in Liga-Tabelle und ` +
+      `Topscorer-Liste, nicht nur im Feed.\n` +
+      `   Wenn das wirklich gewollt ist: --ich-weiss-was-ich-tue anhängen.`
+  );
   process.exit(1);
+}
+if (FREIGABE && db.databaseName !== ERLAUBTE_DB) {
+  console.warn(`⚠️  Schreibe auf "${db.databaseName}" – ausdrücklich freigegeben.`);
 }
 
 const Teams = db.collection("teams");
@@ -113,12 +155,22 @@ for (let i = 0; i < SPIELE.length; i++) {
   const heimSpieler = kader.get(String(heim._id)) || [];
   const gastSpieler = kader.get(String(gast._id)) || [];
   const playerStats = [];
+  // ⚠️ Beide Zeilen mit `% STATS.length` – und die Länge wird an DEM Feld
+  // gemessen, aus dem auch gelesen wird (Befund Kai 6c, Gate 18.08.2026).
+  // Vorher stand `STATS[i][...]` ohne Modulo und `[k % STATS[i].length]` für
+  // die Gastzeile, die aus `STATS[i+1]` liest. Kai hatte es als latent
+  // gemeldet („bricht still, sobald eine Zeile abweicht"). Beim Ergänzen des
+  // fünften Spiels ist es sofort hart gebrochen – `STATS[4]` gibt es nicht.
+  // Aus latent wurde akut, bevor der Befund abgearbeitet war.
+  const zeile = (n) => STATS[n % STATS.length];
   heimSpieler.forEach((p, k) => {
-    const w = STATS[i][k % STATS[i].length];
+    const feld = zeile(i);
+    const w = feld[k % feld.length];
     playerStats.push({ player: p._id, team: heim._id, points: w[0], assists: w[1], rebounds: w[2], didNotPlay: false });
   });
   gastSpieler.forEach((p, k) => {
-    const w = STATS[(i + 1) % STATS.length][k % STATS[i].length];
+    const feld = zeile(i + 1);
+    const w = feld[k % feld.length];
     playerStats.push({ player: p._id, team: gast._id, points: w[0], assists: w[1], rebounds: w[2], didNotPlay: false });
   });
 
@@ -140,7 +192,8 @@ for (let i = 0; i < SPIELE.length; i++) {
       ...(s.beidseitig && heimSpieler[0] ? { submittedBy: heimSpieler[0]._id } : {}) },
     teamBResult: { ownPoints: s.gp, opponentPoints: s.hp, submittedAt: datum,
       ...(s.beidseitig && gastSpieler[0] ? { submittedBy: gastSpieler[0]._id } : {}) },
-    resultStatus: s.beidseitig ? "confirmed" : "pending",
+    // `adminGesetzt` = bestätigt, aber ohne beidseitigen Absender (s. o.).
+    resultStatus: s.beidseitig || s.adminGesetzt ? "confirmed" : "pending",
     seedTag: TAG, seedKey: key,
   };
 
@@ -160,10 +213,32 @@ for (let i = 0; i < SPIELE.length; i++) {
   // ⚠️ Wer dort `meta` ändert, muss es HIER mitziehen; sonst sehen die
   // Testdaten anders aus als echte Ereignisse, und genau das würde beim
   // Prüfen des Designs niemandem auffallen.
-  const belegStufe = s.beidseitig ? "beidseitig" : "vorlaeufig";
-  const note = s.beidseitig
-    ? "Von beiden Teams bestätigt"
-    : "Vorläufig – noch nicht vom Gegner bestätigt";
+  // ⚠️ DIE STUFE WIRD AUS DEM ERZEUGTEN SPIEL ABGELEITET, nicht aus der
+  // Absicht (Befund Kai, Gate 18.08.2026).
+  //
+  // Vorher hing der NACHWEIS an einer Zusatzbedingung (`s.beidseitig &&
+  // heimSpieler[0]`), die BEHAUPTUNG aber nur an `s.beidseitig`. Fehlt einem
+  // Team der Kader, entstünde ein Spiel ohne beidseitigen Absender – und der
+  // Beitrag trüge trotzdem das grüne Siegel. Im Feed „bestätigt", auf
+  // `/match/[id]` kein Abzeichen: exakt der Widerspruch, den Tobias am
+  // 15.08.2026 gefunden hat.
+  // Jetzt kann es per Konstruktion nicht auseinanderlaufen – dieselbe Regel
+  // wie im Produkt: Was „bestätigt" heißen darf, entscheidet der Datensatz.
+  const beidseitigEcht = beidseitigBelegt(doc);
+  const belegStufe = beidseitigEcht
+    ? "beidseitig"
+    : doc.resultStatus === "confirmed"
+    ? "fest"
+    : "vorlaeufig";
+  const note =
+    belegStufe === "beidseitig"
+      ? "Von beiden Teams bestätigt"
+      : belegStufe === "fest"
+      ? "Ergebnis steht fest"
+      : "Vorläufig – noch nicht vom Gegner bestätigt";
+  if (s.beidseitig && !beidseitigEcht) {
+    console.warn(`  ⚠️  ${heim.teamName} vs ${gast.teamName}: beidseitig gewollt, aber ein Kader ist leer – Beitrag wird als vorläufig ausgewiesen.`);
+  }
 
   await Posts.updateOne(
     { eventKey: `result:${match._id}` },
