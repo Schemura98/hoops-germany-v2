@@ -3900,3 +3900,125 @@ Verhaltensmessung auf die lokale Production-Runtime desselben Commits.
   ihr vorgelesener Name ist nur die Zahl, ohne Beschriftung.
 
 **Commit `aff17e6`.**
+
+---
+
+## 18.08.2026 (3) – Deploy `da7756b`: der Newsfeed zeigt endlich, was er weiß
+
+**Live vorher `aff17e6`, jetzt `da7756b`.** Am Server verifiziert, `pm2 restart` gelaufen,
+`online`, kein `npm install` nötig. 16 Live-Routen je 200.
+
+### Der Anlass
+
+Patrick, zum **zweiten** Mal mit demselben Wortlaut: *„nicht sonderlich kreativ und neu
+redesigned"* (erste Runde 15.08.). Eine Wiederholung nach einem umgesetzten Redesign ist selbst
+ein Befund — deshalb begann die Arbeit nicht mit Gestaltung, sondern mit Messen und **Ansehen**.
+
+⚠️ **Methodischer Durchbruch:** Erstmals wurde die eigene Oberfläche **gesehen**, nicht nur
+gemessen — Playwright nimmt auf, `Read` stellt dar. Die Skill `design-trend-recherche` hielt das
+für unmöglich; das galt für `computer{screenshot}` in der Vorschaufläche, nicht für Playwright.
+Register fortgeschrieben. **Alle drei Befunde dieser Runde stammen aus dem Hinsehen.**
+
+### Was gemessen wurde
+
+| Befund | Wert |
+|---|---|
+| Beiträge im Feed | 6 sichtbar, **alle formal identisch** |
+| Textbreite je Beitrag | 700 px für Sätze um 40–60 Zeichen |
+| Beiträge mit einer Zahl | **0** von 6 |
+| Mobil: Kästen vor dem ersten Beitrag | **4** |
+
+⚠️ **Korrektur an meinem eigenen Befund:** Ich meldete „1 Rang statt der geplanten 2". Falsch —
+beide Ränge **sind** gebaut. Im Testbestand lagen nur Wortmeldungen, also war vom oberen Rang
+nichts zu sehen. **Das Design war da, das Material fehlte.** Genau deshalb wurden die Testdaten
+Teil der Arbeit.
+
+### Recherche (Stufe L, `docs/INSPIRATION-NEWSFEED-2026-08-18.md`)
+
+Zwei tragende Referenzen, beide Sorte B:
+- **NN/G:** *„Card layouts typically deemphasize the ranking of content."* Plus die
+  Entscheidungsregel homogen → Liste, heterogen → unterschiedliche Formen. **Hoops zeigte
+  heterogenen Inhalt in homogener Form** — das ist die Ursache des „KI-generiert"-Eindrucks, und
+  es ist keine Farb- oder Schriftfrage.
+- **Strava-Hilfeseite:** Der Feed-Eintrag zeigt nicht immer dieselben Felder, sondern die, die bei
+  *diesem* Ereignis bemerkenswert sind — mit hartem Schwellenwert, und *„There is no way to
+  customize the stats"*.
+
+### Gebaut
+
+- `lib/autoPost.js` legt die Einzelwerte eines Ergebnisses in `meta` ab; `content` bleibt als Satz.
+- `components/posts/ErgebnisInhalt.js` — Punktestand führt, Beleg als eigene Zeile, **drei** Stufen.
+- `lib/eigeneZahlen.js` — Box-Score-Werte des **Betrachters**, pro Anfrage berechnet, nie
+  gespeichert. ⚠️ **Bewusst KEIN eigener Beitragstyp:** Das wären zwölf Beiträge pro Spiel bei
+  zwölf Kadermitgliedern, und im Feed anderer stünde „Deine Zahlen" über fremden Werten.
+- `app/player/newsfeed/page.js` — mobil eine Wegweiser-Zeile statt vier Kästen.
+- Tour-Schritt „Dein Feed" an Position 2, mit eigener Fassung für den ausgeloggten Fall.
+- `scripts/seed-feed-lebendig.mjs` — Zustimmungszahlen bewusst klein (15 auf 6 Beiträge, höchster
+  Wert 5; `seed-world` erzeugte auf Prod 4.073 mit Höchstwert 40).
+
+### ⚠️ Der Gate-Befund, der alles überstrahlt (Kai, hoch)
+
+Mein Rückfall-Zweig für Altbeiträge gab ein blankes `<div>` zurück — **jeder Ergebnis-Beitrag auf
+Prod hätte seinen Klickweg zum Spiel verloren.** Kein Fehlerbild, nur keine Reaktion mehr.
+
+**Und der Lehrsatz dahinter:** Auf der Dev-DB haben **4 von 4** Ergebnis-Beiträgen die neuen
+Felder, auf `hoops_prod` **5 von 5 nicht** (nachgemessen). Sie entstehen nur bei einer
+Ergebnisänderung, und die 137 abgeschlossenen Spiele ändern sich nicht mehr.
+**Der Zustand, den 100 % der Live-Beiträge haben, ist lokal weder für einen Entwickler noch für
+ein Browser-Gate auslösbar.** Behoben und mit einem eigens erzeugten Altbeitrag nachgeprüft.
+
+### Weitere Gate-Befunde, alle abgearbeitet
+
+- **Widerspruch in der Tour:** Band „Beispiel · **Endstand**" über grünem „Von beiden Vereinen
+  bestätigt". „Endstand" ist in `lib/matchScore.js` reserviert für `state: "final"` = **einseitig
+  gemeldet**. Auf der Folie, deren Zweck es ist, dieses Vokabular zu erklären.
+- **DB-Riegel des Seed-Skripts** sicherte `test` (Produktiv-DB der **alten** Seite); `hoops_prod`
+  lief durch. Jetzt positiv geriegelt. Das Skript schreibt Spiele und Box-Scores — die landen in
+  Liga-Tabelle und Topscorer-Liste.
+- **Der Beleg-Wächter suchte Wortlaute** und übersah „von beiden **Vereinen**". ⚠️ Dabei kam
+  heraus: **Die Startseite war nie geprüft** — sie sagt „**D**oppelt bestätigt", der Wächter suchte
+  klein. Jetzt ein Muster über die Bedeutung, `scripts/` in den Suchwurzeln, und drei zulässige
+  Nachweise (`beidseitigBelegt` / `belegStufe` / Marker `BELEG-AUSSAGE-PRINZIP`) **statt einer
+  Ausnahmeliste**.
+- **Falscher Kommentar** (Tobias): Meine Begründung sagte „Tabelle und News stehen oben als
+  Wegweiser" — News steht dort **nicht**. Korrigiert; die Gewichtung liegt bei Vivien/Ronja.
+
+### ⚠️ Der wichtigste neue Test
+
+Ein Test für die **Zuordnung** der drei Beleg-Stufen. Eigene Gegenprobe: Ich konnte „Ergebnis steht
+fest" in „Von beiden Vereinen bestätigt" umbiegen — **also die Falschaussage vom 15.08. neu
+einbauen — und die Suite blieb grün.** Die bisherigen Prüfungen kontrollierten die *Quelle*, nicht
+die *Zuordnung*. Jetzt greifen alle drei Gegenproben.
+Dazu: Der Fall **„fest"** fehlte in den Testdaten, obwohl er auf Prod **137 von 137** ausmacht.
+
+### ⚠️ Vier eigene Fehlmessungen an einem Tag — dieselbe Wurzel
+
+1. Test rot bei korrektem Code — `next dev` lief auf dem `.next` eines Production-Builds.
+2. Gegenprobe rot — gemessen, bevor `position: sticky` überhaupt greift.
+3. **26 rote Hero-Tests** — kein Produktfehler: Sie messen rAF-Bilder, bei `load average` 14
+   liefert der Browser keine. Bei load 6 alle 24 grün. **Die Ehrlichkeitsschranke hat genau das
+   geleistet, wofür sie gebaut wurde.** ⚠️ Vor Suite-Läufen `uptime` ansehen.
+4. Live-Prüfung des Altbeitrags meldete „Text nicht sichtbar" — `/post/[id]` verlangt Anmeldung,
+   die Sonde stand auf der Anmeldemaske.
+
+**Gemeinsamer Nenner: viermal am falschen Ort oder zu früh gemessen, nie falsch gerechnet.**
+
+### ⚠️ Ein Commit trägt eine fremde Löschung
+
+`b454a7c` (Testkorrektur) enthält die Löschung von `components/feed/CollapsibleWidget.js` — sie
+stand beim Committen bereits im Index, mit hoher Wahrscheinlichkeit aus einer parallel laufenden
+Sitzung. **Der Hergang ist nicht belegt und wird hier nicht erfunden.** Funktional unkritisch (die
+Löschung war gewollt, keine toten Verweise), dokumentarisch ein Fehler: Wer die Datei sucht, findet
+einen Commit über Testkorrekturen. Nicht nachträglich korrigiert, weil zu dem Zeitpunkt beide Gates
+gegen genau diesen Stand liefen.
+
+### Offen
+
+- **Vivien:** „Basketball-News" mobil nicht mehr vom Newsfeed erreichbar (Entscheidung, kein
+  Defekt) · innere Bildlaufleiste der Schiene (Kontrast 1,92:1) · Like/Kommentar-Knöpfe **29×20 px**
+  (AA-Mindestmaß 24×24, **vorbestehend**, bereits im Live-Stand `aff17e6`) · Fokusrahmen.
+- **Ronja:** Trägt der Wegweiser „Spieler" mehr als News?
+- **Kai:** Zwei-Konten-Test für die Anreicherung (heute korrekt, aber unbewacht) · mobiler Umbau
+  ohne Abdeckung (`newsfeed-schiene.spec.mjs` prüft nur Desktop).
+
+**Commit `da7756b`.**

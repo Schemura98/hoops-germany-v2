@@ -11,7 +11,27 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> ✅ **DEPLOYT: `aff17e6`** (18.08.2026, zweiter Deploy des Tages) – Newsfeed: die rechte Schiene
+> ✅ **DEPLOYT: `da7756b`** (18.08.2026, dritter Deploy des Tages) – **Newsfeed-Umbau**: Ergebnisse
+> führen mit dem Punktestand statt mit einem Satz, der Beleg ist eine eigene Zeile mit **drei**
+> Stufen, wer im Box-Score steht sieht seine Zahlen daneben (`components/posts/ErgebnisInhalt.js`,
+> `lib/eigeneZahlen.js`). Mobil: vier gleichförmige Aufklapp-Kästen → **eine** Wegweiser-Zeile
+> (48 statt ~192 px, Tippziele 44 px). Neuer Tour-Schritt „Dein Feed" (Position 2 von 6).
+> Testdaten `scripts/seed-feed-lebendig.mjs`. Grundlage: `docs/INSPIRATION-NEWSFEED-2026-08-18.md`.
+> Build durch · Playwright **232/232** (gegen `--list`, bei `load` 1,7) · **Tobias freigabefähig** ·
+> **Kai erst nach einer Korrektur** – alle Befunde abgearbeitet. 16 Live-Routen je 200.
+> ⚠️ **DER WICHTIGSTE SATZ DIESES DEPLOYS** (Befund Kai, hoch): Ergebnis-Beiträge auf `hoops_prod`
+> haben die neuen `meta`-Felder **NICHT** – gemessen **5 von 5 alt, 0 neu**, weil sie nur bei einer
+> Ergebnisänderung entstehen und die 137 abgeschlossenen Spiele sich nicht mehr ändern. Auf der
+> Dev-DB ist es **umgekehrt**. **Der Zustand, den 100 % der Live-Beiträge haben, ist lokal weder
+> für einen Entwickler noch für ein Browser-Gate auslösbar.** Mein erster Rückfall-Zweig hätte
+> jedem dieser Beiträge den Klickweg zum Spiel genommen – ohne dass es kaputt ausgesehen hätte.
+> ✅ Nachgeprüft mit einem eigens erzeugten Altbeitrag am identischen Code: Verweis vorhanden,
+> Ziel korrekt, Mauszeiger klickbar, 0 Fehler.
+> ⚠️ **Live NICHT angemeldet nachgemessen** – `/post/[id]` verlangt Anmeldung, die Testkonten auf
+> `hoops_prod` sind seit dem 15.08. bewusst entwertet. Die Aussage stützt sich auf den identischen
+> Code lokal, nicht auf eine Live-Sichtung.
+>
+> ✅ **Davor: `aff17e6`** (18.08.2026, zweiter Deploy des Tages) – Newsfeed: die rechte Schiene
 > versteckte bis zu 464 px ihres Inhalts auf **jedem** Desktop (Befund Patrick). Haftkante und
 > Höhendeckel hängen jetzt an EINEM Schalter (`haftend` in `components/feed/Schiene.js`).
 > ⚠️ **Der erste Anlauf war ein Rückschritt** (Befund Tobias im Gate): Mit zusätzlichem
