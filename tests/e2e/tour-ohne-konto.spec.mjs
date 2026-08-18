@@ -71,17 +71,39 @@ async function bisZumSchluss(tour) {
   }
 }
 
+// Klickt „Weiter", bis das gesuchte Element sichtbar ist – statt eine feste
+// Anzahl Klicks anzunehmen.
+//
+// ⚠️ WARUM DAS SEIN MUSS (18.08.2026): Hier stand `.click()` genau einmal, mit
+// dem Kommentar „Schritt 1 → 2 (Wegfrage)". Als am 18.08. ein Schritt „Dein
+// Feed" an Position 2 eingefügt wurde, landeten beide Tests auf der neuen
+// Folie und wurden rot – obwohl am Produkt nichts kaputt war. Ein zweiter
+// `.click()` hätte sie grün gemacht und dieselbe Falle für den nächsten
+// eingefügten Schritt neu gestellt.
+// Dieselbe Fehlerklasse wie die festen Zeichenfenster in CLAUDE.md: Der Test
+// kodiert eine Zahl, die keine Zusicherung des Produkts ist.
+async function weiterBis(tour, ziel, maxSchritte = 8) {
+  for (let i = 0; i < maxSchritte; i++) {
+    if (await ziel.isVisible().catch(() => false)) return;
+    const weiter = tour.getByRole("button", { name: /^Weiter/ });
+    if (!(await weiter.isVisible().catch(() => false))) break;
+    await weiter.click();
+  }
+  // Werfen statt still weiterlaufen: Sonst prüft der Test danach etwas
+  // anderes als gemeint und meldet einen Fehler an der falschen Stelle.
+  await ziel.waitFor({ state: "visible", timeout: 5000 });
+}
+
 test.describe("Plattform-Tour ohne Konto", () => {
   test("meldet keinen Speicherfehler, wenn eine Position gewählt wird", async ({
     page,
   }) => {
     const tour = await tourOeffnenOhneKonto(page);
 
-    // Schritt 1 → 2 (Wegfrage) → 3 (Position)
-    await tour.getByRole("button", { name: /^Weiter/ }).click();
-    await tour
-      .getByRole("button", { name: /Ich spiele in einem Verein/i })
-      .click();
+    // Vorwärts bis zur Wegfrage – ohne Annahme, an welcher Position sie liegt.
+    const vereinsweg = tour.getByRole("button", { name: /Ich spiele in einem Verein/i });
+    await weiterBis(tour, vereinsweg);
+    await vereinsweg.click();
 
     const position = tour.getByRole("button", {
       name: "Point Guard",
@@ -127,13 +149,12 @@ test.describe("Plattform-Tour ohne Konto", () => {
 
   test("der Zweitausgang führt nicht in die Anmeldemaske", async ({ page }) => {
     const tour = await tourOeffnenOhneKonto(page);
-    await tour.getByRole("button", { name: /^Weiter/ }).click();
     // Weg „Ich organisiere ein Team" ist der heikle Fall: Sein reguläres Ziel
     // /team/create verlangt einen Login, der Ausgang muss ausgeloggt auf /teams
     // umbiegen.
-    await tour
-      .getByRole("button", { name: /Ich organisiere ein Team/i })
-      .click();
+    const adminweg = tour.getByRole("button", { name: /Ich organisiere ein Team/i });
+    await weiterBis(tour, adminweg);
+    await adminweg.click();
     await bisZumSchluss(tour);
 
     const zweit = tour.getByRole("link", { name: /Erst mal umsehen/i });
