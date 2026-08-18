@@ -440,21 +440,60 @@ export default function PostCard({ post, currentPlayerId }) {
         </>
       )}
 
-      {/* Aktionen */}
+      {/* Aktionen
+          ⚠️ GRÖSSERE ZIELE OHNE GRÖSSERE KARTE (Entwurf Vivien, 18.08.2026).
+          Die Knöpfe maßen 29x20 px – unter dem Mindestmaß von 24x24 (WCAG
+          2.5.8 AA). Der Fehler ist ALT (stand schon im Live-Stand `aff17e6`),
+          fiel aber erst auf, seit die mobilen Wegweiser sauber auf 44 px
+          stehen: sauberes Ziel oben, 20-px-Ziel darunter.
+
+          Der Kniff: Innenabstand macht das ZIEL größer, ein gleich großer
+          negativer Außenabstand zieht das LAYOUT wieder zurück. Am laufenden
+          Browser vorher/nachher gemessen – Kartenhöhe 155 → 155 px,
+          Aktionszeile 33 → 33 px, Ziel 28,7x20 → 44,7x32.
+
+          ⚠️ BEWUSST 32 UND NICHT 44 px. Die Wegweiser sind Navigation am
+          Rand; diese Knöpfe sitzen mitten im Lesestoff, in einer Liste, durch
+          die gewischt wird. Ein 44-px-Ziel unter einem 20-px-Bild fängt
+          Wischbewegungen ab und erzeugt Fehlklicks – und ein Like verschickt
+          eine Benachrichtigung an einen echten Menschen. Viviens Grenze:
+          „Ein Klickziel darf großzügig sein, aber es muss noch das sein, was
+          man sieht."
+
+          ⚠️ KEIN dauerhafter Rahmen um die Knöpfe: Das ergäbe dieselbe
+          Pillenform wie die mobilen Wegweiser – zwei Bauteile mit derselben
+          Geste und verschiedener Funktion, also genau die Gleichförmigkeit,
+          die diesen ganzen Umbau ausgelöst hat. */}
+      {/* ⚠️ `gap-5` (20 px) MUSS bleiben und darf nicht verkleinert werden.
+          Die Knöpfe ziehen sich mit -mx-2 je 8 px nach außen; bei gap-3 (12 px)
+          ergibt das 12 − 8 − 8 = **−4 px**, die Ziele ÜBERLAPPEN sich also und
+          ein Tippen am Rand trifft den falschen Knopf. Beim Bauen genau so
+          passiert und nur aufgefallen, weil der Abstand mitgemessen wurde.
+          Mit gap-5 bleiben 20 − 16 = 4 px echter Zwischenraum. */}
       <div className="mt-3 flex items-center gap-5 text-sm text-mist-400 border-t border-navy-600 pt-3">
         <button
           onClick={toggleLike}
-          className={`inline-flex items-center gap-1.5 ${
+          aria-pressed={liked}
+          className={`inline-flex items-center gap-1.5 -my-1.5 -mx-2 px-2 py-1.5 rounded-sm transition-colors hover:bg-navy-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-800 ${
             liked ? "text-brand-400" : "hover:text-brand-400"
           }`}
         >
-          {liked ? <PiHeartFill /> : <PiHeartBold />} {likeCount}
+          {liked ? <PiHeartFill aria-hidden="true" /> : <PiHeartBold aria-hidden="true" />}{" "}
+          {/* Vorleseprogramme sagten bisher nur die nackte Zahl („fünf").
+              Das Wort steht IM Knopf statt als überschreibende Beschriftung –
+              sonst verschwindet die Zahl für Blinde ganz. Muster wie in
+              `components/landing/LandingFeatures.js`. */}
+          <span className="sr-only">Gefällt mir{liked ? ", von dir markiert" : ""}: </span>
+          {likeCount}
         </button>
         <button
           onClick={() => setShowComments((v) => !v)}
-          className="inline-flex items-center gap-1.5 hover:text-brand-400"
+          aria-expanded={showComments}
+          className="inline-flex items-center gap-1.5 -my-1.5 -mx-2 px-2 py-1.5 rounded-sm transition-colors hover:bg-navy-700 hover:text-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-800"
         >
-          <PiChatCircleBold /> {commentTotal}
+          <PiChatCircleBold aria-hidden="true" />{" "}
+          <span className="sr-only">Kommentare: </span>
+          {commentTotal}
         </button>
       </div>
 

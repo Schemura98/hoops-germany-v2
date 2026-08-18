@@ -24,11 +24,19 @@ import { test, expect } from "@playwright/test";
 
 // Vier reale Desktop-Formate. 1280×720 ist der engste Fall (nur 624 px Platz),
 // 1024×768 der schmalste, auf dem das Zweispalten-Layout überhaupt greift.
+// ⚠️ BEIDE FÄLLE MÜSSEN VORKOMMEN (Umbau 18.08.2026).
+// Seit „Basketball-News" aus der Schiene entfernt ist (378 px), passt sie auf
+// normalen Fensterhöhen vollständig hinein – der alte Test konnte seinen Fall
+// gar nicht mehr erzeugen und hat das über seine Ehrlichkeitsschranke auch
+// gemeldet („572px Inhalt, 574px Platz. Dann prüft dieser Test NICHTS").
+// Deshalb jetzt zwei Sorten Fenster: hohe, in denen alles hineinpasst, und
+// flache, in denen es überläuft. Eine Prüfmatrix mit nur einer Sorte prüft nur
+// eine Richtung – dieselbe Lehre wie die fehlende Höhenachse in Roadmap 20b.
 const GROESSEN = [
   { breite: 1440, hoehe: 900 },
   { breite: 1280, hoehe: 800 },
-  { breite: 1280, hoehe: 720 },
-  { breite: 1024, hoehe: 768 },
+  { breite: 1280, hoehe: 600 },
+  { breite: 1024, hoehe: 560 },
 ];
 
 test.describe("Newsfeed – die rechte Schiene versteckt nichts", () => {
@@ -85,9 +93,10 @@ test.describe("Newsfeed – die rechte Schiene versteckt nichts", () => {
 
       await page.goto("/player/newsfeed", { waitUntil: "domcontentloaded" });
 
-      // Auf die Schiene warten – NICHT auf einen einzelnen Abschnitt: der
-      // unterste („Basketball-News") hängt an einem externen RSS-Abruf und
-      // kommt manchmal spät. Ein Test, der darauf wartet, ist zufällig rot.
+      // Auf die Schiene warten – NICHT auf einen einzelnen Abschnitt.
+      // (Der frühere unterste Abschnitt „Basketball-News" hing an einem
+      // externen RSS-Abruf; er ist seit dem 18.08.2026 entfernt, aber die
+      // Regel bleibt richtig.)
       await page.waitForFunction(
         () =>
           [...document.querySelectorAll("main *")].some(
@@ -95,8 +104,8 @@ test.describe("Newsfeed – die rechte Schiene versteckt nichts", () => {
           ),
         { timeout: 30_000 },
       );
-      // ⚠️ Die Schiene WÄCHST NACH. Der unterste Abschnitt hängt an einem
-      // externen RSS-Abruf; misst man zu früh, ist sie ~658 statt ~1086 px hoch
+      // ⚠️ Die Schiene WÄCHST NACH (Widgets laden). Misst man zu früh, ist sie
+      // niedriger als am Ende
       // – und dann passt sie zufällig ins Fenster, der Test prüft nichts, und
       // die Schranke unten schlägt (zu Recht) fehl. Beim Bauen genau so
       // passiert, auf zwei von vier Größen.
@@ -167,6 +176,8 @@ test.describe("Newsfeed – die rechte Schiene versteckt nichts", () => {
           letzterUnten: Math.round(l.bottom),
           anzahlAbschnitte: el.children.length,
           schieneMitteX: r.x + r.width / 2,
+          radiusUnten: getComputedStyle(el).borderBottomLeftRadius,
+          rahmenUnten: getComputedStyle(el).borderBottomWidth,
           overscroll: getComputedStyle(el).overscrollBehaviorY,
         };
       });
@@ -182,15 +193,36 @@ test.describe("Newsfeed – die rechte Schiene versteckt nichts", () => {
         `Nur ${mess.anzahlAbschnitte} Abschnitt(e) in der Schiene – zu wenig, ` +
           `um den Fall überhaupt zu erzeugen. Der Test würde blind grün.`,
       ).toBe(true);
-      expect(
-        mess.inhaltsHoehe > mess.sichtbareHoehe,
-        `Die Schiene passt hier vollständig ins Bild (${mess.inhaltsHoehe}px Inhalt, ` +
-          `${mess.sichtbareHoehe}px Platz). Dann prüft dieser Test NICHTS. Entweder ist ` +
-          `die Schiene kürzer geworden – dann diesen Test anpassen – oder die Messung ` +
-          `ist zu früh gelaufen.`,
-      ).toBe(true);
+      // ⚠️ KEINE Schranke „Inhalt muss größer als Platz sein" mehr. Beide
+      // Zustände sind jetzt gültig und werden beide geprüft – siehe unten.
 
       // ── Die eigentlichen Zusicherungen ────────────────────────────────────
+      // ── Viviens Prüfmaß: Die Kante sagt die Wahrheit ────────────────────
+      // Eine Schiene mit sichtbarer Unterkante ENDET. Solange Inhalt dahinter
+      // liegt, ist das eine Falschaussage in Form einer Linie – im Sinne des
+      // Codes richtig, im Sinne des Betrachters falsch (dieselbe Familie wie
+      // `docs/MUSTER-ZAHLEN-DIE-LUEGEN`). Deshalb: Anschnitt genau dann, wenn
+      // etwas verborgen ist. BEIDE Richtungen, denn ein fehlender Anschnitt
+      // wirft keinen Fehler – er fehlt nur.
+      const laeuftUeber = mess.inhaltsHoehe > mess.sichtbareHoehe + 1;
+      if (laeuftUeber) {
+        expect(
+          mess.radiusUnten === "0px" && mess.rahmenUnten === "0px",
+          `Die Schiene verbirgt ${mess.inhaltsHoehe - mess.sichtbareHoehe}px Inhalt, ` +
+            `zeichnet unten aber weiter einen Abschluss (Radius ${mess.radiusUnten}, ` +
+            `Rahmen ${mess.rahmenUnten}). Die Form behauptet „hier ist Schluss", ` +
+            `während es weitergeht.`,
+        ).toBe(true);
+      } else {
+        expect(
+          mess.radiusUnten !== "0px" && mess.rahmenUnten !== "0px",
+          `Es ist nichts verborgen, die Schiene ist unten trotzdem angeschnitten ` +
+            `(Radius ${mess.radiusUnten}, Rahmen ${mess.rahmenUnten}). Dann behauptet ` +
+            `der Anschnitt seinerseits etwas Falsches: „hier geht es weiter", obwohl ` +
+            `alles zu sehen ist.`,
+        ).toBe(true);
+      }
+
       expect(
         mess.schieneUnten <= mess.fensterHoehe + 1,
         `Die Schiene ragt unten aus dem Fenster: Unterkante ${mess.schieneUnten}px ` +

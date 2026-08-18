@@ -33,7 +33,12 @@ export default function LandingPage() {
             erreicht (Befund Ronja O4, Entscheid Nele: Sichtbarkeit statt
             Zahlensignal – eine Beteiligungszahl waere in der Testphase entweder
             unehrlich oder entmutigend). */}
-        <section className="bg-navy-800 py-20 px-4">
+        {/* ⚠️ `id` und `scroll-mt` neu am 18.08.2026: Seit die Nachrichten aus
+            dem Newsfeed entfernt sind, ist DIES ihr einziger Ort – und er muss
+            von außen anspringbar sein (Footer-Weg „Basketball-News").
+            `scroll-mt-28` hält den Abschnitt unter der haftenden Navigation;
+            ohne das läge die Überschrift beim Anspringen dahinter. */}
+        <section id="news" className="bg-navy-800 py-20 px-4 scroll-mt-28">
           <div className="max-w-6xl mx-auto">
             <NewsWidget />
           </div>

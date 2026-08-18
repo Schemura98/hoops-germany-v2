@@ -19,7 +19,6 @@ import Schiene, { SchienenAbschnitt } from "@/components/feed/Schiene";
 import TeamMatchesWidget from "@/components/feed/TeamMatchesWidget";
 import TopTeamsWidget from "@/components/feed/TopTeamsWidget";
 import FollowSuggestions from "@/components/feed/FollowSuggestions";
-import NewsWidget from "@/components/NewsWidget";
 import OnboardingChecklist from "@/components/onboarding/OnboardingChecklist";
 import Button from "@/components/ui/Button";
 import Loading from "@/components/ui/Loading";
@@ -177,16 +176,30 @@ export default function PlayerNewsfeedPage() {
                   Belanglosem gefüllt werden muss, hat kein eigenes Publikum.
                   Die Wechsel stehen weiterhin im Feed, mit Kontext. */}
 
-              {/* ⚠️ `NewsWidget` bleibt vorerst, BEWUSST gegen Viviens
-                  Streichvorschlag. Mats hat Ronjas Begründung korrigiert: Die
-                  „wird NICHT gebraucht"-Zeile der Bedarfsanalyse zielt auf
-                  EIGENE Redaktion, nicht auf einen fremden Strom – für diese
-                  Frage gibt es schlicht keinen Nutzerbeleg, in keine Richtung.
-                  Also: unterste Position, kleinstes Gewicht, und die
-                  Entscheidung fällt nach einer Klickmessung. */}
-              <SchienenAbschnitt label="Basketball-News">
-                <NewsWidget compact nackt />
-              </SchienenAbschnitt>
+              {/* ⚠️ „Basketball-News" ist hier ENTFERNT (Entscheidung Vivien +
+                  Patrick, 18.08.2026). Zwei Gründe, der zweite wiegt schwerer:
+
+                  (1) DIE BEGRÜNDUNG WAR EINE ÜBERGABE AN NICHTS. Hier stand,
+                      das Widget bleibe „bis zu einer Klickmessung". Diese
+                      Messung existiert nicht und hat nie existiert: Das Projekt
+                      erfasst ausschließlich Seitenaufrufe (`AnalyticsTracker.js`
+                      schickt nur `"pageview"`), ein Klick auf eine
+                      Nachrichtenüberschrift wird nirgends gezählt. Die Fläche
+                      wartete auf ein Ergebnis, das niemand erhebt.
+
+                  (2) POSITIONIERUNG. Es war die einzige Fläche des Feeds, die
+                      fremde, ungeprüfte Inhalte zeigt und den Nutzer von der
+                      Plattform WEGSCHICKT – auf einer Seite, deren These
+                      „hier ist belegt, was du geleistet hast" lautet.
+
+                  Nebeneffekt, gemessen: Der Abschnitt war 378 px hoch und damit
+                  der Grund, warum die Schiene überhaupt überlief. Ohne ihn passt
+                  sie auf 1440x900 vollständig ins Bild (vorher 300 px verborgen).
+
+                  ⚠️ Die Nachrichten sind NICHT verschwunden: Sie stehen auf der
+                  Startseite `/` – dort auch für Angemeldete, anders als der
+                  Registrierungs-Aufruf darunter – und sind über den Footer von
+                  jeder Seite aus erreichbar. */}
             </Schiene>
           </div>
         ) : (

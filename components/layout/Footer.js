@@ -1,7 +1,24 @@
 import Link from "next/link";
 import TourLink from "@/components/onboarding/TourLink";
 
+// ⚠️ „Basketball-News" neu am 18.08.2026 (Entscheidung Patrick).
+// Vivien hat die Fläche aus dem Newsfeed gestrichen – fremde, ungeprüfte
+// Inhalte, die vom Produkt wegführen, gehören nicht in einen Feed, dessen
+// These „hier ist belegt, was du geleistet hast" lautet. Patricks Einwand:
+// Sie sollen deshalb nicht NUR für Ausgeloggte da sein.
+//
+// Der Footer ist die Antwort auf beides. Er steht auf JEDER Seite, auch im
+// Newsfeed, ist also auch angemeldet erreichbar – und er hebt die Nachrichten
+// nicht auf dieselbe Stufe wie die Hauptnavigation. Ein vierter mobiler
+// Wegweiser hätte genau das getan (Viviens Einwand: „stellt Fremdes neben
+// Eigenes auf dieselbe Stufe"), eine eigene Seite `/news` wäre ein halber
+// Feature-Bau für eine Fläche ohne einen einzigen Nutzerbeleg.
+//
+// ⚠️ Das Ziel ist ein Anker auf der Startseite, kein eigener Weg: Der
+// Abschnitt steht dort für ALLE, nicht nur für Ausgeloggte – anders als der
+// Registrierungs-Aufruf darunter.
 const legal = [
+  { href: "/#news", label: "Basketball-News" },
   { href: "/installieren", label: "App installieren" },
   { href: "/tryouts", label: "Tryouts" },
   { href: "/about", label: "Über uns" },

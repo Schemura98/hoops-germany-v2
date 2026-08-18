@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+
 // Die Schiene – Zone 3 des Newsfeeds (15.08.2026).
 // Entwurf: `docs/NEWSFEED-DESKTOP-2026-08-15.md` (Vivien), §3.5.
 //
@@ -81,16 +83,71 @@ export function SchienenAbschnitt({ label, aktion, children }) {
 // Die Zeile hatte also keinen Nutzen und einen Preis.
 const HAFTEND = [
   "lg:sticky lg:top-24",
-  // 7rem = Haftkante (6rem) + 1rem Luft nach unten.
-  "lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto",
+  // ⚠️ 6rem = exakt die Haftkante, KEINE Luft mehr nach unten (18.08.2026).
+  // Vorher 7rem. Die 16 px Abstand ließen die Schiene sichtbar VOR dem
+  // Fensterrand enden – mit Rahmen und gerundeter Ecke, also als geschlossenes
+  // Rechteck. Zusammen mit dem Höhendeckel behauptete diese Form „hier ist
+  // Schluss", während 44 % des Inhalts dahinter lagen (1280x720 gemessen).
+  // Dieselbe Familie wie `docs/MUSTER-ZAHLEN-DIE-LUEGEN`: im Sinne des Codes
+  // richtig, im Sinne des Betrachters falsch – nur ist es hier keine Zahl,
+  // sondern eine Kante.
+  "lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto",
   // Dünne, dunkle Leiste statt der hellen Standardleiste (color-scheme: dark
   // allein reicht hier nicht, weil der Grund navy-800 ist).
   "lg:[scrollbar-width:thin] lg:[scrollbar-color:theme(colors.navy.600)_transparent]",
 ].join(" ");
 
 export default function Schiene({ children, className = "", haftend = false }) {
+  const eigen = useRef(null);
+
+  // ⚠️ DER ANSCHNITT SAGT „HIER GEHT ES WEITER" – und zwar nur dann, wenn es
+  // stimmt (Entwurf Vivien, 18.08.2026).
+  //
+  // Warum kein Verlauf und keine auffälligere Bildlaufleiste:
+  // Die Leiste ist nur WÄHREND des Scrollens sichtbar (macOS-Voreinstellung,
+  // gemessen: nach 3 s pixelgenau weg), die geschlossene Kante ist IMMER da.
+  // Ein Hinweis, der drei Sekunden zeigt, kann keine Aussage widerrufen, die
+  // dauerhaft danebensteht. Und ein Verlauf verblasst nur den Inhalt – die
+  // Rahmenlinie bliebe als Schlussstrich stehen, der Widerspruch also auch.
+  // In der Anzeigetafel-Sprache entsteht Tiefe ohnehin aus Fläche und
+  // Haarlinie, nicht aus Effekten; der Anschnitt ist dort bereits etabliert
+  // (Hero-Ball, `docs/VISUELLE-RICHTUNG-2026-08-12.md`).
+  //
+  // ⚠️ BEIDE Richtungen sind wichtig: Passt alles hinein, MUSS der Rahmen
+  // zurückkommen – sonst behauptet eine offene Kante ihrerseits etwas Falsches.
+  // Messmuster von `components/ui/ScrollTable.js` übernommen.
+  useEffect(() => {
+    const el = eigen.current;
+    if (!el || !haftend) return;
+    let raf = 0;
+    const pruefen = () => {
+      raf = 0;
+      // 1 px Toleranz gegen Rundung bei gebrochenen Bildschirmauflösungen.
+      const laeuftUeber = el.scrollHeight - el.clientHeight > 1;
+      el.classList.toggle("rounded-b-none", laeuftUeber);
+      el.classList.toggle("border-b-0", laeuftUeber);
+    };
+    const anstossen = () => {
+      if (!raf) raf = requestAnimationFrame(pruefen);
+    };
+    pruefen();
+    const beobachter =
+      typeof ResizeObserver !== "undefined" ? new ResizeObserver(anstossen) : null;
+    beobachter?.observe(el);
+    // Kinder wachsen nach (Widgets laden), das meldet der Beobachter am
+    // Element selbst nicht zuverlässig – deshalb zusätzlich jedes Kind.
+    for (const kind of el.children) beobachter?.observe(kind);
+    window.addEventListener("resize", anstossen);
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      beobachter?.disconnect();
+      window.removeEventListener("resize", anstossen);
+    };
+  }, [haftend, children]);
+
   return (
     <div
+      ref={eigen}
       className={`rounded-md border border-navy-600 bg-navy-800 divide-y divide-navy-600 ${
         haftend ? HAFTEND : "overflow-hidden"
       } ${className}`}

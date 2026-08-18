@@ -200,4 +200,91 @@ test.describe("Newsfeed mobil", () => {
         `auf y≈888 gedrückt haben – auf dem Gerät, das der Hauptfall ist.`,
     ).toEqual([]);
   });
+
+  test("Klickziele der Beitragsleiste: größer, ohne die Karte zu strecken", async ({
+    page,
+    request,
+  }) => {
+    // ⚠️ Der zweite Teil ist die eigentliche Zusage (Entwurf Vivien, 18.08.2026).
+    //
+    // Die Knöpfe maßen 29x20 px – unter dem Mindestmaß 24x24 (WCAG 2.5.8 AA).
+    // Der Vorschlag vergrößert das ZIEL per Innenabstand und zieht das LAYOUT
+    // mit einem gleich großen negativen Außenabstand zurück: Ziel wächst,
+    // Kartenhöhe bleibt. Genau diese Zusage („155 → 155") kann später still
+    // gebrochen werden – deshalb steht sie hier.
+    //
+    // ⚠️ Und der Abstand wird mitgemessen, nicht nur die Größe. Beim Bauen war
+    // er kurzzeitig **−4 px**: Die Knöpfe ziehen sich je 8 px nach außen, bei
+    // einem zu kleinen `gap` überlappen die Ziele und ein Tippen am Rand trifft
+    // den falschen Knopf. Bei einem Like geht dann eine Benachrichtigung an
+    // einen fremden Menschen raus. Größe allein ist also keine gute Nachricht.
+    const token = await anmelden(request);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.addInitScript((t) => {
+      localStorage.setItem("playerAuthToken", t);
+      sessionStorage.setItem("hg_welcome_token", t);
+    }, token);
+    await page.goto("/player/newsfeed", { waitUntil: "domcontentloaded" });
+    await page.waitForFunction(() => document.body.innerText.includes("Für dich"), {
+      timeout: 30_000,
+    });
+    // Auf einen Beitrag mit Aktionsleiste warten – nicht auf eine feste Zeit.
+    await page.waitForSelector("main button[aria-pressed]", { timeout: 30_000 });
+
+    const m = await page.evaluate(() => {
+      const like = document.querySelector("main button[aria-pressed]");
+      const zeile = like.parentElement;
+      const kommentar = zeile.querySelector("button[aria-expanded]");
+      const karte = zeile.parentElement;
+      const r = (el) => el.getBoundingClientRect();
+      return {
+        like: { h: Math.round(r(like).height), w: Math.round(r(like).width) },
+        kommentar: kommentar
+          ? { h: Math.round(r(kommentar).height), w: Math.round(r(kommentar).width) }
+          : null,
+        abstand: kommentar ? Math.round(r(kommentar).left - r(like).right) : null,
+        zeileH: Math.round(r(zeile).height),
+        karteH: Math.round(r(karte).height),
+        vorleseLike: like.textContent.replace(/\s+/g, " ").trim(),
+        vorleseKommentar: kommentar?.textContent.replace(/\s+/g, " ").trim() || "",
+      };
+    });
+
+    expect(m.kommentar, "Kein Kommentar-Knopf in der Aktionsleiste gefunden").not.toBeNull();
+
+    // 24 ist die Norm (AA). Geprüft wird gegen 30, damit eine stille
+    // Rückstufung auffällt, nicht erst der Bruch der Mindestnorm.
+    for (const [name, z] of [["Like", m.like], ["Kommentar", m.kommentar]]) {
+      expect(
+        z.h,
+        `${name}-Knopf ist ${z.h}px hoch. Vor dem 18.08.2026 waren es 20px – ` +
+          `unter dem WCAG-Mindestmaß von 24. Wurde der Innenabstand entfernt?`,
+      ).toBeGreaterThanOrEqual(30);
+      expect(z.w, `${name}-Knopf ist nur ${z.w}px breit.`).toBeGreaterThanOrEqual(24);
+    }
+
+    expect(
+      m.abstand,
+      `Die beiden Klickziele überlappen sich (${m.abstand}px). Ein Tippen am ` +
+        `Rand trifft dann den falschen Knopf – und ein Like verschickt eine ` +
+        `Benachrichtigung an einen echten Menschen. Ursache ist fast immer ein ` +
+        `zu kleines \`gap\` in der Aktionsleiste: die Knöpfe ziehen sich je 8px ` +
+        `nach außen, es braucht also mindestens gap-5 (20px).`,
+    ).toBeGreaterThan(0);
+
+    // Die Zusage: das Layout bleibt stehen.
+    expect(
+      m.zeileH,
+      `Die Aktionsleiste ist ${m.zeileH}px hoch statt 33. Der negative ` +
+        `Außenabstand fehlt – die größeren Ziele strecken jetzt jeden Beitrag.`,
+    ).toBeLessThanOrEqual(34);
+
+    // Vorleseprogramme: die Zahl allein ist keine Information.
+    expect(
+      m.vorleseLike,
+      `Der Like-Knopf sagt Vorleseprogrammen „${m.vorleseLike}" – die nackte ` +
+        `Zahl ohne Wort. Erwartet wird eine Beschriftung IM Knopf.`,
+    ).toMatch(/gefällt mir/i);
+    expect(m.vorleseKommentar, `Kommentar-Knopf ohne Beschriftung.`).toMatch(/kommentar/i);
+  });
 });
