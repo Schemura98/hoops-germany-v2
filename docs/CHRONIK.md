@@ -4049,3 +4049,94 @@ gelesen (Kai: *„behaupten und messen sind zweierlei"*); Gegenprobe mit entfern
    nicht am Code.**
 
 Volle Suite **241/241** (gegen `--list` abgeglichen, 23 Dateien). Reine Testdateien, kein Deploy.
+
+---
+
+## 18.08.2026 (4) – Deploy `96eba14`: der Tag, an dem das Browser-Gate eine Seite gerettet hat
+
+**Live vorher `da7756b`, jetzt `96eba14`.** Am Server verifiziert, `pm2 restart` gelaufen.
+16 Routen je 200, 0 Laufzeitfehler.
+
+### Inhalt
+
+- **Viviens drei Gestaltungspunkte**: „Basketball-News" aus dem Newsfeed (ihr Hauptbefund: die
+  im Code genannte „Klickmessung" existierte nie), Ersatzweg im Footer (`/#news`) auf Patricks
+  Einwand hin; Anschnitt statt geschlossener Kante an der Schiene; Klickziele 20 → 32 px bei
+  unveränderter Kartenhöhe.
+- **Patricks abgeschnittene Überschrift** (Foto vom eigenen Telefon): Untergrenze 3rem → 2rem.
+  Viviens Messung: Die Zeile ist immer das **10,617-fache** ihrer Schriftgröße breit, bei `9vw`
+  also 95,5 % – sie kann nie überstehen; nur die Untergrenze griff auf schmalen Geräten.
+- **`hyphens-auto`** im Seitenkopf – „DATENSCHUTZERKLÄRUNG" quoll um 6 px über.
+
+### ⚠️ Der Befund, der alles überstrahlt – und er war meiner
+
+**Ich hatte `app/kontakt/page.js` mit `app/about/page.js` überschrieben.** Kein Formular, kein
+Absenden-Knopf, Footer verlinkte weiter „Kontakt", die Seite zeigte auf sich selbst.
+
+Hergang, aus den eigenen Befehlen belegbar: `cp app/about/page.js /tmp/AB.bak 2>/dev/null ||
+cp app/kontakt/page.js /tmp/AB.bak` – ein Ausweichpfad für den Fall, dass die erste Datei fehlt.
+Sie fehlte nicht. Also lag `about` in der Sicherung, und das Zurückspielen schrieb sie über
+`kontakt`.
+
+**Was nicht passierte, ist der eigentliche Befund:**
+- `npm run build` lief durch.
+- **Alle 253 Tests blieben grün.**
+- Kai hat den Diff gelesen und die Datei nicht erwähnt.
+- Gefunden hat es **ausschließlich** Tobias – im Browser, durch Aufrufen der Seite.
+
+Eine Seite, die durch eine andere ersetzt wird, ist syntaktisch fehlerfrei. Sie ist nur die
+falsche Seite. **Das Browser-Gate ist damit nachweislich keine Formsache**, und diese Zeile
+gehört zu den wenigen, die in diesem Projekt aus einem echten Beinahe-Schaden stammen.
+
+Geschlossen durch `tests/e2e/seiten-identitaet.spec.mjs`: Überschrift passt zum Weg · kein
+doppelter **spezifischer** Titel (der Standardtitel des Layouts zählt nicht) · die Kontaktseite
+hat Eingabefelder und einen Absenden-Knopf. Gegenprobe mit nachgestelltem Fehlgriff: **dreifach
+rot**.
+
+### ⚠️ Zweiter schwerer Befund: eine Messung, die ihre eigene Stellgröße verändert (Kai B1)
+
+Die neue Schienen-Mechanik schaltete den unteren Rahmen ab, sobald Inhalt dahinter lag. Der
+Rahmen ist 1 px hoch und damit **Teil der gemessenen Höhe**: Abschalten vergrößerte den
+Innenbereich um genau diesen Pixel, die Antwort kippte, der Rahmen kam zurück – in jedem Bild.
+**120 Wechsel pro Sekunde, endlos**, bei genau einer Fensterhöhe. Tobias hat es mit einer echten
+Bildfolge belegt (150 Bilder, zwei Zustände, streng abwechselnd).
+
+⚠️ **Die Toleranz zu erhöhen hilft nicht** – sie verschiebt das Fenster um einen Pixel.
+**Behoben: Die Rahmenbreite bleibt, nur die Farbe wird durchsichtig.** Nachgemessen: 0 statt 120.
+Bewacht durch einen eigenen Testfall, der die kritische Höhe **zur Laufzeit** rechnet (sie hängt
+am Konto) und die Zustandswechsel zählt.
+
+### Zwei Tests, die weniger prüften, als ihr Name versprach (beide Kai, beide belegt)
+
+- Der mobile Test nannte in seiner Fehlermeldung „888 px" als kaputten Zustand und prüfte gegen
+  **900**. `888 < 900` – er wäre im ausdrücklich benannten Fehlerfall grün gewesen.
+- Die Zusage „Kartenhöhe bleibt 155" wurde erhoben und **nie geprüft** – genau der Punkt, den
+  der Kommentar darüber als „kann später still gebrochen werden" bezeichnet. Eine Übergabe an
+  nichts, im Test, der sie sichern soll.
+
+### ⚠️ Eigene Fehlmessungen dieses Durchgangs
+
+1. **Der Schienen-Test wurde rot – zu Recht.** Ich hatte die Umsetzung geändert (Farbe statt
+   Breite) und den Test nicht mitgezogen. Er prüft jetzt **Sichtbarkeit** statt Breite und ist
+   damit unabhängig vom gewählten Mittel.
+2. **Die Flacker-Gegenprobe lief grün durch, obwohl der Fehler wieder eingebaut war.** Meine
+   Formel für die kritische Fensterhöhe war um 2 px daneben (4 px verborgen statt 2 – dort
+   flackert nichts). Der Test wäre eingecheckt worden, ohne je etwas zu können.
+3. **Eine Gegenprobe lief gegen den alten Build**, weil noch der Production-Server lief –
+   **sechste Instanz derselben Fehlerklasse an diesem Tag.**
+4. Der Identitäts-Test war zunächst zu streng: Vier Seiten teilen den **Standardtitel** des
+   Layouts, das ist keine Kopie. **Nebenbefund, nicht behoben:** `/kontakt`, `/feedback`,
+   `/tryouts` und `/installieren` setzen keinen eigenen Seitentitel.
+
+### Offen
+
+- **Vivien:** Schwelle des Anschnitts (öffnet schon bei 5 px verborgen) · mobile Ankerlandung
+  von `/#news` (obere Bildschirmhälfte bleibt leer) · geduldeter 320-px-Anschnitt der
+  Überschrift · Silbentrennung trennt jetzt auch **Vereinsnamen** (MÖNCHENGLAD-BACH).
+- **Kai:** vier weitere Testlücken aus seinem Bericht (u. a. der Datenschutz-Test fängt
+  „vertauschte", nicht nur „identische" Zahlen nicht) · fehlende Seitentitel.
+- **Nele:** Auflage – die Überschrift „Eine Saison, sechs Spielzüge" kann nicht mehr
+  umformuliert werden, ohne die Geometrie neu zu messen (bewacht durch
+  `landing-ueberschrift.spec.mjs`).
+
+**Commit `96eba14`.**

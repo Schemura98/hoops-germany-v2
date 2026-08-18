@@ -11,7 +11,36 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> ✅ **DEPLOYT: `da7756b`** (18.08.2026, dritter Deploy des Tages) – **Newsfeed-Umbau**: Ergebnisse
+> ✅ **DEPLOYT: `96eba14`** (18.08.2026, vierter Deploy des Tages) – Newsfeed-Umbau Teil 2,
+> Viviens drei Gestaltungspunkte, Patricks abgeschnittene Überschrift. Am Server verifiziert.
+> Live nachgemessen: 16 Routen je 200 · Kontaktseite trägt „Kontakt", **3 Eingabefelder, 1
+> Absenden-Knopf** · Überschrift der Startseite auf 390 px vollständig im Bild (96 % randfüllend)
+> · 0 Laufzeitfehler. Build durch · Playwright **257/257 + 1 übersprungen** (26 Dateien).
+>
+> ⚠️ **DER WICHTIGSTE BEFUND DES TAGES – und er war meiner:** Ich hatte
+> `app/kontakt/page.js` mit dem Inhalt von `app/about/page.js` überschrieben. Das
+> Kontaktformular war weg, der Footer verlinkte weiter „Kontakt", die Seite zeigte auf sich
+> selbst. Hergang: ein Sicherungsbefehl mit Ausweichpfad
+> (`cp app/about/page.js … || cp app/kontakt/page.js …`) – der **erste** Teil gelang, also lag
+> `about` in der Sicherung, und das Zurückspielen schrieb sie über `kontakt`.
+> **Was NICHT passierte, ist das Eigentliche:** Der Build lief durch. **253 Tests blieben grün.**
+> Der Diff wurde von Kai gelesen, ohne dass die Datei auffiel. Gefunden hat es **nur** Tobias'
+> Browser-Gate – jemand, der die Seite aufgerufen hat. Eine Seite, die durch eine andere ersetzt
+> wird, ist syntaktisch fehlerfrei; sie ist nur die falsche Seite.
+> **Regel daraus: Das Browser-Gate ist keine Formsache.** Bewacht durch
+> `tests/e2e/seiten-identitaet.spec.mjs` (Überschrift passt zum Weg · kein doppelter
+> spezifischer Titel · Kontaktseite hat Eingabefelder) – Gegenprobe mit nachgestelltem
+> Fehlgriff: dreifach rot.
+>
+> ⚠️ **Zweiter schwerer Befund (Kai B1): Endlosschleife in der neuen Schienen-Mechanik.**
+> Der 1-px-Rahmen ist Teil der gemessenen Höhe – ihn abzuschalten vergrößerte den Innenbereich
+> um genau diesen Pixel, die Antwort kippte, der Rahmen kam zurück. **120 Wechsel pro Sekunde,
+> ohne Ende**, bei genau einer Fensterhöhe (die pro Konto woanders liegt). Die Toleranz zu
+> erhöhen hätte das Fenster nur verschoben. **Behoben: Rahmenbreite bleibt, nur die FARBE wird
+> durchsichtig** – die Geometrie ändert sich nie mehr. Nachgemessen 0 statt 120 Wechsel.
+> **Merksatz: Eine Messung darf ihre eigene Stellgröße nicht verändern.**
+>
+> ✅ **Davor: `da7756b`** (18.08.2026, dritter Deploy des Tages) – **Newsfeed-Umbau**: Ergebnisse
 > führen mit dem Punktestand statt mit einem Satz, der Beleg ist eine eigene Zeile mit **drei**
 > Stufen, wer im Box-Score steht sieht seine Zahlen daneben (`components/posts/ErgebnisInhalt.js`,
 > `lib/eigeneZahlen.js`). Mobil: vier gleichförmige Aufklapp-Kästen → **eine** Wegweiser-Zeile
