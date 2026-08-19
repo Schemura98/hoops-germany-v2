@@ -149,7 +149,20 @@ export default function LandingHero() {
               >
                 Hey {player.firstName},
                 <br />
-                <SplitFlap delay={420} className="text-brand-400">
+                {/* ⚠️ KEIN FARBAKZENT MEHR – dieselbe Regel wie im
+                  ausgeloggten Hero (Befund Tobias B4, 19.08.2026). Hier stand
+                  `text-brand-400`, während die ausgeloggte Überschrift beim
+                  Umbau auf Weiss gewechselt ist: zwei Regeln für dieselbe
+                  Stelle, je nachdem ob jemand angemeldet ist.
+                  Die Begründung ist wortgleich die des ausgeloggten Zweigs und
+                  steht dort ausführlich: Das Designsystem erlaubt EIN Orange,
+                  und es gehört der Handlung (Taste) und dem Motiv (Zeichnung).
+                  Ein Überschriftswort markiert hier nichts, was ohne Markierung
+                  übersehen würde.
+                  ⚠️ Der UMFANG des eingeloggten Heros – acht Dinge, fünf Tasten
+                  – ist damit NICHT erledigt und gehört zu Nele; das hier ist
+                  ausschliesslich die Farbfrage. */}
+                <SplitFlap delay={420}>
                   schön, dass du da bist!
                 </SplitFlap>
               </Reveal>

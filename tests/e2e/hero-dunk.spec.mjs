@@ -658,7 +658,14 @@ test.describe("Hero-Zeichnung – der stille Punktlinien-Geist", () => {
         });
       });
 
-      expect(pfade.length, "keine Zeichenlinien gefunden").toBeGreaterThan(3);
+      // ⚠️ ZWEI, NICHT VIER (19.08.2026). Bis dahin zeichneten sich auch die
+      // beiden Feldlinien beim Scrollen; seit dem 19.08. STEHT das Feld (Szene
+      // im ersten Bild, s. HeroDunk.js bei `F`) und trägt kein `data-dunk-path`
+      // mehr. Übrig bleiben je Fassung der Zug und der Ball.
+      // Die Schranke bleibt eine Schranke: `toBe(2)` statt `> 1`, damit ein
+      // stiller Verlust einer der beiden Linien hier auffällt und nicht in einem
+      // grünen Lauf mit einer Messung verschwindet.
+      expect(pfade.length, "keine Zeichenlinien gefunden").toBe(2);
       for (const p of pfade) {
         // ⚠️ Die Regel, nicht nur ihr Symptom: Unter `non-scaling-stroke`
         // stimmt die Muster-Arithmetik nur bei Maßstab 1.

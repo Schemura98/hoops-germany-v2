@@ -95,10 +95,20 @@ export const HoopEmblem = forwardRef(function HoopEmblem(
           strokeWidth="1.6"
         />
       )}
+      {/* ⚠️ DAS NETZ WAR WEISS UND IST JETZT ORANGE (Befund Tobias B3,
+          19.08.2026). Der Hero zeichnet seit dem Umbau einen Korb aus GENAU
+          EINER Farbe – `brand-500`, unterschieden nur über die Strichdeckkraft.
+          Dieses Emblem zeichnete denselben Gegenstand mit orangem Ring und
+          weissem Netz. Zwei Sprachen für eine Sache auf einer Seite, und seit
+          der Endmarken-Entscheidung steht es ab dem ersten Bild im Bild.
+          ⚠️ Die Deckkraft steigt dabei von 0,55 auf 0,72: Weiss auf Navy trägt
+          von sich aus, Orange auf Navy nicht. Gleiche Farbe heisst nicht
+          gleicher Wert – wer nur den Farbwert tauscht, bekommt ein Netz, das
+          verschwindet. */}
       {teil === "ring" ? null : (
         <g
-          stroke="#F5F7FA"
-          strokeOpacity=".55"
+          stroke="#F07A27"
+          strokeOpacity=".72"
           strokeWidth="0.9"
           strokeLinecap="round"
         >

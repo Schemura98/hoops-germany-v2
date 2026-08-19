@@ -164,6 +164,37 @@ body {
   }
 }
 
+/* ══ DAS STANDBILD BEI REDUZIERTER BEWEGUNG ════════════════════════════════
+   Befund Kai K1, 19.08.2026 – und der Fehler davor ist lehrreicher als der Fix.
+
+   WAS FALSCH WAR: Das Standbild (ganze Zeichnung fertig, Ring auf voller
+   Staerke) haing an einer React-Eigenschaft, die beim ersten Render noch nicht
+   wissen konnte, ob jemand reduzierte Bewegung eingestellt hat. Beim
+   Server-Rendern kann sie es grundsaetzlich nicht wissen – dort gibt es kein
+   Fenster, das man fragen koennte. Also wurde geraten, und geraten wurde
+   zugunsten des Standbilds. Ergebnis: Der Server lieferte die fertige
+   Zeichnung an ALLE aus, das JavaScript nahm sie beim Laden zurueck, und
+   danach wurde sie beim Scrollen noch einmal erzaehlt.
+   Kurz: Die Pointe wurde gezeigt, zurueckgenommen und dann erzaehlt.
+
+   WARUM CSS DER RICHTIGE ORT IST: `prefers-reduced-motion` ist eine
+   Eigenschaft des Geraets, kein Anwendungszustand. Eine Media-Query gilt ab
+   dem ersten gemalten Bild, ohne auf JavaScript zu warten – es gibt also gar
+   kein Fenster, in dem der falsche Zustand zu sehen waere.
+
+   ⚠️ DIE ZAHL FUER DEN GEHOBENEN RING STEHT NICHT HIER. `--dunk-abschluss`
+   setzt HeroDunk.js aus `EBENE.abschluss`, damit die Ebenen an EINER Stelle
+   stehen. Wer den Wert hier fest eintraegt, hat zwei Wahrheiten. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-dunk [data-dunk-path] {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+  }
+  .hero-dunk [data-dunk-ring] {
+    stroke-opacity: var(--dunk-abschluss, 1);
+  }
+}
+
 /* Einmaliger Farbblitz am Ring, wenn der Ball durchgeht – derselbe Signalton,
    den die „Bestaetigt"-Badge traegt (signal-ok, #6B9A5B), kein neuer
    Bedeutungston. Bewusst eine Stroke-Animation statt Glow/Schatten: die

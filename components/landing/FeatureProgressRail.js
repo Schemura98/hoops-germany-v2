@@ -586,8 +586,20 @@ export default function FeatureProgressRail({ labels = [] }) {
         </div>
         <div ref={trackRef} className="relative h-1 w-full">
           {/* Das Ziel sitzt über der Balkenspitze – dort, wo der Fortschritt
-              endet und der Ball ankommt. Native Größe (20x14), keine
-              Skalierung: keine Verzerrung, kein zusätzlicher Rechenwert. */}
+              endet und der Ball ankommt.
+              ⚠️ 28x20 STATT 40x28 (Befund Tobias B2, 19.08.2026). Über dem
+              Balken stehen genau 27 px: Beschriftung (13) + Abstand (6) +
+              Innenabstand des Streifens (8). Die alte Marke brauchte 32 –
+              sie ragte also aus dem Streifen heraus und schnitt die Trennlinie
+              der Navigationsleiste.
+              ⚠️ NICHT DEN STREIFEN HÖHER MACHEN, das war die naheliegende
+              Abhilfe: Er klebt unter der Navigationsleiste und nimmt jedem
+              Inhalt darunter die Höhe weg – auf 360 px ist das die knappste
+              Fläche der Seite. Kleiner ist hier billiger als höher.
+              Das Seitenverhältnis bleibt exakt 20:14, sonst verzerrt der Korb.
+              Die Marke ist mit 28 px immer noch deutlich breiter als der
+              20-px-Ball, der in ihr ankommt – sie bleibt also ein Ziel und
+              wird nicht zum Punkt. */}
           <span
             ref={goalMobileRef}
             className="absolute bottom-full right-0 mb-1 opacity-0 transition-opacity duration-300 motion-reduce:transition-none"
@@ -595,7 +607,7 @@ export default function FeatureProgressRail({ labels = [] }) {
           >
             <HoopEmblem
               teil="netz"
-              className="pointer-events-none block h-7 w-10"
+              className="pointer-events-none block h-5 w-7"
             />
           </span>
           <div className="absolute inset-0 overflow-hidden rounded-full bg-navy-700">
@@ -624,7 +636,7 @@ export default function FeatureProgressRail({ labels = [] }) {
             aria-hidden="true"
             className="pointer-events-none absolute bottom-full right-0 mb-1 opacity-0 transition-opacity duration-300 motion-reduce:transition-none"
           >
-            <HoopEmblem teil="ring" className="block h-7 w-10" />
+            <HoopEmblem teil="ring" className="block h-5 w-7" />
           </span>
         </div>
       </div>

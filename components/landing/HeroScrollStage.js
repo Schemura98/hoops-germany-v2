@@ -89,9 +89,20 @@ export default function HeroScrollStage({ className = "", children }) {
   // aller Zustände: den rückwärts laufenden Dunk.
   const abgeschlossenRef = useRef(false);
 
-  // null = noch nicht geprüft (erster Render, auch serverseitig): dann wird der
-  // ruhige Endzustand gerendert, damit nichts aufblitzt.
-  const [animated, setAnimated] = useState(null);
+  // ⚠️ HIER STAND `useState(null)` MIT DER BEGRÜNDUNG „dann wird der ruhige
+  // Endzustand gerendert, damit nichts aufblitzt" — UND GENAU DAS WAR KAIS
+  // BEFUND K1 (19.08.2026). `null` ist falsy, `!animated` also `true`, und damit
+  // rendert der SERVER das Standbild: die fertige Zeichnung mit gehobenem Ring.
+  // Sobald das JavaScript lief, verschwand alles bis auf Ring und Netz und wurde
+  // beim Scrollen ein zweites Mal gezeichnet. Es hat also sehr wohl etwas
+  // aufgeblitzt — nur andersherum, als der Kommentar dachte.
+  //
+  // Jetzt hat dieser Zustand nur noch EINE Aufgabe: Läuft die Choreografie?
+  // Was der Nutzer OHNE JavaScript sieht, entscheidet das Markup (Szene) und die
+  // Media-Query in app/globals.css (Standbild bei reduzierter Bewegung) — beides
+  // ohne diesen Zustand. `false` heißt deshalb schlicht „der Controller ist noch
+  // nicht dran", nicht mehr „zeig sicherheitshalber das Ende".
+  const [animated, setAnimated] = useState(false);
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -305,7 +316,11 @@ export default function HeroScrollStage({ className = "", children }) {
       className={`relative flex items-center justify-center overflow-hidden bg-navy-950 text-paper-50 ${className}`}
       style={{ minHeight: "calc(100vh - 4rem)" }}
     >
-      <HeroDunk gezeichnet={!animated} />
+      {/* ⚠️ OHNE PROP. Was ohne JavaScript zu sehen ist, steht im Markup
+          (die Szene) bzw. in der Media-Query für reduzierte Bewegung. Ein
+          Schalter, den der Server raten muss, hat hier zwei Gate-Runden
+          gekostet. */}
+      <HeroDunk />
 
       <div className="relative z-10 mx-auto max-w-4xl px-6 py-24 text-center">
         {children}

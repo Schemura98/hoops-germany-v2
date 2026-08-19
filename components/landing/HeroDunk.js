@@ -103,13 +103,36 @@ export const ABSCHLUSS_MS = 420;
 // Choreografie geändert werden kann, ohne die rAF-Schleife anzufassen —
 // dieselbe Trennung, die `PlayDiagram.js` schon hatte.
 const F = {
-  feldGrund: [0.0, 0.18],
-  feldZone: [0.08, 0.28],
   // Der Ring HEBT sich (Deckkraft), er zeichnet sich nicht — er steht schon da.
-  ringHebung: [0.1, 0.25],
-  zug: [0.28, 0.84], // die halbe Strecke gehört der Hauptbewegung allein
-  ball: [0.86, 1.0],
+  ringHebung: [0.06, 0.3],
+  zug: [0.02, 0.82], // die GANZE Strecke gehört der Hauptbewegung
+  ball: [0.82, 1.0],
 };
+
+// ⚠️ `feldGrund` UND `feldZone` STEHEN HIER NICHT MEHR — DAS FELD ZEICHNET SICH
+// NICHT, ES STEHT (Entscheidung Vivien, 19.08.2026, zweite Runde).
+// Das ist die Antwort auf zwei Befunde, die dieselbe Ursache hatten:
+//   · Kai K1: Der Server lieferte die FERTIGE Zeichnung aus, das JavaScript nahm
+//     sie zurück und erzählte sie danach noch einmal.
+//   · Tobias: „Bei Scrollstand 0 sind 0 % der vier Linienzüge gezeichnet … es
+//     liest sich als lose Einzelstriche statt als Spielzug."
+// Beide Male ging es um dasselbe: WAS STEHT IM ERSTEN BILD. Es stand entweder
+// alles (Server) oder fast nichts (nach der Hydration) – und beides war falsch.
+//
+// Die Trennung, die jetzt gilt, ist eine inhaltliche und keine technische:
+//   SZENE  = wo es stattfindet. Grundlinie, Zone, Ring, Netz. Steht ab dem
+//            ersten Bild, ohne Scrollen, ohne JavaScript.
+//   ZUG    = was passiert. Bahn und Ball. Entsteht beim Scrollen.
+// Ein Spielzug wird auf ein Feld gezeichnet, das schon da ist – niemand malt
+// beim Erklären erst die Halle. Vier Linien, die nacheinander erscheinen, sind
+// vier Ereignisse; eine Linie, die über einer stehenden Szene wächst, ist eines.
+//
+// ⚠️ Der Nebengewinn ist der eigentliche: Die Scroll-Strecke gehört jetzt der
+// BEWEGUNG allein. Vorher teilten sich Grundlinie, Zone, Zug und Ball dieselben
+// rund 250 px Scrollweg – die Hauptbewegung bekam davon 56 %. Jetzt bekommt der
+// Zug 80 % und der Ball die letzten 18 %; die Strecke selbst bleibt gleich lang,
+// und WARUM sie nicht länger werden darf, steht bei `PROGRESS_SPAN` im
+// Controller (die Geometrie gibt es nicht her – gemessen, nicht geschätzt).
 
 // ⚠️ DER DREI-PUNKTE-BOGEN IST WEGGEFALLEN (Abweichung vom Konzept, drei
 // Feldpfade → zwei). Grund, am gebauten Stück gesehen und nicht gerechnet:
@@ -254,6 +277,7 @@ const HOCH = (() => {
     ring,
     ballFall: 554 - ball.cy, // Ruhelage im Netz, knapp unter dem Ring
     netzOrigin: ring.cy, // Bezugslinie der Netzbeule: die Ringebene
+    netzUnten: netz.ncy + netz.nry,
     // Das Feld darf über den Rand hinauslaufen – es ist der Boden, kein Motiv.
     // Die Zone öffnet sich nach unten: In der Ansicht von hinter dem Korb
     // fluchtet der Boden nach OBEN weg, und der Ring hängt davor.
@@ -272,6 +296,43 @@ const HOCH = (() => {
   };
 })();
 
+// ⚠️ DER BALL LÄUFT AUF DEM HANDY HINTER DER PRIMÄRTASTE VORBEI — UND DAS
+// BLEIBT SO (Entscheidung Vivien zu Tobias' Befund B1, 19.08.2026).
+// Gemessen an der Production-Runtime, Anteil der Ballfläche hinter der Taste
+// „Profil anlegen" über die 24 Bilder des Falls:
+//   360×800  höchstens 96 % · über 50 % in 21 % der Bilder
+//   375×812  höchstens 98 % · über 50 % in 29 %
+//   390×844  höchstens 98 % · über 50 % in 29 %
+//   430×932  höchstens 74 % · über 50 % in 25 %
+//   768×1024 höchstens 21 % · ab 1280 gar nicht
+// Vollständig verdeckt ist der Ball in KEINEM einzigen Bild.
+//
+// Warum nicht behoben, obwohl der Befund stimmt — drei Gründe, der letzte ist
+// der eigentliche:
+// 1. GEOMETRISCH IST KEIN PLATZ. Auf 360 px liegt die Taste zwischen x = 74 und
+//    286, der Ball zwischen 226 und 281. Damit er die Taste seitlich frei
+//    passiert, müsste er rechts von 286 fallen — also in den letzten 74 px der
+//    Bildbreite. Der Ring, in den er fällt, ist gerendert rund 140 px breit und
+//    wäre dort zur Hälfte abgeschnitten. Beide Bedingungen zusammen sind auf
+//    dieser Breite nicht erfüllbar.
+// 2. WAS VERDECKT WIRD, IST DER TRANSPORT, NICHT DIE POINTE. Der Ball
+//    ERSCHEINT über der Taste (Oberkante 170 gegen Tastenoberkante 214) und er
+//    KOMMT AN unter ihr (Ring bei 291, Taste endet bei 274). Verdeckt ist das
+//    Stück dazwischen. Tobias schreibt selbst, der Höhepunkt liege danach und
+//    sei sichtbar.
+// 3. ⚠️ DER PREIS DER ALTERNATIVE IST BEKANNT UND HOCH. Eine Zeichnung, die der
+//    Bedienoberfläche ausweicht, braucht zur Laufzeit die Lage jedes
+//    Bedienelements — Kastenbau, Lückensuche, Verankerung, Konturkanal. Genau
+//    dieser Apparat ist mit dem alten Ball entfallen (Roadmap 20 bis 20h, acht
+//    Punkte, jeder mindestens eine Gate-Runde). Ihn für 21–29 % der Bilder eines
+//    420-ms-Falls zurückzuholen, wäre der schlechteste Tausch dieses Umbaus.
+//    Eine Zeichnung im HINTERGRUND darf hinter dem Vordergrund verschwinden;
+//    das ist die Bedeutung von Hintergrund.
+// ⚠️ WER ES TROTZDEM WILL, hat genau einen billigen Hebel, und er gehört nicht
+// mir: eine SCHMALERE Primärtaste. „Profil anlegen" ist Neles Rückfall-Wortlaut
+// und misst mit Innenabstand 212 px von 360. Bei rund 150 px Tastenbreite wäre
+// die Überschneidung fast weg. Das ist eine Text- und keine Geometriefrage.
+
 // ── Querformat (≥ 1 : 1) ────────────────────────────────────────────────────
 // Sicherer Bereich: x ∈ [76, 964], y ∈ [51, 649].
 const QUER = (() => {
@@ -284,21 +345,43 @@ const QUER = (() => {
   // rund 39 % im Hochformat. Die im Konzept genannten „rund 34 %" waren eine
   // Zahl für EIN Seitenverhältnis; unter `slice` hängt die gerenderte Breite
   // einer festen viewBox-Größe zwangsläufig am Verhältnis der Bühne.
-  const ring = { cx: 800, cy: 420, rx: 135, ry: 33 };
-  const netz = { ncy: 548, nrx: 93, nry: 22 }; // s. Kommentar im Hochformat
+  // ⚠️ DIE GANZE SZENE IST AM 19.08.2026 UM 54 EINHEITEN NACH UNTEN GERÜCKT
+  // (Ring 420 → 474, Netz 548 → 602, Ball 266 → 320, Feld 452 → 506), UND DAS
+  // IST EIN GEMESSENER BEFUND, KEINE KOMPOSITION.
+  // Auftritt des Balls im Moment der Auslösung, Oberkante in Bildschirm-Pixeln:
+  //   1280×800  →  22 px   (Navigationsleiste reicht bis 64)
+  //   1440×900  →  17 px
+  // Der Ball erschien also HINTER der Leiste und kam erst auf halbem Fallweg
+  // hervor. Das ist Roadmap 20g in neuem Gewand — dort stand über den alten
+  // Ball: „ein Auftritt ohne Publikum". Es war derselbe Fehler an derselben
+  // Stelle, nur mit einem anderen Gegenstand.
+  // ⚠️ WARUM DIE GANZE SZENE UND NICHT NUR DER BALL: Der Ball allein tiefer zu
+  // setzen hätte den Abstand zum Ring von 108 auf 46 Einheiten gedrückt — der
+  // Ball hinge dann eine halbe Balllänge über dem Ring, und der Sprung wäre
+  // seine Fallhöhe los. Die Fallstrecke bleibt jetzt exakt 202 Einheiten.
+  // ⚠️ Nach unten ist die Grenze das NETZ, nicht der Ring: Die Netzunterkante
+  // liegt bei 624 im sicheren Bereich (y ≤ 649). Wer weiter schiebt, schneidet
+  // sie auf der kürzesten Querformat-Bühne an — `hero-dunk.spec.mjs` (P4) sagt
+  // es, aber erst nach dem Bauen.
+  const ring = { cx: 800, cy: 474, rx: 135, ry: 33 };
+  const netz = { ncy: 602, nrx: 93, nry: 22 }; // s. Kommentar im Hochformat
   const ballR = Math.round(ring.rx * 0.4); // s. Kommentar im Hochformat
-  const ball = { cx: 766, cy: 266, r: ballR };
+  const ball = { cx: 766, cy: 320, r: ballR };
   return {
     ring,
-    ballFall: 468 - ball.cy,
+    ballFall: 522 - ball.cy,
     netzOrigin: ring.cy,
+    // Unterkante des Netzes – EINE Quelle, weil `KorbRuhe` weiter unten
+    // denselben Wert braucht. Er stand dort als Zahl im Code und wäre bei
+    // dieser Verschiebung still falsch geworden.
+    netzUnten: netz.ncy + netz.nry,
     feld: {
-      grund: "M-40 452 L1080 452",
-      zone: "M672 452 L582 656 L1018 656 L928 452",
+      grund: "M-40 506 L1080 506",
+      zone: "M672 506 L582 710 L1018 710 L928 506",
     },
     netz: netzPfade({ ...ring, ...netz }),
-    // Kreuzt die Ringebene (y = 420) bei x ≈ 600, linker Ringrand 665.
-    zug: "M180 660 C300 618 410 556 500 476 C578 408 686 350 766 321",
+    // Kreuzt die Ringebene (y = 474) bei x ≈ 600, linker Ringrand 665.
+    zug: "M180 714 C300 672 410 610 500 530 C578 462 686 404 766 375",
     ball: kreisPfad(ball.cx, ball.cy, ballR),
   };
 })();
@@ -369,19 +452,41 @@ const STRICH = { feld: 1.5, netz: 2, zug: 3, ring: 3, ball: 3 };
 // ⚠️ `strokeDasharray` MUSS im Ruhezustand `none` SEIN, nicht `1`. Sonst
 // rendert das Standbild für `prefers-reduced-motion` als gepunktete Linie –
 // derselbe Fehler, nur dauerhaft und genau für die Nutzergruppe, die ihn am
-// wenigsten nachvollziehen kann.
-function Zeichenpfad({ d, von, bis, breite, gezeichnet }) {
+// wenigsten nachvollziehen kann. Dieses `none` setzt seit dem 19.08.2026 die
+// Media-Query in app/globals.css, nicht mehr eine React-Eigenschaft.
+
+// ⚠️ EINE ZAHL, DIE GRÖSSER IST ALS JEDER PFAD — UND WARUM SIE ES SEIN MUSS.
+// `stroke-dasharray: 4000` heißt „4000 Einheiten Strich, 4000 Einheiten Lücke",
+// `stroke-dashoffset: 4000` schiebt das Muster so weit, dass der Pfad komplett
+// in der LÜCKE beginnt. Solange der Pfad kürzer als 4000 Benutzereinheiten ist,
+// ist er dadurch vollständig unsichtbar — ohne JavaScript, ohne `pathLength`,
+// ohne Rechnung.
+// ⚠️ WARUM NICHT `pathLength="1"` PLUS `dasharray="1"`, DER LEHRBUCHWEG: Der
+// Controller fährt danach ABSOLUTE Längen in Benutzereinheiten. Bliebe
+// `pathLength` stehen, würde der Browser jeden dieser Werte noch einmal mit der
+// echten Pfadlänge skalieren — die Rechnung stimmte dann nirgends. Genau die
+// Einheitenverwechslung, die diesen Hero schon zweimal gekostet hat.
+// ⚠️ Der längste Pfad der Zeichnung ist der Zug im Querformat mit rund 730
+// Einheiten. `tests/e2e/hero-erstes-bild.spec.mjs` misst jeden Pfad gegen diese
+// Zahl — wer die Geometrie vergrößert, bekommt es dort gesagt und nicht durch
+// eine Linie, die im ersten Bild plötzlich sichtbar ist.
+const VERSTECKT = 4000;
+
+function Zeichenpfad({ d, von, bis, breite }) {
   return (
     <path
       data-dunk-path
       data-from={von}
       data-to={bis}
       d={d}
-      // Übergangszustand für das eine Bild zwischen Hydration und erstem
-      // Controller-Lauf. Der Controller ersetzt beide Werte durch absolute
-      // Längen, bevor irgendetwas Scrollbares passiert.
-      strokeDasharray={gezeichnet ? "none" : "1"}
-      strokeDashoffset={gezeichnet ? 0 : 1}
+      // ⚠️ DAS IST DER AUSGELIEFERTE ZUSTAND, NICHT EIN ÜBERGANG (Befund Kai K1,
+      // 19.08.2026). Hier stand vorher der FERTIGE Zug — der Server lieferte
+      // also die Pointe, das JavaScript nahm sie zurück und erzählte sie danach
+      // noch einmal. Die Zeichnung beginnt jetzt für alle gleich: ungezeichnet.
+      // Das Standbild für `prefers-reduced-motion` kommt aus der Media-Query,
+      // die keinen ersten Render abwarten muss.
+      strokeDasharray={VERSTECKT}
+      strokeDashoffset={VERSTECKT}
       strokeWidth={breite}
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -389,8 +494,13 @@ function Zeichenpfad({ d, von, bis, breite, gezeichnet }) {
   );
 }
 
-// `gezeichnet`: der Ruhezustand für `prefers-reduced-motion` UND für den ersten
-// Render (auch serverseitig), s. HeroScrollStage.js.
+// ⚠️ DAS STANDBILD FÜR `prefers-reduced-motion` STEHT NICHT MEHR HIER, SONDERN
+// ALS MEDIA-QUERY IN app/globals.css (`.hero-dunk` + `[data-dunk-path]`).
+// Der Grund ist Kais Befund K1 und er ist grundsätzlicher Natur: Eine Bedingung,
+// die schon im ausgelieferten HTML gelten muss, darf nicht an einem React-Render
+// hängen — der findet beim Server-Rendern statt, wo `matchMedia` niemanden
+// fragen kann. Wer es dort trotzdem versucht, muss RATEN, und geraten wurde
+// zugunsten des Standbilds: also bekam es jeder.
 //
 // ⚠️ DAS STANDBILD IST EIN GEWÄHLTES EINZELBILD, KEINE ANGEHALTENE ANIMATION.
 // Prinzip aus dem Trend-Sweep (Referenz 3): erst die Bewegung entwerfen, dann
@@ -403,7 +513,7 @@ function Zeichenpfad({ d, von, bis, breite, gezeichnet }) {
 // ⚠️ Ehrlich benannt: Wer reduzierte Bewegung eingestellt hat, sieht den Ball
 // nie durchgehen. Das ist vertretbar – die Zeichnung ist `aria-hidden` und
 // trägt keine Information.
-function Fassung({ geo, viewBox, klasse, gezeichnet }) {
+function Fassung({ geo, viewBox, klasse }) {
   return (
     <svg
       aria-hidden="true"
@@ -411,25 +521,31 @@ function Fassung({ geo, viewBox, klasse, gezeichnet }) {
       fill="none"
       preserveAspectRatio="xMidYMid slice"
       className={`hero-dunk pointer-events-none absolute inset-0 h-full w-full ${klasse}`}
-      style={{ opacity: ARC_MAX }}
+      // ⚠️ `--dunk-abschluss` WIRD HIER GESETZT, DAMIT DIE MEDIA-QUERY IN
+      // app/globals.css DIE ZAHL NICHT ZWEITES MAL KENNEN MUSS. Das Standbild
+      // für `prefers-reduced-motion` hebt den Ring auf die Abschluss-Ebene; die
+      // Regel steht in CSS (sie muss ohne JavaScript gelten), der WERT steht
+      // weiter hier bei den anderen Ebenen. Eine Zahl, zwei Sprachen — genau die
+      // Doppelung, aus der in dieser Datei schon dreimal ein Fehler wurde.
+      style={{ opacity: ARC_MAX, "--dunk-abschluss": EBENE.abschluss }}
     >
       {/* Das Feld – der Boden, auf dem es stattfindet. Läuft bewusst über den
-          Rand hinaus: eine Grundlinie, die im Bild endet, ist ein Strich. */}
-      <g stroke="#F07A27" strokeOpacity={EBENE.feld}>
-        <Zeichenpfad
-          d={geo.feld.grund}
-          von={F.feldGrund[0]}
-          bis={F.feldGrund[1]}
-          breite={STRICH.feld}
-          gezeichnet={gezeichnet}
-        />
-        <Zeichenpfad
-          d={geo.feld.zone}
-          von={F.feldZone[0]}
-          bis={F.feldZone[1]}
-          breite={STRICH.feld}
-          gezeichnet={gezeichnet}
-        />
+          Rand hinaus: eine Grundlinie, die im Bild endet, ist ein Strich.
+          ⚠️ ES ZEICHNET SICH NICHT MEHR, ES STEHT (19.08.2026, Begründung
+          ausführlich oben bei `F`). Deshalb kein `Zeichenpfad`: Diese zwei
+          Linien tragen kein `data-dunk-path`, der Controller fasst sie nie an,
+          und sie sind im ausgelieferten HTML vollständig vorhanden. Zusammen
+          mit Ring und Netz ergeben sie das erste Bild – eine Szene, kein
+          Fragment. */}
+      <g
+        stroke="#F07A27"
+        strokeOpacity={EBENE.feld}
+        strokeWidth={STRICH.feld}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d={geo.feld.grund} />
+        <path d={geo.feld.zone} />
       </g>
 
       {/* Der Ring – als EINZIGES schon im ersten Bild da, ohne Scrollen.
@@ -445,7 +561,12 @@ function Fassung({ geo, viewBox, klasse, gezeichnet }) {
         rx={geo.ring.rx}
         ry={geo.ring.ry}
         stroke="#F07A27"
-        strokeOpacity={gezeichnet ? EBENE.abschluss : EBENE.ringRuhe}
+        // ⚠️ IMMER DIE RUHELAGE (Befund Kai K1). Hier stand ein Fragezeichen auf
+        // `gezeichnet` – und weil das beim ersten Render `true` war, lieferte der
+        // Server den Ring auf ABSCHLUSS-Stärke aus: die Schlusspointe als
+        // Begrüßung. Die Hebung auf `EBENE.abschluss` gehört dem Scroll (hier)
+        // bzw. der Media-Query (`prefers-reduced-motion`, app/globals.css).
+        strokeOpacity={EBENE.ringRuhe}
         strokeWidth={STRICH.ring}
       />
 
@@ -474,7 +595,6 @@ function Fassung({ geo, viewBox, klasse, gezeichnet }) {
           von={F.zug[0]}
           bis={F.zug[1]}
           breite={STRICH.zug}
-          gezeichnet={gezeichnet}
         />
       </g>
 
@@ -491,7 +611,6 @@ function Fassung({ geo, viewBox, klasse, gezeichnet }) {
             von={F.ball[0]}
             bis={F.ball[1]}
             breite={STRICH.ball}
-            gezeichnet={gezeichnet}
           />
         </g>
       </g>
@@ -506,21 +625,20 @@ function Fassung({ geo, viewBox, klasse, gezeichnet }) {
 // der in dieser Datei schon dreimal ein Fehler geworden ist. Ein Stilschreiben
 // auf ein `display:none`-Element kostet keinen Layoutzugriff.
 // Die Klassen stehen in app/globals.css.
-const HeroDunk = forwardRef(function HeroDunk({ gezeichnet = false }, ref) {
+// ⚠️ DIE PROP `gezeichnet` IST AM 19.08.2026 ENTFALLEN (Befund Kai K1).
+// Sie war als Schalter für `prefers-reduced-motion` gedacht und hat in der
+// Praxis etwas anderes getan: Weil der Zustand beim ERSTEN Render (auch
+// serverseitig) noch nicht feststand, wurde vorsichtshalber das Standbild
+// gerendert – und damit bekamen es ALLE. Die Reihenfolge war „Pointe zeigen,
+// zurücknehmen, erzählen".
+// Ein Zustand, der ohne JavaScript gelten muss, gehört nicht in eine
+// React-Eigenschaft. Er steht jetzt als Media-Query in app/globals.css und
+// braucht keinen ersten Render, den er abwarten könnte.
+const HeroDunk = forwardRef(function HeroDunk(_props, ref) {
   return (
     <div ref={ref} className="pointer-events-none absolute inset-0">
-      <Fassung
-        geo={HOCH}
-        viewBox={VIEWBOX.hoch}
-        klasse="hero-dunk-hoch"
-        gezeichnet={gezeichnet}
-      />
-      <Fassung
-        geo={QUER}
-        viewBox={VIEWBOX.quer}
-        klasse="hero-dunk-quer"
-        gezeichnet={gezeichnet}
-      />
+      <Fassung geo={HOCH} viewBox={VIEWBOX.hoch} klasse="hero-dunk-hoch" />
+      <Fassung geo={QUER} viewBox={VIEWBOX.quer} klasse="hero-dunk-quer" />
     </div>
   );
 });
@@ -559,7 +677,7 @@ export function KorbRuhe({ className = "" }) {
   const x = QUER.ring.cx - QUER.ring.rx - rand;
   const y = QUER.ring.cy - QUER.ring.ry - rand;
   const w = 2 * (QUER.ring.rx + rand);
-  const h = 548 + 22 + rand - y; // bis zur Netzunterkante
+  const h = QUER.netzUnten + rand - y; // bis zur Netzunterkante
   return (
     <svg
       aria-hidden="true"
