@@ -16,28 +16,35 @@ const nextConfig = {
         // `deploy/nginx-hoopsgermany.conf` setzt `expires 30d` nur für die
         // Upload-Verzeichnisse. `/images/` läuft über `location /` in den
         // Next-Prozess, und der lieferte diese Dateien ohne jede Vorgabe aus.
-        // Mit dem Deploy vom 17.08.2026 wurde das teuer: Die Ball-Sequenz der
-        // Startseite ist **107 KB (AVIF) / 164 KB (WebP)** und liegt auf der
-        // Einstiegsseite jedes Erstbesuchers — ohne Vorgabe bei **jedem**
-        // Aufruf neu, nicht einmalig.
+        // Anlass war die Ball-Sequenz der Startseite (107 KB AVIF / 164 KB
+        // WebP) auf der Einstiegsseite jedes Erstbesuchers.
+        //
+        // ⚠️ DER ANLASS IST AM 19.08.2026 ENTFALLEN, DIE VORGABE BLEIBT.
+        // Der Hero zeichnet seit dem Umbau „Der Abschluss" reine Vektoren
+        // (components/landing/HeroDunk.js); Ball-Sequenz und Swish-Sequenz sind
+        // gelöscht, die Startseite lädt wieder **null Bytes Bilddaten**. Unter
+        // `/images/` liegen weiterhin `logo.svg` und die Motive der
+        // Anmeldeseiten — für die gilt dieselbe Rechnung, nur in kleiner.
         //
         // ⚠️ WARUM 30 TAGE UND NICHT EIN JAHR MIT `immutable`:
-        // Die Dateinamen sind **nicht inhaltsadressiert**. `ball-basketball-
-        // 32x200.webp` nennt Bildzahl und Kantenlänge, aber nichts über den
-        // Inhalt — wird die Sequenz mit denselben Parametern neu erzeugt (etwa
-        // mit anderem Nahtmuster), heißt die Datei gleich. `immutable` mit
-        // einem Jahr würde Wiederkehrer dauerhaft auf dem alten Ball
-        // festhalten, und niemand könnte es sehen, weil die Seite bei
-        // Erstbesuchern korrekt aussieht. Genau die Fehlerklasse aus
-        // docs/MUSTER-ZAHLEN-DIE-LUEGEN.
+        // Die Dateinamen sind **nicht inhaltsadressiert**. Ein Name wie
+        // `login-image-1000.avif` nennt Motiv und Kantenlänge, aber nichts über
+        // den Inhalt — wird die Datei mit denselben Parametern neu erzeugt,
+        // heißt sie gleich. `immutable` mit einem Jahr würde Wiederkehrer
+        // dauerhaft auf dem alten Stand festhalten, und niemand könnte es
+        // sehen, weil die Seite bei Erstbesuchern korrekt aussieht. Genau die
+        // Fehlerklasse aus docs/MUSTER-ZAHLEN-DIE-LUEGEN.
         // 30 Tage spiegeln bewusst die Konvention, die für die Uploads schon
         // gilt. `stale-while-revalidate` gibt danach eine schnelle Antwort und
         // erneuert im Hintergrund.
         //
         // ⚠️ WER DEN INHALT EINER DATEI UNTER GLEICHEM NAMEN ÄNDERT, MUSS DEN
-        // NAMEN ÄNDERN. Für die Ball-Sequenz ist das an drei Stellen gekoppelt
-        // und durch `tests/e2e/ball-sequenz.spec.mjs` abgesichert; für
-        // `logo.svg` und die Auth-Motive gibt es diese Absicherung NICHT.
+        // NAMEN ÄNDERN. Für die Ball-Sequenz war das über drei Stellen
+        // gekoppelt und durch einen Test abgesichert; **seit deren Löschung
+        // gibt es diese Absicherung für KEINE Datei unter `/images/` mehr** —
+        // weder für `logo.svg` noch für die Auth-Motive. Das ist keine
+        // Verschlechterung durch den Umbau (sie fehlte dort schon vorher),
+        // aber es ist jetzt der Normalfall statt der Ausnahme.
         source: "/images/:pfad*",
         headers: [
           {

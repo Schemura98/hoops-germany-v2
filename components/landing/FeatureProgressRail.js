@@ -19,8 +19,24 @@ import {
 // Seit A10 (docs/SPIELFELD-STRECKE-2026-08-12.md) trägt diese Leiste zusätzlich
 // den Ball, der im Hero zur Ruhe gekommen ist: Er reitet den Fortschritt mit
 // (Mobil: Balkenspitze, Desktop: zwischen den Punkten interpoliert) und landet
-// einmalig am Ende – ein Korb-Emblem (`HoopEmblem`, bisher an der Hero-CTA)
-// wartet dort. "Einmalig" bezieht sich auf die LANDE-ANIMATION samt Farbblitz,
+// am Ende – ein Korb-Emblem (`HoopEmblem`) steht dort.
+//
+// ⚠️ DIE LANDUNG ALS EREIGNIS IST AM 19.08.2026 ENTFALLEN (Auftrag Patrick,
+// docs/HERO-DUNK-KONZEPT-2026-08-19.md, Möglichkeit B). Weg sind die
+// überschwingende Lande-Kurve und der Farbblitz `rail-goal-flash`; geblieben
+// ist die GEOMETRIE – der Ball kommt weiterhin im Netz zur Ruhe, nicht daneben.
+// Das Korb-Emblem steht ab dem ersten Bild da, als STEHENDE ENDMARKE, statt
+// erst bei der Ankunft aufzudämmern.
+// Begründung, und sie ist hart: CLAUDE.md Roadmap 20 (d) hält fest, dass diese
+// Pointe auf KEINEM Viewport sichtbar war – Ball und Emblem standen bei der
+// Ankunft hinter der stickyen Navbar. Wir hätten also ein Finale geschützt, das
+// nach der eigenen Messung des Projekts noch nie jemand gesehen hat. Den
+// stärksten Moment dorthin zu legen, wo ihn 100 % der Besucher sehen (der
+// Hero), ist keine Geschmacksfrage.
+// ⚠️ Was ein Emblem, das immer dasteht, zusätzlich leistet: Die Leiste zeigt
+// jetzt nicht nur, wo man IST, sondern auch, wohin sie führt. Ein Ziel, das
+// erst erscheint, wenn man es erreicht hat, ist keine Orientierung.
+// Historisch: "Einmalig" bezog sich auf die LANDE-ANIMATION samt Farbblitz,
 // nicht auf die Position: Beim Zurückscrollen folgt der Ball wieder dem
 // Fortschritt. Die erste Fassung fror ihn dauerhaft ein, während Balken und
 // Beschriftung weiterliefen – der Balken stand dann bei 32 %, der Ball klebte
@@ -121,17 +137,19 @@ export default function FeatureProgressRail({ labels = [] }) {
   const goalMobileRef = useRef(null);
   const ballDesktopRef = useRef(null);
   const goalDesktopRef = useRef(null);
-  const goalRingRef = useRef(null);
   const goalMobileRingRef = useRef(null);
-  // Der mobile Ring-Pfad selbst – Träger des Farbblitzes (Befund Tobias B-a).
-  const goalMobileFlashRef = useRef(null);
+  // ⚠️ `goalRingRef` und `goalMobileFlashRef` sind am 19.08.2026 entfallen. Sie
+  // trugen AUSSCHLIESSLICH den Farbblitz. Eine Ref, die niemand mehr liest, ist
+  // keine Dokumentation, sondern eine Spur, der der Nächste folgt (Kai K6).
   // Begrenzt die Wiederholung der Emblem-Messung (Befund Kai).
   const zielMessVersucheRef = useRef(0);
   // Einmal-Sperre, wie `streifenGemeldetRef` im Hero (Empfehlung Kai).
   const diagnoseGemeldetRef = useRef(false); // Einmal-Sperre der Rail-Diagnose
   const spurDesktopRef = useRef(null); // Laufweg-Spur der Desktop-Leiste
   const activeRef = useRef(-1);
-  const arrivedRef = useRef(false); // einmalige Ankunft – danach eingefroren
+  // ⚠️ `arrivedRef` ist am 19.08.2026 entfallen. Es steuerte nur noch, ob die
+  // Lande-Animation schon gelaufen war. Ohne Lande-Animation ist
+  // `ballZielSetzen` idempotent – es gibt kein „erstes Mal" mehr zu merken.
   const tickingRef = useRef(false);
 
   useEffect(() => {
@@ -151,17 +169,25 @@ export default function FeatureProgressRail({ labels = [] }) {
       barRef.current.style.backgroundColor = FARBE_RUHE;
     }
 
-    // Setzt Ball + Korb-Emblem endgültig ans Ziel – einmal bei der echten
-    // Ankunft (mit kurzer Übergangs-Animation) und einmal sofort bei
-    // reduzierter Bewegung (ohne jede Animation, s. Konzept Abschnitt 5: "am
-    // Korb angekommen" ist als Ruhezustand genauso lesbar wie bewegt).
-    const ballZielSetzen = (animiert) => {
+    // ⚠️ DIE ENDMARKE STEHT AB DEM ERSTEN BILD. Alle vier Emblem-Hüllen tragen
+    // `opacity-0` im Markup – das ist Absicht, damit vor der Hydration nichts
+    // an falscher Stelle aufblitzt. Sichtbar gemacht werden sie hier, in EINEM
+    // Aufruf für beide Zweige: welcher davon angezeigt wird, entscheidet der
+    // Breakpoint, und das weiß diese Stelle nicht. Der unsichtbare stört nicht.
+    for (const r of [
+      goalMobileRef.current,
+      goalMobileRingRef.current,
+      goalDesktopRef.current,
+    ]) {
+      if (r) r.style.opacity = "1";
+    }
+
+    // Setzt den Ball an sein Ziel im Netz. Seit dem 19.08.2026 OHNE jede
+    // Übergangskurve: Es gibt keine Landung mehr als Ereignis, nur noch einen
+    // Ball, der am Ende der Strecke steht.
+    const ballZielSetzen = () => {
       if (ballMobileRef.current && trackRef.current) {
         const trackW = trackRef.current.getBoundingClientRect().width;
-        if (animiert) {
-          ballMobileRef.current.style.transition =
-            "transform 320ms cubic-bezier(0.34,1.56,0.64,1)";
-        }
         // ══ DER MOBILE BALL LANDET IM NETZ, NICHT DANEBEN ═══════════════════
         // Befund Tobias B-b (sechste Runde), von Kai am Code bestätigt und
         // nachgerechnet. `RUHE_ANTEIL` existierte NUR im Desktop-Zweig; der
@@ -179,9 +205,9 @@ export default function FeatureProgressRail({ labels = [] }) {
         // neutraler Vorgabewert – es ist B-b, Ball neben statt im Korb.
         // Und anders als bei `clamp` (wirft) oder `offsetWidth` (steigt aus und
         // misst im nächsten Bild neu) gibt es hier KEINEN zweiten Versuch:
-        // `ballZielSetzen` läuft bei der Ankunft genau einmal (`arrivedRef`).
-        // Ein einziges Bild mit ungemessenem Emblem hieße dauerhaft falsche
-        // Endlage – schweigend. Gefunden hat diesen Zustand zuletzt ein Mensch
+        // Bei reduzierter Bewegung läuft `ballZielSetzen` genau EINMAL – ein
+        // einziges Bild mit ungemessenem Emblem hieße dort dauerhaft falsche
+        // Endlage, schweigend. Gefunden hat diesen Zustand zuletzt ein Mensch
         // im Browser, kein Test; die Erreichbarkeit ist gering, die Fehlerform
         // die teure.
         // Deshalb: erneut versuchen statt still danebenlegen.
@@ -204,7 +230,7 @@ export default function FeatureProgressRail({ labels = [] }) {
         if (mobileLeisteSichtbar && (!zielM || zielM.width === 0)) {
           if (zielMessVersucheRef.current < 30) {
             zielMessVersucheRef.current += 1;
-            requestAnimationFrame(() => ballZielSetzen(animiert));
+            requestAnimationFrame(() => ballZielSetzen());
             return;
           }
           // ⚠️ EINMAL, WIE DAS GESCHWISTER IM HERO (Empfehlung Kai). Ohne
@@ -273,18 +299,6 @@ export default function FeatureProgressRail({ labels = [] }) {
         // er über dem Ring und deckte ihn zu.
         const zielY =
           zielRect.top + zielRect.height * RUHE_ANTEIL - colRect.top;
-        if (animiert) {
-          // "back"-Easing statt linear: der Ball schwingt beim Einsetzen ganz
-          // leicht über das Ziel hinaus und pendelt sich ein – ein Aufsetzer,
-          // kein Teleport. Dieselbe Kurve wie beim mobilen Ball oben.
-          ballDesktopRef.current.style.transition =
-            "transform 420ms cubic-bezier(0.34,1.56,0.64,1), opacity 260ms ease-out";
-          // BEIDE Ringe – der sichtbare hängt am Breakpoint, und welcher das
-          // ist, weiß diese Stelle nicht. Der unsichtbare stört nicht.
-          for (const r of [goalRingRef.current, goalMobileFlashRef.current]) {
-            if (r) r.classList.add("rail-goal-flash-ring");
-          }
-        }
         // Auch hier der Drehwinkel des Endstands (s. mobil oben). Bezug ist der
         // erste Punkt, damit er zur laufenden Drehung passt und nicht springt.
         const ersterRectZiel = dotsRef.current[0]?.getBoundingClientRect();
@@ -372,7 +386,16 @@ export default function FeatureProgressRail({ labels = [] }) {
       // Lande-Animation samt Farbblitz.
       if (reduced) return;
 
-      // ⚠️ DIE LANDE-TRANSITION WIRD HIER WIEDER ENTFERNT (Befund Kai B2).
+      // ⚠️ DER B2-AUFRÄUMBLOCK IST AM 19.08.2026 ENTFALLEN, WEIL SEIN ANLASS
+      // ENTFALLEN IST. Er löschte die überschwingende Lande-Transition wieder,
+      // die `ballZielSetzen` bei der Ankunft gesetzt hatte. Es wird keine mehr
+      // gesetzt – der Block hätte nichts mehr zu löschen.
+      // ⚠️ WER HIER JE WIEDER EINE TRANSITION SETZT, BRAUCHT IHN ZURÜCK, und
+      // zwar mit der Feinheit aus Runde zwei: nur AUSSERHALB der Ankunftszone
+      // löschen, sonst reißt das nächste Scroll-Ereignis die Animation mitten
+      // im Flug ab. Der historische Wortlaut steht unten.
+      //
+      // Historisch (Befund Kai B2).
       // `ballZielSetzen` setzt bei der Ankunft eine überschwingende Transition
       // (320/420ms, cubic-bezier mit y=1.56). Sie wurde an KEINER Stelle wieder
       // gelöscht: Ab der ersten Ankunft lief danach jeder Frame durch sie
@@ -397,12 +420,6 @@ export default function FeatureProgressRail({ labels = [] }) {
       // die Landung gekostet, die er schützen sollte.
       // Unterhalb von ARRIVE_T gibt es nichts zu animieren; dort MUSS sie weg,
       // sonst läuft wieder jeder Frame durch eine überschwingende Kurve.
-      if (t < ARRIVE_T) {
-        if (ballMobileRef.current) ballMobileRef.current.style.transition = "";
-        if (ballDesktopRef.current)
-          ballDesktopRef.current.style.transition = "";
-      }
-
       // Mobil: Spitze des sich fuellenden Balkens – dieselbe Zahl t, die auch
       // den Balken fuellt, damit beide immer exakt uebereinstimmen.
       if (trackRef.current && ballMobileRef.current) {
@@ -495,25 +512,17 @@ export default function FeatureProgressRail({ labels = [] }) {
             spurDesktopRef.current.style.strokeDashoffset = String(1 - frac);
           }
 
-          if (goalDesktopRef.current) {
-            // Das Korb-Emblem daemmert schon auf, waehrend sich der Ball dem
-            // letzten Punkt naehert – volle Helligkeit erst bei der Ankunft.
-            const naeher = clamp01(continuous - (labels.length - 2));
-            goalDesktopRef.current.style.opacity = (naeher * 0.5).toFixed(2);
-          }
+          // ⚠️ DAS EMBLEM DÄMMERT NICHT MEHR AUF. Es stand vorher bei
+          // `naeher * 0.5` und erreichte volle Helligkeit erst bei der Ankunft.
+          // Als stehende Endmarke gehört es ab dem ersten Bild ins Bild – es
+          // wird jetzt einmal beim Aufsetzen sichtbar gemacht (s. `endmarke`).
         }
       }
 
-      // Ankunft: kurz vor Sektionsende springt der Ball einmalig ins Ziel und
-      // friert danach ein – kein Zurueckspringen, kein zweites Abspielen beim
-      // Zurueckscrollen (Konzept Abschnitt 3, "kein Deko-Loop").
-      if (t >= ARRIVE_T) {
-        // `arrivedRef` steuert nur noch, ob die Lande-Animation schon lief –
-        // nicht mehr, ob der Ball dem Fortschritt folgt.
-        const erstmalig = !arrivedRef.current;
-        arrivedRef.current = true;
-        ballZielSetzen(erstmalig);
-      }
+      // Ankunft: kurz vor Sektionsende steht der Ball im Netz. Beim
+      // Zurueckscrollen folgt er wieder dem Fortschritt (kein Einfrieren,
+      // Befund Tobias 12.08.2026).
+      if (t >= ARRIVE_T) ballZielSetzen();
     };
 
     let raf = 0;
@@ -530,7 +539,7 @@ export default function FeatureProgressRail({ labels = [] }) {
     // dort neu einrasten. Im bewegten Fall erledigt das `apply` selbst, seit
     // der Ball dem Fortschritt wieder folgt.
     const beiGroessenaenderung = () => {
-      if (reduced) ballZielSetzen(false);
+      if (reduced) ballZielSetzen();
       onScrollOrResize();
     };
 
@@ -538,10 +547,7 @@ export default function FeatureProgressRail({ labels = [] }) {
     // Reduzierte Bewegung: der Ball steht von Anfang an regungslos am Ziel –
     // ohne Animation, ohne dass jemals ein Scroll-Frame die A10-Logik oben
     // erreicht (die kehrt ja wegen `reduced` sofort um).
-    if (reduced) {
-      arrivedRef.current = true;
-      ballZielSetzen(false);
-    }
+    if (reduced) ballZielSetzen();
     window.addEventListener("scroll", onScrollOrResize, { passive: true });
     window.addEventListener("resize", beiGroessenaenderung);
     return () => {
@@ -607,28 +613,18 @@ export default function FeatureProgressRail({ labels = [] }) {
           />
           {/* Der Ring NACH dem Ball – gleiche Lage wie das Netz oben, dadurch
               liegt er davor. Erst damit stimmt das Bild „im Netz".
-              ⚠️ Diese Ref steuert NUR die Deckkraft; den Farbblitz trägt
-              `goalMobileFlashRef` am Pfad darin (Korrektur Kai – der Kommentar
-              stand vorher hier und beschrieb etwas, das diese Ref nicht tut). */}
+              ⚠️ DIE EBENEN-TRENNUNG netz/ring BLEIBT, obwohl der Farbblitz weg
+              ist. Sie ist Geometrie, nicht Choreografie: Ein Ball im Netz liegt
+              UNTER dem Ring und VOR dem Netz – man sieht den Ring vor ihm. Wer
+              sie mit dem Blitz zusammen entfernt, bekommt wieder einen Kreis,
+              der das Emblem vollständig überdeckt (Befund Tobias, 16.08.2026:
+              „Das ist keine Aussage, es ist ein Verschwinden."). */}
           <span
             ref={goalMobileRingRef}
             aria-hidden="true"
             className="pointer-events-none absolute bottom-full right-0 mb-1 opacity-0 transition-opacity duration-300 motion-reduce:transition-none"
           >
-            {/* ⚠️ DER FARBBLITZ HÄNGT JETZT AUCH HIER (Befund Tobias B-a).
-                `ringRef={goalRingRef}` stand nur am Desktop-Emblem – der
-                mobile Ring bekam die Klasse `rail-goal-flash-ring` nie.
-                Tobias' Messung ist der eigentliche Lehrsatz: Sein
-                MutationObserver MELDETE die Klasse auch mobil – sie landete
-                auf dem per `hidden xl:block` ausgeblendeten Desktop-Ring,
-                `getBoundingClientRect().width === 0`. Eine Prüfung auf „ist
-                die Klasse gesetzt" wäre grün gewesen.
-                Betroffen war JEDE Breite unter 1280, nicht nur Telefone. */}
-            <HoopEmblem
-              teil="ring"
-              ringRef={goalMobileFlashRef}
-              className="block h-7 w-10"
-            />
+            <HoopEmblem teil="ring" className="block h-7 w-10" />
           </span>
         </div>
       </div>
@@ -694,18 +690,12 @@ export default function FeatureProgressRail({ labels = [] }) {
             className="absolute left-1/2 top-0"
           />
           {/* Der Ring liegt VOR dem Ball. Das Netz-Emblem ist das letzte Kind
-              IM Fluss, also am Fuß der Spalte – diese Auflage deckt es exakt.
-              Der Farbblitz hängt an diesem Ring und wird dadurch überhaupt
-              erst gesehen (er lag bisher vollständig hinter dem Ball). */}
+              IM Fluss, also am Fuß der Spalte – diese Auflage deckt es exakt. */}
           <span
             aria-hidden="true"
             className="pointer-events-none absolute bottom-0 left-1/2 h-7 w-10 -translate-x-1/2"
           >
-            <HoopEmblem
-              teil="ring"
-              ringRef={goalRingRef}
-              className="block h-full w-full"
-            />
+            <HoopEmblem teil="ring" className="block h-full w-full" />
           </span>
         </div>
       </div>

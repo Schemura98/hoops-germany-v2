@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
 import {
@@ -71,30 +71,30 @@ const HERO_PRIMARY = `${HERO_BTN} bg-brand-500 hover:bg-brand-400 text-navy-950`
 const HERO_GHOST = `${HERO_BTN} border border-navy-600 hover:border-brand-500 hover:bg-navy-800 text-paper-50`;
 const HERO_W = "w-full sm:w-52";
 
-// Vollbild-Hero auf ruhiger Fläche (seit 12.08.2026 ohne Foto, Begründung in
-// HeroScrollStage.js). Zeigt einen personalisierten Bereich für eingeloggte
-// Spieler, sonst die öffentliche Call-to-Action.
+// Vollbild-Hero auf ruhiger Fläche (seit 12.08.2026 ohne Foto). Zeigt einen
+// personalisierten Bereich für eingeloggte Spieler, sonst die öffentliche
+// Aufforderung.
 //
-// Die Fläche selbst liefert `HeroScrollStage` (scroll-gesteuerte Bewegung,
-// Konzept docs/HERO-KONZEPT-2026-08-11.md). Der Inhalt hier bleibt unverändert –
-// ⚠️ `ctaRef` ist am 15.08.2026 ENTFALLEN. Der Ball zielt seit Viviens
-// Bahn-Entscheidung nicht mehr auf die Schaltfläche. Ich hatte die Ref zunächst
-// stehenlassen mit der Begründung, sie „markiere die primäre Aktion" – Kais
-// Einwand (K6) trifft: Ein `useRef`, das niemand liest, ist keine
-// Dokumentation, sondern ein Leser, den der Nächste vergeblich sucht.
+// Die Fläche selbst liefert `HeroScrollStage` (scroll-gezeichneter Dunk,
+// Konzept docs/HERO-DUNK-KONZEPT-2026-08-19.md).
+//
+// ⚠️ `inhaltRef` IST AM 19.08.2026 ENTFALLEN. Sie reichte den Inhaltsblock an
+// die Bühne durch, damit der alte Ball zur Laufzeit wusste, wo jede Textzeile
+// steht. Eine Linie darf jede Zeile kreuzen – die Bühne braucht den Inhalt
+// nicht mehr zu kennen. Das ist auch der Grund, warum Roadmap 20e und 20f
+// (Ballsprung beim späten Anmelde-Wechsel) gegenstandslos sind: Die Zeichnung
+// hängt an keinem Inhaltselement, der Zweigtausch ist ihr gleichgültig.
+//
+// ⚠️ DER AUSGELOGGTE HERO TRUG SECHS DINGE UND TRÄGT JETZT VIER.
+// Entscheidung Nele (docs/HERO-AKTION-ENTSCHEIDUNG-2026-08-19.md), Auftrag
+// Patrick. Was den Apple-Eindruck am meisten beschädigt hat, war nicht der
+// Ball, sondern die Dichte: Abzeichen + vierzeilige Display-Überschrift +
+// Absatz + DREI gleich gewichtete Schaltflächen + Zeichnung + Ball.
+// Geblieben sind: Überschrift · eine Taste · eine Kleinzeile · die Zeichnung.
 export default function LandingHero() {
   const [player, setPlayer] = useState(null); // null = lädt / ausgeloggt
   const [checked, setChecked] = useState(false);
   const [signal, setSignal] = useState(null); // offene Sache für Wiederkehrer
-  // Inhaltsblock: Badge + Headline + Subline UND die Schaltflaechenreihe. Der
-  // fallende Ball dunkelt ab, solange er auf dieser Hoehe ist.
-  // ⚠️ Die Schaltflaechen kamen am 15.08.2026 dazu (Befund Tobias B): Vorher
-  // umfasste der Bezug nur den Text, und der auf 176px vergroesserte Ball lief
-  // bei VOLLER Deckkraft ueber "Teams entdecken" – Kontrast der Beschriftung
-  // 1,67:1 statt der geforderten 4,5:1. Beim 28px-Ball war das folgenlos.
-  // Deshalb heisst er auch nicht mehr `textRef`: Ein Name, der nur "Text" sagt,
-  // laedt genau dazu ein, die naechste Flaeche wieder zu vergessen.
-  const inhaltRef = useRef(null);
 
   useEffect(() => {
     const token = getPlayerToken();
@@ -128,16 +128,17 @@ export default function LandingHero() {
   const teamSlug = player?.team?.slug || null;
 
   return (
-    <HeroScrollStage inhaltRef={inhaltRef}>
+    <HeroScrollStage>
       <>
         {checked && player ? (
           <>
-            <div ref={inhaltRef}>
+            <div>
               <Reveal as="div" delay={0} className="mb-6">
-                <span
-                  data-hero-eyebrow
-                  className="font-display bg-brand-500 text-navy-950 text-sm font-bold px-4 py-1.5 rounded-sm uppercase tracking-[0.2em]"
-                >
+                {/* ⚠️ `data-hero-eyebrow` ist am 19.08.2026 entfallen. Der
+                  Marker war der Anker der mobilen Ball-Ruhelage; mit dem Ball
+                  hat er keinen Leser mehr. Ein Attribut ohne Leser ist keine
+                  Dokumentation, sondern eine Spur, der der Nächste folgt. */}
+                <span className="font-display bg-brand-500 text-navy-950 text-sm font-bold px-4 py-1.5 rounded-sm uppercase tracking-[0.2em]">
                   Willkommen zurück
                 </span>
               </Reveal>
@@ -226,61 +227,121 @@ export default function LandingHero() {
           </>
         ) : (
           <>
-            <div ref={inhaltRef}>
-              <Reveal as="div" delay={0} className="mb-6">
-                <span
-                  data-hero-eyebrow
-                  className="font-display bg-brand-500 text-navy-950 text-sm font-bold px-4 py-1.5 rounded-sm uppercase tracking-[0.2em]"
-                >
-                  Amateur-Basketball in NRW
-                </span>
-              </Reveal>
+            <div>
+              {/* ⚠️ DAS ABZEICHEN (EYEBROW) IST ENTFALLEN (Nele, 19.08.2026).
+                Es trug „Amateur-Basketball in NRW", die Überschrift darunter
+                „Deine Basketball-Community in NRW" – von sechs Dingen im Hero
+                sagten also zwei dasselbe. Das ist die billigste Kürzung, die es
+                hier gab: ein Element weniger, keine Information verloren, kein
+                neuer Anspruch. */}
               <Reveal
                 as="h1"
-                delay={90}
-                className="font-display text-5xl sm:text-6xl md:text-8xl font-black uppercase tracking-tight mb-6 leading-[0.9]"
+                delay={0}
+                className="font-display text-5xl sm:text-6xl md:text-8xl font-black uppercase tracking-tight mb-8 leading-[0.9]"
               >
                 Deine Basketball-
-                {/* Genau EIN Wort klappt um – siehe Begründung in SplitFlap.js. */}
-                <SplitFlap delay={420} className="text-brand-400">
-                  {" "}
-                  Community
-                </SplitFlap>
+                {/* ⚠️ DER UMKLAPP-EFFEKT AUF „COMMUNITY" IST ENTFALLEN
+                  (Entscheidung Vivien; Nele hatte sie mir ausdrücklich
+                  überlassen). Er war ab diesem Umbau das ZWEITE bewegte Element
+                  im selben Bild – neben der Zeichnung, die jetzt schon im
+                  ersten Bild mit dem Ring beginnt. Dieselbe Dichte-Frage wie
+                  bei den sechs Elementen, nur auf der Zeitachse. Neles Befund
+                  dazu: „Das Wort Community gewinnt durch das Umklappen keine
+                  Bedeutung." Der Farbakzent bleibt, die Bewegung geht. */}
+                {/* ⚠️ DIE ÜBERSCHRIFT HAT KEINEN FARBAKZENT MEHR — und das
+                  ist die härteste Entscheidung dieses Umbaus, deshalb steht der
+                  ganze Weg dahin hier.
+                  `docs/VISUELLE-RICHTUNG-2026-08-12.md` sieht ein
+                  „Schlüsselwort in brand-500" vor; gebaut war „Community" in
+                  `brand-400`.
+                  **Gemessen kreuzt der Zug (wirksame Deckkraft 0,558) genau
+                  dieses Wort auf 1024×768 — Kontrast 2,77 : 1.** Orange auf
+                  Orange.
+                  ⚠️ Geometrie löst das NICHT: Der Ball muss über dem Ring
+                  stehen, der Ring steht auf halber Bühnenhöhe, und dort steht
+                  der mittig gesetzte Inhalt. Auf kurzen Querformat-Bühnen
+                  liegen Zug-Spitze und Überschrift zwangsläufig im selben Band.
+                  Wer es über die Lage löst, landet wieder bei der Kastenlogik,
+                  die dieser Umbau gerade abgeschafft hat.
+                  ⚠️ Und Aufhellen löst es auch nicht: `brand-100` (#FFE3C6)
+                  hält zwar 4,74 : 1, aber am gebauten Stück gesehen ist es ein
+                  blasses Creme, das sich von der weißen Zeile kaum noch
+                  absetzt — „Barrierefreiheit gewonnen, Wirkung verloren"
+                  (Tobias, CLAUDE.md) in klein.
+                  **Die eigentliche Ursache ist, dass ZWEI Dinge im Hero
+                  denselben einen Akzent beanspruchen.** Das Designsystem
+                  erlaubt genau ein Orange. Nach der Reduktion trugen es Taste
+                  UND Überschriftswort UND Zeichnung. Eines muss weichen, und
+                  das schwächste ist das Wort: Es markiert nichts, was ohne
+                  Markierung übersehen würde — der Hero hat nur noch EINEN
+                  Textblock, und was gefunden werden muss, ist die Taste.
+                  Das Orange gehört jetzt der Handlung und dem Motiv.
+                  ⚠️ Das ist eine Abweichung von der Visuellen Richtung. Sie
+                  gilt ausdrücklich NUR für diesen Hero; wer sie zurückdreht,
+                  bekommt den Befund auf 1024×768 zurück und muss ihn anders
+                  lösen (`tests/e2e/hero-dunk.spec.mjs`, P1, wird dann rot). */}
+                Community
                 <br />
                 in NRW
               </Reveal>
+              {/* ⚠️ DER ABSATZ IST ENTFALLEN (Nele). Er zählte drei Funktionen
+                auf – genau das, was die Feature-Strecke darunter seit dem
+                11.08. in sechs Szenen mit Bewegung erzählt. Was NICHT verloren
+                gehen durfte, ist die Tatsache „kostenlos": sie sitzt jetzt in
+                der Taste selbst.
+                ⚠️ EINE Taste, EIN Ziel. Der Hero hat nach dieser Reduktion
+                genau einen Ausgang, und der ist `/signup`. Das hebt Roadmap 22
+                (`/signup` liefert ohne JavaScript eine leere Seite) in der
+                Dringlichkeit – bisher standen daneben zwei andere Tasten.
+                `?src=home-hero` nutzt die bereits produktive Kampagnen-Quelle
+                (Muster `[a-z0-9-_]`, max. 40 Zeichen); ab jetzt ist trennbar,
+                wie viele Registrierungen aus dem Hero kommen und wie viele aus
+                dem Flyer-QR.
+                ⚠️ ES IST NELES RÜCKFALL-WORTLAUT, NICHT IHR EMPFOHLENER —
+                und zwar gemessen, nicht geglaubt. Ihre erste Wahl war
+                „Kostenloses Profil anlegen" (26 Zeichen) mit der Kleinzeile
+                „Ab 16 Jahren"; sie hat den Rückfall ausdrücklich an die
+                Bedingung geknüpft, dass 26 Zeichen die Taste auf 360 px
+                zweizeilig machen. Genau das tun sie: am gebauten Stück auf
+                360 px stand dort „Kostenloses Profil / anlegen". Eine
+                zweizeilige Primärtaste in einem Hero, der auf VIER Elemente
+                reduziert wurde, gibt die Ruhe wieder her, für die reduziert
+                wurde. Also 14 Zeichen auf der Taste, und „kostenlos" wandert
+                in die Kleinzeile — die Tatsache bleibt, sie steht nur eine
+                Zeile tiefer. */}
+              <Reveal as="div" delay={90} className="flex justify-center">
+                <Link
+                  href="/signup?src=home-hero"
+                  className="bg-brand-500 hover:bg-brand-400 text-navy-950 font-bold py-4 px-8 rounded-md text-lg flex items-center justify-center gap-2 transition-[transform,background-color] duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
+                >
+                  Profil anlegen <PiArrowRightBold />
+                </Link>
+              </Reveal>
+              {/* Kleinzeile UNTER der Taste, nicht darüber: Überschrift →
+                Angebot → Bedingung. Eine Bedingung über dem Angebot ist eine
+                Hürde, unter dem Angebot ist sie eine Fußnote (Nele).
+                Sie schließt zugleich eine gemessene Lücke: Die Altersgrenze
+                wurde auf der Startseite bisher NIRGENDS genannt, ein
+                14-Jähriger erfuhr sie erst nach fünf ausgefüllten Feldern
+                (Lina, docs/ENTDECKBARKEIT-BEFUND-2026-08-14.md, P2-3). */}
+              {/* ⚠️ `text-paper-100`, NICHT `text-mist-400` (Neles Vorgabe war
+                „klein, gedämpft" — die Farbe ist meine Entscheidung, die
+                Lesbarkeit nicht verhandelbar). Gemessen kreuzen die stärksten
+                Linien der Zeichnung genau diese Zeile: auf 360/375/768 die
+                Abschluss-Ebene (wirksam 0,620), auf 1280/1440 der Zug (0,558).
+                `mist-400` fällt darüber auf **2,79 : 1** bzw. 3,19 : 1 — unter
+                der AA-Schwelle von 4,5. `paper-100` hält über JEDER Ebene
+                mindestens **4,84 : 1**, ist also unabhängig davon, wo die Linie
+                künftig verläuft.
+                Die Unterordnung trägt die GRÖSSE (14 px gegen 48–96 px), nicht
+                die Farbe — auf dunklem Grund ist gedämpftes Grau ohnehin der
+                häufigere Barrierefreiheits-Fehler. */}
               <Reveal
                 as="p"
                 delay={180}
-                className="text-lg md:text-xl text-mist-400 mb-10 max-w-2xl mx-auto leading-relaxed"
+                className="mt-4 text-sm text-paper-100"
               >
-                Finde Spieler, tritt Vereinen bei und verfolge Ligen in deiner
-                Region. Die Plattform für Amateur-Basketball – von Spielern, für
-                Spieler.
-              </Reveal>
-              <Reveal
-                as="div"
-                delay={270}
-                className="flex flex-col sm:flex-row gap-4 justify-center"
-              >
-                <Link
-                  href="/signup"
-                  className="bg-brand-500 hover:bg-brand-400 text-navy-950 font-bold py-4 px-8 rounded-md text-lg flex items-center justify-center gap-2 transition-[transform,background-color] duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
-                >
-                  Als Spieler registrieren <PiArrowRightBold />
-                </Link>
-                <Link
-                  href="/team/register"
-                  className="border border-navy-600 hover:border-brand-500 hover:bg-navy-800 text-paper-50 font-bold py-4 px-8 rounded-md text-lg flex items-center justify-center transition-[transform,background-color,border-color] duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
-                >
-                  Team gründen
-                </Link>
-                <Link
-                  href="/teams"
-                  className="border border-navy-600 hover:border-brand-500 hover:bg-navy-800 text-paper-50 font-bold py-4 px-8 rounded-md text-lg flex items-center justify-center gap-2 transition-[transform,background-color,border-color] duration-150 ease-out-strong active:scale-[0.97] motion-reduce:active:scale-100"
-                >
-                  <PiUsersBold /> Teams entdecken
-                </Link>
+                Kostenlos · ab 16 Jahren
               </Reveal>
             </div>
           </>

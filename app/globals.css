@@ -95,29 +95,17 @@ body {
   animation: none;
 }
 
-/* A10 "ein Motiv trägt alle Szenen" (docs/SPIELFELD-STRECKE-2026-08-12.md):
-   kurzer Farbblitz am Ring des Korb-Emblems, wenn der Ball am Ende der
-   Fortschritts-Leiste ankommt – derselbe Signalton, den die "Bestätigt"-Badge
-   in Szene 3 schon trägt (signal-ok, #6B9A5B), kein neuer Bedeutungston.
-   Bewusst eine Stroke-Animation statt Glow/Schatten – die Vorgabe "keine
-   Verläufe, keine Schatten, kein Glow" gilt auch für neue Mikro-Details. */
-@keyframes rail-goal-flash {
-  0%,
-  100% {
-    stroke: #f68c3e; /* brand-400, Ruhezustand des Rings */
-  }
-  40% {
-    stroke: #6b9a5b; /* signal-ok */
-  }
-}
-.rail-goal-flash-ring {
-  animation: rail-goal-flash 640ms ease-out both;
-}
-@media (prefers-reduced-motion: reduce) {
-  .rail-goal-flash-ring {
-    animation: none;
-  }
-}
+/* ⚠️ `rail-goal-flash` IST AM 19.08.2026 ENTFALLEN. Der Farbblitz gehoerte zur
+   Ankunfts-Choreografie am Ende der Fortschritts-Leiste. Die Leiste behaelt
+   ihr Korb-Emblem als STEHENDE ENDMARKE, aber die Landung als Ereignis ist an
+   den Hero gewandert (docs/HERO-DUNK-KONZEPT-2026-08-19.md, Moeglichkeit B).
+   Begruendung, und sie ist hart: CLAUDE.md Roadmap 20 (d) haelt fest, dass
+   diese Pointe auf KEINEM Viewport sichtbar war – Ball und Emblem standen bei
+   der Ankunft hinter der stickyen Navbar. Es wurde also ein Finale geschuetzt,
+   das nach der eigenen Messung des Projekts nie jemand gesehen hat.
+   Den staerksten Moment dorthin zu legen, wo ihn 100 % der Besucher sehen
+   (Hero), ist keine Geschmacksfrage.
+   Der Nachfolger heisst `hero-dunk-blitz` und steht weiter oben. */
 
 /* Schrittwechsel der Plattform-Tour (components/onboarding/WelcomeTour.js).
    Richtungsabhängig: vorwärts kommt der Inhalt von rechts, zurück von links –
@@ -152,16 +140,53 @@ body {
   }
 }
 
-/* Hero-Ball als gerenderte Bildsequenz (15.08.2026).
-   Zwei Deklarationen mit Absicht: Browser ohne `image-set` behalten die
-   erste (WebP, universell unterstuetzt), alle anderen nehmen AVIF – rund
-   ein Drittel kleiner. Das gehoert hierher und nicht ins Style-Objekt der
-   Komponente, weil ein React-Style denselben Schluessel nur einmal traegt.
-   Erzeugt von scripts/generate-ball-rotation.mjs. */
-.hero-ball-sprite {
-  background-image: url("/images/ball-basketball-32x200.webp");
-  background-image: image-set(
-    url("/images/ball-basketball-32x200.avif") type("image/avif"),
-    url("/images/ball-basketball-32x200.webp") type("image/webp")
-  );
+/* ══ DIE ZWEI FASSUNGEN DER HERO-ZEICHNUNG ═════════════════════════════════
+   components/landing/HeroDunk.js. Beide werden gerendert, hier wird eine
+   ausgeblendet.
+
+   ⚠️ DER UMSCHALTER IST DAS SEITENVERHAELTNIS, NICHT DIE BREITE, und das ist
+   die teuerste Lehre dieses Heros (CLAUDE.md Roadmap 20b/20f: „Breiten
+   geprueft, Hoehe entschieden" – vier Gate-Runden). Mit Zahl: Ein Umschalter
+   bei 768 px schickt das iPad hochkant (768x1024) in die Querformat-Fassung,
+   und dort waeren 46 % der Zeichnung weggeschnitten.
+   Zwischen den beiden Geraetegruppen (Buehnenverhaeltnis 0,489–0,800 und
+   1,268–1,739) liegt kein einziges geprueftes Geraet – die Schwelle 1/1 hat
+   also auf beiden Seiten Luft. */
+.hero-dunk-quer {
+  display: none;
+}
+@media (min-aspect-ratio: 1/1) {
+  .hero-dunk-hoch {
+    display: none;
+  }
+  .hero-dunk-quer {
+    display: block;
+  }
+}
+
+/* Einmaliger Farbblitz am Ring, wenn der Ball durchgeht – derselbe Signalton,
+   den die „Bestaetigt"-Badge traegt (signal-ok, #6B9A5B), kein neuer
+   Bedeutungston. Bewusst eine Stroke-Animation statt Glow/Schatten: die
+   Vorgabe „keine Verlaeufe, keine Schatten, kein Glow" gilt auch fuer neue
+   Mikro-Details.
+   Die Verzoegerung sitzt in der Animation, nicht im Controller – der Blitz
+   gehoert in den Moment, in dem der Ball die Ellipse kreuzt (~160 ms von 420),
+   und eine zweite Zeitquelle im JavaScript waere eine zweite Stelle, die beim
+   Aendern von ABSCHLUSS_MS vergessen wird. */
+@keyframes hero-dunk-blitz {
+  0%,
+  100% {
+    stroke: #f07a27;
+  }
+  45% {
+    stroke: #6b9a5b;
+  }
+}
+.hero-dunk-blitz {
+  animation: hero-dunk-blitz 300ms ease-out 160ms both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-dunk-blitz {
+    animation: none;
+  }
 }

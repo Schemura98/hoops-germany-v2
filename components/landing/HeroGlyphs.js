@@ -9,95 +9,38 @@ import { forwardRef } from "react";
 // rAF-Controller (HeroScrollStage.js für den Fall, FeatureProgressRail.js für
 // den Ritt auf der Fortschritts-Leiste) über die weitergereichte ref.
 //
-// Zwei Auftritte, ein Motiv: BallSprite (Hero, gerenderte Bildsequenz – der
-// fruehere Vektor-BallGlyph ist am 15.08.2026 entfallen, weil ihn nach dem
-// Umbau nichts mehr importierte) und RailBallGlyph (Fortschritts-Leiste,
-// FLACH: kein Verlauf, kein Schatten, nur brand-500 – neue Elemente der
-// Spielfeld-Strecke folgen der Vorgabe "keine Verläufe, keine Schatten, kein
-// Glow"). HoopEmblem ist das gemeinsame Ziel: früher am Hero-CTA, jetzt am Ende
-// der Fortschritts-Leiste (Begründung + Freigabe: SPIELFELD-STRECKE Abschnitt 3,
-// Patricks Freigabe "Ball-Landung darf entfallen" vom 12.08.2026).
+// Seit dem 19.08.2026 bedient diese Datei nur noch die Fortschritts-Leiste:
+// RailBallGlyph (FLACH – kein Verlauf, kein Schatten, nur brand-500) und
+// HoopEmblem als stehende Endmarke am Ende der Leiste. Der Hero hat mit
+// `HeroDunk.js` seine eigene, reine Linien-Sprache bekommen.
+// ⚠️ Der Streckenball BLEIBT bewusst: Er ist der rote Faden durch die Seite,
+// und er ist bereits flach gezeichnet – also schon in der richtigen Sprache.
 
-// ── Hero-Ball als gerenderte Bildsequenz (15.08.2026, Auftrag Patrick) ─────
+// ⚠️ `BallSprite` UND `BALL_SPRITE_FRAMES` SIND AM 19.08.2026 ENTFALLEN.
+// Der Hero-Ball war eine gerenderte 32-Bild-Rotationssequenz (104 KB AVIF /
+// 160 KB WebP, `public/images/ball-basketball-32x200.*`, erzeugt von
+// `scripts/generate-ball-rotation.mjs`). Alles drei ist gelöscht; der Hero
+// zeichnet jetzt einen Dunk als Linien (`HeroDunk.js`) und lädt wieder null
+// Bytes Bilddaten.
 //
-// Ersetzt `BallGlyph` im Hero. Der Vektor-Ball dreht sich per CSS `rotate()`,
-// also in der FLÄCHE – wie ein Rad. Bei 28px fällt das nicht auf, in Hero-Größe
-// sofort: Die Nähte laufen im Kreis, statt über die Kugel zu wandern.
-//
-// Diese Sequenz ist echte 3D-Geometrie (Erzeuger: scripts/generate-ball-
-// rotation.mjs). 32 Bilder einer vollen Umdrehung um eine geneigte Achse,
-// nebeneinander in einem Streifen.
-//
-// Warum Hintergrundbild und nicht <img>: Die Bildwahl geschieht allein über
-// `background-position-x` in Prozent. Dadurch ist sie von der Anzeigegröße
-// UNABHÄNGIG – derselbe Streifen trägt 110px mobil und 200px am Desktop, ohne
-// eine einzige Umrechnung im Controller.
-//
-// ⚠️ DER HERO LÄDT DAMIT ERSTMALS WIEDER BILDDATEN (104 KB AVIF / 160 KB WebP).
-// Das war beim Redesign am 12.08.2026 bewusst abgeschafft worden – damals ging
-// es um ein 1000x652-Foto, das formatfüllend hochskaliert unter einem
-// 65%-Overlay verschwand, also viel Gewicht für fast keine Wirkung. Hier ist
-// das Verhältnis umgekehrt: Das Motiv IST die Bewegung, es trägt die ganze
-// Seite, und es gibt keinen Vektorweg zu echter Kugelrotation. Wer die Zahl
-// drücken muss: `--frames 24` kostet rund ein Viertel und ist bei zügigem
-// Scrollen kaum unterscheidbar (gemessen 24/32/48 am 15.08.2026).
-// ⚠️ Die beiden Bildquellen stehen in `app/globals.css` unter
-// `.hero-ball-sprite`, NICHT hier: Ein Rückfall von AVIF auf WebP braucht
-// ZWEI `background-image`-Deklarationen hintereinander (Browser ohne
-// `image-set` behalten die erste). Ein React-Style-Objekt kann denselben
-// Schlüssel nicht zweimal tragen – im Inline-Style gäbe es also entweder
-// keinen Rückfall oder kein AVIF.
-export const BALL_SPRITE_FRAMES = 32;
-
-// ⚠️ `className` wird ZUSAMMENGEFÜGT, nicht durchgereicht. Die erste Fassung
-// hatte `{...props}` hinter `className` stehen – damit überschrieb jede
-// aufrufende Stelle die eigene Klasse der Komponente, `hero-ball-sprite` fiel
-// weg und mit ihr das Bild. Der Ball war unsichtbar, ohne dass irgendwo ein
-// Fehler auftrat: ein 176px großes, leeres div.
-// Die GRÖSSE kommt bewusst nur aus `className` (Tailwind, brechpunktfähig) –
-// eine zusätzliche Prop wäre eine zweite Quelle für dieselbe Zahl, und der
-// Controller misst ohnehin am Element.
-// ⚠️ `style` wird ebenfalls zusammengefügt, und `backgroundSize` steht HINTER
-// dem Spread (Befund Kai K3, zweite Runde). Vorher war nur `className`
-// geschützt – `style` blieb voll überschreibbar, und ausgerechnet darin steckt
-// `backgroundSize`, also genau die Kopplung an `BALL_SPRITE_FRAMES`, die der
-// Test schützen soll. Ein Aufrufer mit eigener `style`-Prop hätte den Ball
-// still zerlegt, und der Test hätte es nicht gemerkt: Er prüft die Definition,
-// nie die Aufrufstellen.
-export const BallSprite = forwardRef(function BallSprite(
-  { className = "", style, ...props },
-  ref,
-) {
-  return (
-    <div
-      ref={ref}
-      aria-hidden="true"
-      className={`hero-ball-sprite pointer-events-none absolute left-0 top-0 opacity-0 will-change-transform ${className}`}
-      // ⚠️ KEIN `drop-shadow` (Entscheidung Vivien, 15.08.2026). Ein GEWORFENER
-      // Schatten behauptet eine Lichtquelle und eine Fläche hinter dem Ball –
-      // beides gibt es hier nicht, der Ball steht vor einer leeren Navy-Fläche.
-      // Er machte aus dem Körper einen Aufkleber über der Seite. Die Tiefe kommt
-      // jetzt aus dem Anschnitt am Bühnenrand: physikalisch und kostenlos.
-      // Die Verläufe IM Ball (Körperverlauf, Kantenabdunklung, Bouncelight)
-      // bleiben – sie sind Modellierung, keine Dekoration, und genau das ist die
-      // Grenze, die `docs/VISUELLE-RICHTUNG` zieht: keine Verläufe auf FLÄCHEN
-      // DER OBERFLÄCHE (Panels, Tasten, Gründe), sehr wohl auf einem
-      // dargestellten Gegenstand.
-      style={{
-        backgroundRepeat: "no-repeat",
-        ...style,
-        backgroundSize: `${BALL_SPRITE_FRAMES * 100}% 100%`,
-      }}
-      {...props}
-    />
-  );
-});
+// ⚠️ WAS DABEI VERLOREN GEHT, UND ICH SAGE ES KLAR: Die Bildsequenz war gutes
+// Handwerk. Echte Kugelrotation – Nähte, die über eine Kugel wandern statt sich
+// in der Fläche zu drehen – ist mit Vektoren nicht erreichbar, und das war der
+// ganze Grund, warum sie gebaut wurde. Der Verlust ist real.
+// Sie gehört trotzdem nicht in das neue Bild: Ein fotografisch modellierter
+// Körper in einer Strichzeichnung ist ein Genrebruch, und Genrebrüche sind
+// genau das, was Seiten billig aussehen lässt.
+// Wer sie zurückholen will, findet sie im Verlauf – zusammen mit dem Apparat,
+// den sie gebraucht hat (Roadmap 20 bis 20h, acht Punkte, jeder mindestens
+// eine Gate-Runde).
 
 // Korb-Emblem – Ring + Netz, bewusst klein (wie ein Abzeichen). Bis 12.08.2026
 // an der Hero-CTA, jetzt das Reiseziel am Ende der Fortschritts-Leiste
-// (FeatureProgressRail.js). `ringRef` ist optional und zeigt zusätzlich auf den
-// Ring allein – dorthin setzt die Ankunfts-Animation kurz den Signalton
-// `signal-ok`, ohne die Netz-Linien mitzufärben.
+// (FeatureProgressRail.js), seit dem 19.08.2026 als STEHENDE Endmarke.
+// ⚠️ Die Prop `ringRef` ist am 19.08.2026 entfallen. Sie zeigte auf den Ring
+// allein, damit die Ankunfts-Animation dort den Farbblitz setzen konnte, ohne
+// die Netz-Linien mitzufärben. Die Ankunft als Ereignis ist an den Hero
+// gewandert; niemand liest die Prop mehr.
 // ⚠️ Dieselbe Absicherung wie bei den beiden Bällen (Befund Kai K3).
 // Hier war das Muster nicht nur latent, sondern AKTIV: Beide Aufrufstellen
 // übergeben `className` UND `style={{}}` – das leere Objekt ersetzte
@@ -105,7 +48,7 @@ export const BallSprite = forwardRef(function BallSprite(
 // nichts das Emblem dreht. Genau der Zustand, in dem der Drehpunkt des
 // Streckenballs zwei Tage lang lag, bevor er beim ersten `rotate()` auffiel.
 export const HoopEmblem = forwardRef(function HoopEmblem(
-  { ringRef, teil = "voll", className = "", style, ...props },
+  { teil = "voll", className = "", style, ...props },
   ref,
 ) {
   return (
@@ -123,8 +66,7 @@ export const HoopEmblem = forwardRef(function HoopEmblem(
       // ZUSAMMENGEFÜGT – also blieb es stehen. Die Deckkraft steuert aber der
       // umschließende `span`, an dem die Ref hängt: Wrapper 1 × SVG 0 = 0.
       // Ergebnis: Das Korb-Emblem wurde auf KEINEM Viewport mehr gezeichnet,
-      // die Ballreise endete an nichts, und der Farbblitz `rail-goal-flash-ring`
-      // lag im selben unsichtbaren SVG.
+      // die Ballreise endete an nichts.
       // Sichtbarkeit gehört hier dem Wrapper, nicht dem Glyph.
       className={`pointer-events-none will-change-transform ${className}`}
       style={{ ...style, transformOrigin: "10px 3px" }}
@@ -133,8 +75,7 @@ export const HoopEmblem = forwardRef(function HoopEmblem(
       {/* ══ DER BALL LANDET IM NETZ, NICHT AUF DEM EMBLEM ══════════════════
           Entscheidung Vivien (16.08.2026) auf Tobias\' Befund. Der 20px-Ball
           wurde mittig auf ein 20x14-Emblem gesetzt: gleiche Breite, 6px mehr
-          Höhe – er deckte es VOLLSTÄNDIG, Ring inklusive, und der Farbblitz
-          `rail-goal-flash-ring` lag zu 100 % dahinter.
+          Höhe – er deckte es VOLLSTÄNDIG, Ring inklusive.
           Viviens Wort dafür: „Das ist keine Aussage, es ist ein Verschwinden."
           Ein Ball im Netz liegt UNTER dem Ring und VOR dem Netz – man sieht den
           Ring vor ihm. Ein Kreis, der ein Icon exakt überdeckt, liest sich als
@@ -146,7 +87,6 @@ export const HoopEmblem = forwardRef(function HoopEmblem(
           an der kein Ball ankommt. */}
       {teil !== "netz" && (
         <ellipse
-          ref={ringRef}
           cx="10"
           cy="3"
           rx="8.5"
@@ -190,7 +130,7 @@ export const HoopEmblem = forwardRef(function HoopEmblem(
 // Nähte verschwinden hinter der Kugel. Bei 20px trägt die Täuschung, weil das
 // Auge die Naht als Speiche liest. **Deutlich größer darf dieser Glyph nicht
 // werden** – ab etwa 40px kippt er ins Rad-Artige. Wer mehr Präsenz will,
-// braucht anderes Material (gerenderte Bildsequenz), nicht mehr Pixel.
+// braucht anderes Material, nicht mehr Pixel.
 export const RAIL_BALL_PX = 20;
 export const RAIL_BALL_R = RAIL_BALL_PX / 2;
 

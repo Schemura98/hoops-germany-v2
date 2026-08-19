@@ -844,3 +844,201 @@ eines, das sie nennt:
 > **3.** Der Umschalter ist das Seitenverhältnis, nicht der Breakpoint. Jeder
 > bisherige Platzierungsfehler in diesem Hero kam daher, dass über die Breite
 > entschieden wurde, während die Höhe die Sache bestimmte.
+
+---
+
+# Nachtrag: Was beim Bau anders wurde (19.08.2026, Vivien)
+
+Gebaut am selben Tag, nach Patricks Entscheidung für die **figurlose Fassung**
+und Neles Hero-Reduktion (`docs/HERO-AKTION-ENTSCHEIDUNG-2026-08-19.md`).
+Dieser Nachtrag ist Pflichtlektüre für die Gates: Er nennt jede Abweichung vom
+Konzept oben und ihren Grund. Fünf davon stammen daraus, dass ich das Stück
+zum ersten Mal **gesehen** habe — Abschnitt 11 hatte genau das als offene
+Frage benannt.
+
+## A. Was der Blick aufs gebaute Stück geändert hat
+
+| # | Konzept sagte | Gebaut ist | Grund |
+|---|---|---|---|
+| A1 | Das Netz fällt gestaffelt bei td 0,25–0,40 | **Netz steht ab dem ersten Bild**, zusammen mit dem Ring | Auf 360 px gesehen: Eine Ellipse ALLEIN ist kein Korb, sie ist eine Ellipse — sie lag quer über der Headline und las sich als Versehen. Der Grund stand im Konzept selbst, nur an anderer Stelle: „Ellipse plus Netz sind unmissverständlich ein Korb." Das erste Bild ist das einzige, das 100 % der Besucher sehen |
+| A2 | Netztiefe 92 Einheiten (59 % des Ringdurchmessers), 5 Stränge | **74 Einheiten (~40 %), 7 Stränge + 2 Querbögen** | Bei 92 las sich das Gebilde als Papierkorb. Und fünf senkrechte Stränge ohne Querverbindung sind ein Lampenschirm — erst das Geflecht macht das Netz. Dasselbe Mittel benutzt `HoopEmblem` seit dem 12.08. auf 20×14 px |
+| A3 | **Die Hand**: zwei kurze Striche am oberen Ende des Zugs | **entfällt ersatzlos**, der **Ball sitzt an der Spitze des Zugs** | Zwei Striche am Ende einer langen Kurve lesen sich nicht als Hand, sondern als Gabel. Und der Verzicht ist konsequenter, nicht ärmer: Der erste Satz des Konzepts nennt die Notation „Bahn, Ring, Netz, Ball" — die Hand stand in dieser Aufzählung gar nicht. Sie war der letzte Rest Körper in einer Zeichnung, deren ganze Idee das Weglassen des Körpers ist |
+| A4 | Feld = 3 Pfade (Grundlinie, Zone, Drei-Punkte-Bogen) | **2 Pfade**, der Bogen entfällt in BEIDEN Fassungen | Im Hochformat sind nur 78 % der viewBox-Breite sichtbar. Ein Bogen über 108 % der viewBox wird dort nie als Bogen gelesen — man sieht zwei Diagonalen und eine große Kurve, die dem Korb die Aufmerksamkeit nimmt. Eine Form, die nicht erkannt wird, grundiert nicht, sie rauscht. ⚠️ Er fällt auch im Querformat weg (dort hätte er getragen): Sobald die Fassungen sich in der ZAHL der Elemente unterscheiden, sind es zwei Zeichnungen und nicht mehr zwei Anordnungen einer |
+| A5 | Ring in Ruhe auf der Grund-Ebene (0,45 → wirksam 0,279) | **0,70 → wirksam 0,434** | Bei 0,279 sind es 1,54 : 1 gegen den Grund — **unterhalb der 2 : 1, die ich selbst als Untergrenze gesetzt habe.** Das Konzept hätte seine eigene Regel verletzt, und zwar ausgerechnet am einzigen Element des ersten Bildes |
+
+## B. Zwei Zahlen, die das Konzept zu einfach gesagt hat
+
+**B1 — „Der Ring ist rund 34 % der Bühnenbreite breit."**
+Das gilt für **ein** Seitenverhältnis. Unter `preserveAspectRatio="… slice"`
+hängt die gerenderte Breite einer festen viewBox-Größe zwangsläufig am
+Verhältnis der Bühne. Gemessen sind es **rund 39 % im Hochformat und rund 26 %
+im Querformat** — und das ist kein Fehler, sondern responsive Art Direction:
+Die Querformat-Bühne ist breit und flach (736 px hoch bei 1280 Breite), mit der
+Hochformat-Proportion belegte der Korb 37 % der Bühnenhöhe und wurde unten
+angeschnitten.
+
+**B2 — Der Abschluss: „ausbeulen 140 ms · zurückschnappen 180 ms ·
+nachschwingen 100 ms."**
+Das sind drei Konstanten, die zusammen `ABSCHLUSS_MS` ergeben **müssen** und
+beim nächsten Anfassen auseinanderlaufen. Gebaut ist **eine gedämpfte Kurve**,
+die dieselben drei lesbaren Phasen liefert und per Konstruktion exakt bei 1
+endet — auch wenn jemand `ABSCHLUSS_MS` ändert.
+
+## C. Der Fund, der nicht im Konzept stehen konnte
+
+⚠️ **`pathLength="1"` wirkt nicht, wenn am selben Pfad
+`vector-effect: non-scaling-stroke` steht.**
+
+Der Trick, auf dem die ganze Zeichenmechanik beruht — Pfadlänge auf 1 normieren,
+`stroke-dasharray: 1`, `stroke-dashoffset` von 1 auf 0 —, wird vom Browser
+ignoriert, sobald `non-scaling-stroke` danebensteht: Das Strichmuster wird dann
+im Gerätemaß gerechnet, aus „1" wird **1 px an, 1 px aus**. Jede noch nicht
+gezeichnete Linie steht damit als feine Punktlinie im Bild, unabhängig vom
+Versatz.
+
+**Warum das gefährlich ist:** Es sieht fast richtig aus. Kein Konsolenfehler,
+kein kaputtes Layout, nur ein halbheller Geist, den man für Absicht hält.
+Gefunden wurde es allein daran, dass im ersten Bild zwei Diagonalen standen, wo
+per Konstruktion nichts stehen durfte.
+
+**Und er ist vermutlich älter als dieser Umbau:** `PlayDiagram.js` benutzte
+dieselbe Kombination. Dort lief die Tafel bei Deckkraft 0,171 — ein Geist bei
+17 % ist unsichtbar. Erst die Anhebung von `ARC_MAX` auf 0,62 hat ihn ans Licht
+geholt.
+
+**Abhilfe:** Der Controller misst jede Pfadlänge **einmal** beim Aufsetzen
+(`getTotalLength()` — funktioniert auch an der per `display:none`
+ausgeblendeten Fassung, nachgemessen) und fährt das Strichmuster in absoluten
+Benutzereinheiten. Ein Geometriezugriff je Pfad beim Aufsetzen, keiner je Bild.
+Bewacht durch `tests/e2e/hero-dunk.spec.mjs`; Gegenprobe mit zurückgedrehter
+Abhilfe: **rot**.
+
+## D. Was aus Abschnitt 11 („Was ich NICHT geprüft habe") jetzt geprüft ist
+
+| Punkt | Stand |
+|---|---|
+| 1. Nichts im Browser gemessen | ✅ erledigt — gebaut, im Browser gesehen, 25 Prüffälle über neun Viewports |
+| 2. Liest sich ein Strich zwischen Big-Shoulders-Buchstaben als ruhig? | ⚠️ **teilweise.** Ich habe es gesehen und für tragfähig befunden — der Ring kreuzt im ersten Bild keine Headline mehr, weil die Zeichnung in die freie untere Fläche gewandert ist. **Das Urteil bleibt bei Tobias, mobil zuerst** |
+| 3. Seitenverhältnisse aus Nennwerten, echte Geräte haben Browserleisten | ⚠️ **weiterhin ungeprüft.** Die Fassungswahl ist über neun Viewports gemessen, aber alle mit fester Fenstergröße. Auf dem Handy ändert sich die Fensterhöhe **während** des Scrollens |
+| 4. Überlebt der Zug den Hochformat-Beschnitt? | ✅ erledigt — „tragende Elemente werden auf keinem Viewport angeschnitten" ist ein eigener Prüffall |
+| 5. Bildschirmaufnahme als Gegenprobe | ❌ **nicht genutzt.** Der Abschluss ist über seine Dauer und über die Zahl der Positionswechsel gemessen, **nicht als Bewegung angesehen** |
+
+## E. Zwei Messfallen, in die ich beim Bauen selbst gelaufen bin
+
+**E1 — Die Browser-Vorschaufläche war ausgeblendet (`document.hidden === true`),
+und damit laufen keine rAF-Bilder.** Der Abschluss stand dort bei 6,69 von 156
+Einheiten still. Das ist **kein Produktfehler**, es ist die Falle, die in
+CLAUDE.md ausdrücklich steht. Hätte ich sie gemeldet, wäre es ein Fehlalarm
+über die Kernmechanik dieses Umbaus gewesen. Gemessen wurde danach mit
+Playwright gegen echtes Chromium.
+
+**E2 — Mein erster Prüflauf lief in seinen Zeitablauf, und der Fehler war
+meiner:** `waitForSelector(".hero-dunk")` wartet auf **Sichtbarkeit** und nimmt
+den ersten Treffer — im Querformat ist das die per `display:none`
+ausgeblendete Hochformat-Fassung. Behoben mit `state: "attached"`.
+
+---
+
+# Nachtrag 2: Die drei Befunde, die erst das gebaute Stück gezeigt hat
+
+Alle drei sind **still** — kein Konsolenfehler, kein kaputtes Layout, kein
+roter Test der Altbestände. Sie stehen hier, weil sie zusammen die Lehre dieses
+Umbaus tragen.
+
+## F1 — `pathLength` und `non-scaling-stroke` vertragen sich nicht (zweimal gefunden)
+
+Beim **ersten** Mal sichtbar als Punktlinie über jeder noch nicht gezeichneten
+Linie. Behoben, indem der Controller die Pfadlänge misst und das Strichmuster
+absolut setzt.
+
+⚠️ **Und derselbe Fehler kam in zweitem Kostüm zurück, weil ich ihn nur halb
+behoben hatte:** `non-scaling-stroke` blieb stehen. Damit gilt das Strichmuster
+im **Gerätemaß**. Bei Maßstab 1,231 (1280×800) ist der Pfad 867
+Geräteeinheiten lang, das Muster aber nur 704,6 — **19 % jeder Linie fehlten**.
+Sichtbar als offener Ball und als Zug, der kurz vor dem Korb aufhört.
+
+**Auf 360 px war es unsichtbar**, weil der Maßstab dort 0,92 beträgt: Ein
+Muster, das länger ist als der Pfad, deckt ihn vollständig. Und **mein Test war
+grün** — er verglich Muster und Pfadlänge beide in Benutzereinheiten, also in
+der falschen Einheit.
+
+> **Richtig gemessen, in der falschen Einheit.** Dieselbe Fehlerform wie
+> „Bühne statt Sichtfeld" aus CLAUDE.md Roadmap 20b — nur eine Ebene tiefer.
+
+Endgültige Abhilfe: `vector-effect` fällt aus der ganzen Zeichnung. Preis: Der
+Strich skaliert mit (1,9 px bei 320×568 bis 4,9 px bei 1440×1136). Das ist für
+ein Motiv, das als Ganzes wächst, die richtige Seite des Tauschs.
+
+## F2 — Ein Streupunkt aus zwei Nachkommastellen
+
+Im ersten Bild stand ein orangefarbener Punkt über der Taste, wo der Ball noch
+gar nicht gezeichnet sein durfte. Ursache: `toFixed(2)` am Versatz machte aus
+188,522 den Wert 188,52. Die verbleibenden **0,002 px Strich** wurden von
+`stroke-linecap: round` als **voller Punkt in Strichbreite** gezeichnet.
+
+Abhilfe zweiteilig: nicht runden, **und** die Lücke im Strichmuster 2 px länger
+machen als den Pfad — damit ist die Rechnung gegen Rundungsstaub immun, statt
+sich auf exakte Gleitkommazahlen zu verlassen.
+
+## F3 — Das Kontrast-Prüfmaß war zweimal falsch, in beide Richtungen
+
+**Zu wenig:** Die erste Fassung prüfte nur `paper-50`, weil das Konzept nur
+damit gerechnet hatte. Die Kleinzeile unter der Taste (`text-mist-400`) lag über
+der stärksten Linie bei **2,79 : 1** — unter AA, und der Test war grün.
+Behoben: Die Zeile steht jetzt in `paper-100` (mindestens 4,84 : 1 über jeder
+Ebene, also unabhängig davon, wo die Linie künftig verläuft).
+
+**Zu viel:** Die zweite Fassung prüfte jede Textfarbe gegen jede Ebene und
+meldete „Community" (`brand-400`) mit 3,63 : 1. Eine Messung, welche Linie
+welchen Text **tatsächlich** berührt (`isPointInStroke()`), zeigte: Auf
+360/375/768/1280/1440 berührt keine Linie dieses Wort.
+
+⚠️ **Auf 1024×768 aber doch** — dort kreuzt der Zug es mit 2,77 : 1. Und das
+ist **nicht durch Geometrie lösbar**: Der Ball muss über dem Ring stehen, der
+Ring steht auf halber Bühnenhöhe, und dort steht der mittig gesetzte Inhalt.
+Auf kurzen Querformat-Bühnen liegen Zug-Spitze und Überschrift zwangsläufig im
+selben Band.
+
+**Entscheidung: Die Überschrift verliert ihren Farbakzent.**
+Aufhellen war keine Lösung — `brand-100` hält zwar 4,74 : 1, ist am gebauten
+Stück aber ein blasses Creme neben einer weißen Zeile: „Barrierefreiheit
+gewonnen, Wirkung verloren" in klein.
+
+Die eigentliche Ursache liegt tiefer: **Das Designsystem erlaubt genau EIN
+Orange, und nach der Reduktion beanspruchten es drei Dinge** — Taste,
+Überschriftswort und Zeichnung. Eines muss weichen, und das schwächste ist das
+Wort: Es markiert nichts, was ohne Markierung übersehen würde. Der Hero hat nur
+noch einen Textblock; was gefunden werden muss, ist die Taste.
+
+⚠️ **Das ist eine Abweichung von `docs/VISUELLE-RICHTUNG-2026-08-12.md`**
+(„Schlüsselwort in brand-500"). Sie gilt ausdrücklich nur für diesen Hero und
+ist eine Entscheidung, die Patrick überstimmen kann — dann muss der Befund auf
+1024×768 anders gelöst werden.
+
+## Was das Prüfmaß P1 jetzt tut
+
+Es fragt per `isPointInStroke()`, **welche Linie welchen Text wirklich
+kreuzt**, und verlangt dort AA. Der Preis ist benannt: Der Fall ist
+layout-abhängig, ein Textwechsel kann ihn rot machen. Das ist gewollt — dann
+kreuzt tatsächlich eine Linie ein Wort, das sie vorher nicht kreuzte.
+Mit Ehrlichkeitsschranke: Berührt **gar keine** Linie Text, gilt der Lauf als
+nicht gemessen, nicht als grün.
+
+## F4 — Der ruhende Korb im Abschluss-Block, zweimal korrigiert
+
+**Erst zu wenig sichtbar:** Mit der Hero-viewBox (1040×700) und
+`preserveAspectRatio="… slice"` blieb auf 360 px nur ein Bogenstück am rechten
+Rand übrig — der Abschluss-Block ist viel flacher als die Bühne. Ein Fragment
+ist keine Grundierung, es ist ein Strich, den niemand zuordnen kann. Behoben
+mit einem engen Ausschnitt um Ring und Netz und `meet`.
+
+**Dann zu laut:** In der Abschluss-Lautstärke (wirksam 0,620) kreuzte der Ring
+ab 768 px den Fließtext „Werde Teil der Community-Plattform…" (`text-mist-400`)
+mit **2,68 : 1**. Hier ist der Korb Grundierung hinter einem Textblock, nicht
+Hauptdarsteller einer Bühne — er hat jetzt die Lautstärke des Netzes
+(wirksam 0,341 Ring / 0,273 Netz). `mist-400` hält darüber 4,74 bzw. 5,90 : 1.
+
+⚠️ **Die Lehre ist nicht die Zahl, sondern die Reichweite der Regel:** Der
+Hero-Test hätte das nie gesehen — er prüft eine andere Fläche. Eine Regel, die
+nur dort gilt, wo man sie hingeschrieben hat, ist keine Regel. `hero-dunk.spec.mjs`
+prüft den Abschluss-Block deshalb mit demselben Maß.

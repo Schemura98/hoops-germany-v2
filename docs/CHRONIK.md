@@ -4140,3 +4140,172 @@ am Konto) und die Zustandswechsel zählt.
   `landing-ueberschrift.spec.mjs`).
 
 **Commit `96eba14`.**
+
+---
+
+## 19.08.2026 — Hero „Der Abschluss": der Dunk als Linienzeichnung, und acht Roadmap-Punkte fallen mit dem Ball
+
+**Auftrag Patrick über Vivien.** Zwei Vorlagen: `docs/HERO-DUNK-KONZEPT-2026-08-19.md`
+(figurlose Fassung, von Patrick gewählt) und `docs/HERO-AKTION-ENTSCHEIDUNG-2026-08-19.md`
+(Nele: der Hero bekommt eine primäre Handlung). **Nicht deployt, nicht gepusht** — Patrick
+entscheidet, danach laufen die Gates (Kai, Tobias).
+
+### Was gebaut ist
+
+**Neu: `components/landing/HeroDunk.js`.** Ein Dunk als Linienzeichnung in der Strichsprache
+des vorhandenen Spielfelds: Ring, Netz, Zug zum Korb, Ball. **Kein Körper** — gezeichnet wird
+die Notation, der Mensch entsteht aus der Bahn. Zwei viewBox-Fassungen (500×800 hoch,
+1040×700 quer), Umschalter per `@media (min-aspect-ratio: 1/1)`.
+
+**`components/landing/HeroScrollStage.js` von rund 1.350 auf 235 Zeilen.** Der Controller
+zeichnet scroll-gebunden (umkehrbar) und löst den Abschluss **einmal** aus; der läuft dann
+420 ms zeitgesteuert. Danach bleibt die Zeichnung stehen — ein Spielzug, der stattgefunden
+hat, hat stattgefunden.
+
+**Hero-Inhalt reduziert (Nele):** Abzeichen raus · Absatz raus · drei Tasten → **eine**
+(„Profil anlegen" → `/signup?src=home-hero`) · eine Kleinzeile „Kostenlos · ab 16 Jahren".
+Überschrift unverändert (Nora-Präzedenz). **Sechs Dinge im Hero wurden vier.**
+„Team gründen" ist als Textzeile in `LandingCTA.js` gewandert — und dabei auf `/signup?next=`
+statt `/team/register` gelegt, weil Letzteres Ausgeloggte in ein **Anmeldeformular** schickt.
+
+**Gelöscht:** `PlayDiagram.js` · `SwishSequence.js` · `BallSprite`/`BALL_SPRITE_FRAMES` ·
+`public/images/ball-basketball-32x200.{avif,webp}` (272 KB) · `public/images/swish/` (332 KB) ·
+`scripts/generate-ball-rotation.mjs` · `scripts/generate-swish-sequence.js` ·
+`rail-goal-flash` in `app/globals.css`. **Die Startseite lädt wieder null Bytes Bilddaten.**
+
+**Fortschritts-Leiste:** Die Landung am Ende ist eine **stehende Endmarke** geworden — kein
+Farbblitz, keine überschwingende Lande-Kurve, und das Korb-Emblem steht ab dem ersten Bild da
+statt erst bei der Ankunft aufzudämmern. Die Geometrie („der Ball ruht IM Netz") bleibt.
+
+### ⚠️ Der wichtigste Befund des Tages — und er war still
+
+**`pathLength="1"` wirkt nicht, wenn am selben Pfad `vector-effect: non-scaling-stroke` steht.**
+Der Browser rechnet das Strichmuster dann im Gerätemaß: aus `stroke-dasharray: 1` wird 1 px an,
+1 px aus. **Jede noch nicht gezeichnete Linie steht dadurch dauerhaft als feine Punktlinie im
+Bild** — unabhängig vom Versatz, ohne Konsolenfehler, ohne kaputtes Layout.
+
+Gefunden nur daran, dass im ersten Bild zwei Diagonalen standen, wo per Konstruktion nichts
+stehen durfte. **Der Fehler war vermutlich schon in `PlayDiagram.js`** und ist nie aufgefallen,
+weil die Taktiktafel bei Deckkraft 0,171 lief — ein Geist bei 17 % ist unsichtbar. Erst die
+Anhebung von `ARC_MAX` auf 0,62 hat ihn ans Licht geholt.
+
+Abhilfe: Der Controller misst jede Pfadlänge **einmal** beim Aufsetzen (`getTotalLength()`,
+funktioniert auch an einer per `display:none` ausgeblendeten Fassung) und fährt das
+Strichmuster in absoluten Einheiten.
+
+### Sieben Testdateien gelöscht — keine stumm
+
+`hero-ball-laufzeit` · `hero-konturkanal` · `hero-abstand` · `hero-einflug` ·
+`hero-resize-im-flug` · `hero-auth-tausch` · `ball-sequenz`. Für **jede** steht in
+`tests/e2e/README.md` (Abschnitt „Entfallene Tests"), was sie bewacht hat, warum der Gegenstand
+weg ist und wo die Frage — falls sie weiterlebt — jetzt gestellt wird. `rail-ankunft.spec.mjs`
+ist nicht gelöscht, sondern verkleinert: Der Farbblitz-Fall (Tobias B-a) ist entfallen, der
+Geometrie-Fall (B-b) gilt unverändert; an seine Stelle tritt ein Fall, der prüft, dass die
+Endmarke **vor** dem Scrollen dasteht.
+
+**Neu: `tests/e2e/hero-dunk.spec.mjs`, 42 Fälle über neun Viewports** (Höhenachse von Anfang an
+drin) — P1 Kontrastfenster · P2 der Korb ist im Bild, wenn der Ball fällt · P3 der Abschluss
+hängt an der Zeit, nicht am Scroll (mit Ehrlichkeitsschranke: unter 8 beobachteten
+Positionswechseln gilt der Lauf als **nicht gemessen**, nicht als grün) · P4 der Umschalter ist
+das Seitenverhältnis · plus zwei Regeln gegen den Punktlinien-Geist und für das Standbild bei
+reduzierter Bewegung.
+
+### Gemessen (Production-Runtime, `npm start`)
+
+**Gesamtsuite: 176 bestanden + 1 übersprungen (177 Fälle in 23 Dateien).** `npm run build`
+durch. `npm run design-audit --check` ohne Abweichung (Baseline auf den 19.08. nachgezogen —
+⚠️ der größte Teil der Drift war schon bei `062989e` da, also vor diesem Umbau).
+
+- **P1, gerechnet und am angewandten Stil nachgemessen — auf zwei Nachkommastellen identisch
+  mit der Konzepttabelle:** Feld 0,279 → 1,54 : 1 gegen den Grund, Text darüber 11,32 : 1 ·
+  Netz 0,341 → 1,75 / 9,95 · Ring in Ruhe 0,434 → 2,15 / 8,13 · Zug 0,558 → 2,81 / 6,20 ·
+  Abschluss 0,620 → **3,21 / 5,43**. AA-Bruch läge bei wirksamer Deckkraft 0,72.
+- **P2:** Ring auf allen neun Viewports mehr als 24 px unter der Navigationsleiste, Ball bei der
+  Landung vollständig im Bild. Das ist Roadmap 20 (d) als **Bedingung vorher** statt als Befund
+  nachher.
+- **P3:** Abschlussdauer im Fenster 380–460 ms, ≥ 8 Positionswechsel; ±12 px Scrollen um die
+  Schwelle ändert die Ballposition um **0 px**.
+- **P4:** genau eine Fassung sichtbar je Viewport, 768×1024 auf der **Hoch**-Seite.
+- **Zug kreuzt die Ringellipse nicht** (400 Abtastpunkte je Bezier, minimaler Ellipsenwert
+  2,59 hoch / 2,62 quer — 1,0 wäre die Kante).
+
+**Vier Gegenproben gelaufen, alle vier fangen ihren Defekt:**
+Längenmessung abgeklemmt → Punktlinien-Test rot · Umschalter auf `min-width: 768px` → genau
+768×1024 rot · Abschluss an den Scroll gehängt → P3 rot · `non-scaling-stroke` wieder
+angebracht → „die fertige Zeichnung ist auf jedem Maßstab vollständig" rot.
+⚠️ **Und eine fünfte Gegenprobe war zunächst ein falsches Grün:** Sie lief gegen die
+Production-Runtime, die noch den ALTEN Build auslieferte — die Sabotage war nie kompiliert.
+Wiederholt gegen `next dev`, das jede Änderung übersetzt. **Eine Gegenprobe gegen einen
+veralteten Build beweist nichts.**
+
+### ⚠️ Zwei Messfallen, in die ich selbst gelaufen bin
+
+**(1) Die Browser-Vorschaufläche war ausgeblendet** (`document.hidden === true`) — dort laufen
+keine rAF-Bilder. Der Abschluss stand bei 6,69 von 156 Einheiten still. **Kein Produktfehler**,
+sondern genau die Falle, die in CLAUDE.md steht; hätte ich sie gemeldet, wäre es ein Fehlalarm
+über die Kernmechanik dieses Umbaus gewesen. Gemessen wurde danach mit Playwright gegen echtes
+Chromium.
+
+**(2) Mein erster Prüflauf lief in seinen Zeitablauf, und der Fehler war meiner:**
+`waitForSelector(".hero-dunk")` wartet auf **Sichtbarkeit** und nimmt den ersten Treffer — im
+Querformat ist das die ausgeblendete Hochformat-Fassung. Behoben mit `state: "attached"`.
+
+### ⚠️ Zwei weitere stille Befunde, beide erst am gebauten Stück sichtbar
+
+**(1) Derselbe `pathLength`-Fehler kam in zweitem Kostüm zurück — mein erster Fix war halb.**
+Ich hatte `non-scaling-stroke` stehen lassen und nur die Länge absolut gesetzt. Das
+Strichmuster gilt unter `non-scaling-stroke` aber im **Gerätemaß**: Bei Maßstab 1,231
+(1280×800) ist der Pfad 867 Geräteeinheiten lang, das Muster nur 704,6 — **19 % jeder Linie
+fehlten**, sichtbar als offener Ball und als Zug, der kurz vor dem Korb aufhört. **Auf 360 px
+unsichtbar** (Maßstab 0,92: ein zu langes Muster deckt vollständig), **und mein Test war
+grün** — er verglich beides in Benutzereinheiten, also in der falschen Einheit.
+**Richtig gemessen, in der falschen Einheit** – dieselbe Fehlerform wie „Bühne statt
+Sichtfeld" aus Roadmap 20b. Endgültige Abhilfe: `vector-effect` fällt aus der ganzen
+Zeichnung; der Strich skaliert jetzt mit (1,9–4,9 px).
+
+**(2) Ein orangefarbener Streupunkt über der Taste, wo noch nichts gezeichnet sein durfte.**
+`toFixed(2)` machte aus dem Versatz 188,522 den Wert 188,52 — die verbleibenden **0,002 px
+Strich** zeichnete `stroke-linecap: round` als **vollen Punkt in Strichbreite**. Abhilfe:
+nicht runden UND die Lücke im Strichmuster 2 px länger machen als den Pfad.
+
+### ⚠️ Und ein Kontrast-Befund, der zwei Gestaltungsentscheidungen erzwungen hat
+
+Das erste Kontrast-Prüfmaß prüfte nur `paper-50` — so hatte das Konzept gerechnet. Gemessen
+lag aber die **Kleinzeile unter der Taste** (`text-mist-400`) über der stärksten Linie bei
+**2,79 : 1**. Sie steht jetzt in `paper-100` (mindestens 4,84 : 1 über jeder Ebene).
+
+Die zweite Fassung prüfte jede Textfarbe gegen jede Ebene und meldete „Community"
+(`brand-400`) mit 3,63 : 1. Eine exakte Messung (`isPointInStroke()`), welche Linie welchen
+Text wirklich berührt, entlastete das Wort auf 360/375/768/1280/1440 — **aber nicht auf
+1024×768**, wo der Zug es mit 2,77 : 1 kreuzt.
+⚠️ **Geometrie löst das nicht:** Der Ball muss über dem Ring stehen, der Ring steht auf halber
+Bühnenhöhe, dort steht der mittig gesetzte Inhalt. Auf kurzen Querformat-Bühnen liegen
+Zug-Spitze und Überschrift zwangsläufig im selben Band. Aufhellen löste es auch nicht —
+`brand-100` hält zwar 4,74 : 1, ist am gebauten Stück aber ein blasses Creme neben einer
+weißen Zeile.
+**Entscheidung: Die Hero-Überschrift verliert ihren Farbakzent.** Ursache ist, dass das
+Designsystem genau EIN Orange erlaubt und es nach der Reduktion drei Dinge beanspruchten —
+Taste, Überschriftswort, Zeichnung. Das schwächste ist das Wort: Es markiert nichts, was ohne
+Markierung übersehen würde. ⚠️ **Abweichung von `docs/VISUELLE-RICHTUNG-2026-08-12.md`,
+ausdrücklich nur für diesen Hero — Patrick kann sie überstimmen**, dann muss der Befund auf
+1024×768 anders gelöst werden.
+
+### Abweichungen vom eigenen Konzept
+
+Fünf, alle nach dem Blick aufs gebaute Stück, vollständig belegt im Nachtrag des Konzepts
+(`docs/HERO-DUNK-KONZEPT-2026-08-19.md`, Abschnitte A–C): Netz steht ab dem ersten Bild statt zu
+fallen · Netz kürzer und dichter · **die Hand entfällt ersatzlos** (zwei Striche am Ende einer
+Kurve lesen sich als Gabel, nicht als Hand — und die Notation hieß ohnehin „Bahn, Ring, Netz,
+Ball") · Drei-Punkte-Bogen entfällt · Ring in Ruhe auf 0,70 statt 0,45, weil das Konzept sonst
+seine eigene 2 : 1-Untergrenze verletzt hätte.
+
+### Was NICHT geprüft ist
+
+- **Der Abschluss ist nicht als Bewegung angesehen worden**, nur über Dauer und Zahl der
+  Positionswechsel gemessen. Eine Bildschirmaufnahme wäre möglich (`ffmpeg` ist seit dem
+  19.08. installiert) und ist nicht gemacht.
+- **Echte Geräte:** Alle neun Viewports haben feste Fenstergrößen. Auf dem Handy ändert sich
+  die Fensterhöhe **während** des Scrollens (Browserleiste) — ungemessen.
+- **Eingeloggter Hero** nicht im Browser gesehen (die Testkonten auf Prod sind entwertet; lokal
+  wäre es möglich gewesen, ist aber nicht geschehen).
+- **Kein Gate.** Weder Kai noch Tobias haben diesen Stand geprüft.

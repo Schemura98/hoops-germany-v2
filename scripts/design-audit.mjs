@@ -25,16 +25,22 @@ const TOKEN_FILE = path.join(REPO, "lib", "ui.js");
 // WICHTIG: Wenn hier etwas geändert wird, IMMER auch den Abschnitt
 // "Designsystem-Primitive" in CLAUDE.md samt Messdatum nachziehen – sonst
 // verliert der Abgleich seinen Zweck.
+// ⚠️ NACHGEZOGEN AM 19.08.2026 — und der GRÖSSTE TEIL DER DRIFT WAR SCHON DA,
+// bevor der Hero-Umbau begann. Nachgemessen am unveränderten Stand `062989e`:
+// Card 3→2, Reveal 12→11, strikt 141→143, weit 180→184. Es wurde seit dem
+// 15.08. also mehrfach an Panels gebaut, ohne diese Baseline zu pflegen.
+// Der Hero-Umbau selbst hat die Zahl der handgebauten Panels GESENKT
+// (143→141 strikt, 184→182 weit), weil er zwei Komponenten gelöscht hat.
 const BASELINE = {
-  datum: "15.08.2026",
+  datum: "19.08.2026",
   importe: {
-    Button: 25, Card: 3, ConfirmAction: 3, CountUp: 5, EmptyState: 15,
-    FormAlert: 9, LinkTabs: 1, Loading: 19, Reveal: 12, ScrollTable: 3,
+    Button: 25, Card: 2, ConfirmAction: 3, CountUp: 5, EmptyState: 15,
+    FormAlert: 9, LinkTabs: 1, Loading: 19, Reveal: 11, ScrollTable: 3,
     Skeleton: 13, SplitFlap: 3, Tabs: 6,
   },
   tokens: { cardClass: 0 },
   panelsStrikt: 141,
-  panelsWeit: 180,
+  panelsWeit: 182,
 };
 
 const ARGS = new Set(process.argv.slice(2));

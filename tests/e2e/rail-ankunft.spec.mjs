@@ -5,10 +5,18 @@ import { test, expect } from "@playwright/test";
 // Befunde Tobias (Browser-Gate, sechste Runde), beide UNTER 1280px, beide an
 // einem einzelnen Viewport unsichtbar, weil der Desktop-Zweig korrekt ist:
 //
-//   B-a  `ringRef={goalRingRef}` steht nur am DESKTOP-Emblem. Das mobile
-//        Ring-Emblem bekommt nie `rail-goal-flash-ring`. Der Farbblitz –
-//        Viviens erklärter Hauptzweck der Ebenen-Trennung – ist mobil
-//        unsichtbar.
+//   B-a  ⚠️ AM 19.08.2026 GEGENSTANDSLOS GEWORDEN, NICHT WIDERLEGT.
+//        Der Befund lautete: `ringRef={goalRingRef}` steht nur am
+//        DESKTOP-Emblem, das mobile bekommt nie `rail-goal-flash-ring`.
+//        Es gibt keinen Farbblitz mehr – die Landung am Ende der
+//        Fortschritts-Leiste ist eine STEHENDE ENDMARKE geworden, die Landung
+//        als Ereignis ist an den Hero gewandert
+//        (docs/HERO-DUNK-KONZEPT-2026-08-19.md, Möglichkeit B; Begründung:
+//        CLAUDE.md Roadmap 20 (d) – diese Pointe war auf keinem Viewport
+//        sichtbar). Der zugehörige Testfall ist deshalb entfernt.
+//        ⚠️ WER DEN BLITZ ZURÜCKBAUT, HOLT DIESEN FALL AUS DEM VERLAUF ZURÜCK.
+//        Sein Lehrsatz gilt unverändert und steht unten weiter: Die Ausdehnung
+//        messen, nicht die Klasse.
 //   B-b  `RUHE_ANTEIL = 15/28` existiert nur im Desktop-Zweig. Der mobile Ball
 //        hängt unverändert an `top-1/2` des Balkens; seine Mitte liegt unter
 //        der Emblem-Unterkante. Die Ebenen-Trennung läuft mobil ins Leere.
@@ -41,9 +49,10 @@ const VIEWPORTS = [
 
 // Vivien: der Ball ruht bei 15 von 28px Emblemhöhe, nicht auf der Mitte.
 const RUHE_ANTEIL = 15 / 28;
-// Großzügig: Die Ankunft nutzt eine "back"-Kurve, die kurz überschwingt.
-// Die Toleranz muss den Aufsetzer schlucken und den Defekt trotzdem fangen –
-// mobil liegt der Wert bei ~1,2, also weit außerhalb.
+// ⚠️ Die Toleranz stammt aus der Zeit der überschwingenden Lande-Kurve und
+// bleibt unverändert stehen, obwohl es die Kurve nicht mehr gibt: Sie muss den
+// Defekt fangen (mobil lag der Wert bei ~1,2, also weit außerhalb), und enger
+// zu ziehen hieße, eine Schwelle ohne Anlass zu verschieben.
 const TOLERANZ = 0.2;
 
 async function zumZielScrollen(page) {
@@ -56,8 +65,10 @@ async function zumZielScrollen(page) {
       await bild();
     }
   });
-  // Ankunfts-Animation: 420ms Ball + 300ms Emblem-Einblendung, plus Puffer.
-  await page.waitForTimeout(1000);
+  // Kein Ankunfts-Übergang mehr (19.08.2026) – der Puffer bleibt trotzdem,
+  // weil die Leiste ihre Lage per rAF schreibt und das Emblem als Flex-Kind
+  // erst nach dem Layout seine endgültige Position hat.
+  await page.waitForTimeout(600);
 }
 
 function messen() {
@@ -79,7 +90,6 @@ function messen() {
   // Korb-Emblem = HoopEmblem (viewBox 0 0 20 14), Streckenball = RailBallGlyph.
   const embleme = [...document.querySelectorAll('svg[viewBox="0 0 20 14"]')];
   const baelle = [...document.querySelectorAll('svg[viewBox="0 0 14 14"]')];
-  const geblitzt = [...document.querySelectorAll(".rail-goal-flash-ring")];
 
   return {
     embleme: embleme.map(rechteck),
@@ -88,10 +98,6 @@ function messen() {
       ...rechteck(el),
       deck: Number(getComputedStyle(el).opacity),
     })),
-    // ⚠️ Der springende Punkt: NICHT „gibt es die Klasse", sondern „hat das
-    // Element, das sie trägt, überhaupt eine Ausdehnung".
-    geblitztGesamt: geblitzt.length,
-    geblitztSichtbar: geblitzt.filter(sichtbar).map(rechteck),
   };
 }
 
@@ -99,33 +105,24 @@ test.describe("Ankunft auf der Fortschritts-Leiste", () => {
   for (const [breite, hoehe, wie] of VIEWPORTS) {
     const seite = breite >= RAIL_BREAKPOINT ? "Spalte" : "Balken";
 
-    test(`${breite}x${hoehe} (${wie}): der Farbblitz sitzt auf einem sichtbaren Ring`, async ({
+    test(`${breite}x${hoehe} (${wie}): die Endmarke steht sichtbar am Ende der Strecke`, async ({
       page,
     }) => {
       await page.setViewportSize({ width: breite, height: hoehe });
       await page.goto("/", { waitUntil: "networkidle" });
-      await zumZielScrollen(page);
+      // ⚠️ BEWUSST OHNE SCROLLEN. Seit dem 19.08.2026 ist das Korb-Emblem eine
+      // STEHENDE Endmarke: Es muss von Anfang an da sein, nicht erst bei der
+      // Ankunft aufdämmern. Ein Ziel, das erst erscheint, wenn man es erreicht
+      // hat, ist keine Orientierung.
+      // Genau deshalb prüft dieser Fall VOR dem Scrollen – ein Test, der erst
+      // ans Ende fährt, wäre auch mit der alten Aufdämmerung grün gewesen.
+      await page.waitForTimeout(400);
       const m = await page.evaluate(messen);
 
-      // Eine leere Messung ist kein Bestehen (Lehre aus der fünften Runde).
       expect(
         m.emblemeSichtbar.length,
-        `Kein sichtbares Korb-Emblem gefunden (${m.embleme.length} im DOM). ` +
-          `Die Messung wäre bedeutungslos, nicht grün.`,
-      ).toBeGreaterThan(0);
-      expect(
-        m.geblitztGesamt,
-        `Die Klasse rail-goal-flash-ring wurde nirgends gesetzt – die Ankunft ` +
-          `hat gar nicht stattgefunden, der Test misst den falschen Zustand.`,
-      ).toBeGreaterThan(0);
-
-      expect(
-        m.geblitztSichtbar.length,
-        `Der Farbblitz sitzt auf ${m.geblitztGesamt} Element(en), aber auf ` +
-          `KEINEM mit Ausdehnung – er ist im ${seite}-Zweig unsichtbar. ` +
-          `Genau hier trügt die naheliegende Prüfung: Die Klasse IST gesetzt, ` +
-          `nur auf dem per hidden/xl ausgeblendeten Gegenzweig ` +
-          `(getBoundingClientRect().width === 0). Befund Tobias B-a.`,
+        `Kein sichtbares Korb-Emblem gefunden (${m.embleme.length} im DOM) – ` +
+          `die Endmarke steht nicht, bevor der Ball ankommt.`,
       ).toBeGreaterThan(0);
     });
 

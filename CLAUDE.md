@@ -3,7 +3,7 @@
 
 ---
 
-## 0. AKTUELLER STAND (Überblick · Stand 18.08.2026)
+## 0. AKTUELLER STAND (Überblick · Stand 19.08.2026)
 
 > 🟢 **v2 IST LIVE auf https://hoopsgermany.de** (seit 24.06.2026). Hostinger-VPS `92.113.25.249`
 > (Ubuntu 24.04), Code in `/root/hoops-v2` (Branch **`redesign`**), PM2-Prozess **`hoops-v2` auf Port 3001**,
@@ -11,7 +11,27 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> ✅ **DEPLOYT: `7da3905`** (18.08.2026, fünfter Deploy des Tages) – Silbentrennung ohne Stummel
+> 🔨 **NICHT DEPLOYT, NICHT GEPUSHT (19.08.2026): Der Hero der Startseite ist neu.**
+> „Der Abschluss" – ein Dunk als Linienzeichnung statt des gerenderten Balls
+> (`components/landing/HeroDunk.js`, Konzept `docs/HERO-DUNK-KONZEPT-2026-08-19.md`), dazu die
+> Hero-Reduktion von Nele (`docs/HERO-AKTION-ENTSCHEIDUNG-2026-08-19.md`): **sechs Dinge im Hero
+> wurden vier**, eine Taste statt drei. Gelöscht: `PlayDiagram`, `SwishSequence`, `BallSprite`
+> und **295 KB Bilddaten** – die Startseite lädt wieder null Bytes davon.
+> **Geprüft:** Build durch · Production-Runtime (`npm start`) · Playwright **176 bestanden +
+> 1 übersprungen** (177 Fälle, 23 Dateien; davon 42 neu in `tests/e2e/hero-dunk.spec.mjs`) ·
+> `npm run design-audit --check` ohne Abweichung · **vier Gegenproben, jede rot mit
+> zurückgedrehter Abhilfe.**
+> **NICHT geprüft:** kein Gate (weder Kai noch Tobias) · der Abschluss ist über Dauer und
+> Positionswechsel gemessen, **nicht als Bewegung angesehen** · keine echten Geräte (alle
+> Fenstergrößen fest; auf dem Handy ändert sich die Höhe beim Scrollen) · eingeloggter Hero
+> nicht im Browser gesehen.
+> ⚠️ **Eine Entscheidung darin gehört Patrick zur Bestätigung:** Die Hero-Überschrift hat
+> **keinen Farbakzent mehr** (das orange „Community" ist weiß geworden). Grund gemessen: Auf
+> 1024×768 kreuzt die Zeichnung genau dieses Wort, Kontrast 2,77 : 1. Geometrie kann es nicht
+> lösen, Aufhellen sieht blass aus – die Ursache ist, dass das Designsystem EIN Orange erlaubt
+> und es nach der Reduktion drei Dinge beanspruchten. Details in Roadmap 20a (c).
+>
+> ✅ **ZULETZT DEPLOYT: `7da3905`** (18.08.2026, fünfter Deploy des Tages) – Silbentrennung ohne Stummel
 > (Vivien) + Backoffice-Kennzahl, die nur wachsen konnte. Live: 16 Routen je 200, Trennregel im
 > ausgelieferten CSS belegt (`hyphenate-limit-chars: 8 5 4` **und** die `-webkit-`-Variante –
 > ohne die fiele Safari zurück). Playwright 260/260 + 1 übersprungen.
@@ -576,9 +596,15 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
   (öffentlich, login-bewusst), `components/layout/FeedbackLink.js` (Feedback-Zugang im Sticky-Chrome
   aller drei Leisten, seit 13.08.2026 – ersetzt den schwebenden FeedbackButton, der dreimal
   unabhängig als Inhalts-Verdeckung gemeldet wurde; Mobil-Menüs scrollen seitdem selbst), `components/landing/HeroScrollStage.js` (scroll-gesteuerte Hero-Bühne
-  „Sprungball": ein rAF-Controller für alle Deko-Ebenen, Ziel wird zur Laufzeit am CTA-Rechteck
-  gemessen, kein Pinning, `prefers-reduced-motion` rendert Ball/Emblem gar nicht) mit
-  `components/landing/HeroGlyphs.js` (Ball, Korb-Emblem, Spielfeld-Bogen als reine Vektoren).
+  **„Der Abschluss"**, seit 19.08.2026: ein rAF-Controller, der eine Linienzeichnung zeichnet;
+  kein Pinning, `prefers-reduced-motion` zeigt ein gewähltes Einzelbild) mit
+  `components/landing/HeroDunk.js` (Ring, Netz, Zug, Ball als reine Vektoren, zwei
+  viewBox-Fassungen) und `components/landing/HeroGlyphs.js` (nur noch Korb-Emblem und
+  Streckenball der Fortschritts-Leiste).
+  ⚠️ **`PlayDiagram.js`, `SwishSequence.js` und `BallSprite` sind am 19.08.2026 ERSATZLOS
+  ENTFALLEN**, ebenso die Bilddateien `public/images/ball-basketball-32x200.*` (295 KB),
+  `public/images/swish/` und die beiden Erzeuger-Skripte. Die Startseite lädt wieder **null
+  Bytes Bilddaten**.
 - **Designsystem-Primitive (`components/ui/`):** `Button` (Varianten primary/secondary/ghost/danger/
   dangerGhost + Größen sm/md/lg, `href`→Link), `Tabs` (Umschalter mit Unterstreichung, kein Pill mehr), `Card`, `EmptyState`,
   `Loading` (Basketball-Spinner), `Skeleton`/`SkeletonCard`/`SkeletonList`, `FormAlert`
@@ -589,14 +615,20 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
   **Konvention:** neue/überarbeitete Seiten IMMER diese Primitive nutzen (keine Ad-hoc-Buttons/Tabs/
   Spinner, kein `window.confirm`). **Rollout abgeschlossen (Wellen 1–5 + Welle 2b für das
   Team-Admin-Panel, Commits in der Chronik)** – **mit einer Ausnahme, nachgemessen am 15.08.2026:**
-  `Card` hat **3 Importe** (`components/feed/SpieltagStrip.js`, `components/feed/FollowSuggestions.js`,
-  `components/posts/PostComposer.js`) und `cardClass` **0 Verwendungen** (nur die Definition in
+  `Card` hat **2 Importe** (`components/feed/FollowSuggestions.js`,
+  `components/posts/PostComposer.js` — nachgemessen 19.08.2026; die dritte Fundstelle
+  `components/feed/SpieltagStrip.js` existiert nicht mehr) und `cardClass` **0 Verwendungen** (nur die Definition in
   `lib/ui.js:22`); stattdessen bauen **141 Stellen** die Panel-Fläche von Hand (`bg-navy-800` +
   `border-navy-600`). Die **141 ist eine Untergrenze**: Zeilen mit `bg-navy-800` gibt es **180** –
   die übrigen 39 sind ebenfalls handgebaute Panels, nur mit abweichender Rahmenfarbe
   (`signal-ok`, `brand-500`, dynamisch) oder ganz ohne. Betroffen sind **78 Dateien**. Alle übrigen
-  Primitive sind echt im Einsatz (Button 25, Loading 19, EmptyState 15, Skeleton 13, Reveal 12,
-  FormAlert 9, Tabs 6, CountUp 5, Card/ConfirmAction/ScrollTable/SplitFlap je 3, LinkTabs 1).
+  Primitive sind echt im Einsatz (Button 25, Loading 19, EmptyState 15, Skeleton 13, Reveal 11,
+  FormAlert 9, Tabs 6, CountUp 5, ConfirmAction/ScrollTable/SplitFlap je 3, Card 2, LinkTabs 1).
+  ⚠️ **Stand 19.08.2026 nachgezogen — und der größte Teil der Drift war schon da**, bevor der
+  Hero-Umbau begann: Am unveränderten Stand `062989e` gemessen Card 3→2, Reveal 12→11,
+  strikt 141→143, weit 180→184. Es wurde seit dem 15.08. mehrfach an Panels gebaut, ohne die
+  Baseline zu pflegen. Der Hero-Umbau selbst hat die Zahl **gesenkt** (143→141 strikt,
+  184→182 weit), weil er zwei Komponenten gelöscht hat.
   Folge: Eine Änderung an der Kartensprache wirkt
   **nicht** zentral – sie muss an 141 Stellen nachgezogen werden. Das ist der größte offene
   Konsistenz-Posten des Designsystems (Umbau bewusst zurückgestellt: hohes Regressionsrisiko,
@@ -608,7 +640,7 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
   (`scripts/design-audit.mjs`) zählt sie neu. `--files` zeigt die Fundstellen, `--json` gibt sie
   maschinenlesbar aus, `--check` vergleicht mit der Baseline im Skript und endet mit exit 1, sobald
   etwas gedriftet ist. **Bei Drift immer BEIDES nachziehen** – die `BASELINE`-Konstante im Skript
-  und diesen Absatz samt Messdatum. Der Drift ist real: 126 → 141 in drei Tagen (12. → 15.08.2026).
+  und diesen Absatz samt Messdatum. Der Drift ist real: 126 → 141 in drei Tagen (12. → 15.08.2026), und er wurde zwischen dem 15. und 19.08. erneut nicht gepflegt (s. o.).
   Bewusst belassen (custom/kompakt): lokale `inputClass` in
   `team/claim`, `admin/leagues`, `admin/update-match`. Optionaler Restschliff: Super-Admin-Tabellen/
   „Lädt…"-Texte auf `<Loading>`/`EmptyState`.
@@ -744,15 +776,18 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     er lag auf 390×640 gemessen über den letzten 36 px von „Konto erstellen". **Überholt am
     13.08.2026:** Der schwebende Knopf ist insgesamt entfernt; der Feedback-Zugang sitzt im
     Sticky-Chrome (`components/layout/FeedbackLink.js`, Protokoll in der Chronik).
-11. **Startseite als Scroll-Erlebnis – was noch offen ist:** Konzepte liegen vollständig vor
-    (`docs/LANDING-KONZEPT-2026-08-11.md` inkl. Nachtrag, `docs/HERO-KONZEPT-2026-08-11.md`,
-    `docs/LANDING-COPY-2026-08-11.md`). Gebaut sind Hero-Stufe 1, Feature-Choreografie (Stufe 1),
-    Fortschritts-Anzeige (Stufe 2), Neles Texte (Stufe 3) und Viviens Feinschliff. **Offen:**
-    Hero-**Desktop**-Ausbaustufe (gepinnte Bühne, 140vh, drei Szenen – Konzept steht, bewusst
-    zurückgestellt, weil mobil der Hauptfall ist); Stufe 4 der Feature-Strecke (kurzer Pin nur für
-    die Ergebnis-Szene) **nur**, falls Ronjas Nutzungsprüfung zeigt, dass die Doppel-Bestätigung
-    nicht verstanden wird; Test auf echtem Low-End-Android (bisher nur 4×-CPU-Drosselung);
-    Neles „nice to have"-Textvorschläge für die Karten 2/5/6.
+11. **Startseite als Scroll-Erlebnis – was noch offen ist.** ⚠️ **Der Hero ist am 19.08.2026
+    neu gebaut worden** („Der Abschluss", `docs/HERO-DUNK-KONZEPT-2026-08-19.md`); das ältere
+    `docs/HERO-KONZEPT-2026-08-11.md` beschreibt den abgelösten Stand und ist **Historie, keine
+    Vorgabe mehr**. Für die Feature-Strecke gelten `docs/LANDING-KONZEPT-2026-08-11.md` und
+    `docs/LANDING-COPY-2026-08-11.md` unverändert.
+    **Offen:** Stufe 4 der Feature-Strecke (kurzer Pin nur für die Ergebnis-Szene) **nur**,
+    falls Ronjas Nutzungsprüfung zeigt, dass die Doppel-Bestätigung nicht verstanden wird;
+    Test auf echtem Low-End-Android (bisher nur 4×-CPU-Drosselung); Neles „nice to
+    have"-Textvorschläge für die Karten 2/5/6.
+    **Entfallen:** die Hero-Desktop-Ausbaustufe (gepinnte Bühne, 140vh, drei Szenen) – sie war
+    eine Ausbaustufe des alten Ball-Heros. Der neue Hero hat zwei gleichwertige Fassungen
+    (Hoch-/Querformat) und braucht kein Pinning.
 12. **Entscheidungen zu „Deine Zahlen stehen" (`own_stats`, seit 13.08.2026 gebaut):**
     (a) Soll die spätere **Bestätigung** eines zunächst vorläufigen Ergebnisses eine **zweite**
     Nachricht auslösen? Heute bewusst nein (Rauschen-Abwägung) – wer beim Stand „vorläufig"
@@ -914,297 +949,105 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     Team-Follow; sharp-Resize für gespeicherte Upload-JPEGs; Super-Admin-Tabellen auf `<Loading>`/`EmptyState`;
     Folge-Vorschläge nur für neue User; TransferEvents bleiben nach Team-Löschung als Historie (Design);
     `seed-world.mjs --prod` nur nach ausdrücklicher Freigabe des Users.
-20. **Ball-Choreografie der Startseite – vier GESTALTUNGSENTSCHEIDUNGEN für Vivien**
-    (Stand `cd51c92`, 15.08.2026; beide Gate-Prüfer weisen alle vier ihr zu, nicht der
-    Entwicklung). Nichts davon ist ein Defekt – es sind Abwägungen, die am Produkt gemessen sind:
-    (a) ⚠️ **Der Preis des Kontrast-Fixes.** Der Abdunkelungs-Bezug umfasst jetzt auch die
-    Schaltflächenreihe (nötig: Kontrast der Beschriftung war 1,67:1 statt 4,5:1). Folge,
-    gemessen: Der Hero-Ball ist über seinen gesamten Auftritt nur **9–10 % der Zeit** heller als
-    0,6, mittlere Deckkraft **0,66 → 0,36–0,42**, und der **Aufsetzer findet bei 0,20 statt**.
-    Tobias' Wort dafür: *Barrierefreiheit gewonnen, Wirkung verloren.*
-    (b) **Die Übergabe findet mobil räumlich nicht statt.** Der Hero-Ball verlässt das Bild oben
-    rechts, der Streckenball blendet unten LINKS am Balken ein – zwei Auftritte an
-    entgegengesetzten Ecken. Bei 1280/1440 trägt es, weil beide am rechten Rand liegen.
-    (c) **Ruhepunkt unter 640 px 34 px innerhalb der CTA-Ecke.** Nötig, damit der Ball nicht
-    beschnitten wird (vorher 3 % sichtbar) – aber aus dem „Abzeichen an der oberen Ecke" wird
-    eine Scheibe auf der Tastenkante. Der Kommentar in `HeroScrollStage.js` beschreibt noch das
-    Alte.
-    (d) **Die Landung ist auf KEINEM Viewport sichtbar** – Ball und Korb-Emblem stehen bei der
-    Ankunft hinter der stickyen Navbar; mobil sitzt das Emblem links, der Ball landet rechts.
-    ⚠️ **Altbestand, nicht aus dieser Runde** (per `git diff` belegt) – aber es heißt: Die Pointe
-    der „einen Reise durch die Seite" hat noch nie jemand gesehen.
-    Dazu offen: Zickzack statt Sinuswelle für die Dribbel-Spur (die Notationsbegründung im Code
-    trägt erst dann wieder), und der `drop-shadow` auf dem Hero-Ball – Patricks Freigabe deckt
-    ihn, die Abweichung von `docs/VISUELLE-RICHTUNG` sollte aber bei Vivien liegen.
-20b. **Ball-Choreografie — die GESTALTUNG ist eingefroren, der Code war es nicht.**
-    Roadmap 20 (a)–(d) ist umgesetzt, sechs Runden mit Vivien, fünf Gate-Runden.
-    ⚠️ **Diese Überschrift log zwei Runden lang** (Befund Kai, fünfte Runde): Sie
-    sagte „EINGEFROREN", darunter stand „kein Regressionsverdacht, sondern
-    Entscheidungen" – und unmittelbar danach begann eine Liste behobener Defekte.
-    Wer die Überschrift überflog, las das Gegenteil des Inhalts. Eingefroren ist
-    seit dem 15.08. die **Gestaltungsrichtung** (keine weitere Vivien-Runde);
-    die **Umsetzung** trug danach noch zwei Befunde von Tobias und sieben von Kai.
-    Was hier als Abweichung steht, ist eine bewusste Entscheidung — **nicht als
-    Zusicherung lesen, dass nichts mehr offen ist.**
-    (a) ⚠️ **ZUERST: WAS DIE ZAHL MISST** (Befund Kai, vierte Runde). Es gibt
-    ZWEI Kennzahlen: **geometrisch** = Anteil des Balls im Sichtfeld abzüglich
-    Navbar, **wirksam** = derselbe Wert **mal Deckkraft**. Sie wurden von mir
-    verwechselt (ich meldete „80 % → 43 %" als Vorher/Nachher – es waren beide
-    Kennzahlen an derselben Position). **Viviens 55-%-Prüfmaß meint die
-    WIRKSAME** – von ihr bestätigt: „Ein voll deckender Ball hinter der Navbar
-    und ein weggedimmter Ball im Bild sind beide ‚nicht gesehen'."
-    ✅ **Die frühere Ausnahme ist ERLEDIGT, nicht mehr eingefroren.** Sie lautete
-    „mobil 43 %, 768×1024 50 % gegen ≥ 55 %". Ursache war eine Abdunkelung, die
-    schon im **Anflug** rampte, obwohl die Lückensuche die Ruhelage per
-    Konstruktion als frei bestimmt – zwei Mechanismen, die einander
-    widersprachen. Seit die Abdunkelung nur noch bei **echter Überlappung**
-    greift: **Deckkraft in der Ruhelage 1,00 auf jedem Viewport**, wirksame
-    Sichtbarkeit **80 % mobil / 83 % ab 768**. Prüfmaß erfüllt.
-    (b) **320 px liegt außerhalb des Zielbereichs** (Entscheidung Vivien) – der
-    beginnt bei 375. Dort gilt nur „überhaupt sichtbar" (erfüllt: **80 %**,
-    Fenster gemessen **132 px**), nicht die 150-px-Schwelle.
-    ⚠️ **Hier standen bis zum 15.08. abends „43 %, ~138 px"** (Befund Kai): Die
-    43 % stammten aus genau der Abdunkelung, die (a) zwei Zeilen weiter oben als
-    behoben feiert. Die Zahl, deren Beseitigung der Absatz meldet, stand darunter
-    noch als Beleg. **Eine korrigierte Aussage zieht ihre Belegzahlen mit.** Die war eine gegriffene runde Zahl.
-    ⚠️ **UND DIE ZWEITE ZAHL DERSELBEN FEHLERFORM, 16.08.2026 (Vivien, selbst
-    zurückgezogen).** Ihr erstes Prüfmaß zum Ball-Abstand lautete „auf 375–430
-    kein Inhaltskasten näher als **16 px**, weder waagerecht noch senkrecht".
-    Sie hat es kassiert, mit der schärfsten Begründung dieser Arbeit:
-    > Der **senkrechte** Abstand ist eine Code-Konstante (`+ 8`) – frei wählbar.
-    > Der **waagerechte** ist ein **Rest**: Viewport-Breite − Badge-Breite −
-    > Anschnitt. Er wird nicht gesetzt, er **fällt an**. Eine Zahl über „beide
-    > Achsen" behandelt eine **Stellschraube** und einen **Restbetrag** als
-    > dieselbe Größe.
-    Das ist die Bühne/Sichtfeld-Verwechslung im neuen Kostüm: in einer Einheit
-    spezifizieren, die niemand steuert. ⚠️ Dazu: **Die klemmende Achse wechselt
-    mit der Breite** – auf 375 bindet die Waagerechte (10,15 px), auf 320 die
-    Senkrechte (dort überlappt der Ball das Badge waagerecht um 17 px). Eine
-    Messung mit nur einer Achse kommt auf beiden Breiten zu einem Wert und auf
-    einer davon zum falschen Schluss.
-    **Geltendes Prüfmaß** (`tests/e2e/hero-abstand.spec.mjs`): gegenüber jedem
-    Inhaltskasten – Textzeile ODER gefüllte Fläche, gemessen an der
-    **gezeichneten** Fläche – mindestens **8 px auf mindestens einer Achse**
-    („kein Kontakt, keine geteilte Kante"). Der waagerechte Abstand hat **keinen
-    Sollwert**; wer ihn vergrößern will, muss eine der drei Entscheidungen
-    aufgeben – Durchmesser mobil 72 px, Anschnitt `0,6·R`, Badge-Breite – **und
-    benennen welche**.
-    ⚠️ Diese Unterscheidung stand bis zur vierten Runde **nur hier und nicht im
-    Test**: `ZIELBEREICH_AB`/`FENSTER_MIN` waren definiert und unbenutzt, weil
-    meine Ergänzung am Suchmuster gescheitert war und ich die Fehlermeldung
-    nicht nachgezogen habe (Befund Kai K4). Seit dem 15.08.2026 gilt sie im Test
-    – wer sie ändert, ändert beide Stellen.
-    (c) Der `drop-shadow` ist entfernt, die **Verläufe im Ball bleiben** – Viviens
-    Grenze: keine Verläufe auf Flächen der Oberfläche, sehr wohl auf einem
-    dargestellten Gegenstand. ⚠️ Gehört noch als Regel in
-    `docs/VISUELLE-RICHTUNG-2026-08-12.md` nachgetragen.
-    ⚠️ **Die zwei Sätze, die diese sechs Runden teuer gemacht haben** (beide von
-    Vivien, beide gehören in `MUSTER-ZAHLEN-DIE-LUEGEN`):
-    > „Frei" ist eine Aussage über die **Bühne**, „sichtbar" eine über das
-    > **Sichtfeld**. Wer in Bühnenkoordinaten spezifiziert, was ein Mensch sehen
-    > soll, bekommt grüne Kennzahlen über einen Gegenstand außerhalb des Bildschirms.
+20. ✅ **GEGENSTANDSLOS (19.08.2026): Roadmap 20, 20b, 20c, 20d, 20e, 20f, 20g und 20h
+    — die komplette Ball-Choreografie der Startseite.**
+    Acht Punkte, jeder mindestens eine Gate-Runde, alle über denselben Gegenstand: einen
+    **gerenderten Ball**, also eine deckende Scheibe, die keinen Buchstaben berühren durfte.
+    Sie ist ersetzt durch eine **Linienzeichnung** („Der Abschluss", Konzept
+    `docs/HERO-DUNK-KONZEPT-2026-08-19.md`, Auftrag Patrick). Eine Linie darf jeden Buchstaben
+    kreuzen — damit stellt sich keine der acht Fragen mehr.
+    **Erledigt heißt hier: der Gegenstand ist weg, nicht das Problem gelöst.** Konkret entfallen:
+    Abdunkelung (`ballDeckkraftUeberKaesten`, `TEXT_DIM_FLOOR`, `TEXT_FADE_MARGIN`) ·
+    Kastenbau (`TreeWalker`, `Range.getClientRects()`, „Fläche oder Tinte") · Lückensuche ·
+    mobile Verankerung am Eyebrow · Konturkanal · `MutationObserver` auf den Anmelde-Wechsel ·
+    mobiler Einflug samt Schiedsrichter · Übergabe an die Fortschritts-Leiste. Aus rund
+    1.350 Zeilen in `HeroScrollStage.js` wurden **235**.
+    ⚠️ **WER WIEDER EINE GEFÜLLTE, DECKENDE FORM IN DIESE BÜHNE SETZT, BRAUCHT DEN GANZEN
+    APPARAT ZURÜCK** — und zwar vollständig, nicht in Teilen. Er war für seinen Gegenstand
+    richtig; er ist weg, weil der Gegenstand weg ist. Der Verlauf hält ihn vor.
+    ⚠️ **Was dabei WIRKLICH verloren geht, und es ist nicht nichts:** echte Kugelrotation.
+    Nähte, die über eine Kugel wandern statt sich in der Fläche zu drehen, sind mit Vektoren
+    nicht erreichbar — das war der ganze Grund, warum die 32-Bild-Sequenz gebaut wurde. Sie
+    passt nur nicht in eine Strichzeichnung: Ein fotografisch modellierter Körper in einem
+    Diagramm ist ein Genrebruch.
+    ⚠️ **Und drei Sätze aus diesen acht Punkten gelten unverändert weiter** — sie beschreiben
+    Fehlerformen, nicht den Ball:
+    > „Frei" ist eine Aussage über die **Bühne**, „sichtbar" eine über das **Sichtfeld**. Wer in
+    > Bühnenkoordinaten spezifiziert, was ein Mensch sehen soll, bekommt grüne Kennzahlen über
+    > einen Gegenstand außerhalb des Bildschirms.
 
-    > Vier Runden lang haben wir **Breiten** geprüft. Der Ausfall hing an der
-    > **Fensterhöhe**. Eine Prüfmatrix mit nur einer Achse lässt beide Seiten
-    > korrekt messen und trotzdem zu gegensätzlichen Ergebnissen kommen.
-    Der Laufzeit-Test `tests/e2e/hero-ball-laufzeit.spec.mjs` prüft deshalb jetzt
-    **neun Viewports mit Höhenachse**, jeder ein reales Gerät.
-20d. ✅ **Viviens vier Punkte vom 17.08.2026 sind entschieden und umgesetzt** –
-    und der wichtigste war keiner der vier, sondern ein Befund, den sie ungefragt
-    dazu gefunden hat:
-    (a) ⚠️ **Auf 360 px parkte der Ball im Textblock.** Weil die mobile Ruhelage
-    am „obersten Kasten im x-Band" hing, hing sie am **ausgefransten rechten Rand
-    der Display-Headline** – und der ist nicht monoton in der Breite. 360, 368,
-    440, 480, 560 und 640 px trafen alle daneben; 360 px ist die verbreitetste
-    Android-Breite Deutschlands. **Der Kanal zum Badge betrug dort genau 2,65 px –
-    exakt der Wert, den Vivien zwei Runden früher als Defekt gemeldet hatte.**
-    Er war nie behoben, nur auf eine Breite gewandert, wo er unsichtbar blieb.
-    **Behoben:** Mobil ist die Ruhelage jetzt am Eyebrow **verankert** statt
-    gesucht (`[data-hero-eyebrow]`).
-    (b) ⚠️ **DIE REGEL, DIE DARAUS FOLGT — vierter Einheitenfehler dieser Arbeit,
-    diesmal meiner:** Ich hatte „waagerechter Kanal ≥ 8 px" gebaut. Das Wort
-    **waagerecht** schmuggelt eine ACHSE in ein Kriterium, das eine **diagonale**
-    Beziehung beschreibt. Der Kanal zwischen Kreis und gerundetem Rechteck
-    verläuft diagonal; achsenweise gemessen meldet er Kollision, wo Luft ist
-    (bei 360 px: Hüllkörper 2,65 – echter Konturkanal **7,8–9,7**).
-    **Geltendes Maß: kürzester Abstand der KONTUREN ≥ 10 px** (Eckenradius zählt
-    mit, gemessen per `getComputedStyle`, nicht aus dem Tailwind-Mapping
-    geschlossen). Der senkrechte Mittenabstand ist die **freie** Größe und wird
-    als kleinster Wert in [12, 24] gelöst, der das erreicht.
-    ⚠️ **Der eigentliche Gewinn:** Die Regel überlebt eine **Textänderung** am
-    Eyebrow. In jeder früheren Zahl steckte die Badgebreite von 239,5 px – ein
-    Wort mehr, und alle brachen.
-    (c) **Die Schwelle „26 von 32 Bildern" ist GESTRICHEN**, nicht justiert:
-    analytisch durchläuft die Kurve per Konstruktion alle 32, gezeigt ist die Zahl
-    eine Eigenschaft der **Hardware** (30 Hz → 14, 60 Hz → 24, 120 Hz → 32), und
-    Tobias' 26 gegen exakt 24 bei 60 Hz ist Frame-Jitter. Vivien: *„Eine Kennzahl,
-    die zwischen zwei Läufen um zwei wandert, während die Schwelle auf der Kante
-    liegt, ist kein Prüfmaß, sondern ein Münzwurf mit Fehlerbericht."*
-    Es gilt **Bildstillstand ≤ 80 ms** – bindende Stelle ist der **Auslauf**
-    (~66 ms von 520), also nur ~14 ms Reserve.
-    (d) **Das 150-px-Scrollfenster ist GESTRICHEN**, nicht gesenkt (es wäre die
-    dritte Nachgabe derselben Zahl). Begründung: Es war ein Ersatzmaß für
-    „erscheint der Ball überhaupt" – richtig, solange die Ruhelage ein
-    **Suchergebnis** war. Seit sie relativ zu einem Element liegt, das auf jeder
-    Breite im ersten Bild steht, ist die Sichtbarkeit **per Konstruktion**
-    zugesichert; sie über den Scrollweg nachzuprüfen heißt, hinter einer Garantie
-    zu messen. Dazu: **Mobil ist der Auftritt nicht der Scrollweg, sondern die
-    Ruhe davor** – der Scrollweg ist der **Abgang**, und der braucht keine
-    Mindestdauer. Ersatz ist das bestehende Maß: wirksame Sichtbarkeit der
-    Ruhelage **≥ 55 %**.
-    (e) **`ZIELBEREICH_AB` 375 → 360.** Viviens Selbstkorrektur: *„Ich habe den
-    Zielbereich bei 375 beginnen lassen, weil das die kleinste iPhone-Breite ist.
-    Das war eine Apple-Brille."*
-    (f) **72 px bleiben; die Erzählung wird korrigiert.** „Ein Motiv trägt die
-    ganze Seite" war mobil **nie wahr** – ein 176-px-Ball neben einer dreizeiligen
-    Headline war Konkurrenz zum `h1`, daraus der Kontrast 1,67:1, daraus die
-    Abdunkelung, daraus der Wirkungsverlust aus Roadmap 20 (a). **Es wurde viermal
-    am Symptom gearbeitet.** Mobil ist der Ball ein **wiederkehrender Akzent**;
-    was ihn zum Motiv macht, ist Wiedererkennbarkeit an jeder Station, nicht
-    Größe. Steht in `docs/VISUELLE-RICHTUNG-2026-08-12.md`.
-    (g) **Klickfläche im Testphase-Banner 16 → 24,5 px**, Bandhöhe unverändert 45,
-    eigener Fokusring. ⚠️ **Kein WCAG-Verstoß** (SC 2.5.8 hat eine Inline-Ausnahme
-    für Ziele im Satzfluss) – es ist eine Wahl, keine Pflicht.
-    ✅ **ERLEDIGT 17.08.2026 (`72a4fe9`):** Skip-Link + `main`-Landmarke stehen,
-    SC 2.4.1 *Bypass Blocks* (A) und 1.3.1 sind bedient. **Zwei Fallen, die ein
-    späterer Umbau kennen muss:**
-    (1) Ein Wurzel-`main` um `<PageTransition>{children}</PageTransition>` in
-    `app/layout.js` – der naheliegende Griff – ist **falsch**: Jede Seite bringt
-    ihre eigene `Navbar`/`main`/`Footer` als Geschwister mit. Das hätte ~55
-    vorhandene `main` ineinander verschachtelt und Navigation + Footer **in** den
-    Inhalt gezogen; die Sprungmarke wäre **vor** der Navigation gelandet. Der
-    Messwert `main.length === 0` galt für `/`, das tatsächlich eine der wenigen
-    Seiten **ohne** `main` war – nicht für die Seite als Ganzes.
-    (2) `sr-only` + `focus-visible:not-sr-only` ist die **falsche** Tailwind-
-    Lösung: `not-sr-only` setzt `position: static`, das Element stünde im Fluss
-    und würde den Testphase-Banner verschieben – genau die 45 px, auf die
-    `Navbar.js`/`PlayerNav.js` mit ihren 7rem-Offsets rechnen. Deshalb
-    `position: fixed`, das den Fluss **nie** beeinflusst.
-    Ziel ist `main#hauptinhalt` mit `tabindex="-1"` (sonst wandert nur der
-    Bildlauf, nicht der Fokus); Ring unterdrückt in `app/globals.css`.
+    > Vier Runden lang haben wir **Breiten** geprüft. Der Ausfall hing an der **Fensterhöhe**.
+    > Eine Prüfmatrix mit nur einer Achse lässt beide Seiten korrekt messen und trotzdem zu
+    > gegensätzlichen Ergebnissen kommen.
 
-20c. **Fünf Gestaltungspunkte liegen bei Vivien** (vorgelegt 16.08.2026, aus den
-    Gate-Runden vier und fünf). Nichts davon ist ein Defekt – es sind Abwägungen,
-    die beide Prüfer ausdrücklich ihr zuweisen und nicht der Entwicklung:
-    (a) ⚠️ **Die Abdunkelung greift MOBIL überhaupt nie** (Befund Kai). Gemessen
-    liegt die minimale Ball-Deckkraft auf 320–430 px über den **gesamten**
-    Scrollweg bei **1,00**. Damit ist das ganze Werk aus `taste`-Unterscheidung,
-    `TEXT_DIM_FLOOR` und `TEXT_FADE_MARGIN` auf dem **Hauptgerät wirkungslos** –
-    es wirkt erst ab 768. Frage: gewollter Endzustand (die Lückensuche bzw. die
-    mobile Bahn löst es geometrisch, die Abdunkelung ist nur noch Sicherheitsnetz)
-    oder unentschiedener Nebeneffekt? ⚠️ Wenn gewollt, muss es als **Regel**
-    festgeschrieben werden, sonst „repariert" oder entfernt jemand in vier Wochen
-    eine scheinbar tote Mechanik.
-    (b) **Der harte Sprung 1,00 → 0,20 über Schaltflächen** (~8 px Scrollweg, Faktor
-    1 statt Rampe). ⚠️ Kais Messung dreht die ursprüngliche Begründung um: Von den
-    drei Schaltflächen ist **nur „Als Spieler registrieren" deckend**; dahinter ist
-    der Ball ohnehin unsichtbar. „Team gründen"/„Teams entdecken" sind
-    `rgba(0,0,0,0)` – **dort** entsteht das Kontrastproblem. Die Regel wirkt
-    richtig, die Begründung im Code führte in die falsche Richtung (korrigiert).
-    (c) **Die Drehung steht in den letzten 150 ms des Einflugs still** (Tobias):
-    ab t = 283 ms von 520 ms kein Bildwechsel mehr, gezeigt werden **14 statt 22**
-    der 32 Bilder. Die Verzögerungskurve staucht die Rotation. Physikalisch
-    stimmig oder soll die Bildwahl an die **lineare** Zeit statt an die verzögerte
-    Position koppeln?
-    (d) **Der Ball verdeckt bei der Ankunft das Netz des Korb-Emblems** fast
-    vollständig (Tobias, Neubewertung von C1). Ein Akzent an dieser Stelle fände
-    größtenteils dahinter statt. „Die Geometrie ist die Frage, nicht die
-    Animation."
-    (e) **Die Verlaufs-Regel fehlt in `docs/VISUELLE-RICHTUNG-2026-08-12.md`.**
-    Dort steht pauschal „keine Verläufe, keine Schatten, kein Glow"; Viviens
-    Unterscheidung (keine Verläufe auf **Flächen der Oberfläche**, sehr wohl auf
-    einem **dargestellten Gegenstand**) steht bisher nur in CLAUDE.md.
-20e. ✅ **ERLEDIGT: Tobias' H1 – der Ball sprang bis 39,8 px, wenn die Anmeldung
-    spät auflöste.** Die beiden Hero-Zweige haben verschiedene Ruhelagen (das
-    eingeloggte Eyebrow ist 179,8 px breit, das ausgeloggte 239,5 – und die
-    Verankerung folgt dem Eyebrow). Löste `getmyinfo` nach der Landung auf, landete
-    der Ball auf dem **ausgeloggten** Anker und `apply` schrieb die neue Lage
-    danach ohne Übergang: 320 → 32,0 px · **600 → 39,8 px** · 640 → 25,2 px, je in
-    EINEM Frame. ⚠️ Dass 375–412 px unauffällig waren, war **Zufall** – dort sind
-    beide Anker deckungsgleich.
-    Behoben: Die Korrektur wird **gefahren** (320 ms), und die Übergangszeit wird
-    einmal gesetzt und danach abgeräumt – eine, die bei jedem Scroll neu startet,
-    kommt nie an (Fehlerklasse Kai, dritte Runde).
-    Bewacht durch `tests/e2e/hero-auth-tausch.spec.mjs` (4 Fälle); der Test prüft
-    **vorab, dass der Zweig wirklich getauscht hat**, sonst wäre er grün und würde
-    nichts messen.
-    ⚠️ **Die Lehre steckt in der Messung, nicht im Fix** – gehört zu
-    `docs/MUSTER-ZAHLEN-DIE-LUEGEN`: Meine Sonde war **zweimal wertlos**. Erst mit
-    erfundenem Token (kein Zweigtausch; gemessen 20,0 px auf allen Breiten
-    identisch – das waren `Reveal`s 20 px bei unsichtbarem Ball, und die Identität
-    über alle Breiten war das Signal). Dann mit echtem Token und 0,0 px – **auch
-    mit abgeklemmtem Fix 0,0 px**, weil sie eine Pause von >100 ms zwischen den
-    Proben verlangte und die Korrektur 14 ms dauert. Entschieden hat erst die
-    **Rohspur**, nicht die Kennzahl.
+    > Eine Messung darf ihre eigene Stellgröße nicht verändern.
 
-20f. ✅ **ERLEDIGT: H1 gilt jetzt auch über 768 px** (war Kais K1). Die Federung
-    hing an `eingeflogenRef`, das nur im `mobil`-Zweig gesetzt wird – über 768 px
-    war sie **per Konstruktion unerreichbar**, und dort ist der Sprung GRÖSSER:
-    768 → 231 px · 820 → 245 px · 900 → **255 px** · 1000 → 151 px.
-    ⚠️ **Der Betrag hängt an der FENSTERHÖHE, nicht an der Breite** – bei Höhe
-    1024 misst derselbe Fall 31 px. Die Zahlen im Code tragen deshalb jetzt ihre
-    Bedingungen (Höhe 812, Vorscroll 400); ohne sie hält der nächste Prüfer den
-    Kommentar für falsch. Dieselbe Achse wie in Roadmap 20b.
-    ⚠️ **Warum es acht Runden überlebt hat:** `tests/e2e/hero-auth-tausch.spec.mjs`
-    ist die einzige Stelle, an der Auth-Tausch und `transitionDuration` zusammen
-    geprüft werden – und `BREITEN` lag **komplett unter 768**. Dort ist
-    `eingeflogenRef` immer gesetzt, der Defekt also unsichtbar. Jetzt mit 768/900.
-    ⚠️ **Und mein Fix hatte ein Rennen, das es vorher nicht gab** (Befund Kai):
-    Trifft die Anmeldung den EINEN Frame vor `einflugAktivRef = true`, fuhr der
-    mobile Einflug 24–26 Frames unter einer aktiven 320-ms-Übergangszeit.
-    Behoben – der Einflug löscht Flag, Timer und Übergangszeit, bevor er startet:
-    **er fährt selbst und darf keine fremde Übergangszeit erben.**
-    ⚠️ **Der wichtigste Satz der Runde** (Kai, gehört in
-    `docs/MUSTER-ZAHLEN-DIE-LUEGEN`): Sein naheliegender Testnachtrag wäre GRÜN
-    geworden – mit **null Messframes**. Gefangen hat es die Ehrlichkeitsschranke
-    im Test („Nur 7 Schreibvorgänge – die Sonde hat nicht gemessen").
-    *„Ohne diese Schranke wäre daraus ein grüner Test mit null Messframes
-    geworden — der Fehler aus deinem ersten Anlauf, diesmal eingecheckt."*
-    ⚠️ **Warum drei eigene Sonden von mir blind waren** – zwei Hälften einer
-    Antwort: `style.transform` ist der **Inline-Stil** und springt bei einer
-    Übergangszeit immer in einem Frame (interpoliert wird die **gerenderte** Lage,
-    `getBoundingClientRect` pro rAF-Frame) · und bei `scrollY = 0` steht der Ball
-    auf Desktop-Breiten auf **Deckkraft 0,000**, eine Sonde mit
-    Sichtbarkeitsfilter verwirft dort jeden Messpunkt.
-    **Tobias' Gegenprobe ist der bessere Weg:** Federung browserseitig abklemmen
-    (`addStyleTag` mit `transition:none`) – echtes Vorher/Nachher ohne Eingriff
-    in den Quelltext.
+    Die Höhenachse ist deshalb in `tests/e2e/hero-dunk.spec.mjs` von Anfang an drin, und der
+    Umschalter zwischen den beiden Fassungen ist das **Seitenverhältnis**, nicht die Breite —
+    ein Breakpoint bei 768 px schnitte dem iPad hochkant **46 %** der Zeichnung weg
+    (Gegenprobe gelaufen: genau dieser Fall wird rot).
+    ⚠️ **Sieben Testdateien sind mit dem Ball gelöscht worden.** Warum jede einzelne
+    gegenstandslos ist, steht in `tests/e2e/README.md`, Abschnitt „Entfallene Tests" —
+    **kein Wächter wurde stumm entfernt.**
+20a. ⚠️ **DREI STILLE BEFUNDE AUS DIESEM UMBAU — jeder sieht fast richtig aus.**
+    Sie stehen vollständig in `docs/HERO-DUNK-KONZEPT-2026-08-19.md` (Nachtrag 2);
+    hier die Kurzfassungen, weil alle drei über diesen Hero hinaus gelten.
+    **(a) Der Befund, den man sich merken muss:**
+    **`pathLength="1"` wirkt nicht, wenn am selben Pfad `vector-effect: non-scaling-stroke`
+    steht.** Der Browser rechnet das Strichmuster dann im Gerätemaß; aus `stroke-dasharray: 1`
+    wird 1 px an, 1 px aus. Folge: **Jede noch nicht gezeichnete Linie steht dauerhaft als feine
+    Punktlinie im Bild**, unabhängig vom Versatz. Kein Konsolenfehler, kein kaputtes Layout —
+    es sieht fast richtig aus.
+    Gefunden nur, weil im ersten Bild zwei Diagonalen standen, wo per Konstruktion nichts stehen
+    durfte. **Der Fehler war vermutlich schon in `PlayDiagram.js` und ist nie aufgefallen**,
+    weil die Taktiktafel bei Deckkraft 0,171 lief — ein Geist bei 17 % ist unsichtbar. Erst die
+    Anhebung von `ARC_MAX` auf 0,62 hat ihn ans Licht geholt.
+    Abhilfe: Der Controller misst jede Pfadlänge **einmal** beim Aufsetzen (`getTotalLength()`,
+    funktioniert auch an einer per `display:none` ausgeblendeten Fassung) und fährt das
+    Strichmuster in absoluten Einheiten. Bewacht durch `hero-dunk.spec.mjs`; Gegenprobe mit
+    zurückgedrehter Abhilfe: rot.
+    ⚠️ **UND DERSELBE FEHLER KAM IN ZWEITEM KOSTÜM ZURÜCK, weil meine erste
+    Abhilfe halb war:** `non-scaling-stroke` blieb stehen. Damit gilt das
+    Strichmuster im **Gerätemaß** — bei Maßstab 1,231 (1280×800) ist der Pfad
+    867 Geräteeinheiten lang, das Muster nur 704,6, also **fehlten 19 % jeder
+    Linie**. Sichtbar als offener Ball und als Zug, der kurz vor dem Korb
+    aufhört. **Auf 360 px unsichtbar** (Maßstab 0,92: ein zu langes Muster
+    deckt vollständig), **und mein Test war grün** — er verglich Muster und
+    Pfadlänge beide in Benutzereinheiten.
+    > **Richtig gemessen, in der falschen Einheit.** Dieselbe Fehlerform wie
+    > „Bühne statt Sichtfeld" aus Roadmap 20b, eine Ebene tiefer.
+    Endgültige Abhilfe: `vector-effect` fällt aus der ganzen Zeichnung; der
+    Strich skaliert jetzt mit (gemessen 1,9–4,9 px).
 
-20g. ⚠️ **OFFEN bei Vivien (Befund Tobias M1, Altbestand):** Im **eingeloggten**
-    Hero steht der Ball bei 768–820 px Breite und Fensterhöhe 700–800 komplett
-    **hinter der Navbar** (`top −149,6` bei 176 px Höhe). Deshalb ist die
-    Lagekorrektur dort überhaupt so groß. Tobias: *„ein 104-KB-Ball, den ein
-    eingeloggter Nutzer auf dem iPad nie sieht, ist ein bezahlter Auftritt ohne
-    Publikum."* ⚠️ Die Sichtbarkeit wurde in Roadmap 20b bisher **nur ausgeloggt**
-    gemessen. Frage an sie: Soll der Hero-Ball eingeloggt bei niedrigen
-    Fensterhöhen überhaupt einen Auftritt haben – und wenn ja, muss der Anker im
-    eingeloggten Zweig anders sitzen?
-    ✅ **Das Gate ist gelaufen (18.08.2026, freigabefähig)** – die Einflug-Abhilfe
-    war als sichtbare Bewegungsänderung gate-pflichtig (Hinweis Kai), Tobias hat
-    sie mobil zuerst geprüft. **Neue Zahlen zu diesem Punkt:** auf **768×812
-    eingeloggt** ist der Ball über den gesamten Scrollweg 0–700 px **0 % wirksam
-    sichtbar**; derselbe Viewport ausgeloggt erreicht **86 %**, und 768×1024
-    eingeloggt ebenfalls 86 %. Es hängt also an der **Fensterhöhe**, nicht an der
-    Breite – dieselbe Achse wie in Roadmap 20b.
-    ⚠️ Tobias hat **nicht** gegen den Live-Stand `cc128ed` gegengemessen (das hätte
-    einen zweiten Build gebraucht, der im Gate ausgeschlossen war). „Vorbestehend"
-    ist aus dem Diff **hergeleitet**, nicht gemessen.
+    **(b) Ein Streupunkt aus zwei Nachkommastellen.** Im ersten Bild stand ein
+    orangefarbener Punkt über der Taste, wo noch nichts gezeichnet sein durfte.
+    `toFixed(2)` machte aus dem Versatz 188,522 den Wert 188,52 — die
+    verbleibenden **0,002 px Strich** zeichnete `stroke-linecap: round` als
+    **vollen Punkt in Strichbreite**. Abhilfe: nicht runden UND die Lücke im
+    Strichmuster 2 px länger machen als den Pfad, damit die Rechnung gegen
+    Rundungsstaub immun ist statt auf exakte Gleitkommazahlen zu bauen.
 
-20h. ⚠️ **OFFEN bei Kai (Befund Tobias B2, 18.08.2026): Der Wettlauf-Teil des
-    K1-Fixes hat keine Testabdeckung.** `tests/e2e/hero-auth-tausch.spec.mjs`
-    arbeitet mit `AUTH_VERZUG_MS = 2600`; der Zweigtausch fällt damit rund 1,6 s
-    **nach** den Einflug. Der Moment, gegen den die zweite Änderung gebaut wurde
-    (Anmeldung trifft den einen Frame **vor** dem Einflug), liegt bei **820–940 ms**
-    – also außerhalb dessen, was irgendein Test berührt. **Wer den Fix wieder
-    entfernt, bekommt eine grüne Suite.**
-    Tobias' Vorschlag: Fall bei **320 px** – dort unterscheiden sich die Anker um
-    32 px, bei 375 px sind sie deckungsgleich und der Fall wäre **blind**. Prüfmaß:
-    `transitionDuration === "0s"` in **jedem** Frame des Einflugs, Endlage 155 px.
-    ⚠️ Mit Ehrlichkeitsschranke „Einflug überhaupt erkannt?" – Tobias' eigener
-    erster Detektor meldete „0 von 29 Läufen auffällig" und hatte dabei die
-    **falsche Bewegungsphase** erfasst (t ≈ 70 ms statt t ≈ 940 ms). Das wäre ein
-    grünes Ergebnis mit null Messframes gewesen – exakt das Muster aus Roadmap 20f.
-
+    **(c) Das Kontrast-Prüfmaß war zweimal falsch, in BEIDE Richtungen.**
+    Zu wenig: Es prüfte nur `paper-50` (so hatte das Konzept gerechnet), während
+    die Kleinzeile unter der Taste (`text-mist-400`) über der stärksten Linie
+    bei **2,79 : 1** lag — unter AA, Test grün. Sie steht jetzt in `paper-100`
+    (mindestens 4,84 : 1 über jeder Ebene, also lageunabhängig).
+    Zu viel: Die zweite Fassung prüfte jede Textfarbe gegen jede Ebene und
+    meldete „Community" (`brand-400`) mit 3,63 : 1 — ein Fehlalarm auf fünf von
+    sechs geprüften Viewports. Eine exakte Berührungsmessung
+    (`isPointInStroke()`) zeigt: **auf 1024×768 kreuzt der Zug das Wort
+    tatsächlich, mit 2,77 : 1.**
+    ⚠️ **Geometrie löst das nicht** – der Ball muss über dem Ring stehen, der
+    Ring steht auf halber Bühnenhöhe, dort steht der mittig gesetzte Inhalt.
+    Aufhellen auch nicht (`brand-100` hält 4,74 : 1, ist am gebauten Stück aber
+    ein blasses Creme neben einer weißen Zeile).
+    **Entscheidung: Die Hero-Überschrift verliert ihren Farbakzent.** Ursache
+    ist, dass das Designsystem genau EIN Orange erlaubt und es nach der
+    Reduktion drei Dinge beanspruchten – Taste, Überschriftswort, Zeichnung.
+    Das schwächste ist das Wort.
+    ⚠️ **Abweichung von `docs/VISUELLE-RICHTUNG-2026-08-12.md` („Schlüsselwort
+    in brand-500"), ausdrücklich nur für diesen Hero. Patrick kann sie
+    überstimmen** – dann muss der Befund auf 1024×768 anders gelöst werden.
 21. ✅ **ERLEDIGT (17.08.2026): Cache-Vorgabe für `/images/` und `/fonts/`.** Gesetzt in
     `next.config.mjs` über `headers()` – **nicht** in Nginx, damit die Vorgabe versioniert ist und
     mit jedem Deploy mitgeht statt am Server zu leben. Wert:
@@ -1220,7 +1063,11 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     `tests/e2e/ball-sequenz.spec.mjs` abgesichert; für `logo.svg` und die Auth-Motive gibt es diese
     Absicherung **nicht**.
 
-22. **`/signup` liefert ohne JavaScript eine leere Seite — liegt bei Vivien UND Nora.**
+22. ⚠️ **`/signup` liefert ohne JavaScript eine leere Seite — SEIT DEM 19.08.2026 DRINGLICHER,
+    liegt bei Vivien UND Nora.** Neuer Grund: Der Hero hat nach der Reduktion (Nele,
+    `docs/HERO-AKTION-ENTSCHEIDUNG-2026-08-19.md`) **genau einen Ausgang**, und der ist
+    `/signup`. Bisher war der Befund „kein Blocker", weil daneben zwei andere Tasten standen.
+    Ab jetzt ist es die einzige Tür der reichweitenstärksten Seite.
     Befund 17.08.2026, Nebenbefund der Sprungmarken-Arbeit, **vorbestehend**, kein Blocker:
     `docs/SIGNUP-OHNE-JS-2026-08-17.md`. Im rohen Server-HTML von `/signup` stehen **0**
     Formularfelder, **0** `<main>`, **0** Verweise auf Datenschutz und Impressum — ausgeliefert
