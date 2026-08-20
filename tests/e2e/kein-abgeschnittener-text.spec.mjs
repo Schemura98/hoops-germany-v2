@@ -220,12 +220,95 @@ async function laden(page, pfad, breite) {
   ).catch(() => {});
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// EHRLICHKEITSSCHRANKE — der Wächter darf nicht schweigen, wenn seine
+// Datenquelle klemmt (Befund Kai, gebaut mit Vivien am 20.08.2026)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Die Startseite trägt einen Abschnitt, dessen Inhalt NICHT aus diesem Projekt
+// kommt: `#news` zeigt echte Schlagzeilen aus einem fremden RSS-Feed. Und
+// `components/NewsWidget.js` gibt bei leerer Liste `null` zurück — der
+// Abschnitt bleibt dann einfach leer.
+//
+// Damit hatte dieser Test dieselbe Krankheit, die er heilen soll: Ist der Feed
+// langsam, leer oder nicht erreichbar, misst er sechs Karten weniger und meldet
+// „alles in Ordnung". Genau so war er in Kais erstem Lauf grün — über einer
+// Seite, auf der die Nachrichten 45 px über den Rand ragten.
+//
+// „Ich habe nichts gefunden" und „ich habe nicht nachgesehen" sind zwei
+// verschiedene Aussagen. Ein Test, der sie zu einer verschmilzt, ist kein
+// Wächter, sondern ein Feigenblatt.
+//
+// Die Schranke unterscheidet deshalb ZWEI Fälle, und das ist ihr eigentlicher
+// Wert — die Fehlermeldung sagt, wer schuld ist:
+//   • Feed liefert Meldungen, Seite zeigt keine → FEHLER AN DER SEITE.
+//   • Feed liefert nichts                       → NICHT GEMESSEN, fremde Quelle.
+// Beides ist rot. Nur das eine ist ein Auftrag an die Entwicklung.
+//
+// ⚠️ Ja, das koppelt diesen Lauf an eine fremde Erreichbarkeit — ohne Netz wird
+// er rot. Das ist die bewusst gewählte Seite des Irrtums: ein lautes „nicht
+// geprüft" kostet eine Minute Nachsehen, ein stilles „geprüft" hat 45 px
+// abgeschnittenen Text bis auf die Live-Seite durchgelassen.
+//
+// ⚠️ Die Schranke sichert nur, dass ÜBERHAUPT gemessen wurde. Sie kann nicht
+// sichern, dass die Meldungen des Tages den heiklen Fall enthalten (einen
+// langen Quellennamen). Dafür gibt es `tests/e2e/nachrichten-karten.spec.mjs`
+// mit festen Testdaten — der Regressionsschutz hängt dort, nicht hier.
+async function nachrichtenStand(page) {
+  const gezeigt = await page.locator("#news a[target=_blank]").count();
+  if (gezeigt > 0) return { gezeigt, geliefert: gezeigt, lage: "gemessen" };
+  // Erst jetzt die Quelle fragen — sie kostet eine Anfrage, und im Normalfall
+  // ist die Antwort schon am Bildschirm zu sehen.
+  const geliefert = await page.evaluate(async () => {
+    try {
+      const r = await fetch("/api/news/rss");
+      const j = await r.json();
+      return (j?.news || []).length;
+    } catch {
+      return -1; // Anfrage selbst gescheitert
+    }
+  });
+  return { gezeigt, geliefert, lage: geliefert > 0 ? "seite-zeigt-nichts" : "quelle-leer" };
+}
+
 test.describe("Kein Text ragt über den Bildschirmrand", () => {
   for (const breite of BREITEN) {
     test(`${breite}px: alle öffentlichen Seiten`, async ({ page }) => {
       const kaputt = [];
+      const nichtGemessen = [];
+      let seitlich = 0;
       for (const pfad of SEITEN) {
         await laden(page, pfad, breite);
+
+        if (pfad === "/") {
+          const n = await nachrichtenStand(page);
+          if (n.lage === "seite-zeigt-nichts") {
+            nichtGemessen.push(
+              `FEHLER AN DER SEITE: Der Feed hat ${n.geliefert} Meldungen geliefert, ` +
+                `die Startseite zeigt aber 0 Nachrichten-Karten. Das ist kein ` +
+                `Quellenproblem — hier rendert etwas nicht.`,
+            );
+          } else if (n.lage === "quelle-leer") {
+            nichtGemessen.push(
+              `NICHT GEMESSEN: Die Startseite zeigt 0 Nachrichten-Karten, weil ` +
+                (n.geliefert === -1
+                  ? `die Anfrage an /api/news/rss gescheitert ist (kein Netz?).`
+                  : `der RSS-Feed 0 Meldungen geliefert hat.`) +
+                ` Der Nachrichtenteil der Startseite wurde in diesem Lauf also ` +
+                `NICHT geprüft. Das ist kein Freispruch — genau dort saß der ` +
+                `Fehler vom 20.08.2026.`,
+            );
+          }
+        }
+
+        // Die gemessene Wahrheit statt einer Behauptung — s. Kommentar unten.
+        seitlich = Math.max(
+          seitlich,
+          await page.evaluate(
+            () => document.documentElement.scrollWidth - window.innerWidth,
+          ),
+        );
+
         const funde = await abgeschnitten(page);
         for (const f of funde) {
           kaputt.push(
@@ -233,11 +316,39 @@ test.describe("Kein Text ragt über den Bildschirmrand", () => {
           );
         }
       }
+      // ⚠️ ECHTE FUNDE ZUERST. Fehlen die Nachrichten UND liegt anderswo ein
+      // echter Fund, wäre eine vorangestellte Schranken-Meldung das Falscheste:
+      // Sie verdeckte den einen Befund, an dem jemand sofort arbeiten kann.
+      //
+      // ⚠️ HIER STAND EINE BEHAUPTUNG, DIE FÜR DEN ERSTEN ECHTEN FUND FALSCH WAR
+      // (Befund Vivien, 20.08.2026). Der Satz lautete „Die Seite scrollt dabei
+      // NICHT seitlich". Für die Startseite mit den Nachrichten-Karten stimmte
+      // das nicht: gemessen 426 px Dokumentbreite bei 360 px Fenster, und sie
+      // ließ sich um 66 px schieben.
+      //
+      // Der Blindfleck lag woanders, und er ist der interessantere:
+      // **Die Nachrichten kommen erst NACH dem Laden.** Direkt nach
+      // `domcontentloaded` gemessen: Dokumentbreite 360 = Fensterbreite 360,
+      // null Karten. Wer da prüft, sieht eine saubere Seite. Erst 6 Karten
+      // später sind es 426 px. Jede Querscroll-Prüfung, die nicht auf den Feed
+      // wartet, ist also nicht falsch gebaut — sie kommt zu früh.
+      //
+      // Konsequenz für diese Meldung: nicht behaupten, sondern MESSEN und den
+      // gemessenen Wert hinschreiben. Ein Test, der über sich selbst eine feste
+      // Aussage trifft, kann darin veralten wie jeder andere Text.
       expect(
         kaputt,
-        `Auf ${breite}px ragt Text über den Bildschirmrand. Die Seite scrollt ` +
-          `dabei NICHT seitlich – deshalb fängt es keine der übrigen Prüfungen. ` +
-          `Der Leser sieht schlicht den Anfang oder das Ende nicht:\n${kaputt.join("\n")}`,
+        `Auf ${breite}px ragt Text über den Bildschirmrand. Der Leser sieht ` +
+          `den Anfang oder das Ende nicht.\n` +
+          `Querscrollen in diesem Lauf: ${seitlich > 0 ? `${seitlich}px (die Seite lässt sich schieben)` : "keines"}` +
+          ` — abgeschnittener Text macht die Seite nicht zwangsläufig breiter, ` +
+          `deshalb wird hier die gezeichnete Fläche gemessen und nicht die ` +
+          `Dokumentbreite.\n${kaputt.join("\n")}`,
+      ).toEqual([]);
+
+      expect(
+        nichtGemessen,
+        `Dieser Lauf ist KEIN Freispruch für die Startseite:\n${nichtGemessen.join("\n")}`,
       ).toEqual([]);
     });
   }
