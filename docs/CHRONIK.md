@@ -4749,3 +4749,66 @@ nicht mehr gibt — ersetzt durch `hero-standbild.spec.mjs` P4.
   Chromium (ein Projekt in der Config).
 - **Vorbestehend, nicht aus dieser Runde:** `CLAUDE.md` führt den Roadmap-Block 20/20a
   **doppelt** (zwei wortgleiche Fassungen, auch schon in `5080879`).
+
+#### Update (20.–21.08.2026) — Spielfeld nach Regelwerk, Navigationsleiste entlastet
+
+**Deploy:** `70c36ba` (Merge aus `d4c847a` → `b3487a8` → `76406fb` Leiste und `571931c` Feld),
+am Server verifiziert.
+
+**1. Das Feld war falsch vermessen** (`571931c`, Vivien). `components/landing/HeroCourt.js`,
+`HeroStage.js`, `app/globals.css`, neu `tests/e2e/hero-feld-masse.spec.mjs`,
+`docs/INSPIRATION-HERO-FELD-2026-08-20.md`.
+Quelle: FIBA Official Basketball Rules 2026, Regel 2.1 und 2.5.1–2.5.7 plus Diagram 3 (als Bild
+gerendert und angesehen, weil die Marken-Maße im Text nur als Verweis stehen).
+- **Dreipunktlinie auf halber Entfernung:** „6,60 m" als Abstand der Geraden zueinander gelesen
+  statt je Seite. Bogenübergang 7,46 statt 2,99 m — die Geraden liefen über die halbe Feldlänge
+  und lasen sich als Klammer um die Überschrift.
+- Ladezone 1,25 statt 1,30 m, ohne die 0,375-m-Schenkel · Freiwurfkreis als Vollkreis · die
+  Zone fehlte komplett.
+- ⚠️ Korrektur an meiner Vorgabe: Der halb gestrichelte Freiwurfkreis ist NBA/NCAA. FIBA kennt
+  nur „free-throw semi-circles".
+- ⚠️ Korrektur an BEIDEN Prüfern: Tobias und Kai hielten die 1,30 m für falsch. Kai hat das
+  offizielle PDF geholt und sich selbst widerlegt — die Regel wurde geändert.
+- Neu: Zone, Aufstellungsmarken samt neutraler Zone, Brett, Ladezone mit Schenkeln, Ecken-Drei,
+  Seitenlinien. Näher heran, drei Liniengewichte, Ring als einziges Orange.
+- Bewusst weggelassen: der Freiwurf-Halbkreis (säße auf jeder Breite unter der Überschrift).
+- Kai hat belegt, dass der Maß-Test die **Zeichnung** liest, nicht die Konstanten: Bogen falsch
+  herum gewölbt ohne eine Zahl anzufassen → rot.
+
+**2. Die Navigationsleiste war auf jeder Desktop-Breite zu voll** (`d4c847a`, Vivien).
+`components/layout/Navbar.js`, `tailwind.config.js`.
+Der Kasten wächst nur bis 1152 px → 1104 px Platz auf jedem Bildschirm; angemeldet brauchte die
+Leiste 1214,6 px. Die Wortmarke schluckte den Überhang: 0,0 px bei 1024, 39,2 px bei 1280 und
+1600. Nie gemeldet, weil nichts kaputt aussah.
+Behoben: „Mein Profil" → Avatar, „Abmelden" → Symbol (kein Punkt entfällt), Umschaltpunkt am
+Anmeldezustand, `shrink-0` auf der Wortmarke.
+
+**3. Der Blitzer** (`76406fb`, Kai). Die Leiste hat drei Zustände, nicht zwei — der dritte
+(„weiß ich noch nicht") stand nirgends im Code. Gemessen 1250–1296 ms auf langsamer Leitung.
+- ⚠️ Der naheliegende Fix war ein Denkfehler: Für die Zeile ist die vorsichtige Antwort die
+  angemeldete, für den Hamburger die ausgeloggte.
+- Umgesetzt: umschaltbarer Teil unsichtbar bei unbekanntem Zustand, nur im Band 1024–1151.
+- ⚠️ Kais Fix machte einen harmlosen Ausfall gefährlich: Die Anmeldeauskunft lief ohne Zeitlimit.
+  Behoben mit 8 s Abbruch, bewusst kein Nebenher-Timer.
+- Ein vierter Block hatte den Riegel nicht (Konto-Abschnitt im Klappmenü).
+- Zusätzlich behoben: Die Tour verwies auf Anwesenheit statt Sichtbarkeit des Avatar-Markers —
+  auf 390 px war er da, unsichtbar, Breite 0, und die Tour sagte „oben rechts".
+
+**Methodik-Lehren**
+- ⚠️ **Ober- und Untergrenze desselben Abstands an zwei verschiedenen Elementen** — beide
+  Wächter antworten ehrlich, keiner bewacht das Kaputte (Roadmap 27).
+- ⚠️ **Die Testsuite vergiftet sich selbst** über das Besucher-Protokoll (Roadmap 26).
+- ⚠️ **Ein Kommentar, der eine Quelle nennt, ist kein Beleg, dass gegen sie geprüft wurde**
+  (Viviens neue Registerregel).
+- ⚠️ **Meine eigene Live-Sonde zählte das Logo statt des Feldes** und meldete „1 Element" —
+  ersetzt statt gemeldet.
+- ⚠️ Tobias hat für „besser als vorher" zwei ältere Stände schreibgeschützt mitlaufen lassen
+  (`git archive`) statt zu schätzen. Seine Blitzer-Sonde ist damit beweisbar nicht blind: gegen
+  `b3487a8` meldet sie 7 Punkte über 1449 ms.
+
+**Bewusst mitgefahrene Verschlechterung (Entscheidung Patrick):** Zwischen 1024 und 1151 px
+steht ohne JavaScript keine Navigation mehr. Unauflösbar ohne Architektur-Eingriff — der
+Anmelde-Ausweis liegt im Browser, nicht in einem Cookie.
+
+**Live nachgemessen (21.08.2026):** 19 Feldelemente über volle Bildbreite · Wortmarke 123 px ·
+Seitenbreite = Fensterbreite · 16 Routen je 200 · 0 Laufzeitfehler.

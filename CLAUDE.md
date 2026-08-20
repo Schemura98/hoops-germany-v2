@@ -136,6 +136,101 @@
 > ⚠️ **Nebenbefund, nicht mein Auftrag:** `data-spur="desktop"` in der Feature-Strecke liefert
 > `d=""` — ein leerer Pfad mit `pathLength="1"` im ausgelieferten Blatt.
 >
+> ✅ **DEPLOYT: `70c36ba`** (21.08.2026) – **Das Spielfeld im Hero ist maßstabsgetreu, und die
+> Navigationsleiste war auf JEDER Desktop-Breite zu voll.** Fünf Commits: `d4c847a` + `b3487a8`
+> + `76406fb` (Vivien/Kai, Leiste) und `571931c` (Vivien, Feld), zusammengeführt in `70c36ba`.
+>
+> ⚠️ **DAS FELD WAR FALSCH VERMESSEN – vier Fehler, einer davon bildbestimmend.** Quelle:
+> **FIBA Official Basketball Rules 2026**, Regel 2.1 und 2.5.1–2.5.7 plus Diagram 3 (von Vivien
+> als Bild gerendert und **angesehen**, weil die Marken-Maße im Text nur als Verweis stehen).
+> **(1) Die Dreipunktlinie stand auf der HALBEN Entfernung.** „6,60 m" war als Abstand der
+> Geraden **zueinander** gelesen; gemeint ist 0,90 m innerhalb der Seitenlinie eines 15-m-Feldes,
+> also **6,60 m je Seite**. Der Bogenübergang lag bei **7,46 statt 2,99 m** – die Geraden liefen
+> über die halbe Feldlänge und lasen sich als **Klammer um die Überschrift**. Genau das, was
+> Patrick als „da geht noch was" beschrieben hatte.
+> **(2)** Ladezone r = 1,25 statt **1,30 m**, ohne die zwei 0,375-m-Schenkel. **(3)** Der
+> Freiwurfkreis war ein Vollkreis. **(4)** Die Zone fehlte komplett – die Form, an der man ein
+> Feld zuerst erkennt.
+> ⚠️ **EINE KORREKTUR AN MIR:** Ich hatte den **halb gestrichelten** Freiwurfkreis als fehlendes
+> Echtheitsmerkmal genannt. Den gibt es nur in **NBA/NCAA**. Das FIBA-Regelwerk kennt
+> ausschließlich „free-throw **semi**-circles"; Diagram 3 zeichnet nur die abgewandte Hälfte.
+> Für eine deutsche Liga-Plattform ist die FIBA-Notation die richtige.
+> ⚠️ **UND EINE KORREKTUR AN BEIDEN PRÜFERN:** Tobias **und** Kai hielten die 1,30 m für falsch
+> und kannten 1,25. **Kai hat das offizielle PDF geholt und sich selbst widerlegt** – die Regel
+> wurde geändert, die aktuelle Fassung sagt wörtlich „radius of 1.30 m … to the outer edge".
+> **Zwei Prüfer einer Meinung, und der mit der Quelle in der Hand hat sie widerlegt.**
+> **Neu gezeichnet:** Zone · **Freiwurf-Aufstellungsmarken** (1,75/2,60/3,00/3,85/4,70 m, 0,10 m
+> lang) samt ausgefüllter neutraler Zone · Brett (1,80 m breit, 1,20 m vor der Grundlinie) ·
+> Ladezone mit Schenkeln · korrekte Ecken-Drei · Seitenlinien. Näher heran (mobil ~7,7 m
+> Bildbreite statt ~16), **drei Liniengewichte statt einem**, Ring als einziges Orange.
+> **Viviens Wow-Träger:** *„Die Aufstellungsmarken zeichnet niemand, der das Feld aus dem
+> Gedächtnis zeichnet."*
+> ⚠️ **BEWUSST WEGGELASSEN: der Freiwurf-Halbkreis**, obwohl regelkonform. Er säße auf **jeder**
+> Breite genau dort, wo die Überschrift steht. Tobias hat gegengeprüft: Er kann gar nicht
+> vermisst werden, weil die Freiwurflinie selbst bei 5,80 m Tiefe auf Deckkraft **0** steht.
+> ⚠️ **Die Erkenntnis dahinter:** Es gibt **keinen Zoom**, bei dem die Zonenlinien auf Telefon
+> UND Notebook neben dem Text liegen (Textspalte mobil ~87 % der Fensterbreite, Desktop ~53 %).
+> Gelöst nicht über die Lage, sondern über **Tiefe**. ⚠️ Tobias' Nachtrag: Bei der
+> **Dreipunktlinie** trägt nicht das Gefälle, sondern die **Verdeckung durch die Schrift** – sie
+> läuft hinter den Buchstaben durch. Wer den Text kleiner oder heller macht, verliert diesen
+> Schutz, ohne am Gefälle etwas geändert zu haben.
+> Bewacht durch `tests/e2e/hero-feld-masse.spec.mjs` – **in Verhältnissen**, damit ein
+> Maßstabswechsel grün bleibt und ein falsches Maß rot wird. ✅ Kai hat belegt, dass der Test die
+> **Zeichnung** liest und nicht die Konstanten: Bogen falsch herum gewölbt **ohne eine Zahl
+> anzufassen** → rot.
+>
+> ⚠️ **DIE NAVIGATIONSLEISTE WAR AUF JEDER DESKTOP-BREITE ZU VOLL – 1024 px war nur die Stelle,
+> wo es auffiel.** Die Leiste sitzt in einem Kasten, der bei 1152 px aufhört zu wachsen; es
+> bleiben **1104 px Platz, auf JEDEM Bildschirm**. Angemeldet brauchte sie **1214,6 px**, war
+> also **immer und überall um 110,6 px zu voll**. Die Wortmarke war das einzige nachgiebige
+> Element und schluckte den Überhang: **angemeldet 0,0 px bei 1024 · 39,2 px (26 %) bei 1280 und
+> 1600** – gemessen am Live-Stand. Sie ist der einzige Weg zurück zur Startseite.
+> **Nie gemeldet, weil nichts kaputt aussah.** Patricks 1024-Befund war das **Ende einer
+> Rutschbahn, nicht ihr Anfang.**
+> **Behoben:** „Mein Profil" → Avatar, „Abmelden" → Symbol (die Form, die `PlayerNav` längst
+> hat; **kein Punkt entfällt**, im Klappmenü stehen beide ausgeschrieben) · Umschaltpunkt hängt
+> am Anmeldezustand (ausgeloggt ab 1024, angemeldet ab 1152) · **die Wortmarke gibt nicht mehr
+> nach** (`shrink-0`). Viviens Merksatz: **Ein Überlauf ist messbar, ein Schrumpfen war es nicht.**
+> ⚠️ Nebenwirkung, die etwas gutmacht: Die Tour verspricht seit dem 14.08. einen Avatar „oben
+> rechts", den öffentliche Seiten gar nicht hatten. Jetzt haben sie ihn.
+>
+> ⚠️ **DER BLITZER – von zwei Prüfern unabhängig gefunden.** Die Leiste hat seither **drei**
+> Zustände, nicht zwei: angemeldet, ausgeloggt und **„weiß ich noch nicht"**. Der dritte stand
+> nirgends im Code und wurde wie „ausgeloggt" behandelt: Die sieben öffentlichen Punkte
+> erschienen und klappten dann zusammen. Gemessen **1250–1296 ms auf langsamer Leitung**.
+> ⚠️ **DER NAHELIEGENDE FIX WAR EIN DENKFEHLER:** vorsorglich die angemeldete Variante zu zeigen
+> spiegelt den Blitzer nur – dann trifft er die Ausgeloggten, und das sind auf der Startseite die
+> meisten. **Für die Zeile ist die vorsichtige Antwort die angemeldete, für den Hamburger die
+> ausgeloggte.** Wer beide gleich setzt, repariert eine Hälfte und bricht die andere.
+> **Umgesetzt (Entscheidung Patrick):** Solange der Zustand unbekannt ist, wird der umschaltbare
+> Teil nicht gezeigt – **aber nur im Band 1024–1151 px**, wo sich die Antworten unterscheiden.
+> Kais Messung dazu: Wörtlich alles auszublenden hätte auf dem Telefon **94 von 119 Bildern ohne
+> jeden Menü-Knopf** ergeben.
+> ⚠️ **KAIS FIX MACHTE EINEN HARMLOSEN AUSFALL GEFÄHRLICH:** Die Anmeldeauskunft lief **ohne
+> Zeitlimit**. Ein *Fehler* war folgenlos (dann galt die ausgeloggte Fassung); eine *hängende*
+> Verbindung kommt aber nie zu diesem Punkt – seit der Zustand über die Darstellung entscheidet,
+> hieß „nie" **dauerhaft keine Navigation**. Behoben mit 8 s Grenze, bewusst als **Abbruch** und
+> nicht als Nebenher-Timer (der baut den Blitzer zu unvorhersehbarem Zeitpunkt wieder ein).
+> ⚠️ Ein **vierter Block** hatte den Riegel nicht: der Konto-Abschnitt im Klappmenü zeigte erst
+> „Konto · Anmelden · Registrieren" und tauschte zu „Mein Bereich · Mein Profil · Abmelden" –
+> **unter demselben Finger tauschen die Zeilen die Plätze.** Behoben.
+>
+> ⚠️ **BEWUSST MITGEFAHRENE VERSCHLECHTERUNG (Entscheidung Patrick, Tobias A9):** Zwischen
+> **1024 und 1151 px steht OHNE JavaScript keine Navigation mehr** – dauerhaft, nicht kurz
+> (vorher 7 Punkte). Betrifft iPad 10,2" quer und 1024er-Laptops. Tragbar, **weil ohne
+> JavaScript ohnehin niemand ein Konto anlegen kann**. ⚠️ **Unauflösbar ohne Architektur-Eingriff:**
+> Der Anmelde-Ausweis liegt im Browser, nicht in einem Cookie – der Server *kann* nicht wissen,
+> ob jemand angemeldet ist. In diesem Band gibt es kein „sofort etwas zeigen" UND „nichts
+> Falsches zeigen" zugleich.
+> ⚠️ **Und der Kommentar im Code stimmt nur halb** (Tobias A3): Er sagt, ein ausgeloggter
+> Besucher verliere „nur ein Bild". Gemessen sind es **1115 ms auf 3G** – auch für Ausgeloggte.
+> Richtig über den Mechanismus, falsch über den Nutzer.
+>
+> ✅ **Live nachgemessen (21.08.2026):** 19 Feldelemente im Hero über volle Bildbreite ·
+> Wortmarke 123 px (volle mobile Variante) · Seitenbreite = Fensterbreite · 16 Routen je 200 ·
+> 0 Laufzeitfehler. ⚠️ Meine erste Sonde zählte **das Logo statt des Feldes** und meldete „1
+> Element" – ersetzt statt gemeldet.
+>
 > ✅ **DEPLOYT: `04ba621`** (20.08.2026) – **Die Nachrichten-Karten der Startseite ragten auf
 > Handys über den Bildschirm.** Auf 360 px war die Seite **426 px breit**, ließ sich seitlich
 > wegschieben, und jede der sechs Nachrichten verlor rechts ein Stück. Live nachgemessen nach
@@ -602,7 +697,8 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `04ba621` (aktuell live) → `07150cf` (nur Werkzeug) → `d2cfa47` → `35b8bc0` → `d841c4b` → `bd99263` (Dunk, vor den
+> **Rollback-Kette:** `70c36ba` (aktuell live) → `76406fb` → `571931c` (Feld) → `b3487a8` →
+> `d4c847a` (Leiste, erster Schritt) → `070a1e7` (letzter Stand vor Feld und Leiste) → `04ba621` → `07150cf` (nur Werkzeug) → `d2cfa47` → `35b8bc0` → `d841c4b` → `bd99263` (Dunk, vor den
 > Gate-Befunden) → `062989e` (letzter Stand vor dem Hero-Umbau) → `a4c6811` → `cf02293` →
 > `7da3905` → `96eba14` → `da7756b` → `aff17e6` → `787d760` → `cc128ed` → `dba7baa` → `f4c2d15` → `e00b64a` → `f27736a` → `40dff48` → `f5b1b3f` → `f46a783` → `84cb7ba` → `75f2c3a` → `bc7ccad` → `6e2fbe1` → `1bcf854` →
 > `4d03ba2` → `76aa289` → `1d2e3ae` → `1dc617f` → `d07c475` → `2be664e` → `cd51c92` →
@@ -1287,6 +1383,46 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     damit ausgerechnet im isolierten Arbeitsbaum blind), **N4** (die neue Endmarkengröße 28×20
     ist von keinem Test bewacht – wer sie vergrößert, bekommt Tobias' B2 zurück und eine grüne
     Suite) und **ein Signup-Fall durchs Formular** (beide Prüfer kamen nur über `/login`).
+
+26. ⚠️ **Die Analytics-Auswertung bricht ab einer Datenmenge ab** (Befund Kai, 20.08.2026).
+    `POST /api/analytics/summary` antwortet mit „Interner Serverfehler", sobald zu viele
+    Besucher-Einträge da sind: MongoDB bricht eine Sortierung über 32 MB ab
+    (`QueryExceededMemoryLimitNoDiskUseAllowed`, Code 292). Fundstelle: die **zweite**
+    `$setWindowFields`-Stufe in `lib/analyticsSummary.js` (~Z. 338) – die erste allein läuft.
+    **Betroffen wären `/admin/analytics` und der Sponsor-Report.**
+    ⚠️ **Der naheliegende Einzeiler hilft NICHT:** `allowDiskUse: true` gesetzt → scheitert
+    genauso (bei kleinen Atlas-Tarifen greift es nicht). Es braucht einen **Umbau der Abfrage**.
+    ✅ **Live gemessen (21.08.2026): 3.474 Einträge auf `hoops_prod`, der Report antwortet 200.**
+    Zum Vergleich: Die Dev-DB hat **63.859** und kippt. Wir wachsen darauf zu.
+    ⚠️ **Nebenwirkung ab sofort:** Die Testsuite vergiftet sich selbst – jeder Lauf legt ~1.600
+    Einträge nach, derselbe Commit lief einmal grün und einmal mit 5 roten Tests. Das ist „ein
+    Test, der seinen eigenen Ausgangszustand verändert", auf Ebene der ganzen Suite.
+
+27. **Drei Testlücken am Hero-Feld** (Kai, 11 Mutationen). Die schwerste:
+    ⚠️ **Der KOMPLETTE Korbbereich lässt sich um 3 Meter verschieben – alle 58 Hero-Tests bleiben
+    grün.** Der Ring schwebt dann allein im Leeren, die Zonenlinien laufen durch „COMMUNITY".
+    Ursache strukturell, gehört in `docs/MUSTER-ZAHLEN-DIE-LUEGEN`: In
+    `tests/e2e/hero-standbild.spec.mjs` hängen **Ober- und Untergrenze desselben Abstands an zwei
+    verschiedenen Elementen** – Obergrenze an der Ladezone, Untergrenze am Ring, und der Ring
+    liegt außerhalb der verschobenen Gruppe. Mutiert gemessen: −191,9 px zur Ladezone
+    (Obergrenze erfüllt, negativ ist kleiner als 48) und 101,4 px zum Ring (Untergrenze erfüllt).
+    **Beide Wächter sagen ehrlich ja, und keiner bewacht das Kaputte.**
+    Dazu: die **Länge** der Aufstellungsmarken ist ungeschützt (6× so lang → grün), die
+    **neutrale Zone** hat gar keinen Griff für einen Test (3× so hoch → grün).
+
+28. **Vier offene Punkte an der Navigationsleiste** (Tobias, keiner blockierend): **(a)** 183 px
+    Versatz der Linkzeile auf 1280 px angemeldet, sobald der Konto-Block nachlädt – wer
+    währenddessen zielt, trifft daneben. **Vorbestehend und durch diesen Stapel VERKLEINERT**
+    (live 212 → 183 px; auf 1600 px 287 → 108), aber nicht beseitigt. Kein Wächter – er misst
+    Sichtbarkeit, nicht Lage. **(b)** Die letzte Menüzeile wandert 278,5 px nach unten, wenn der
+    Konto-Block erscheint (nur bei geöffnetem Menü auf langsamer Leitung). **(c)** Nach dem
+    8-Sekunden-Limit sieht ein Angemeldeter „Anmelden · Registrieren" – falsch, nur verzögert
+    statt sofort; verschoben, nicht gelöst. **(d)** Der Kommentar zur Lücke für Ausgeloggte
+    („nur ein Bild") ist über den Nutzer falsch – gemessen 1115 ms auf 3G.
+
+29. **CLAUDE.md führt einen Roadmap-Block doppelt** (Befund Kai). „Weitere UX-Feinschliffe"
+    steht zweimal (Z. ~1386 und ~1558), ebenso Roadmap 20/20a. Altbestand, beim nächsten
+    Aufräumen zusammenführen.
 
 18. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
 19. **Optional / bewusst offen:** Best-of-Serien + echte Playoff-Bracket-Grafik; Status-basierte
