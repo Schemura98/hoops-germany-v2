@@ -86,10 +86,48 @@
 // gibt dem Trichter Drehung, ohne zur Blende zu werden.
 //
 // ⚠️ UND DIE GROESSE IST TEIL DER ZEICHNUNG, KEINE LAYOUT-FRAGE. Bei 56 px
-// verschmiert dieses Netz zu einem Fleck; ab rund 72 px liest es sich als
-// Trichter mit offener Kehle. Deshalb steht die Anzeigegroesse als Vorgabe im
-// Aufrufer (`LandingCTA.js`) und ist durch einen Test gedeckt. Wer sie
-// verkleinert, bekommt keinen kleineren Korb, sondern ein Rauschen.
+// verschmiert dieses Netz zu einem Fleck. Deshalb steht die Anzeigegroesse als
+// Vorgabe im Aufrufer (`LandingCTA.js`) und ist durch einen Test gedeckt. Wer
+// sie verkleinert, bekommt keinen kleineren Korb, sondern ein Rauschen.
+//
+// ⚠️⚠️ HIER STAND: „ab rund 72 px liest es sich als Trichter mit offener
+// Kehle." DAS HAELT DER PRUEFUNG NICHT STAND, und die Korrektur ist meine
+// (Vivien, 20.08.2026, Anlass: Tobias' Wahrnehmungsbefund im Gate).
+// Tobias liest die Marke bei 72 px als SPINNENNETZ bzw. RADARSCHIRM. Ich habe
+// sie daraufhin in echter Anzeigegroesse angesehen — er hat recht.
+//
+// UND ES IST KEINE GROESSENFRAGE, SONDERN EINE PROJEKTIONSFRAGE. Tiefe
+// entsteht durch Perspektive (hier bewusst aufgegeben — eine Draufsicht) oder
+// durch Tonwert (hier bewusst aufgegeben — keine Verlaeufe). Ein Netz von
+// senkrecht oben ist damit zwangslaeufig eine konzentrische Radialfigur, und
+// jede konzentrische Radialfigur liest sich als INSTRUMENT: Blende, Rosette,
+// Radar. Genau daran sind auch die zwei oben verworfenen Fassungen
+// gescheitert — nicht an der Strangzahl, sondern alle drei an derselben
+// Ursache. Der Kommentar begruendete die dritte Fassung mit dem Argument, das
+// gegen sie selbst spricht.
+//
+// ⚠️ DAZU DIE MESSUNG, die die Wahrnehmung erklaert — und sie ist wieder eine
+// Zahl, die auf dem Papier stimmt und auf dem Schirm nicht (siehe unten die
+// Farbrolle, wo 2,11 : 1 als „haelt die Untergrenze" steht):
+// Ausgezaehlt am ausgelieferten Stueck bei 390 px Fensterbreite, Marke 72 px:
+//     Sollfarbe des Netzes #3A4E7A auf navy-900 .......... 2,11 : 1
+//     hellster TATSAECHLICH gezeichneter Strangpunkt ..... 1,95 : 1
+//     die grosse Mehrheit der Strangpunkte ............... 1,15–1,66 : 1
+// **Kein einziger gerenderter Bildpunkt erreicht den Sollwert.** Die Straenge
+// sind bei dieser Groesse duenner als ein Bildpunkt; die Kantenglaettung
+// mischt jeden von ihnen unter die Untergrenze, die sich dieses Projekt fuer
+// einen gezeichneten Strich gesetzt hat. Was ankommt, ist deshalb kein
+// Geflecht, sondern ein Grauschleier in Kreisform — und ein Grauschleier in
+// Kreisform IST ein Radarschirm.
+// Die 2,11 war fuer die FARBE gerechnet und nie an der ZEICHNUNG gemessen.
+//
+// ⚠️ NICHT HIER ENTSCHIEDEN. Die Marke umzuzeichnen ist eine neue
+// Gestaltungsrunde an einem Bauteil, das gerade durch zwei Gates gegangen ist,
+// und sie war nicht beauftragt (Auftrag: die zwei Blocker am Hero). Der Befund
+// liegt bei Patrick. Die Richtung, falls er sie will: nicht MEHR Netzdetail,
+// sondern weniger — was von oben unmissverstaendlich ein Korb ist, ist der
+// Ring. Der Preis waere die Unterscheidung „Hero aus der Distanz, Abschluss
+// nah", die diese Datei oben begruendet.
 const STRAENGE = 12;
 const RING_R = 26;
 const FLECHT = [19, 12]; // die beiden sichtbaren Querringe des Geflechts
