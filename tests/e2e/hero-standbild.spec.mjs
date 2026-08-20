@@ -45,7 +45,8 @@ async function messen(page) {
   return page.evaluate(() => {
     const buehne = document.querySelector("[data-hero-stage]");
     if (!buehne) throw new Error("Keine Hero-Bühne gefunden");
-    const nav = document.querySelector("nav") || document.querySelector("header");
+    const nav =
+      document.querySelector("nav") || document.querySelector("header");
     if (!nav) throw new Error("Kein Seitengerüst gefunden");
     const chromeUnten = nav.getBoundingClientRect().bottom;
 
@@ -56,20 +57,62 @@ async function messen(page) {
       throw new Error("Hero unvollständig – dieser Test misst dann nichts");
     }
 
-    // Oberste sichtbare „Tinte" der Bühne: die höchstliegende Kante von
-    // Zeichnung ODER Text. Bewusst beides — die Regel lautet „oben ist etwas",
-    // nicht „oben ist eine Linie".
-    const tinte = [...linien, korb, h1]
-      .map((el) => el.getBoundingClientRect())
-      .filter((r) => r.width > 0 && r.height >= 0)
-      .map((r) => r.top);
+    // ⚠️ ZWEI VERSCHIEDENE GRÖSSEN, UND SIE AUSEINANDERZUHALTEN IST DER GANZE
+    // PUNKT DIESER DATEI (Befund Kai H2, 20.08.2026).
+    //
+    //   `zeichnungOben` = oberste Kante der ZEICHNUNG (Feldlinien + Ring).
+    //   `erstesInhalt`  = oberste Kante des ersten Elements mit eigenem TEXT
+    //                     im Inhaltsblock.
+    //
+    // Bis zum 20.08. warf P1 beides in einen Topf („die oberste Tinte") und
+    // nahm davon das Minimum. Da die Grundlinie per Konstruktion bei
+    // viewBox-y = 44 liegt, war dieses Minimum IMMER die Zeichnung — gemessen
+    // 34–53 px unter dem Seitengerüst, auf jedem der sieben Fenster. Die
+    // Überschrift konnte beliebig tief rutschen, ohne die Zahl zu bewegen.
+    const zeichnungOben = Math.min(
+      ...[...linien, korb]
+        .map((el) => el.getBoundingClientRect())
+        .filter((r) => r.width > 0)
+        .map((r) => r.top),
+    );
+
+    // Erstes SICHTBARES Element mit EIGENEM Text. „Eigener" Text heißt: ein
+    // direktes Text-Kind. Ohne diese Einschränkung meldet der umschließende
+    // Container die Oberkante des Blocks statt die des ersten Zeichens — und
+    // der Block beginnt oberhalb seiner ersten Zeile.
+    const block = buehne.querySelector("[data-hero-inhalt]");
+    if (!block) {
+      throw new Error(
+        "Kein [data-hero-inhalt] gefunden – ohne diesen Griff misst P1 wieder " +
+          "die Zeichnung statt den Inhalt (genau der Befund H2)",
+      );
+    }
+    let erstesInhalt = null;
+    for (const el of block.querySelectorAll("*")) {
+      const eigen = [...el.childNodes]
+        .filter((k) => k.nodeType === 3)
+        .map((k) => k.textContent.trim())
+        .join("");
+      if (!eigen) continue;
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) continue;
+      if (!erstesInhalt || r.top < erstesInhalt.top) {
+        erstesInhalt = {
+          top: r.top,
+          text: eigen.slice(0, 40),
+          tag: el.tagName,
+        };
+      }
+    }
 
     const kb = korb.getBoundingClientRect();
     return {
       chromeUnten,
       sichtbar: window.innerHeight - chromeUnten,
-      ersteTinte: Math.min(...tinte),
+      zeichnungOben,
+      erstesInhalt,
       h1Oben: h1.getBoundingClientRect().top,
+      h1Text: (h1.textContent || "").trim().slice(0, 60),
       korb: { top: kb.top, bottom: kb.bottom, left: kb.left, right: kb.right },
       fensterBreite: window.innerWidth,
       dokumentBreite: document.documentElement.scrollWidth,
@@ -77,36 +120,113 @@ async function messen(page) {
   });
 }
 
-test.describe("Hero-Standbild – P1: das erste Bild ist oben nicht leer", () => {
-  // Der Schwellenwert ist ein VERHÄLTNIS, keine Pixelzahl — sonst gilt er nur
-  // für die Gerätehöhe, an der er entstanden ist. 12 % der sichtbaren Höhe ist
-  // ein bewusst großzügiger Rand: gemessen liegt der Wert auf allen sieben
-  // Fenstern zwischen 6 und 7 %. Der beanstandete Zustand lag bei 40 %.
-  const MAX_LEER = 0.12;
+// Ehrlichkeitsschranken, die JEDER Fall dieser Datei braucht — ausgelagert,
+// damit der eingeloggte Zweig sie nicht „vergessen" kann.
+function schrankenPruefen(expect, m) {
+  // Ist die Bühne gar nicht im Bild, misst der Fall nichts und wäre trotzdem
+  // grün. (Fehlerklasse Kai/Tobias, CLAUDE.md Roadmap 20f/20h: „ein grüner
+  // Test mit null Messframes".)
+  expect(
+    m.sichtbar,
+    "Unter dem Seitengerüst ist nichts sichtbar – hier wird nichts gemessen",
+  ).toBeGreaterThan(200);
+
+  expect(
+    m.erstesInhalt,
+    "Im Hero steht kein Element mit eigenem Text – dieser Fall misst nichts",
+  ).not.toBeNull();
+}
+
+// ⚠️ DIE ZWEI SCHRANKEN AM ANKER GEHÖREN ZUSAMMEN — und sie stehen bewusst in
+// ZWEI Prüfblöcken, weil sie zwei verschiedene Fragen beantworten:
+//   · P1 ist die OBERE Schranke: Rutscht der Inhalt vom Ring weg nach unten?
+//     Das ist Patricks Befund vom 20.08.2026.
+//   · P2 ist die UNTERE Schranke: Rückt der Inhalt in den Ring hinein?
+//     Das ist der einzige Kontrastfall dieser Zeichnung.
+// Gemessen am gebauten Stand liegt der Abstand auf allen sieben Fenstern
+// konstant bei 24,1 px (ausgeloggt) bzw. 27,0 px (eingeloggt).
+const ANKER_MIN = 16;
+const ANKER_MAX = 48;
+
+test.describe("Hero-Standbild – P1: der Inhalt hängt am Ring, nicht am Zufall", () => {
+  // ⚠️ DIESER BLOCK WAR BIS ZUM 20.08.2026 BLIND FÜR SEINEN EIGENEN GEGENSTAND
+  // (Befund Kai H2). Er maß den Abstand zur obersten „Tinte" — und in dieser
+  // Menge lagen die FELDLINIEN. Deren Lage ist gesetzt (Grundlinie bei
+  // viewBox-y = 44), sie sitzen per Konstruktion dicht unter der Leiste.
+  // Gemessen 4,0–6,6 % gegen eine Schwelle von 12 %: Eine Überschrift 260 px
+  // tiefer ergab 66 % leere Fläche und der Test blieb GRÜN.
+  //
+  // ⚠️ UND DIE NAHELIEGENDE KORREKTUR WÄRE DIE FALSCHE GEWESEN. Sie lautet:
+  // dieselbe Rechnung, nur gegen den Inhalt statt gegen die Zeichnung, also
+  // „höchstens X % der sichtbaren Höhe liegen über der Überschrift". Diese Zahl
+  // ist KEIN Prüfmaß, und das ist am gebauten Stand gemessen, nicht behauptet:
+  //
+  //     360×640 → 30,4 %    390×844 → 22,0 %    430×932 → 19,6 %
+  //
+  // Dreimal dasselbe Seitenlayout, dreimal ein anderer Wert. Der Zähler ist
+  // eine GESETZTE Größe (Korblage × Maßstab + 1,5 rem), der Nenner ist die
+  // Fensterhöhe — sie haben nichts miteinander zu tun. Wer so misst, bekommt
+  // eine Kennzahl, die sich bewegt, ohne dass sich etwas geändert hat, und
+  // muss die Schwelle am kürzesten Fenster ausrichten, wo sie dem
+  // beanstandeten Zustand (40,6 %) auf zehn Punkte nahekommt.
+  // Das ist wörtlich die Fehlerklasse aus CLAUDE.md Roadmap 20b — „eine
+  // Stellschraube und einen Restbetrag als dieselbe Größe behandeln".
+  //
+  // DESHALB WIRD IN DER WÄHRUNG GEMESSEN, IN DER DER ABSTAND GESETZT IST:
+  // gegen den RING. `HeroStage.js` rechnet den oberen Innenabstand des
+  // Inhaltsblocks ausdrücklich als „Korbunterkante + 1,5 rem" — der Abstand
+  // ist dort keine Messgröße mehr, sondern gesetzt. Genau darauf prüft P1.
+  // Er überlebt jede Fensterhöhe, jede Breite und beide Anmeldezustände.
 
   for (const [breite, hoehe] of FENSTER) {
-    test(`${breite}×${hoehe}: höchstens ${MAX_LEER * 100} % leerer Rand über dem Inhalt`, async ({
+    test(`${breite}×${hoehe}: der Inhalt beginnt höchstens ${ANKER_MAX} px unter dem Ring`, async ({
       page,
     }) => {
       await page.setViewportSize({ width: breite, height: hoehe });
       await page.goto(BASIS, { waitUntil: "networkidle" });
       const m = await messen(page);
+      schrankenPruefen(expect, m);
 
-      // Ehrlichkeitsschranke: Ist die Bühne gar nicht im Bild, misst der Test
-      // nichts und wäre trotzdem grün. (Fehlerklasse Kai/Tobias, CLAUDE.md
-      // Roadmap 20f/20h: „ein grüner Test mit null Messframes".)
+      const anker = m.erstesInhalt.top - m.korb.bottom;
       expect(
-        m.sichtbar,
-        "Unter dem Seitengerüst ist nichts sichtbar – hier wird nichts gemessen",
-      ).toBeGreaterThan(200);
+        anker,
+        `Zwischen der Ringunterkante (y=${m.korb.bottom.toFixed(0)}) und dem ` +
+          `ersten Inhalt („${m.erstesInhalt.text}", y=${m.erstesInhalt.top.toFixed(0)}) ` +
+          `liegen ${anker.toFixed(0)} px. Der Inhalt hat sich vom Ring gelöst — ` +
+          `Überschrift und Taste rutschen nach unten, oben bleibt Fläche übrig. ` +
+          `Genau das war Patricks Befund vom 20.08.2026 (damals 215 px).`,
+      ).toBeLessThanOrEqual(ANKER_MAX);
+    });
+  }
+});
 
-      const leer = m.ersteTinte - m.chromeUnten;
+test.describe("Hero-Standbild – P1b: die Zeichnung selbst beginnt oben", () => {
+  // Die zweite Hälfte von P1 — und sie ist NICHT überflüssig neben dem Anker.
+  // Der Anker prüft den Abstand ZWISCHEN Ring und Inhalt; er bliebe grün, wenn
+  // Zeichnung UND Inhalt gemeinsam nach unten wanderten (etwa durch einen
+  // Innenabstand an der Bühne). Diese Prüfung fängt genau den Fall.
+  //
+  // Hier ist das Verhältnis zur sichtbaren Höhe zulässig, und zwar aus einem
+  // Grund, der bei P1 nicht galt: Gefragt ist „wie viel vom ERSTEN BILD ist
+  // nichts" — Zähler und Nenner beschreiben dieselbe Sache. Gemessen 4,0–6,6 %.
+  const MAX_LEER = 0.12;
+
+  for (const [breite, hoehe] of FENSTER) {
+    test(`${breite}×${hoehe}: höchstens ${MAX_LEER * 100} % leerer Rand über der Zeichnung`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: breite, height: hoehe });
+      await page.goto(BASIS, { waitUntil: "networkidle" });
+      const m = await messen(page);
+      schrankenPruefen(expect, m);
+
+      const leer = m.zeichnungOben - m.chromeUnten;
       const anteil = leer / m.sichtbar;
       expect(
         anteil,
-        `Über dem ersten sichtbaren Element liegen ${leer.toFixed(0)} px ` +
+        `Über der obersten Linie der Zeichnung liegen ${leer.toFixed(0)} px ` +
           `(${(anteil * 100).toFixed(1)} % der sichtbaren Höhe) leere Fläche. ` +
-          `Genau das war Patricks Befund vom 20.08.2026.`,
+          `Die ganze Bühne ist nach unten gerutscht.`,
       ).toBeLessThan(MAX_LEER);
     });
   }
@@ -122,28 +242,36 @@ test.describe("Hero-Standbild – P2: der Korb berührt keinen Buchstaben", () =
   // dürfen jede Zeile kreuzen, der orange Korb darf es nicht. Das ist der
   // ganze Ersatz für die Abdunkelungs-Mechanik des Vorgängers.
   //
+  // ⚠️ GEMESSEN WIRD GEGEN DAS ERSTE INHALTSELEMENT, NICHT GEGEN DAS `h1` —
+  // und das ist Tobias' Befund M1 vom 20.08.2026. Ausgeloggt sind beide
+  // dasselbe; EINGELOGGT steht über der Überschrift eine Eyebrow-Zeile, und
+  // die liegt 3 px höher. Ein Test gegen das `h1` misst dort also einen zu
+  // GROSSEN Abstand — er wäre großzügig genau in dem Zustand, in dem der
+  // Defekt (Tobias' B1, Ring hinter dem Willkommens-Schild) tatsächlich auftrat.
+  //
   // ⚠️ ALLE DREI ZAHLEN OBEN WAREN LEICHT FALSCH und sind am 20.08.2026
   // nachgerechnet worden (Befund Kai M2): 2,59 → 2,60 · 7,52 → 7,67 ·
   // 6,72 → 6,83. Keine davon kehrt eine Aussage um, und genau das ist der
   // Grund, sie zu korrigieren: Eine Kennzahl, die ungefähr stimmt, wird beim
   // nächsten Mal nicht nachgerechnet, sondern zitiert.
-  const MIN_ABSTAND = 16;
 
   for (const [breite, hoehe] of FENSTER) {
-    test(`${breite}×${hoehe}: mindestens ${MIN_ABSTAND} px zwischen Korb und Überschrift`, async ({
+    test(`${breite}×${hoehe}: mindestens ${ANKER_MIN} px zwischen Korb und Inhalt`, async ({
       page,
     }) => {
       await page.setViewportSize({ width: breite, height: hoehe });
       await page.goto(BASIS, { waitUntil: "networkidle" });
       const m = await messen(page);
+      schrankenPruefen(expect, m);
 
-      const abstand = m.h1Oben - m.korb.bottom;
+      const abstand = m.erstesInhalt.top - m.korb.bottom;
       expect(
         abstand,
-        `Der Korb endet bei y=${m.korb.bottom.toFixed(0)}, die Überschrift ` +
-          `beginnt bei y=${m.h1Oben.toFixed(0)} – Abstand ${abstand.toFixed(0)} px. ` +
+        `Der Korb endet bei y=${m.korb.bottom.toFixed(0)}, der erste Inhalt ` +
+          `(„${m.erstesInhalt.text}") beginnt bei y=${m.erstesInhalt.top.toFixed(0)} – ` +
+          `Abstand ${abstand.toFixed(0)} px. ` +
           `Bei Überlappung steht weißer Text auf #F07A27 (2,60 : 1).`,
-      ).toBeGreaterThanOrEqual(MIN_ABSTAND);
+      ).toBeGreaterThanOrEqual(ANKER_MIN);
     });
   }
 });
@@ -161,9 +289,10 @@ test.describe("Hero-Standbild – P3: Rahmenbedingungen", () => {
       // angeschnitten werden – das ist bei einer Spielfeld-Markierung der
       // Normalfall und ausdrücklich gewollt. Der Korb darf es nicht: Ein
       // halber Ring am Bildrand war einer der drei Befunde vom 20.08.
-      expect(m.korb.top, "Korb ragt hinter das Seitengerüst").toBeGreaterThanOrEqual(
-        m.chromeUnten - 1,
-      );
+      expect(
+        m.korb.top,
+        "Korb ragt hinter das Seitengerüst",
+      ).toBeGreaterThanOrEqual(m.chromeUnten - 1);
       expect(m.korb.left, "Korb links angeschnitten").toBeGreaterThanOrEqual(0);
       expect(m.korb.right, "Korb rechts angeschnitten").toBeLessThanOrEqual(
         m.fensterBreite,
@@ -216,7 +345,8 @@ test.describe("Hero-Standbild – P4: der Grundzustand ist die fertige Zeichnung
     // dem Hero nichts zu tun hat. Ein Test, der über seinen Gegenstand
     // hinausgreift, meldet fremde Befunde als eigene — hier harmlos, weil er
     // rot wurde; bei umgekehrtem Vorzeichen wäre er still falsch grün.
-    const courtTags = html.match(/<(?:path|circle)\b[^>]*data-court-[^>]*>/g) || [];
+    const courtTags =
+      html.match(/<(?:path|circle)\b[^>]*data-court-[^>]*>/g) || [];
     expect(
       courtTags.length,
       "Keine Zeichnungs-Elemente im Blatt – dieser Test misst dann nichts",
@@ -250,7 +380,9 @@ test.describe("Hero-Standbild – P4: der Grundzustand ist die fertige Zeichnung
       });
     });
 
-    expect(zustand.length, "Keine Zeichnung gefunden").toBeGreaterThanOrEqual(6);
+    expect(zustand.length, "Keine Zeichnung gefunden").toBeGreaterThanOrEqual(
+      6,
+    );
     for (const z of zustand) {
       expect(
         z.name,
@@ -263,4 +395,135 @@ test.describe("Hero-Standbild – P4: der Grundzustand ist die fertige Zeichnung
       expect(Number(z.deckkraft)).toBe(1);
     }
   });
+});
+
+test.describe("Hero-Standbild – P5: derselbe Hero, angemeldet (Tobias M1)", () => {
+  // ⚠️ WARUM DIESER BLOCK EXISTIERT — und er ist der teuerste Teil dieser Datei.
+  // P1 bis P4 laufen alle AUSGELOGGT. Tobias' Blocker B1 vom 20.08.2026 (der
+  // Ring lag hinter dem Willkommens-Schild, auf 9 von 11 Fenstern, bis
+  // −44,8 px) trat AUSSCHLIESSLICH eingeloggt auf — er lag deshalb in keinem
+  // einzigen Test und wäre durch eine grüne Suite marschiert.
+  //
+  // Das ist wortgleich das Muster aus CLAUDE.md Roadmap 20f: Dort war
+  // `hero-auth-tausch.spec.mjs` die einzige Stelle, an der ein Defekt sichtbar
+  // gewesen wäre, und die Viewport-Liste lag komplett unter 768 px — also
+  // genau außerhalb des Bereichs, in dem der Defekt lebte. Ein Prüffeld, das
+  // einen ganzen Zustand auslässt, ist nicht „etwas weniger gründlich",
+  // sondern für diesen Zustand blind.
+  //
+  // ⚠️ UND GEMESSEN WIRD GEGEN DAS ERSTE INHALTSELEMENT, NICHT GEGEN DAS `h1`.
+  // Eingeloggt steht über der Überschrift eine Eyebrow-Zeile; ein Test gegen
+  // das `h1` misst dort einen zu GROSSEN Abstand und ist ausgerechnet in dem
+  // Zustand großzügig, in dem der Defekt auftrat.
+
+  async function anmelden(page, request) {
+    const res = await request.post("/api/player/playerlogin", {
+      data: { email: "max@test.de", password: "test123" },
+    });
+    const j = await res.json().catch(() => ({}));
+    const token = j?.data?.token || j?.token;
+    expect(
+      typeof token === "string" && token.length > 20,
+      `Keine Anmeldung möglich – ohne Token rendert der ausgeloggte Hero und ` +
+        `dieser Block prüft NICHTS. Antwort: ${JSON.stringify(j).slice(0, 160)}`,
+    ).toBe(true);
+
+    const info = await request.post("/api/player/getmyinfo", {
+      data: { token },
+    });
+    const ij = await info.json().catch(() => ({}));
+    const vorname = ij?.data?.player?.firstName || ij?.player?.firstName || "";
+    expect(
+      vorname.length,
+      "Kein Vorname aus getmyinfo – ohne ihn greift die Ehrlichkeitsschranke nicht",
+    ).toBeGreaterThan(0);
+
+    await page.addInitScript(
+      (t) => localStorage.setItem("playerAuthToken", t),
+      token,
+    );
+    return vorname;
+  }
+
+  for (const [breite, hoehe] of FENSTER) {
+    test(`${breite}×${hoehe} angemeldet: Ring und Inhalt halten ihren Abstand`, async ({
+      page,
+      request,
+    }) => {
+      const vorname = await anmelden(page, request);
+      await page.setViewportSize({ width: breite, height: hoehe });
+      await page.goto(BASIS, { waitUntil: "networkidle" });
+
+      // ══ EHRLICHKEITSSCHRANKE: HAT DER ZWEIG WIRKLICH GETAUSCHT? ══════════
+      // Ohne sie wäre dieser Block der teuerste Selbstbetrug der Datei: Der
+      // Hero entscheidet erst NACH der Anmeldeprüfung, welchen Zweig er
+      // rendert. Löst sie nicht auf — abgelaufener Token, geänderter
+      // Speicherschlüssel, fehlgeschlagene API —, dann steht hier der
+      // AUSGELOGGTE Hero, alle sieben Fälle sind grün, und geprüft ist
+      // wieder nichts.
+      //
+      // Der Nachweis hängt bewusst NICHT am Wortlaut („Willkommen zurück"):
+      // CLAUDE.md hält fest, dass Nele über diese Zeile noch nicht entschieden
+      // hat. Er hängt an der PERSONALISIERUNG — das ist die Eigenschaft, die
+      // den eingeloggten Zweig überhaupt zu einem eigenen macht.
+      const h1 = page.locator("[data-hero-stage] h1");
+      await expect(
+        h1,
+        `Die Überschrift im Hero nennt den Vornamen „${vorname}" nicht. Entweder ` +
+          `hat der Anmelde-Zweig nicht getauscht (dann misst dieser Fall den ` +
+          `AUSGELOGGTEN Hero und ist grün über nichts), oder der eingeloggte ` +
+          `Hero ist nicht mehr personalisiert – dann gehört diese Schranke ` +
+          `angepasst, und zwar von Hand.`,
+      ).toContainText(vorname, { timeout: 15_000 });
+
+      const m = await messen(page);
+      schrankenPruefen(expect, m);
+
+      // Zweite Schranke: Der gemessene Inhalt muss AUS dem eingeloggten Zweig
+      // stammen. Ausgeloggt beginnt der Hero mit dem `h1`; eingeloggt liegt
+      // darüber die Eyebrow-Zeile. Sind beide identisch, misst der Fall zwar
+      // etwas, aber nicht den Zustand, für den er gebaut wurde.
+      expect(
+        m.h1Text,
+        "Die gemessene Überschrift ist nicht die personalisierte",
+      ).toContain(vorname);
+
+      const abstand = m.erstesInhalt.top - m.korb.bottom;
+
+      // Untere Schranke — Tobias' B1 in seiner reinen Form. Gemessen lag er
+      // hier bei −41,7 px (360–430) und −44,8 px (320).
+      expect(
+        abstand,
+        `ANGEMELDET: Der Ring endet bei y=${m.korb.bottom.toFixed(0)}, der erste ` +
+          `Inhalt („${m.erstesInhalt.text}") beginnt bei ` +
+          `y=${m.erstesInhalt.top.toFixed(0)} – Abstand ${abstand.toFixed(0)} px. ` +
+          `Bei Überlappung steht Text auf #F07A27 (2,60 : 1). Das ist Tobias' ` +
+          `Blocker B1 vom 20.08.2026, und er trat NUR angemeldet auf.`,
+      ).toBeGreaterThanOrEqual(ANKER_MIN);
+
+      // Obere Schranke — dieselbe Regel wie P1, damit die Komposition auch
+      // angemeldet am Ring hängt und nicht am Inhaltsumfang. Genau daran ist
+      // die Vorfassung gescheitert: Die Zeichnung wuchs mit dem Inhalt.
+      expect(
+        abstand,
+        `ANGEMELDET: Zwischen Ring und erstem Inhalt liegen ` +
+          `${abstand.toFixed(0)} px. Die Komposition hängt wieder am ` +
+          `Inhaltsumfang statt am Ring.`,
+      ).toBeLessThanOrEqual(ANKER_MAX);
+
+      // Der Ring bleibt im Bild — angemeldet wie abgemeldet.
+      expect(
+        m.korb.top,
+        "ANGEMELDET: Ring ragt hinter das Seitengerüst",
+      ).toBeGreaterThanOrEqual(m.chromeUnten - 1);
+      expect(
+        m.korb.left,
+        "ANGEMELDET: Ring links angeschnitten",
+      ).toBeGreaterThanOrEqual(0);
+      expect(
+        m.korb.right,
+        "ANGEMELDET: Ring rechts angeschnitten",
+      ).toBeLessThanOrEqual(m.fensterBreite);
+    });
+  }
 });

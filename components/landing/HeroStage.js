@@ -185,7 +185,24 @@ export default function HeroStage({ className = "", children }) {
       <div className={ZEICHNUNG} aria-hidden="true">
         <HeroCourt />
       </div>
-      <div className={INHALT}>{children}</div>
+      {/* ⚠️ `data-hero-inhalt` IST NICHT DEKORATION, SONDERN DIE ANTWORT AUF
+          EINEN BLINDEN TEST (Befund Kai H2, 20.08.2026).
+          `hero-standbild.spec.mjs` P1 maß bis dahin den Abstand zwischen
+          Seitengerüst und der obersten „Tinte" — und in dieser Menge steckten
+          die FELDLINIEN. Deren Lage ist aber gesetzt (Grundlinie bei
+          viewBox-y = 44), sie liegt per Konstruktion immer dicht unter der
+          Navigationsleiste. Gemessen: 34–53 px, also 4,0–6,6 % der sichtbaren
+          Höhe, gegen eine Schwelle von 12 %.
+          Damit war die Prüfung gegen Patricks Befund blind: Eine Überschrift
+          260 px tiefer ergab 66 % leere Fläche — und der Test blieb GRÜN, weil
+          die Grundlinie unverändert oben lag.
+          Der Inhaltsblock braucht deshalb einen eigenen Griff. Bewusst ein
+          Attribut und keine Klassenkette, aus demselben Grund wie bei
+          `data-hero-stage`: Eine Klassenänderung hätte den Test still blind
+          gemacht statt rot. */}
+      <div data-hero-inhalt className={INHALT}>
+        {children}
+      </div>
     </div>
   );
 }

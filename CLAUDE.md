@@ -11,6 +11,51 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
+> ⚠️ **NICHT DEPLOYT, NUR COMMITTET (20.08.2026): DIE WÄCHTER ZUM HERO — und drei davon
+> haben bisher etwas anderes geprüft, als draufstand.** Kein Push, kein Deploy; beides war
+> nicht beauftragt. Volle Suite **251 grün + 1 übersprungen** (252 laut `--list`, 29 Dateien)
+> gegen die ausgelieferte Fassung, Build durch, Design-Prüfung ohne Abweichung.
+> **(1) Die Prüfung, die Patricks Befund festhalten sollte, war für genau ihn blind.** Sie maß
+> den Abstand zwischen Navigationsleiste und der obersten **Zeichnung** — und die Feldlinien
+> liegen per Konstruktion immer dicht unter der Leiste (gemessen 4,0–6,6 % gegen eine Schwelle
+> von 12 %). Eine Überschrift 260 px tiefer ergab **66 % leere Fläche und einen grünen Test**.
+> ⚠️ **Die naheliegende Korrektur wäre die falsche gewesen** — dieselbe Rechnung gegen den
+> Inhalt liefert am selben Layout 30,4 % (360×640), 22,0 % (390×844), 19,6 % (430×932): Der
+> Zähler ist gesetzt, der Nenner ist die Fensterhöhe. Gemessen wird jetzt **gegen den Ring**,
+> in der Währung, in der der Abstand gesetzt ist — konstant 24,1 px ausgeloggt, 27,0 px
+> eingeloggt.
+> **(2) Drei gelöschte Wächter, deren Gegenstand lebt**, sind zurück (`hero-einblendung.spec.mjs`).
+> Einer davon hätte die nie stattfindende Ladeanimation **im ersten Lauf** gefangen.
+> **(3) Der Hero wird jetzt auch ANGEMELDET geprüft** (Befund Tobias M1). Die drei neuen
+> Testdateien vom 20.08. enthielten **null** Anmelde-Token; Tobias' Blocker B1 trat
+> ausschließlich angemeldet auf. Belegt mit zurückgedrehtem B1: angemeldet **6 von 7** Fenstern
+> rot, ausgeloggt nur **2** — und die zwei sind nicht die, auf denen der Defekt gemeldet wurde.
+> ⚠️ **DER UNANGENEHMSTE BEFUND IST EINE ANLEITUNG, DIE IN DIE IRRE FÜHRTE.** Als Prüfmaß für
+> „findet die Einblendung statt" stand in `tests/e2e/README.md` genau die Sonde, die Vivien im
+> selben Commit **selbst verworfen** hatte (Versatz-Wechsel zählen). Nachgemessen: **55 gegen
+> 53** Wechsel — Abhilfe und Defekt ununterscheidbar. `CLAUDE.md` und `docs/CHRONIK.md`
+> verwiesen beide auf diese Stelle als Quelle. **Eine widerlegte Messmethode, die als
+> Sollvorgabe stehen bleibt, ist schlimmer als eine offene Lücke: Die Lücke weiß man, die
+> falsche Anleitung glaubt man.** Ersetzt durch: Animationszeit **setzen** und mit
+> `isPointInStroke()` messen (0/205 bei t=0, 205/205 am Ende; im Defekt durchgehend 205/205).
+> ⚠️ **Und mein eigener erster E3 war derselbe Fehler noch einmal:** Er verglich das
+> ANGEGEBENE Strichmuster mit der Pfadlänge und behauptete, damit `non-scaling-stroke` zu
+> bewachen. Nachgemessen bleibt das Verhältnis mit gesetztem Attribut **exakt 1,0000** — der
+> Test wäre nie rot geworden. Gemessen wird jetzt, was der Browser **zeichnet**.
+> ⚠️ **Achse dazu, die niemand kürzen darf:** Die Gegenprobe wird nur bei Maßstab **1,200**
+> rot (171/205), bei 0,778 und 0,844 nicht. Ein Prüffeld aus lauter Handy-Breiten wäre für
+> diesen Rückfall **per Konstruktion blind**.
+> ⚠️ **Zum Querlauf auf 1024 px (von Vivien gemeldet): teilweise widerlegt.** Reproduziert ist
+> er nur im **Ladezustand**; im eingeschwungenen Zustand ist das Dokument auf 1000–1280 px
+> immer genau so breit wie das Fenster (die angemeldete Desktop-Leiste misst 497 px und endet
+> bei x = 694 auf einem 1024-px-Fenster). Sechs Sonden, fünf davon sahen nie einen Querlauf.
+> Der benannte Verursacher stimmt (`components/layout/Navbar.js`, Desktop-Zweig), die Folgerung
+> „die Seite lässt sich seitlich wegschieben" **nicht**. Die Datei ist seit dem Live-Stand
+> `7da3905` unverändert — **kein Deploy-Hindernis**.
+> ⚠️ **Nebenbefund, betrifft jede künftige Gate-Meldung:** `npm run design-audit --check` reicht
+> das Flag **nicht durch** (npm frisst es), der Lauf prüft dann gar nichts und endet mit 0.
+> Richtig ist **`npm run design-audit -- --check`**. So gelaufen: keine Abweichung.
+>
 > ⚠️ **NICHT DEPLOYT, NUR COMMITTET (20.08.2026, `d4f9465`): DIE LADEANIMATION DES HEROS HAT NIE
 > STATTGEFUNDEN — und die Nacharbeit an `5080879` hatte selbst zwei Fehler.** Beide Gate-Blocker
 > sind behoben, Kai und Tobias haben diesen Stand noch **nicht** gesehen.
@@ -186,8 +231,11 @@
 > Server hat keines und kann es nicht wissen.** Der alte Code hat geraten, zugunsten des
 > Standbilds. Es gehört jetzt dem Stylesheet, nicht einer JavaScript-Entscheidung.
 > **Merksatz: Eine Regel, die schon im ausgelieferten Blatt gelten muss, darf nicht auf
-> JavaScript warten.** Bewacht durch `tests/e2e/hero-erstes-bild.spec.mjs` – es liest das
-> **rohe Server-Blatt**, nicht die Seite im Browser. Kais Gegenprobe: 6 Mutationen, 5 rot.
+> JavaScript warten.** Bewacht durch **`tests/e2e/hero-standbild.spec.mjs` P4** – es liest das
+> **rohe Server-Blatt**, nicht die Seite im Browser.
+> ⚠️ **Hier stand bis zum 20.08.2026 `tests/e2e/hero-erstes-bild.spec.mjs` – diese Datei ist
+> gelöscht.** Ein Verweis auf einen gelöschten Wächter verspricht eine Absicherung, die
+> niemand mehr hat; die Zusicherung selbst lebt weiter, nur an anderer Stelle.
 >
 > ⚠️ **DIE WEITERLEITUNGS-LÜCKE (Kai K4, vorbestehend):** Nach Anmeldung/Registrierung wurde
 > das Ziel aus der Adresszeile **ungeprüft** übernommen. Angriff: Ein Link auf unsere **echte**

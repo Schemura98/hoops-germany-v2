@@ -117,6 +117,8 @@ harten Abbruch etwas liegen, räumt der nächste Lauf es über die Registry mit 
 | `auth.spec.mjs` | 8 Tests: 3× Login, 2× Signup, 3× Dual-Auth |
 | `sicherer-pfad.spec.mjs` | Offene Weiterleitung über `?next=` (Kai K4): das Modul, die echte Kette im Browser, und dass die Prüfung an **einer** Stelle steht |
 | `rail-ball-drehpunkt.spec.mjs` | Drehpunkt des Streckenballs, gemessen auf beiden Aufrufstellen (wiederhergestellt, s. Korrektur unten) |
+| `hero-standbild.spec.mjs` | Der Hero als Standbild: Anker, Kontrastfall, Rahmen, Server-Blatt — **und seit 20.08. auch angemeldet** (P5) |
+| `hero-einblendung.spec.mjs` | Dass die Zeichnung sich wirklich zeichnet (E1), ihre Längen (E2), Vollständigkeit auf jedem Maßstab (E3), das Versteck (E4), `non-scaling-stroke` (E5) |
 | `helpers/env.mjs` | .env-Parser + Dev-DB-Guard |
 | `helpers/created-users.mjs` | Namensraum + Registry der Wegwerf-Accounts |
 | `.artifacts/` | Laufzeit-Artefakte (Registry, Screenshots) — nicht einchecken |
@@ -190,27 +192,104 @@ Höhenachse):
 
 | | Zusicherung |
 |---|---|
-| **P1** | Das erste Bild ist oben nicht leer — höchstens 12 % der sichtbaren Höhe liegen über der ersten Tinte. Das ist Patricks Befund vom 20.08. als Regel |
-| **P2** | Mindestens 16 px zwischen Ring und Überschrift. Der einzige Kontrastfall der Zeichnung: weiß auf `#F07A27` wäre 2,60 : 1 |
+| **P1** | Der Inhalt beginnt höchstens **48 px** unter der Ringunterkante. Das ist Patricks Befund vom 20.08. als Regel |
+| **P1b** | Über der obersten Linie der Zeichnung liegen höchstens 12 % der sichtbaren Höhe |
+| **P2** | Mindestens 16 px zwischen Ring und erstem Inhalt. Der einzige Kontrastfall der Zeichnung: weiß auf `#F07A27` wäre 2,60 : 1 |
 | **P3** | Der Ring ist vollständig im Bild (die Linien dürfen angeschnitten werden, der Ring nicht), kein Querscrollen |
 | **P4** | Das rohe Server-Blatt trägt die fertige Zeichnung und **kein** Strichmuster; bei `prefers-reduced-motion` läuft keine Animation |
+| **P5** | Alles davon noch einmal **angemeldet**, mit Ehrlichkeitsschranke auf den Zweigtausch |
 
-**Und was NICHT bewacht wird — offen, gehört zu Kai:**
+### ⚠️ Korrektur 20.08.2026 (dritte): P1 hat seinen eigenen Gegenstand nicht gesehen
 
-1. **Dass die Einblendung überhaupt stattfindet.** P4 prüft nur die
-   *Abwesenheit* eines Strichmusters im Server-Blatt und den Ruhezustand bei
-   reduzierter Bewegung. Genau in dieser Lücke hat Kais Befund H1 gelebt: Das
-   `--len` kam ohne Einheit, `calc(var(--len) + 2px)` war ungültig,
-   `stroke-dasharray` fiel auf `none` — die Animation fand auf **keinem**
-   Browser statt, und die Suite war grün. Benötigt wird ein Fall unter
-   `prefers-reduced-motion: no-preference`, der (a) `strokeDasharray !== "none"`
-   verlangt und (b) über rund 1,5 s **mehrere verschiedene**
-   `strokeDashoffset`-Werte zählt, mit Ehrlichkeitsschranke auf die Zahl der
-   Messbilder. Gemessen am reparierten Stand: Chromium 47, WebKit 33,
-   Firefox 23 Wechsel — vorher jeweils 0.
-2. **Der eingeloggte Hero.** Alle sieben Fenster laufen ausgeloggt; Tobias' B1
-   (Ring hinter dem Willkommens-Schild, −44,8 px) lag deshalb in keinem Test.
-3. **Dass nirgends `vector-effect: non-scaling-stroke` zurückkehrt.** Das
-   Attribut ist am 20.08. entfernt worden; käme es je Pfad zurück, würde das
-   Strichmuster in Geräte-Pixel umgerechnet und es fehlten bei Maßstab 1,2
-   16,7 % jeder Linie — ohne Fehlermeldung.
+Hier stand für P1 „höchstens 12 % der sichtbaren Höhe liegen über der ersten
+Tinte". In dieser „ersten Tinte" lagen die **Feldlinien** — und deren Lage ist
+gesetzt (Grundlinie bei viewBox-y = 44). Gemessen lag der Wert auf allen sieben
+Fenstern zwischen **4,0 und 6,6 %**, gegen eine Schwelle von 12 %.
+
+**Folge: Eine Überschrift 260 px tiefer ergab 66 % leere Fläche — und P1 blieb
+grün.** Die Prüfung, die ausdrücklich Patricks Befund festhalten sollte, war
+für genau ihn blind (Befund Kai H2).
+
+⚠️ **Und die naheliegende Korrektur wäre die falsche gewesen:** dieselbe
+Rechnung, nur gegen den Inhalt. Diese Zahl ist am gebauten Stand gemessen
+**30,4 % (360×640) · 22,0 % (390×844) · 19,6 % (430×932)** — dreimal dasselbe
+Layout, dreimal ein anderer Wert. Der Zähler ist eine GESETZTE Größe
+(Korblage × Maßstab + 1,5 rem), der Nenner die Fensterhöhe. Das ist die
+Fehlerklasse „Stellschraube gegen Restbetrag" aus CLAUDE.md Roadmap 20b.
+Gemessen wird deshalb **gegen den Ring**, in der Währung, in der der Abstand
+gesetzt ist: konstant 24,1 px ausgeloggt, 27,0 px eingeloggt.
+
+### ✅ Geschlossen am 20.08.2026 — und die Anleitung dazu war falsch
+
+Hier standen drei offene Punkte für Kai. Alle drei sind gebaut
+(`hero-einblendung.spec.mjs` E1–E5, `hero-standbild.spec.mjs` P5).
+
+> ⚠️ **DER ERSTE PUNKT NANNTE EIN PRÜFMASS, DAS NICHTS MISST — und das ist der
+> wichtigste Satz dieses Abschnitts.** Er lautete: „über rund 1,5 s **mehrere
+> verschiedene** `strokeDashoffset`-Werte zählen", mit den Belegzahlen
+> „Chromium 47, WebKit 33, Firefox 23 Wechsel — vorher jeweils 0".
+>
+> Genau diese Sonde hatte Vivien im selben Commit (`d4f9465`) **selbst
+> verworfen und die Verwerfung protokolliert**: Der Versatz ändert sich **auch
+> im Defekt**, weil die Animation läuft — sie hat nur nichts, woran sie ziehen
+> kann. Nachgemessen am 20.08.2026 auf 390×844 in Chromium, Abhilfe gegen
+> nachgestellten Defekt: **55 gegen 53 verschiedene Werte.** Ununterscheidbar.
+>
+> Die Anleitung stand also in der Datei, die als Prüfmaß-Quelle benannt war
+> (`CLAUDE.md` und `docs/CHRONIK.md` verweisen beide hierher) — und sie hätte
+> den nächsten Prüfer in eine Sonde geschickt, die im Defekt grün wird.
+> **Eine widerlegte Messmethode, die als Sollvorgabe stehen bleibt, ist
+> schlimmer als eine offene Lücke:** Die Lücke weiß man, die falsche Anleitung
+> glaubt man.
+
+**Gültig ist:** die **Animationszeit setzen** (`animation.currentTime`) statt
+auf sie zu warten, und dann messen, was tatsächlich gezeichnet ist.
+`hero-einblendung.spec.mjs` nutzt dafür `isPointInStroke()` — die browsereigene
+Antwort auf „liegt dieser Punkt im Strich", die das Strichmuster einrechnet.
+41 Proben je Pfad, 5 Pfade = 205 Proben:
+
+| Zeit | Abhilfe | Defekt (`dasharray: none`) |
+|---|---|---|
+| t = 0 | 0 / 205 | 205 / 205 |
+| t = 300 | 51 / 205 | 205 / 205 |
+| t = 700 | 174 / 205 | 205 / 205 |
+| t = 1400 | 205 / 205 | 205 / 205 |
+
+In Chromium, WebKit und Firefox auf die Probe identisch — anders als eine
+Bildpunkt-Zählung, deren Grundwert am Ausschnitt und an der Kantenglättung der
+Engine hängt (gemessen 3.637 / 3.381 / 3.007 bei t = 0 im selben Ausschnitt).
+
+**Was jetzt bewacht wird:**
+
+| | Zusicherung | Gegenprobe |
+|---|---|---|
+| **E1** | Die Einblendung findet statt: bei t = 0 nichts, mittendrin ein Teil, am Ende alles | `--len` ohne Einheit → rot · `dasharray: none` → rot |
+| **E2** | Jede Linie trägt ihre echte Länge als Strichmuster (die Längen in `HeroCourt.js` sind **gerechnet**, nicht gemessen) | `--len` ohne Einheit → rot auf allen drei Maßstäben |
+| **E3** | Die fertige Zeichnung ist auf jedem Maßstab vollständig | `non-scaling-stroke` → rot **nur bei 1440×900** (s. u.) |
+| **E4** | Kein Pfad ist länger als sein Versteck (der Punktlinien-Geist aus Roadmap 20a) | Lücke verkürzt → rot |
+| **E5** | Nirgends `vector-effect: non-scaling-stroke`, auch nicht am Ring | Attribut zurückgeholt → rot auf allen drei Maßstäben |
+| **P5** | Derselbe Hero **angemeldet**, mit Schranke auf den Zweigtausch | Tobias' B1 zurückgedreht → rot auf **6 von 7** Fenstern |
+
+> ⚠️ **E3 HAT SEINEN MECHANISMUS EINMAL GEWECHSELT, und der Grund gehört
+> gelesen, bevor jemand daran arbeitet.** Der erste Anlauf verglich das
+> ANGEGEBENE Strichmuster mit der Pfadlänge und begründete das damit, die
+> Währungen liefen auseinander. Nachgemessen mit je Pfad gesetztem
+> `non-scaling-stroke` blieb das Verhältnis auf allen drei Maßstäben **exakt
+> 1,0000**: `getComputedStyle` gibt den angegebenen px-Wert zurück, dass der
+> Browser ihn danach im Gerätemaß auslegt, steht in keiner Zeichenkette.
+> Der Test hätte den Rückfall nie gefangen und dabei behauptet, genau ihn zu
+> bewachen. Gemessen wird jetzt, was der Browser **zeichnet**.
+>
+> ⚠️ **Und die Achse dazu:** Die Gegenprobe wird rot bei Maßstab 1,200
+> (171/205), aber **grün bei 0,778 und 0,844**. Das ist die Physik, nicht die
+> Messung: Unter Maßstab 1 wird das Muster im Gerätemaß länger als der Pfad,
+> die Linie bleibt gedeckt. **Ein Prüffeld aus lauter Handy-Breiten wäre hier
+> per Konstruktion blind** — der Eintrag über 1 in `MASSSTAEBE` ist kein „auch
+> noch Desktop", er ist der einzige Fall, in dem der Defekt existiert.
+
+> ⚠️ **Warum P5 überhaupt nötig war** (Tobias' Befund M1): Die drei neuen
+> Testdateien vom 20.08. enthielten **null** `playerAuthToken`. Tobias' Blocker
+> B1 trat ausschließlich angemeldet auf und wäre durch eine grüne Suite
+> marschiert. Belegt: Mit zurückgedrehtem B1 wird der angemeldete Block auf
+> **6 von 7** Fenstern rot, der ausgeloggte nur auf **2** — und die zwei sind
+> ausgerechnet nicht die, auf denen der Defekt gemeldet wurde.

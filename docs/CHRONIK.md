@@ -4611,3 +4611,141 @@ verworfene Fassungen mit genau diesem Argument.
 - **Nur der Kommentar korrigiert, die Marke nicht umgezeichnet.** Das wäre eine neue
   Gestaltungsrunde an einem gerade durch zwei Gates gegangenen Bauteil und war nicht beauftragt.
   Der Befund liegt bei Patrick; die Richtung, falls er sie will, steht in der Datei.
+
+---
+
+## 20.08.2026 — Die Wächter zum Hero: drei prüften etwas anderes, als draufstand
+
+Testarbeit an der Hero-Fläche nach `d4f9465`. **Nicht gepusht, nicht deployt** — beides war
+nicht beauftragt. Volle Suite **251 grün + 1 übersprungen** (252 laut `--list`, 29 Dateien)
+gegen die **ausgelieferte Fassung**, `npm run build` durch, Design-Prüfung ohne Abweichung.
+
+### H2 — die Prüfung für Patricks Befund war für genau ihn blind
+
+`tests/e2e/hero-standbild.spec.mjs` P1 maß den Abstand zwischen Seitengerüst und der obersten
+„Tinte" — und in dieser Menge lagen die **Feldlinien**. Deren Lage ist gesetzt (Grundlinie bei
+viewBox-y = 44), sie sitzen per Konstruktion dicht unter der Leiste: gemessen **4,0–6,6 %** der
+sichtbaren Höhe gegen eine Schwelle von **12 %**. Eine Überschrift 260 px tiefer ergab 66 %
+leere Fläche — und der Test blieb grün.
+
+> ⚠️ **Die naheliegende Korrektur wäre die falsche gewesen** — dieselbe Rechnung, nur gegen den
+> Inhalt. Am gebauten Stand gemessen: **30,4 % (360×640) · 22,0 % (390×844) · 19,6 % (430×932)**.
+> Dreimal dasselbe Layout, dreimal ein anderer Wert. Der Zähler ist eine GESETZTE Größe
+> (Korblage × Maßstab + 1,5 rem), der Nenner die Fensterhöhe — die Fehlerklasse „Stellschraube
+> gegen Restbetrag" aus Roadmap 20b, und die Schwelle hätte am kürzesten Fenster dem
+> beanstandeten Zustand (40,6 %) auf zehn Punkte nahegelegen.
+
+Gemessen wird jetzt **gegen den Ring**, in der Währung, in der `HeroStage.js` den Abstand setzt:
+**24,1 px ausgeloggt, 27,0 px eingeloggt**, konstant auf allen sieben Fenstern. P1 ist die obere
+Schranke (Komposition), P2 die untere (Kontrast). Neu ist **P1b** für den Fall, dass Zeichnung
+und Inhalt gemeinsam nach unten wandern. Griff dafür: `data-hero-inhalt` in `HeroStage.js`.
+
+### H3 — drei gelöschte Wächter, deren Gegenstand lebt
+
+Neu in `tests/e2e/hero-einblendung.spec.mjs`: **E2** (jede Linie trägt ihre echte Länge als
+Strichmuster), **E3** (die fertige Zeichnung ist auf jedem Maßstab vollständig), **E4** (kein
+Pfad ist länger als sein Versteck). Dazu **E1** (die Einblendung findet statt) und **E5**
+(`non-scaling-stroke` kehrt nicht zurück) aus Viviens Übergabe.
+**E2 hätte den H1-Befund im ersten Lauf gefangen** — Gegenprobe mit `--len` ohne Einheit: rot.
+
+### Tobias' M1 — der eingeloggte Hero lag in keinem Test
+
+Die drei neuen Testdateien vom 20.08. enthielten **null** `playerAuthToken`. Neu ist **P5**:
+alle sieben Fenster noch einmal angemeldet, gemessen gegen das **erste Inhaltselement** (das ist
+eingeloggt die Eyebrow-Zeile, nicht das `h1` — ein Test gegen das `h1` wäre ausgerechnet dort
+großzügig, wo der Defekt auftrat). Ehrlichkeitsschranke: Die Überschrift muss den Vornamen aus
+`getmyinfo` tragen; hängt sie am Wortlaut, bricht sie bei Neles nächster Entscheidung.
+**Belegt:** Mit zurückgedrehtem B1 wird der angemeldete Block auf **6 von 7** Fenstern rot, der
+ausgeloggte nur auf **2** — und die zwei sind nicht die, auf denen der Defekt gemeldet wurde.
+
+### ⚠️ Der unangenehmste Befund ist eine Anleitung, die in die Irre führte
+
+Als Prüfmaß für „findet die Einblendung statt" stand in `tests/e2e/README.md` genau die Sonde,
+die Vivien im selben Commit **selbst verworfen und die Verwerfung protokolliert** hatte:
+verschiedene `stroke-dashoffset`-Werte zählen. `CLAUDE.md` und dieser Chronik-Eintrag verwiesen
+beide auf diese Stelle als Quelle des Prüfmaßes.
+**Nachgemessen** (390×844, Chromium, Abhilfe gegen nachgestellten Defekt): **55 gegen 53**
+verschiedene Werte. Ununterscheidbar.
+
+> **Eine widerlegte Messmethode, die als Sollvorgabe stehen bleibt, ist schlimmer als eine
+> offene Lücke: Die Lücke weiß man, die falsche Anleitung glaubt man.**
+
+Gültig ist: die **Animationszeit setzen** (`animation.currentTime`) und dann mit
+`isPointInStroke()` messen, was tatsächlich gezeichnet ist — 41 Proben je Pfad, 5 Pfade:
+**0/205 bei t = 0 · 51/205 bei t = 300 · 174/205 bei t = 700 · 205/205 bei t = 1400**; im Defekt
+durchgehend 205/205. In Chromium, WebKit und Firefox identisch. Bewusst **keine** Bildpunkt-
+Zählung als Dauerwächter: deren Grundwert hängt am Ausschnitt und an der Kantenglättung der
+Engine (gemessen 3.637 / 3.381 / 3.007 bei t = 0 im selben Ausschnitt).
+
+### ⚠️ Und mein eigener erster E3 war derselbe Fehler noch einmal
+
+Er verglich das **angegebene** Strichmuster mit der Pfadlänge und behauptete, damit
+`non-scaling-stroke` zu bewachen. Nachgemessen mit je Pfad gesetztem Attribut bleibt das
+Verhältnis auf allen drei Maßstäben **exakt 1,0000** — `getComputedStyle` gibt den angegebenen
+px-Wert zurück, dass der Browser ihn im Gerätemaß auslegt, steht in keiner Zeichenkette. Der
+Test wäre nie rot geworden und hätte dabei behauptet, genau diesen Rückfall zu bewachen.
+Gemessen wird jetzt, was der Browser **zeichnet**.
+
+> ⚠️ **Die Achse dazu:** Die Gegenprobe wird rot bei Maßstab **1,200** (171/205), aber grün bei
+> 0,778 und 0,844 — unter Maßstab 1 wird das Muster im Gerätemaß länger als der Pfad, die Linie
+> bleibt gedeckt. **Ein Prüffeld aus lauter Handy-Breiten wäre für diesen Rückfall per
+> Konstruktion blind.** Wer `MASSSTAEBE` kürzt, muss den Eintrag über 1 stehen lassen.
+
+### Mutationsmatrix (zehn Mutationen, alle wie erwartet rot)
+
+| Mutation | rot |
+|---|---|
+| Überschrift 260 px tiefer (der Fall aus H2) | P1 7/7 · P5 7/7 |
+| Ganze Bühne 200 px tiefer | P1 7/7 · P5 |
+| Zeichnung **und** Inhalt 200 px tiefer | P1b 7/7 |
+| Inhalt 40 px höher, in den Ring hinein | P2 4/7 · P5 4/7 |
+| Zeichnung wieder so hoch wie die Bühne (Tobias B1) | **P5 6/7** · P2 nur 2/7 |
+| `--len` ohne Einheit (Befund H1 im Original) | E1 · E2 3/3 · E4 |
+| `stroke-dasharray: none` | E1 · E2 3/3 · E4 |
+| `non-scaling-stroke` je Pfad | E5 3/3 · **E3 nur 1440×900** |
+| Lücke kürzer als der Pfad | E1 · E4 |
+| Anmeldung kaputt (Schranke) | P5 7/7 — **nicht** still grün |
+| Animation ganz entfernt (Schranke) | E1 · E2 · E3 · E4 |
+
+> ⚠️ **Und ein Befund an meinem eigenen Werkzeug:** Der erste Mutationstreiber filterte mit
+> `-g` und fuhr dabei still einen **anderen** Testsatz als gemeint — er meldete „14 passed" für
+> eine Mutation, die tatsächlich 14 Fälle rot macht. Erst der Lauf **ohne Filter** war
+> verwertbar. Ein Prüfwerkzeug, das seinen eigenen Umfang nicht ausweist, produziert grüne
+> Ergebnisse über den falschen Gegenstand — dieselbe Form wie der Gegenstand der Prüfung.
+
+### Zum Querlauf auf 1024 px — teilweise widerlegt
+
+Vivien meldete: eingeloggt auf genau 1024 px sei das Dokument 1089 px breit, „die Seite lässt
+sich seitlich wegschieben". **Der Verursacher stimmt** (`components/layout/Navbar.js`,
+Desktop-Zweig `hidden lg:flex`), **die Folgerung nicht.** Sechs Sonden gebaut; fünf sahen nie
+einen Querlauf, darunter eine, die vom ersten Bild an jedes Einzelbild mitschrieb, und eine, die
+nach dem Laden 24-mal abtastete. Im **eingeschwungenen** Zustand über 1000/1023/1024/1080/1090/
+1100/1280 px ist die Dokumentbreite immer gleich der Fensterbreite; die angemeldete
+Desktop-Leiste misst 497 px und endet bei x = 694. Reproduzierbar ist der Wert 1089 nur in einer
+Sonde, die unmittelbar nach `networkidle` misst — also in einem **Ladezustand**.
+Dieselbe Form wie Viviens eigene zweite Sonde: gemessen wurde die Ladezeit, nicht der Gegenstand.
+`Navbar.js` ist seit dem Live-Stand `7da3905` **unverändert** — **kein Deploy-Hindernis**.
+**Bewusst kein Wächter gebaut:** Ein Test auf einen Zustand, den fünf von sechs Sonden nicht
+sehen, wäre ein Münzwurf mit Fehlerbericht.
+
+### Nebenbefund, betrifft jede künftige Gate-Meldung
+
+**`npm run design-audit --check` reicht das Flag nicht durch** — npm verschluckt es, der Lauf
+prüft dann gar nichts und endet mit 0. In CLAUDE.md und in den Gate-Meldungen vom 20.08. steht
+diese Form. Richtig ist **`npm run design-audit -- --check`**. So gelaufen: keine Abweichung zur
+Baseline vom 19.08.2026.
+
+### Dokumentation nachgezogen
+
+`tests/e2e/README.md`: neue Dateien in der Struktur-Tabelle, P-Tabelle auf den echten Stand,
+das widerlegte Prüfmaß ersetzt und als Korrektur benannt. `CLAUDE.md`: der Verweis auf
+`tests/e2e/hero-erstes-bild.spec.mjs` (gelöscht am 20.08.) zeigte auf einen Wächter, den es
+nicht mehr gibt — ersetzt durch `hero-standbild.spec.mjs` P4.
+
+### Offen / nicht geprüft
+
+- **Kein Browser-Gate.** Diese Runde ist Testarbeit; das unabhängige Urteil bleibt bei Tobias.
+- Die Werte für **WebKit und Firefox** stammen aus Messungen von Hand; die Suite läuft in
+  Chromium (ein Projekt in der Config).
+- **Vorbestehend, nicht aus dieser Runde:** `CLAUDE.md` führt den Roadmap-Block 20/20a
+  **doppelt** (zwei wortgleiche Fassungen, auch schon in `5080879`).
