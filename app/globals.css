@@ -105,7 +105,13 @@ body {
    das nach der eigenen Messung des Projekts nie jemand gesehen hat.
    Den staerksten Moment dorthin zu legen, wo ihn 100 % der Besucher sehen
    (Hero), ist keine Geschmacksfrage.
-   Der Nachfolger heisst `hero-dunk-blitz` und steht weiter oben. */
+   ⚠️ HIER STAND „Der Nachfolger heisst `hero-dunk-blitz` und steht weiter
+   oben." DAS STIMMT SEIT DEM 20.08.2026 NICHT MEHR (Befund Kai M4):
+   `hero-dunk-blitz` ist im selben Commit geloescht worden, der die
+   scroll-gesteuerte Choreografie zurueckgenommen hat. Es gibt keinen
+   Nachfolger — die Ankunft als Ereignis existiert nicht mehr, weder an der
+   Leiste noch im Hero. Die Endmarke der Leiste ist ein STEHENDES Emblem,
+   und das ist der ganze Stand. */
 
 /* Schrittwechsel der Plattform-Tour (components/onboarding/WelcomeTour.js).
    Richtungsabhängig: vorwärts kommt der Inhalt von rechts, zurück von links –

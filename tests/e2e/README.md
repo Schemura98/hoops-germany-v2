@@ -138,7 +138,7 @@ worden. Sieben Testdateien prüften Eigenschaften, die es danach nicht mehr gibt
 
 | Gelöschte Datei | Was sie bewacht hat | Warum gegenstandslos | Nachfolger |
 |---|---|---|---|
-| `hero-ball-laufzeit.spec.mjs` | Ball am Ruhepunkt vollständig sichtbar; Balldeckkraft über Schaltflächen ≤ `TEXT_DIM_FLOOR` | Beide Zusicherungen beschreiben eine **deckende Scheibe**, die keinen Buchstaben berühren darf. Eine Linie darf jeden Buchstaben kreuzen; es gibt keine Ruhelage und keine Abdunkelung mehr | Der Kontrast wird jetzt als Farbfrage geprüft: `hero-dunk.spec.mjs` **P1** |
+| `hero-ball-laufzeit.spec.mjs` | Ball am Ruhepunkt vollständig sichtbar; Balldeckkraft über Schaltflächen ≤ `TEXT_DIM_FLOOR` | Beide Zusicherungen beschreiben eine **deckende Scheibe**, die keinen Buchstaben berühren darf. Eine Linie darf jeden Buchstaben kreuzen; es gibt keine Ruhelage und keine Abdunkelung mehr | Der Kontrast wird jetzt als GEOMETRIE geprüft: `hero-standbild.spec.mjs` **P2** (der orange Ring darf keinen Buchstaben berühren; die kühlen Linien dürfen jeden kreuzen) |
 | `hero-konturkanal.spec.mjs` | Kürzester Abstand der Konturen zwischen Ball und Eyebrow-Badge ≥ 10 px | Es gibt weder den Ball noch das Eyebrow (letzteres entfernt auf Entscheidung Nele, `docs/HERO-AKTION-ENTSCHEIDUNG-2026-08-19.md`). Der Kanal war die Antwort auf eine gesuchte Ruhelage — die Zeichnung hat keine | keiner nötig |
 | `hero-abstand.spec.mjs` | Ball teilt sich keine Kante mit einem Inhaltskasten | dito — eine Linie darf jede Kante kreuzen, das ist der Kern des neuen Konzepts | keiner nötig |
 | `hero-einflug.spec.mjs` | Mobiler Ladeauftritt des Balls: findet statt, zeigt Bildwechsel, ist keine Standbild-Attrappe | Der mobile Einflug existiert nicht mehr. Er war nötig, weil mobil keine scroll-getriebene Lösung für eine deckende Scheibe existierte | keiner nötig |
@@ -177,10 +177,40 @@ die Landung am Ende der Fortschritts-Leiste ist zur **stehenden Endmarke**
 geworden. Der Geometrie-Teil (Befund B-b, „der Ball ruht IM Netz, nicht
 daneben") gilt unverändert und wird weiter geprüft.
 
-**Was NEU bewacht wird** (`hero-dunk.spec.mjs`):
-P1 Kontrastfenster · P2 der Korb ist im Bild, wenn der Ball fällt · P3 der
-Abschluss hängt an der Zeit, nicht am Scroll (mit Ehrlichkeitsschranke) ·
-P4 der Umschalter ist das Seitenverhältnis, nicht der Breakpoint · plus zwei
-Regressionsregeln zum stillen Punktlinien-Geist (`pathLength` wirkt nicht
-zusammen mit `vector-effect: non-scaling-stroke`) und zum Standbild bei
-`prefers-reduced-motion`.
+### ⚠️ Korrektur 20.08.2026 (zweite): dieser Abschnitt nannte eine gelöschte Datei
+
+Hier stand „Was NEU bewacht wird (`hero-dunk.spec.mjs`)“ mit vier Prüfungen
+P1–P4. **`hero-dunk.spec.mjs` ist am 20.08.2026 gelöscht worden** — im selben
+Umbau, den dieser Abschnitt beschreibt (Befund Kai M4). Damit stand die Regel
+„ein stumm gelöschter Wächter ist die gefährlichste Änderung eines Umbaus“ in
+einer Datei, die genau das für zwei eigene Löschungen nicht nachgezogen hatte.
+
+**Was tatsächlich bewacht wird** (`hero-standbild.spec.mjs`, 7 Fenster mit
+Höhenachse):
+
+| | Zusicherung |
+|---|---|
+| **P1** | Das erste Bild ist oben nicht leer — höchstens 12 % der sichtbaren Höhe liegen über der ersten Tinte. Das ist Patricks Befund vom 20.08. als Regel |
+| **P2** | Mindestens 16 px zwischen Ring und Überschrift. Der einzige Kontrastfall der Zeichnung: weiß auf `#F07A27` wäre 2,60 : 1 |
+| **P3** | Der Ring ist vollständig im Bild (die Linien dürfen angeschnitten werden, der Ring nicht), kein Querscrollen |
+| **P4** | Das rohe Server-Blatt trägt die fertige Zeichnung und **kein** Strichmuster; bei `prefers-reduced-motion` läuft keine Animation |
+
+**Und was NICHT bewacht wird — offen, gehört zu Kai:**
+
+1. **Dass die Einblendung überhaupt stattfindet.** P4 prüft nur die
+   *Abwesenheit* eines Strichmusters im Server-Blatt und den Ruhezustand bei
+   reduzierter Bewegung. Genau in dieser Lücke hat Kais Befund H1 gelebt: Das
+   `--len` kam ohne Einheit, `calc(var(--len) + 2px)` war ungültig,
+   `stroke-dasharray` fiel auf `none` — die Animation fand auf **keinem**
+   Browser statt, und die Suite war grün. Benötigt wird ein Fall unter
+   `prefers-reduced-motion: no-preference`, der (a) `strokeDasharray !== "none"`
+   verlangt und (b) über rund 1,5 s **mehrere verschiedene**
+   `strokeDashoffset`-Werte zählt, mit Ehrlichkeitsschranke auf die Zahl der
+   Messbilder. Gemessen am reparierten Stand: Chromium 47, WebKit 33,
+   Firefox 23 Wechsel — vorher jeweils 0.
+2. **Der eingeloggte Hero.** Alle sieben Fenster laufen ausgeloggt; Tobias' B1
+   (Ring hinter dem Willkommens-Schild, −44,8 px) lag deshalb in keinem Test.
+3. **Dass nirgends `vector-effect: non-scaling-stroke` zurückkehrt.** Das
+   Attribut ist am 20.08. entfernt worden; käme es je Pfad zurück, würde das
+   Strichmuster in Geräte-Pixel umgerechnet und es fehlten bei Maßstab 1,2
+   16,7 % jeder Linie — ohne Fehlermeldung.

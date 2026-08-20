@@ -140,7 +140,30 @@ export default function LandingHero() {
                   Marker war der Anker der mobilen Ball-Ruhelage; mit dem Ball
                   hat er keinen Leser mehr. Ein Attribut ohne Leser ist keine
                   Dokumentation, sondern eine Spur, der der Nächste folgt. */}
-                <span className="font-display bg-brand-500 text-navy-950 text-sm font-bold px-4 py-1.5 rounded-sm uppercase tracking-[0.2em]">
+                {/* ⚠️ DIESES SCHILD WAR EINE ORANGE FLÄCHE UND IST JETZT EINE
+                  EYEBROW-ZEILE (Vivien, 20.08.2026). Der Anlass war Tobias'
+                  Befund B1 — der Ring lag dahinter —, aber der Grund ist nicht
+                  der Zusammenstoß, der ist eine Etage höher behoben.
+                  Der Grund ist, was NACH dem Freistellen zu sehen war: zwei
+                  orange Marken direkt übereinander, Ring und Schild, im selben
+                  Ton, im selben Band. Von zwei gleichfarbigen Zeichen betont
+                  keines mehr etwas — dieselbe Regel, mit der am 19.08. der
+                  Farbakzent aus der ausgeloggten Überschrift verschwunden ist:
+                  Das Designsystem erlaubt EIN Orange, und es gehört der
+                  Handlung („Zum Feed") und dem Motiv (dem Ring).
+                  Ein Willkommensgruß ist ein Etikett, keine Handlung — er muss
+                  nicht gefunden werden, er ist schon da, wenn man liest.
+                  Die Eyebrow-Zeile ist dafür die vorgesehene Form
+                  (docs/VISUELLE-RICHTUNG-2026-08-12.md: font-display,
+                  Versalien, gesperrt).
+                  ⚠️ OFFEN UND NICHT MEINE ENTSCHEIDUNG (→ Nele): ob die Zeile
+                  überhaupt bleibt. Sie sagt „Willkommen zurück", die
+                  Überschrift darunter sagt „Hey Max, schön, dass du da bist!" —
+                  zweimal derselbe Gruß. Das ist wörtlich der Befund, mit dem
+                  Nele am 19.08. das ausgeloggte Eyebrow gestrichen hat
+                  („von sechs Dingen sagten zwei dasselbe"). Ich ändere hier nur
+                  die Farbe; der Wortlaut und das Ob gehören ihr. */}
+                <span className="font-display text-sm font-bold uppercase tracking-[0.2em] text-mist-400">
                   Willkommen zurück
                 </span>
               </Reveal>
@@ -292,9 +315,21 @@ export default function LandingHero() {
                   Textblock, und was gefunden werden muss, ist die Taste.
                   Das Orange gehört jetzt der Handlung und dem Motiv.
                   ⚠️ Das ist eine Abweichung von der Visuellen Richtung. Sie
-                  gilt ausdrücklich NUR für diesen Hero; wer sie zurückdreht,
-                  bekommt den Befund auf 1024×768 zurück und muss ihn anders
-                  lösen (`tests/e2e/hero-dunk.spec.mjs`, P1, wird dann rot). */}
+                  gilt ausdrücklich NUR für diesen Hero.
+                  ⚠️ UND DER WÄCHTER, DER HIER STAND, EXISTIERT NICHT MEHR
+                  (Befund Kai M4, 20.08.2026). Hier hieß es, wer den Farbakzent
+                  zurückdreht, mache `tests/e2e/hero-dunk.spec.mjs` P1 rot —
+                  diese Datei ist am 20.08. gelöscht worden. Ein Verweis auf
+                  einen gelöschten Wächter ist schlimmer als gar keiner: Er
+                  verspricht eine Absicherung, die niemand mehr hat.
+                  Der Sachstand, ehrlich: Der BEFUND von damals (der bewegte
+                  Zug kreuzte auf 1024×768 das Wort „Community", 2,77 : 1) kann
+                  nicht zurückkommen, weil es den Zug nicht mehr gibt. Es gibt
+                  also nichts mehr zu bewachen — der Grund für die Regel ist
+                  entfallen, die Regel selbst bleibt aus dem EINEN Orange
+                  begründet. Der einzige Kontrastfall, den dieser Hero noch
+                  kennt, ist der Ring über der Überschrift, und den prüft
+                  `tests/e2e/hero-standbild.spec.mjs` P2 geometrisch. */}
                 Community
                 <br />
                 in NRW

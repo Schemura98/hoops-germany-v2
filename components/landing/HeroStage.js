@@ -59,61 +59,118 @@ import HeroCourt from "@/components/landing/HeroCourt";
 // And Full-Height Elements", zur Wartbarkeit fixer `calc()`-Höhen.)
 //
 // DESHALB: Die Bühne ist NICHT MEHR AN DEN BILDSCHIRM GEKOPPELT. Sie ist so
-// hoch, wie ihr Inhalt plus ein gesetzter Rhythmus sie macht. Es gibt keine
-// Viewport-Einheit mehr in dieser Datei — damit gibt es auch keine Zahl, die
-// beim nächsten Umbau der Leisten still falsch wird.
+// hoch, wie ihr Inhalt plus ein gesetzter Rhythmus sie macht.
+// ⚠️ HIER STAND „Es gibt keine Viewport-Einheit mehr in dieser Datei" — DAS WAR
+// SCHON BEIM SCHREIBEN FALSCH, und zwar in meiner eigenen Datei: Der `pt`-Term
+// unten enthält ein `vw`, seit es ihn gibt.
+// Richtig ist die UNTERSCHEIDUNG, auf die es ankommt: Keine Viewport-Einheit
+// steht mehr in einer HÖHE. Die gefährliche Zahl war `calc(100vh − 4rem)`,
+// weil das stillschweigend behauptet, über der Bühne stünden für immer genau
+// zwei bestimmte Leisten. Das `vw` im Textabstand behauptet nichts über die
+// Seite: Es ist die Umrechnung der Korblage in dem Regime, in dem die BREITE
+// den Maßstab treibt — dieselbe Größe, nur anders geschrieben.
 //
-// Nebenwirkung, die ausdrücklich gewollt ist: Auf üblichen Telefonhöhen endet
-// der Hero knapp oberhalb der Falz, sodass die Kante des nächsten Abschnitts
-// eben noch ins Bild ragt. Das ist das ehrlichste „hier geht es weiter"-
-// Signal, das es gibt — es braucht keinen Pfeil und keine Wackel-Animation.
+// ⚠️ HIER STAND EINE BEGRÜNDUNG, DIE AUF KEINER TELEFONBREITE ZUTRAF, und sie
+// war meine (Befund Tobias, 20.08.2026). Sie lautete, der Hero ende knapp über
+// der Falz, „sodass die Kante des nächsten Abschnitts eben noch ins Bild ragt"
+// — das ehrlichste „hier geht es weiter"-Signal.
+// Nachgemessen und ANGESEHEN auf 360×800: Es gibt dort keine Kante. Der
+// folgende Abschnitt trägt denselben Grund (`bg-navy-950`), seine ersten 80 px
+// sind Innenabstand, und zwischen der letzten Linie der Zeichnung (y ≈ 620) und
+// dem Bildende liegen **185 px, in denen nichts ist** — kein Farbwechsel, kein
+// Text, keine Linie. Auf 390×844 dasselbe Bild.
+// Das ist Patricks Befund vom 20.08. in der Spiegelung: oben behoben, unten
+// unbemerkt geblieben. `hero-standbild.spec.mjs` P1 bewacht ausschließlich die
+// OBERE Kante, weil oben beanstandet wurde.
+// ⚠️ NICHT HIER BEHOBEN, UND DAS IST EINE ENTSCHEIDUNG: Der leere Streifen
+// gehört nicht dem Hero, sondern dem Übergang — er entsteht aus `py-20` am
+// folgenden Abschnitt (components/landing/LandingFeatures.js). Ihn im Hero
+// wegzunehmen hieße, die Bühne kürzer zu machen als ihre Zeichnung.
+// Vorschlag, gemessen, aber bewusst nicht eigenmächtig gebaut: den oberen
+// Innenabstand der Feature-Strecke mobil auf ~2,5 rem nehmen. Deren erstes
+// Element ist die randfüllende Überschrift „Eine Saison, sechs Spielzüge" —
+// die im ersten Bild anzuschneiden ist ein echtes Weiter-Signal, und weil sie
+// im Sichtfeld liegt, blendet ihr `Reveal` auch tatsächlich ein.
 const STAGE =
   "relative isolate overflow-hidden bg-navy-950 text-paper-50 " +
   // Untergrenze, damit die Bühne auch im eingeloggten Kurzfall nicht
   // zusammenfällt. Bewusst in `rem`, nicht in `vh`.
   "min-h-[35rem] sm:min-h-[38rem] lg:min-h-[40rem]";
 
+// ══ DIE ZEICHNUNG HAT IHRE EIGENE HÖHE — UND DAS IST BLOCKER 2 ══════════════
+//
+// ⚠️ WAS VORHER FALSCH WAR (Befund Tobias B1, 20.08.2026): Die Zeichnung lag
+// als `absolute inset-0 h-full` in der Bühne, war also so hoch wie die Bühne.
+// Bei `slice` ist der Maßstab das Maximum aus Breite/1200 und HÖHE/720 — die
+// Zeichnung wuchs damit mit dem INHALT. Eingeloggt steht ein Element mehr im
+// Hero, die Bühne ist 811,6 statt 560 px hoch, der Maßstab springt von 0,78 auf
+// 1,13, und der Ring wandert um 62 px nach unten. Er landete hinter dem orangen
+// Willkommens-Schild: gemessener Abstand −41,7 px auf 360–430, −44,8 auf 320,
+// auf 9 von 11 Fenstern negativ.
+//
+// ⚠️ DAS IST DIE FÜNFTE AUFLAGE DERSELBEN FEHLERKLASSE (CLAUDE.md Roadmap 20b:
+// „eine Stellschraube und ein Restbetrag als dieselbe Größe behandelt"), und
+// diesmal war ICH der Fall: Der `max()`-Term unten deckte beide REGIME des
+// Maßstabs ab — schmal/hoch und breit/flach — aber beide nur für den
+// ausgeloggten Inhalt. Die dritte Größe, an der der Maßstab hängt, war die
+// INHALTSHÖHE, und die kommt in keinem der beiden Terme vor.
+//
+// ⚠️ DIE ABHILFE IST DESHALB NICHT „DEN TERM UM EINEN FALL ERWEITERN".
+// Das wäre die sechste Auflage: Nele hat den Umfang des eingeloggten Heros noch
+// offen (acht Dinge, fünf Tasten) — jede Zahl, die auf DIESEN Inhalt geeicht
+// ist, wird still falsch, sobald er sich ändert. Stattdessen bekommt die
+// Zeichnung eine eigene, vom Inhalt UNABHÄNGIGE Höhe. Damit ist der Restbetrag
+// keiner mehr: Die Korblage ist ab jetzt auf jedem Fenster dieselbe, ob
+// angemeldet oder nicht, und der `max()`-Term hat wieder genau zwei Fälle.
+//
+// ⚠️ DIE DREI LEITERN MÜSSEN ZUSAMMENBLEIBEN und stehen deshalb untereinander
+// in EINER Datei: Bühnen-Mindesthöhe, Zeichnungshöhe, Textabstand. Wer eine
+// anfasst, fasst alle drei an. Bewacht ist das nicht über die Zahlen, sondern
+// über die Wirkung (siehe `tests/e2e/hero-standbild.spec.mjs`).
+const ZEICHNUNG =
+  "pointer-events-none absolute inset-x-0 top-0 " +
+  "h-[35rem] sm:h-[38rem] lg:h-[40rem]";
+
 // Der Rhythmus. `pt` ist die einzige Zahl, die die Komposition wirklich
-// steuert — sie entscheidet, wo die Überschrift anfängt.
-// ⚠️ SIE IST NICHT FREI GEWÄHLT, SONDERN AN DIE ZEICHNUNG GEBUNDEN, und die
-// Bindung ist eine Verhältnisrechnung, keine Pixelzahl:
-// Der Korb sitzt bei 19,4 % der Bühnenhöhe (Korbmitte 139,8 von 720
-// viewBox-Einheiten; auf schmalen Geräten füllt die Zeichnung die Höhe, der
-// Maßstab ist also Bühnenhöhe / 720). Die Überschrift muss UNTER dem Korb
-// beginnen — weißer Text auf dem einen orangen Element ist der einzige
-// Kontrastfall, den diese Zeichnung überhaupt noch kennt.
-// ⚠️ DESHALB IST `pt` EIN `max()` UND KEINE FESTE ZAHL — und das ist die
-// vierte Auflage derselben Fehlerklasse, die dieses Projekt schon dreimal
-// protokolliert hat (CLAUDE.md Roadmap 20b: „eine Stellschraube und ein
-// Restbetrag als dieselbe Größe behandelt"). Der Hergang, gemessen:
+// steuert — sie entscheidet, wo die Überschrift anfängt. Die Überschrift muss
+// UNTER dem Korb beginnen: Weißer Text auf dem einen orangen Element ist der
+// einzige Kontrastfall, den diese Zeichnung überhaupt noch kennt (#F5F7FA auf
+// #F07A27 = 2,60 : 1; die kühlen Linien halten 7,67 : 1 und sind harmlos).
 //
-// Der Korb sitzt bei einem festen ANTEIL der Zeichnung (176,3 von 720
-// Einheiten bis zu seiner Unterkante). Wie viele Pixel das sind, bestimmt der
-// Maßstab — und der ist bei `slice` das MAXIMUM aus zwei Verhältnissen:
-//   · schmal/hoch → Bühnenhöhe / 720   (die Höhe treibt)
-//   · breit/flach → Fensterbreite / 1200 (die BREITE treibt)
-// `pt` in `rem` ist eine gesetzte Zahl. Die Korblage ist ein Restbetrag aus
-// Fenstermaßen. Beide in derselben Einheit zu vergleichen geht schief, sobald
-// das Fenster das Regime wechselt.
+// ⚠️ `pt` IST KEINE GEWÄHLTE ZAHL, SONDERN DIE KORBLAGE PLUS LUFT — und seit
+// dem 20.08.2026 ist sie in DERSELBEN WÄHRUNG geschrieben wie die Korblage.
+// Genau daran ist die Vorfassung gescheitert (Tobias B1, oben): Sie verglich
+// eine gesetzte rem-Zahl mit einem Restbetrag aus Fenster- UND Inhaltsmaßen.
 //
-// Gemessen am gebauten Stück, mit festen 12 rem:
-//   360–430 px  → Abstand 23 px  (Höhe treibt, Bühne steht auf `min-h`)
-//   768×1024    → Abstand  9 px  (Höhe treibt, Bühne aber inhaltsgetrieben)
-//   1440×900    → Abstand −20 px → DER KORB LAG AUF DER ÜBERSCHRIFT.
-// Genau dort ist es kein Schönheitsfehler: Weißer Text auf `brand-500`
-// erreicht 2,59 : 1, die einzige Stelle dieser Zeichnung, die AA reißen kann.
-// Alle kühlen Haarlinien halten dagegen 7,52 : 1 und sind harmlos.
+// Die Rechnung, vollständig, damit sie nachprüfbar ist statt geglaubt:
+//   Die Korb-UNTERKANTE liegt bei viewBox-y = 159,76 + 16,54 = 176,30 von 720.
+//   Bei `slice` ist der Maßstab max(Breite/1200, Zeichnungshöhe/720), also:
+//     · breit/flach → 176,30/1200          = 14,692 vw
+//     · schmal/hoch → 176,30/720 × Höhe    = 0,244861 × Zeichnungshöhe
+//         35 rem → 8,5701 rem · 38 rem → 9,3047 rem · 40 rem → 9,7944 rem
+//   Die Zeichnungshöhe ist seit Blocker 2 eine feste Leiter (siehe oben),
+//   nicht mehr die Bühnenhöhe. Damit ist der zweite Term wieder eine ZAHL und
+//   kein Restbetrag — und beide Terme gelten angemeldet wie abgemeldet.
+//   Der `max()` bildet die zwei Regime ab, `+ 1,5 rem` ist die Luft.
 //
-// Der `max()`-Term bildet beide Regime ab: 14,7 vw ist die Korbunterkante im
-// breitengetriebenen Fall (176,3/1200 = 0,1469), die feste Untergrenze deckt
-// den höhengetriebenen. Plus 1,5 rem Luft. Nachgemessen liegt der Abstand
-// danach auf jedem geprüften Fenster zwischen 23 und 27 px.
-// ⚠️ Wer `min-h`, `pt` oder die Zeichnung anfasst, misst nach — nicht schätzen:
+// Ergebnis, auf zwölf Fenstern von 320 bis 1440 nachgemessen: Die Oberkante
+// des Inhaltsblocks liegt ab jetzt IMMER 24,0 px unter der Korbunterkante —
+// angemeldet wie abgemeldet, in jedem Regime. Der Abstand ist keine Messgröße
+// mehr, sondern gesetzt.
+// ⚠️ ZWEI ZAHLEN, NICHT EINE — sonst wäre dieser Satz die nächste Zusage, die
+// nur halb gilt: Gemessen wird beim GEZEICHNETEN ersten Element, und das liegt
+// nicht auf der Kante des Inhaltsblocks. Ausgeloggt beginnt dort die
+// Überschrift → **24,0 px**. Eingeloggt beginnt dort die Eyebrow-Zeile, deren
+// Textkasten 3 px innerhalb der Zeilenbox sitzt → **27,0 px**. Beide Werte
+// sind auf allen zwölf Fenstern konstant.
+// Vorher: 22,9–27,5 px ausgeloggt, **−44,8 bis +18,7 px eingeloggt**.
+// ⚠️ Wer eine der drei Leitern anfasst, misst nach — nicht schätzen:
 // `tests/e2e/hero-standbild.spec.mjs` prüft genau diesen Abstand.
 const INHALT =
   "relative z-10 mx-auto w-full max-w-3xl px-6 text-center " +
-  "pt-[max(10rem,calc(14.7vw+1.5rem))] pb-14 " +
-  "sm:pt-[max(12rem,calc(14.7vw+1.5rem))] sm:pb-16 lg:pb-20";
+  "pt-[calc(max(14.692vw,8.5701rem)+1.5rem)] pb-14 " +
+  "sm:pt-[calc(max(14.692vw,9.3047rem)+1.5rem)] sm:pb-16 " +
+  "lg:pt-[calc(max(14.692vw,9.7944rem)+1.5rem)] lg:pb-20";
 
 export default function HeroStage({ className = "", children }) {
   return (
@@ -125,7 +182,9 @@ export default function HeroStage({ className = "", children }) {
       data-hero-stage
       className={`${STAGE} ${className}`}
     >
-      <HeroCourt />
+      <div className={ZEICHNUNG} aria-hidden="true">
+        <HeroCourt />
+      </div>
       <div className={INHALT}>{children}</div>
     </div>
   );

@@ -37,6 +37,13 @@ yarn-error.log*
 
 # Wegwerf-Skripte, Screenshots und Logs aus Prüf-/Gate-Läufen (Agenten-Arbeitsreste)
 /tmp/
+# dito – die Sitzungs-Ablage. ⚠️ Sie war bis zum 20.08.2026 NICHT ignoriert, und darin
+# lagen drei Sicherungskopien echter Quelldateien (`*.orig`). Genau so eine Kopie hat am
+# 18.08.2026 `app/kontakt/page.js` überschrieben, ohne dass Build oder 253 grüne Tests es
+# gemerkt haben. Eine Kopie einer Quelldatei im Projektordner ist eine Falle, ob sie nun
+# eingecheckt wird oder nicht – ignoriert wird sie wenigstens nicht versehentlich Teil
+# eines `git add -A`.
+/scratchpad/
 
 # vercel
 .vercel

@@ -115,12 +115,18 @@ test.describe("Hero-Standbild – P1: das erste Bild ist oben nicht leer", () =>
 test.describe("Hero-Standbild – P2: der Korb berührt keinen Buchstaben", () => {
   // ⚠️ DER EINZIGE KONTRASTFALL, DEN DIESE ZEICHNUNG NOCH KENNT.
   // Gerechnet gegen die tatsächlich gebauten Farben:
-  //   · weißer Text (#F5F7FA) auf der Korb-Farbe (#F07A27) → 2,59 : 1 → AA gerissen
-  //   · weißer Text auf einer Feldlinie (#3A4E7A)          → 7,52 : 1 → unbedenklich
-  //   · Kleinzeile (#E6EAF2) auf einer Feldlinie           → 6,72 : 1 → unbedenklich
+  //   · weißer Text (#F5F7FA) auf der Korb-Farbe (#F07A27) → 2,60 : 1 → AA gerissen
+  //   · weißer Text auf einer Feldlinie (#3A4E7A)          → 7,67 : 1 → unbedenklich
+  //   · Kleinzeile (#E6EAF2) auf einer Feldlinie           → 6,83 : 1 → unbedenklich
   // Deshalb prüft dieser Block GEOMETRIE statt Kontrast: Die kühlen Linien
   // dürfen jede Zeile kreuzen, der orange Korb darf es nicht. Das ist der
   // ganze Ersatz für die Abdunkelungs-Mechanik des Vorgängers.
+  //
+  // ⚠️ ALLE DREI ZAHLEN OBEN WAREN LEICHT FALSCH und sind am 20.08.2026
+  // nachgerechnet worden (Befund Kai M2): 2,59 → 2,60 · 7,52 → 7,67 ·
+  // 6,72 → 6,83. Keine davon kehrt eine Aussage um, und genau das ist der
+  // Grund, sie zu korrigieren: Eine Kennzahl, die ungefähr stimmt, wird beim
+  // nächsten Mal nicht nachgerechnet, sondern zitiert.
   const MIN_ABSTAND = 16;
 
   for (const [breite, hoehe] of FENSTER) {
@@ -136,7 +142,7 @@ test.describe("Hero-Standbild – P2: der Korb berührt keinen Buchstaben", () =
         abstand,
         `Der Korb endet bei y=${m.korb.bottom.toFixed(0)}, die Überschrift ` +
           `beginnt bei y=${m.h1Oben.toFixed(0)} – Abstand ${abstand.toFixed(0)} px. ` +
-          `Bei Überlappung steht weißer Text auf #F07A27 (2,59 : 1).`,
+          `Bei Überlappung steht weißer Text auf #F07A27 (2,60 : 1).`,
       ).toBeGreaterThanOrEqual(MIN_ABSTAND);
     });
   }

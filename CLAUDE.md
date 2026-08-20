@@ -44,12 +44,12 @@
 > `max(10rem, calc(14.7vw + 1.5rem))`; nachgemessen 23–27 px auf allen sieben Fenstern.
 > **Mein Auge hatte „eng" gesagt, die Messung sagte „überlappt" — Ansehen und Messen fangen
 > verschiedene Fehlerklassen.**
-> ⚠️ **Offen, bewusst nicht angefasst:** `KorbRuhe` im Abschluss-Block wurde **unverändert** nach
-> `components/landing/KorbRuhe.js` herausgelöst. Damit stehen auf EINER Seite jetzt beide
-> Projektionen — Hero in Draufsicht, Abschluss-Block in Schrägansicht. Das ist genau der
-> Perspektivbruch, den Patrick beanstandet hat, eine Etage tiefer. Auftrag lautete „nur den Hero".
-> ⚠️ **Kein Gate.** Weder Kai noch Tobias haben diesen Stand gesehen. Volle Suite **211 grün +
-> 1 übersprungen** gegen die ausgelieferte Fassung.
+> ✅ **ERLEDIGT mit `5080879`:** Der Perspektivbruch ist weg — `components/landing/KorbRuhe.js`
+> ist neu in Draufsicht gezeichnet. Hier stand er bis zum 20.08. noch als OFFEN; die Zeile war
+> beim Nachziehen liegengeblieben.
+> ⚠️ **Zahl korrigiert:** Hier stand „**211 grün** + 1 übersprungen". Gezählt sind es
+> **225 grün + 1 übersprungen** (226 laut `--list`, 28 Dateien). Nicht schätzen, zählen —
+> `npx playwright test -c tests/e2e/playwright.config.mjs --list`.
 > ⚠️ **Nebenbefund, nicht mein Auftrag:** `data-spur="desktop"` in der Feature-Strecke liefert
 > `d=""` — ein leerer Pfad mit `pathLength="1"` im ausgelieferten Blatt.
 >

@@ -43,6 +43,15 @@
 // Grund, warum die zwei Fassungen (`hero-dunk-hoch`/`-quer`) samt der
 // `min-aspect-ratio`-Weiche in app/globals.css entfallen konnten.
 //
+// ⚠️ WORAUF SICH DIESE HÖHE BEZIEHT, HAT SICH AM 20.08.2026 GEÄNDERT — und das
+// ist der Kern von Tobias' Befund B1. Die Zeichnung füllt NICHT mehr die
+// Bühne, sondern einen Rahmen mit eigener, inhaltsunabhängiger Höhe; er wird
+// in `HeroStage.js` gesetzt (`ZEICHNUNG`) und dort auch begründet.
+// Kurz: `h-full` bezog den Maßstab auf die Bühne, und die Bühne wächst mit dem
+// Inhalt — der eingeloggte Hero hat ein Element mehr, also wurde die Zeichnung
+// größer und der Ring wanderte in den Text. Ein Spielfeld wird nicht größer,
+// weil jemand angemeldet ist.
+//
 // ── Maßstab: 1 Meter ≈ 73,5 Einheiten ──────────────────────────────────────
 // Die Geometrie ist NICHT frei gezeichnet, sondern aus echten FIBA-Maßen
 // gerechnet. Das ist kein Selbstzweck: Ein Basketballspieler erkennt eine
@@ -61,16 +70,16 @@ const MITTE = 600; // x-Mitte der viewBox
 // eigene Linie auftritt, nah genug, dass sie den Abschnitt oben abschliesst.
 const GRUND = 44; // y der Grundlinie
 
-const KORB_Y = GRUND + 1.575 * M; // 175,8
-const KORB_R = (0.45 / 2) * M; // 16,5
-const ZONE_HALB = (4.9 / 2) * M; // 180,1
+const KORB_Y = GRUND + 1.575 * M; // 159,76
+const KORB_R = (0.45 / 2) * M; // 16,54
+const ZONE_HALB = (4.9 / 2) * M; // 180,08
 const ZONE_TIEF = 5.8 * M; // 426,3
-const FW_R = 1.8 * M; // 132,3
-const DREI_R = 6.75 * M; // 496,1
-const DREI_X = (6.6 / 2) * M; // 242,6 → Parallele bei MITTE ± 242,6
-const BRETT_HALB = (1.8 / 2) * M; // 66,2
-const BRETT_Y = GRUND + 1.2 * M; // 148,2
-const LADE_R = 1.25 * M; // 91,9
+const FW_R = 1.8 * M; // 132,30
+const DREI_R = 6.75 * M; // 496,13
+const DREI_X = (6.6 / 2) * M; // 242,55 → Parallele bei MITTE ± 242,55
+const BRETT_HALB = (1.8 / 2) * M; // 66,15
+const BRETT_Y = GRUND + 1.2 * M; // 132,20
+const LADE_R = 1.25 * M; // 91,88
 
 // Wo die Dreipunkt-Parallele in den Bogen übergeht: der Punkt auf dem Kreis
 // (r = DREI_R um die Korbmitte) mit x = MITTE − DREI_X.
@@ -81,6 +90,22 @@ const UEBERGANG_Y = KORB_Y + Math.sqrt(DREI_R * DREI_R - DREI_X * DREI_X);
 
 const n = (v) => Number(v.toFixed(2));
 
+// ⚠️ MIT EINHEIT — UND DAS IST DER WICHTIGSTE FIX DIESER DATEI (Befund Kai H1,
+// 20.08.2026). Hier stand `n(v)`, also eine nackte Zahl. Das Stylesheet baut
+// daraus `calc(var(--len) + 2px)` — eine Zahl plus eine Länge. Diese Rechnung
+// ist ungültig, und eine ungültige Rechnung macht nicht den einen Summanden
+// kaputt, sondern die GANZE Deklaration: `stroke-dasharray` fiel auf `none`
+// zurück, die `stroke-dashoffset`-Animation hatte nichts, woran sie ziehen
+// konnte, und die Einblendung fand auf keinem Browser statt.
+// ⚠️ Sie hat nie stattgefunden, und trotzdem stand sie an DREI Stellen als
+// Zusicherung (hier, app/globals.css, CLAUDE.md). Nachgemessen:
+//   `--len:1200`   → strokeDasharray "none"          ← der gebaute Zustand
+//   `--len:1200px` → strokeDasharray "1200px, 1202px"
+// Die Fehlerform gehört zu docs/MUSTER-ZAHLEN-DIE-LUEGEN: Es gab keine
+// Fehlermeldung, nichts sah kaputt aus, und in einer Bewegungsspur las sich
+// die Deckkraft-Einblendung des Korbs wie „die Linien zeichnen sich".
+const px = (v) => `${n(v)}px`;
+
 // Länge je Pfad, großzügig aufgerundet — sie steuert das Strichmuster der
 // Einblend-Animation.
 // ⚠️ WARUM HIER ZAHLEN STEHEN UND NICHT `pathLength="1"`: `pathLength` wird
@@ -90,22 +115,55 @@ const n = (v) => Number(v.toFixed(2));
 // JavaScript scheidet aus, weil diese Datei bewusst KEIN JavaScript hat.
 // Also: analytisch gerechnete Längen, jeweils aufgerundet. Zu groß ist
 // harmlos (der Strich ist früher fertig), zu klein wäre sichtbar.
+//
+// ⚠️ DIESE LÄNGEN GELTEN IN viewBox-EINHEITEN — UND DAS HÄLT NUR, SOLANGE
+// NIRGENDWO `vector-effect: non-scaling-stroke` STEHT. Die Falle ist real und
+// war bis zum 20.08.2026 eingebaut (Befund Kai M1): Das Attribut stand auf der
+// `<g>`-Gruppe, wo es NICHTS tut — `vector-effect` wird in SVG nicht vererbt,
+// gemessen war es auf jedem Pfad `none`. Die Längenrechnung war also nur
+// deshalb richtig, weil das Attribut wirkungslos war. Wer es „aufräumt" und
+// korrekt je Pfad setzt, rechnet das Strichmuster in GERÄTE-Pixel um: bei
+// Maßstab 1,2 fehlen dann 16,7 % jeder Linie — still, ohne Fehlermeldung, als
+// Lücke am Ende jedes Strichs.
+// Deshalb steht das Attribut jetzt an KEINER Stelle mehr (Begründung zur
+// Strichbreite unten an der Gruppe).
+// ⚠️ HIER STANDEN ZWEI LÄNGEN OHNE LESER — `korb` und `zone`, beide am
+// 20.08.2026 entfernt. `zone` gehörte zu den Zonen-Zargen, die weiter unten
+// begründet entfallen sind; `korb` wurde an den Ring durchgereicht, der sich
+// gar nicht zeichnet, sondern aufblendet. Eine Konstante, die an nichts
+// übergibt, ist in diesem Projekt eine eigene Fehlerklasse (Kai K4): Sie liest
+// sich wie eine Zusicherung und ist keine.
 const L = {
   grund: 1200,
   brett: 2 * BRETT_HALB,
-  korb: 2 * Math.PI * KORB_R,
   lade: Math.PI * LADE_R,
-  zone: 2 * ZONE_TIEF + 2 * ZONE_HALB,
   fw: 2 * Math.PI * FW_R,
   drei: 2 * (UEBERGANG_Y - GRUND) + DREI_R * 2 * Math.asin(DREI_X / DREI_R),
 };
 
 export default function HeroCourt() {
   return (
+    // ⚠️ `overflow: visible` TRENNT ZWEI DINGE, DIE EIN SVG SONST KOPPELT:
+    // den MASSSTAB und den BESCHNITT. Beides hängt normalerweise am selben
+    // Kasten — und genau daran ist mein erster Anlauf gegen Tobias' B1
+    // gescheitert. Der Kasten bekam eine feste Höhe (richtig, damit der Maßstab
+    // nicht mehr am Inhalt hängt), und damit endete auch die ZEICHNUNG dort:
+    // auf 1440×900 hörten die Dreipunkt-Parallelen 92 px vor dem
+    // Abschnittsende einfach auf. Vier abgeschnittene Linienenden mitten in
+    // einer leeren Fläche — gebaut, ANGESEHEN, verworfen.
+    // Mit `visible` bestimmt der Kasten nur noch den Maßstab; beschnitten wird
+    // von der Bühne (`overflow-hidden` in HeroStage.js). Die Zeichnung läuft
+    // damit immer bis zur Unterkante des Abschnitts, egal wie hoch der Inhalt
+    // ist — und das ist bei einer Feld-Markierung der richtige Abschluss: Ein
+    // Spielfeld hört am Bildrand auf, nicht im Nichts.
+    // ⚠️ Es entsteht dadurch KEIN Querüberlauf: Die Zeichnung ragt auch
+    // seitlich über den Kasten, aber die Bühne schneidet beide Achsen ab.
+    // Nachgemessen auf zwölf Fenstern: Dokumentbreite = Fensterbreite.
     <svg
       className="hero-court pointer-events-none absolute inset-0 h-full w-full"
       viewBox="0 0 1200 720"
       preserveAspectRatio="xMidYMin slice"
+      style={{ overflow: "visible" }}
       aria-hidden="true"
       focusable="false"
     >
@@ -123,19 +181,39 @@ export default function HeroCourt() {
           Deshalb ist der Hero reine Haarlinie — dieselbe Sprache, nur das
           andere der beiden zulässigen Mittel. */}
 
+      {/* ⚠️ DIE STRICHBREITE SKALIERT MIT — ENTSCHEIDUNG, NICHT VERSEHEN
+          (Vivien, 20.08.2026, aus Kais Befund M1 heraus entschieden).
+          Hier stand `vectorEffect="non-scaling-stroke"`, wirkungslos, weil
+          `vector-effect` nicht vererbt wird. Die naheliegende „Korrektur"
+          wäre gewesen, es je Pfad zu setzen. Sie ist falsch, und zwar
+          zweifach:
+          · Sie hätte das Strichmuster der Einblendung zerlegt (siehe oben).
+          · Sie widerspricht der Sache. Eine Feldlinie ist Teil des
+            GEZEICHNETEN GEGENSTANDS, keine Kante der Oberfläche. In echt ist
+            sie 5 cm breit und wird mit dem Feld größer, wenn man näher
+            herangeht. Das ist dieselbe Grenze, die für Verläufe schon gilt:
+            keine auf Flächen der Oberfläche, sehr wohl auf einem
+            dargestellten Gegenstand.
+          Gemessen bedeutet das 1,17 px auf 360 und 1,80 px auf 1440.
+          ⚠️ Und deshalb trägt der Ring es jetzt AUCH NICHT MEHR. Vorher war
+          er das einzige Element mit fester Breite (3 px überall) — sein
+          Gewicht gegenüber den Linien wäre damit von 2,6 : 1 auf 1,7 : 1
+          gewandert, je größer der Bildschirm. Das eine bedeutungstragende
+          Zeichen der Zeichnung wäre also ausgerechnet dort am leisesten, wo am
+          meisten Platz ist. Jetzt skaliert alles gemeinsam, das Verhältnis
+          bleibt konstant 2 : 1. */}
       <g
         className="hero-court-linien"
         fill="none"
         stroke="#3A4E7A"
         strokeWidth="1.5"
         strokeLinecap="round"
-        vectorEffect="non-scaling-stroke"
       >
         {/* Grundlinie — läuft absichtlich von Rand zu Rand. Sie ist die
             Kante, an der die Komposition oben abschließt. */}
         <path
           d={`M 0 ${GRUND} H 1200`}
-          style={{ "--len": n(L.grund), "--delay": "0ms" }}
+          style={{ "--len": px(L.grund), "--delay": "0ms" }}
           data-court-path
         />
 
@@ -160,7 +238,7 @@ export default function HeroCourt() {
           cx={MITTE}
           cy={n(GRUND + ZONE_TIEF)}
           r={n(FW_R)}
-          style={{ "--len": n(L.fw), "--delay": "180ms" }}
+          style={{ "--len": px(L.fw), "--delay": "180ms" }}
           data-court-path
         />
 
@@ -172,14 +250,14 @@ export default function HeroCourt() {
             `A ${n(DREI_R)} ${n(DREI_R)} 0 0 0 ${n(MITTE + DREI_X)} ${n(UEBERGANG_Y)} ` +
             `V ${GRUND}`
           }
-          style={{ "--len": n(L.drei), "--delay": "260ms" }}
+          style={{ "--len": px(L.drei), "--delay": "260ms" }}
           data-court-path
         />
 
         {/* Brett, von oben eine Linie. */}
         <path
           d={`M ${n(MITTE - BRETT_HALB)} ${n(BRETT_Y)} H ${n(MITTE + BRETT_HALB)}`}
-          style={{ "--len": n(L.brett), "--delay": "340ms" }}
+          style={{ "--len": px(L.brett), "--delay": "340ms" }}
           data-court-path
         />
 
@@ -187,7 +265,7 @@ export default function HeroCourt() {
             Draufsicht endgültig als Regelwerk-Schaubild lesbar macht. */}
         <path
           d={`M ${n(MITTE - LADE_R)} ${n(KORB_Y)} A ${n(LADE_R)} ${n(LADE_R)} 0 0 0 ${n(MITTE + LADE_R)} ${n(KORB_Y)}`}
-          style={{ "--len": n(L.lade), "--delay": "400ms" }}
+          style={{ "--len": px(L.lade), "--delay": "400ms" }}
           data-court-path
         />
       </g>
@@ -209,9 +287,7 @@ export default function HeroCourt() {
         fill="none"
         stroke="#F07A27"
         strokeWidth="3"
-        vectorEffect="non-scaling-stroke"
         data-court-korb
-        style={{ "--len": n(L.korb) }}
       />
     </svg>
   );
