@@ -116,6 +116,89 @@ const INLINE_AN = "hidden leiste:flex"; // angemeldet: ab 1152px
 const KOMPAKT_AUS = "lg:hidden"; // Hamburger + Mobilmenue unter 1024px
 const KOMPAKT_AN = "leiste:hidden"; // … unter 1152px
 
+// ---------------------------------------------------------------------------
+// DER DRITTE ZUSTAND: UNBEKANNT (Befund B1 Tobias, 20.08.2026)
+// ---------------------------------------------------------------------------
+// Seit der Umschaltpunkt am Anmeldezustand haengt, hat die Leiste nicht zwei
+// Zustaende, sondern DREI — und der dritte stand nirgends: Beim ersten Bild
+// ist noch nicht bekannt, ob jemand angemeldet ist (`getmyinfo` laeuft noch).
+// `isLoggedIn` war dort `false`, also wurde „unbekannt" wie „ausgeloggt"
+// behandelt.
+//
+// Was das kostete, gemessen bei 1088px angemeldet:
+//   ungedrosselt              44–68ms
+//   4x langsamere CPU, ~1,6Mbit/s  1250–1296ms
+//   Anmeldeauskunft +1,5s kuenstlich  1564ms
+// Ueber eine Sekunde lang standen sieben anklickbare Punkte da, die danach
+// verschwanden. Wer in dieser Zeit auf „Ligen" zielte, traf ins Leere.
+//
+// ⚠️ DER NAHELIEGENDE FIX IST EIN DENKFEHLER — nicht so bauen:
+//   `(!checked || isLoggedIn) ? INLINE_AN : INLINE_AUS`
+// also vorsorglich ueberall die angemeldete Variante. Dann blitzt es fuer
+// AUSGELOGGTE Besucher in dieselbe Richtung: Bei 1088px waere der Hamburger
+// erst da und danach weg. Auf der Startseite sind das die meisten Besucher.
+// Es ist derselbe Fehler, gespiegelt.
+//
+// ENTSCHEIDUNG PATRICK: Solange der Zustand unbekannt ist, wird der
+// umschaltbare Teil GAR NICHT gezeigt — kurz eine Luecke statt kurz etwas
+// Falsches.
+//
+// „Umschaltbar" ist dabei genau das Band, in dem sich die beiden Antworten
+// UNTERSCHEIDEN, naemlich 1024–1151px. Ausserhalb dieses Bands gibt es nichts
+// zu entscheiden, und dort steht deshalb sofort das Richtige:
+//
+//                      <1024      1024–1151      >=1152
+//   Zeile  ausgeloggt   weg         DA            DA
+//   Zeile  angemeldet   weg         weg           DA
+//   → unbekannt:        weg      (Luecke)         DA     = "hidden leiste:flex"
+//
+//   Burger ausgeloggt    DA         weg           weg
+//   Burger angemeldet    DA         DA            weg
+//   → unbekannt:         DA      (Luecke)         weg    = "lg:hidden"
+//
+// ⚠️ Die beiden Zeilen sind ABSICHTLICH nicht dieselbe Variante — genau daran
+// scheitert der Denkfehler oben. Fuer die Zeile ist die vorsichtige Antwort die
+// ANGEMELDETE (spaeter einblenden), fuer den Hamburger die AUSGELOGGTE
+// (frueher ausblenden). Wer beide gleich setzt, repariert eine Haelfte und
+// bricht die andere.
+//
+// ⚠️ WARUM NICHT EINFACH ALLES AUSBLENDEN, solange unbekannt: Ohne Token setzt
+// der Effekt `checked` sofort und ohne Netzanfrage — ein ausgeloggter Besucher
+// verloere also nur ein Bild. Ein ANGEMELDETER wartet dagegen auf `getmyinfo`,
+// gedrosselt ueber eine Sekunde. „Alles ausblenden" haette ihm auf 390px ueber
+// eine Sekunde lang den Menue-Knopf genommen — also gar keinen Zugang zur
+// Navigation, auf jeder Breite. Das waere ein neuer Defekt anstelle des alten.
+const INLINE_UNBEKANNT = "hidden leiste:flex"; // = INLINE_AN, siehe Tabelle
+const KOMPAKT_UNBEKANNT = "lg:hidden"; // = KOMPAKT_AUS, siehe Tabelle
+
+// Zeitlimit fuer die Anmeldeauskunft. Begruendung an der Aufrufstelle —
+// kurz: Ohne Limit kann der Zustand „unbekannt" NIE enden, und seit er ueber
+// die Darstellung entscheidet, waere das eine Leiste ohne Navigation.
+const AUTH_TIMEOUT_MS = 8000;
+
+// ⚠️ WAS DIESE ENTSCHEIDUNG KOSTET — gemessen am 20.08.2026, gehoert zu
+// `docs/MUSTER-ZAHLEN-DIE-LUEGEN`, weil es genau die Sorte Nebenwirkung ist,
+// die man beim Beheben eines Blitzers nicht sieht:
+//
+// Der Server rendert die Leiste IMMER mit `checked = false` — er kann es nicht
+// anders, der Anmelde-Ausweis liegt in `localStorage` und nicht in einem
+// Cookie, die Serverseite WEISS also nichts ueber die Anmeldung. Im
+// ausgelieferten HTML steht damit `hidden leiste:flex` (vorher `hidden
+// lg:flex`), und das heisst: ZWISCHEN 1024 UND 1151 PX ZEIGT DIE VOM SERVER
+// GELIEFERTE SEITE KEINE NAVIGATION, bis der Browser die Seite uebernommen hat
+// (Hydration). Ohne JavaScript dauerhaft. Betroffen sind u. a. iPad 10,2" quer
+// (1080) und 1024er-Laptops.
+//
+// ⚠️ DAS IST KEIN VERSEHEN, SONDERN DIE UNAUFLOESBARE HAELFTE DES BEFUNDS:
+// Wer im Server-HTML die ausgeloggte Zeile stehen laesst, damit dort etwas
+// steht, baut B1 exakt wieder ein — bei 1088px angemeldet stuenden die sieben
+// Punkte da und verschwaenden nach der Anmeldeauskunft. Man kann in diesem
+// Band nicht gleichzeitig „sofort etwas zeigen" und „nichts Falsches zeigen",
+// solange der Server den Anmeldezustand nicht kennt.
+// Der einzige echte Ausweg waere, den Anmeldezustand serverseitig lesbar zu
+// machen (Cookie statt `localStorage`) — ein Architektur-Eingriff, keine
+// Nacharbeit. Liegt als Entscheidung bei Patrick.
+
 export default function Navbar() {
   const [me, setMe] = useState(null); // null = unbekannt/ausgeloggt
   const [checked, setChecked] = useState(false);
@@ -196,7 +279,31 @@ export default function Navbar() {
     let active = true;
     (async () => {
       try {
-        const { data } = await axios.post("/api/player/getmyinfo", { token });
+        // ⚠️ `timeout` ist hier KEIN Feinschliff, sondern die Bedingung dafuer,
+        // dass der dritte Zustand („unbekannt", s. oben) jemals endet.
+        // Vorher lief dieser Aufruf ohne Zeitlimit. Ein FEHLER war harmlos —
+        // `catch` und `finally` setzen `checked`, die Leiste zeigte dann die
+        // ausgeloggte Fassung. Eine HAENGENDE Verbindung (Server stockt, Netz
+        // bricht nach dem Laden weg) erreicht das `finally` aber nie, und
+        // seit `checked` ueber die Darstellung entscheidet, ist das nicht mehr
+        // harmlos: Zwischen 1024 und 1151px stuende dauerhaft KEINE Navigation
+        // da, und der Konto-Abschnitt des Klappmenues („Anmelden" bzw.
+        // „Abmelden") erschiene auf KEINER Breite jemals.
+        // Der Riegel oben hat also eine Fehlerform, die frueher folgenlos war,
+        // zu einer folgenreichen gemacht — deshalb gehoert die Abhilfe zu ihm.
+        // 8 Sekunden: Die langsamste gemessene echte Antwort lag bei 1,3s
+        // (4x gedrosselte CPU, ~1,6 Mbit/s). Wer nach dem Sechsfachen davon
+        // nicht geantwortet hat, antwortet nicht mehr.
+        // Bewusst ein ABBRUCH und kein Nebenher-Timer: Ein Timer, der `checked`
+        // setzt und die Anfrage weiterlaufen laesst, holt die Antwort
+        // irgendwann nach — und baut damit genau den Blitzer wieder ein, gegen
+        // den dieser ganze Abschnitt angetreten ist, nur zu einem
+        // unvorhersehbaren Zeitpunkt.
+        const { data } = await axios.post(
+          "/api/player/getmyinfo",
+          { token },
+          { timeout: AUTH_TIMEOUT_MS },
+        );
         if (active) setMe(data.player || null);
         // Den vollstaendigen Spieler auch zurueckschreiben: Die Anmelde-Antwort
         // enthaelt kein `teamId`, und bislang reicherte nur `useCurrentPlayer`
@@ -469,8 +576,11 @@ export default function Navbar() {
   // Bewusst als ganze Klassen-Zeichenketten und nicht zusammengebaut —
   // Tailwind liest den Quelltext, ein `lg:`+`flex` aus Bausteinen faende es
   // nicht und die Klasse fehlte still im ausgelieferten CSS.
-  const inline = isLoggedIn ? INLINE_AN : INLINE_AUS;
-  const kompakt = isLoggedIn ? KOMPAKT_AN : KOMPAKT_AUS;
+  // DREI Zustaende, nicht zwei — Herleitung samt Tabelle oben bei
+  // INLINE_UNBEKANNT. `checked` zuerst abfragen: Solange er false ist, ist
+  // `isLoggedIn` keine Auskunft, sondern nur „noch nichts gehoert".
+  const inline = !checked ? INLINE_UNBEKANNT : isLoggedIn ? INLINE_AN : INLINE_AUS;
+  const kompakt = !checked ? KOMPAKT_UNBEKANNT : isLoggedIn ? KOMPAKT_AN : KOMPAKT_AUS;
 
   // Initialen wie in PlayerNav — dieselbe Person, dieselbe Form.
   const initialen =
@@ -498,10 +608,18 @@ export default function Navbar() {
               die Leiste zu voll, laeuft sie ueber — und ein Ueberlauf ist
               messbar, ein stilles Schrumpfen war es nicht. Lieber ein lautes
               Versagen im Test als ein leises im Gesicht des Nutzers.
-              ⚠️ Der Test dazu ist am 20.08.2026 NOCH NICHT GEBAUT (liegt bei
-              Kai): Dokumentbreite <= Fensterbreite auf 1024/1056/1088/1152,
-              angemeldet als Team-Admin, PLUS „Wortmarke hat Breite > 0" —
-              denn die Breitenpruefung allein war fuer diesen Befund blind. */}
+              ✅ Bewacht seit dem 20.08.2026 durch
+              `tests/e2e/navigationsleiste-breite.spec.mjs`, Abschnitt 2 („Die
+              Wortmarke gibt nicht nach"): gemessen wird nicht eine feste
+              Pixelzahl, sondern das SEITENVERHAELTNIS der Datei gegen die
+              gerenderte Flaeche — plus eine Mindestbreite als zweites Netz.
+              ⚠️ Der Wortmarken-Waechter ist der wichtigere von beiden. Ein
+              reiner Ueberlauf-Test haette diesen Befund auf einem 1600er
+              NIE gefangen: Dort lief nichts ueber, es war nur alles falsch.
+              ⚠️ Bis zum 20.08.2026 stand hier „NOCH NICHT GEBAUT (liegt bei
+              Kai)" — der Test lag da bereits im SELBEN Commit. Ein Kommentar,
+              der eine Luecke behauptet, die es nicht gibt, schickt den
+              naechsten Leser dieselbe Strecke noch einmal. */}
           <Link
             href="/"
             className="flex shrink-0 items-center hover:opacity-80 transition-opacity"
@@ -857,105 +975,132 @@ export default function Navbar() {
                 </div>
               </div>
             ))}
-            <p className="bg-navy-950 px-5 py-2 font-display text-[11px] font-bold uppercase tracking-[0.2em] text-mist-600">
-              {isLoggedIn ? "Mein Bereich" : "Konto"}
-            </p>
-            {isLoggedIn ? (
+            {/* Der Konto-Abschnitt haengt am Anmeldezustand — also gilt hier
+                dieselbe Regel wie fuer die Umschaltpunkte oben: solange der
+                Zustand unbekannt ist, steht hier NICHTS.
+                Das ist kein Schoenheitsfehler. Der Hamburger ist unter 1024px
+                waehrend der Wartezeit bedienbar (so gewollt, s. Tabelle oben);
+                ein Angemeldeter auf langsamer Leitung konnte das Menue also
+                oeffnen und sah „Konto · Anmelden · Registrieren", was sich
+                danach in „Mein Bereich · Mein Profil · Abmelden" verwandelte —
+                mit vertauschten Zeilen unter demselben Finger. Dieselbe
+                Fehlerform wie B1, nur eine Ebene tiefer.
+                Von den zustandsabhaengigen Bloecken der Leiste tragen drei den
+                Riegel laengst (Anmeldeblock, Avatar, Abmelde-Symbol); dies war
+                der letzte, der ihn brauchte.
+                ⚠️ „Der letzte" ist NICHT dasselbe wie „ab jetzt tragen ihn
+                alle": Die Glocke haengt weiterhin blank an `isLoggedIn`. Sie
+                braucht ihn auch nicht — sie ist erst weg und dann da, zeigt
+                also nie eine falsche Fassung. Der Riegel ist gegen WECHSELNDEN
+                Inhalt gebaut, nicht gegen Erscheinen.
+                Hier stand zuerst „die uebrigen drei Bloecke" — das haette den
+                naechsten Leser glauben lassen, es gebe keinen ungeriegelten
+                mehr. Es sind vier, und der vierte ist mit Absicht offen. */}
+            {checked && (
               <>
-                {teamSlug && (
+              <p className="bg-navy-950 px-5 py-2 font-display text-[11px] font-bold uppercase tracking-[0.2em] text-mist-600">
+                {isLoggedIn ? "Mein Bereich" : "Konto"}
+              </p>
+              {isLoggedIn ? (
+                <>
+                  {teamSlug && (
+                    <Link
+                      href={`/team/team-detail/${teamSlug}`}
+                      onClick={() => setMobileOpen(false)}
+                      aria-current={isActive(`/team/team-detail/${teamSlug}`) ? "page" : undefined}
+                      className={mobClass(`/team/team-detail/${teamSlug}`)}
+                    >
+                      <PiBasketballBold className="text-brand-400 w-4 h-4 flex-shrink-0" />
+                      <span className="text-sm font-medium">Mein Team</span>
+                    </Link>
+                  )}
                   <Link
-                    href={`/team/team-detail/${teamSlug}`}
+                    href="/player/newsfeed"
                     onClick={() => setMobileOpen(false)}
-                    aria-current={isActive(`/team/team-detail/${teamSlug}`) ? "page" : undefined}
-                    className={mobClass(`/team/team-detail/${teamSlug}`)}
+                    aria-current={isActive("/player/newsfeed") ? "page" : undefined}
+                    className={mobClass("/player/newsfeed")}
                   >
-                    <PiBasketballBold className="text-brand-400 w-4 h-4 flex-shrink-0" />
-                    <span className="text-sm font-medium">Mein Team</span>
+                    <PiNewspaperClippingBold className="text-brand-400 w-4 h-4 flex-shrink-0" />
+                    <span className="text-sm font-medium">Feed</span>
                   </Link>
-                )}
-                <Link
-                  href="/player/newsfeed"
-                  onClick={() => setMobileOpen(false)}
-                  aria-current={isActive("/player/newsfeed") ? "page" : undefined}
-                  className={mobClass("/player/newsfeed")}
-                >
-                  <PiNewspaperClippingBold className="text-brand-400 w-4 h-4 flex-shrink-0" />
-                  <span className="text-sm font-medium">Feed</span>
-                </Link>
-                <Link
-                  href="/player/player-detail"
-                  onClick={() => setMobileOpen(false)}
-                  aria-current={isActive("/player/player-detail") ? "page" : undefined}
-                  className={mobClass("/player/player-detail")}
-                >
-                  <PiUserBold className="text-brand-400 w-4 h-4 flex-shrink-0" />
-                  <span className="text-sm font-medium">Mein Profil</span>
-                </Link>
-                {me?.isSuperAdmin && (
                   <Link
-                    href="/admin/dashboard"
+                    href="/player/player-detail"
                     onClick={() => setMobileOpen(false)}
-                    aria-current={isActive("/admin/dashboard") ? "page" : undefined}
-                    className={mobAdminClass("/admin/dashboard")}
+                    aria-current={isActive("/player/player-detail") ? "page" : undefined}
+                    className={mobClass("/player/player-detail")}
                   >
-                    <PiShieldCheckBold className="w-4 h-4 flex-shrink-0" />
-                    <span className="text-sm font-medium">Super Admin</span>
+                    <PiUserBold className="text-brand-400 w-4 h-4 flex-shrink-0" />
+                    <span className="text-sm font-medium">Mein Profil</span>
                   </Link>
-                )}
-                {me?.isTeamAdmin && !me?.isSuperAdmin && (
+                  {me?.isSuperAdmin && (
+                    <Link
+                      href="/admin/dashboard"
+                      onClick={() => setMobileOpen(false)}
+                      aria-current={isActive("/admin/dashboard") ? "page" : undefined}
+                      className={mobAdminClass("/admin/dashboard")}
+                    >
+                      <PiShieldCheckBold className="w-4 h-4 flex-shrink-0" />
+                      <span className="text-sm font-medium">Super Admin</span>
+                    </Link>
+                  )}
+                  {me?.isTeamAdmin && !me?.isSuperAdmin && (
+                    <Link
+                      href="/team/admin"
+                      onClick={() => setMobileOpen(false)}
+                      aria-current={isActive("/team/admin") ? "page" : undefined}
+                      className={mobAdminClass("/team/admin")}
+                    >
+                      <PiTrophyBold className="w-4 h-4 flex-shrink-0" />
+                      <span className="text-sm font-medium">Team-Admin</span>
+                    </Link>
+                  )}
+                  {!me?.isTeamAdmin && !me?.isSuperAdmin && (
+                    <Link
+                      href="/team/create"
+                      onClick={() => setMobileOpen(false)}
+                      aria-current={isActive("/team/create") ? "page" : undefined}
+                      className={mobClass("/team/create")}
+                    >
+                      <PiUsersBold className="text-brand-400 w-4 h-4 flex-shrink-0" />
+                      <span className="text-sm font-medium">Team gründen</span>
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => {
+                      logout();
+                      setMobileOpen(false);
+                    }}
+                    className="flex items-center gap-3 px-5 py-3.5 w-full text-left text-mist-600 hover:bg-navy-700 transition-colors"
+                  >
+                    <PiXBold className="w-4 h-4 flex-shrink-0" />
+                    <span className="text-sm font-medium">Abmelden</span>
+                  </button>
+                </>
+              ) : (
+                <>
                   <Link
-                    href="/team/admin"
+                    href="/login"
                     onClick={() => setMobileOpen(false)}
-                    aria-current={isActive("/team/admin") ? "page" : undefined}
-                    className={mobAdminClass("/team/admin")}
+                    aria-current={isActive("/login") ? "page" : undefined}
+                    className={mobClass("/login")}
                   >
-                    <PiTrophyBold className="w-4 h-4 flex-shrink-0" />
-                    <span className="text-sm font-medium">Team-Admin</span>
+                    <PiUserBold className="text-brand-400 w-4 h-4 flex-shrink-0" />
+                    <span className="text-sm font-medium">Anmelden</span>
                   </Link>
-                )}
-                {!me?.isTeamAdmin && !me?.isSuperAdmin && (
                   <Link
-                    href="/team/create"
+                    href="/signup"
                     onClick={() => setMobileOpen(false)}
-                    aria-current={isActive("/team/create") ? "page" : undefined}
-                    className={mobClass("/team/create")}
+                    className="flex items-center gap-3 px-5 py-3.5 text-brand-400 hover:bg-navy-700 transition-colors"
                   >
-                    <PiUsersBold className="text-brand-400 w-4 h-4 flex-shrink-0" />
-                    <span className="text-sm font-medium">Team gründen</span>
+                    <PiBasketballBold className="w-4 h-4 flex-shrink-0" />
+                    <span className="text-sm font-bold">Registrieren</span>
                   </Link>
-                )}
-                <button
-                  onClick={() => {
-                    logout();
-                    setMobileOpen(false);
-                  }}
-                  className="flex items-center gap-3 px-5 py-3.5 w-full text-left text-mist-600 hover:bg-navy-700 transition-colors"
-                >
-                  <PiXBold className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-sm font-medium">Abmelden</span>
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  onClick={() => setMobileOpen(false)}
-                  aria-current={isActive("/login") ? "page" : undefined}
-                  className={mobClass("/login")}
-                >
-                  <PiUserBold className="text-brand-400 w-4 h-4 flex-shrink-0" />
-                  <span className="text-sm font-medium">Anmelden</span>
-                </Link>
-                <Link
-                  href="/signup"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-5 py-3.5 text-brand-400 hover:bg-navy-700 transition-colors"
-                >
-                  <PiBasketballBold className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-sm font-bold">Registrieren</span>
-                </Link>
+                </>
+              )}
               </>
             )}
+            {/* Feedback steht immer — es haengt an keinem Anmeldezustand und
+                darf deshalb auch nicht auf ihn warten. */}
             <FeedbackLink variant="row" onNavigate={() => setMobileOpen(false)} />
           </div>
         )}

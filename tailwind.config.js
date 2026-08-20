@@ -32,9 +32,22 @@ module.exports = {
       // nicht schaetzen: Inhaltsbreite der Leiste gegen (Containerbreite
       // minus Polsterung), angemeldet, mit Team-Admin-Konto, auf der Seite
       // mit dem laengsten aktiven Punkt (/transfermarkt).
-      // ⚠️ STAND 20.08.2026: Ein Waechter dafuer ist NOCH NICHT GEBAUT — er
-      // liegt bei Kai. Bis er steht, haelt diese Zahl nichts ausser diesem
-      // Kommentar.
+      // ✅ Bewacht seit dem 20.08.2026 durch
+      // `tests/e2e/navigationsleiste-breite.spec.mjs`. Die Datei haelt vier
+      // Aussagen ueber genau diese Zahl:
+      //   1) Angemeldet passt die Leiste auf 1024–1600px in ihre eigene Reihe
+      //      (gemessen wird `scrollWidth` gegen `clientWidth` — das Dokument
+      //      allein genuegt nicht, weil `overflow-x-hidden` den Ueberhang
+      //      abklemmt statt ihn zu zeigen).
+      //   2) Die Wortmarke wird nirgends gestaucht.
+      //   3) Der Umschaltpunkt ist scharf: bei 1151 Klappmenue, bei 1152
+      //      Zeile — und nie beides oder keins von beidem.
+      //   4) Waehrend der Anmeldezustand noch unbekannt ist, verschwindet
+      //      kein Punkt wieder, der schon sichtbar war (Blitzer-Waechter).
+      // ⚠️ Bis zum 20.08.2026 stand hier „NOCH NICHT GEBAUT … bis er steht,
+      // haelt diese Zahl nichts ausser diesem Kommentar". Der Waechter lag da
+      // bereits im SELBEN Commit. Wer eine Zahl aendert, aendert weiterhin
+      // eine MESSUNG — aber sie faellt jetzt auf, statt still zu bleiben.
       screens: {
         leiste: "1152px",
       },
