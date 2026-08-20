@@ -167,15 +167,26 @@ test.describe("Plattform-Tour ohne Konto", () => {
 });
 
 // Die Quittung nach dem Positions-Tipp sagt „da kommst du jederzeit oben rechts
-// hin" und zeigt den Avatar daneben – aber nur, wenn die Spieler-Leiste
-// tatsächlich auf dem Bildschirm steht. Erkannt wird das am Marker
-// `data-profil-avatar` in components/layout/PlayerNav.js. Dieser Test hält
-// beide Hälften fest: Ohne ihn könnte der Marker beim nächsten Umbau still
-// verschwinden, und die Quittung fiele wortlos auf die kurze Fassung zurück –
-// oder, schlimmer, jemand setzt ihn in die öffentliche Navbar, wo gar kein
-// Avatar steht (Befund Tobias, 14.08.2026).
+// hin" und zeigt den Avatar daneben – aber nur, wenn dort auch wirklich einer
+// steht. Erkannt wird das am Marker `data-profil-avatar`.
+//
+// ⚠️ NACHGEFÜHRT AM 20.08.2026 – die alte Fassung dieses Blocks beschrieb eine
+// Welt, die es nicht mehr gibt. Sie nannte als Schreckensfall: „jemand setzt
+// ihn in die öffentliche Navbar, wo gar kein Avatar steht". Genau dorthin ist
+// er inzwischen gewandert – aber ZU RECHT, denn die Navbar zeigt seit Viviens
+// Umbau selbst einen Avatar (statt des Textlinks „Mein Profil").
+//
+// Der Marker sitzt damit an ZWEI Stellen, und die Regel ist nicht mehr „nur
+// PlayerNav", sondern:
+//     Der Marker steht dort, wo ein Avatar zu SEHEN ist – und nur dann darf
+//     die Tour „oben rechts" sagen.
+// Was davon wo geprüft wird:
+//   • ausgeloggt gibt es ihn nirgends                        → hier, gleich unten
+//   • die Spieler-Leiste trägt ihn                           → hier
+//   • die Leiste stellt ihn oben rechts und ins Profil       → navigationsleiste-breite.spec.mjs
+//   • die Tour behauptet nur, was zu sehen ist               → hier, ganz unten
 test.describe("Profil-Avatar als Bezugspunkt der Tour", () => {
-  test("öffentliche Seiten tragen den Marker NICHT", async ({ page }) => {
+  test("ausgeloggt trägt keine Seite den Marker", async ({ page }) => {
     await page.goto(SEITE);
     await expect(page.locator("[data-profil-avatar]")).toHaveCount(0);
   });
@@ -417,4 +428,166 @@ test.describe("Plattform-Tour – Beleg-Aussage", () => {
       /Beide Teams melden das Ergebnis unabhängig voneinander/i,
     );
   });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DIE TOUR BEHAUPTET NUR, WAS ZU SEHEN IST
+// ═══════════════════════════════════════════════════════════════════════════
+// Befund 20.08.2026, entstanden als Nebenwirkung von Viviens Leisten-Umbau.
+//
+// `StepPosition` entschied mit `!!document.querySelector("[data-profil-avatar]")`
+// — also über ANWESENHEIT. Der Kommentar am Zweig verlangte aber von Anfang an
+// SICHTBARKEIT: „Ohne sichtbare Spieler-Leiste bliebe ‚oben rechts' eine
+// Aussage über etwas, das dort nicht steht."
+//
+// Solange nur `PlayerNav` den Marker trug, war beides dasselbe: Dessen Avatar
+// hat keine `hidden`-Klasse. Seit ihn auch die öffentliche `Navbar` trägt, dort
+// aber als `hidden sm:flex`, fällt es auseinander. Gemessen am gebauten Stand,
+// 390px auf /spieler, angemeldet: Marker gefunden, `display:none`, Breite 0 —
+// und die Quittung sagte trotzdem „da kommst du jederzeit oben rechts hin"
+// samt Avatar-Zitat. Auf dieser Breite liegt der Profil-Weg im Klappmenü.
+//
+// Es ist derselbe Fehler, den Tobias am 14.08.2026 schon einmal gefunden hat,
+// durch eine neue Tür wieder hereingekommen. Deshalb prüft dieser Wächter
+// nicht mehr die Bauweise der Leiste, sondern die AUSSAGE:
+//     Die Quittung sagt genau dann „oben rechts", wenn dort ein Avatar steht.
+// Damit überlebt er jede Gestaltungsentscheidung — ob die Navbar mobil einen
+// Avatar zeigt, ist Viviens Sache und bleibt es.
+test.describe("Die Quittung nennt den Ort nur bei sichtbarem Avatar", () => {
+  const KONTO = { email: "sven.adler@test.de", password: "test123" };
+
+  // (Seite, Breite, Erwartung) — die drei Fälle, die sich unterscheiden.
+  const FAELLE = [
+    ["/spieler", 390, false, "öffentliche Leiste, mobil: Avatar ausgeblendet, Profil im Klappmenü"],
+    ["/spieler", 1280, true, "öffentliche Leiste, Desktop: Avatar steht oben rechts"],
+    ["/player/update-password", 390, true, "Spieler-Leiste: Avatar steht auf jeder Breite"],
+  ];
+
+  for (const [wo, breite, avatarErwartet, warum] of FAELLE) {
+    test(`${wo} @ ${breite}px — ${warum}`, async ({ page, request }) => {
+      const res = await request.post("/api/player/playerlogin", { data: KONTO });
+      expect(res.status(), "Seed-Konto fehlt – seed-demo.mjs laufen lassen").toBe(200);
+      const { token } = await res.json();
+      // Auto-Start abschalten, bevor die Seite lädt (Begründung oben im File).
+      await request.post("/api/player/mark-welcome-seen", { data: { token } });
+
+      await page.setViewportSize({ width: breite, height: 900 });
+      await page.goto(SEITE);
+      await page.evaluate((t) => localStorage.setItem("playerAuthToken", t), token);
+      await page.goto(wo);
+      await page.evaluate(() => document.fonts.ready);
+
+      // ⚠️ WARTEN, BIS DER ANMELDEZWEIG STEHT — sonst misst die Prämisse unten
+      // die ausgeloggte Leiste. Genau daran ist der erste Anlauf gescheitert:
+      // Direkt nach `goto` gibt es den Marker auf KEINER Breite, weil er erst
+      // entsteht, wenn `getmyinfo` aufgelöst hat. Die zwei Fälle, in denen ein
+      // Avatar erwartet wird, waren dadurch rot — über eine Leiste, die völlig
+      // in Ordnung war.
+      // Gewartet wird auf die ANWESENHEIT im Dokument (nicht auf Sichtbarkeit):
+      // Im dritten Fall ist der Avatar absichtlich ausgeblendet, dort käme ein
+      // Warten auf Sichtbarkeit nie zum Ziel.
+      await page.waitForFunction(
+        () => !!document.querySelector("[data-profil-avatar]"),
+        { timeout: 20_000 },
+      );
+      // …und danach kurz zur Ruhe kommen lassen, damit die Breitenmessung nicht
+      // einen Zwischenstand des Einblendens trifft.
+      await page.evaluate(async () => {
+        let letzte = null, ruhig = 0;
+        for (let i = 0; i < 120 && ruhig < 8; i++) {
+          await new Promise((r) => requestAnimationFrame(r));
+          const el = document.querySelector("[data-profil-avatar]");
+          const s = el ? el.getBoundingClientRect().width.toFixed(2) : "-";
+          if (s === letzte) ruhig++; else ruhig = 0;
+          letzte = s;
+        }
+      });
+
+      // ---- Prämisse messen, NICHT annehmen -------------------------------
+      // Steht auf dieser Breite tatsächlich ein sichtbarer Avatar? Wenn die
+      // Erwartung hier schon nicht stimmt, prüft der Rest des Tests eine Lage,
+      // die es gar nicht gibt.
+      const avatar = await page.evaluate(() => {
+        const el = document.querySelector("[data-profil-avatar]");
+        if (!el) return { imDokument: false, sichtbar: false };
+        const r = el.getBoundingClientRect();
+        return {
+          imDokument: true,
+          sichtbar: r.width > 0 && r.height > 0,
+          display: getComputedStyle(el).display,
+        };
+      });
+      expect(
+        avatar.sichtbar,
+        `Prämisse verfehlt: Bei ${breite}px auf ${wo} war ein ${avatarErwartet ? "" : "NICHT "}` +
+          `sichtbarer Avatar erwartet, gefunden: imDokument=${avatar.imDokument}, ` +
+          `sichtbar=${avatar.sichtbar} (display: ${avatar.display}).`,
+      ).toBe(avatarErwartet);
+
+      // ---- Tour bis zur Positionsfrage -----------------------------------
+      const tour = tourLocator(page);
+      const schonOffen = await tour.isVisible().catch(() => false);
+      if (!schonOffen) {
+        const oeffner = page.getByRole("button", { name: "Plattform-Tour" });
+        await oeffner.waitFor({ state: "visible", timeout: 30_000 });
+        await expect(async () => {
+          await oeffner.click();
+          await expect(tour).toBeVisible({ timeout: 3000 });
+        }).toPass({ timeout: 60_000 });
+      }
+      await expect(tour).toBeVisible();
+
+      const ersterChip = tour.getByRole("button", { name: "Point Guard", exact: true });
+      for (let i = 0; i < 6; i++) {
+        if (await ersterChip.isVisible().catch(() => false)) break;
+        const weg = tour.getByRole("button", { name: /Ich spiele in einem Verein/i });
+        const weiter = tour.getByRole("button", { name: /^Weiter/ });
+        if (await weg.isVisible().catch(() => false)) await weg.click();
+        else if (await weiter.isVisible().catch(() => false)) await weiter.click();
+        else break;
+        await page.waitForTimeout(400); // Einblend-Übergang der Folie
+      }
+      await expect(
+        ersterChip,
+        "Der Positions-Schritt wurde nicht erreicht — dieser Test hat nichts geprüft.",
+      ).toBeVisible({ timeout: 15_000 });
+
+      // ⚠️ Einen Chip wählen, der NICHT schon aktiv ist: Ein Klick auf den
+      // aktiven wählt AB (`wert === rolle ? "" : rolle`), dann bleibt `wert`
+      // leer und die Quittung erscheint zu Recht nicht — der Test wäre beim
+      // zweiten Lauf rot, obwohl nichts kaputt ist.
+      let chip = null;
+      for (const name of ["Point Guard", "Shooting Guard", "Small Forward", "Power Forward", "Center"]) {
+        const k = tour.getByRole("button", { name, exact: true });
+        if ((await k.getAttribute("aria-pressed")) !== "true") { chip = k; break; }
+      }
+      expect(chip, "kein inaktiver Positions-Chip gefunden").not.toBeNull();
+      await chip.click();
+
+      // ---- EHRLICHKEITSSCHRANKE ------------------------------------------
+      // Ohne diese Zeile wäre der Fall „kein ‚oben rechts'" auch dann erfüllt,
+      // wenn überhaupt keine Quittung erscheint — der wichtigste der drei
+      // Fälle wäre grün, ohne je etwas gesehen zu haben.
+      const quittung = tour.getByText(/Steht in deinem Profil/i).first();
+      await expect(
+        quittung,
+        "Es ist gar keine Quittung erschienen — ohne sie sagt dieser Test nichts.",
+      ).toBeVisible({ timeout: 15_000 });
+
+      const text = (await quittung.innerText()).replace(/\s+/g, " ").trim();
+      const sagtObenRechts = /oben rechts/i.test(text);
+
+      expect(
+        sagtObenRechts,
+        avatarErwartet
+          ? `Bei ${breite}px auf ${wo} steht ein sichtbarer Avatar oben rechts, ` +
+            `die Quittung nennt den Ort aber nicht: „${text}"`
+          : `Bei ${breite}px auf ${wo} ist KEIN Avatar zu sehen (display: ` +
+            `${avatar.display}) — die Quittung sagt trotzdem „oben rechts":\n` +
+            `  „${text}"\n` +
+            `  Der Profil-Weg liegt auf dieser Breite im Klappmenü. Die Tour ` +
+            `verweist damit auf eine leere Stelle.`,
+      ).toBe(avatarErwartet);
+    });
+  }
 });

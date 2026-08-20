@@ -213,7 +213,29 @@ export function StepPosition({ weg, wert, onWert, onGespeichert, player }) {
   // Pfadliste, die still veraltet.
   const [zeigtAvatar, setZeigtAvatar] = useState(false);
   useEffect(() => {
-    setZeigtAvatar(!!document.querySelector("[data-profil-avatar]"));
+    // ⚠️ SICHTBARKEIT, nicht bloße Anwesenheit (Korrektur 20.08.2026).
+    // Hier stand `!!document.querySelector("[data-profil-avatar]")`. Das war
+    // dasselbe, solange nur `PlayerNav` den Marker trug — dessen Avatar hat
+    // keine `hidden`-Klasse und steht auf jeder Breite. Seit die öffentliche
+    // `Navbar` ihn ebenfalls trägt, dort aber als `hidden sm:flex`, fallen
+    // beide Begriffe auseinander: Unter 640px ist der Marker im Dokument und
+    // der Avatar auf `display:none`. Gemessen auf 390px/`/spieler`: Marker
+    // gefunden, Breite 0 — und die Quittung sagte trotzdem „oben rechts hin"
+    // samt Avatar-Zitat, während der Profil-Weg im Klappmenü lag.
+    // Der Kommentar unten am Zweig verlangte von Anfang an eine SICHTBARE
+    // Leiste; nur der Ausdruck hier tat es nicht.
+    // Bewacht von tests/e2e/navigationsleiste-breite.spec.mjs, Abschnitt 4.
+    const messen = () => {
+      const el = document.querySelector("[data-profil-avatar]");
+      const kasten = el?.getBoundingClientRect();
+      setZeigtAvatar(!!(kasten && kasten.width > 0 && kasten.height > 0));
+    };
+    messen();
+    // Beim Drehen des Geräts wechselt die Sichtbarkeit mit der Fensterbreite.
+    // Ohne diesen Anschluss bliebe eine einmal gezeigte Zusage stehen, nachdem
+    // der Avatar verschwunden ist — die unsichere der beiden Richtungen.
+    window.addEventListener("resize", messen);
+    return () => window.removeEventListener("resize", messen);
   }, []);
 
   async function waehlen(rolle) {
