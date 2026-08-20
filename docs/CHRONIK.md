@@ -4450,3 +4450,140 @@ neu `tests/e2e/nachrichten-karten.spec.mjs`.
 
 **Live nachgemessen (20.08.2026):** 360 → 360 · 390 → 390 · 768 → 768, jeweils **nach** dem
 Eintreffen des Feeds gemessen. Vorher bei 360 px: 426.
+
+---
+
+## 20.08.2026 — Hero-Nacharbeit: die Einblendung hat nie stattgefunden (Commit `d4f9465`)
+
+Nacharbeit an `5080879` nach zwei Gate-Runden. Beide Prüfer hatten „nicht deployfähig"
+gemeldet. **Nicht gepusht, nicht deployt** — beides war nicht beauftragt.
+
+### Blocker 1 (Kai H1): `stroke-dasharray` war ungültig
+
+`components/landing/HeroCourt.js` reichte `--len` als **nackte Zahl** durch. `app/globals.css`
+baut daraus `stroke-dasharray: var(--len) calc(var(--len) + 2px)`. Zahl plus Länge ist ungültig,
+und eine ungültige Rechnung nimmt **die ganze Deklaration** mit: Der Wert fiel auf `none`, die
+`stroke-dashoffset`-Animation hatte nichts, woran sie ziehen konnte. Die Einblendung fand auf
+**keinem** Browser statt und stand trotzdem an drei Stellen als Zusicherung (`HeroStage.js`,
+`app/globals.css`, `CLAUDE.md`).
+
+- Behoben mit `px()` statt `n()` in den `--len`-Übergaben. Gewählt wurde **reparieren**, nicht
+  streichen: Die Bewegung findet beim Ankommen statt, nicht beim Weggehen, ist reines CSS und
+  liegt vollständig in der `prefers-reduced-motion: no-preference`-Klammer.
+- **Gegenprobe** (`scratchpad/gegenprobe-zeit.mjs`, verworfen mit dem Arbeitsstand): gezeichnete
+  Bildpunkte im Feldbereich bei **gesetzter** Animationszeit. Alt: 455 (Chromium) / 474 (WebKit) /
+  479 (Firefox) zu **jedem** Zeitpunkt — es bewegt sich nichts. Neu: **0** bei t = 0 und t = 300,
+  voll bei t = 700 und t = 1400. In allen drei Engines identisch.
+
+> ⚠️ **Zwei eigene Sonden waren vorher wertlos.** Die erste zählte verschiedene
+> `stroke-dashoffset`-Werte — und die ändern sich **auch im Defekt** (48 Wechsel bei
+> `dasharray: none`): Die Animation lief, sie hatte nur nichts zu zeigen. Eine Sonde, die im
+> Defekt dieselbe Zahl liefert wie in der Abhilfe, misst den falschen Gegenstand.
+> Die zweite maß Bildpunkte nach fester Wartezeit ab `waitForSelector` und meldete WebKit als
+> abweichend (474 statt 0 bei 250 ms). Gemessen war die **Ladezeit des Browsers**, nicht die
+> Animation. Erst `animation.currentTime` machte den Messpunkt browserunabhängig.
+> Gehört zu `docs/MUSTER-ZAHLEN-DIE-LUEGEN`.
+
+**Dazu die Falle aus Kai M1 abgeräumt:** `vector-effect="non-scaling-stroke"` stand auf der
+`<g>`-Gruppe, wo es **nichts tut** — die Eigenschaft wird in SVG nicht vererbt. Die
+Längenrechnung war also nur richtig, weil das Attribut wirkungslos war; wer es „korrekt" je Pfad
+gesetzt hätte, hätte bei Maßstab 1,2 **16,7 % jeder Linie** verloren, ohne Fehlermeldung.
+Entfernt — **auch am Ring**, damit nicht ein Element skaliert und das andere nicht. Entscheidung
+Vivien: Eine Feldlinie ist Teil des gezeichneten Gegenstands, keine Kante der Oberfläche; sie
+skaliert mit (1,17 px auf 360 → 1,80 px auf 1440), das Gewicht Ring : Linie bleibt konstant 2 : 1
+statt von 2,6 : 1 auf 1,7 : 1 zu wandern.
+
+### Blocker 2 (Tobias B1): der Ring lag hinter dem Willkommens-Schild
+
+Eingeloggt auf **9 von 11 Fenstern** negativ, gemessen −44,8 px (320) und −41,7 px (360–430).
+Ursache: Die Zeichnung lag als `absolute inset-0 h-full` in der Bühne. Bei `slice` ist der
+Maßstab `max(Breite/1200, Höhe/720)` — die Höhe ist die **Bühnenhöhe**, und die wächst mit dem
+Inhalt. Eingeloggt 811,6 statt 560 px, Maßstab 0,78 → 1,13, Ring 62 px tiefer.
+**Fünfte Auflage von „Stellschraube gegen Restbetrag"** (Roadmap 20b): Der `max()`-Term deckte
+beide Maßstabs-Regime ab, aber beide nur für den ausgeloggten Inhalt.
+
+- **Nicht** den Term um einen Fall erweitert — das wäre die sechste Auflage, weil Neles Umfang
+  des eingeloggten Heros noch offen ist. Stattdessen: `ZEICHNUNG` in
+  `components/landing/HeroStage.js` gibt der Zeichnung eine eigene, inhaltsunabhängige Höhe
+  (`h-[35rem] sm:h-[38rem] lg:h-[40rem]`, dieselbe Leiter wie `min-h` der Bühne), und `pt` ist
+  in derselben Währung geschrieben: `calc(max(14.692vw, 8.5701rem) + 1.5rem)` (Korbunterkante
+  176,30 von 720 bzw. von 1200).
+- Nachgemessen auf **zwölf** Fenstern (320–1440) in **beiden** Anmeldezuständen: Abstand konstant
+  **24,0 px** ausgeloggt (Überschrift) und **27,0 px** eingeloggt (Eyebrow-Textkasten, 3 px
+  innerhalb der Zeilenbox). Vorher 22,9–27,5 ausgeloggt und −44,8 bis +18,7 eingeloggt.
+- **Gegenprobe:** Zeichnungsrahmen zur Laufzeit wieder auf `height:100%` gesetzt → −34,9 px.
+
+> ⚠️ **Der erste Anlauf war auf Desktop ein Rückschritt.** Mit fester Kastenhöhe endete auch die
+> **Zeichnung** dort: Auf 1440×900 hörten die zwei Dreipunkt-Parallelen und der Bogen **92 px vor
+> dem Abschnittsende** auf — vier abgeschnittene Linienenden mitten in leerer Fläche. Gebaut,
+> **angesehen**, verworfen. Behoben mit `overflow: visible` am SVG: Der Kasten bestimmt nur noch
+> den **Maßstab**, den **Beschnitt** macht die Bühne. Nebeneffekt, erwünscht: Auch im hohen
+> eingeloggten Hero läuft die Zeichnung bis zur Unterkante statt 300 px darüber zu enden.
+> **Kein Querlauf** dadurch — auf 24 Fällen in Chromium, WebKit und Firefox geprüft.
+
+### Gestaltung (Vivien, aus B1 heraus sichtbar geworden)
+
+Das orange gefüllte Schild „Willkommen zurück" in `components/landing/LandingHero.js` ist eine
+**Eyebrow-Zeile in `mist-400`** (8,97 : 1 auf navy-950). Grund ist nicht der Zusammenstoß —
+der ist eine Etage höher behoben —, sondern was nach dem Freistellen zu sehen war: **zwei orange
+Marken direkt übereinander**, Ring und Schild, im selben Ton, im selben Band. Von zwei
+gleichfarbigen Zeichen betont keines mehr etwas; dieselbe Regel, mit der am 19.08. der Farbakzent
+aus der ausgeloggten Überschrift verschwunden ist.
+⚠️ **Ob die Zeile überhaupt bleibt, gehört Nele** — sie sagt „Willkommen zurück", die Überschrift
+darunter „Hey Max, schön, dass du da bist!". Zweimal derselbe Gruß, wörtlich der Befund, mit dem
+sie am 19.08. das ausgeloggte Eyebrow gestrichen hat.
+
+### Zahlen und Verweise (Kai M2/M4)
+
+| Stelle | war | ist |
+|---|---|---|
+| `HeroCourt.js` `KORB_Y` | 175,8 | **159,76** (die alte Zahl stammt aus `GRUND = 60`) |
+| `HeroCourt.js` `BRETT_Y` | 148,2 | **132,20** (dito) |
+| vier weitere Konstanten | gerundet | auf zwei Stellen nachgezogen |
+| `hero-standbild.spec.mjs` Kontraste | 2,59 / 7,52 / 6,72 | **2,60 / 7,67 / 6,83** |
+| `HeroStage.js` „19,4 % / 139,8 von 720" | falsch | Rechenweg vollständig ausgeschrieben |
+
+Entfernt: `L.korb` und `L.zone` — zwei Längen **ohne Leser** (der Ring zeichnet sich nicht, er
+blendet auf; die Zonen-Zargen sind entfallen). Verweise auf das gelöschte `hero-dunk.spec.mjs`
+in `LandingHero.js` und `tests/e2e/README.md` (zwei Stellen) sowie auf das gelöschte
+`hero-dunk-blitz` in `app/globals.css` richtiggestellt. `CLAUDE.md` führte den mit `5080879`
+behobenen Perspektivbruch noch als offen und nannte „211 grün" statt 225.
+
+> ⚠️ **Zwei falsche Zusagen in meinen eigenen Kommentaren, beide ersetzt:**
+> (a) „auf jedem geprüften Fenster zwischen 23 und 27 px" — galt nur ausgeloggt.
+> (b) „die Kante des nächsten Abschnitts ragt eben noch ins Bild" — **auf 360 und 390 ist dort
+> keine Kante.** Der folgende Abschnitt trägt denselben Grund, seine ersten 80 px sind
+> Innenabstand: zwischen der letzten Linie (y ≈ 620) und dem Bildende liegen **185 px, in denen
+> nichts ist**. Das ist Patricks Befund vom 20.08. gespiegelt — oben behoben, unten unbemerkt.
+> **Nicht im Hero behoben**, weil der Streifen dem Übergang gehört; Vorschlag steht im Kommentar.
+> (c) „Es gibt keine Viewport-Einheit mehr in dieser Datei" — war beim Schreiben falsch, das `vw`
+> im Textabstand stand schon da.
+
+### Nicht aus dieser Runde, aber real
+
+**Eingeloggt auf genau 1024 px ist das Dokument 1089 px breit** — die Seite lässt sich seitlich
+wegschieben. Quelle ist der Desktop-Zweig der Navigationsleiste (`components/layout/Navbar.js`,
+Zeile ~589, `hidden lg:flex items-center gap-4`), in dieser Runde nicht angefasst; mit
+**geklemmter** Zeichnung derselbe Wert, in allen drei Browsern.
+
+### Aufgeräumt
+
+`scratchpad/KorbRuhe.orig`, `LandingCTA.orig`, `Rail.orig` aus dem Projektordner entfernt
+(zwei davon byte-gleich mit der Quelle, `KorbRuhe.orig` ein überholter Entwurf mit einer selbst
+zurückgezogenen Kennzahl). `/scratchpad/` steht jetzt in `.gitignore` — es war es nicht, und
+genau so eine Sicherungskopie hat am 18.08. `app/kontakt/page.js` überschrieben.
+
+### Offen bei Kai (bewusst nicht gebaut — Testarbeit an dieser Fläche ist ihm zugewiesen)
+
+1. Ein Wächter dafür, dass die Einblendung **stattfindet**. Prüfmaß und die zwei Sonden-Fallen
+   stehen in `tests/e2e/README.md`.
+2. Der **eingeloggte** Hero in `hero-standbild.spec.mjs` — alle sieben Fenster laufen ausgeloggt,
+   deshalb lag B1 in keinem Test.
+3. Ein Wächter gegen die Rückkehr von `vector-effect: non-scaling-stroke`.
+
+### Gates
+
+`npm run build` durch · Playwright **225 grün + 1 übersprungen** gegen die ausgelieferte Fassung
+(226 laut `--list`, 28 Dateien) · `npm run design-audit --check` ohne Abweichung zur Baseline ·
+Messungen gegen die **Production-Runtime** (`npx next start`), nicht nur gegen `next dev`.
+⚠️ **Kein Gate:** Weder Kai noch Tobias haben diesen Stand gesehen.

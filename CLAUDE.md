@@ -11,6 +11,44 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
+> ⚠️ **NICHT DEPLOYT, NUR COMMITTET (20.08.2026, `d4f9465`): DIE LADEANIMATION DES HEROS HAT NIE
+> STATTGEFUNDEN — und die Nacharbeit an `5080879` hatte selbst zwei Fehler.** Beide Gate-Blocker
+> sind behoben, Kai und Tobias haben diesen Stand noch **nicht** gesehen.
+> **(1) Die Zeichnung sollte sich beim Laden selbst zeichnen — sie tat es nie.** Eine Zahl ohne
+> Einheit (`--len`) machte die ganze CSS-Regel ungültig; das Strichmuster fiel auf `none`, die
+> Animation hatte nichts, woran sie ziehen konnte. **Sie stand trotzdem an drei Stellen als
+> Zusage** (Bauteil, Stylesheet, diese Datei). Repariert statt gestrichen; belegt an gezeichneten
+> Bildpunkten bei **gesetzter** Animationszeit in Chromium, WebKit und Firefox.
+> ⚠️ **Zwei eigene Sonden waren vorher wertlos, und das ist die Lehre:** Die erste zählte
+> `stroke-dashoffset`-Werte — die ändern sich **auch im Defekt** (48 Wechsel bei `dasharray:none`).
+> Die zweite maß nach Wartezeit ab `waitForSelector` und meldete WebKit als abweichend; gemessen
+> war die **Ladezeit**, nicht die Animation. Vierter Fehlalarm dieser Bauart im Projekt.
+> **(2) Der Ring lag hinter dem Willkommens-Schild** (eingeloggt, 9 von 11 Fenstern, bis −44,8 px).
+> Ursache: Die Zeichnung war so hoch wie die Bühne, die Bühne wächst mit dem Inhalt — also wuchs
+> die Zeichnung mit der Anmeldung. **Fünfte Auflage von „Stellschraube gegen Restbetrag"**
+> (Roadmap 20b). Nicht den Term um einen Fall erweitert (das wäre die sechste): Die Zeichnung hat
+> jetzt eine eigene, inhaltsunabhängige Höhe. Abstand auf **zwölf** Fenstern und in **beiden**
+> Anmeldezuständen konstant — 24,0 px ausgeloggt, 27,0 px eingeloggt.
+> ⚠️ **Und mein erster Anlauf war auf Desktop ein Rückschritt:** Mit fester Kastenhöhe endete auch
+> die Zeichnung dort — auf 1440×900 hörten die Dreipunkt-Linien **92 px vor dem Abschnittsende in
+> der Luft auf**. Gebaut, **angesehen**, verworfen. Gelöst über `overflow: visible`: Der Kasten
+> bestimmt nur noch den Maßstab, beschnitten wird von der Bühne.
+> **Gestaltung (Vivien):** Das orange Willkommens-Schild ist eine Eyebrow-Zeile. Nach dem
+> Freistellen standen zwei orange Marken übereinander — von zwei gleichfarbigen Zeichen betont
+> keines mehr etwas. **Ob die Zeile überhaupt bleibt, gehört Nele:** Sie sagt „Willkommen zurück",
+> die Überschrift darunter „Hey Max, schön, dass du da bist!" — zweimal derselbe Gruß, wörtlich
+> der Befund, mit dem Nele am 19.08. das ausgeloggte Eyebrow gestrichen hat.
+> ⚠️ **Ein Querlauf bleibt und ist NICHT aus dieser Runde:** Eingeloggt auf **genau 1024 px** ist
+> das Dokument **1089 px** breit — die Seite lässt sich seitlich wegschieben. Quelle ist die
+> Navigationsleiste (`components/layout/Navbar.js`, hier nicht angefasst); mit geklemmter
+> Zeichnung derselbe Wert, in allen drei Browsern.
+> ⚠️ **Offen bei Kai** (nicht gebaut, weil Testarbeit an dieser Fläche ihm zugewiesen ist):
+> ein Wächter dafür, dass die Einblendung **stattfindet** · der eingeloggte Hero in
+> `hero-standbild.spec.mjs` · ein Wächter gegen die Rückkehr von `non-scaling-stroke`.
+> Prüfmaße stehen in `tests/e2e/README.md`.
+> Build durch · Playwright **225 grün + 1 übersprungen** (226 laut `--list`, 28 Dateien) ·
+> `design-audit --check` ohne Abweichung.
+>
 > ⚠️ **NICHT DEPLOYT, NUR COMMITTET (20.08.2026): DER HERO DER STARTSEITE IST EIN STANDBILD.**
 > Patrick hat den scroll-gesteuerten Dunk vom Vortag **als Ganzes zurückgenommen** („die Hero
 > Animation sieht nicht gut aus … alles zusammen — neu ansetzen"). Kein Push, kein Deploy —
