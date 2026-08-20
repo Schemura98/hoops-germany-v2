@@ -200,8 +200,27 @@ body {
        Strichkappe wird daraus ein voller Punkt. Genau dieser Punkt stand am
        Vorgänger über der Taste. */
     stroke-dasharray: var(--len) calc(var(--len) + 2px);
-    animation: hero-court-zeichnen 900ms cubic-bezier(0.33, 1, 0.68, 1)
-      var(--delay, 0ms) both;
+    /* `--dur` statt einer festen Zahl: Die Aufstellungsmarken sind 6 Einheiten
+       lang. Mit denselben 900 ms wie die 1.200 Einheiten lange Grundlinie
+       waechst so ein Strich ueber fast eine Sekunde aus dem Nichts — das sieht
+       nicht nach Zeichnen aus, sondern nach einem haengenden Haar. Sie
+       bekommen deshalb 240 ms. */
+    animation: hero-court-zeichnen var(--dur, 900ms)
+      cubic-bezier(0.33, 1, 0.68, 1) var(--delay, 0ms) both;
+  }
+
+  /* ⚠️ DIESE REGEL HAT GEFEHLT, UND DAS WAR AM STANDBILD NICHT ZU SEHEN.
+     Die neutrale Zone (der ausgefuellte Block an der Zonenkante) trug die
+     Klasse `hero-court-block` — und es gab dazu keine Deklaration. Folge: Die
+     zwei Bloecke standen ab dem ERSTEN Bild in voller Staerke da, waehrend die
+     Zonenlinie, an der sie sitzen, noch gar nicht gezeichnet war. Zwei
+     Farbkloetze schwebten rund eine Sekunde lang im Leeren.
+     Gefunden wurde das NICHT durch eine Messung, sondern durch ein Standbild
+     mitten in der Einblendung (t = 480 ms). Es ist die Fehlerklasse „Uebergabe
+     an nichts" (CLAUDE.md, Kai K4) in ihrer sichtbaren Form: ein Klassenname,
+     der wie eine Zusicherung aussieht und keine ist. */
+  .hero-court .hero-court-block {
+    animation: hero-court-korb 300ms ease-out 900ms both;
   }
 
   /* Gestaffelt in der Reihenfolge, in der ein Mensch ein Spielfeld aufzeichnen
@@ -220,6 +239,6 @@ body {
      Ein sich zeichnender 33-Einheiten-Kreis ist eine Zappelei; der eine
      orange Punkt der Seite soll ankommen, nicht kribbeln. */
   .hero-court [data-court-korb] {
-    animation: hero-court-korb 420ms ease-out 760ms both;
+    animation: hero-court-korb 420ms ease-out 960ms both;
   }
 }

@@ -105,6 +105,21 @@ async function messen(page) {
       }
     }
 
+    // ⚠️ ANKER IST SEIT DEM 20.08.2026 DIE LADEZONE, NICHT DER RING.
+    // Die Zeichnung zeichnet die Ladezone jetzt regelkonform mit (Halbkreis
+    // r = 1,30 m um die Korbmitte). Damit ist der Ring nicht mehr das TIEFSTE
+    // Element des Korbbereichs — der Bogen reicht 1,075 m weiter. Am Ring
+    // gemessen liefe die Ueberschrift in den Bogen hinein.
+    // Die REGEL ist unveraendert: Der Inhalt haengt am tiefsten Punkt dessen,
+    // was ueber ihm steht, nicht am Zufall.
+    const lade = buehne.querySelector("[data-court-lade]");
+    if (!lade) {
+      throw new Error(
+        "[data-court-lade] fehlt – ohne diesen Griff misst P1 gegen den Ring " +
+          "und meldet einen Abstand, den es so nicht gibt",
+      );
+    }
+    const lb = lade.getBoundingClientRect();
     const kb = korb.getBoundingClientRect();
     return {
       chromeUnten,
@@ -114,6 +129,7 @@ async function messen(page) {
       h1Oben: h1.getBoundingClientRect().top,
       h1Text: (h1.textContent || "").trim().slice(0, 60),
       korb: { top: kb.top, bottom: kb.bottom, left: kb.left, right: kb.right },
+      lade: { top: lb.top, bottom: lb.bottom },
       fensterBreite: window.innerWidth,
       dokumentBreite: document.documentElement.scrollWidth,
     };
@@ -179,7 +195,7 @@ test.describe("Hero-Standbild – P1: der Inhalt hängt am Ring, nicht am Zufall
   // Er überlebt jede Fensterhöhe, jede Breite und beide Anmeldezustände.
 
   for (const [breite, hoehe] of FENSTER) {
-    test(`${breite}×${hoehe}: der Inhalt beginnt höchstens ${ANKER_MAX} px unter dem Ring`, async ({
+    test(`${breite}×${hoehe}: der Inhalt beginnt höchstens ${ANKER_MAX} px unter dem Korbbereich`, async ({
       page,
     }) => {
       await page.setViewportSize({ width: breite, height: hoehe });
@@ -187,10 +203,10 @@ test.describe("Hero-Standbild – P1: der Inhalt hängt am Ring, nicht am Zufall
       const m = await messen(page);
       schrankenPruefen(expect, m);
 
-      const anker = m.erstesInhalt.top - m.korb.bottom;
+      const anker = m.erstesInhalt.top - m.lade.bottom;
       expect(
         anker,
-        `Zwischen der Ringunterkante (y=${m.korb.bottom.toFixed(0)}) und dem ` +
+        `Zwischen der Ladezonen-Unterkante (y=${m.lade.bottom.toFixed(0)}) und dem ` +
           `ersten Inhalt („${m.erstesInhalt.text}", y=${m.erstesInhalt.top.toFixed(0)}) ` +
           `liegen ${anker.toFixed(0)} px. Der Inhalt hat sich vom Ring gelöst — ` +
           `Überschrift und Taste rutschen nach unten, oben bleibt Fläche übrig. ` +
@@ -488,27 +504,38 @@ test.describe("Hero-Standbild – P5: derselbe Hero, angemeldet (Tobias M1)", ()
         "Die gemessene Überschrift ist nicht die personalisierte",
       ).toContain(vorname);
 
-      const abstand = m.erstesInhalt.top - m.korb.bottom;
+      // ⚠️ ZWEI VERSCHIEDENE ABSTAENDE, UND SIE ZU TRENNEN IST SEIT DEM
+      // 20.08.2026 noetig, weil die Zeichnung die Ladezone mitzeichnet:
+      //   · `abstandRing` beantwortet die KONTRAST-Frage — beruehrt das eine
+      //     orange Element einen Buchstaben? Bezug ist und bleibt der Ring.
+      //   · `anker` beantwortet die KOMPOSITIONS-Frage — haengt der Inhalt am
+      //     Korbbereich oder am Inhaltsumfang? Bezug ist dessen tiefster
+      //     Punkt, und das ist die Ladezone.
+      // Vorher trugen beide Fragen dieselbe Zahl. Das ging nur so lange gut,
+      // wie Ring und Korbbereich unten zusammenfielen.
+      const abstandRing = m.erstesInhalt.top - m.korb.bottom;
+      const anker = m.erstesInhalt.top - m.lade.bottom;
 
       // Untere Schranke — Tobias' B1 in seiner reinen Form. Gemessen lag er
       // hier bei −41,7 px (360–430) und −44,8 px (320).
       expect(
-        abstand,
+        abstandRing,
         `ANGEMELDET: Der Ring endet bei y=${m.korb.bottom.toFixed(0)}, der erste ` +
           `Inhalt („${m.erstesInhalt.text}") beginnt bei ` +
-          `y=${m.erstesInhalt.top.toFixed(0)} – Abstand ${abstand.toFixed(0)} px. ` +
+          `y=${m.erstesInhalt.top.toFixed(0)} – Abstand ${abstandRing.toFixed(0)} px. ` +
           `Bei Überlappung steht Text auf #F07A27 (2,60 : 1). Das ist Tobias' ` +
           `Blocker B1 vom 20.08.2026, und er trat NUR angemeldet auf.`,
       ).toBeGreaterThanOrEqual(ANKER_MIN);
 
       // Obere Schranke — dieselbe Regel wie P1, damit die Komposition auch
-      // angemeldet am Ring hängt und nicht am Inhaltsumfang. Genau daran ist
-      // die Vorfassung gescheitert: Die Zeichnung wuchs mit dem Inhalt.
+      // angemeldet am Korbbereich hängt und nicht am Inhaltsumfang. Genau
+      // daran ist die Vorfassung gescheitert: Die Zeichnung wuchs mit dem
+      // Inhalt.
       expect(
-        abstand,
-        `ANGEMELDET: Zwischen Ring und erstem Inhalt liegen ` +
-          `${abstand.toFixed(0)} px. Die Komposition hängt wieder am ` +
-          `Inhaltsumfang statt am Ring.`,
+        anker,
+        `ANGEMELDET: Zwischen Ladezonen-Unterkante und erstem Inhalt liegen ` +
+          `${anker.toFixed(0)} px. Die Komposition hängt wieder am ` +
+          `Inhaltsumfang statt am Korbbereich.`,
       ).toBeLessThanOrEqual(ANKER_MAX);
 
       // Der Ring bleibt im Bild — angemeldet wie abgemeldet.
