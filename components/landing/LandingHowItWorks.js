@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Aussenlinie from "@/components/landing/Aussenlinie";
 import axios from "axios";
 import { PiUserBold, PiUsersBold, PiTrophyBold } from "react-icons/pi";
 import { getPlayerToken } from "@/lib/clientAuth";
@@ -78,7 +79,8 @@ export default function LandingHowItWorks() {
     ];
 
     return (
-      <section className="bg-navy-950 py-20 px-4">
+      <section className="relative bg-navy-950 py-20 px-4">
+      <Aussenlinie />
         <div className="max-w-5xl mx-auto text-center">
           <h2 className="font-display uppercase tracking-tight text-3xl md:text-4xl font-black mb-4 text-paper-50">
             Deine nächsten Schritte
@@ -118,7 +120,8 @@ export default function LandingHowItWorks() {
   }
 
   return (
-    <section className="bg-navy-950 py-20 px-4">
+    <section className="relative bg-navy-950 py-20 px-4">
+      <Aussenlinie />
       <div className="max-w-4xl mx-auto text-center">
         <h2 className="font-display uppercase tracking-tight text-3xl md:text-4xl font-black mb-4 text-paper-50">So funktionierts</h2>
         <p className="text-mist-400 mb-16">In 3 einfachen Schritten dabei</p>

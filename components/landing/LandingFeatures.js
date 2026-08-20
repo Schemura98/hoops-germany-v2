@@ -7,7 +7,8 @@ import {
   PiNewspaperClippingBold,
 } from "react-icons/pi";
 import Reveal from "@/components/ui/Reveal";
-import FeatureProgressRail from "@/components/landing/FeatureProgressRail";
+import Dribbelweg from "@/components/landing/Dribbelweg";
+import Aussenlinie from "@/components/landing/Aussenlinie";
 import FeatureFocus from "@/components/landing/FeatureFocus";
 import {
   ProfileMock,
@@ -111,6 +112,7 @@ export default function LandingFeatures() {
     // Anzeige gescheitert (zweiter Befund Tobias, 12.08.2026). `clip` schneidet
     // identisch ab, ohne einen Scroll-Container zu erzeugen.
     <section className="relative bg-navy-950 py-20 px-4 overflow-x-clip">
+      <Aussenlinie />
       {/* A1 (Mechanik-Katalog, docs/SPIELFELD-STRECKE-2026-08-12.md-Umfeld):
           Die Überschrift läuft ohne Zeilenumbruch über beide Bildränder hinaus.
           Bewusst AUSSERHALB von `max-w-6xl mx-auto` platziert: Der Full-Bleed-
@@ -128,7 +130,12 @@ export default function LandingFeatures() {
           mehr, kuerzerer weniger, nichts davon ist von Hand fuer "Eine Saison,
           sechs Spielzüge" nachjustiert. Verifiziert mit `tmp/a1-check.mjs`
           (Original-Text UND eine doppelt so lange Test-Ueberschrift). */}
-      <div className="relative left-1/2 w-screen -translate-x-1/2 mb-6">
+      {/* `data-feld-durchbruch`: Dieser Block ist randlos (`w-screen`) und
+          kreuzt die Aussenlinie deshalb auf JEDER Breite – das ist eine
+          Eigenschaft der Bauart, keine des Textes. Die Aussenlinie setzt
+          hier aus und darunter wieder an; die y-Grenzen liest sie am
+          Element ab, nicht aus einer eingetragenen Zahl. */}
+      <div data-feld-durchbruch className="relative left-1/2 w-screen -translate-x-1/2 mb-6">
         {/* Zweite, von Reveal UNBERÜHRTE Zentrierungs-Ebene: `inline-block` +
             `left-1/2` + `-translate-x-1/2` schrumpft die Box auf die
             tatsächliche Textbreite (Voraussetzung für symmetrischen Überstand)
@@ -182,7 +189,12 @@ export default function LandingFeatures() {
           </Reveal>
         </div>
       </div>
-      <div className="max-w-6xl mx-auto">
+      {/* `relative` ist die Bezugsfläche des Dribbelwegs: Zeilen, Spalten und
+          Zeichnung teilen sich dadurch EIN Koordinatensystem (offsetLeft/
+          offsetTop zeigen alle auf diesen Kasten). Ohne das müsste jede Lage
+          umgerechnet werden – und genau solche Umrechnungen waren an der
+          Vorgängerin die Quelle der Versatz-Befunde. */}
+      <div data-strecke className="relative max-w-6xl mx-auto">
         <Reveal
           as="p"
           delay={80}
@@ -191,7 +203,7 @@ export default function LandingFeatures() {
           Vom eigenen Profil bis zur Liga-Tabelle: So läuft eine Saison bei Hoops Germany
           ab – Schritt für Schritt, mitten in der Basketball-Community NRW.
         </Reveal>
-        <FeatureProgressRail labels={FEATURES.map((f) => f.eyebrow)} />
+        <Dribbelweg labels={FEATURES.map((f) => f.eyebrow)} />
 
         <FeatureFocus className="space-y-16 md:space-y-24">
           {FEATURES.map((f, i) => {
@@ -201,6 +213,7 @@ export default function LandingFeatures() {
             return (
               <div
                 key={f.title}
+                data-feature-zeile
                 className={`flex flex-col md:flex-row items-center gap-8 md:gap-16 ${
                   reversed ? "md:flex-row-reverse" : ""
                 }`}

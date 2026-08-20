@@ -6,6 +6,7 @@ import LandingFeatures from "@/components/landing/LandingFeatures";
 import LandingHowItWorks from "@/components/landing/LandingHowItWorks";
 import LandingCTA from "@/components/landing/LandingCTA";
 import NewsWidget from "@/components/NewsWidget";
+import Aussenlinie from "@/components/landing/Aussenlinie";
 
 export default function LandingPage() {
   return (
@@ -38,8 +39,9 @@ export default function LandingPage() {
             von außen anspringbar sein (Footer-Weg „Basketball-News").
             `scroll-mt-28` hält den Abschnitt unter der haftenden Navigation;
             ohne das läge die Überschrift beim Anspringen dahinter. */}
-        <section id="news" className="bg-navy-800 py-20 px-4 scroll-mt-28">
-          <div className="max-w-6xl mx-auto">
+        <section id="news" className="relative bg-navy-800 py-20 px-4 scroll-mt-28">
+          <Aussenlinie />
+          <div className="relative max-w-6xl mx-auto">
             <NewsWidget />
           </div>
         </section>

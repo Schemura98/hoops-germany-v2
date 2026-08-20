@@ -1,151 +1,108 @@
 import { test, expect } from "@playwright/test";
 
-// ══ DIE ENDMARKE DER FORTSCHRITTS-LEISTE RAGT NICHT IN DIE NAVIGATION ═══════
+// ══ DER HAFTENDE STRECKEN-STREIFEN BLEIBT UNTER DER NAVIGATION ══════════════
 //
-// Anlass: Kais Befund N4 — Tobias hatte gemeldet, dass die Endmarke am Ende
-// der mobilen Fortschritts-Leiste in die Navigationsleiste hineinragt. Sie
-// wurde daraufhin auf 28x20 px verkleinert, und danach hat **kein einziger
-// Test diese Einpassung bewacht**. Wer die Marke wieder vergroessert, holt
-// Tobias' Befund zurueck — und bekommt dabei eine gruene Suite.
+// ⚠️ DIESE DATEI HAT AM 21.08.2026 IHREN GEGENSTAND GEWECHSELT, NICHT IHREN
+// ZWECK. Sie bewachte bis dahin die Korb-Endmarke am Ende der mobilen
+// Fortschritts-Leiste (Kais Befund N4: Sie ragte in die Navigationsleiste, es
+// waren gemessen nur 4 px Platz). Die Endmarke ist mit dem Umbau auf den
+// Dribbelweg entfallen — sie war der DRITTE Korb der Seite und stand in
+// Schrägansicht, während Hero und Abschluss den Korb von oben zeigen.
 //
-// ⚠️ WARUM DAS EINE ECHTE LUECKE WAR UND KEINE FORMSACHE: Der Platz ist
-// gemessen **4 px** (20.08.2026, auf 360/375/390/430/768 identisch — die
-// Leiste haftet bei `top-16`, die Navigationsleiste endet bei 65). Vier Pixel
-// sind kein Spielraum, das ist ein Rundungsfehler. Jede Vergroesserung der
-// Marke, jede zusaetzliche Zeile Innenabstand und jede geaenderte Navbar-Hoehe
-// verbraucht ihn sofort und lautlos.
+// Der Defekt, den sie bewachte, ist damit aber NICHT verschwunden: Der
+// haftende Streifen selbst kann weiter in die Navigationsleiste ragen, wenn
+// jemand ihm eine Zeile, mehr Innenabstand oder eine größere Schrift gibt.
+// Deshalb misst die Datei jetzt den Streifen. Sie ersatzlos zu löschen hätte
+// eine bewachte Kante wieder unbewacht gemacht.
 //
-// ⚠️ UND WARUM DIESE DATEI IM HAFTENDEN ZUSTAND MISST. Ungescrollt steht die
-// Leiste irgendwo mitten im Dokument und hat beliebig viel Luft nach oben —
-// dort ist JEDE Groesse unauffaellig. Der Defekt existiert nur, WENN die
-// Leiste haftet. Ein Test, der ohne Scrollen misst, ist auf genau den einen
-// Zustand blind, den er pruefen soll. (Dieselbe Klasse wie die
-// Sichtbarkeitssonde ohne Vorscroll, CLAUDE.md Roadmap 20f.)
-//
-// ⚠️ EHRLICHKEITSSCHRANKE. Es gibt ZWEI Endmarken im Baum (mobile Leiste,
-// Desktop-Spalte); je nach Breite ist eine per `display:none` auf 0x0. Wer
-// die falsche greift, misst ein Element ohne Ausdehnung und bekommt ein
-// gruenes Ergebnis ueber null Messpunkte — das Muster, das in diesem Projekt
-// schon mehrfach als „gruener Test mit null Messframes" protokolliert ist.
-// Deshalb wird vorab geprueft, dass ueberhaupt etwas Sichtbares gemessen wird.
+// ⚠️ UND WARUM SIE IM HAFTENDEN ZUSTAND MISST (unverändert der Kern):
+// Ungescrollt steht der Streifen irgendwo mitten im Dokument und hat beliebig
+// viel Luft nach oben — dort ist JEDE Größe unauffällig. Der Defekt existiert
+// nur, WENN er haftet. Ein Test ohne Scrollen ist auf genau den einen Zustand
+// blind, den er prüfen soll.
 
 const MOBIL = [
   [360, 800, "kleinste verbreitete Android-Breite"],
   [375, 812, "iPhone"],
   [390, 844, "iPhone"],
   [430, 932, "grosses Handy"],
-  [768, 1024, "Tablet hochkant"],
-  [1024, 768, "knapp unter xl — immer noch der Balken"],
+  [640, 900, "knapp unter md — immer noch der Streifen"],
 ];
 
-const DESKTOP = [
-  [1280, 800, "genau xl — ab hier die Spalte"],
-  [1440, 900, "grosser Desktop"],
-];
-
-// Ergebnis einer Messung im haftenden Zustand.
-async function markeImHaftzustand(page) {
+async function streifenImHaftzustand(page) {
   return page.evaluate(async () => {
     const bild = () =>
       new Promise((f) => requestAnimationFrame(() => requestAnimationFrame(f)));
+    const streifen = document.querySelector("[data-strecke-streifen]");
+    if (!streifen) return { gefunden: false };
+    const r0 = streifen.getBoundingClientRect();
+    if (r0.width === 0 || r0.height === 0) return { gefunden: false, ausgeblendet: true };
 
-    const sichtbar = (el) => {
-      const r = el.getBoundingClientRect();
-      return r.width > 0 && r.height > 0;
-    };
-    const alle = [...document.querySelectorAll("[title='Ziel: Nachspielzeit']")];
-    const marke = alle.find(sichtbar);
-    if (!marke) return { gefunden: false, imBaum: alle.length };
-
-    const sektion = marke.closest("section");
+    const sektion = streifen.closest("section");
     const sr = sektion.getBoundingClientRect();
-    // Mitten in die Strecke — dort haftet die Leiste sicher.
-    window.scrollTo(0, sr.top + window.scrollY + sr.height * 0.45);
+    // ⚠️ AUF EINEN GANZZAHLIGEN WERT SCROLLEN. Mit einem gebrochenen Ziel
+    // steht die haftende Leiste nicht bei 0, sondern bei 1,38 px — gemessen,
+    // nicht vermutet. Die Schranke „top <= 1" war damit ein Münzwurf, und der
+    // Test meldete „die Leiste haftet nicht", während sie einwandfrei haftete.
+    // Dieselbe Klasse wie „feste Zahl gegen einen Restbetrag" (CLAUDE.md 20b).
+    window.scrollTo(0, Math.round(sr.top + window.scrollY + sr.height * 0.45));
     await bild();
     await bild();
 
-    const m = marke.getBoundingClientRect();
+    const m = streifen.getBoundingClientRect();
     const nav = document.querySelector("nav, header");
     const nr = nav ? nav.getBoundingClientRect() : null;
-    // Haftet die Navigationsleiste ueberhaupt oben? Wenn nicht, misst dieser
-    // Fall nicht das, was er zu messen glaubt.
-    const navHaftet = nr ? nr.top <= 1 && nr.bottom > 0 : false;
-
     return {
       gefunden: true,
-      imBaum: alle.length,
-      markeOben: Number(m.top.toFixed(1)),
-      markeUnten: Number(m.bottom.toFixed(1)),
-      breite: Number(m.width.toFixed(1)),
+      oben: Number(m.top.toFixed(1)),
       hoehe: Number(m.height.toFixed(1)),
       navUnten: nr ? Number(nr.bottom.toFixed(1)) : null,
-      navHaftet,
-      fensterHoehe: window.innerHeight,
+      // 2 px Toleranz: Auch bei ganzzahligem Scroll bleibt die Rundung auf
+      // Geräte-Pixel als Rest.
+      navHaftet: nr ? nr.top <= 2 && nr.bottom > 0 : false,
     };
   });
 }
 
-test.describe("Endmarke der Fortschritts-Leiste: Einpassung (Kai N4)", () => {
+test.describe("Haftender Strecken-Streifen: Einpassung", () => {
   for (const [breite, hoehe, wozu] of MOBIL) {
-    test(`${breite}x${hoehe} (${wozu}): die Marke bleibt unter der Navigation`, async ({
+    test(`${breite}x${hoehe} (${wozu}): der Streifen bleibt unter der Navigation`, async ({
       page,
     }) => {
       await page.setViewportSize({ width: breite, height: hoehe });
-      await page.goto("/", { waitUntil: "networkidle" });
+      await page.goto("/", { waitUntil: "domcontentloaded" });
+      await page.waitForSelector("[data-strecke-streifen]");
 
-      const m = await markeImHaftzustand(page);
+      const m = await streifenImHaftzustand(page);
 
-      expect(
-        m.gefunden,
-        `Keine sichtbare Endmarke gefunden (${m.imBaum} im Baum). Ohne diese ` +
-          `Schranke waere der Fall gruen — ueber null Messpunkte.`,
-      ).toBe(true);
-      expect(
-        m.breite,
-        "Die gemessene Endmarke hat Breite 0 — es wurde der ausgeblendete Zweig gegriffen.",
-      ).toBeGreaterThan(0);
+      // Ehrlichkeitsschranke: Ohne sie wäre der Fall grün, wenn der Streifen
+      // gar nicht gezeichnet wird — grüner Test über null Messpunkte.
+      expect(m.gefunden, "Kein sichtbarer Strecken-Streifen gemessen.").toBe(true);
+      expect(m.hoehe, "Der Streifen hat Höhe 0.").toBeGreaterThan(0);
       expect(
         m.navHaftet,
         "Die Navigationsleiste haftet nicht oben — dieser Fall misst nicht den " +
-          "Zustand, in dem der Defekt ueberhaupt auftreten kann.",
+          "Zustand, in dem der Defekt überhaupt auftreten kann.",
       ).toBe(true);
-
       expect(
-        m.markeOben,
-        `Die Endmarke beginnt bei y=${m.markeOben}, die Navigationsleiste endet ` +
-          `bei y=${m.navUnten}. Sie ragt also ${(m.navUnten - m.markeOben).toFixed(1)} px ` +
-          `darunter — Tobias' Befund ist zurueck. Verfuegbar sind hier nur ` +
-          `rund 4 px; die Marke misst ${m.breite}x${m.hoehe} px.`,
-      ).toBeGreaterThanOrEqual(m.navUnten);
+        m.oben,
+        `Der Streifen beginnt bei y=${m.oben}, die Navigationsleiste endet bei ` +
+          `y=${m.navUnten} — er ragt darunter.`,
+      ).toBeGreaterThanOrEqual(m.navUnten - 2);
     });
   }
 
-  for (const [breite, hoehe, wozu] of DESKTOP) {
-    test(`${breite}x${hoehe} (${wozu}): die Marke steht vollstaendig im Fenster`, async ({
-      page,
-    }) => {
-      await page.setViewportSize({ width: breite, height: hoehe });
-      await page.goto("/", { waitUntil: "networkidle" });
-
-      const m = await markeImHaftzustand(page);
-
-      expect(m.gefunden, "Keine sichtbare Endmarke gefunden").toBe(true);
-      expect(m.breite, "Die gemessene Endmarke hat Breite 0").toBeGreaterThan(0);
-
-      // Am Desktop haengt die Marke am Fuss einer mittig haftenden Spalte.
-      // Dort ist die Navigationsleiste nicht die Grenze, sondern der
-      // Fensterrand: Eine Marke, die unten heraushaengt, ist das Ziel einer
-      // Reise, das niemand sieht (CLAUDE.md Roadmap 20 d, dieselbe Sache).
-      expect(
-        m.markeUnten,
-        `Die Endmarke endet bei y=${m.markeUnten}, das Fenster ist ` +
-          `${m.fensterHoehe} px hoch — sie haengt unten heraus.`,
-      ).toBeLessThanOrEqual(m.fensterHoehe);
-      expect(
-        m.markeOben,
-        `Die Endmarke beginnt bei y=${m.markeOben} und liegt damit hinter der ` +
-          `Navigationsleiste (endet bei ${m.navUnten}).`,
-      ).toBeGreaterThanOrEqual(m.navUnten);
+  test("ab md gibt es den Streifen nicht mehr — dort läuft der Weg im Mittelkanal", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1024, height: 800 });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await page.waitForSelector("[data-feature-zeile]");
+    const sichtbar = await page.evaluate(() => {
+      const s = document.querySelector("[data-strecke-streifen]");
+      return s ? getComputedStyle(s).display !== "none" : false;
     });
-  }
+    // Zwei Fortschrittsanzeigen nebeneinander wären schlechter als eine.
+    expect(sichtbar).toBe(false);
+  });
 });

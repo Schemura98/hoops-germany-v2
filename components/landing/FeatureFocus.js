@@ -18,7 +18,7 @@ import { useEffect, useRef, useState } from "react";
 //
 // Ein Listener für die ganze Strecke, rAF-gedrosselt, direkte Style-Mutation
 // ohne Re-Render – dieselbe Disziplin wie in HeroScrollStage.js und
-// FeatureProgressRail.js.
+// Dribbelweg.js.
 const RUHE_SCALE = 0.955;
 const RUHE_OPACITY = 0.45;
 // Abstand vom Bildschirmmittelpunkt (als Anteil der Fensterhöhe), ab dem eine
