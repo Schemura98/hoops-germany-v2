@@ -5,7 +5,7 @@ import Link from "next/link";
 import { PiArrowRightBold } from "react-icons/pi";
 import { getPlayerToken } from "@/lib/clientAuth";
 import Reveal from "@/components/ui/Reveal";
-import { KorbRuhe } from "@/components/landing/HeroDunk";
+import KorbRuhe from "@/components/landing/KorbRuhe";
 
 // Abschluss-CTA der Landing-Page – nur für ausgeloggte Besucher.
 // Eingeloggte User brauchen die Registrieren/Anmelden-Aufforderung nicht.

@@ -1,70 +1,33 @@
-"use client";
+// ══ DER RUHENDE KORB IM ABSCHLUSS-BLOCK ═════════════════════════════════════
+//
+// ⚠️ AM 20.08.2026 UNVERAENDERT AUS HeroDunk.js HERAUSGELOEST — nicht neu
+// gestaltet. HeroDunk.js ist mit der Ruecknahme der Hero-Choreografie
+// entfallen (Auftrag Patrick: „die Hero Animation … alles zusammen — neu
+// ansetzen"); dieser Korb war der einzige Teil der Datei, der ausserhalb des
+// Heros benutzt wird, naemlich in components/landing/LandingCTA.js.
+//
+// ⚠️ ES IST EINE VERSCHIEBUNG, KEINE ENTSCHEIDUNG — und der offene Punkt
+// gehoert benannt, nicht verschwiegen: Patricks Ruecknahme nannte
+// ausdruecklich zwei Perspektiven in einem Bild (Netz als Schraegansicht,
+// Spielfeldlinien flach). Genau diese Schraegansicht steht hier weiter, waehrend
+// der neue Hero streng in Draufsicht zeichnet. Auf EINER Seite stehen damit
+// jetzt beide Projektionen — eine Etage tiefer als der beanstandete Fall,
+// aber dieselbe Sache.
+// Patricks Auftrag lautete „fokussiere dich nur darauf [den Hero]", deshalb
+// ist hier nichts angefasst. Die Angleichung des Abschluss-Blocks an die
+// Draufsicht ist ein eigener, zu entscheidender Auftrag.
+//
+// Alles Folgende ist Originalcode aus HeroDunk.js: die Konstanten und
+// Hilfsfunktionen, die `KorbRuhe` braucht, und die Funktion selbst.
+// Der Hochformat-Block `HOCH` ist NICHT mitgekommen — er gehoerte
+// ausschliesslich der Hero-Buehne. Eine mitgeschleppte Konstante ohne
+// Verwendung ist genau das Muster, das Kai als K4 gemeldet hat.
 
-import { forwardRef } from "react";
-
-// ══ „DER ABSCHLUSS" — DER DUNK ALS LINIENZEICHNUNG ══════════════════════════
-//
-// Spezifikation: docs/HERO-DUNK-KONZEPT-2026-08-19.md (Vivien, 19.08.2026),
-// Auftrag Patrick. Ersetzt `PlayDiagram.js` (Taktiktafel) UND den gerenderten
-// Hero-Ball (`BallSprite`, 32-Bild-Sequenz, 104 KB). Der Hero lädt danach
-// wieder null Bytes Bilddaten.
-//
-// ⚠️ WARUM EINE LINIE UND KEINE FLÄCHE — DER SATZ, DER ACHT ROADMAP-PUNKTE
-// GEGENSTANDSLOS MACHT:
-// Der alte Ball war eine deckende Scheibe. Er durfte keinen Buchstaben
-// berühren, also musste der Controller zur Laufzeit wissen, wo jede einzelne
-// Textzeile steht — daraus kamen Kastenbau, Lückensuche, Verankerung,
-// Konturkanal, Abdunkelung und der Einflug-Schiedsrichter (Roadmap 20 bis 20h).
-// Eine Linie darf jeden Buchstaben kreuzen: Ein 3 px breiter Strich über einem
-// 96 px hohen Buchstaben berührt rund 3 % seiner Höhe. Damit entfällt die
-// gesamte Messmaschine, nicht nur ein Teil davon.
-//
-// ⚠️ ES WIRD KEIN KÖRPER GEZEICHNET (Entscheidung Patrick, 19.08.2026).
-// Gezeichnet wird die NOTATION — Bahn, Ring, Netz, Ball. Der Mensch entsteht
-// aus der Bahn und kommt nie ins Bild. Zwei Gründe: Eine Linienfigur ist
-// entweder Clipart oder braucht mehrere Illustrationsrunden; und die stilisierte
-// Dunk-Silhouette ist der Branchenreflex, dessen prominentester Vertreter eine
-// eingetragene Marke ist. Das Weglassen ist die Autorenentscheidung, keine
-// Sparmaßnahme — es setzt uns zugleich von der Branche ab.
-// ⚠️ AUCH DIE HAND IST WEGGEFALLEN, UND ZWAR NACH DEM BLICK AUFS GEBAUTE
-// STÜCK. Das Konzept sah zwei kurze Striche am oberen Ende des Zugs vor
-// (Unterarm + zweite Hand). Auf 360 px gesehen lesen sich zwei Striche am Ende
-// einer langen Kurve nicht als Hand, sondern als Gabel — der Zug bekam eine
-// Spitze mit zwei Zinken.
-// Der Verzicht ist nicht nur die Reparatur eines Details, er ist konsequenter:
-// Der erste Satz dieser Datei nennt die Notation „Bahn, Ring, Netz, Ball".
-// Die Hand stand in dieser Aufzählung gar nicht. Sie war der letzte Rest
-// Körper in einer Zeichnung, deren ganze Idee das Weglassen des Körpers ist.
-// Jetzt sitzt der BALL an der Spitze des Zugs — die Linie trägt ihn nach oben,
-// und was ihn trägt, denkt sich der Betrachter.
-
-// ── Deckkraft ───────────────────────────────────────────────────────────────
-//
-// ⚠️ `ARC_MAX` IST VON 0,38 AUF 0,62 GESTIEGEN, UND DAS IST GERECHNET, NICHT
-// GESCHMACK. Nach der WCAG-Relativluminanzformel auf navy-950 (#0B1220) mit
-// brand-500 (#F07A27) und paper-50 (#F5F7FA):
-//
-//   wirksame Deckkraft   Linie gegen Grund   paper-50 ÜBER der Linie
-//   0,279 (Feld)                  1,54 : 1                 11,32 : 1
-//   0,341 (Netz)                  1,75 : 1                  9,95 : 1
-//   0,434 (Ring in Ruhe)          2,15 : 1                  8,13 : 1
-//   0,558 (Zug)                   2,81 : 1                  6,20 : 1
-//   0,620 (Abschluss)             3,21 : 1                  5,43 : 1
-//   0,720                         3,64 : 1        4,42 : 1  ← AA-BRUCH
-//
-// Die Obergrenze ist hart und hängt an ZWEI Farbwerten und sonst nichts — nicht
-// am Wortlaut, nicht an der Breite, nicht an der Fensterhöhe. Genau die
-// Eigenschaft, die dem Ball-Prüfmaß gefehlt hat. Reserve bis zum AA-Bruch:
-// 0,10 wirksame Deckkraft (rund 16 %).
-// ⚠️ Wer `brand-500` aufhellt oder den Grund ändert, muss sie NEU RECHNEN.
-// Nachrechnen: die Tabelle stammt aus einer Ableitung, nicht aus einer Messung
-// am Bildschirm — `tests/e2e/hero-dunk.spec.mjs` (P1) misst sie am gerenderten
-// Pixel gegen.
-export const ARC_MAX = 0.62;
+const ARC_MAX = 0.62;
 
 // Ebenen als Anteil von ARC_MAX. Die Zeichnung hat drei Tiefen, damit „Grund",
 // „Bewegung" und „Ereignis" ohne Farbwechsel unterscheidbar sind.
-export const EBENE = {
+const EBENE = {
   feld: 0.45, // die ruhende Fläche, auf der es stattfindet
   netz: 0.55, // hängt am Ring, gehört zum Abschluss, ist aber Textur
   ringRuhe: 0.7, // ⚠️ ABWEICHUNG VOM KONZEPT, s. u.
@@ -96,7 +59,7 @@ export const EBENE = {
 // (ABSCHLUSS_MS), unabhängig davon, ob und wie weiter gescrollt wird.
 // Danach bleibt die Zeichnung stehen: Ein Spielzug, der stattgefunden hat, hat
 // stattgefunden.
-export const ABSCHLUSS_MS = 420;
+const ABSCHLUSS_MS = 420;
 
 // Zeichenfenster in `td` (dem eigenen Fortschritt der Zeichnung, s.
 // HeroScrollStage.js). Sie stehen hier und nicht im Controller, damit die
@@ -147,7 +110,7 @@ const F = {
 // Anordnung" ist mehr wert als ein Bogen — sobald die Fassungen sich in der
 // Zahl der Elemente unterscheiden, sind es zwei Zeichnungen und nicht mehr
 // zwei Anordnungen einer.
-export const RING_HEBUNG = F.ringHebung;
+const RING_HEBUNG = F.ringHebung;
 
 // ⚠️ DAS NETZ ZEICHNET SICH NICHT — ES STEHT AB DEM ERSTEN BILD, ZUSAMMEN MIT
 // DEM RING. Das ist eine Abweichung vom Konzept (dort fiel es gestaffelt bei
@@ -188,7 +151,7 @@ export const RING_HEBUNG = F.ringHebung;
 //   Querformat 1040×700  = 1,486  über 1,268–1,739  → höchstens 14,7 %
 // Daraus die Sicherheitsränder: tragende Elemente liegen innerhalb der inneren
 // 76 % (Hochformat) bzw. 84 % (Querformat) der viewBox.
-export const VIEWBOX = {
+const VIEWBOX = {
   hoch: { w: 500, h: 800, sicher: 0.76 },
   quer: { w: 1040, h: 700, sicher: 0.84 },
 };
@@ -257,44 +220,6 @@ const kreisPfad = (cx, cy, r) =>
 
 // ── Hochformat (< 1 : 1) ────────────────────────────────────────────────────
 // Sicherer Bereich: x ∈ [60, 440], y ∈ [88, 712].
-const HOCH = (() => {
-  const ring = { cx: 340, cy: 528, rx: 76, ry: 20 };
-  // ⚠️ NETZTIEFE 74, NICHT 92. Am gebauten Stück nachgemessen: Bei 92 (also
-  // 59 % des Ringdurchmessers) liest sich das Gebilde als Papierkorb. Ein
-  // echtes Basketballnetz ist rund 40 % des Ringdurchmessers lang.
-  const netz = { ncy: 602, nrx: 53, nry: 13 };
-  // ⚠️ BALLRADIUS = 0,40 · RINGRADIUS, UND DAS IST EINE PROPORTION, KEINE
-  // Ästhetik. Der erste Bau hatte 0,22 – am gerenderten Bild gemessen las sich
-  // der Ball als Murmel im Korb. In Wirklichkeit misst ein Basketball 24 cm bei
-  // 45 cm Ringdurchmesser, also **0,53**; er passt gerade eben durch, und genau
-  // das ist die Dramatik eines Dunks. 0,40 ist der bewusste Kompromiss: deutlich
-  // als Ball lesbar, ohne den Ring zu verschlucken.
-  // ⚠️ Wer den Ring verbreitert, zieht diesen Wert mit – er hängt am Radius,
-  // damit das Verhältnis nicht still zurückkippt.
-  const ballR = Math.round(ring.rx * 0.4);
-  const ball = { cx: 330, cy: 440, r: ballR };
-  return {
-    ring,
-    ballFall: 554 - ball.cy, // Ruhelage im Netz, knapp unter dem Ring
-    netzOrigin: ring.cy, // Bezugslinie der Netzbeule: die Ringebene
-    netzUnten: netz.ncy + netz.nry,
-    // Das Feld darf über den Rand hinauslaufen – es ist der Boden, kein Motiv.
-    // Die Zone öffnet sich nach unten: In der Ansicht von hinter dem Korb
-    // fluchtet der Boden nach OBEN weg, und der Ring hängt davor.
-    feld: {
-      grund: "M-20 556 L520 556",
-      zone: "M242 556 L180 760 L500 760 L438 556",
-    },
-    netz: netzPfade({ ...ring, ...netz }),
-    // ⚠️ DER ZUG MUSS DIE RINGELLIPSE FREI LASSEN. Er kreuzt die Ringebene
-    // (y = 528) bei x ≈ 240, der linke Ringrand liegt bei 264 – 24 Einheiten
-    // Luft. Wer den Ring verschiebt oder verbreitert, prüft diesen Wert nach:
-    // eine Linie, die durch die Ellipse läuft, liest sich als Zeichenfehler,
-    // nicht als Bahn.
-    zug: "M84 764 C132 700 164 626 196 556 C228 504 284 482 330 471",
-    ball: kreisPfad(ball.cx, ball.cy, ballR),
-  };
-})();
 
 // ⚠️ DER BALL LÄUFT AUF DEM HANDY HINTER DER PRIMÄRTASTE VORBEI — UND DAS
 // BLEIBT SO (Entscheidung Vivien zu Tobias' Befund B1, 19.08.2026).
@@ -403,261 +328,7 @@ const QUER = (() => {
 // teuer geworden ist.
 const STRICH = { feld: 1.5, netz: 2, zug: 3, ring: 3, ball: 3 };
 
-// ⚠️ `pathLength="1"` FUNKTIONIERT HIER NICHT — UND DAS IST DER TEUERSTE FUND
-// DIESES UMBAUS, WEIL ER STILL IST.
-// Der bewährte Trick lautet: `pathLength="1"` normiert die Pfadlänge auf 1,
-// `stroke-dasharray="1"` deckt sie genau ab, und `stroke-dashoffset` von 1 auf 0
-// zeichnet den Pfad – ohne `getTotalLength()`, also ohne Geometriezugriff je
-// Bild. Genau so stand es im Konzept und genau so machte es `PlayDiagram.js`.
-//
-// **Zusammen mit `vector-effect: non-scaling-stroke` gilt die Normierung nicht.**
-// Der Browser rechnet das Strichmuster dann im Gerätemaß: Aus „dasharray 1"
-// wird 1 px an, 1 px aus – eine feine Punktlinie über den GANZEN Pfad, und
-// zwar unabhängig vom Versatz.
-//
-// ⚠️ WARUM DAS GEFÄHRLICH IST: Es sieht fast richtig aus. Jede noch nicht
-// gezeichnete Linie steht als halbheller Geist im Bild, und wer die Seite
-// nicht Bild für Bild vergleicht, hält es für Absicht. Kein Fehler in der
-// Konsole, kein kaputtes Layout. Gefunden wurde es nur, weil im ersten Bild
-// zwei Diagonalen standen, wo per Konstruktion nichts stehen durfte.
-// Gegenprobe im Browser: `vector-effect` entfernt → die Linie verschwindet.
-//
-// ⚠️ WARUM ES IN `PlayDiagram.js` NIE AUFFIEL: Dort lief die ganze Tafel bei
-// Deckkraft 0,171 – ein Geist bei 17 % Deckkraft ist unsichtbar. Bei 0,62 ist
-// er es nicht. Der Fehler war also vermutlich schon vorher da und wurde erst
-// durch die Anhebung von `ARC_MAX` sichtbar.
-//
-// ⚠️⚠️ UND DERSELBE FEHLER KAM IN ZWEITEM KOSTÜM ZURÜCK — mein erster Anlauf
-// hat ihn nur halb behoben, und der halbe Fix war auf dem Hauptgerät grün.
-// Ich hatte `non-scaling-stroke` STEHEN LASSEN und nur die Länge absolut
-// gesetzt. Das Strichmuster gilt unter `non-scaling-stroke` aber im GERÄTEMASS:
-// Bei Maßstab 1,231 (1280×800) ist der Pfad 704,6 × 1,231 = 867 Geräteeinheiten
-// lang, das Muster aber nur 704,6 — **19 % jeder Linie fehlten**.
-// Sichtbar war das als offener Ball und als Zug, der kurz vor dem Korb aufhört.
-// **Auf 360 px war es unsichtbar**, weil der Maßstab dort 0,92 beträgt: Ein
-// Muster, das LÄNGER ist als der Pfad, deckt ihn vollständig.
-// Und mein Test war grün — er prüfte die Länge in Benutzereinheiten, also in
-// der falschen Einheit. **Dieselbe Fehlerklasse wie „Bühne statt Sichtfeld"
-// aus CLAUDE.md Roadmap 20b: richtig gemessen, in der falschen Einheit.**
-//
-// Die Abhilfe ist deshalb zweiteilig, und beide Teile sind nötig:
-//   1. `vector-effect` fällt weg (s. Kommentar an `STRICH`) – damit gilt das
-//      Strichmuster in Benutzereinheiten, und die Rechnung stimmt per Bauart.
-//   2. Der Controller (HeroScrollStage.js) misst jede Pfadlänge EINMAL beim
-//      Aufsetzen (`getTotalLength()`, funktioniert auch an der per
-//      `display:none` ausgeblendeten Fassung – nachgemessen) und fährt
-//      `stroke-dasharray`/`stroke-dashoffset` absolut.
-// Ein Geometriezugriff je Pfad beim Aufsetzen, keiner je Bild.
-//
-// ⚠️ `strokeDasharray` MUSS im Ruhezustand `none` SEIN, nicht `1`. Sonst
-// rendert das Standbild für `prefers-reduced-motion` als gepunktete Linie –
-// derselbe Fehler, nur dauerhaft und genau für die Nutzergruppe, die ihn am
-// wenigsten nachvollziehen kann. Dieses `none` setzt seit dem 19.08.2026 die
-// Media-Query in app/globals.css, nicht mehr eine React-Eigenschaft.
-
-// ⚠️ EINE ZAHL, DIE GRÖSSER IST ALS JEDER PFAD — UND WARUM SIE ES SEIN MUSS.
-// `stroke-dasharray: 4000` heißt „4000 Einheiten Strich, 4000 Einheiten Lücke",
-// `stroke-dashoffset: 4000` schiebt das Muster so weit, dass der Pfad komplett
-// in der LÜCKE beginnt. Solange der Pfad kürzer als 4000 Benutzereinheiten ist,
-// ist er dadurch vollständig unsichtbar — ohne JavaScript, ohne `pathLength`,
-// ohne Rechnung.
-// ⚠️ WARUM NICHT `pathLength="1"` PLUS `dasharray="1"`, DER LEHRBUCHWEG: Der
-// Controller fährt danach ABSOLUTE Längen in Benutzereinheiten. Bliebe
-// `pathLength` stehen, würde der Browser jeden dieser Werte noch einmal mit der
-// echten Pfadlänge skalieren — die Rechnung stimmte dann nirgends. Genau die
-// Einheitenverwechslung, die diesen Hero schon zweimal gekostet hat.
-// ⚠️ Der längste Pfad der Zeichnung ist der Zug im Querformat mit rund 730
-// Einheiten. `tests/e2e/hero-erstes-bild.spec.mjs` misst jeden Pfad gegen diese
-// Zahl — wer die Geometrie vergrößert, bekommt es dort gesagt und nicht durch
-// eine Linie, die im ersten Bild plötzlich sichtbar ist.
-const VERSTECKT = 4000;
-
-function Zeichenpfad({ d, von, bis, breite }) {
-  return (
-    <path
-      data-dunk-path
-      data-from={von}
-      data-to={bis}
-      d={d}
-      // ⚠️ DAS IST DER AUSGELIEFERTE ZUSTAND, NICHT EIN ÜBERGANG (Befund Kai K1,
-      // 19.08.2026). Hier stand vorher der FERTIGE Zug — der Server lieferte
-      // also die Pointe, das JavaScript nahm sie zurück und erzählte sie danach
-      // noch einmal. Die Zeichnung beginnt jetzt für alle gleich: ungezeichnet.
-      // Das Standbild für `prefers-reduced-motion` kommt aus der Media-Query,
-      // die keinen ersten Render abwarten muss.
-      strokeDasharray={VERSTECKT}
-      strokeDashoffset={VERSTECKT}
-      strokeWidth={breite}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  );
-}
-
-// ⚠️ DAS STANDBILD FÜR `prefers-reduced-motion` STEHT NICHT MEHR HIER, SONDERN
-// ALS MEDIA-QUERY IN app/globals.css (`.hero-dunk` + `[data-dunk-path]`).
-// Der Grund ist Kais Befund K1 und er ist grundsätzlicher Natur: Eine Bedingung,
-// die schon im ausgelieferten HTML gelten muss, darf nicht an einem React-Render
-// hängen — der findet beim Server-Rendern statt, wo `matchMedia` niemanden
-// fragen kann. Wer es dort trotzdem versucht, muss RATEN, und geraten wurde
-// zugunsten des Standbilds: also bekam es jeder.
-//
-// ⚠️ DAS STANDBILD IST EIN GEWÄHLTES EINZELBILD, KEINE ANGEHALTENE ANIMATION.
-// Prinzip aus dem Trend-Sweep (Referenz 3): erst die Bewegung entwerfen, dann
-// das stehende Bild als eines ihrer Bilder ableiten. Gewählt ist der
-// SCHEITELPUNKT — vollständige Zeichnung, Ball und Hand über dem Ring, der
-// Abschluss findet nicht statt. Ein Körper im höchsten Punkt seines Sprungs ist
-// das lesbarste Standbild, das der Sport kennt; es IST seiner Natur nach ein
-// Standbild, niemand erwartet, dass es sich bewegt. Der Endzustand („Ball im
-// Netz") wäre dagegen ein Logo und verschenkte die Pointe.
-// ⚠️ Ehrlich benannt: Wer reduzierte Bewegung eingestellt hat, sieht den Ball
-// nie durchgehen. Das ist vertretbar – die Zeichnung ist `aria-hidden` und
-// trägt keine Information.
-function Fassung({ geo, viewBox, klasse }) {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox={`0 0 ${viewBox.w} ${viewBox.h}`}
-      fill="none"
-      preserveAspectRatio="xMidYMid slice"
-      className={`hero-dunk pointer-events-none absolute inset-0 h-full w-full ${klasse}`}
-      // ⚠️ `--dunk-abschluss` WIRD HIER GESETZT, DAMIT DIE MEDIA-QUERY IN
-      // app/globals.css DIE ZAHL NICHT ZWEITES MAL KENNEN MUSS. Das Standbild
-      // für `prefers-reduced-motion` hebt den Ring auf die Abschluss-Ebene; die
-      // Regel steht in CSS (sie muss ohne JavaScript gelten), der WERT steht
-      // weiter hier bei den anderen Ebenen. Eine Zahl, zwei Sprachen — genau die
-      // Doppelung, aus der in dieser Datei schon dreimal ein Fehler wurde.
-      style={{ opacity: ARC_MAX, "--dunk-abschluss": EBENE.abschluss }}
-    >
-      {/* Das Feld – der Boden, auf dem es stattfindet. Läuft bewusst über den
-          Rand hinaus: eine Grundlinie, die im Bild endet, ist ein Strich.
-          ⚠️ ES ZEICHNET SICH NICHT MEHR, ES STEHT (19.08.2026, Begründung
-          ausführlich oben bei `F`). Deshalb kein `Zeichenpfad`: Diese zwei
-          Linien tragen kein `data-dunk-path`, der Controller fasst sie nie an,
-          und sie sind im ausgelieferten HTML vollständig vorhanden. Zusammen
-          mit Ring und Netz ergeben sie das erste Bild – eine Szene, kein
-          Fragment. */}
-      <g
-        stroke="#F07A27"
-        strokeOpacity={EBENE.feld}
-        strokeWidth={STRICH.feld}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d={geo.feld.grund} />
-        <path d={geo.feld.zone} />
-      </g>
-
-      {/* Der Ring – als EINZIGES schon im ersten Bild da, ohne Scrollen.
-          Warum er so früh kommt: Eine aufsteigende Linie ohne sichtbares Ziel
-          ist ein beliebiger Schwung. Erst wenn der Korb dasteht, wird aus der
-          Linie ein Zug ZUM KORB. Das ist Dramaturgie und kostet nichts.
-          ⚠️ Er zeichnet sich nicht, er HEBT sich – die Deckkraft läuft von
-          EBENE.ringRuhe auf EBENE.abschluss. */}
-      <ellipse
-        data-dunk-ring
-        cx={geo.ring.cx}
-        cy={geo.ring.cy}
-        rx={geo.ring.rx}
-        ry={geo.ring.ry}
-        stroke="#F07A27"
-        // ⚠️ IMMER DIE RUHELAGE (Befund Kai K1). Hier stand ein Fragezeichen auf
-        // `gezeichnet` – und weil das beim ersten Render `true` war, lieferte der
-        // Server den Ring auf ABSCHLUSS-Stärke aus: die Schlusspointe als
-        // Begrüßung. Die Hebung auf `EBENE.abschluss` gehört dem Scroll (hier)
-        // bzw. der Media-Query (`prefers-reduced-motion`, app/globals.css).
-        strokeOpacity={EBENE.ringRuhe}
-        strokeWidth={STRICH.ring}
-      />
-
-      {/* Das Netz. Eigene Gruppe, weil der Abschluss sie um die RINGEBENE
-          staucht und dehnt (Beule + Zurückschnappen). Die Bezugslinie steht in
-          `geo.netzOrigin`, damit die Beule am Ring hängt und nicht in der Luft. */}
-      <g
-        data-dunk-netz
-        data-origin={geo.netzOrigin}
-        stroke="#F07A27"
-        strokeOpacity={EBENE.netz}
-      >
-        {geo.netz.map((d, i) => (
-          <path key={i} d={d} strokeWidth={STRICH.netz} strokeLinecap="round" />
-        ))}
-      </g>
-
-      {/* Der Zug – die Hauptbewegung, ihr allein gehört die halbe Strecke.
-          ⚠️ Er läuft von unten links nach oben rechts, also GEGEN die
-          Scrollrichtung. Das ist hier richtig, anders als beim fallenden Ball,
-          der bewusst mitlief: Ein Sprung ist eine Bewegung gegen die
-          Schwerkraft, und das Auge liest den Widerstand. */}
-      <g stroke="#F07A27" strokeOpacity={EBENE.zug}>
-        <Zeichenpfad
-          d={geo.zug}
-          von={F.zug[0]}
-          bis={F.zug[1]}
-          breite={STRICH.zug}
-        />
-      </g>
-
-      {/* Der Ball – die Abschluss-Ebene. */}
-      <g stroke="#F07A27" strokeOpacity={EBENE.abschluss}>
-        {/* Eigene Gruppe: den Ball verschiebt der Abschluss, sonst nichts.
-            ⚠️ KEINE NÄHTE. Ein Kreis in dieser Strichsprache IST ein Ball,
-            sobald ein Ring danebensteht. Nähte machen daraus ein Icon – und ein
-            Icon in einer Notation ist ein Genrebruch, genau wie ein Foto in
-            einem Diagramm. */}
-        <g data-dunk-ball data-fall={geo.ballFall}>
-          <Zeichenpfad
-            d={geo.ball}
-            von={F.ball[0]}
-            bis={F.ball[1]}
-            breite={STRICH.ball}
-          />
-        </g>
-      </g>
-    </svg>
-  );
-}
-
-// ⚠️ BEIDE FASSUNGEN WERDEN GERENDERT, DIE MEDIA-QUERY BLENDET EINE AUS.
-// Der Controller schreibt in beide (26 statt 13 Pfade je Bild). Das ist bewusst:
-// Die Alternative wäre, zur Laufzeit zu entscheiden, welche Fassung „gilt" –
-// also ein zweiter Ort, an dem die Schwelle steht, und die Sorte Doppelung, aus
-// der in dieser Datei schon dreimal ein Fehler geworden ist. Ein Stilschreiben
-// auf ein `display:none`-Element kostet keinen Layoutzugriff.
-// Die Klassen stehen in app/globals.css.
-// ⚠️ DIE PROP `gezeichnet` IST AM 19.08.2026 ENTFALLEN (Befund Kai K1).
-// Sie war als Schalter für `prefers-reduced-motion` gedacht und hat in der
-// Praxis etwas anderes getan: Weil der Zustand beim ERSTEN Render (auch
-// serverseitig) noch nicht feststand, wurde vorsichtshalber das Standbild
-// gerendert – und damit bekamen es ALLE. Die Reihenfolge war „Pointe zeigen,
-// zurücknehmen, erzählen".
-// Ein Zustand, der ohne JavaScript gelten muss, gehört nicht in eine
-// React-Eigenschaft. Er steht jetzt als Media-Query in app/globals.css und
-// braucht keinen ersten Render, den er abwarten könnte.
-const HeroDunk = forwardRef(function HeroDunk(_props, ref) {
-  return (
-    <div ref={ref} className="pointer-events-none absolute inset-0">
-      <Fassung geo={HOCH} viewBox={VIEWBOX.hoch} klasse="hero-dunk-hoch" />
-      <Fassung geo={QUER} viewBox={VIEWBOX.quer} klasse="hero-dunk-quer" />
-    </div>
-  );
-});
-
-export default HeroDunk;
-
-// ── Der Korb als Ruhebild ───────────────────────────────────────────────────
-//
-// Ersetzt `SwishSequence` im Abschluss-Block (45 Rasterbilder, 191 KB, Deckkraft
-// 0,28) durch dieselbe Geometrie als Vektor. Ring und Netz, sonst nichts – kein
-// Zug, keine Hand, kein Ball.
-//
-// ⚠️ WARUM NUR RING UND NETZ: Auf der Startseite gab es bisher DREI Momente, in
-// denen ein Ball in einen Korb geht (Hero-Ball an der Taste, Landung am Ende der
-// Fortschritts-Leiste, SwishSequence hier). Ein Dunk im Hero machte daraus vier.
-// Das ist kein Motiv mehr, das ist ein Tick. Der Abschluss-Block bekommt deshalb
-// das ZIEL, nicht noch einen Ballwurf: Der Korb steht da, das Angebot steht
-// darüber.
-export function KorbRuhe({ className = "" }) {
+export default function KorbRuhe({ className = "" }) {
   // ⚠️ ENGE viewBox UND `meet`, NICHT `slice` WIE IM HERO — am gebauten Stück
   // korrigiert. Mit der Hero-viewBox (1040×700) und `slice` blieb auf 360 px
   // vom Korb ein Bogenstück am rechten Rand übrig: Der Abschluss-Block ist viel
@@ -709,3 +380,4 @@ export function KorbRuhe({ className = "" }) {
     </svg>
   );
 }
+

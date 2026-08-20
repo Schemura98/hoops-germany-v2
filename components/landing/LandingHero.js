@@ -61,7 +61,7 @@ function rueckkehrSignal(notifications) {
 }
 import Reveal from "@/components/ui/Reveal";
 import SplitFlap from "@/components/ui/SplitFlap";
-import HeroScrollStage from "@/components/landing/HeroScrollStage";
+import HeroStage from "@/components/landing/HeroStage";
 
 // Einheitliche Hero-Buttons: ein primärer (orange) + gleichartige „Ghost"-Buttons,
 // damit der Button-Block farblich ruhig und konsistent wirkt.
@@ -75,8 +75,10 @@ const HERO_W = "w-full sm:w-52";
 // personalisierten Bereich für eingeloggte Spieler, sonst die öffentliche
 // Aufforderung.
 //
-// Die Fläche selbst liefert `HeroScrollStage` (scroll-gezeichneter Dunk,
-// Konzept docs/HERO-DUNK-KONZEPT-2026-08-19.md).
+// Die Fläche selbst liefert `HeroStage` (Standbild mit der Spielfeld-Zone,
+// Konzept docs/HERO-NEUANSATZ-2026-08-20.md). ⚠️ Der scroll-gesteuerte Dunk
+// ist am 20.08.2026 zurückgenommen worden (Patrick: „alles zusammen — neu
+// ansetzen"); es gibt im Hero keine scroll-gebundene Bewegung mehr.
 //
 // ⚠️ `inhaltRef` IST AM 19.08.2026 ENTFALLEN. Sie reichte den Inhaltsblock an
 // die Bühne durch, damit der alte Ball zur Laufzeit wusste, wo jede Textzeile
@@ -128,7 +130,7 @@ export default function LandingHero() {
   const teamSlug = player?.team?.slug || null;
 
   return (
-    <HeroScrollStage>
+    <HeroStage>
       <>
         {checked && player ? (
           <>
@@ -360,6 +362,6 @@ export default function LandingHero() {
           </>
         )}
       </>
-    </HeroScrollStage>
+    </HeroStage>
   );
 }

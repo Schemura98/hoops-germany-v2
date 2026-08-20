@@ -11,6 +11,48 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
+> ⚠️ **NICHT DEPLOYT, NUR COMMITTET (20.08.2026): DER HERO DER STARTSEITE IST EIN STANDBILD.**
+> Patrick hat den scroll-gesteuerten Dunk vom Vortag **als Ganzes zurückgenommen** („die Hero
+> Animation sieht nicht gut aus … alles zusammen — neu ansetzen"). Kein Push, kein Deploy —
+> beides war nicht beauftragt. Entwurf: `docs/HERO-NEUANSATZ-2026-08-20.md`,
+> Sweep: `docs/INSPIRATION-HERO-2026-08-20.md`.
+> **Der schwerste Befund war kein Animationsfehler, sondern Arithmetik:** Die Bühne stand auf
+> `calc(100vh - 4rem)` und zog damit **64 px** ab, wo **109 px** abzuziehen waren (Navigationsleiste
+> **plus** Testphase-Band). Sie war 45 px zu hoch, ragte unten aus dem Bild, und weil ihr Inhalt in
+> genau dieser zu hohen Box zentriert wurde, rutschte er nach unten. Ergebnis auf 360 px:
+> **rund 215 px leere Fläche über der Überschrift — über 40 % der sichtbaren Höhe, im oberen
+> Drittel.** Die naheliegende Korrektur (4 rem → 6,8 rem) wurde **bewusst nicht** gemacht: Sie
+> wäre nach der Testphase wieder falsch, und zwar wieder unsichtbar falsch. Die Bühne trägt jetzt
+> **keine Viewport-Einheit mehr**.
+> Gebaut: `components/landing/HeroCourt.js` (Spielfeld-Zone streng in Draufsicht, aus FIBA-Maßen
+> gerechnet) + `components/landing/HeroStage.js`. Entfallen: `HeroDunk.js` und
+> `HeroScrollStage.js` (1.041 Zeilen), die Weiche `hero-dunk-hoch`/`-quer` und der Ring-Farbblitz.
+> **Null JavaScript im Hero**, null Bilddaten; die Zeichnung zeichnet sich **einmal beim Laden**
+> (900 ms, reines CSS, `no-preference`-Klammer → Grundzustand ist die fertige Zeichnung).
+> ⚠️ **DER WICHTIGSTE SATZ, UND ER BETRIFFT DIE ARBEITSWEISE:** Der zurückgenommene Hero war auf
+> zwei Nachkommastellen **vermessen und nie angesehen**. Die halb leere obere Bildhälfte stand in
+> keinem Bericht, und **keiner der damals grünen Tests konnte sie sehen** — keiner hat gefragt, ob
+> das erste Bild oben etwas ZEIGT. Bewacht jetzt durch `tests/e2e/hero-standbild.spec.mjs` (23
+> Fälle, ersetzt `hero-dunk.spec.mjs` + `hero-erstes-bild.spec.mjs`). **Beide Gegenproben
+> gefahren:** Zeichnung ausgeblendet → P1 auf allen sieben Fenstern rot; `pt` fest → P2 rot **nur
+> auf 1440** (−19 px), grün auf den anderen sechs.
+> ⚠️ **UND DIE VIERTE AUFLAGE VON „STELLSCHRAUBE GEGEN RESTBETRAG" (Roadmap 20b), diesmal meine:**
+> `pt` in `rem` ist gesetzt, die Korblage ist ein Restbetrag aus Fenstermaßen — bei `slice` ist der
+> Maßstab das **Maximum** aus Bühnenhöhe/720 **und Fensterbreite/1200**. Mit festem `pt` gemessen:
+> 360–430 px → 23 px Abstand, 768×1024 → 9 px, **1440×900 → −20 px, der Korb lag auf der
+> Überschrift** (weißer Text auf `#F07A27` = **2,59 : 1**). Behoben mit
+> `max(10rem, calc(14.7vw + 1.5rem))`; nachgemessen 23–27 px auf allen sieben Fenstern.
+> **Mein Auge hatte „eng" gesagt, die Messung sagte „überlappt" — Ansehen und Messen fangen
+> verschiedene Fehlerklassen.**
+> ⚠️ **Offen, bewusst nicht angefasst:** `KorbRuhe` im Abschluss-Block wurde **unverändert** nach
+> `components/landing/KorbRuhe.js` herausgelöst. Damit stehen auf EINER Seite jetzt beide
+> Projektionen — Hero in Draufsicht, Abschluss-Block in Schrägansicht. Das ist genau der
+> Perspektivbruch, den Patrick beanstandet hat, eine Etage tiefer. Auftrag lautete „nur den Hero".
+> ⚠️ **Kein Gate.** Weder Kai noch Tobias haben diesen Stand gesehen. Volle Suite **211 grün +
+> 1 übersprungen** gegen die ausgelieferte Fassung.
+> ⚠️ **Nebenbefund, nicht mein Auftrag:** `data-spur="desktop"` in der Feature-Strecke liefert
+> `d=""` — ein leerer Pfad mit `pathLength="1"` im ausgelieferten Blatt.
+>
 > ✅ **DEPLOYT: `04ba621`** (20.08.2026) – **Die Nachrichten-Karten der Startseite ragten auf
 > Handys über den Bildschirm.** Auf 360 px war die Seite **426 px breit**, ließ sich seitlich
 > wegschieben, und jede der sechs Nachrichten verlor rechts ein Stück. Live nachgemessen nach
