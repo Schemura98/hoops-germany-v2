@@ -144,6 +144,7 @@ test.describe("B) Anmeldung mit feindlichem ?next=", () => {
   for (const nutzlast of DURCH_DAS_FORMULAR) {
     test(`Login mit next=${JSON.stringify(nutzlast)} bleibt auf unserem Host`, async ({
       page,
+      baseURL,
     }) => {
       await page.goto(`/login?next=${encodeURIComponent(nutzlast)}`);
       await page.fill('input[name="email"]', SEED_ADMIN.email);
@@ -153,11 +154,19 @@ test.describe("B) Anmeldung mit feindlichem ?next=", () => {
       // Auf die Weiterleitung warten – NICHT auf eine feste Zeit.
       await page.waitForURL("**/player/newsfeed", { timeout: 60_000 });
 
+      // ⚠️ Der Vergleichswert kommt aus dem LÄUFER, nicht aus dieser Datei.
+      // Hier stand bis zum 20.08.2026 fest "http://localhost:3000". Auf jedem
+      // anderen Port meldete dieser Test dann „die Weiterleitung hat die Seite
+      // verlassen" – ein Sicherheitsalarm über einen Angriff, den es nicht gab,
+      // ausgelöst durch die eigene Testeinstellung. Isolierte Arbeitsbäume
+      // laufen auf eigenen Ports (Projektregel seit dem 15.08.2026); ein fest
+      // verdrahteter Host macht dort JEDE Zahl falsch.
+      const unserHost = new URL(baseURL).origin;
       const url = new URL(page.url());
       expect(
         url.origin,
-        `Nach der Anmeldung stand der Browser auf ${url.origin} – die Weiterleitung hat die Seite verlassen`,
-      ).toBe("http://localhost:3000");
+        `Nach der Anmeldung stand der Browser auf ${url.origin} statt auf ${unserHost} – die Weiterleitung hat die Seite verlassen`,
+      ).toBe(unserHost);
       expect(url.pathname).toBe("/player/newsfeed");
 
       // Ehrlichkeitsschranke: Die Anmeldung muss wirklich stattgefunden haben.
@@ -187,6 +196,7 @@ test.describe("B) Anmeldung mit feindlichem ?next=", () => {
 
   test("die Startseite verlinkt weiterhin ein Ziel, das die Prüfung besteht", async ({
     page,
+    baseURL,
   }) => {
     // Der Vorbehalt aus dem Auftrag, am gebauten Stück statt am Quelltext:
     // Was LandingCTA tatsächlich verlinkt, muss die Prüfung bestehen.
@@ -201,9 +211,12 @@ test.describe("B) Anmeldung mit feindlichem ?next=", () => {
       "Kein Link mit ?next= auf der Startseite gefunden – der Test prüft ins Leere",
     ).toBeGreaterThan(0);
     for (const href of ziele) {
-      const next = new URL(href, "http://localhost:3000").searchParams.get(
-        "next",
-      );
+      // Auch hier der Host aus dem Läufer. Diese Stelle war harmlos – gelesen
+      // wird nur der Suchparameter, die Basis dient bloß dem Auflösen eines
+      // relativen Verweises. Sie bleibt trotzdem nicht stehen: Ein zweiter
+      // fester Host in derselben Datei ist die Vorlage, an der sich der
+      // nächste Zusatz orientiert.
+      const next = new URL(href, baseURL).searchParams.get("next");
       expect(
         istSichererPfad(next),
         `Die Startseite verlinkt ${href}, dessen next=${next} von der Prüfung abgewiesen würde – dieser Weg bräche still`,

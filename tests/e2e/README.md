@@ -14,8 +14,9 @@ kompletten Lauf ab**, wenn sie nicht auf `hoopsgermany` zeigt (niemals
 ## Voraussetzungen (einmalig)
 
 ```bash
-# 1. Test-Runner installieren (bewusst --no-save: package.json bleibt unberührt)
-npm install --no-save @playwright/test@1.62.1
+# 1. Abhängigkeiten (enthält @playwright/test — seit `1a00846` regulär
+#    in package.json und Lockfile, NICHT mehr --no-save)
+npm install
 
 # 2. Browser installieren
 npx playwright install chromium
@@ -34,11 +35,66 @@ Benötigte Seed-Accounts (kommen aus `seed-demo.mjs`, PW `test123`):
 npx playwright test -c tests/e2e/playwright.config.mjs
 ```
 
-Der Dev-Server (`npm run dev`, Port 3000) wird automatisch gestartet; läuft
-bereits einer, wird er wiederverwendet (`reuseExistingServer`). Es wird **nie**
-`npm run build` ausgeführt (Projektregel: Build nie parallel zu `next dev`).
+Das **baut** und startet dann `next start` — also die Fassung, die auch auf dem
+Server läuft. Der Build kostet rund **12 Sekunden** (warm), der ganze Lauf rund
+**3,5 Minuten**.
 
 Einzelne Gruppe: `npx playwright test -c tests/e2e/playwright.config.mjs -g "Dual-Auth"`
+
+### ⚠️ Warum gebaut wird (Befund H1, Roadmap 23)
+
+Bis zum 20.08.2026 startete die Konfiguration fest `npm run dev`. Damit konnte
+die Suite eine ganze Fehlerklasse **per Konstruktion nicht sehen**: alles, was
+nur in der ausgelieferten Fassung auftritt — statische Vorab-Erzeugung,
+Hydration, `NODE_ENV=production`. Die Projektregel „vor Deploy immer die
+Production-Runtime testen" und das Werkzeug widersprachen sich.
+
+Wie real das ist, zeigt `d841c4b`: Die Startseite kam mit der **fertigen**
+Zeichnung beim Nutzer an und nahm sie beim Laden zurück. Jeder Browser-Test war
+zu Recht grün — sie fragten alle die Seite *nach* dem Laden. Gefunden hat es
+erst ein Test, der das **rohe Server-Blatt** liest.
+
+### Stellschrauben
+
+| Variable | Wirkung |
+|---|---|
+| `E2E_PORT=3210` | Eigener Port für isolierte Arbeitsbäume. Vorgabe 3000. |
+| `E2E_MODUS=dev` | `next dev` statt der ausgelieferten Fassung. Schnell, aber **kein Gate-Beleg**. |
+| `E2E_BUILD=auto` | Baut nur, wenn eine Quelldatei jünger ist als der Build. |
+| `E2E_BUILD=aus` | Baut nie. Nutzt den vorhandenen Build, wie er ist. |
+
+Jede dieser Entscheidungen wird beim Start **gedruckt**. `E2E_BUILD=aus` warnt
+zusätzlich laut, wenn eine Quelldatei jünger ist als der Build — ein
+übersprungener Build, der doch veraltet war, ist die Zombie-Falle.
+
+⚠️ **`E2E_MODUS=dev` zerstört den Production-Build.** `next dev` schreibt sein
+eigenes `.next` und überschreibt dabei, was `next build` dort abgelegt hat
+(dieselbe Ursache wie die Projektregel „`npm run build` nie parallel zu
+`next dev`"). Der nächste Production-Lauf baut deshalb neu — die Vorgabe
+`E2E_BUILD=immer` tut das ohnehin, und `auto` erkennt die fehlende `BUILD_ID`.
+Nur `E2E_BUILD=aus` bricht danach ab, und zwar mit Ansage statt mit einem
+irreführenden Testergebnis.
+
+### ⚠️ `reuseExistingServer` übernimmt keinen fremden Server mehr
+
+Früher stand hier `reuseExistingServer: true`: Die Suite übernahm **jeden**
+Server, der auf dem Port antwortete. Ein verwaister Prozess hat so mehrfach
+einen veralteten Build ausgeliefert — und die Suite war grün, weil sie nicht
+wusste, was sie da prüft. (`preview_stop` beendet einen Dev-Server **nicht**,
+es löst ihn nur aus der Verwaltung; der Node-Prozess hält den Port weiter.)
+
+Jetzt wird die **Identität** geprüft: Ein `next start` beantwortet
+`/_next/static/<BUILD_ID>/_buildManifest.js` nur für *seinen eigenen* Build mit
+200. Nur dann wird wiederverwendet. Alles andere bricht den Lauf ab und nennt
+beide Auswege (Port freimachen oder `E2E_PORT` setzen).
+
+### ⚠️ Keine festen Hosts in Testdateien
+
+`sicherer-pfad.spec.mjs` verglich bis zum 20.08.2026 fest gegen
+`http://localhost:3000` und meldete auf jedem anderen Port „die Weiterleitung
+hat die Seite verlassen" — ein **Sicherheitsalarm über einen Angriff, den es
+nicht gab**, ausgelöst durch die eigene Testeinstellung. Der Vergleichswert
+kommt jetzt aus der `baseURL`-Fixture. Wer einen Host braucht, nimmt sie.
 
 ## Wegwerf-Accounts & Aufräumen
 
@@ -54,7 +110,8 @@ harten Abbruch etwas liegen, räumt der nächste Lauf es über die Registry mit 
 
 | Datei | Zweck |
 |---|---|
-| `playwright.config.mjs` | Runner-Config (1 Worker, Dev-Server-Autostart, Screenshots bei Fehlern) |
+| `playwright.config.mjs` | Runner-Config (1 Worker, **Build + `next start`**, BUILD_ID-Prüfung, Screenshots bei Fehlern) |
+| `playwright.gate6.config.mjs` | Dünner Aufsatz: nur eigener Port + eigener Ablageort. Neue Aufrufe nehmen `E2E_PORT`. |
 | `global-setup.mjs` | DB-Guard (Abbruch, wenn nicht Dev-DB `hoopsgermany`) |
 | `global-teardown.mjs` | Löscht nur selbst angelegte Wegwerf-Accounts |
 | `auth.spec.mjs` | 8 Tests: 3× Login, 2× Signup, 3× Dual-Auth |
