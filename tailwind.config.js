@@ -10,6 +10,34 @@ module.exports = {
   ],
   theme: {
     extend: {
+      // Eigener Umschaltpunkt NUR fuer die waagerechte Navigationsleiste
+      // (Vivien, 20.08.2026). Er ist gerechnet, nicht gegriffen:
+      //
+      // Die Leiste sitzt in `max-w-6xl` (1152px) mit `px-6` (2x24). Mehr als
+      // 1104px Inhaltsbreite gibt es also auf KEINEM Bildschirm — auch nicht
+      // auf einem 1600er. Das Budget ist eine Konstante, keine Funktion der
+      // Fensterbreite; das ist der Satz, an dem dieser Befund haengt.
+      //
+      // Angemeldet braucht die Leiste nach der Diaet im ungünstigsten Fall
+      // 1075,7px (gemessen: Seite /transfermarkt, wo der laengste Punkt aktiv
+      // und damit `font-semibold` ist, UND mit blockierter Webschrift, wo die
+      // Ersatz-Metriken 12,3px zusetzen). Sie passt damit ab einer
+      // Fensterbreite von 1123,7px.
+      //
+      // 1152 ist der naechste Wert mit Bedeutung im System — es ist die
+      // Hoechstbreite des Containers selbst. Verbleibende Luft: 40,6px mit
+      // eigener Schrift, 28,3px mit Ersatzschrift.
+      //
+      // ⚠️ Wer hier eine Zahl aendert, aendert eine MESSUNG — nachrechnen,
+      // nicht schaetzen: Inhaltsbreite der Leiste gegen (Containerbreite
+      // minus Polsterung), angemeldet, mit Team-Admin-Konto, auf der Seite
+      // mit dem laengsten aktiven Punkt (/transfermarkt).
+      // ⚠️ STAND 20.08.2026: Ein Waechter dafuer ist NOCH NICHT GEBAUT — er
+      // liegt bei Kai. Bis er steht, haelt diese Zahl nichts ausser diesem
+      // Kommentar.
+      screens: {
+        leiste: "1152px",
+      },
       colors: {
         // Nachtblauer Hallengrund. Entscheidung Patrick (12.08.2026): Navy +
         // Orange ist die Basketball-Paarung – Ball auf Nachtblau, Hallenlicht,

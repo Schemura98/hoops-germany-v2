@@ -20,6 +20,7 @@ import {
   PiArrowsLeftRightBold,
   PiMegaphoneBold,
   PiRankingBold,
+  PiSignOutBold,
 } from "react-icons/pi";
 import {
   getPlayerToken,
@@ -90,6 +91,30 @@ const NAV_GRUPPEN = [
 ];
 
 const PUBLIC_LINKS = NAV_GRUPPEN.flatMap((g) => g.links);
+
+// ---------------------------------------------------------------------------
+// DER UMSCHALTPUNKT HAENGT AM ANMELDEZUSTAND (Vivien, 20.08.2026)
+// ---------------------------------------------------------------------------
+// Vorher schaltete die waagerechte Leiste in BEIDEN Zustaenden bei 1024px ein.
+// Das konnte nicht aufgehen, weil die beiden Zustaende verschieden breit sind:
+// ausgeloggt stehen sieben Punkte plus „Anmelden/Registrieren" in der Leiste,
+// angemeldet kommen Team-Admin, Mein Team, Feed, Mein Profil und Abmelden dazu.
+//
+// Gemessen am gebauten Stand (18./20.08.2026, `next start`, Team-Admin-Konto):
+//   ausgeloggt   ~830px Inhalt  → passt ab 1024 muehelos
+//   angemeldet  1214,6px Inhalt → passt NIRGENDWO, denn der Container ist bei
+//                                 `max-w-6xl` gedeckelt: 1152 − 2x24 = 1104px.
+// Die Folge war nicht etwa ein Umbruch, sondern ein stilles Zusammenquetschen
+// der Wortmarke: 149,9px → 39,2px auf JEDER Desktop-Breite, bis 1600px hinauf.
+// Unter 1089px war sie dann bei 0 und die Seite lief seitlich ueber.
+//
+// Ein Umschaltpunkt beantwortet die Frage „passt der Inhalt". Der Inhalt ist
+// zustandsabhaengig, also ist es der Umschaltpunkt auch. Beide Werte sind
+// gerechnet (Herleitung in tailwind.config.js).
+const INLINE_AUS = "hidden lg:flex"; // ausgeloggt: ab 1024px
+const INLINE_AN = "hidden leiste:flex"; // angemeldet: ab 1152px
+const KOMPAKT_AUS = "lg:hidden"; // Hamburger + Mobilmenue unter 1024px
+const KOMPAKT_AN = "leiste:hidden"; // … unter 1152px
 
 export default function Navbar() {
   const [me, setMe] = useState(null); // null = unbekannt/ausgeloggt
@@ -440,18 +465,46 @@ export default function Navbar() {
   const teamSlug = me?.team?.slug || null;
   const teamName = me?.team?.teamName || null;
 
+  // Umschaltpunkt nach Anmeldezustand (Herleitung oben bei INLINE_AUS).
+  // Bewusst als ganze Klassen-Zeichenketten und nicht zusammengebaut —
+  // Tailwind liest den Quelltext, ein `lg:`+`flex` aus Bausteinen faende es
+  // nicht und die Klasse fehlte still im ausgelieferten CSS.
+  const inline = isLoggedIn ? INLINE_AN : INLINE_AUS;
+  const kompakt = isLoggedIn ? KOMPAKT_AN : KOMPAKT_AUS;
+
+  // Initialen wie in PlayerNav — dieselbe Person, dieselbe Form.
+  const initialen =
+    `${me?.firstName?.[0] || ""}${me?.lastName?.[0] || ""}`.toUpperCase() || "?";
+
   return (
     <>
       <nav className="sticky top-0 z-50 bg-navy-900 text-paper-50 border-b border-navy-600">
-        {/* `gap-4`: Ohne Mindestabstand stiessen Wortmarke und erster Punkt
+        {/* `gap-3`: Ohne Mindestabstand stiessen Wortmarke und erster Punkt
             direkt aneinander („HOOPS GERMANYLigen"), sobald die eingeloggte
             Fassung die Leiste fuellt — justify-between verteilt nur den REST,
-            es haelt keinen Abstand frei. */}
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4 px-4 sm:px-6 h-16">
-          {/* Logo */}
+            es haelt keinen Abstand frei.
+            16 → 12px am 20.08.2026: Teil der Diaet, mit der die angemeldete
+            Leiste ueberhaupt erst in ihren eigenen Container passt. */}
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-3 px-4 sm:px-6 h-16">
+          {/* Logo.
+              ⚠️ `shrink-0` ist hier kein Feinschliff, sondern die Lehre aus
+              diesem Befund. Ohne die Klasse war die Wortmarke das einzige
+              nachgiebige Element der Leiste — sie hat den gesamten Ueberhang
+              der angemeldeten Fassung STILL aufgesogen und war auf einem
+              1600px-Bildschirm nur noch 39px breit, ein unleserlicher Fleck,
+              der zugleich der einzige Weg zurueck zur Startseite ist. Niemand
+              hat es gemeldet, weil nichts kaputt AUSSAH.
+              Mit `shrink-0` kann dieselbe Ursache nie wieder leise wirken: Ist
+              die Leiste zu voll, laeuft sie ueber — und ein Ueberlauf ist
+              messbar, ein stilles Schrumpfen war es nicht. Lieber ein lautes
+              Versagen im Test als ein leises im Gesicht des Nutzers.
+              ⚠️ Der Test dazu ist am 20.08.2026 NOCH NICHT GEBAUT (liegt bei
+              Kai): Dokumentbreite <= Fensterbreite auf 1024/1056/1088/1152,
+              angemeldet als Team-Admin, PLUS „Wortmarke hat Breite > 0" —
+              denn die Breitenpruefung allein war fuer diesen Befund blind. */}
           <Link
             href="/"
-            className="flex items-center hover:opacity-80 transition-opacity"
+            className="flex shrink-0 items-center hover:opacity-80 transition-opacity"
           >
             <img
               src="/images/logo.svg"
@@ -460,8 +513,18 @@ export default function Navbar() {
             />
           </Link>
 
-          {/* Desktop-Navigation */}
-          <div className="hidden lg:flex items-center gap-5">
+          {/* Desktop-Navigation. `gap-3` statt `gap-5` (20.08.2026).
+              Warum so weit herunter — die Zahl ist gegen den SCHLECHTESTEN
+              Fall gerechnet, nicht gegen den schoensten: Solange die eigene
+              Schrift noch nicht geladen ist, rendert die Leiste in den
+              Ersatz-Metriken und wird dabei 12,3px BREITER. Mit gap-4 blieben
+              in diesem Moment 4,3px Luft — vier Pixel vor dem seitlichen
+              Ueberlauf, und zwar genau waehrend des Erstbesuchs auf einer
+              langsamen Leitung. Mit gap-3 sind es 28,3px.
+              12px zwischen 14px-Beschriftungen bleiben ein sauber lesbarer
+              Nav-Rhythmus; die Gruppen trennt ohnehin der groessere Abstand
+              zur Wortmarke und zur Aktionsgruppe. */}
+          <div className={`${inline} items-center gap-3`}>
             {PUBLIC_LINKS.map((l) => (
               <Link
                 key={l.href}
@@ -474,8 +537,10 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Aktionen rechts */}
-          <div className="flex items-center gap-4">
+          {/* Aktionen rechts. `gap-3` ist zugleich der Rhythmus, den PlayerNav
+              seit jeher fuer dieselbe Gruppe benutzt (`gap-1.5 sm:gap-3`) —
+              die beiden Leisten schwingen damit erstmals gleich. */}
+          <div className="flex items-center gap-3">
             {/* Feedback fest im Chrome statt als schwebender Knopf – Herkunft
                 und Begründung in components/layout/FeedbackLink.js. */}
             <FeedbackLink />
@@ -586,7 +651,7 @@ export default function Navbar() {
 
             {/* Desktop: Login-State */}
             {checked && (
-              <div className="hidden lg:flex items-center gap-4">
+              <div className={`${inline} items-center gap-3`}>
                 {isLoggedIn ? (
                   <>
                     {me?.isSuperAdmin && (
@@ -633,19 +698,6 @@ export default function Navbar() {
                     >
                       Feed
                     </Link>
-                    <Link
-                      href="/player/player-detail"
-                      aria-current={isActive("/player/player-detail") ? "page" : undefined}
-                      className={deskClass("/player/player-detail")}
-                    >
-                      Mein Profil
-                    </Link>
-                    <button
-                      onClick={logout}
-                      className="text-sm text-mist-300 hover:text-paper-50 transition-colors"
-                    >
-                      Abmelden
-                    </button>
                   </>
                 ) : (
                   <>
@@ -667,6 +719,73 @@ export default function Navbar() {
               </div>
             )}
 
+            {/* ---------------------------------------------------------------
+                Identitaet: Avatar statt „Mein Profil", Symbol statt „Abmelden"
+                ---------------------------------------------------------------
+                Beide Punkte VERSCHWINDEN NICHT — sie wechseln nur ihre Form,
+                und zwar in genau die Form, die PlayerNav (die Leiste auf den
+                eigenen Seiten) seit jeher benutzt. Bisher trugen die beiden
+                Leisten fuer dieselbe Sache zwei verschiedene Gestalten; das
+                war der eigentliche Bruch, die Breite war nur die Rechnung
+                darunter. Als Text im Mobilmenue stehen beide weiterhin
+                ausgeschrieben.
+
+                Der Avatar ist zudem das, was die Plattform-Tour ohnehin
+                behauptet: Sie sagt „da kommst du jederzeit oben rechts hin"
+                und zeigt eine Avatar-Form daneben — auf oeffentlichen Seiten
+                gab es die aber gar nicht (Befund Tobias, 14.08.2026). Mit
+                `data-profil-avatar` gilt die Zusage jetzt auch hier.
+
+                `hidden sm:flex` und nicht schon ab 375px: Unter 640px waere
+                die Leiste sonst auf 360px nur noch 9px von der Ueberlaufkante
+                entfernt und auf 320px darueber. Ein Zugewinn, der die
+                schmalste Breite bricht, ist keiner. */}
+            {checked && isLoggedIn && (
+              <>
+                <Link
+                  href="/player/player-detail"
+                  aria-current={isActive("/player/player-detail") ? "page" : undefined}
+                  // `p-1 -m-1`: hebt die Trefferflaeche von 32 auf 40px, ohne
+                  // die Leiste um einen einzigen Pixel zu verbreitern (4px
+                  // Polster hinein, 4px Rand wieder heraus). Dasselbe Muster
+                  // wie bei den Symbol-Knoepfen nebenan, nur vollstaendig
+                  // ausgeglichen — 32px lagen ueber dem Mindestmass (WCAG
+                  // 2.5.8: 24px), aber unter dem, was man mit dem Daumen
+                  // sicher trifft.
+                  className="hidden sm:flex shrink-0 items-center rounded-full p-1 -m-1 hover:opacity-80 transition-opacity"
+                  title="Mein Profil"
+                  aria-label="Mein Profil"
+                  data-profil-avatar="true"
+                >
+                  {me?.profileImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={me.profileImage}
+                      alt=""
+                      width={32}
+                      height={32}
+                      className="h-8 w-8 rounded-full object-cover ring-2 ring-paper-50/15"
+                    />
+                  ) : (
+                    <span
+                      aria-hidden="true"
+                      className="h-8 w-8 rounded-full bg-brand-500/20 text-brand-300 text-xs font-semibold flex items-center justify-center"
+                    >
+                      {initialen}
+                    </span>
+                  )}
+                </Link>
+                <button
+                  onClick={logout}
+                  className={`${inline} shrink-0 p-2 -m-1 text-mist-300 hover:text-paper-50 transition-colors`}
+                  aria-label="Abmelden"
+                  title="Abmelden"
+                >
+                  <PiSignOutBold className="w-5 h-5" />
+                </button>
+              </>
+            )}
+
             {/* Mobile-Toggle */}
             {/* `p-2 -m-1` wie bei den Nachbarn. Er war der letzte 20×20-Knopf
                 dieser Leiste – und ausgerechnet der einzige Zugang zur
@@ -681,7 +800,7 @@ export default function Navbar() {
             <button
               ref={mobileOpenerRef}
               onClick={() => setMobileOpen((v) => !v)}
-              className="lg:hidden p-2 -m-1 text-paper-50 hover:text-brand-400 transition-colors"
+              className={`${kompakt} shrink-0 p-2 -m-1 text-paper-50 hover:text-brand-400 transition-colors`}
               aria-label={mobileOpen ? "Menü schließen" : "Menü öffnen"}
               aria-expanded={mobileOpen}
               aria-controls="mobil-menue"
@@ -711,7 +830,7 @@ export default function Navbar() {
             id="mobil-menue"
             ref={menuRef}
             style={menuMaxHoehe ? { maxHeight: menuMaxHoehe } : undefined}
-            className="lg:hidden bg-navy-900 border-t border-navy-600 divide-y divide-navy-600/60 max-h-[calc(100dvh-7rem)] overflow-y-auto overscroll-contain"
+            className={`${kompakt} bg-navy-900 border-t border-navy-600 divide-y divide-navy-600/60 max-h-[calc(100dvh-7rem)] overflow-y-auto overscroll-contain`}
           >
             {NAV_GRUPPEN.map((g) => (
               <div key={g.titel}>
