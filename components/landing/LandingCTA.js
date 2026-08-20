@@ -35,10 +35,27 @@ export default function LandingCTA() {
     //      aussehen lässt. Der Verlust ist real (echte Kugelrotation ist mit
     //      Vektoren nicht erreichbar); das Verlorene passt nicht ins neue Bild.
     <section className="relative overflow-hidden bg-navy-900 text-paper-50 py-20 px-4 text-center">
-      {/* Mittig und mit Abstand zu den Rändern: Der Korb ist hier das ZIEL
-        hinter der Aufforderung, keine randfüllende Tapete. */}
-      <KorbRuhe className="absolute inset-y-6 left-1/2 w-[min(90%,520px)] -translate-x-1/2" />
       <div className="relative">
+        {/* ⚠️ DER KORB STEHT IM FLUSS, NICHT MEHR IM HINTERGRUND (20.08.2026).
+          Vorher lag er als `absolute` Zeichnung hinter Headline und Tasten und
+          kreuzte beide – auf jeder Breite, weil Text und Zeichnung beide
+          mittig sind. Die Begründung steht ausführlich in `KorbRuhe.js`;
+          die Kurzfassung: Eine Hintergrund-Zeichnung hinter einem mittigen
+          Textblock kann dem Text nicht ausweichen, und Deckkraft ist keine
+          Lösung dafür, sondern der Weg ins Braun.
+          Als Element im Fluss kann sie per Konstruktion nichts überlagern.
+          Und die Stelle ist die inhaltlich richtige: Der Hero setzt denselben
+          orangen Ring über seine Überschrift. Die Seite bekommt Buchstützen. */}
+        {/* ⚠️ DIE ANZEIGEGRÖSSE IST TEIL DER ZEICHNUNG, NICHT DES LAYOUTS.
+          Unter rund 72 px verschmiert das Netz zu einem Fleck – gebaut,
+          angesehen, gemessen (Begründung und die zwei verworfenen Fassungen
+          stehen in `KorbRuhe.js`). `tests/e2e/abschluss-korb.spec.mjs` hält die
+          Untergrenze fest; wer sie unterschreitet, bekommt keinen kleineren
+          Korb, sondern Rauschen.
+          Ab `md` 88 px, weil die Überschrift dort von `text-4xl` auf
+          `text-6xl` springt – die Marke folgt dem Sprung, statt daneben zu
+          verschwinden. */}
+        <KorbRuhe className="mx-auto mb-6 h-[72px] w-[72px] md:h-[88px] md:w-[88px]" />
         <Reveal
           as="h2"
           className="font-display uppercase tracking-tight text-4xl md:text-6xl font-black mb-4"
