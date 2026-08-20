@@ -4587,3 +4587,27 @@ genau so eine Sicherungskopie hat am 18.08. `app/kontakt/page.js` überschrieben
 (226 laut `--list`, 28 Dateien) · `npm run design-audit --check` ohne Abweichung zur Baseline ·
 Messungen gegen die **Production-Runtime** (`npx next start`), nicht nur gegen `next dev`.
 ⚠️ **Kein Gate:** Weder Kai noch Tobias haben diesen Stand gesehen.
+
+### Nachtrag (20.08.2026, Commit `3abf594`) — die Korb-Marke des Abschluss-Blocks
+
+Tobias' Wahrnehmungsbefund aus dem Gate („bei 72 px lese ich kein Trichter, sondern ein
+Spinnennetz / einen Radarschirm") ist in echter Anzeigegröße **nachgesehen und bestätigt**.
+`components/landing/KorbRuhe.js` behauptete im Kommentar das Gegenteil und begründete zwei
+verworfene Fassungen mit genau diesem Argument.
+
+- **Es ist keine Größen-, sondern eine Projektionsfrage.** Tiefe käme aus Perspektive oder
+  Tonwert; beides ist in dieser Zeichnung bewusst aufgegeben. Ein Netz von senkrecht oben ist
+  damit zwangsläufig eine konzentrische Radialfigur — und die liest sich als Instrument
+  (Blende, Rosette, Radar). Alle drei Fassungen sind an **derselben** Ursache gescheitert, nicht
+  an der Strangzahl.
+- **Die Messung, die es erklärt** (390 px Fensterbreite, Marke 72 px, Farben ausgezählt):
+  Sollfarbe `#3A4E7A` auf navy-900 = **2,11 : 1** — genau die Zahl, mit der der Kommentar die
+  Farbwahl begründet. Tatsächlich gezeichnet: hellster Strangpunkt **1,95**, die Mehrheit
+  **1,15–1,66**. **Kein einziger gerenderter Bildpunkt erreicht den Sollwert.** Die Stränge sind
+  dünner als ein Bildpunkt, die Kantenglättung mischt jeden unter die Untergrenze. Was ankommt,
+  ist ein Grauschleier in Kreisform — und der ist ein Radarschirm.
+  **Die 2,11 war für die FARBE gerechnet und nie an der ZEICHNUNG gemessen** —
+  `docs/MUSTER-ZAHLEN-DIE-LUEGEN`, gleiche Bauart wie der `--len`-Fehler desselben Tages.
+- **Nur der Kommentar korrigiert, die Marke nicht umgezeichnet.** Das wäre eine neue
+  Gestaltungsrunde an einem gerade durch zwei Gates gegangenen Bauteil und war nicht beauftragt.
+  Der Befund liegt bei Patrick; die Richtung, falls er sie will, steht in der Datei.
