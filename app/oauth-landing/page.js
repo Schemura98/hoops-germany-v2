@@ -7,6 +7,7 @@ import { setPlayerToken } from "@/lib/clientAuth";
 import Loading from "@/components/ui/Loading";
 import FormAlert from "@/components/ui/FormAlert";
 import Button from "@/components/ui/Button";
+import { sichererPfad, STANDARD_ZIEL } from "@/lib/sichererPfad";
 
 // Landepunkt nach dem Google-Login. Im Normalfall sieht man diese Seite nur
 // für den Bruchteil einer Sekunde – im Fehlerfall aber schon, und dann stand
@@ -38,11 +39,7 @@ function OauthLandingInner() {
       return () => clearTimeout(t);
     }
     setPlayerToken(token);
-    const next = searchParams.get("next");
-    const dest =
-      next && next.startsWith("/") && !next.startsWith("//")
-        ? next
-        : "/player/newsfeed";
+    const dest = sichererPfad(searchParams.get("next"), STANDARD_ZIEL);
     router.replace(dest);
   }, [searchParams, router]);
 

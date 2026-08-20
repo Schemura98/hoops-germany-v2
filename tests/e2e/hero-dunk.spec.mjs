@@ -458,9 +458,23 @@ test.describe("Hero-Zeichnung – P3: der Abschluss hängt an der Zeit, nicht am
     // genau der Fall, den Kai in der neunten Runde gefangen hat. Und er ist
     // hier real erreichbar: In einer ausgeblendeten Browser-Vorschaufläche
     // laufen keine rAF-Bilder, die Bewegung fände schlicht nicht statt.
+    //
+    // ⚠️ SIE ZÄHLT VERSCHIEDENE WERTE, NICHT SCHREIBVORGÄNGE (Befund Kai K2,
+    // 20.08.2026). Bis dahin stand hier `spur.length` – die Zahl der
+    // Attributschreibungen. Ein MutationObserver meldet aber JEDE Schreibung,
+    // auch die, die denselben Wert noch einmal hineinschreibt. Nachgemessen:
+    // Wird die Fallkurve durch einen festen Endwert ersetzt, schreibt die
+    // Schleife weiter 42-mal pro Lauf – die Schranke war mit 42 ≥ 8 zufrieden,
+    // und der Test blieb grün, obwohl der Ball sich nicht mehr bewegte.
+    //
+    // Die Schranke hieß „Positionswechsel beobachtet" und prüfte „Schreibungen
+    // beobachtet". Das sind zwei verschiedene Aussagen, und die schwächere trug
+    // den Namen der stärkeren. Genau diese Sorte Zusicherung ist gefährlicher
+    // als gar keine, weil sie das Nachdenken beendet.
+    const verschiedeneLagen = new Set(spur.map((p) => p.v)).size;
     expect(
-      spur.length,
-      `Nur ${spur.length} Positionswechsel beobachtet – die Sonde hat nicht gemessen, das Ergebnis ist keines`,
+      verschiedeneLagen,
+      `${spur.length} Schreibvorgänge, aber nur ${verschiedeneLagen} VERSCHIEDENE Lagen – der Ball wird beschrieben, aber nicht bewegt`,
     ).toBeGreaterThanOrEqual(8);
 
     const dauer = spur[spur.length - 1].t - spur[0].t;

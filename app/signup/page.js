@@ -10,6 +10,7 @@ import AuthShell from "@/components/layout/AuthShell";
 import Button from "@/components/ui/Button";
 import FormAlert from "@/components/ui/FormAlert";
 import { inputClass } from "@/lib/ui";
+import { sichererPfad, STANDARD_ZIEL } from "@/lib/sichererPfad";
 import {
   SIGNUP_SOURCE_KEY,
   SIGNUP_SOURCE_RE as SRC_RE,
@@ -57,7 +58,12 @@ function SignupForm() {
   // Die Bestaetigung muss den Google-Weg mitgehen, sonst waere sie in zehn
   // Sekunden umgangen: Der Callback legt Konten ohne Formular an.
   useEffect(() => {
-    const next = new URLSearchParams(window.location.search).get("next");
+    // Auch hier geprueft, damit ein manipuliertes Ziel gar nicht erst an den
+    // Google-Weg weitergereicht wird. Der Endpunkt prueft ebenfalls - doppelt
+    // ist hier richtig, weil beide Stellen fuer sich verstaendlich bleiben.
+    const next = sichererPfad(
+      new URLSearchParams(window.location.search).get("next"),
+    );
     const p = new URLSearchParams();
     if (next) p.set("next", next);
     if (abTZ) p.set("minAge", "1");
@@ -125,7 +131,7 @@ function SignupForm() {
       setPlayerToken(data.token);
       setStoredPlayer(data.player);
       const next = new URLSearchParams(window.location.search).get("next");
-      router.push(next || "/player/newsfeed");
+      router.push(sichererPfad(next, STANDARD_ZIEL));
     } catch (err) {
       setError(
         err.response?.data?.message || "Registrierung fehlgeschlagen. Bitte erneut versuchen."

@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { getBaseUrl, googleRedirectUri } from "@/lib/baseUrl";
+import { sichererPfad } from "@/lib/sichererPfad";
 
 // GET /api/auth/google – leitet zum Google-Consent-Screen weiter.
 export async function GET(req) {
@@ -17,10 +18,7 @@ export async function GET(req) {
 
   // Zielort nach dem Login merken (nur interne Pfade zulassen).
   const nextParam = new URL(req.url).searchParams.get("next");
-  const safeNext =
-    nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//")
-      ? nextParam
-      : null;
+  const safeNext = sichererPfad(nextParam);
 
   const params = new URLSearchParams({
     client_id: clientId,

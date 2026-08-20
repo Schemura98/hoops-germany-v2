@@ -10,6 +10,7 @@ import AuthShell from "@/components/layout/AuthShell";
 import Button from "@/components/ui/Button";
 import FormAlert from "@/components/ui/FormAlert";
 import { inputClass } from "@/lib/ui";
+import { sichererPfad, STANDARD_ZIEL } from "@/lib/sichererPfad";
 
 function LoginForm() {
   const router = useRouter();
@@ -24,7 +25,9 @@ function LoginForm() {
     if (params.get("error")) {
       setError("Google-Anmeldung fehlgeschlagen. Bitte erneut versuchen.");
     }
-    const next = params.get("next");
+    // s. Kommentar in app/signup/page.js: ein abgewiesenes Ziel wird gar nicht
+    // erst an den Google-Weg weitergereicht.
+    const next = sichererPfad(params.get("next"));
     if (next) setGoogleHref(`/api/auth/google?next=${encodeURIComponent(next)}`);
   }, []);
 
@@ -39,7 +42,7 @@ function LoginForm() {
       setPlayerToken(data.token);
       setStoredPlayer(data.player);
       const next = new URLSearchParams(window.location.search).get("next");
-      router.push(next || "/player/newsfeed");
+      router.push(sichererPfad(next, STANDARD_ZIEL));
     } catch (err) {
       setError(err.response?.data?.message || "Login fehlgeschlagen. Bitte erneut versuchen.");
     } finally {

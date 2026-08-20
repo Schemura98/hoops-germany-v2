@@ -58,6 +58,8 @@ harten Abbruch etwas liegen, räumt der nächste Lauf es über die Registry mit 
 | `global-setup.mjs` | DB-Guard (Abbruch, wenn nicht Dev-DB `hoopsgermany`) |
 | `global-teardown.mjs` | Löscht nur selbst angelegte Wegwerf-Accounts |
 | `auth.spec.mjs` | 8 Tests: 3× Login, 2× Signup, 3× Dual-Auth |
+| `sicherer-pfad.spec.mjs` | Offene Weiterleitung über `?next=` (Kai K4): das Modul, die echte Kette im Browser, und dass die Prüfung an **einer** Stelle steht |
+| `rail-ball-drehpunkt.spec.mjs` | Drehpunkt des Streckenballs, gemessen auf beiden Aufrufstellen (wiederhergestellt, s. Korrektur unten) |
 | `helpers/env.mjs` | .env-Parser + Dev-DB-Guard |
 | `helpers/created-users.mjs` | Namensraum + Registry der Wegwerf-Accounts |
 | `.artifacts/` | Laufzeit-Artefakte (Registry, Screenshots) — nicht einchecken |
@@ -85,7 +87,32 @@ worden. Sieben Testdateien prüften Eigenschaften, die es danach nicht mehr gibt
 | `hero-einflug.spec.mjs` | Mobiler Ladeauftritt des Balls: findet statt, zeigt Bildwechsel, ist keine Standbild-Attrappe | Der mobile Einflug existiert nicht mehr. Er war nötig, weil mobil keine scroll-getriebene Lösung für eine deckende Scheibe existierte | keiner nötig |
 | `hero-resize-im-flug.spec.mjs` | Größenänderung während des Einflugs friert die Ziellage nicht ein | Der Abschluss rechnet in viewBox-Einheiten und kennt keine eingefrorene Bildschirmkoordinate — eine Größenänderung ist per Konstruktion folgenlos | keiner nötig; die Eigenschaft steht als Kommentar an `abschlussSetzen()` |
 | `hero-auth-tausch.spec.mjs` | Ball springt nicht, wenn die Anmeldung spät auflöst und den Hero-Zweig tauscht | Die Zeichnung hängt an **keinem** Inhaltselement. Der Zweigtausch ist ihr gleichgültig — damit sind auch Roadmap 20e und 20f gegenstandslos | keiner nötig |
-| `ball-sequenz.spec.mjs` | Bildzahl der Rotationssequenz stimmt über Konstante, CSS-Dateinamen und Datei überein | Die Sequenz, ihre beiden Bilddateien und der Erzeuger `scripts/generate-ball-rotation.mjs` sind gelöscht | keiner nötig |
+| `ball-sequenz.spec.mjs` | **vier** Fälle: 3× Bildzahl der Rotationssequenz über Konstante, CSS-Dateinamen und Datei — **und 1× der Drehpunkt des Streckenballs** | Für die drei Sequenz-Fälle: Sequenz, Bilddateien und Erzeuger `scripts/generate-ball-rotation.mjs` sind gelöscht. **Für den vierten Fall galt das nicht** — s. Korrektur unten | `rail-ball-drehpunkt.spec.mjs` (wiederhergestellt 20.08.2026) |
+
+### ⚠️ Korrektur 20.08.2026: diese Löschung war unvollständig begründet
+
+Die Zeile zu `ball-sequenz.spec.mjs` nannte einen Grund, der nur für **drei der
+vier** Fälle jener Datei zutraf. Der vierte prüfte einen anderen Gegenstand, der
+dort nur einquartiert war: **den Drehpunkt des Streckenballs** (ursprünglich
+Befund Kai B1 vom 15.08.2026).
+
+Dieser Gegenstand **lebt**: `RailBallGlyph` in `components/landing/HeroGlyphs.js`,
+eingesetzt an zwei Stellen in `components/landing/FeatureProgressRail.js`, mit
+aktiver Rollbewegung bis 1965°. Nach der Löschung fand
+`grep -rn transformOrigin tests/` **null** Treffer — der Wächter war weg, sein
+Gegenstand nicht.
+
+> **Die Lehre ist nicht „sorgfältiger löschen".** Eine Testdatei mit vier Fällen
+> kann vier verschiedene Gegenstände bewachen. Der Satz „der Gegenstand ist weg"
+> muss für **jeden Fall einzeln** gelten, nicht für den Dateinamen. Diese Tabelle
+> ist nach Dateien geordnet — das ist bequem und genau deshalb die Stelle, an der
+> ein Fall unter dem Namen eines anderen verschwindet.
+
+Wiederhergestellt und dabei verschärft in `rail-ball-drehpunkt.spec.mjs`: Der
+alte Fall las nur Quelltext. Der neue **misst** zusätzlich den tatsächlichen
+`transform-origin` im Browser, und zwar auf **beiden** Aufrufstellen (mobil und
+Desktop) — der ursprüngliche Fehler trat nur auf der Desktop-Stelle auf, ein
+Test auf einer Breite hätte ihn mit halber Wahrscheinlichkeit durchgelassen.
 
 **Nicht gelöscht, aber inhaltlich verkleinert:** `rail-ankunft.spec.mjs`. Der
 Farbblitz-Teil (Befund B-a) ist entfallen, weil es keinen Farbblitz mehr gibt —

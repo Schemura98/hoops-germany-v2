@@ -6,6 +6,7 @@ import { uniqueSlug } from "@/lib/slug";
 import { getBaseUrl, googleRedirectUri } from "@/lib/baseUrl";
 import { sendMail } from "@/lib/mailer";
 import { welcomeEmail } from "@/lib/emailTemplates";
+import { sichererPfad } from "@/lib/sichererPfad";
 
 // Dekodiert das JWT-Payload eines Google id_token (ohne Signaturprüfung –
 // der Token stammt direkt vom Google-Token-Endpunkt über TLS).
@@ -128,9 +129,11 @@ export async function GET(req) {
 
     // 3. JWT erstellen und zum OAuth-Landing weiterleiten (Zielort erhalten)
     const token = signPlayerToken({ id: player._id.toString() });
-    const nextDest = req.cookies.get("g_oauth_next")?.value;
+    // Erneut geprueft, obwohl beim Setzen des Cookies schon geprueft wurde:
+    // Das Cookie ist ein Wert, der die Anfrage verlassen hat und wiederkommt.
+    const nextDest = sichererPfad(req.cookies.get("g_oauth_next")?.value);
     let landing = `${base}/oauth-landing?token=${encodeURIComponent(token)}`;
-    if (nextDest && nextDest.startsWith("/") && !nextDest.startsWith("//")) {
+    if (nextDest) {
       landing += `&next=${encodeURIComponent(nextDest)}`;
     }
     const res = NextResponse.redirect(landing);
