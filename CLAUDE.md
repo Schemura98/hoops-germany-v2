@@ -11,6 +11,75 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
+> ✅ **DEPLOYT: `04ba621`** (20.08.2026) – **Die Nachrichten-Karten der Startseite ragten auf
+> Handys über den Bildschirm.** Auf 360 px war die Seite **426 px breit**, ließ sich seitlich
+> wegschieben, und jede der sechs Nachrichten verlor rechts ein Stück. Live nachgemessen nach
+> dem Fix: **360 → 360 · 390 → 390 · 768 → 768.**
+> ⚠️ **Die Ursache war eine AUSLASSUNG, kein Rechenfehler** (Befund Vivien): Das Gitter hieß
+> `grid gap-4 sm:grid-cols-2 lg:grid-cols-3` – Tablet und Desktop erklärten ihre Spalten,
+> **mobil erklärte es niemand.** Ohne Ansage legt CSS eine Spalte vom Typ `auto` an, und die
+> richtet sich nach ihrem **Inhalt** statt nach dem Bildschirm. Der Inhalt war ein Quellenname
+> aus dem Live-Feed („GT/ET Göttinger Tageblatt - Eichsfelder Tageblatt", 266,6 px, nicht
+> umbrechbar) → **386,2 px in einem 280-px-Platz**, und alle sechs Karten teilen sich diese
+> eine Spalte. Behoben mit `grid-cols-1` (Untergrenze 0 statt `auto`) und `gap-3`.
+> ⚠️ **DER SATZ, DER HÄNGENBLEIBT:** *Die Kürzung mit „…" stand die ganze Zeit im Markup und
+> konnte nie greifen.* `truncate` ist ein **Angebot** – „ich mache mich kleiner, **wenn** mir
+> jemand eine Breite vorgibt". Niemand gab eine vor. Die Spalte fragte die Karte, wie breit sie
+> sein will, und die Karte antwortete mit der Breite ihres Textes.
+> ⚠️ **Zweiter Befund, von Vivien selbst gefunden und live bestätigt:** Kürzungspunkte und Datum
+> lagen auf **einer Kante – 0,00 px**, auf allen Breiten, **auf Desktop schon vorher**. Dann
+> liest sich „…20.08.2026" als ein Ausdruck. Dieselbe Regel wie beim Hero-Ball: kein Kontakt,
+> keine geteilte Kante. Jetzt konstant 12,00 px.
+> ⚠️ **Und der Grund, warum es nie jemand fand, ist der eigentliche Lehrsatz: Die Nachrichten
+> kommen erst NACH dem Laden.** Direkt nach dem Seitenaufbau gemessen ist die Seite sauber
+> (360 = 360, null Karten); erst sechs Karten später sind es 426. **Jede Querscroll-Prüfung, die
+> nicht auf den Feed wartet, ist nicht falsch gebaut – sie kommt zu früh.**
+> ✅ **Tobias' Gate:** 13 Breiten von 320 bis 1440 je Seitenbreite = Fensterbreite · Gegenprobe
+> mit abgeklemmtem Fix reproduziert exakt 386,2 px · Belastungstest mit einem Quellennamen aus
+> **96 zusammenhängenden Zeichen ohne Trennmöglichkeit**: Karte bleibt 280 px · 0 Konsolen- und
+> Netzwerkfehler · Nebengewinn: Die Ladeplatzhalter sind jetzt gleich breit wie die Karten, die
+> Fläche springt beim Eintreffen nicht mehr von 280 auf 386.
+> ⚠️ **Nebenwirkung, bewusst in Kauf genommen** (Gestaltung Vivien, von Tobias mitgetragen): In
+> einem 12 px schmalen Band werden Quellennamen neu gekürzt, die vorher ganz zu sehen waren –
+> **genau die, die vorher am Datum klebten**. „ein bis zwei Buchstaben gegen die Lesbarkeit der
+> ganzen Zeile".
+> ⚠️ **NEBENBEFUND, NICHT ANGEFASST:** Dieselbe fehlende Spalten-Ansage steht an zwei weiteren
+> Stellen – `app/player/newsfeed/page.js:136` und `components/team/tabs/KaderTab.js:497`. Vivien
+> hat dort **keinen Defekt gemessen** und deshalb nichts geändert: „das blind zu ändern wäre
+> eine Behauptung statt eines Befunds."
+> Bewacht durch `tests/e2e/nachrichten-karten.spec.mjs` – **der Feed wird abgefangen und durch
+> feste Meldungen ersetzt.** Grund: Der Fehler trat nur auf, weil an diesem Tag zufällig eine
+> Meldung mit langem Quellennamen dabei war. **Ein Schutz, dessen Auslösung davon abhängt, was
+> ein fremder Verlag heute veröffentlicht, ist keiner.**
+>
+> ✅ **Davor deployt: `07150cf`** (20.08.2026, Roadmap 23 erledigt) – **Die Testsuite prüft jetzt
+> die ausgelieferte Fassung** (`npm run build` + `next start`) statt `npm run dev`. Stellschrauben,
+> jede beim Start **gedruckt**: `E2E_PORT` (isolierte Arbeitsbäume), `E2E_MODUS=dev` (schneller
+> Weg **ohne** Gate-Anspruch), `E2E_BUILD=auto|aus`.
+> ⚠️ **`reuseExistingServer` übernimmt keinen fremden Server mehr** – die Konfiguration prüft die
+> `BUILD_ID` über `/_next/static/<BUILD_ID>/_buildManifest.js`. Am nachgestellten Zombie belegt:
+> alter Server auf 3000, neuer Build auf der Platte → Lauf bricht ab und nennt beide Auswege.
+> **Diese Woche hat ein verwaister `npm start` zweimal einen veralteten Build ausgeliefert.**
+> ⚠️ **`E2E_MODUS=dev` zerstört den Production-Build** (`next dev` überschreibt `.next`).
+> **Kosten:** Lauf 227,5/228,0 s (~3,8 min inkl. Build), Build 10,8–12,3 s warm / 20,5 s kalt.
+> ⚠️ **Der Gewinn war sofort eingelöst:** Derselbe Commit, dieselbe Minute – `next dev` **2 grün**,
+> `next start` **2 rot**. Das waren die Nachrichten-Karten (s. o.), ein Fehler, den die alte
+> Konfiguration per Konstruktion nicht sehen konnte.
+> ⚠️ **ZUR ZAHL „6 ROT" AUS DEM URSPRUNGSBEFUND – sie war nie ein Rätsel, ich habe falsch
+> gerechnet:** Es waren **nicht** sechs Befunde, sondern zwei, verteilt auf sechs Testfälle –
+> M1 (Nachrichten-Karten) sind **2**, M2 (Kais fest verdrahteter Host in
+> `sicherer-pfad.spec.mjs`) sind **4**. Kai hat zwei vollständige Läufe gefahren: außer diesen
+> beiden kein roter Test. Seine Vermutung, die „vier übrigen" stammten aus einem älteren Stand,
+> ist damit gegenstandslos – die Rechnung geht ohne sie auf.
+> ⚠️ **Kais eigener Fehler unterwegs, mit der besten Einordnung des Tages:** Sein erster Anlauf
+> baute in **jedem** Arbeitsprozess neu; die `BUILD_ID` wechselte mitten im Lauf, 26 Dateien rot,
+> 206 Tests nicht gelaufen. Dazu hielten sich seine Warte-Schleifen **gegenseitig am Leben**
+> (`pgrep -f` fand die anderen Warte-Shells, in deren Kommandozeile derselbe Suchbegriff stand).
+> Sein Fazit: **dieselbe Fehlerform dreimal an einem Tag in drei Kostümen** – eine Prüfung, die
+> ihren Vergleichswert fest verdrahtet · eine Messung, die ihre eigene Stellgröße verändert ·
+> ein Detektor, der sich selbst mitzählt. **Merksatz (steht seit 18.08. in dieser Datei): Eine
+> Messung darf ihren eigenen Gegenstand nicht mitmessen.**
+>
 > ✅ **DEPLOYT: `35b8bc0`** (20.08.2026) – **Der Hero der Startseite ist neu**, und die
 > Weiterleitung nach der Anmeldung ist abgesichert. Drei Commits: `bd99263` (Vivien, der Dunk),
 > `d841c4b` (Vivien, Blocker + vier Gate-Befunde), `35b8bc0` (Kai, Weiterleitung + zwei Testlücken).
@@ -405,7 +474,7 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `35b8bc0` (aktuell live) → `d841c4b` → `bd99263` (Dunk, vor den
+> **Rollback-Kette:** `04ba621` (aktuell live) → `07150cf` (nur Werkzeug) → `d2cfa47` → `35b8bc0` → `d841c4b` → `bd99263` (Dunk, vor den
 > Gate-Befunden) → `062989e` (letzter Stand vor dem Hero-Umbau) → `a4c6811` → `cf02293` →
 > `7da3905` → `96eba14` → `da7756b` → `aff17e6` → `787d760` → `cc128ed` → `dba7baa` → `f4c2d15` → `e00b64a` → `f27736a` → `40dff48` → `f5b1b3f` → `f46a783` → `84cb7ba` → `75f2c3a` → `bc7ccad` → `6e2fbe1` → `1bcf854` →
 > `4d03ba2` → `76aa289` → `1d2e3ae` → `1dc617f` → `d07c475` → `2be664e` → `cd51c92` →
@@ -1055,24 +1124,27 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     wann ein live erfasster Stand als **eingereicht** gilt (die Doppel-Bestätigung darf nicht
     versehentlich schon durch das Mitschreiben ausgelöst werden) · Vorprüfung an Mats/Ronja,
     ob die Ehrenamtlichen das überhaupt wollen.
-23. ⚠️ **Die Testsuite läuft gegen den falschen Server** (Befund Kai, 20.08.2026, hoch).
-    `tests/e2e/playwright.config.mjs` startet fest `npm run dev`. Fehler, die **nur in der
-    ausgelieferten Fassung** auftreten, kann die Suite per Konstruktion nicht sehen. Belegt am
-    selben Commit in derselben Minute: **Entwicklung 231 grün · Produktion 225 grün, 6 rot.**
-    Die Projektregel „vor Deploy immer die Production-Runtime testen" und das Werkzeug
-    widersprechen sich – **alle früher protokollierten „grün"-Zahlen sind Dev-Zahlen.**
-    ⚠️ Der Beleg dafür, dass das nicht theoretisch ist, ist Roadmap 24: Gefunden hat es nicht
-    die Suite, sondern der Blick auf die ausgelieferte Fassung.
-    Umstellung ist keine Nebenarbeit (Build vor jedem Lauf, längere Laufzeit) → Aufwand an Ole.
+23. ✅ **ERLEDIGT (20.08.2026, `07150cf`).** Die Suite prüft jetzt die **ausgelieferte
+    Fassung** (`npm run build` + `next start`) als Vorgabe; `reuseExistingServer` übernimmt
+    keinen fremden Server mehr, sondern prüft die `BUILD_ID`. Stellschrauben `E2E_PORT`,
+    `E2E_MODUS=dev`, `E2E_BUILD=auto|aus`, jede beim Start gedruckt (`tests/e2e/README.md`).
+    Kosten ~3,8 min inkl. Build. **Der Gewinn war sofort eingelöst** – s. Roadmap 24.
+    ⚠️ **Die Regel dahinter bleibt und gilt weiter:** Eine Suite, die den Entwicklungs-Server
+    prüft, kann Fehler der ausgelieferten Fassung per Konstruktion nicht sehen. Wer die
+    Konfiguration wieder auf `dev` stellt, nimmt genau das zurück.
+    ⚠️ **`E2E_MODUS=dev` zerstört den Production-Build** (`next dev` überschreibt `.next`).
 
-24. ⚠️ **Nachrichten-Karten ragen auf schmalen Handys über den Bildschirm** (Befund Kai,
-    20.08.2026, mittel, **vorbestehend und live**). Auf **360 und 390 px** ist die Startseite
-    **426 px breit statt 360** – der Leser verliert rechts ein Stück jeder Nachricht.
-    Äußerster Verursacher: der Einblend-Rahmen um die Karte in `components/NewsWidget.js`
-    (Karte bei x=40, 386 px breit), 12 Elemente betroffen, 45 px Überstand.
-    ⚠️ **Nur in der Produktionsfassung sichtbar** – deshalb hat es nie ein Test gefunden.
-    Kai hat `bd99263` eigens gebaut und gegengemessen: dort identisch, also kein Rückfall aus
-    dem Hero-Umbau. 360 px ist die verbreitetste Android-Breite Deutschlands.
+24. ✅ **ERLEDIGT (20.08.2026, `04ba621`, live nachgemessen: 360/390/768 je Seitenbreite =
+    Fensterbreite).** Details oben im Deploy-Block. Kern in einem Satz: Das Gitter erklärte
+    seine Spalten erst ab Tablet-Breite, mobil legte CSS eine **inhaltsgesteuerte** Spalte an,
+    und ein 266-px-Quellenname aus dem Live-Feed blies alle sechs Karten auf 386 px auf.
+    ⚠️ **Offen geblieben, bewusst:** Dieselbe fehlende Ansage steht in
+    `app/player/newsfeed/page.js:136` und `components/team/tabs/KaderTab.js:497`. Vivien hat
+    dort **keinen Defekt gemessen** – wer es prüfen will, braucht einen eigenen Auftrag.
+    ⚠️ **Zwei kleine Punkte aus Tobias' Gate, beide vorbestehend, beide niedrig:** Der gekürzte
+    Quellenname hat keinen Tooltip (→ Vivien) · fällt der Nachrichtenfeed aus, verschwindet der
+    Abschnitt kommentarlos, ohne Leerzustand (→ Ronja) · dazu ein **toter Kompakt-Zweig** in
+    `components/NewsWidget.js`, der nirgends mehr aufgerufen wird (→ Kai).
 
 25. **Gate-Berichte gehören ins Repo** (Anlass Kai, 20.08.2026). Er konnte seine eigenen
     Befunde K5–K9 aus der Vorrunde **nicht bestätigen**, weil der Bericht nur in der Sitzung

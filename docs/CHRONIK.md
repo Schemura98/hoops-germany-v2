@@ -4397,3 +4397,56 @@ dessen Gegenstand noch lebt).
   Und „89/92 px" ist nicht reproduzierbar (76,6/79,7).
 - ⚠️ **Prüfzeilen dürfen nicht auf Wörter prüfen, die der eigene Kommentar enthält** — beim
   `/signup`-Fix dreimal falsch angeschlagen, weil die Begründung den gesuchten Begriff nennt.
+
+#### Update (20.08.2026, Nachtrag) — Testsuite auf die ausgelieferte Fassung, Nachrichten-Karten
+
+**Deploys:** `07150cf` (nur Werkzeug, kein Produktcode) → `04ba621`. Beide am Server verifiziert.
+
+**1. Roadmap 23 — die Suite prüfte den falschen Server** (`07150cf`, Kai).
+`tests/e2e/playwright.config.mjs`, `playwright.gate6.config.mjs`, `sicherer-pfad.spec.mjs`,
+`tests/e2e/README.md`. **Keine Produktdatei berührt**, deshalb kein Browser-Gate.
+- Vorgabe ist jetzt `npm run build` + `next start`. Stellschrauben `E2E_PORT`, `E2E_MODUS=dev`,
+  `E2E_BUILD=auto|aus`, jede beim Start gedruckt — ein stiller Sonderweg wäre derselbe Fehler
+  noch einmal.
+- `reuseExistingServer` übernimmt keinen fremden Server mehr, sondern prüft die `BUILD_ID` über
+  `/_next/static/<BUILD_ID>/_buildManifest.js`. Am nachgestellten Zombie belegt.
+- `playwright.gate6.config.mjs` war eine vollständige Abschrift, die sich nur im Port unterschied,
+  und blieb beim Umstellen prompt auf `npm run dev` hängen — jetzt dünner Aufsatz.
+- Kosten: Lauf 227,5/228,0 s, Build 10,8–12,3 s warm / 20,5 s kalt. 232 Tests.
+- ⚠️ **Die „6 rot" waren zwei Befunde auf sechs Testfällen**, nicht sechs Befunde: M1 = 2,
+  M2 = 4. Die Fehlrechnung war meine. Kais Vermutung, vier stammten aus einem älteren Stand,
+  ist damit gegenstandslos.
+- ⚠️ Kais eigener Fehler: Build auf Modulebene → jeder Worker baute neu, `BUILD_ID` wechselte
+  mitten im Lauf, 26 Dateien rot. Dazu Warte-Schleifen, die sich per `pgrep -f` gegenseitig am
+  Leben hielten. Seine Einordnung: **dieselbe Fehlerform dreimal an einem Tag** — eine Prüfung,
+  die ihren Vergleichswert fest verdrahtet · eine Messung, die ihre eigene Stellgröße verändert ·
+  ein Detektor, der sich selbst mitzählt.
+
+**2. Roadmap 24 — Nachrichten-Karten ragten über den Bildschirm** (`04ba621`, Vivien).
+`components/NewsWidget.js` (zwei CSS-Klassen), `tests/e2e/kein-abgeschnittener-text.spec.mjs`,
+neu `tests/e2e/nachrichten-karten.spec.mjs`.
+- Ursache: `grid gap-4 sm:grid-cols-2 lg:grid-cols-3` — mobil erklärte niemand die Spalte, also
+  legte CSS eine vom Typ `auto` an, die sich nach dem Inhalt richtet. Ein Quellenname aus dem
+  Live-Feed (266,6 px, nicht umbrechbar) → 386,2 px in einem 280-px-Platz, alle sechs Karten
+  betroffen. Behoben mit `grid-cols-1` (Untergrenze 0 statt `auto`) und `gap-3`.
+- ⚠️ **`truncate` stand die ganze Zeit im Markup und konnte nie greifen** — es ist ein Angebot,
+  das eine vorgegebene Breite braucht.
+- ⚠️ Zweiter Befund (Vivien, live bestätigt): Kürzungspunkte und Datum auf **einer Kante,
+  0,00 px**, auch auf Desktop, auch vorher. Jetzt 12,00 px.
+- ⚠️ **Der eigentliche Lehrsatz: Die Nachrichten kommen erst NACH dem Laden.** Direkt nach dem
+  Seitenaufbau ist die Seite sauber; erst sechs Karten später sind es 426 px. Jede
+  Querscroll-Prüfung, die nicht auf den Feed wartet, kommt zu früh.
+- Der neue Test fängt den Feed ab und ersetzt ihn durch feste Meldungen: Der Fehler trat nur
+  auf, weil an diesem Tag zufällig eine Meldung mit langem Quellennamen dabei war.
+- Tobias' Gate: 13 Breiten 320–1440 je Seitenbreite = Fensterbreite · Gegenprobe reproduziert
+  exakt 386,2 px · Belastungstest mit 96 zusammenhängenden Zeichen: Karte bleibt 280 px ·
+  0 Konsolen- und Netzwerkfehler · Nebengewinn: Ladeplatzhalter springen nicht mehr.
+- Nebenwirkung bewusst in Kauf genommen: In einem 12-px-Band werden Quellennamen neu gekürzt —
+  genau die, die vorher am Datum klebten.
+- Offen, bewusst nicht angefasst: dieselbe fehlende Ansage in `app/player/newsfeed/page.js:136`
+  und `components/team/tabs/KaderTab.js:497` (kein Defekt gemessen); kein Tooltip am gekürzten
+  Namen; stummes Verschwinden des Abschnitts bei Feed-Ausfall; toter Kompakt-Zweig in
+  `NewsWidget`.
+
+**Live nachgemessen (20.08.2026):** 360 → 360 · 390 → 390 · 768 → 768, jeweils **nach** dem
+Eintreffen des Feeds gemessen. Vorher bei 360 px: 426.
