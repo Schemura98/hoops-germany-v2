@@ -142,12 +142,21 @@ const ZEICHNUNG =
 // Genau daran ist die Vorfassung gescheitert (Tobias B1, oben): Sie verglich
 // eine gesetzte rem-Zahl mit einem Restbetrag aus Fenster- UND Inhaltsmaßen.
 //
+// ⚠️ DER ANKER IST AM 20.08.2026 EIN ANDERES ELEMENT GEWORDEN — die REGEL ist
+// dieselbe geblieben. Vorher hing der Text an der Ring-Unterkante. Seit die
+// Zeichnung die Ladezone regelkonform mitzeichnet (Halbkreis r = 1,30 m um die
+// Korbmitte, Rule 2.5.7), ist der Ring nicht mehr das UNTERSTE Element des
+// Korbbereichs: Der Ladezonen-Bogen reicht 1,075 m tiefer. Am Ring gemessen
+// würde die Überschrift in den Bogen hineinlaufen.
+// Anker ist deshalb die UNTERKANTE DER LADEZONE — der tiefste Punkt dessen,
+// was über dem Text steht. Der Abstand selbst ist unverändert.
+//
 // Die Rechnung, vollständig, damit sie nachprüfbar ist statt geglaubt:
-//   Die Korb-UNTERKANTE liegt bei viewBox-y = 159,76 + 16,54 = 176,30 von 720.
+//   Ladezonen-Unterkante = 44 + (1,575 + 1,30) × 60 = viewBox-y 216,50 von 720.
 //   Bei `slice` ist der Maßstab max(Breite/1200, Zeichnungshöhe/720), also:
-//     · breit/flach → 176,30/1200          = 14,692 vw
-//     · schmal/hoch → 176,30/720 × Höhe    = 0,244861 × Zeichnungshöhe
-//         35 rem → 8,5701 rem · 38 rem → 9,3047 rem · 40 rem → 9,7944 rem
+//     · breit/flach → 216,50/1200          = 18,0417 vw
+//     · schmal/hoch → 216,50/720 × Höhe    = 0,300694 × Zeichnungshöhe
+//         35 rem → 10,5243 rem · 38 rem → 11,4264 rem · 40 rem → 12,0278 rem
 //   Die Zeichnungshöhe ist seit Blocker 2 eine feste Leiter (siehe oben),
 //   nicht mehr die Bühnenhöhe. Damit ist der zweite Term wieder eine ZAHL und
 //   kein Restbetrag — und beide Terme gelten angemeldet wie abgemeldet.
@@ -168,9 +177,9 @@ const ZEICHNUNG =
 // `tests/e2e/hero-standbild.spec.mjs` prüft genau diesen Abstand.
 const INHALT =
   "relative z-10 mx-auto w-full max-w-3xl px-6 text-center " +
-  "pt-[calc(max(14.692vw,8.5701rem)+1.5rem)] pb-14 " +
-  "sm:pt-[calc(max(14.692vw,9.3047rem)+1.5rem)] sm:pb-16 " +
-  "lg:pt-[calc(max(14.692vw,9.7944rem)+1.5rem)] lg:pb-20";
+  "pt-[calc(max(18.0417vw,10.5243rem)+1.5rem)] pb-14 " +
+  "sm:pt-[calc(max(18.0417vw,11.4264rem)+1.5rem)] sm:pb-16 " +
+  "lg:pt-[calc(max(18.0417vw,12.0278rem)+1.5rem)] lg:pb-20";
 
 export default function HeroStage({ className = "", children }) {
   return (
