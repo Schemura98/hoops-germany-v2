@@ -11,25 +11,135 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> 🔨 **NICHT DEPLOYT, NICHT GEPUSHT (19.08.2026): Der Hero der Startseite ist neu.**
-> „Der Abschluss" – ein Dunk als Linienzeichnung statt des gerenderten Balls
-> (`components/landing/HeroDunk.js`, Konzept `docs/HERO-DUNK-KONZEPT-2026-08-19.md`), dazu die
-> Hero-Reduktion von Nele (`docs/HERO-AKTION-ENTSCHEIDUNG-2026-08-19.md`): **sechs Dinge im Hero
-> wurden vier**, eine Taste statt drei. Gelöscht: `PlayDiagram`, `SwishSequence`, `BallSprite`
-> und **295 KB Bilddaten** – die Startseite lädt wieder null Bytes davon.
-> **Geprüft:** Build durch · Production-Runtime (`npm start`) · Playwright **176 bestanden +
-> 1 übersprungen** (177 Fälle, 23 Dateien; davon 42 neu in `tests/e2e/hero-dunk.spec.mjs`) ·
-> `npm run design-audit --check` ohne Abweichung · **vier Gegenproben, jede rot mit
-> zurückgedrehter Abhilfe.**
-> **NICHT geprüft:** kein Gate (weder Kai noch Tobias) · der Abschluss ist über Dauer und
-> Positionswechsel gemessen, **nicht als Bewegung angesehen** · keine echten Geräte (alle
-> Fenstergrößen fest; auf dem Handy ändert sich die Höhe beim Scrollen) · eingeloggter Hero
-> nicht im Browser gesehen.
-> ⚠️ **Eine Entscheidung darin gehört Patrick zur Bestätigung:** Die Hero-Überschrift hat
-> **keinen Farbakzent mehr** (das orange „Community" ist weiß geworden). Grund gemessen: Auf
-> 1024×768 kreuzt die Zeichnung genau dieses Wort, Kontrast 2,77 : 1. Geometrie kann es nicht
-> lösen, Aufhellen sieht blass aus – die Ursache ist, dass das Designsystem EIN Orange erlaubt
-> und es nach der Reduktion drei Dinge beanspruchten. Details in Roadmap 20a (c).
+> ✅ **DEPLOYT: `35b8bc0`** (20.08.2026) – **Der Hero der Startseite ist neu**, und die
+> Weiterleitung nach der Anmeldung ist abgesichert. Drei Commits: `bd99263` (Vivien, der Dunk),
+> `d841c4b` (Vivien, Blocker + vier Gate-Befunde), `35b8bc0` (Kai, Weiterleitung + zwei Testlücken).
+>
+> **Der Dunk** – eine Linienzeichnung statt des gerenderten Balls (`components/landing/HeroDunk.js`,
+> Konzept `docs/HERO-DUNK-KONZEPT-2026-08-19.md`), dazu Neles Hero-Reduktion
+> (`docs/HERO-AKTION-ENTSCHEIDUNG-2026-08-19.md`): **sechs Dinge im Hero wurden vier**, eine Taste
+> statt drei. Gelöscht: `PlayDiagram`, `SwishSequence`, `BallSprite` und **295 KB Bilddaten** – die
+> Startseite lädt null Bytes davon. **Steuerdatei ~1350 → 235 Zeilen.**
+> ⚠️ **ROADMAP 20, 20b–20h SIND DAMIT GEGENSTANDSLOS** – acht Punkte, jeder mindestens eine
+> Gate-Runde teuer. Der Grund in einem Satz: Der alte Ball war eine **deckende Scheibe**, die
+> keinen Buchstaben berühren durfte; daraus kamen Kastenbau, Lückensuche, Verankerung und
+> Konturkanal. **Eine Linie darf jeden Buchstaben kreuzen** – die Frage ist nicht mehr Geometrie,
+> sondern Kontrast, und dorthin ist der Wächter gewandert. Sieben Testdateien entfielen,
+> **jede begründet in `tests/e2e/README.md`**.
+> ✅ **Live nachgemessen (20.08.2026):** 4 Zeichenlinien, **alle vier versteckt** ausgeliefert,
+> 0 fertig gezeichnet · Ring vorhanden · alte Ballsequenz **404** · 16 Routen je 200 ·
+> `/signup` mit 6 Eingabefeldern.
+>
+> ⚠️ **DER BLOCKER, DEN KAI FAND (K1) – und warum er lehrreich ist:** Die Seite lieferte das
+> **fertige Standbild an ALLE** aus und wischte es beim Laden wieder weg. Die Pointe wurde
+> gezeigt, zurückgenommen und dann erzählt. Viviens Diagnose ging tiefer als der Fehler:
+> **Ob jemand `prefers-reduced-motion` gesetzt hat, ist eine Eigenschaft seines GERÄTS – der
+> Server hat keines und kann es nicht wissen.** Der alte Code hat geraten, zugunsten des
+> Standbilds. Es gehört jetzt dem Stylesheet, nicht einer JavaScript-Entscheidung.
+> **Merksatz: Eine Regel, die schon im ausgelieferten Blatt gelten muss, darf nicht auf
+> JavaScript warten.** Bewacht durch `tests/e2e/hero-erstes-bild.spec.mjs` – es liest das
+> **rohe Server-Blatt**, nicht die Seite im Browser. Kais Gegenprobe: 6 Mutationen, 5 rot.
+>
+> ⚠️ **DIE WEITERLEITUNGS-LÜCKE (Kai K4, vorbestehend):** Nach Anmeldung/Registrierung wurde
+> das Ziel aus der Adresszeile **ungeprüft** übernommen. Angriff: Ein Link auf unsere **echte**
+> Anmeldeseite, der Nutzer meldet sich wirklich bei uns an – und landet auf einer nachgebauten
+> Maske, die „noch einmal" nach dem Passwort fragt. Belegt: Mit der alten Prüfung protokollierte
+> Playwright `navigated to "http://evil.com/"`.
+> **Die Prüfung stand VIERMAL da und war viermal umgehbar** – `startsWith("/") &&
+> !startsWith("//")` lässt den **Rückwärtsstrich** durch, und der Browser macht aus
+> `/\evil.com` ein `https://evil.com/`. Jetzt **eine** Quelle: `lib/sichererPfad.js`, an allen
+> fünf Stellen (Login, Signup, OAuth-Landing, beide Google-Endpunkte). Sie bildet **nicht nach,
+> was der Browser tut, sondern fragt ihn**: Ziel auflösen, Ursprung vergleichen.
+> Tobias: 26 Angriffsformen abgewiesen, 13 legitime Ziele durchgelassen.
+> ⚠️ **Kais erste Fassung war ZU STRENG** und ließ `/spieler?q=max mustermann` still auf den
+> Newsfeed fallen – kein Fehler, keine Meldung, nur die falsche Seite. Die Browser-Funktion
+> wandelt `%20` bereits in ein Leerzeichen um. **Eine Abwehr, die zu viel abweist, ist ein
+> stiller Ausfall wie jeder andere.**
+> ⚠️ **Ein abgewiesenes Ziel führt jetzt still zum Newsfeed.** Absicht (eine gelungene Anmeldung
+> soll nicht mit einer Fehlermeldung quittiert werden), von Tobias mitgetragen. Die eigentliche
+> Gefahr der Stille ist die andere Richtung: Würde ein **legitimes** Ziel fälschlich abgewiesen,
+> merkt es weder Nutzer noch Betreiber – dagegen grast Kais Test die Startseite ab und prüft
+> jeden dort verlinkten Zielwert.
+> ⚠️ **NICHT GEPRÜFT:** Der **Google-Weg ist nie durchgelaufen** (lokal keine Schlüssel) – das
+> sind **drei der fünf** geänderten Stellen. Und `/signup` mit `?next=` lief bei beiden Prüfern
+> **nicht durchs Formular**, nur über `/login`. Einmal echt auf Prod durchspielen.
+>
+> ⚠️ **DER SCHWERSTE BEFUND DES TAGES BETRIFFT NICHT DEN CODE, SONDERN UNSER WERKZEUG (Kai H1):**
+> **Die gesamte Playwright-Suite läuft gegen `npm run dev`** – fest verdrahtet in
+> `tests/e2e/playwright.config.mjs`. Sie kann Fehler, die **nur in der ausgelieferten Fassung**
+> auftreten, per Konstruktion nicht sehen. Belegt am selben Commit in derselben Minute:
+> **Entwicklung 231 grün / Produktion 225 grün, 6 rot.** Die Projektregel „vor Deploy immer die
+> Production-Runtime testen" und das Werkzeug widersprechen sich. **Alle früher protokollierten
+> „grün"-Zahlen sind Dev-Zahlen.** Umstellung ist keine Nebenarbeit → Roadmap 23.
+>
+> ⚠️ **UND EIN ECHTER FEHLER AUF DER STARTSEITE, VORBESTEHEND UND SEIT LÄNGEREM LIVE (Kai M1):**
+> Auf **360 und 390 px** ragen die Nachrichten-Karten über den Bildschirm – die Seite ist dort
+> **426 px breit statt 360**. Der Leser verliert rechts ein Stück jeder Nachricht. Verursacher
+> ist der Einblend-Rahmen in `components/NewsWidget.js` (Karte bei x=40, 386 px breit). Kai hat
+> `bd99263` eigens gebaut und gegengemessen: dort identisch. **Nur in der Produktionsfassung
+> sichtbar** – deshalb hat es nie ein Test gefunden. → Roadmap 24.
+>
+> ⚠️ **ZWEI ANGABEN VON VIVIEN STIMMEN NICHT** (Befund Tobias, beides Doku, nicht Produkt):
+> (1) „Vollständig verdeckt ist der Ball in **keinem einzigen Bild**" – über 48 gemessene Bilder
+> gibt es **genau eines** (~16 ms). Ursache: Sie hat **Fläche** gemessen, der Ball ist ein
+> **Umriss ohne Füllung**, und mit 24 Stichproben rutscht ein 16-ms-Fenster durch.
+> (2) Ihr Abstand „89/92 px" zur Navigationsleiste ist nicht reproduzierbar (Tobias misst
+> 76,6/79,7). Der Kern stimmt jeweils, die Zahl nicht.
+>
+> ⚠️ **KAI HAT SICH SELBST GEBREMST, und das gehört festgehalten:** Zu seinen kleineren Punkten
+> K5–K9 aus der Vorrunde sagt er, er könne sie **nicht bestätigen** – sein damaliger Bericht
+> liegt nirgends im Arbeitsbaum. *„Aus dem Gedächtnis eine Unbedenklichkeitsbescheinigung
+> auszustellen wäre genau die Sorte Zusicherung, die ich in diesem Bericht zweimal als Befund
+> melde."* **Folge: Gate-Berichte gehören ins Repo, nicht nur in die Sitzung.** → Roadmap 25.
+>
+> ✅ **Davor deployt: `062989e`** (19.08.2026) – **`/signup` kam LEER beim Nutzer an.** Das
+> ausgelieferte HTML trug 0 Eingabefelder, 0 `<main>` und 0 Verweise auf Datenschutz und
+> Impressum; `useSearchParams()` ließ beim statischen Vorrendern die umschließende
+> `<Suspense>`-Grenze auf ihren **leeren** Ersatzinhalt fallen. Im Browser war nach dem Nachladen
+> alles da – **deshalb fiel es monatelang niemandem auf, und ein Browser-Test wäre immer grün
+> geblieben.** Der Haken wurde an zwei Stellen benutzt, beide laufen ohnehin erst im Browser;
+> sie lesen die Adresszeile jetzt direkt, wie es der Google-Effekt in derselben Datei immer tat.
+> ⚠️ **Der Punkt für Nora:** Die Rechtsverweise, die sie am 13.08. für genau diese Seite
+> verlangt hat (Art. 13 DSGVO, § 5 DDG), waren eingebaut – und erreichten das ausgelieferte
+> Blatt nie. Live nachgemessen: 6 Eingabefelder, 1 `<main>`, je 3 Verweise.
+> Bewacht durch `tests/e2e/signup-ohne-js.spec.mjs` (liest das rohe Server-Blatt).
+>
+> ✅ **Davor deployt: `cf02293` → `a4c6811`** (19.08.2026) – **Sponsor-Report auf sechs Zahlen**
+> (Auftrag Patrick, Urteil Tobias: „ein Sponsorendokument braucht sechs starke Zahlen mit je
+> einem erklärenden Satz, nicht dreißig"). Neun Abschnitte mit ~30 Kennzahlen wurden zwei
+> Abschnitte mit sechs Zahlen, jede mit Erklärsatz.
+> ⚠️ **Drei Zahlen darin logen**, und eine davon war mein eigener Fehler:
+> (1) „Ligen im Katalog" – meine Begründung war **erfunden**: Ich hatte eine Zahl aus der Dev-DB
+> mit einer aus Prod verrechnet und von „77 → 51" erzählt. Auf Prod waren es 51 vorher und 51
+> nachher; die Demo-Kreisligen tragen `official: false`. Der Filter bleibt als Schutzgeländer.
+> (2) **Bestandszahlen trugen ein Prozent-Wachstum, das etwas anderes misst** – `entityStats`
+> rechnet die NEUEN Anmeldungen der letzten 30 Tage gegen die 30 davor, daneben stand der
+> Gesamtbestand. „4 Vereine +100 %" liest sich als Verdopplung. Jetzt „davon N neu in 30 Tagen".
+> (3) **Der Report zeigte Anstiege und verschwieg Rückgänge** (Befund Kai H1, ebenfalls meiner):
+> `wachstumsText` gab bei jedem Wert ≤ 0 `null` zurück. Real: auf Prod Seitenaufrufe **−34 %**,
+> Besucher **−39 %**, beide ohne jedes Abzeichen. Ein Hinweis erschien **nur bei guten
+> Nachrichten**. Jetzt beidseitig, mit Deckel in beide Richtungen.
+> ⚠️ **Und der Sponsorenlink zeigte ein ANDERES Blatt als die Backoffice-Vorschau** (Kai H2 /
+> Tobias H-1): `newLast30` stand als „interne Wachstumsrohdaten" auf der Ausschlussliste, also
+> fehlte draußen die Zeile „davon N neu in 30 Tagen" – ohne Fehler, ohne Meldung. Darüber steht
+> „Zeitraum: letzte 7 Tage". **Ich hatte in der Vorschau geprüft, die das Problem nicht hat.**
+> Entfernt, mit Begründung im Code: Beliebteste Inhalte (**fünf Klarnamen** unter einer
+> gedruckten Zusicherung, es würden keine personenbezogenen Daten genannt), Regionale Stärke
+> (>90 % Seed), Wiederkehrende (0), Sitzungsdauer (4 s), Aktive Nutzer, Beliebteste Seiten
+> (rohe Pfade inkl. `/player/update-password`).
+> ⚠️ **NEUE AUFLAGE TOBIAS, ersetzt die alte:** Die PDF-Auflage ist **für den Report aufgehoben**
+> (Klarnamen auf allen drei Wegen weg, im Druck geprüft). An ihre Stelle treten zwei engere:
+> **(a) Kein CSV-Export aus dem Sponsoren-Reiter** – die Datei schreibt weiterhin fünf
+> Spielernamen mit (`content.topPlayers`), eine Knopfbreite neben „Sponsoring-Report öffnen".
+> **(b) Kein Freigabelink nach draußen, bis B1 entschieden ist:** Der Sponsor wählt den Zeitraum
+> selbst, und bei „90 Tage"/„1 Jahr" zeigt der Report **„+100 %"**, wo im Vorzeitraum **gar
+> nichts** gemessen wurde (`growth()`: `if (!prev) return cur > 0 ? 100 : 0`). Der 300-%-Deckel
+> greift nicht, weil 100 darunter liegt. Auf Prod **nicht** nachgemessen.
+> Bewacht durch `tests/e2e/sponsor-report.spec.mjs` (3 Fälle). ⚠️ Kais Mutationsmatrix fand
+> **3 Überlebende von 15** – zwei davon geschlossen: Der Feldgleichheits-Test prüft jetzt die
+> **ausgelieferte Nutzlast** statt den Quelltext (eine Textsuche blieb grün, wenn jemand den
+> Helfer schlicht nicht mehr aufrief), und der Klarnamen-Test hat eine Schranke auf die
+> Namensliste (bei leerer Liste lief er ins Nichts).
 >
 > ✅ **ZULETZT DEPLOYT: `7da3905`** (18.08.2026, fünfter Deploy des Tages) – Silbentrennung ohne Stummel
 > (Vivien) + Backoffice-Kennzahl, die nur wachsen konnte. Live: 16 Routen je 200, Trennregel im
@@ -295,7 +405,9 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `cc128ed` (aktuell live) → `dba7baa` → `f4c2d15` → `e00b64a` → `f27736a` → `40dff48` → `f5b1b3f` → `f46a783` → `84cb7ba` → `75f2c3a` → `bc7ccad` → `6e2fbe1` → `1bcf854` →
+> **Rollback-Kette:** `35b8bc0` (aktuell live) → `d841c4b` → `bd99263` (Dunk, vor den
+> Gate-Befunden) → `062989e` (letzter Stand vor dem Hero-Umbau) → `a4c6811` → `cf02293` →
+> `7da3905` → `96eba14` → `da7756b` → `aff17e6` → `787d760` → `cc128ed` → `dba7baa` → `f4c2d15` → `e00b64a` → `f27736a` → `40dff48` → `f5b1b3f` → `f46a783` → `84cb7ba` → `75f2c3a` → `bc7ccad` → `6e2fbe1` → `1bcf854` →
 > `4d03ba2` → `76aa289` → `1d2e3ae` → `1dc617f` → `d07c475` → `2be664e` → `cd51c92` →
 > `164c784` (der Stand vor dieser Serie, bis 17.08. live) → `66f9000` → `4f64af7` → `4f3811d` (Newsfeed-Umbau,
 > von beiden Gates blockiert – NICHT dorthin zurück) → `f23757b` → `074bcf1` (letzter Stand vor
@@ -943,6 +1055,211 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     wann ein live erfasster Stand als **eingereicht** gilt (die Doppel-Bestätigung darf nicht
     versehentlich schon durch das Mitschreiben ausgelöst werden) · Vorprüfung an Mats/Ronja,
     ob die Ehrenamtlichen das überhaupt wollen.
+23. ⚠️ **Die Testsuite läuft gegen den falschen Server** (Befund Kai, 20.08.2026, hoch).
+    `tests/e2e/playwright.config.mjs` startet fest `npm run dev`. Fehler, die **nur in der
+    ausgelieferten Fassung** auftreten, kann die Suite per Konstruktion nicht sehen. Belegt am
+    selben Commit in derselben Minute: **Entwicklung 231 grün · Produktion 225 grün, 6 rot.**
+    Die Projektregel „vor Deploy immer die Production-Runtime testen" und das Werkzeug
+    widersprechen sich – **alle früher protokollierten „grün"-Zahlen sind Dev-Zahlen.**
+    ⚠️ Der Beleg dafür, dass das nicht theoretisch ist, ist Roadmap 24: Gefunden hat es nicht
+    die Suite, sondern der Blick auf die ausgelieferte Fassung.
+    Umstellung ist keine Nebenarbeit (Build vor jedem Lauf, längere Laufzeit) → Aufwand an Ole.
+
+24. ⚠️ **Nachrichten-Karten ragen auf schmalen Handys über den Bildschirm** (Befund Kai,
+    20.08.2026, mittel, **vorbestehend und live**). Auf **360 und 390 px** ist die Startseite
+    **426 px breit statt 360** – der Leser verliert rechts ein Stück jeder Nachricht.
+    Äußerster Verursacher: der Einblend-Rahmen um die Karte in `components/NewsWidget.js`
+    (Karte bei x=40, 386 px breit), 12 Elemente betroffen, 45 px Überstand.
+    ⚠️ **Nur in der Produktionsfassung sichtbar** – deshalb hat es nie ein Test gefunden.
+    Kai hat `bd99263` eigens gebaut und gegengemessen: dort identisch, also kein Rückfall aus
+    dem Hero-Umbau. 360 px ist die verbreitetste Android-Breite Deutschlands.
+
+25. **Gate-Berichte gehören ins Repo** (Anlass Kai, 20.08.2026). Er konnte seine eigenen
+    Befunde K5–K9 aus der Vorrunde **nicht bestätigen**, weil der Bericht nur in der Sitzung
+    lag: *„Aus dem Gedächtnis eine Unbedenklichkeitsbescheinigung auszustellen wäre genau die
+    Sorte Zusicherung, die ich in diesem Bericht zweimal als Befund melde."* Damit sind K5–K9
+    (Rundungs-Wächter, Ring-Lesbarkeit im Ruhezustand, Ringblitz, Blitzdauer an zwei Stellen,
+    **und ob der Ball überhaupt im Korb landet**) offen, nicht erledigt. Der letzte wiegt am
+    schwersten: Die Pointe des ganzen Umbaus hat keinen Test, die Fortschritts-Leiste hat
+    genau diesen – weil Tobias dort einmal fand, dass der Ball nicht ankommt, sondern
+    verschwindet.
+    Dazu offen: **M2** (Kais `sicherer-pfad.spec.mjs` vergleicht fest gegen Port 3000 und ist
+    damit ausgerechnet im isolierten Arbeitsbaum blind), **N4** (die neue Endmarkengröße 28×20
+    ist von keinem Test bewacht – wer sie vergrößert, bekommt Tobias' B2 zurück und eine grüne
+    Suite) und **ein Signup-Fall durchs Formular** (beide Prüfer kamen nur über `/login`).
+
+18. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
+19. **Optional / bewusst offen:** Best-of-Serien + echte Playoff-Bracket-Grafik; Status-basierte
+    Tabellen-Exklusion; Stat-Filter Hauptrunde/Playoffs/Gesamt; stabiler `leagueKey`; Benachrichtigung bei
+    Team-Follow; sharp-Resize für gespeicherte Upload-JPEGs; Super-Admin-Tabellen auf `<Loading>`/`EmptyState`;
+    Folge-Vorschläge nur für neue User; TransferEvents bleiben nach Team-Löschung als Historie (Design);
+    `seed-world.mjs --prod` nur nach ausdrücklicher Freigabe des Users.
+20. ✅ **GEGENSTANDSLOS (19.08.2026): Roadmap 20, 20b, 20c, 20d, 20e, 20f, 20g und 20h
+    — die komplette Ball-Choreografie der Startseite.**
+    Acht Punkte, jeder mindestens eine Gate-Runde, alle über denselben Gegenstand: einen
+    **gerenderten Ball**, also eine deckende Scheibe, die keinen Buchstaben berühren durfte.
+    Sie ist ersetzt durch eine **Linienzeichnung** („Der Abschluss", Konzept
+    `docs/HERO-DUNK-KONZEPT-2026-08-19.md`, Auftrag Patrick). Eine Linie darf jeden Buchstaben
+    kreuzen — damit stellt sich keine der acht Fragen mehr.
+    **Erledigt heißt hier: der Gegenstand ist weg, nicht das Problem gelöst.** Konkret entfallen:
+    Abdunkelung (`ballDeckkraftUeberKaesten`, `TEXT_DIM_FLOOR`, `TEXT_FADE_MARGIN`) ·
+    Kastenbau (`TreeWalker`, `Range.getClientRects()`, „Fläche oder Tinte") · Lückensuche ·
+    mobile Verankerung am Eyebrow · Konturkanal · `MutationObserver` auf den Anmelde-Wechsel ·
+    mobiler Einflug samt Schiedsrichter · Übergabe an die Fortschritts-Leiste. Aus rund
+    1.350 Zeilen in `HeroScrollStage.js` wurden **235**.
+    ⚠️ **WER WIEDER EINE GEFÜLLTE, DECKENDE FORM IN DIESE BÜHNE SETZT, BRAUCHT DEN GANZEN
+    APPARAT ZURÜCK** — und zwar vollständig, nicht in Teilen. Er war für seinen Gegenstand
+    richtig; er ist weg, weil der Gegenstand weg ist. Der Verlauf hält ihn vor.
+    ⚠️ **Was dabei WIRKLICH verloren geht, und es ist nicht nichts:** echte Kugelrotation.
+    Nähte, die über eine Kugel wandern statt sich in der Fläche zu drehen, sind mit Vektoren
+    nicht erreichbar — das war der ganze Grund, warum die 32-Bild-Sequenz gebaut wurde. Sie
+    passt nur nicht in eine Strichzeichnung: Ein fotografisch modellierter Körper in einem
+    Diagramm ist ein Genrebruch.
+    ⚠️ **Und drei Sätze aus diesen acht Punkten gelten unverändert weiter** — sie beschreiben
+    Fehlerformen, nicht den Ball:
+    > „Frei" ist eine Aussage über die **Bühne**, „sichtbar" eine über das **Sichtfeld**. Wer in
+    > Bühnenkoordinaten spezifiziert, was ein Mensch sehen soll, bekommt grüne Kennzahlen über
+    > einen Gegenstand außerhalb des Bildschirms.
+
+    > Vier Runden lang haben wir **Breiten** geprüft. Der Ausfall hing an der **Fensterhöhe**.
+    > Eine Prüfmatrix mit nur einer Achse lässt beide Seiten korrekt messen und trotzdem zu
+    > gegensätzlichen Ergebnissen kommen.
+
+    > Eine Messung darf ihre eigene Stellgröße nicht verändern.
+
+    Die Höhenachse ist deshalb in `tests/e2e/hero-dunk.spec.mjs` von Anfang an drin, und der
+    Umschalter zwischen den beiden Fassungen ist das **Seitenverhältnis**, nicht die Breite —
+    ein Breakpoint bei 768 px schnitte dem iPad hochkant **46 %** der Zeichnung weg
+    (Gegenprobe gelaufen: genau dieser Fall wird rot).
+    ⚠️ **Sieben Testdateien sind mit dem Ball gelöscht worden.** Warum jede einzelne
+    gegenstandslos ist, steht in `tests/e2e/README.md`, Abschnitt „Entfallene Tests" —
+    **kein Wächter wurde stumm entfernt.**
+20a. ⚠️ **DREI STILLE BEFUNDE AUS DIESEM UMBAU — jeder sieht fast richtig aus.**
+    Sie stehen vollständig in `docs/HERO-DUNK-KONZEPT-2026-08-19.md` (Nachtrag 2);
+    hier die Kurzfassungen, weil alle drei über diesen Hero hinaus gelten.
+    **(a) Der Befund, den man sich merken muss:**
+    **`pathLength="1"` wirkt nicht, wenn am selben Pfad `vector-effect: non-scaling-stroke`
+    steht.** Der Browser rechnet das Strichmuster dann im Gerätemaß; aus `stroke-dasharray: 1`
+    wird 1 px an, 1 px aus. Folge: **Jede noch nicht gezeichnete Linie steht dauerhaft als feine
+    Punktlinie im Bild**, unabhängig vom Versatz. Kein Konsolenfehler, kein kaputtes Layout —
+    es sieht fast richtig aus.
+    Gefunden nur, weil im ersten Bild zwei Diagonalen standen, wo per Konstruktion nichts stehen
+    durfte. **Der Fehler war vermutlich schon in `PlayDiagram.js` und ist nie aufgefallen**,
+    weil die Taktiktafel bei Deckkraft 0,171 lief — ein Geist bei 17 % ist unsichtbar. Erst die
+    Anhebung von `ARC_MAX` auf 0,62 hat ihn ans Licht geholt.
+    Abhilfe: Der Controller misst jede Pfadlänge **einmal** beim Aufsetzen (`getTotalLength()`,
+    funktioniert auch an einer per `display:none` ausgeblendeten Fassung) und fährt das
+    Strichmuster in absoluten Einheiten. Bewacht durch `hero-dunk.spec.mjs`; Gegenprobe mit
+    zurückgedrehter Abhilfe: rot.
+    ⚠️ **UND DERSELBE FEHLER KAM IN ZWEITEM KOSTÜM ZURÜCK, weil meine erste
+    Abhilfe halb war:** `non-scaling-stroke` blieb stehen. Damit gilt das
+    Strichmuster im **Gerätemaß** — bei Maßstab 1,231 (1280×800) ist der Pfad
+    867 Geräteeinheiten lang, das Muster nur 704,6, also **fehlten 19 % jeder
+    Linie**. Sichtbar als offener Ball und als Zug, der kurz vor dem Korb
+    aufhört. **Auf 360 px unsichtbar** (Maßstab 0,92: ein zu langes Muster
+    deckt vollständig), **und mein Test war grün** — er verglich Muster und
+    Pfadlänge beide in Benutzereinheiten.
+    > **Richtig gemessen, in der falschen Einheit.** Dieselbe Fehlerform wie
+    > „Bühne statt Sichtfeld" aus Roadmap 20b, eine Ebene tiefer.
+    Endgültige Abhilfe: `vector-effect` fällt aus der ganzen Zeichnung; der
+    Strich skaliert jetzt mit (gemessen 1,9–4,9 px).
+
+    **(b) Ein Streupunkt aus zwei Nachkommastellen.** Im ersten Bild stand ein
+    orangefarbener Punkt über der Taste, wo noch nichts gezeichnet sein durfte.
+    `toFixed(2)` machte aus dem Versatz 188,522 den Wert 188,52 — die
+    verbleibenden **0,002 px Strich** zeichnete `stroke-linecap: round` als
+    **vollen Punkt in Strichbreite**. Abhilfe: nicht runden UND die Lücke im
+    Strichmuster 2 px länger machen als den Pfad, damit die Rechnung gegen
+    Rundungsstaub immun ist statt auf exakte Gleitkommazahlen zu bauen.
+
+    **(c) Das Kontrast-Prüfmaß war zweimal falsch, in BEIDE Richtungen.**
+    Zu wenig: Es prüfte nur `paper-50` (so hatte das Konzept gerechnet), während
+    die Kleinzeile unter der Taste (`text-mist-400`) über der stärksten Linie
+    bei **2,79 : 1** lag — unter AA, Test grün. Sie steht jetzt in `paper-100`
+    (mindestens 4,84 : 1 über jeder Ebene, also lageunabhängig).
+    Zu viel: Die zweite Fassung prüfte jede Textfarbe gegen jede Ebene und
+    meldete „Community" (`brand-400`) mit 3,63 : 1 — ein Fehlalarm auf fünf von
+    sechs geprüften Viewports. Eine exakte Berührungsmessung
+    (`isPointInStroke()`) zeigt: **auf 1024×768 kreuzt der Zug das Wort
+    tatsächlich, mit 2,77 : 1.**
+    ⚠️ **Geometrie löst das nicht** – der Ball muss über dem Ring stehen, der
+    Ring steht auf halber Bühnenhöhe, dort steht der mittig gesetzte Inhalt.
+    Aufhellen auch nicht (`brand-100` hält 4,74 : 1, ist am gebauten Stück aber
+    ein blasses Creme neben einer weißen Zeile).
+    **Entscheidung: Die Hero-Überschrift verliert ihren Farbakzent.** Ursache
+    ist, dass das Designsystem genau EIN Orange erlaubt und es nach der
+    Reduktion drei Dinge beanspruchten – Taste, Überschriftswort, Zeichnung.
+    Das schwächste ist das Wort.
+    ⚠️ **Abweichung von `docs/VISUELLE-RICHTUNG-2026-08-12.md` („Schlüsselwort
+    in brand-500"), ausdrücklich nur für diesen Hero. Patrick kann sie
+    überstimmen** – dann muss der Befund auf 1024×768 anders gelöst werden.
+21. ✅ **ERLEDIGT (17.08.2026): Cache-Vorgabe für `/images/` und `/fonts/`.** Gesetzt in
+    `next.config.mjs` über `headers()` – **nicht** in Nginx, damit die Vorgabe versioniert ist und
+    mit jedem Deploy mitgeht statt am Server zu leben. Wert:
+    `public, max-age=2592000, stale-while-revalidate=86400` (30 Tage, wie die Konvention für die
+    Upload-Verzeichnisse). Auf der Production-Runtime nachgemessen, dann live.
+    ⚠️ **Bewusst KEIN `immutable` und kein Jahr:** Die Dateinamen sind **nicht inhaltsadressiert**.
+    `ball-basketball-32x200.webp` nennt Bildzahl und Kantenlänge, aber nichts über den Inhalt – wird
+    die Sequenz mit denselben Parametern neu erzeugt (etwa mit anderem Nahtmuster), heißt die Datei
+    gleich. Ein Jahr mit `immutable` hielte Wiederkehrer dauerhaft auf dem alten Ball, **und niemand
+    könnte es sehen**, weil die Seite bei Erstbesuchern korrekt aussieht.
+    ⚠️ **Regel daraus: Wer den Inhalt einer Datei unter gleichem Namen ändert, muss den Namen
+    ändern.** Für die Ball-Sequenz ist das über drei Stellen gekoppelt und durch
+    `tests/e2e/ball-sequenz.spec.mjs` abgesichert; für `logo.svg` und die Auth-Motive gibt es diese
+    Absicherung **nicht**.
+
+22. ✅ **ERLEDIGT (19.08.2026, `062989e`, live nachgemessen).** `/signup` lieferte 0
+    Eingabefelder, 0 `<main>` und 0 Verweise auf Datenschutz und Impressum aus. Ursache:
+    `useSearchParams()` ließ beim statischen Vorrendern die umschließende `<Suspense>`-Grenze
+    auf ihren **leeren** Ersatzinhalt fallen. Behoben – der Haken wurde an zwei Stellen benutzt,
+    beide laufen ohnehin erst im Browser und lesen die Adresszeile jetzt direkt (so, wie es der
+    Google-Effekt in derselben Datei immer tat); die leere Grenze entfällt ersatzlos.
+    **Live: 6 Eingabefelder, 1 `<main>`, je 3 Rechtsverweise.**
+    Bewacht durch `tests/e2e/signup-ohne-js.spec.mjs` – **es liest das rohe Server-Blatt, nicht
+    die Seite im Browser.** Das ist der ganze Punkt: Im Browser sah `/signup` immer richtig aus,
+    ein Browser-Test wäre per Konstruktion immer grün geblieben, und genau deshalb ist es
+    monatelang niemandem aufgefallen. Gegenprobe mit wieder eingebautem Haken: 0 Eingabefelder,
+    Test rot.
+    ⚠️ **Noras Punkt ist erledigt, aber er war real:** Die Rechtsverweise, die sie am 13.08.
+    für genau diese Seite verlangt hat (Art. 13 DSGVO, § 5 DDG), waren eingebaut – und
+    erreichten das ausgelieferte Blatt nie.
+    ⚠️ **Dringlich wurde es durch eine Entscheidung, nicht durch den Fehler:** Neles Hero-Umbau
+    macht `/signup` zum **einzigen** Ausgang der Startseite. Vorher war es ein Schönheitsfehler.
+    Ursprünglicher Befund zur Nachlese: `docs/SIGNUP-OHNE-JS-2026-08-17.md`.
+
+23. ⚠️ **Die Testsuite läuft gegen den falschen Server** (Befund Kai, 20.08.2026, hoch).
+    `tests/e2e/playwright.config.mjs` startet fest `npm run dev`. Fehler, die **nur in der
+    ausgelieferten Fassung** auftreten, kann die Suite per Konstruktion nicht sehen. Belegt am
+    selben Commit in derselben Minute: **Entwicklung 231 grün · Produktion 225 grün, 6 rot.**
+    Die Projektregel „vor Deploy immer die Production-Runtime testen" und das Werkzeug
+    widersprechen sich – **alle früher protokollierten „grün"-Zahlen sind Dev-Zahlen.**
+    ⚠️ Der Beleg dafür, dass das nicht theoretisch ist, ist Roadmap 24: Gefunden hat es nicht
+    die Suite, sondern der Blick auf die ausgelieferte Fassung.
+    Umstellung ist keine Nebenarbeit (Build vor jedem Lauf, längere Laufzeit) → Aufwand an Ole.
+
+24. ⚠️ **Nachrichten-Karten ragen auf schmalen Handys über den Bildschirm** (Befund Kai,
+    20.08.2026, mittel, **vorbestehend und live**). Auf **360 und 390 px** ist die Startseite
+    **426 px breit statt 360** – der Leser verliert rechts ein Stück jeder Nachricht.
+    Äußerster Verursacher: der Einblend-Rahmen um die Karte in `components/NewsWidget.js`
+    (Karte bei x=40, 386 px breit), 12 Elemente betroffen, 45 px Überstand.
+    ⚠️ **Nur in der Produktionsfassung sichtbar** – deshalb hat es nie ein Test gefunden.
+    Kai hat `bd99263` eigens gebaut und gegengemessen: dort identisch, also kein Rückfall aus
+    dem Hero-Umbau. 360 px ist die verbreitetste Android-Breite Deutschlands.
+
+25. **Gate-Berichte gehören ins Repo** (Anlass Kai, 20.08.2026). Er konnte seine eigenen
+    Befunde K5–K9 aus der Vorrunde **nicht bestätigen**, weil der Bericht nur in der Sitzung
+    lag: *„Aus dem Gedächtnis eine Unbedenklichkeitsbescheinigung auszustellen wäre genau die
+    Sorte Zusicherung, die ich in diesem Bericht zweimal als Befund melde."* Damit sind K5–K9
+    (Rundungs-Wächter, Ring-Lesbarkeit im Ruhezustand, Ringblitz, Blitzdauer an zwei Stellen,
+    **und ob der Ball überhaupt im Korb landet**) offen, nicht erledigt. Der letzte wiegt am
+    schwersten: Die Pointe des ganzen Umbaus hat keinen Test, die Fortschritts-Leiste hat
+    genau diesen – weil Tobias dort einmal fand, dass der Ball nicht ankommt, sondern
+    verschwindet.
+    Dazu offen: **M2** (Kais `sicherer-pfad.spec.mjs` vergleicht fest gegen Port 3000 und ist
+    damit ausgerechnet im isolierten Arbeitsbaum blind), **N4** (die neue Endmarkengröße 28×20
+    ist von keinem Test bewacht – wer sie vergrößert, bekommt Tobias' B2 zurück und eine grüne
+    Suite) und **ein Signup-Fall durchs Formular** (beide Prüfer kamen nur über `/login`).
+
 18. **Weitere UX-Feinschliffe nach Tester-Feedback** (laufend).
 19. **Optional / bewusst offen:** Best-of-Serien + echte Playoff-Bracket-Grafik; Status-basierte
     Tabellen-Exklusion; Stat-Filter Hauptrunde/Playoffs/Gesamt; stabiler `leagueKey`; Benachrichtigung bei

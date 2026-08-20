@@ -4309,3 +4309,91 @@ seine eigene 2 : 1-Untergrenze verletzt hätte.
 - **Eingeloggter Hero** nicht im Browser gesehen (die Testkonten auf Prod sind entwertet; lokal
   wäre es möglich gewesen, ist aber nicht geschehen).
 - **Kein Gate.** Weder Kai noch Tobias haben diesen Stand geprüft.
+
+#### Update (19.–20.08.2026) — Sponsor-Report, `/signup`, der Dunk und die Weiterleitung
+
+**Deploys dieser Runde:** `cf02293` → `a4c6811` → `062989e` → `35b8bc0` (alle am Server verifiziert).
+
+**1. Sponsor-Report auf sechs Zahlen** (`cf02293`, `a4c6811`) — Auftrag Patrick, Urteil Tobias:
+„Ein Sponsorendokument braucht sechs starke Zahlen mit je einem erklärenden Satz, nicht dreißig."
+`components/admin/SponsorReportView.js`, `lib/analyticsSummary.js`,
+`app/api/analytics/public-report/route.js`, neu `tests/e2e/sponsor-report.spec.mjs`.
+
+Drei Zahlen darin logen, zwei davon durch eigenes Verschulden:
+- **„Ligen im Katalog"**: Die Begründung war erfunden — eine Zahl aus der Dev-DB mit einer aus
+  Prod verrechnet und daraus „77 → 51" erzählt. Auf Prod 51 vorher, 51 nachher; die
+  Demo-Kreisligen tragen `official: false` (`seed-kreisligen-demo.mjs:81`, `-niers.mjs:125`).
+  Unabhängig widerlegt von Kai UND Tobias. Filter bleibt als Schutzgeländer.
+- **Bestandszahlen mit Zufluss-Wachstum**: `entityStats` rechnet neue Anmeldungen der letzten
+  30 Tage gegen die 30 davor; daneben stand der Gesamtbestand. „4 Vereine +100 %" liest sich als
+  Verdopplung. Dazu rechnet es immer mit 30 Tagen, auch bei „letztes Jahr". Jetzt `neuText()` →
+  „davon N neu in 30 Tagen".
+- **Rückgänge unsichtbar** (Kai H1): `wachstumsText` gab bei jedem Wert ≤ 0 `null` zurück. Auf
+  Prod real: Seitenaufrufe −34 %, Besucher −39 %, beide ohne Abzeichen. Ein Hinweis erschien nur
+  bei guten Nachrichten. Jetzt beidseitig mit Deckel in beide Richtungen.
+- **Der Sponsorenlink zeigte ein anderes Blatt als die Vorschau** (Kai H2 / Tobias H-1):
+  `newLast30` stand auf der Ausschlussliste des öffentlichen Wegs. Geprüft worden war die
+  Vorschau, die das Problem nicht hat.
+
+Entfernt mit Begründung im Code: Beliebteste Inhalte (fünf Klarnamen unter gedruckter
+Zusicherung), Regionale Stärke (>90 % Seed), Wiederkehrende (0), Sitzungsdauer (4 s), Aktive
+Nutzer, Beliebteste Seiten (rohe Pfade). Kais Mutationsmatrix fand 3 Überlebende von 15; zwei
+geschlossen — Feldgleichheit gegen die **ausgelieferte Nutzlast** statt gegen den Quelltext, und
+eine Schranke auf die Namensliste.
+
+**2. `/signup` kam leer beim Nutzer an** (`062989e`) — `app/signup/page.js`, neu
+`tests/e2e/signup-ohne-js.spec.mjs`. 0 Eingabefelder, 0 `<main>`, 0 Rechtsverweise im
+ausgelieferten HTML; `useSearchParams()` ließ die umschließende `<Suspense>`-Grenze auf ihren
+leeren Ersatzinhalt fallen. Live danach: 6 / 1 / je 3. Gegenprobe mit wieder eingebautem Haken:
+0 Eingabefelder, Test rot.
+
+**3. Der Dunk** (`bd99263`, `d841c4b`) — Vivien. `components/landing/HeroDunk.js`,
+`HeroScrollStage.js` (~1350 → 235 Zeilen), `FeatureProgressRail.js`, `LandingCTA.js`,
+`app/globals.css`. Gelöscht: `PlayDiagram`, `SwishSequence`, `BallSprite`, 295 KB Bilddaten,
+sieben Testdateien (jede begründet in `tests/e2e/README.md`). Konzept
+`docs/HERO-DUNK-KONZEPT-2026-08-19.md`, Hero-Reduktion `docs/HERO-AKTION-ENTSCHEIDUNG-2026-08-19.md`
+(Nele): sechs Elemente wurden vier, eine Taste statt drei.
+- **Kais Blocker K1**: Die Seite lieferte das fertige Standbild an ALLE aus und wischte es beim
+  Laden weg. Viviens Diagnose ging tiefer als der Fehler — `prefers-reduced-motion` ist eine
+  Eigenschaft des Geräts, der Server hat keines. Das Standbild gehört jetzt dem Stylesheet.
+  Bewacht durch `tests/e2e/hero-erstes-bild.spec.mjs` (rohes Server-Blatt). Kai: 6 Mutationen,
+  5 rot.
+- Viviens Selbstfund: Ball erschien auf 1280/1440 hinter der Navigationsleiste — Roadmap 20g in
+  neuem Gewand. Behoben.
+- Tobias' B2/B3/B4 umgesetzt, B1 abgelehnt (Ball hinter der Taste; auf 360 px kein Platz, und
+  der ausweichende Apparat ist genau der, den dieser Umbau abgeschafft hat). Tobias trägt die
+  Ablehnung mit.
+
+**4. Die Weiterleitungs-Lücke** (`35b8bc0`) — Kai. Neu `lib/sichererPfad.js`, eingesetzt an fünf
+Stellen (`app/login/page.js`, `app/signup/page.js`, `app/oauth-landing/page.js`,
+`app/api/auth/google/route.js`, `callback/route.js`), neu `tests/e2e/sicherer-pfad.spec.mjs`,
+`tests/e2e/rail-ball-drehpunkt.spec.mjs`.
+Das Ziel aus `?next=` wurde ungeprüft übernommen. Angriff: Link auf unsere echte Anmeldeseite,
+der Nutzer meldet sich wirklich an und landet auf einer nachgebauten Passwortmaske. Belegt:
+Playwright protokollierte `navigated to "http://evil.com/"`. Die Prüfung stand viermal da und war
+viermal umgehbar — `startsWith("/") && !startsWith("//")` lässt den Rückwärtsstrich durch.
+Die neue Prüfung bildet nicht nach, was der Browser tut, sondern fragt ihn.
+Tobias: 26 Angriffsformen abgewiesen, 13 legitime Ziele durchgelassen, Neles Weg von der
+Startseite end-to-end durchgeklickt.
+⚠️ Kais erste Fassung war zu streng und ließ `/spieler?q=max mustermann` still auf den Newsfeed
+fallen — die Browser-Funktion wandelt `%20` bereits in ein Leerzeichen um.
+Dazu K2 (die Schranke hieß „Positionswechsel" und zählte Schreibvorgänge — Gegenprobe: 26
+Schreibvorgänge, 1 verschiedene Lage) und K3 (eine der sieben Löschungen nahm einen Wächter mit,
+dessen Gegenstand noch lebt).
+
+**Methodik-Lehren dieser Runde**
+- ⚠️ **Die Testsuite läuft gegen `npm run dev`.** Belegt am selben Commit in derselben Minute:
+  Entwicklung 231 grün, Produktion 225 grün / 6 rot. Alle früher protokollierten „grün"-Zahlen
+  sind Dev-Zahlen. → Roadmap 23.
+- ⚠️ **Nachrichten-Karten ragen auf 360/390 px über den Bildschirm** (426 statt 360 px),
+  vorbestehend und live, nur in der Produktionsfassung sichtbar. → Roadmap 24.
+- ⚠️ **Gate-Berichte gehören ins Repo.** Kai konnte seine eigenen Befunde K5–K9 nicht
+  bestätigen, weil der Bericht nur in der Sitzung lag. → Roadmap 25.
+- ⚠️ **Ein verwaister `npm start` lieferte einen veralteten Build aus** — Playwright hätte ihn
+  wegen `reuseExistingServer: true` stillschweigend weiterbenutzt. Vor jedem Lauf `BUILD_ID`
+  gegen den eigenen Build halten.
+- ⚠️ **Zwei Angaben Viviens stimmten nicht** (Tobias): „in keinem einzigen Bild ganz verdeckt" —
+  es gibt genau eines (~16 ms); sie hat Fläche gemessen, der Ball ist ein Umriss ohne Füllung.
+  Und „89/92 px" ist nicht reproduzierbar (76,6/79,7).
+- ⚠️ **Prüfzeilen dürfen nicht auf Wörter prüfen, die der eigene Kommentar enthält** — beim
+  `/signup`-Fix dreimal falsch angeschlagen, weil die Begründung den gesuchten Begriff nennt.
