@@ -521,14 +521,51 @@ test.describe("Aussenlinie", () => {
 //
 // Gemessen ohne Abhilfe: Weg endet 56 px zu früh, Pass-Ball liegt 120 px neben
 // der Taste — beides dauerhaft.
-test.describe("Reduzierte Bewegung", () => {
-  test.use({ reducedMotion: "reduce" });
+//
+// ══ ⚠️ UND EIN BEFUND AM TEST SELBST, GEFUNDEN DURCH DIE GEGENPROBE ════════
+//
+// Dieser Block stand zuerst mit `test.use({ reducedMotion: "reduce" })` im
+// `describe` da und war **grün — auch mit zurückgedrehter Abhilfe**. Gemessen:
+// `matchMedia("(prefers-reduced-motion: reduce)").matches` war im Browser
+// **false**. Die Einstellung kam nicht an (Playwright 1.62.1), die Tests liefen
+// im NORMALEN Zweig — und der hat den Beobachter seit jeher. Sie prüften also
+// eine Eigenschaft, die dort ohnehin gilt, und hätten den Rückbau nie gemeldet.
+//
+// Das ist die Fehlerform aus CLAUDE.md, wörtlich: „Eine Gegenprobe, die
+// durchläuft, ist ein Befund am Test, nicht am Code." Gefunden hat es nicht das
+// Lesen, sondern die Mutationsmatrix.
+//
+// Zwei Konsequenzen, und die zweite ist die wichtigere:
+//   1. Der Kontext wird selbst geöffnet (`browser.newContext`) — dort wirkt die
+//      Einstellung nachweislich.
+//   2. ⚠️ ES WIRD IM BROWSER NACHGEWIESEN, DASS DER ZWEIG AUCH WIRKLICH DER
+//      RUHIGE IST. Ohne diesen Nachweis ist jede Zusicherung dieses Blocks
+//      eine Aussage über einen Zustand, in dem der Test gar nicht war.
+async function ruhigeSeite(browser, w, h) {
+  const ctx = await browser.newContext({
+    viewport: { width: w, height: h },
+    reducedMotion: "reduce",
+  });
+  const page = await ctx.newPage();
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.waitForSelector("[data-feature-zeile]");
+  const ruhig = await page.evaluate(
+    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  expect(
+    ruhig,
+    "Der Browser meldet KEINE reduzierte Bewegung. Dieser Fall läuft dann im " +
+      "normalen Zweig — und der hat den Beobachter ohnehin. Alles, was danach " +
+      "kommt, wäre grün über den falschen Zustand.",
+  ).toBe(true);
+  return { ctx, page };
+}
 
+test.describe("Reduzierte Bewegung", () => {
   test("der gezeichnete Weg zieht nach, wenn sich der Inhalt nachträglich umbaut", async ({
-    page,
+    browser,
   }) => {
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await ladeStartseite(page);
+    const { ctx, page } = await ruhigeSeite(browser, 1280, 900);
     await page.waitForTimeout(600);
 
     const vorher = await page.evaluate(() => ({
@@ -566,13 +603,13 @@ test.describe("Reduzierte Bewegung", () => {
         "Bei reduzierter Bewegung läuft kein Scroll-Zuhörer — der Weg bleibt damit " +
         "für die ganze Sitzung falsch (Befund Kai B10).",
     ).not.toBe(vorher.d);
+    await ctx.close();
   });
 
   test("der Pass-Ball zieht nach, wenn sich der Abschluss-Block nachträglich umbaut", async ({
-    page,
+    browser,
   }) => {
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await ladeStartseite(page);
+    const { ctx, page } = await ruhigeSeite(browser, 1280, 900);
     await page.waitForSelector("[data-pass-ziel]");
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     await page.waitForTimeout(600);
@@ -606,5 +643,6 @@ test.describe("Reduzierte Bewegung", () => {
       "Der Ball liegt unverändert, obwohl die Taste gewandert ist — er steht " +
         "damit dauerhaft daneben (Befund Kai B10).",
     ).not.toBe(vorher.t);
+    await ctx.close();
   });
 });
