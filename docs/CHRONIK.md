@@ -5094,3 +5094,72 @@ identischen Maßen, 18 Routen ohne Konsolen- oder Netzwerkfehler. Kai 285 grün 
 **Live nachgemessen (gezählte Bildpunkte):** HOOPS 20 px, GERMANY 22 px (Unterlänge des Y),
 Claim weg, Logo 134×44 px · Leiste zieht `logo-leiste.svg`, `/login` weiterhin `logo.svg` ·
 16 Routen je 200.
+
+---
+
+## 21.08.2026 — Das gespiegelte Feldende: die Seite bekommt einen zweiten Korb
+
+**Commit:** siehe unten (nur committet, **kein Push, kein Deploy** — beides war nicht beauftragt)
+**Auftrag Patrick:** „wie wäre es denn, wenn das Spielfeld aus der Hero unten auf der Seite
+gespiegelt dargestellt wird und somit die ganze Seite ein Spielfeld ergibt und somit am Ende
+der Pass an die Funktion/den Button zu einem Wurf in den gegnerischen minimalistischen Korb
+landet / geworfen wird."
+
+**Neu:** `components/landing/AbschlussFeld.js` (das gespiegelte Feldende),
+`components/landing/feldmasse.js` (die FIBA-Maße als EINE Quelle für beide Enden).
+**Geändert:** `components/landing/LandingCTA.js` (untere Leiter, Einbau),
+`components/landing/HeroCourt.js` (bezieht die Maße jetzt aus `feldmasse.js` — sonst
+unverändert, Standbild pixelgleich), `components/landing/Aussenlinie.js` (Grundlinie hell).
+**Entfallen:** `components/landing/KorbRuhe.js`.
+**Sweep:** `docs/INSPIRATION-FELDENDE-2026-08-21.md` (Stufe M).
+
+### Die Entscheidung: der Ball bleibt an der Taste
+
+Patricks Bild ist der Wurf. Gebaut ist der Assist, und der Grund ist nicht Aufwand, sondern
+Projektion: **Was einen Wurf zum Wurf macht, ist der Bogen — und der liegt in genau der Ebene,
+die eine Draufsicht auf null projiziert.** Von senkrecht oben sind ein Wurf und ein Rollen
+dasselbe Bild. Den Bogen zu zeichnen ginge nur in der Schrägansicht, und zwei Projektionen auf
+einer Seite sind der Befund, mit dem Patrick am 19.08. die alte Hero-Choreografie
+zurückgenommen hat.
+Dazu: Unter der Ziel-Oberkante liegen 385 px, die nicht mit dem Fenster wachsen — ein zweiter
+Flugabschnitt bräuchte Scrollweg, den es auf hohen Fenstern nicht gibt. Und der Ball ist die
+einzige gefüllte Fläche der Startseite; ihn an der einzigen Handlungsaufforderung
+vorbeizuschicken gibt den stärksten Blickfang für Dekoration aus.
+Umgesetzt: Ring **unter** der Tastenreihe, in Laufrichtung dahinter. Ball → Taste → Ring.
+
+### Kein durchgehendes Feld — Arithmetik, keine Abkürzung
+
+Ein Feld ist 28 × 15 m (quer, 1,87 : 1), eine Startseite mobil ~360 × 6.000 px (hoch, 1 : 16,7).
+Maßstabsgetreu bliebe ein 118-px-Feld in einer 6.000-px-Seite oder ein verzerrtes. Gebaut sind
+zwei gezeichnete Enden plus die durchlaufende Außenlinie. Was die Seite zu EINEM Feld macht,
+ist gleiche Projektion, gleiche Maße im Feldstück, gleiche Farbrolle und eine Linie, die an
+beiden Enden ankommt.
+
+### Der Befund, den nur das Hinsehen gefunden hat
+
+Der Textabstand war zuerst am Hero-Anker gebaut (Ladezonen-Unterkante, 2,875 m). Die
+**Zonenlinien** reichen aber 5,80 m tief und sind erst bei 4,2 m auf null — gemessen liefen sie
+mit Deckkraft **0,47–0,69** durch die letzte Textzeile. Am 3-fach vergrößerten Standbild
+unmissverständlich. **Anker ist jetzt die Stelle, an der die Zeichnung aufhört sichtbar zu
+sein** (4,2 m); sichtbare Berührung danach 0 von 20 Fenster-/Anmeldekombinationen.
+⚠️ **Der Hero hat denselben Anker und denselben latenten Fehler** — er fällt dort nur nicht auf,
+weil die Tinte der mittigen Überschrift schmaler ist als die Zone. Roadmap 34 (b).
+
+### Gemessen
+
+- Abstand letzte Textunterkante → Ladezone: **87,9 px ausgeloggt / 85,9 px angemeldet**,
+  konstant über alle mobilen Breiten (121,5 / 119,5 auf 1440) — gesetzt, nicht angefallen.
+- Ring an beiden Enden gleich groß: 21,0 px mobil · 32,4 px auf 1440 · 43,2 px auf 1920.
+- Roadmap 20 (d) gehalten: Ankunft **271–810 px unter der haftenden Leiste**, Deckkraft 1,00,
+  auf 16 Fenster-/Anmeldekombinationen. Pass-Lücke 11,2–14,5 px auf **24 von 24**.
+  Gegen den zurückgebauten Alt-Stand verglichen: identische Ankunftswerte.
+- Kein Querlauf auf 12 Breiten × 2 Anmeldezuständen.
+- Build durch · Playwright **279 grün, 11 rot, 1 übersprungen** (6 × `abschluss-korb`,
+  Gegenstand entfallen → Kai; 5 vorbestehend aus Roadmap 26) · `design-audit -- --check`
+  ohne Abweichung.
+
+### Werkzeuge im Repo statt Zahlen im Bericht (Roadmap 32 e)
+
+`scripts/messungen/` (im Repo, NICHT in `tmp/` — Roadmap 32 e): `shot.mjs`, `ausschnitt.mjs` (3-fache Vergrößerung),
+`messen.mjs` (Leiter, Ring, Pass), `tinte.mjs` (sichtbare Berührung der Tinte),
+`ankunft.mjs` (der Moment der Ankunft gegen die haftende Leiste).

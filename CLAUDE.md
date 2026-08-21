@@ -11,6 +11,133 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
+> ⚠️ **NICHT DEPLOYT, NUR COMMITTET (21.08.2026): DIE SEITE HAT JETZT ZWEI KÖRBE —
+> und der Ball fliegt bewusst NICHT in den zweiten.** Kein Push, kein Deploy; beides war
+> nicht beauftragt. Patricks Auftrag: „wie wäre es denn, wenn das Spielfeld aus der Hero unten
+> auf der Seite gespiegelt dargestellt wird und somit die ganze Seite ein Spielfeld ergibt und
+> somit am Ende der Pass an die Funktion/den Button zu einem Wurf in den gegnerischen
+> minimalistischen Korb landet." Neu: `components/landing/AbschlussFeld.js` (das gespiegelte
+> Feldende) und `components/landing/feldmasse.js` (die FIBA-Maße, ab jetzt EINE Quelle für
+> beide Enden). Entfallen: `components/landing/KorbRuhe.js`.
+> Sweep: `docs/INSPIRATION-FELDENDE-2026-08-21.md` (Stufe M).
+>
+> ⚠️ **DIE ENTSCHEIDUNG GEGEN DEN WURF IST KEINE BEQUEMLICHKEIT, SONDERN GEOMETRIE: EINE
+> DRAUFSICHT KANN KEINEN WURF ZEIGEN.** Was einen Wurf zum Wurf macht, ist der **Bogen** — und
+> der liegt in genau der Ebene, die eine Draufsicht auf null projiziert. Von senkrecht oben
+> sind ein Wurf und ein Rollen **dasselbe Bild**: eine gerade Linie zum Ring, dann ist der Ball
+> weg. Den Bogen zu zeichnen ginge nur in der Schrägansicht — und zwei Projektionen auf einer
+> Seite sind der Befund, mit dem Patrick am 19.08. die ganze alte Hero-Choreografie
+> zurückgenommen hat. Dazu zwei weitere Gründe: Unter der Ziel-Oberkante liegen **385 px, die
+> nicht mit dem Fenster wachsen** — ein zweiter Flugabschnitt bräuchte Scrollweg, den es auf
+> hohen Fenstern nicht gibt (der Blocker vom 21.08. in neuer Auflage). Und der Ball ist die
+> **einzige gefüllte Fläche der ganzen Startseite**; ihn an der einzigen Handlungsaufforderung
+> vorbeizuschicken gibt den stärksten Blickfang für Dekoration aus.
+> **Umgesetzt ist Patricks Bild deshalb so:** Der Ring sitzt **unter** der Tastenreihe, in
+> Laufrichtung dahinter. Ball → Taste (deine Hand) → Ring (wofür). Der letzte Pass vor dem
+> Abschluss ist der Assist; die Seite spielt den Assist, der Wurf ist der Klick.
+> ⚠️ Der Ring sitzt ausdrücklich **nicht über** der Taste. Das wäre kein Spiegel, sondern eine
+> Wiederholung des Heros — und ein zweiter oranger Ring unmittelbar über einer orangen Taste
+> ist der Fall vom 20.08. („von zwei gleichfarbigen Zeichen betont keines mehr etwas").
+>
+> ⚠️ **ES IST KEIN DURCHGEHENDES FELD, UND DAS IST ARITHMETIK, KEINE ABKÜRZUNG.** Ein Feld ist
+> 28 × 15 m, also **quer** (1,87 : 1); eine Startseite ist mobil rund 360 × 6.000 px, also
+> **hochkant** (1 : 16,7). Maßstabsgetreu über die volle Seitenlänge bliebe entweder ein
+> 118-px-Feld in einer 6.000-px-Seite oder ein verzerrtes — und verzerrt ist es kein Feld mehr.
+> Gebaut sind **zwei gezeichnete Enden plus die durchlaufende Außenlinie**. Was die Seite zu
+> EINEM Feld macht, ist nicht der Maßstab, sondern gleiche Projektion, gleiche Maße im
+> Feldstück, gleiche Farbrolle und eine Linie, die an beiden Enden an einem Korbbereich
+> ankommt. So sieht auch ein Spieler das Feld: die Markierungen um sich herum scharf, die
+> Seitenlinien in die Ferne — nicht den Grundriss.
+>
+> ✅ **TOBIAS' „RADARSCHIRM" IST DAMIT ERLEDIGT — durch das Element, das der Befund selbst
+> genannt hat.** Im Referenz-Register stand seit dem 20.08.: *„Was den Ring eindeutig macht,
+> ist das BRETT — und das ist maßstabsgetreu 4 Ringradien breit; die Marke bräuchte statt
+> 1 : 1 ein Verhältnis von 3 : 1."* In einem Feldstück ist der Platz da. Der Ring steht jetzt
+> mit Brett, Ladezone, Zone, Aufstellungsmarken und Grundlinie — kein Netz mehr, das von oben
+> zwangsläufig zur konzentrischen Radialfigur wird.
+>
+> ⚠️ **DER FEHLER, DEN NUR DAS HINSEHEN GEFUNDEN HAT — und er steckt auch im HERO.** Der
+> Textabstand war zuerst am selben Anker gebaut wie im Hero: an der Unterkante der Ladezone
+> (2,875 m). Gemessen liefen die **Zonenlinien** damit mit Deckkraft **0,47 bis 0,69** durch
+> „Du organisierst dein Team? Team gründen" bzw. „Ein Satz reicht" — sie reichen 5,80 m tief
+> und sind erst bei 4,2 m auf null. Am 3-fach vergrößerten Standbild unmissverständlich: zwei
+> Striche durch eine Textzeile und ihre Unterstreichung.
+> **Der Anker ist deshalb nicht mehr der GEGENSTAND, sondern die Stelle, an der die Zeichnung
+> aufhört SICHTBAR zu sein** (4,2 m). Nachgemessen: sichtbare Berührung des Nahbereichs
+> **0 von 20** Fenster-/Anmeldekombinationen, Deckkraft an jeder Kreuzung 0,000.
+> ⚠️ **Der Hero hat denselben Anker und denselben latenten Fehler.** Er fällt dort nicht auf,
+> weil an der Ankerstelle eine **mittige, kurze Überschrift** steht, deren Tinte schmaler ist
+> als die Zone — die Striche laufen neben den Buchstaben vorbei. Das ist Glück, keine
+> Konstruktion. Wer die Hero-Überschrift je verbreitert oder durch eine randfüllende Zeile
+> ersetzt, bekommt den Befund dort sofort. **Nicht geändert**, weil der Hero abgenommen ist und
+> die Änderung ihn ohne Not verschöbe.
+>
+> ⚠️ **WAS DER TINTE-TEST TROTZDEM MELDET, und es gehoert ungeschoenigt hierher:** Er zaehlt
+> **24 sichtbare Beruehrungen** — alle aus dem FERNEN Feld, also der Dreipunktlinie, keine
+> einzige aus dem Nahbereich. Der Bogen laeuft auf breiten Fenstern hinter „Bereit
+> loszulegen?" und dem Absatz darunter durch. Nachgerechnet und am dreifach vergroesserten
+> Standbild angesehen: Die Linie ist dort, ueber navy-900 zusammengerechnet, **#28355E — ein
+> Kontrast von 1,45 : 1 zur Flaeche**, also unterhalb der Grenze von rund 2 : 1, ab der sich
+> ein Strich in diesem Projekt ueberhaupt als Zeichnung liest. Der Text darueber verliert
+> nichts Wesentliches: paper-50 faellt von 16,16 auf **11,11 : 1**, mist-400 von 8,31 auf
+> **5,71 : 1** — beides weiter ueber AA. **Das ist kein Freispruch, sondern eine Einordnung:**
+> Es ist ein Tonwert, kein Strich, und der Hero macht an derselben Stelle dasselbe. Wer die
+> Zahl „24" ohne diesen Absatz liest, haelt sie fuer einen Defekt.
+>
+> ✅ **ROADMAP 20 (d) HAT GEHALTEN, gegen den Alt-Stand gemessen und nicht behauptet:** Der
+> Moment der Ankunft liegt auf allen 16 geprüften Fenster-/Anmeldekombinationen **271–810 px
+> unter der haftenden Leiste**, Deckkraft 1,00, Unterkante bei 358–899 von der Fensterhöhe.
+> Pass-Lücke 11,2–14,5 px auf **24 von 24** Kombinationen. Vergleichsmessung am zurückgebauten
+> Stand: identische Ankunftswerte.
+> ⚠️ **Eine Zahl ist schlechter geworden, und sie gehört benannt:** Am **untersten** Punkt der
+> Seite (also NACH der Ankunft) steht der Ball rund 140 px höher als vorher, weil der
+> Abschluss-Block gewachsen ist. Auf 320×640 ausgeloggt war er dort schon vorher hinter der
+> Leiste (−101,6 px), jetzt −241,6; neu betroffen sind 360×800 ausgeloggt (+119,9 → −20,1) und
+> 320×640 angemeldet (+31,1 → −108,9). Das betrifft **nicht** die Ankunft, sondern das
+> Weiterscrollen danach — vorbestehend in der Sache, verschärft in der Zahl.
+>
+> ⚠️ **EIN TEST IST ROT, UND ZWAR ABSICHTLICH — ER GEHÖRT KAI, NICHT MIR.**
+> `tests/e2e/abschluss-korb.spec.mjs` (6 Fälle) wartet auf `svg[data-abschluss-korb]`; dieses
+> Element gibt es nicht mehr. Der Test hat drei Zusicherungen, und **zwei davon leben weiter**:
+> „eine Projektion" (kein `<ellipse>`, mindestens ein `<circle>`, kein ungleich skalierter
+> Kreis) und „keine Überlagerung von Text". Die dritte („quadratisch, ≥ 72 px") ist mit ihrem
+> Gegenstand entfallen — sie war die Untergrenze eines Netzes, das es nicht mehr gibt.
+> **Prüfmaße für den Nachbau, alle am gebauten Stück gemessen:**
+> · Griff `svg[data-endfeld-svg]`, Ring `[data-endfeld-korb]`, Bauteile `[data-endfeld="…"]`
+>   (zone · brett · lade · marke · drei).
+> · **Kein `<ellipse>` im Abschluss-Block, mindestens ein `<circle>`** — unverändert der
+>   verlässlichste Fingerabdruck der Schrägansicht.
+> · **Keine SICHTBARE Berührung von Tinte durch den Nahbereich.** Nicht die Elementbox messen
+>   (eine mittige Zeile in einem randfüllenden `<p>` hat eine drei- bis viermal zu breite Box),
+>   sondern die Zeilenkästen der Textknoten (`Range.getClientRects`) gegen `isPointInStroke` —
+>   und die Deckkraft des Verlaufs an der Kreuzungstiefe mitrechnen. Muster:
+>   `scripts/messungen/tinte.mjs`. Sollwert 0,000; Gegenprobe: Anker zurück auf 2,875 m ⇒
+>   0,47–0,69 auf 20 von 20 Fenstern.
+> · **Der Abstand ist gesetzt, nicht gemessen:** letzte Textunterkante zur Ladezonen-Oberkante
+>   **87,9 px ausgeloggt / 85,9 px angemeldet** auf allen mobilen Breiten, 121,5 / 119,5 auf
+>   1440. Er darf mit dem Fenster wachsen, aber nie mit dem ANMELDEZUSTAND springen.
+> · **Der Ring ist an beiden Enden gleich groß** (mobil 21,0 px, 1440 32,4 px, 1920 43,2 px).
+>   Wer eine der drei Leitern anfasst, bricht das — und nichts sieht kaputt aus.
+>
+> ⚠️ **NICHT GELÖST: ROADMAP 30 (e), der Schnitt Hero ↔ Seite — und der naheliegende Fix ist
+> nachweislich falsch.** Das gespiegelte Ende löst seinen eigenen Schnitt (das ferne Feld fällt
+> dort vor der Naht auf Deckkraft null, es gibt nichts zu beschneiden). Am Hero geht dasselbe
+> **nicht**: Die Unterkante der Bühne fällt je nach Breite auf eine ANDERE viewBox-Koordinate
+> (auf 1440 bei y ≈ 533, mobil bei y = 720). Ein Ausblendpunkt, der auf dem Notebook früh genug
+> greift, löscht mobil den **Bogenscheitel der Dreipunktlinie** (y = 543,5) — also genau das
+> Element, das den Hero trägt. Wieder eine gesetzte Größe gegen einen Restbetrag. Bewusst nicht
+> gebaut.
+> ⚠️ **Ebenfalls offen: Roadmap 30 (d), der 58-px-Auftakt der Außenlinie.** Das Feld hat jetzt
+> ein Ende, aber keinen Anfang — die Linie beginnt weiterhin abrupt in der Feature-Strecke. Der
+> saubere Weg wäre, sie im Hero beginnen zu lassen; das geht heute nicht, weil `Aussenlinie`
+> ihren Bezug über `closest("section")` sucht und `HeroStage` ein `<div>` rendert. Das ist ein
+> Eingriff in zwei abgenommene Bauteile und war nicht beauftragt.
+>
+> Build durch · Playwright **279 grün, 11 rot, 1 übersprungen** (291 gesamt) — die 11 sind die
+> 6 oben genannten plus die **5 vorbestehenden aus Roadmap 26** (Analytics-Speichergrenze) ·
+> `npm run design-audit -- --check` ohne Abweichung · 12 Fenster × 2 Anmeldezustände ohne
+> Querlauf.
+>
 > ⚠️ **NICHT DEPLOYT, NUR COMMITTET (21.08.2026): DER BALL DRIBBELT DIE SEITE HINUNTER —
 > und die Zahl im Kopf des neuen Bauteils war richtig gemessen und falsch abgeleitet.**
 > Kein Push, kein Deploy; beides war nicht beauftragt. Patricks Auftrag: „beim Runterscrollen
@@ -1736,6 +1863,28 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     (→ Vivien)
     **(f)** Tippfläche der Wortmarke mobil **109,7 × 36 px** — Höhe unter der 44-px-Empfehlung,
     und sie ist der einzige Weg zurück zur Startseite. Vorbestehend, gehört zu 32 (b). (→ Vivien)
+
+34. **Offen aus der Feldende-Runde (21.08.2026)** — nichts davon blockiert:
+    **(a)** ⚠️ **`tests/e2e/abschluss-korb.spec.mjs` ist rot und muss neu geschrieben werden**
+    (→ Kai). Der Gegenstand (`KorbRuhe.js`) ist ersetzt; zwei der drei Zusicherungen leben
+    weiter. Vollständige Prüfmaße samt Gegenproben stehen oben im Deploy-Block.
+    **(b)** ⚠️ **Der Hero trägt denselben latenten Fehler wie das Feldende ihn hatte:** Sein
+    Textanker ist der GEGENSTAND (Ladezonen-Unterkante, 2,875 m), nicht die Stelle, an der die
+    Zeichnung aufhört sichtbar zu sein (4,2 m). Er fällt nur nicht auf, weil dort eine mittige,
+    kurze Überschrift steht, deren Tinte schmaler ist als die Zone. **Wer die Hero-Überschrift
+    verbreitert oder durch eine randfüllende Zeile ersetzt, bekommt sofort Zonenlinien mit
+    Deckkraft ~0,5 durch die Buchstaben** — und kein Test meldet es. (→ Vivien/Kai)
+    **(c)** Am **untersten** Punkt der Seite steht der Pass-Ball rund 140 px höher als vorher
+    und liegt auf 320×640 (beide Zustände) und 360×800 ausgeloggt hinter der Navigationsleiste.
+    Betrifft nicht die Ankunft, sondern das Weiterscrollen danach; auf 320 px war es
+    vorbestehend. (→ Vivien)
+    **(d)** Auf **1920 px** wird der Bogenscheitel der Dreipunktlinie am oberen Rand des
+    Abschlusses um 28 px beschnitten — an der Farbkante navy-950/navy-900, also an einer
+    lesbaren Stelle. Auf allen anderen zehn geprüften Fenstern gar nicht. (→ Vivien)
+    **(e)** Die drei Leitern des Feldendes (Zeichnungshöhe in `AbschlussFeld.js`, das
+    Nah-Gefälle ebendort, der untere Innenabstand in `LandingCTA.js`) hängen an derselben
+    Größe und sind **von keinem Test zusammengehalten**. Wer eine allein ändert, verschiebt den
+    Text gegen die Zeichnung, ohne dass etwas kaputt aussieht. (→ Kai)
 
 32. **Kleinere offene Punkte aus den Gates vom 21.08.2026**, keiner blockierend:
     **(a)** Fällt die Nachrichtenquelle aus, bleibt ein leeres Band von **160 px** stehen — keine

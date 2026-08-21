@@ -67,6 +67,18 @@ const UMBRUCH = 768;
 // einen Fehler aussehen lässt.
 const LUFT = 22;
 
+// ⚠️ DIE GRUNDLINIE IST HELLER ALS DIE SEITENLINIEN, und das ist keine
+// Inkonsequenz, sondern dieselbe Tiefenlogik wie im Hero. Dort ist die
+// Grundlinie Teil des KORBBEREICHS (voller Strich, `#7E9AD8`), die
+// Seitenlinien gehoeren zum FERNEN FELD (duenner, dunkler). Am unteren Ende
+// gilt dasselbe: Die Grundlinie ist die naechste Linie des ganzen Feldes, die
+// Seitenlinien laufen von ihr weg in die Ferne.
+// ⚠️ Angesehen, nicht gerechnet: Mit der Seitenlinien-Farbe (#3A4E82) stiessen
+// die vollen Zonenlinien aus `AbschlussFeld.js` auf eine deutlich dunklere
+// Linie — das las sich, als sei die Grundlinie ein anderer Gegenstand, auf dem
+// die Zone zufaellig steht.
+const GRUND_FARBE = "#7E9AD8";
+
 export default function Aussenlinie({ grundlinie = false }) {
   const wrapRef = useRef(null);
 
@@ -165,7 +177,7 @@ export default function Aussenlinie({ grundlinie = false }) {
           style={{
             left: "var(--feld-abstand)",
             right: "var(--feld-abstand)",
-            backgroundColor: "var(--feld-farbe)",
+            backgroundColor: GRUND_FARBE,
           }}
         />
       )}

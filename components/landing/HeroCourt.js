@@ -1,3 +1,27 @@
+import {
+  MITTE,
+  m,
+  n,
+  px,
+  HALB_BREIT,
+  ZONE_HALB,
+  ZONE_TIEF,
+  KORB_TIEF,
+  KORB_R,
+  BRETT_HALB,
+  BRETT_TIEF,
+  LADE_R,
+  LADE_SCHENKEL,
+  DREI_R,
+  DREI_X,
+  MARKE_LANG,
+  MARKEN,
+  NEUTRAL_VON,
+  NEUTRAL_BIS,
+  UEBERGANG,
+  bogenLaenge,
+} from "@/components/landing/feldmasse";
+
 // ══ HERO-ZEICHNUNG „DER KORBBEREICH" ════════════════════════════════════════
 //
 // Ueberarbeitung vom 20.08.2026 (Auftrag Patrick: „schau dir nochmal genau an
@@ -96,61 +120,26 @@
 // Quelle aller Masse: FIBA, Official Basketball Rules 2026 (gueltig ab Juli
 // 2026), Rule 2.1 / 2.5.1–2.5.7 und Diagram 3. Die Werte sind gegen die
 // Ausgabe 2024 gegengelesen — sie sind identisch, es hat sich nichts geaendert.
-const M = 60;
-const MITTE = 600;
+// ⚠️ DIE MASSE STEHEN NICHT MEHR HIER, SONDERN IN `feldmasse.js` — seit die
+// Startseite am 21.08.2026 ein ZWEITES Feldstueck bekommen hat (das
+// gespiegelte Ende in `AbschlussFeld.js`). Zwei Zeichnungen mit je eigener
+// Zahlenliste waeren zwei Felder, die nur zufaellig gleich aussehen: Wer eine
+// Zonenbreite aendert, aendert sie an einem Ende und nicht am anderen, und
+// nichts sieht dabei kaputt aus.
+// Hier bleibt ausschliesslich, was NUR fuer den Hero gilt.
 
 // ⚠️ 44 bleibt, und der Grund bleibt derselbe: Bei kleineren Werten liegt die
 // Grundlinie so dicht unter der Haarlinie der Navigationsleiste, dass beide
 // zusammen als doppelt gezogener Rahmen gelesen werden statt als „hier beginnt
 // das Feld".
+// ⚠️ Und das ist der eine Wert, den das gespiegelte Ende NICHT uebernimmt:
+// Dort schliesst die Seite unmittelbar mit der Fusszeile an, die Grundlinie
+// liegt also auf der Unterkante des Abschnitts. Ein Vorlauf waere dort eine
+// Luecke ohne Gegenstand.
 const GRUND = 44;
 
-const m = (meter) => meter * M; // Meter → viewBox-Einheiten
 const y = (meter) => GRUND + m(meter); // Tiefe ab Grundlinie
-const n = (v) => Number(v.toFixed(2));
 
-// ── Die Masse, jeweils mit ihrer Fundstelle ────────────────────────────────
-const HALB_BREIT = 7.5; // Rule 2.1 — Feld 28 × 15 m, also ± 7,50 m
-const ZONE_HALB = 2.45; // Rule 2.5.3 — Aussenkante 2,45 m von der Mitte
-const ZONE_TIEF = 5.8; // Rule 2.5.3 — Freiwurflinie 5,80 m von der Grundlinie
-const KORB_TIEF = 1.575; // Rule 2.5.4 — Korbmitte 1,575 m von der Grundlinie
-const KORB_R = 0.225; // Ring Ø 0,45 m
-const BRETT_HALB = 0.9; // Brett 1,80 m breit
-const BRETT_TIEF = 1.2; // Rule 2.5.7 — Brettvorderkante 1,20 m
-const LADE_R = 1.3; // Rule 2.5.7 — Ladezone r = 1,30 m
-const LADE_SCHENKEL = 0.375; // Rule 2.5.7 — Laenge der zwei Geraden
-const DREI_R = 6.75; // Rule 2.5.4 — Bogen r = 6,75 m um die Korbmitte
-const DREI_X = HALB_BREIT - 0.9; // Rule 2.5.4 — 0,90 m innerhalb der Seitenlinie ⇒ 6,60 m
-const MARKE_LANG = 0.1; // Diagram 3 — die Marken sind 0,10 m lang
-
-// Freiwurf-Aufstellung: die Marken an den Zonenkanten. Abstaende ab der
-// Grundlinie, aus Diagram 3 abgelesen UND aus der Kette nachgerechnet:
-// 1,75 → erste Marke · +0,85 → Ende des ersten Platzes · +0,40 → Ende der
-// neutralen Zone · +0,85 · +0,85. Die neutrale Zone ist in der Regel ein
-// AUSGEFUELLTER Block, kein Strich — sie ist deshalb unten ein `rect`.
-const MARKEN = [1.75, 2.6, 3.0, 3.85, 4.7];
-const NEUTRAL_VON = 2.6;
-const NEUTRAL_BIS = 3.0;
-
-// Wo die Dreipunkt-Gerade in den Bogen uebergeht. GERECHNET, nicht gesetzt:
-// der Punkt des Kreises (r = 6,75 m um die Korbmitte) bei x = 6,60 m.
-// Ergibt 1,575 + 1,4151 = 2,9901 m — die bekannten „knapp 3 m" der Ecken-Drei.
-const UEBERGANG = KORB_TIEF + Math.sqrt(DREI_R * DREI_R - DREI_X * DREI_X);
-
-// ⚠️ MIT EINHEIT. Hier stand einmal eine nackte Zahl, und `calc(<Zahl> + 2px)`
-// ist eine ungueltige Rechnung — sie macht nicht den Summanden kaputt, sondern
-// die ganze Deklaration: `stroke-dasharray` fiel auf `none` zurueck und die
-// Einblendung fand auf KEINEM Browser statt, ohne Fehlermeldung.
-const px = (v) => `${n(v)}px`;
-
-// Pfadlaengen, analytisch gerechnet und aufgerundet — sie steuern das
-// Strichmuster der Einblendung. Zu gross ist harmlos (der Strich ist frueher
-// fertig), zu klein waere als Luecke sichtbar.
-// ⚠️ Sie gelten in viewBox-EINHEITEN. Das haelt nur, solange nirgends
-// `vector-effect: non-scaling-stroke` steht — das Attribut rechnet das
-// Strichmuster in Geraete-Pixel um und schluckt bei Massstab 1,2 rund 17 % je
-// Linie, still. Es steht deshalb an keiner Stelle dieser Datei.
-const bogenLaenge = (r, halbSehne) => 2 * r * Math.asin(halbSehne / r);
 const L = {
   grund: 1200,
   seiten: 2 * (900 - GRUND),
