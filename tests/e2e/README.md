@@ -116,7 +116,9 @@ harten Abbruch etwas liegen, räumt der nächste Lauf es über die Registry mit 
 | `global-teardown.mjs` | Löscht nur selbst angelegte Wegwerf-Accounts |
 | `auth.spec.mjs` | 8 Tests: 3× Login, 2× Signup, 3× Dual-Auth |
 | `sicherer-pfad.spec.mjs` | Offene Weiterleitung über `?next=` (Kai K4): das Modul, die echte Kette im Browser, und dass die Prüfung an **einer** Stelle steht |
-| `dribbelweg.spec.mjs` | Der Dribbelweg und der Pass (seit 21.08.2026): Berührungsfreiheit des Balls auf 6 Breiten × 15 Scrollpunkten, „mobil wird kein Weg gezeichnet", Ankunft des Passes auf 6 Fenstern × 2 Anmeldezuständen, Abschluss-Block für Angemeldete, Aussenlinie samt Unterbrechung |
+| `dribbelweg.spec.mjs` | Der Dribbelweg und der Pass (seit 21.08.2026): Berührungsfreiheit des Balls auf 6 Breiten × **2 Höhen** × 15 Scrollpunkten, „mobil wird kein Weg gezeichnet", Ankunft des Passes auf **8 Fenstern** × 2 Anmeldezuständen, **Berührungsfreiheit des Passes über den ganzen Flug** (5 Fenster × 2 Zustände × 19 Punkte), Abschluss-Block für Angemeldete, Aussenlinie, **Standbild bei reduzierter Bewegung** |
+| `ball-drehpunkt.spec.mjs` | Der Drehpunkt der **drei** rollenden Bälle (mobiler Streckenball, Desktop-Dribbelball, Pass-Ball) — im Browser gemessen, nicht im Quelltext gelesen |
+| `helpers/landing.mjs` | Gemeinsame Werkzeuge der Startseiten-Wächter: **echte** Anmeldung mit Ehrlichkeitsschranke, Warten auf Layout-Stillstand, Kontur statt Hüllbox, Drehversatz |
 | `endmarke-einpassung.spec.mjs` | ⚠️ **Gegenstand gewechselt, Zweck gleich** (21.08.2026): prüfte die Korb-Endmarke der alten Fortschritts-Leiste, prüft jetzt den haftenden Streifen selbst |
 | `hero-standbild.spec.mjs` | Der Hero als Standbild: Anker, Kontrastfall, Rahmen, Server-Blatt — **und seit 20.08. auch angemeldet** (P5) |
 | `hero-einblendung.spec.mjs` | Dass die Zeichnung sich wirklich zeichnet (E1), ihre Längen (E2), Vollständigkeit auf jedem Maßstab (E3), das Versteck (E4), `non-scaling-stroke` (E5) |
@@ -147,7 +149,7 @@ worden. Sieben Testdateien prüften Eigenschaften, die es danach nicht mehr gibt
 | `hero-einflug.spec.mjs` | Mobiler Ladeauftritt des Balls: findet statt, zeigt Bildwechsel, ist keine Standbild-Attrappe | Der mobile Einflug existiert nicht mehr. Er war nötig, weil mobil keine scroll-getriebene Lösung für eine deckende Scheibe existierte | keiner nötig |
 | `hero-resize-im-flug.spec.mjs` | Größenänderung während des Einflugs friert die Ziellage nicht ein | Der Abschluss rechnet in viewBox-Einheiten und kennt keine eingefrorene Bildschirmkoordinate — eine Größenänderung ist per Konstruktion folgenlos | keiner nötig; die Eigenschaft steht als Kommentar an `abschlussSetzen()` |
 | `hero-auth-tausch.spec.mjs` | Ball springt nicht, wenn die Anmeldung spät auflöst und den Hero-Zweig tauscht | Die Zeichnung hängt an **keinem** Inhaltselement. Der Zweigtausch ist ihr gleichgültig — damit sind auch Roadmap 20e und 20f gegenstandslos | keiner nötig |
-| `ball-sequenz.spec.mjs` | **vier** Fälle: 3× Bildzahl der Rotationssequenz über Konstante, CSS-Dateinamen und Datei — **und 1× der Drehpunkt des Streckenballs** | Für die drei Sequenz-Fälle: Sequenz, Bilddateien und Erzeuger `scripts/generate-ball-rotation.mjs` sind gelöscht. **Für den vierten Fall galt das nicht** — s. Korrektur unten | `rail-ball-drehpunkt.spec.mjs` (wiederhergestellt 20.08.2026) |
+| `ball-sequenz.spec.mjs` | **vier** Fälle: 3× Bildzahl der Rotationssequenz über Konstante, CSS-Dateinamen und Datei — **und 1× der Drehpunkt des Streckenballs** | Für die drei Sequenz-Fälle: Sequenz, Bilddateien und Erzeuger `scripts/generate-ball-rotation.mjs` sind gelöscht. **Für den vierten Fall galt das nicht** — s. Korrektur unten | **`ball-drehpunkt.spec.mjs`** (21.08.2026) — ⚠️ hier stand bis dahin `rail-ball-drehpunkt.spec.mjs`, und die Datei gab es zu diesem Zeitpunkt schon nicht mehr |
 
 ### ⚠️ Korrektur 20.08.2026: diese Löschung war unvollständig begründet
 
@@ -193,11 +195,29 @@ durchgerutscht' keine Erklärung mehr."*
 > gereicht, ihn aufzuschreiben. Was gefehlt hat, ist eine Prüfung, die **nicht
 > in derselben Datei wohnt wie das Versprechen** — ein Wächter über den Wächter.
 
-**Status: offen, und zwar bei Kai** (Testnachträge sind sein Gebiet; Vivien hat
-in dieser Runde ausdrücklich keinen Test gebaut). Was der Nachfolger können muss:
-den `transform-origin` des mobilen Balls **im Browser messen**, nicht im
-Quelltext lesen — der Quelltext-Fall der Urfassung hätte den Desktop-Ausfall mit
-halber Wahrscheinlichkeit durchgelassen.
+**Status: ERLEDIGT am 21.08.2026 — `tests/e2e/ball-drehpunkt.spec.mjs`.**
+
+Und die Lehre ist diesmal in den **Dateinamen** gewandert. Alle drei Löschungen
+waren nach demselben Muster begründet: Das **Bauteil** im Dateinamen war weg
+(`ball-sequenz`, `rail-ball-drehpunkt`), die **Eigenschaft** nicht. Die neue
+Datei heißt nach der Eigenschaft — „der Ball dreht sich um seine eigene Mitte" —
+und überlebt damit jede weitere Umbenennung von Glyph, Leiste und Weg.
+
+Sie liest keinen Quelltext. Geprüft wird eine Eigenschaft, die keinen
+Mechanismus kennt: Dreht ein Körper um seine eigene Mitte, ist die Mitte
+**drehinvariant**. Also einmal messen wie gezeichnet, einmal mit entferntem
+`rotate(...)` derselben Transformation — beide Mitten müssen zusammenfallen.
+Das deckt den mobilen Ball (CSS `transform-origin`) und die beiden SVG-Bälle
+(`rotate(a cx cy)` im Attribut) mit **einem** Kriterium ab, obwohl sie den
+Drehpunkt völlig verschieden festlegen.
+
+⚠️ **Der Pass-Ball ist als dritter dazugekommen** — er benutzt dieselbe
+`rollwinkel()`-Rechnung und stand in keiner Testdatei.
+
+Gesund gemessen: Versatz **0,00 px** an allen Messpunkten, bei Drehwinkeln von
+188° bis 8818°. Mit Ehrlichkeitsschranke auf den Winkel: Bei nahezu 0° fällt die
+Mitte auch bei falschem Drehpunkt zusammen — ein Test ohne diese Schranke wäre
+grün über null Messpunkte.
 
 ---
 

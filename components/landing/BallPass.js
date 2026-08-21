@@ -107,23 +107,63 @@ import {
 // außerhalb des Bildes bis auf seine Ruhelage. Er verlässt das freie Band nie,
 // also kann er auch nichts kreuzen — dieselbe Begründung wie beim Dribbelweg,
 // eine Ebene kleiner.
-// Nachgemessen über den ganzen Flug, 40 Messpunkte je Fenster, beide
-// Anmeldezustände: Textberührung **0 von 40** auf 360×640, 390×844 (ausgeloggt),
-// 768×1024, 1024×1366, 1280×800 und 1440×900. Vorher 7–19 von 40.
+// Nachgemessen über den ganzen Flug, beide Anmeldezustände, 25 Messpunkte je
+// Fenster, jeweils NACH dem Stillstand des Layouts gemessen: Textberührung
+// **0 von 25** auf 360×640, 390×844, 768×1024, 1024×1366, 1280×800 und
+// 1440×900. Vorher 7–19 von 40.
+// Bewacht durch `tests/e2e/dribbelweg.spec.mjs`, Block „Pass — Berührungs-
+// freiheit über den ganzen Flug". ⚠️ Bis zum 21.08.2026 stand die Zusicherung
+// nur hier: Der einzige Pass-Wächter sah die RUHELAGE an, einen einzigen
+// Scrollpunkt — den Flug nie.
 //
-// ⚠️ EINE AUSNAHME, GEMESSEN UND BEWUSST STEHEN GELASSEN: 390×844 angemeldet,
-// 2 von 40 Messpunkten. Der Grund ist keine Layout-Kollision — der Absatz
-// darüber ist in diesem Moment noch in seiner `Reveal`-Einblendung und steht
-// per `transform` 6–18 px TIEFER als sein Layoutkasten, also im Band des Balls.
-// Nach ~200 ms sitzt er, und die Berührung ist vorbei. Es trifft nur den Fall
-// „Ruhelage über der Taste" (mobil) und nur das eine Fenster, in dem der Block
-// so kurz ist, dass die Einblendung beim Passbeginn noch läuft.
-// Nicht behoben, und das ist eine Entscheidung: Der Ball dagegen abzusichern
-// hieße, ihn an den LAUFZEITZUSTAND einer fremden Animation zu koppeln. Genau
-// diese Kopplung ist der Kern des Apparats, den diese Fassung losgeworden ist —
-// und dieselbe Datei begründet zwei Absätze weiter unten, warum sie überall
-// `offsetTop` statt `getBoundingClientRect()` benutzt: weil Reveals Transform
-// eine vorübergehende Verschiebung ist und keine Lage.
+// ══ ⚠️ DIE VORÜBERGEHENDE BERÜHRUNG BEIM LADEN — KORRIGIERT 21.08.2026 ═════
+//
+// Hier stand: „EINE AUSNAHME … 390×844 angemeldet, 2 von 40 Messpunkten … nur
+// das eine Fenster, in dem der Block so kurz ist". Das war als BEFUND richtig
+// und als BESCHREIBUNG falsch, und zwar in der teuren Richtung: Wer die Zeile
+// liest, prüft auf 390×844 nach, findet dort nichts (weil er gemächlich
+// hinunterscrollt) und hält die Sache für erledigt.
+//
+// Tobias hat nachgemessen, ich habe es gegengeprüft. Es ist kein Merkmal EINES
+// FENSTERS, sondern von zwei anderen Dingen:
+//
+//   1. VON DER RUHELAGE. Es trifft ausschließlich den Fall „Ruhelage ÜBER der
+//      Taste" — dort liegt der Ball im 40-px-Band zwischen Absatz und Taste,
+//      und genau in dieses Band rutscht der Absatz während seiner Einblendung
+//      hinein. Gemessen betroffen: 360×640, 375×812, 390×844 und 430×932 in
+//      BEIDEN Anmeldezuständen, dazu 768×1024 ausgeloggt. Auf 768 angemeldet
+//      **nie** — dort steht nur EINE Taste, links davon bleibt genug Anlauf,
+//      und der Ball nimmt die seitliche Ruhelage. Bei der liegt kein Text.
+//      1280×800 und 1440×900: nie.
+//
+//   2. VON DER ANKUNFTSART, nicht von der Breite. Wer beim Laden direkt ans
+//      Seitenende springt (Anker, wiederhergestellte Leseposition, Sprung zur
+//      Fußzeile), trifft die Einblendung mitten im Lauf: 12–14 von 73 Bildern,
+//      von ~4–29 ms bis ~200–221 ms nach dem Sprung. Wer scrollt, trifft sie
+//      um so seltener, je normaler er scrollt — gemessen über 30 Stufen:
+//      bei 25 ms je Stufe noch 2 Stufen, bei 60 ms noch 2, ab **120 ms je
+//      Stufe null**, und das ist immer noch schneller als jedes Lesen.
+//
+// Der Mechanismus ist unverändert und war nie strittig: Der Absatz steht
+// während seiner `Reveal`-Einblendung per `transform` 6–18 px TIEFER als sein
+// Layoutkasten. Nach ~200 ms sitzt er, und die Berührung ist vorbei.
+//
+// NICHT BEHOBEN, und das bleibt eine Entscheidung: Der Ball dagegen
+// abzusichern hieße, ihn an den LAUFZEITZUSTAND einer fremden Animation zu
+// koppeln. Genau diese Kopplung ist der Kern des Apparats, den diese Fassung
+// losgeworden ist — und dieselbe Datei begründet zwei Absätze weiter unten,
+// warum sie überall `offsetTop` statt `getBoundingClientRect()` benutzt: weil
+// Reveals Transform eine vorübergehende Verschiebung ist und keine Lage.
+// ⚠️ Wer sie doch beheben will, fasst deshalb NICHT den Ball an, sondern eines
+// der beiden echten Stellrädchen: das 40-px-Band (`mb-10` am Absatz) oder den
+// Reveal-Versatz. Beides gehört Vivien.
+//
+// ⚠️ UND DER FLUG-WÄCHTER HÄNGT AN DER RICHTIGEN URSACHE: Er wartet nach jedem
+// Scrollschritt, bis sich im Abschluss-Block nichts mehr bewegt, und misst erst
+// dann. Das ist kein Wegschauen — er bewacht die BAHN des Balls, und die ist
+// eine Layout-Eigenschaft. Die Einblendung ist ein eigener, hier benannter
+// Gegenstand. Ein Wächter, der beides in eine Zahl wirft, kann keines von
+// beidem melden.
 //
 // ⚠️ Nebenbefund derselben Runde: Hier stand „Der Ball kommt von OBEN und von
 // der Seite, aus der Richtung, in die der Dribbelweg zuletzt zeigte." Beide
@@ -308,8 +348,25 @@ export default function BallPass() {
       // Ein Ball, der an einer Schaltfläche liegt, sagt vollständig, was der
       // Pass sagt — hier ist der Ball, hier übernimmst du. Nur eben als Bild
       // statt als Vorgang.
+      //
+      // ⚠️ DIESER ZWEIG HÖRTE BIS ZUM 21.08.2026 NUR AUF `resize` DES FENSTERS
+      // (Befund Kai B10). Das ist zu wenig, und hier wiegt es schwerer als
+      // überall sonst: Ohne Bewegung läuft KEIN Scroll-Zuhörer, also gibt es
+      // keinen zweiten Anlass, jemals neu zu messen. Eine Ruhelage, die einmal
+      // falsch berechnet wurde, bleibt für die ganze Sitzung falsch.
+      // Nachgemessen: Baut sich der Abschluss-Block nach dem ersten Messen um
+      // (späte Schrift, anderer Umbruch, nachgeladener Inhalt), wandert die
+      // Taste — der Ball nicht. Bei einem Umbau von 120 px lag er 120 px
+      // daneben, dauerhaft. Ohne reduzierte Bewegung zieht derselbe Fall sauber
+      // nach; der Beobachter dafür stand schon da, nur eben eine Zeile tiefer.
+      const beobachterRuhig = new ResizeObserver(neu);
+      beobachterRuhig.observe(bezug);
+      beobachterRuhig.observe(document.body);
       window.addEventListener("resize", neu);
-      return () => window.removeEventListener("resize", neu);
+      return () => {
+        window.removeEventListener("resize", neu);
+        beobachterRuhig.disconnect();
+      };
     }
 
     window.addEventListener("scroll", anstossen, { passive: true });

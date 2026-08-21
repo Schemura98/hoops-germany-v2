@@ -478,8 +478,21 @@ export default function Dribbelweg({ labels = [] }) {
     vermessen();
     if (ruhig) {
       standbild();
+      // ⚠️ AUCH HIER DER BEOBACHTER, UND AUS DEMSELBEN GRUND (Befund Kai B10).
+      // Der Zweig unten begründet ihn selbst: „Die Bilder der Feature-Karten
+      // und die Schriften können nach dem ersten Messen noch Höhen verändern."
+      // Das gilt bei reduzierter Bewegung genauso — nur gibt es dort keinen
+      // Scroll-Zuhörer, der es beim nächsten Bild wieder geraderückt.
+      // Nachgemessen: Wächst eine Feature-Zeile nach dem ersten Messen um
+      // 56 px, endet der gezeichnete Weg 56 px zu früh und bleibt so. Ohne
+      // reduzierte Bewegung zieht er nach.
+      const beobachterRuhig = new ResizeObserver(neuVermessen);
+      beobachterRuhig.observe(feld);
       window.addEventListener("resize", neuVermessen);
-      return () => window.removeEventListener("resize", neuVermessen);
+      return () => {
+        window.removeEventListener("resize", neuVermessen);
+        beobachterRuhig.disconnect();
+      };
     }
     setzen();
 
