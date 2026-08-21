@@ -5033,3 +5033,64 @@ der klemmenden Größe; `md:gap-16` → `md:gap-20` bringt 12,85 → 18,57 px.
 **Live nachgemessen (21.08.2026):** Pass 1440×900 → 13,4 px · 1024×1366 → 14,0 px, Ball jeweils
 vollständig sichtbar · ruhiger Zweig nachweislich aktiv, 14,3 px bei Sollwert 14 · 16 Routen je
 200 · 0 Laufzeitfehler.
+
+#### Update (21.08.2026, Nachtrag) — Das Logo in der Navigationsleiste
+
+**Deploy:** `17bb00a`, am Server verifiziert. Patricks Befund: „auf der Desktop Version ist das
+Logo oben links zu klein und man kann die Schrift nicht gut lesen."
+
+**Vorab, weil Patrick danach gefragt hat:** Bei der Migration Windows → Mac ist **nichts**
+verlorengegangen. `public/images/logo.svg` ist echtes Vektormaterial — 33 Pfade, 103 Gruppen,
+kein eingebettetes Pixelbild, kein `<text>` (Schrift in Kurven). Es gibt keine bessere
+Originaldatei; das Problem war die Anzeigegröße.
+
+**⚠️ Meine erste Messung war um Faktor 1,76 falsch, und sie hätte zur falschen Reparatur geführt.**
+Gemeldet: 8,1 px Hauptzeile / 3,0 px Claim. Tatsächlich 14,2 / 5,4. Ursache: Zeichnung auf 440 px
+gerendert und durch 440 geteilt statt durch die Höhe des Koordinatensystems (250) — `getBBox()`
+liefert Benutzereinheiten, keine Bildpunkte. Vivien fand es, ich zählte am Bildschirmfoto nach
+(14/5), Kai ein drittes Mal (14,19/5,31).
+Die falsche Zahl drehte die Diagnose um: Mit 8,1 px wäre die Hauptzeile die *kleinste* Schrift der
+Leiste gewesen. Tatsächlich ist sie die **größte** — unlesbar war allein der Claim (kleinste
+Schrift der Startseite 7,10 px).
+
+**Die Lösung: eine eigene Logofassung für die Leiste, kein Navbar-Umbau.**
+`public/images/logo-leiste.svg` (neu), `scripts/logo-leiste-bauen.mjs` (neu),
+`components/layout/Navbar.js`, `PlayerNav.js`, `docs/INSPIRATION-NAVBAR-LOGO-2026-08-21.md`.
+- Die einzeilige Wortmarke ist exakt **7,00× so breit wie hoch**; bei 41 px Reserve hätte
+  „größer" nur 5,9 px Zuwachs ergeben und die Reserve aufgebraucht. **Gelöst über die Breite:**
+  zweizeilig bestimmt nur noch GERMANY (327,3 statt 566,4 Einheiten) die Breite — −42 %.
+- Desktop **14,2 → 19,8 px**, mobil **11,7 → 16,2 px** (+39 %), Logo **15,8 px schmaler**,
+  angemeldete Reserve **41 → 56,5 px**. Die Leiste gibt Platz ab.
+- Patrick hatte die Freigabe für ein neues Navbar-Konzept erteilt; **sie wurde nicht gebraucht.**
+  Struktur unangetastet: nichts für Lina, nichts für Nele an dieser Stelle.
+- Die Datei ist ein **Schnitt, keine Neuzeichnung** — alle 14 Pfade stehen wörtlich im Original,
+  Ausgabe bitgleich reproduzierbar (Kai und Tobias unabhängig, gleicher SHA-256). Roadmap 32 (e)
+  damit eingelöst: die Ableitung liegt als Skript im Repo, nicht als Zahl in einem Bericht.
+- Vivien hat eine Alternative mit vereinfachtem, größerem Ball gebaut, **angesehen** und
+  verworfen: Der Ball verliert dabei seine Nähte und wird zum orangen Fleck.
+
+**Befunde der Gates (beide freigabefähig)**
+- ⚠️ **Der Generator behauptet eine Sicherung, die er nicht hat** (Kai): Ein Buchstabe im
+  Original um 50 Einheiten verschoben → derselbe Ausgabetext, Exit 0, sichtbar kaputte Datei.
+  Geprüft werden Struktur (Gruppenzahl, Ball-Pfad), nicht Geometrie.
+- ⚠️ **Zwei Regressionslücken:** `src` zurück auf `logo.svg` → Suite vollständig grün (Kai M4).
+  Und **kein Wächter dafür, dass die Auth-Seiten die Fassung mit Claim behalten** (Tobias) — wer
+  die vier Stellen „vereinheitlicht", nimmt den Claim von der ganzen Plattform, und nichts sieht
+  kaputt aus.
+- ⚠️ **Der Claim steht nirgends als Text** (Vivien): null Treffer in `app`, `components`, `lib`,
+  `docs`. Für Suchmaschinen und Vorleseprogramme unsichtbar. Auf `/oauth-landing` 6,79 px —
+  weiter unter der Grenze, mit der dieser Umbau begründet wurde.
+- ⚠️ **Mails nutzen ein drittes Bild** (Tobias): `logo-email.png`, unabhängig von beiden SVGs.
+  Der Commit-Text behauptete, `logo.svg` trage den Claim „auch in Mails" — das stimmt nicht.
+- ⚠️ **Dieselbe Zahl stand dreimal verschieden da** (Tobias): „~28 px" im Code, „~41 px" im
+  Commit, „41 → 56,5" in der Übergabe; er misst 70,4 → 86,3 (bzw. 46,4 → 62,3 ohne die
+  Innenabstände). **Der Zugewinn reproduziert exakt** (+15,9 px, genau die eingesparte
+  Logobreite) — die absoluten Zahlen nicht. Musterfall für `MUSTER-ZAHLEN-DIE-LUEGEN`.
+
+**Prüfumfang:** Tobias 29 Fenster-/Anmeldekombinationen (320–1920 px), drei Browser-Motoren mit
+identischen Maßen, 18 Routen ohne Konsolen- oder Netzwerkfehler. Kai 285 grün / 5 rot
+(vorbestehend, Roadmap 26), alle Zahlen unabhängig reproduziert.
+
+**Live nachgemessen (gezählte Bildpunkte):** HOOPS 20 px, GERMANY 22 px (Unterlänge des Y),
+Claim weg, Logo 134×44 px · Leiste zieht `logo-leiste.svg`, `/login` weiterhin `logo.svg` ·
+16 Routen je 200.

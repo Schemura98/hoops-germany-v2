@@ -228,6 +228,71 @@
 > ⚠️ **Nebenbefund, nicht mein Auftrag:** `data-spur="desktop"` in der Feature-Strecke liefert
 > `d=""` — ein leerer Pfad mit `pathLength="1"` im ausgelieferten Blatt.
 >
+> ✅ **DEPLOYT: `17bb00a`** (21.08.2026) – **Das Logo in der Navigationsleiste war nicht zu klein;
+> die Hälfte davon war unlesbar.** Patricks Befund: „auf der Desktop Version ist das Logo oben
+> links zu klein und man kann die Schrift nicht gut lesen."
+>
+> ⚠️ **MEINE ERSTE MESSUNG WAR UM FAKTOR 1,76 FALSCH — und sie hätte zur falschen Reparatur
+> geführt.** Ich meldete 8,1 px für die Hauptzeile und 3,0 px für den Claim. Tatsächlich sind es
+> **14,2 und 5,4 px**. Fehler: Zeichnung auf 440 px gerendert und durch **440** geteilt – richtig
+> ist die Höhe des Koordinatensystems (**250**). `getBBox()` liefert **Benutzereinheiten, keine
+> Bildpunkte**. Vivien fand es, ich zählte es unabhängig am Bildschirmfoto nach (14 und 5 px),
+> Kai ein drittes Mal (14,19 / 5,31).
+> **Die falsche Zahl drehte die Diagnose um:** Mit 8,1 px wäre die Hauptzeile die *kleinste*
+> Schrift der Leiste gewesen und „einfach größer" die Antwort. Tatsächlich ist sie mit 14,2 px die
+> **größte** dort – unlesbar war allein der Claim (kleinste Schrift der Startseite: 7,10 px).
+> *Richtig gemessen, in der falschen Einheit* – Roadmap 20a in dritter Auflage, diesmal meine.
+>
+> **Gelöst über die BREITE, nicht über die Höhe.** Die einzeilige Wortmarke ist exakt **7,00× so
+> breit wie hoch**; bei 41 px Reserve hätte „größer" nur **5,9 px** Zuwachs ergeben und die
+> Reserve aufgebraucht. Zweizeilig bestimmt nicht mehr die ganze Wortmarke die Breite (566,4
+> Einheiten), sondern nur GERMANY (327,3) – **−42 %**, direkt in Größe umgemünzt:
+> Desktop **14,2 → 19,8 px** · mobil **11,7 → 16,2 px** (**+39 %**), Logo **15,8 px schmaler**.
+> ⚠️ **Die Leiste GIBT dabei Platz ab** – angemeldete Reserve 41 → 56,5 px. Deshalb blieb die
+> Navigationsstruktur unangetastet: kein Kontomenü, keine verschobenen Punkte, keine geänderten
+> Beschriftungen. Patrick hatte die Freigabe für ein neues Navbar-Konzept ausdrücklich erteilt;
+> **sie wurde nicht gebraucht, und das ist ein Ergebnis, keine Bequemlichkeit.**
+> ✅ **Live nachgemessen (gezählte Bildpunkte, nicht gerechnet):** HOOPS **20 px**, GERMANY
+> **22 px** (Unterlänge des Y), Claim weg, Logo 134×44 px · Leiste zieht `logo-leiste.svg`,
+> `/login` weiterhin `logo.svg` · 16 Routen je 200.
+>
+> ⚠️ **DIE NEUE DATEI IST EIN SCHNITT, KEINE NEUZEICHNUNG.** `scripts/logo-leiste-bauen.mjs`
+> leitet sie aus `logo.svg` ab; alle 14 Pfade stehen **wörtlich** im Original, die Ausgabe ist
+> **bitgleich reproduzierbar** (von Kai UND Tobias unabhängig geprüft, gleicher SHA-256). Die
+> Ableitung liegt damit als Skript im Repo statt als Zahl in einem Bericht – Roadmap 32 (e)
+> eingelöst.
+> ⚠️ **ABER der Generator behauptet eine Sicherung, die er nicht hat** (Befund Kai): Im Kopf
+> steht, er breche ab, wenn jemand das Original austauscht. Gegenprobe: **ein Buchstabe in
+> `logo.svg` um 50 Einheiten verschoben** → derselbe Ausgabetext, Exit 0, und eine **sichtbar
+> kaputte Datei** (ein 44-px-Block statt zwei 19,8-px-Zeilen). Geprüft werden Gruppenzahl und
+> Ball-Pfad, also die **Struktur** – nicht die **Geometrie**.
+>
+> ⚠️ **ZWEI REGRESSIONSLÜCKEN, beide klein, beide unbewacht:**
+> **(1)** Dreht jemand den `src` auf `logo.svg` zurück, bleibt die Suite **vollständig grün** und
+> die Leiste steht wieder bei 14,2 px (Kais M4). Der Wächter müsste die **Eigenschaft** benennen,
+> nicht die Datei: *„Die Hauptzeile belegt mindestens 40 % der Logohöhe"* – heute 45 %,
+> zurückgedreht 32 %. Dieselbe Lehre wie `ball-drehpunkt.spec.mjs`.
+> **(2)** Es gibt **keinen Wächter dafür, dass `/login`, `/signup` und `/oauth-landing` die
+> Fassung MIT Claim behalten** (Befund Tobias). Wer die vier Stellen eines Tages
+> „vereinheitlicht", nimmt den Claim von der ganzen Plattform – **und nichts sieht kaputt aus.**
+>
+> ⚠️ **DER CLAIM STEHT NIRGENDS ALS TEXT** (Befund Vivien): „Basketball 4 everyone" hat **null**
+> Treffer in `app`, `components`, `lib`, `docs` – er existiert ausschließlich als Vektorkonturen.
+> Für Suchmaschinen und Vorleseprogramme ist der Markenclaim auf der ganzen Plattform unsichtbar,
+> und seit diesem Deploy steht er nicht mehr auf der reichweitenstärksten Fläche. **Frage an
+> Nele**, ob er einen lesbaren Ort braucht. ⚠️ Auf `/oauth-landing` misst er **6,79 px** – weiter
+> unter den 7,10 px, mit denen dieser Umbau begründet wurde.
+>
+> ✅ **Beide Gates freigabefähig.** Tobias: **29 Fenster-/Anmeldekombinationen** von 320 bis
+> 1920 px, drei Browser-Motoren (Chromium, WebKit, Firefox) mit identischen Maßen, kein Überlauf,
+> kein Querlauf, Wortmarke nirgends gestaucht, im engsten angemeldeten Fall **15,9 px MEHR** Luft
+> als vorher, 18 Routen ohne Konsolen- oder Netzwerkfehler. Kai: 285 grün / 5 rot (vorbestehend,
+> Roadmap 26), alle Zahlen unabhängig reproduziert.
+> ⚠️ **Zur Frage nach den Logodateien (Patrick):** Bei der Migration Windows → Mac ist **nichts**
+> verlorengegangen. `logo.svg` ist echtes Vektormaterial – 33 Pfade, 103 Gruppen, **kein**
+> eingebettetes Pixelbild, **kein** `<text>` (Schrift in Kurven). Es gibt keine bessere
+> „Originaldatei"; das Problem war immer die Anzeigegröße.
+>
 > ✅ **DEPLOYT: `c4982bd`** (21.08.2026) – **Der Ball dribbelt durch die Seite, und die Landung
 > ist zum ersten Mal sichtbar.** Vier Commits: `0da80c7` (Vivien, Dribbelweg + Außenlinie + Pass),
 > `fb23317` (Vivien, beide Gate-Blocker), `c5cbf6f` + `c4982bd` (Kai, vier Wächter + ein echter Fix).
@@ -889,7 +954,7 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `c4982bd` (aktuell live) → `c5cbf6f` → `fb23317` → `0da80c7` (Dribbelweg,
+> **Rollback-Kette:** `17bb00a` (aktuell live) → `8e63cf6` (nur Doku) → `c4982bd` → `c5cbf6f` → `fb23317` → `0da80c7` (Dribbelweg,
 > vor den Gate-Befunden) → `70c36ba` (letzter Stand vor der Ball-Reise) → `76406fb` → `571931c` (Feld) → `b3487a8` →
 > `d4c847a` (Leiste, erster Schritt) → `070a1e7` (letzter Stand vor Feld und Leiste) → `04ba621` → `07150cf` (nur Werkzeug) → `d2cfa47` → `35b8bc0` → `d841c4b` → `bd99263` (Dunk, vor den
 > Gate-Befunden) → `062989e` (letzter Stand vor dem Hero-Umbau) → `a4c6811` → `cf02293` →
@@ -1185,7 +1250,7 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
   `/team/create` → wird Admin (`adminPlayerId`, `isTeamAdmin`, `teamAdminOf`, eigenes `teamId`).
   Verwaltung von `/team/admin` läuft über den **Spieler-Token** (Dual-Auth). `/team/login` &
   `/team/register` sind nur noch Redirects. `Team.email` ist optional (sparse).
-- **Design-Sprache „Anzeigetafel“ (seit 12.08.2026, Spezifikation `docs/VISUELLE-RICHTUNG-2026-08-12.md`):** nachtblauer Grund `navy-950 #0B1220` (Navigation `navy-900 #111A2E`, Panels `navy-800 #182543`, Hover/Eingaben `navy-700 #223058`, Rahmen `navy-600 #3D5080`), Text `paper-50` / gedämpft `mist-300|400|600`, **ein** Akzent = das echte Logo-Orange `brand-500 #F07A27`, semantische Status in `signal-ok|wait|error`. Schriften: **Big Shoulders Display** (`font-display`, Headlines ab `text-2xl`, Eyebrows, große Zahlen), **Geist** (`font-sans`, Fließtext/UI), **Geist Mono** (`font-mono tabular-nums`, Zahlen in Tabellen) – Geist fehlt im Font-Katalog von Next 14.2.35, deshalb selbst gehostet aus `public/fonts/` über `next/font/local` (`lib/fonts.js`); nachladbar mit `sh scripts/fetch-fonts.sh` (holt das latin-Subset als woff2, `--dry` zeigt nur an). Radien gestuft 6/10/16px (`rounded-sm|md|lg`). **Farbentscheid Patrick 12.08.2026:** Navy statt des ursprünglich von Vivien vorgeschlagenen warmen Braun – Navy + Orange ist für ihn die Basketball-Paarung. Die Skala heißt deshalb `navy-*`; die Stufung ist unverändert, nur der Farbton wechselte. Werte von Vivien gerechnet (`docs/WOW-KONZEPT-2026-08-12.md` Abschnitt 0). **Keine Verläufe, keine Schatten, kein Glow** – Tiefe entsteht aus Flächenstufe + 1px-Haarlinie. Signatur: 2px `brand-500`-Leiste an genau drei Stellen (Unterkante Navbar/PageHeader, Oberkante der einen hervorgehobenen Karte, aktive Stat-Zahl). Primärbutton = orange Fläche mit **dunklem** Text (`text-navy-950`, 6,88:1) – weiß auf Orange wäre 2,61:1. Icons: `react-icons/pi` (Phosphor Bold), **nicht** mehr `fa`. `app/globals.css` setzt `color-scheme: dark`, damit auch browsereigene Bedienelemente dunkel rendern. Echte Assets in `public/images/` (`logo.svg` = weiße Wortmarke für Navy-Navbar; `logo-hoops.svg` = dunkle Variante, seit dem Redesign nirgends mehr im Einsatz; `login image.jpg`/`signupImage.jpg` = Motive der Auth-Seiten (der **Hero der Startseite trägt seit 12.08.2026 kein Foto mehr**), jeweils mit AVIF/WebP-Varianten `login-image-1000.*`/`signup-image-1000.*` über `AuthShell.js`). `registerimage.jpg`/`playerimage.jpg` waren nie bzw. nicht mehr im Einsatz (`/team/register` ist nur Redirect) und liegen seit 11.08.2026 archiviert in `docs/asset-archive/` (Befund: `docs/ABLAGE-AUDIT-BILDER-2026-08-11.md`). Namenskonvention für neue Bild-Varianten: `docs/NAMENSKONVENTION-BILDER.md` (Kebab-Case, `<basis>-<lange-Kante>.<format>`).
+- **Design-Sprache „Anzeigetafel“ (seit 12.08.2026, Spezifikation `docs/VISUELLE-RICHTUNG-2026-08-12.md`):** nachtblauer Grund `navy-950 #0B1220` (Navigation `navy-900 #111A2E`, Panels `navy-800 #182543`, Hover/Eingaben `navy-700 #223058`, Rahmen `navy-600 #3D5080`), Text `paper-50` / gedämpft `mist-300|400|600`, **ein** Akzent = das echte Logo-Orange `brand-500 #F07A27`, semantische Status in `signal-ok|wait|error`. Schriften: **Big Shoulders Display** (`font-display`, Headlines ab `text-2xl`, Eyebrows, große Zahlen), **Geist** (`font-sans`, Fließtext/UI), **Geist Mono** (`font-mono tabular-nums`, Zahlen in Tabellen) – Geist fehlt im Font-Katalog von Next 14.2.35, deshalb selbst gehostet aus `public/fonts/` über `next/font/local` (`lib/fonts.js`); nachladbar mit `sh scripts/fetch-fonts.sh` (holt das latin-Subset als woff2, `--dry` zeigt nur an). Radien gestuft 6/10/16px (`rounded-sm|md|lg`). **Farbentscheid Patrick 12.08.2026:** Navy statt des ursprünglich von Vivien vorgeschlagenen warmen Braun – Navy + Orange ist für ihn die Basketball-Paarung. Die Skala heißt deshalb `navy-*`; die Stufung ist unverändert, nur der Farbton wechselte. Werte von Vivien gerechnet (`docs/WOW-KONZEPT-2026-08-12.md` Abschnitt 0). **Keine Verläufe, keine Schatten, kein Glow** – Tiefe entsteht aus Flächenstufe + 1px-Haarlinie. Signatur: 2px `brand-500`-Leiste an genau drei Stellen (Unterkante Navbar/PageHeader, Oberkante der einen hervorgehobenen Karte, aktive Stat-Zahl). Primärbutton = orange Fläche mit **dunklem** Text (`text-navy-950`, 6,88:1) – weiß auf Orange wäre 2,61:1. Icons: `react-icons/pi` (Phosphor Bold), **nicht** mehr `fa`. `app/globals.css` setzt `color-scheme: dark`, damit auch browsereigene Bedienelemente dunkel rendern. Echte Assets in `public/images/` (**`logo-leiste.svg` = die Fassung der NAVIGATIONSLEISTE** (zweizeilig HOOPS/GERMANY, **ohne** Claim, seit 21.08.2026; erzeugt von `scripts/logo-leiste-bauen.mjs` aus `logo.svg`, bitgleich reproduzierbar) – eingesetzt in `Navbar.js` UND `PlayerNav.js`; `logo.svg` = einzeilige Wortmarke **mit** Claim, nur noch auf `/login`, `/signup`, `/oauth-landing`; ⚠️ **Mails nutzen ein DRITTES Bild**, `logo-email.png` (`lib/emailTemplates.js:65`), unabhängig von beiden; `logo-hoops.svg` = dunkle Variante, seit dem Redesign nirgends mehr im Einsatz; `login image.jpg`/`signupImage.jpg` = Motive der Auth-Seiten (der **Hero der Startseite trägt seit 12.08.2026 kein Foto mehr**), jeweils mit AVIF/WebP-Varianten `login-image-1000.*`/`signup-image-1000.*` über `AuthShell.js`). `registerimage.jpg`/`playerimage.jpg` waren nie bzw. nicht mehr im Einsatz (`/team/register` ist nur Redirect) und liegen seit 11.08.2026 archiviert in `docs/asset-archive/` (Befund: `docs/ABLAGE-AUDIT-BILDER-2026-08-11.md`). Namenskonvention für neue Bild-Varianten: `docs/NAMENSKONVENTION-BILDER.md` (Kebab-Case, `<basis>-<lange-Kante>.<format>`).
 - **Wiederverwendbare Redesign-Bausteine:** `components/layout/AuthShell.js` (Split-Screen Auth),
   `components/layout/PageHeader.js` (Seitenkopf auf `ink-900` mit Marken-Leiste), `components/Avatar.js`
   (generiertes Initialen-Logo mit deterministischer Namensfarbe – Fallback für Spieler & Teams, überall),
@@ -1651,6 +1716,26 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     zurückgeht. Tobias' Testvorschlag für danach: von der untersten Position auf eine Detailseite
     und zurück, Rückkehrposition gegen Ausgangsposition — **mit Ehrlichkeitsschranke „war ich
     vorher überhaupt unten?"**, sonst ist der Test grün, ohne gemessen zu haben.
+
+33. **Offen aus der Logo-Runde (21.08.2026)**, keiner blockierend:
+    **(a)** ⚠️ `scripts/logo-leiste-bauen.mjs` **behauptet eine Sicherung, die er nicht hat** —
+    er prüft Gruppenzahl und Ball-Pfad, also die Struktur, nicht die Geometrie. Kais Gegenprobe:
+    ein Buchstabe im Original um 50 Einheiten verschoben → derselbe Ausgabetext, Exit 0, kaputte
+    Datei. (→ Kai/Vivien)
+    **(b)** **Kein Wächter für Patricks Befund:** `src` zurück auf `logo.svg` → Suite vollständig
+    grün, Leiste wieder bei 14,2 px. Prüfmaß gehört an die **Eigenschaft**, nicht an die Datei:
+    „Hauptzeile ≥ 40 % der Logohöhe" (heute 45 %, zurückgedreht 32 %). (→ Kai)
+    **(c)** **Kein Wächter dafür, dass `/login`, `/signup`, `/oauth-landing` die Fassung MIT
+    Claim behalten.** Wer die vier Stellen „vereinheitlicht", nimmt den Claim von der ganzen
+    Plattform, und nichts sieht kaputt aus. (→ Kai)
+    **(d)** Der Markenclaim steht **nirgends als Text** — null Treffer in `app`, `components`,
+    `lib`, `docs`. Für Suchmaschinen und Vorleseprogramme unsichtbar; auf `/oauth-landing` mit
+    6,79 px weiterhin unter der Lesbarkeitsgrenze. (→ Nele)
+    **(e)** Das Logo wechselt beim Anmelden weiter die **Größe** (44 → 36 px, Versalhöhe
+    19,8 → 16,0). Die Form ist jetzt gleich, die Höhenklassen sind unverändert. Vorbestehend.
+    (→ Vivien)
+    **(f)** Tippfläche der Wortmarke mobil **109,7 × 36 px** — Höhe unter der 44-px-Empfehlung,
+    und sie ist der einzige Weg zurück zur Startseite. Vorbestehend, gehört zu 32 (b). (→ Vivien)
 
 32. **Kleinere offene Punkte aus den Gates vom 21.08.2026**, keiner blockierend:
     **(a)** Fällt die Nachrichtenquelle aus, bleibt ein leeres Band von **160 px** stehen — keine
