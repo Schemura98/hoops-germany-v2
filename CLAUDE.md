@@ -96,9 +96,16 @@
 > 320×640 angemeldet (+31,1 → −108,9). Das betrifft **nicht** die Ankunft, sondern das
 > Weiterscrollen danach — vorbestehend in der Sache, verschärft in der Zahl.
 >
-> ⚠️ **EIN TEST IST ROT, UND ZWAR ABSICHTLICH — ER GEHÖRT KAI, NICHT MIR.**
-> `tests/e2e/abschluss-korb.spec.mjs` (6 Fälle) wartet auf `svg[data-abschluss-korb]`; dieses
-> Element gibt es nicht mehr. Der Test hat drei Zusicherungen, und **zwei davon leben weiter**:
+> ✅ **ERLEDIGT 21.08.2026 (Kai, `492e465`): der Wächter ist neu gebaut und grün.**
+> `tests/e2e/abschluss-korb.spec.mjs` hat statt 6 nun **21 Fälle** (Projektion · freie Tinte ·
+> gesetzter Abstand · gleicher Ring), Lauf **21/21 grün** gegen die ausgelieferte Fassung.
+> Jede der vier Zusicherungen wurde mindestens einmal durch eine Gegenprobe ROT gesehen — ein
+> grüner Test, der nicht rot werden kann, sichert nichts. Zwei Prüfmaße unten sind dabei
+> korrigiert worden (s. die beiden ⚠️-Blöcke). Offen bleibt allein das Augenurteil (Tobias).
+>
+> ⚠️ Der Anlass, zur Nachvollziehbarkeit: Der alte Test wartete auf `svg[data-abschluss-korb]`;
+> dieses Element gibt es nicht mehr, alle 6 Fälle liefen in eine Zeitüberschreitung.
+> Er hatte drei Zusicherungen, und **zwei davon leben weiter**:
 > „eine Projektion" (kein `<ellipse>`, mindestens ein `<circle>`, kein ungleich skalierter
 > Kreis) und „keine Überlagerung von Text". Die dritte („quadratisch, ≥ 72 px") ist mit ihrem
 > Gegenstand entfallen — sie war die Untergrenze eines Netzes, das es nicht mehr gibt.
@@ -112,10 +119,27 @@
 >   sondern die Zeilenkästen der Textknoten (`Range.getClientRects`) gegen `isPointInStroke` —
 >   und die Deckkraft des Verlaufs an der Kreuzungstiefe mitrechnen. Muster:
 >   `scripts/messungen/tinte.mjs`. Sollwert 0,000; Gegenprobe: Anker zurück auf 2,875 m ⇒
->   0,47–0,69 auf 20 von 20 Fenstern.
+>   **0,47–0,50, rot auf 4 von 12 Fällen** des Wächters.
+>   ⚠️ **KORRIGIERT 21.08.2026 (Kai, belegt durch `492e465`).** Hier stand „0,47–0,69 auf 20 von
+>   20 Fenstern". Die Deckkraftwerte stimmen, die Trefferzahl nicht: Sie stammt aus
+>   `tinte.mjs`, und das Werkzeug zählt AUCH die Dreipunktlinie mit — die hinter dem Text
+>   durchlaufen DARF (dieselbe Regel wie im Hero: kühle Linien dürfen jede Zeile kreuzen, der
+>   orange Ring nicht). Im angemeldeten Zustand bleibt der Defekt zusätzlich unsichtbar, weil
+>   dort nur „Ein Satz reicht" steht — eine kurze mittige Zeile, an der die Zonenlinien links
+>   und rechts vorbeilaufen. ⚠️ Genau deshalb steht der Abstands-Fall NEBEN dem Tinten-Fall:
+>   Ein Test nur auf die Tinte lässt diesen Fehler in zwei Dritteln der Fälle durch.
 > · **Der Abstand ist gesetzt, nicht gemessen:** letzte Textunterkante zur Ladezonen-Oberkante
->   **87,9 px ausgeloggt / 85,9 px angemeldet** auf allen mobilen Breiten, 121,5 / 119,5 auf
->   1440. Er darf mit dem Fenster wachsen, aber nie mit dem ANMELDEZUSTAND springen.
+>   **87,9 px mobil · 93,2 auf 768 · 110,8 auf 1280 · 121,4 auf 1440** — und zwar in BEIDEN
+>   Anmeldezuständen derselbe Wert. Er darf mit dem Fenster wachsen, aber nie mit dem
+>   ANMELDEZUSTAND springen.
+>   ⚠️ **KORRIGIERT 21.08.2026 (Kai, belegt durch `492e465`).** Hier stand „87,9 px ausgeloggt /
+>   85,9 px angemeldet, 121,5 / 119,5 auf 1440". Die ausgeloggten Werte reproduzieren sich
+>   punktgenau; die angemeldeten waren ein MESSARTEFAKT. Ausgeloggt endet der Block mit einem
+>   `<Link>` (inline — sein Kasten ist nur so hoch wie die Buchstaben), angemeldet mit einem
+>   `<p>` (bringt die volle Zeilenhöhe mit). Wer die ELEMENT-Kästen misst statt der Zeilenkästen
+>   der Textknoten, liest daraus 2 px Sprung, wo nichts springt. Gegen die Zeilenkästen gemessen
+>   sind beide Zustände gleich. **Der befürchtete Sprung existiert nicht** — die Schranke im
+>   Wächter konnte deshalb von 3 px auf 1 px zugezogen werden.
 > · **Der Ring ist an beiden Enden gleich groß** (mobil 21,0 px, 1440 32,4 px, 1920 43,2 px).
 >   Wer eine der drei Leitern anfasst, bricht das — und nichts sieht kaputt aus.
 >
@@ -137,6 +161,10 @@
 > 6 oben genannten plus die **5 vorbestehenden aus Roadmap 26** (Analytics-Speichergrenze) ·
 > `npm run design-audit -- --check` ohne Abweichung · 12 Fenster × 2 Anmeldezustände ohne
 > Querlauf.
+> ➕ **Nachtrag 21.08.2026 nach `492e465`** (Kais Neubau des Wächters; die Zahl oben bleibt als
+> Messwert ZU DIESEM Stand stehen): **300 grün, 5 rot, 1 übersprungen** (306 gesamt). Die 6
+> absichtlich roten Fälle sind durch 21 grüne ersetzt; die verbleibenden 5 sind unverändert die
+> vorbestehenden aus Roadmap 26.
 >
 > ⚠️ **NICHT DEPLOYT, NUR COMMITTET (21.08.2026): DER BALL DRIBBELT DIE SEITE HINUNTER —
 > und die Zahl im Kopf des neuen Bauteils war richtig gemessen und falsch abgeleitet.**
