@@ -37,9 +37,28 @@ import { useEffect, useRef } from "react";
 // Diese Linie ist deshalb etwas anderes, und das steht hier, damit es niemand
 // für eine schlampige Fortsetzung hält: Der Hero ist die NAHAUFNAHME, die
 // Seite darunter die TOTALE. Die Seite selbst ist das Feld, ihre Ränder sind
-// die Aussenlinie. Ein Schnitt, kein Fehler — und er ist an keiner Stelle
-// gleichzeitig mit der Hero-Linie im Bild, weil die dort, wo dieser Schnitt
-// stattfindet (unter dem Hero), ohnehin ausserhalb des Bildes liegt.
+// die Aussenlinie. Ein Schnitt, kein Fehler.
+//
+// ⚠️ KORRIGIERT 21.08.2026 (Befund Tobias, nachgemessen). Hier stand, der
+// Schnitt sei „an keiner Stelle gleichzeitig mit der Hero-Linie im Bild, weil
+// die dort ohnehin ausserhalb des Bildes liegt". DAS IST FALSCH — und die
+// Tabelle oben in diesem Block widerlegt es selbst: Ausserhalb liegt die
+// Hero-Seitenlinie nur MOBIL (360 px → −170, 430 px → −135). Ab 768 px ist sie
+// IM Bild (768 → 4 px, 900 → 70 px, 1440 → 180 px).
+//
+// Auf 1440 px stehen deshalb beide Linien gleichzeitig an der Hero-Unterkante:
+// Die Hero-Seitenlinie endet bei x = 180, die Aussenlinie beginnt bei x = 28
+// (`ABSTAND_BREIT`) — 152 px weiter aussen, auf derselben Hoehe. Das liest sich
+// als Versatz, nicht als Fortsetzung: zwei aehnlich helle Linien, ein Wechsel
+// auf einer Zeile.
+//
+// ⚠️ WAS DIE KORREKTUR NICHT UMSTOESST: Der Grund GEGEN die massstabsgetreue
+// Fortsetzung steht in der Tabelle und gilt unveraendert — es gibt keinen
+// Massstab, der auf dem Telefon UND auf dem Notebook funktioniert. Der Entwurf
+// bleibt richtig; falsch war die Beruhigung hinterher. Der Preis des Schnitts
+// ist also hoeher als hier behauptet, er ist auf breiten Fenstern SICHTBAR.
+// Wer ihn senken will, faengt an der Hero-Unterkante an (Roadmap 30 e) — nicht
+// in dieser Datei, und nicht damit, die Aussenlinie zu verschieben.
 //
 // ══ DIE UNTERBRECHUNG ═══════════════════════════════════════════════════════
 // Die Linie endet vor einem Block, der sie kreuzt, und beginnt darunter neu.
