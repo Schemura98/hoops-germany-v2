@@ -5352,3 +5352,67 @@ die vorbestehenden aus Roadmap 26) · `npm run design-audit -- --check` ohne Abw
 `prefers-reduced-motion` alle 16 Pfade vorhanden, dasselbe Bild · Standbilder auf 360, 768, 900,
 1440, 1600 und 1920 px angesehen, ausgeloggt und angemeldet.
 **Gates: keine** — Kai und Tobias haben diesen Stand nicht gesehen. Kein Push, kein Deploy.
+
+#### Update (21./22.08.2026) — Der Hero-Schnitt, der Google-Test und die Seed-Entscheidung
+
+**Deploy:** `3181ad2` (aus `6348625` → `3181ad2`), am Server verifiziert.
+**Übergabe für die nächste Sitzung: `docs/UEBERGABE-2026-08-21.md`.**
+
+**1. Tobias' zwei Auflagen abgearbeitet** (`6348625`, Vivien). `HeroStage.js`, `app/globals.css`,
+Kommentare in `HeroCourt.js`/`Aussenlinie.js`, neu `scripts/messungen/hero-kontrast.mjs` und
+`hero-naht.mjs`.
+- **Die Dreipunktlinie über dem Hero-Text bleibt**, der falsche Kommentar geht. 1,61–1,85 : 1 zur
+  Fläche, unter der 2:1-Grenze — ein Tonwert, kein Strich. Tobias hat es angesehen und trägt es
+  mit. ⚠️ Vivien hat dabei den Befund korrigiert: Der falsche Satz war ein **anderer** als der
+  gemeldete, und es sind die **Überschriften**, nicht die Tastenbeschriftungen.
+- **Der Hero-Schnitt ist gelöst.** Ausgeblendet wird in den letzten 7 rem der Bühne, nicht in
+  Feldtiefe (die Naht liegt je nach Fenster bei 8,29–12,82 m). ⚠️ Die Zahl, mit der er als
+  unlösbar galt, war die Unterkante des **Zeichnungskastens** statt der Bühne (533 gegen 649,8) —
+  aus meinem Auftrag. ⚠️ Der Befund war größer als gemeldet: Auf 1920 px wurde auch der
+  **Bogenscheitel** durchgeschnitten.
+- Tobias gegen die **Live-Fassung** gemessen: Kontrast an der Naht 1,19–1,83 → 1,01–1,02 auf neun
+  Breiten bis 2560 px. ⚠️ Er hat Viviens Messskripte bewusst nicht benutzt: *„Wer das Messgerät
+  des Gebauten übernimmt, prüft das Gerät mit."*
+
+**2. ⚠️ Der wichtigste Methodik-Befund — und es war MEIN Prüfmaß** (`3181ad2`, Kai).
+Der übergebene Vorschlag „an der Naht endet kein Pfad mit sichtbarer Deckkraft" trug zweimal nicht:
+- **Blind für den Defekt.** Die neue Fläche liegt ÜBER der Zeichnung und ändert an ihr keine
+  Deckkraft, keinen Verlaufswert, kein Attribut. Ein solcher Test misst vor und nach dem Löschen
+  denselben Wert — grün über dem Fehler, den er bewachen soll.
+- **Feste Schwelle unmöglich.** Ausgeliefert auf 1280 = 1,180, Defekt auf 900 = 1,178. Der gute
+  Wert liegt über dem schlechten; eine Schwelle je Breite wäre „gesetzte Zahl gegen Restbetrag".
+- **Gebaut wird stattdessen der Abfall derselben Linie über die letzten 120 px**, in der Währung
+  des Fensters: ausgeliefert 92,7–97,7 %, im Defekt 6,3–12,7 %. Gegenschranke gegen „Band länger"
+  gilt nur mobil — gemessen, nicht bequem (auf 1600 ist die Luft bereits −28,3 px).
+- Fünf Gegenproben an der Quelle: Element entfernt → 12 von 12 rot, **alte Suite blieb bei 300
+  grün, also komplett blind**. Suite jetzt 312 grün / 5 rot (Roadmap 26) / 1 übersprungen.
+- ⚠️ Kais Nebenbefund: 785 geänderte Zeilen, **funktionale Änderung sind drei Zeilen**.
+
+**3. ✅ Der Google-Login ist erstmals echt durchgespielt** (Patrick selbst, ich gebe keine
+Zugangsdaten ein). Normale Anmeldung ✓ (kein neues Konto, bestehendes erkannt) · **Flyer-Weg
+`?next=/team/create` ✓** — der Weg, den weder Kai noch Tobias je prüfen konnten · Altersabfrage
+kommt **vor** der Google-Weiterleitung ✓ · mit bestehendem Konto Weiterleitung auf `/team/admin`,
+**kein Fehler** (`team/create/page.js:33` schützt vor versehentlichem Zweitverein).
+⚠️ Offene Rückfrage: kam dabei ein Hinweis, oder war die Weiterleitung stumm?
+✅ Zusätzlich live geprüft: Die Weiterleitungs-Absicherung greift auch im Google-Weg —
+`https://evil.com`, `//evil.com`, `/\evil.com`, `javascript:` werden verworfen, `/team/create`
+und `/spieler?q=max mustermann` kommen durch. **Drei der fünf Stellen erstmals live belegt.**
+
+**4. ✅ Entscheidung Patrick: Die Beispieldaten bleiben — vorerst.** Begründung: Tester sollen
+eine lebendige Seite sehen, und Likes/Kommentare zeigen die Funktion. ⚠️ Roadmap 2 ist damit
+**vertagt, nicht erledigt** („erstmal"); der Purge bleibt für den Cutover stehen.
+
+**Methodik-Lehren dieser Runde**
+- ⚠️ **Ein Prüfmaß kann für seinen eigenen Gegenstand blind sein.** Wenn die Abhilfe ÜBER dem
+  Gegenstand liegt statt ihn zu ändern, misst jede Prüfung am Gegenstand denselben Wert.
+- ⚠️ **Eine feste Schwelle setzt voraus, dass gute und schlechte Werte sich nicht überlappen.**
+  Hier taten sie es — das war nur durch Messen beider Spalten zu sehen.
+- ⚠️ **„Sie Code, ich Doku" reicht als Arbeitsteilung nicht**, wenn die Doku über die laufende
+  Arbeit spricht. Ich habe `b88bbd3` committet, während Vivien dieselben zwei Punkte entschied;
+  die Doku führte sie als *offen*. Sie hat es gemeldet.
+- ⚠️ Tobias hat vier eigene Fehlgriffe offengelegt, drei davon hätten wie Befunde geklungen
+  (u. a. „Ball überlappt die Taste um 44,7 px" — er hatte den senkrechten Abstand gemessen,
+  obwohl der Ball auf Desktop absichtlich neben der Tastenreihe liegt).
+
+**Live nachgemessen (22.08.2026):** Naht auf 360/1440/1920 vorhanden, Ausblendband konstant
+112 px, 16 Feldpfade, 16 Routen je 200, 0 Laufzeitfehler.

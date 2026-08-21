@@ -26,6 +26,87 @@
 > Anmeldekombinationen ohne Querlauf und ohne Konsolenfehler. Details in den beiden ✅-Blöcken
 > weiter unten. **Gates: noch keine** — Kai und Tobias haben diesen Stand nicht gesehen.
 >
+> 📄 **ÜBERGABE: `docs/UEBERGABE-2026-08-21.md`** — Stand am Ende des 21.08., Patricks
+> Entscheidungen dieses Tages und die offene Liste vor den Flyern. **Zuerst lesen.**
+>
+> ✅ **DEPLOYT: `3181ad2`** (22.08.2026) — **Der Schnitt zwischen Hero und Seite ist weg.**
+> Zwei Commits: `6348625` (Vivien, Tobias' zwei Auflagen) und `3181ad2` (Kai, der Wächter dazu).
+> **(1) Die Dreipunktlinie über dem Hero-Text bleibt**, der falsche Kommentar geht — gemessen
+> 1,61–1,85 : 1 zur Fläche, unter der 2:1-Grenze: ein **Tonwert, kein Strich**. Tobias hat es
+> angesehen und trägt es mit. ⚠️ **Seine Präzisierung:** Das Hellste, was die ERSTE
+> Überschriftzeile kreuzt, ist die **nahe** Gruppe mit bis zu **2,16 : 1 auf 1920 px** — über der
+> Grenze, mit der der Absatz argumentiert. Am Bild folgenlos (senkrechte Zonenlinien an den
+> Zeilenenden), aber die Begründung im Code ist schmaler als der Sachverhalt → Roadmap 34 (b).
+> **(2) Der Hero-Schnitt ist gelöst** (Roadmap 30 e): Fläche `[data-hero-naht]`, ausgeblendet
+> wird in den **letzten 7 rem der Bühne**, nicht in Feldtiefe — weil die Naht je nach Fenster bei
+> 8,29 bis 12,82 m Feldtiefe liegt und es keine eine Tiefe gibt, die überall vorher liegt.
+> ⚠️ **Die Zahl, mit der er als unlösbar galt, war falsch, und sie stammte aus meinem Auftrag:**
+> „Bühnenunterkante auf 1440 bei y ≈ 533" ist die Unterkante des **Zeichnungskastens**, nicht der
+> Bühne — gemessen **649,8**. Die Folgerung blieb richtig, aus anderem Grund.
+> ⚠️ **Der Befund war größer als gemeldet:** Auf **1920 px** wurde auch der **Bogenscheitel**
+> durchgeschnitten — der Bogen kam von beiden Seiten herunter und hörte mit einer Lücke in der
+> Mitte auf. Behoben.
+> ✅ **Tobias gegen die Live-Fassung gemessen** (nicht gegen einen Eindruck): Kontrast der
+> hellsten Zeichnungsspur an der Naht **1,19–1,83 vorher → 1,01–1,02 nachher**, auf **neun
+> Breiten bis 2560 px**. Der Wert stieg vorher mit der Breite — genau das Muster, das er als
+> „auffälligsten Punkt der Seite" beschrieben hatte.
+> ⚠️ Bemerkenswert an seinem Vorgehen: Er hat Viviens Messskripte **bewusst nicht benutzt** —
+> *„Wer das Messgerät des Gebauten übernimmt, prüft das Gerät mit."*
+>
+> ⚠️ **DER WICHTIGSTE METHODIK-BEFUND, UND ES WAR MEIN PRÜFMASS.** Der von mir übergebene
+> Vorschlag *„an der Naht endet kein Pfad mit sichtbarer Deckkraft"* trug **zweimal nicht**:
+> **(a)** Er ist für genau diesen Defekt **blind** — die neue Fläche liegt **über** der Zeichnung
+> und ändert an ihr keine Deckkraft, keinen Verlaufswert, kein Attribut. Ein Test, der die
+> Deckkraft der Feldlinien liest, misst vor und nach dem Löschen denselben Wert und wäre **grün
+> über dem Defekt, den er bewachen soll**.
+> **(b)** Eine feste Kontrast-Schwelle ist **unmöglich**: ausgeliefert auf 1280 = **1,180**,
+> Defekt auf 900 = **1,178**. Der gute Wert liegt ÜBER dem schlechten; eine Schwelle je Breite
+> wäre die sechste Auflage von „gesetzte Zahl gegen Restbetrag".
+> **Gemessen wird jetzt der ABFALL derselben Linie über die letzten 120 px**, in der Währung des
+> jeweiligen Fensters, ohne eine einzige Zahl je Breite: ausgeliefert **92,7–97,7 %**, im Defekt
+> **6,3–12,7 %** — Faktor sieben. Dazu eine Gegenschranke gegen „Band einfach länger machen", die
+> **nur mobil** gilt, und das ist gemessen: auf 1600 ist die Luft zum Bogenscheitel bereits
+> −28,3 px, auf 1920 −110,6; auf 320–430 konstant +25,0.
+> ✅ **Fünf Gegenproben an der Quelle** (nicht zur Laufzeit weggeschaltet): Element entfernt →
+> **12 von 12 rot**, und die alte Suite blieb dabei bei 300 grün — sie war **komplett blind**.
+> Suite jetzt **312 grün / 5 rot / 1 übersprungen**.
+> ⚠️ **Kais Nebenbefund zur Größe des Eingriffs:** 785 geänderte Zeilen, aber **die gesamte
+> funktionale Änderung sind DREI Zeilen** (eine CSS-Regel, eine Konstante, ein `<div>`).
+> `HeroCourt.js` und `Aussenlinie.js` sind reine Kommentaränderungen, Code zeichengleich.
+> ⚠️ **Zwei Doku-Befunde, offen:** Die Abstandszahlen zum Bogenscheitel in `HeroStage.js` sind
+> durchgehend **142 px zu groß**; und „rund 40 % Kontrastabfall" in `HeroCourt.js` reproduziert
+> sich auf 1024/1100 **nicht** (der Strich ist dort schmaler als ein Bildpunkt). Die tragenden
+> Aussagen bleiben beide richtig.
+> ✅ **Live nachgemessen (22.08.2026):** Naht auf 360/1440/1920 vorhanden, Ausblendband konstant
+> 112 px, 16 Feldpfade, 16 Routen je 200, 0 Laufzeitfehler.
+>
+> ✅ **DER GOOGLE-LOGIN IST ERSTMALS ECHT DURCHGESPIELT** (21.08.2026, von Patrick selbst
+> geklickt — ich gebe keine Zugangsdaten ein). Vier Ergebnisse:
+> **(1)** Normale Anmeldung funktioniert; **kein neues Konto** angelegt, das bestehende korrekt
+> erkannt (nachgemessen: 5 Konten mit `googleId` auf Prod, 0 neu).
+> **(2)** Der **Flyer-Weg** `?next=/team/create&src=flyer-test` funktioniert — **genau der Weg,
+> den weder Kai noch Tobias je durchspielen konnten.**
+> **(3)** Die **Altersabfrage kommt VOR** der Google-Weiterleitung; die Selbstauskunft ist nicht
+> umgehbar.
+> **(4)** Mit bestehendem Konto landet man auf `/team/admin` statt `/team/create` — **kein
+> Fehler**: `app/team/create/page.js:33` leitet Team-Admins weiter, damit niemand versehentlich
+> einen Zweitverein gründet. Tobias ist über dieselbe Stelle gestolpert.
+> ⚠️ **Offene Rückfrage an Patrick:** Kam dabei ein **Hinweis**, oder war die Weiterleitung stumm?
+> ✅ **Zusätzlich live geprüft (nur lesend):** Die Weiterleitungs-Absicherung greift auch im
+> Google-Weg — das Ziel liegt im Cookie `g_oauth_next`, und `https://evil.com`, `//evil.com`,
+> `/\evil.com`, `javascript:` werden **verworfen**, während `/team/create` und
+> `/spieler?q=max mustermann` durchkommen. **Damit sind drei der fünf Stellen der
+> Weiterleitungs-Absicherung erstmals live belegt.**
+>
+> ✅ **ENTSCHEIDUNG PATRICK (21.08.2026): DIE BEISPIELDATEN BLEIBEN — vorerst.**
+> *„Die Test User sollen eine lebendige und laufende Website sehen."* · *„Likes und Kommentare
+> nicht auf Null setzen. Die Tester sollen die Funktion auch sehen."*
+> ⚠️ **Roadmap 2 ist damit VERTAGT, nicht erledigt** (er sagte „erstmal") — der Purge bleibt für
+> den Cutover stehen. Die Abwägung wurde einmal vorgelegt und abgelehnt: 4.073 Seed-Likes gegen
+> 16 echte; der Testphase-Banner deckt *Inhalte* ab, nicht *Zustimmungszahlen*. Ein Vorschlag
+> „Zahlen plausibel machen statt löschen" (2–6 statt 40) liegt unbeantwortet — **nicht erneut
+> vorlegen**, außer Patrick fragt.
+>
 > ✅ **DEPLOYT: `ea982c4`** (21.08.2026) — **DIE SEITE HAT JETZT ZWEI KÖRBE, und der Ball
 > fliegt bewusst NICHT in den zweiten.** Vier Commits: `34dd22f` (Vivien, das gespiegelte
 > Feldende), `492e465` (Kai, Wächter neu gebaut), `cdb8065` + `ea982c4` (zwei Prüfmaß-Korrekturen
@@ -1204,7 +1285,7 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `ea982c4` (aktuell live) → `cdb8065` → `492e465` → `34dd22f` (Feldende,
+> **Rollback-Kette:** `3181ad2` (aktuell live) → `6348625` → `b88bbd3` (nur Doku) → `ea982c4` → `cdb8065` → `492e465` → `34dd22f` (Feldende,
 > vor den Wächtern) → `0f2a933` (nur Doku) → `17bb00a` → `8e63cf6` (nur Doku) → `c4982bd` → `c5cbf6f` → `fb23317` → `0da80c7` (Dribbelweg,
 > vor den Gate-Befunden) → `70c36ba` (letzter Stand vor der Ball-Reise) → `76406fb` → `571931c` (Feld) → `b3487a8` →
 > `d4c847a` (Leiste, erster Schritt) → `070a1e7` (letzter Stand vor Feld und Leiste) → `04ba621` → `07150cf` (nur Werkzeug) → `d2cfa47` → `35b8bc0` → `d841c4b` → `bd99263` (Dunk, vor den
