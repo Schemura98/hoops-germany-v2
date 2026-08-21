@@ -2000,22 +2000,21 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     und sie ist der einzige Weg zurück zur Startseite. Vorbestehend, gehört zu 32 (b). (→ Vivien)
 
 34. **Offen aus der Feldende-Runde (21.08.2026)** — nichts davon blockiert:
-    ⚠️ **(g) und (h) liegen seit dem Deploy von `ea982c4` bei Vivien** (Tobias' Auflage zum
-    Augenurteil, von Patrick freigegeben):
-    **(g) Die Dreipunktlinie kreuzt die Tastenbeschriftungen bei Deckkraft 0,85** auf 768–1100 px.
-    Das Kreuzen ist erlaubt und begründet — kühle Linien dürfen hinter Text durchlaufen, der Hero
-    macht dasselbe. **Das Problem ist die Begründung im Code:** `HeroCourt.js` sagt, die Linie sei
-    dort „nicht mehr laut". **Bei 0,85 trägt der Satz nicht.** Zwei ehrliche Wege: die Linie wird
-    dort tatsächlich leiser, oder der Satz wird durch das ersetzt, was gilt. ⚠️ Es geht über die
-    Tasten — die **einzige Handlungsaufforderung der Seite**; der Kontrast der Beschriftung gehört
-    nachgerechnet, nicht geschätzt.
-    **(h) Der Hero-Schnitt (identisch mit 30 e), laut Tobias „im Vergleich der auffälligste Punkt
-    der Seite":** Seitenlinie endet hart, Außenlinie beginnt **152 px versetzt auf derselben
-    Höhe**. Am Feldende ist es gelöst, weil das ferne Feld vor der Naht auf Deckkraft null fällt —
-    dort gibt es nichts zu beschneiden. Am Hero geht dasselbe nicht (s. 30 e): Die Bühnenunterkante
-    fällt je nach Breite auf eine ANDERE Koordinate der Zeichnung, ein früh genug greifender
-    Ausblendpunkt löscht mobil den Bogenscheitel. **Ein begründetes Nein ist zulässig** — dann
-    bleibt der Befund protokolliert statt behoben.
+    ✅ **(g) und (h) SIND AM 21.08.2026 ENTSCHIEDEN** (Vivien, `54bc039`, committet, NICHT
+    deployt — Details in den beiden ✅-Blöcken oben in Abschnitt 0):
+    **(g) Die Dreipunktlinie über dem Hero-Text bleibt bei 0,85; die Begründung im Code ist
+    ersetzt.** Gemessen an echten Bildpunkten ist sie dort **1,61–1,85 : 1** gegen die Fläche,
+    also unter der 2 : 1-Grenze — ein Tonwert, kein Strich; der Text hält 9,41–10,83 : 1.
+    ⚠️ Zwei Korrekturen am Befund: Es sind auf 768–1100 px die **Überschriften**, nicht die
+    Tastenbeschriftungen (die einzige dort getroffene Taste ist deckend orange; durch eine
+    Beschriftung läuft die Linie nur angemeldet auf 1920 px). Und der Satz, der wirklich nicht
+    trug, war nicht „dort nicht mehr laut", sondern das danebenstehende **„Sie kreuzen den Text
+    nicht"**.
+    **(h) Der Hero-Schnitt ist gelöst** — und die Zahl, mit der er für unlösbar gehalten wurde,
+    war die Unterkante des **Zeichnungskastens** statt der Bühne (1440: 649,8 statt 533).
+    Ausgeblendet wird über die letzten 7 rem der **Bühne** statt über eine Feldtiefe.
+    ⚠️ Die Schranke „das Ausblenden berührt den Bogenscheitel nie" ist unerfüllbar und durch die
+    **mobile** ersetzt; Begründung oben.
     **(a)** ⚠️ **`tests/e2e/abschluss-korb.spec.mjs` ist rot und muss neu geschrieben werden**
     (→ Kai). Der Gegenstand (`KorbRuhe.js`) ist ersetzt; zwei der drei Zusicherungen leben
     weiter. Vollständige Prüfmaße samt Gegenproben stehen oben im Deploy-Block.
