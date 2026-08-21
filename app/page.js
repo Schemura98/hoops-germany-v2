@@ -49,7 +49,10 @@ export default function LandingPage() {
         {/* So funktionierts / Nächste Schritte – je nach Login-Status */}
         <LandingHowItWorks />
 
-        {/* CTA – nur für ausgeloggte Besucher */}
+        {/* Abschluss-Block – seit 21.08.2026 in BEIDEN Anmeldezuständen (hier
+            stand „nur für ausgeloggte Besucher"). Er ist der Empfänger des
+            Balls: Wäre er für Angemeldete weiterhin weg, endete die Ballreise
+            für jeden angemeldeten Besucher im Nichts. */}
         <LandingCTA />
       </main>
 

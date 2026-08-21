@@ -80,8 +80,14 @@ export default function LandingHowItWorks() {
 
     return (
       <section className="relative bg-navy-950 py-20 px-4">
-      <Aussenlinie />
-        <div className="max-w-5xl mx-auto text-center">
+        <Aussenlinie />
+        {/* ⚠️ `relative` ist Pflicht, nicht Geschmack (Befund Kai B9): Die
+            `Aussenlinie` liegt als `absolute inset-0` im Abschnitt. Ohne eigenen
+            Stapelkontext hier malt sie ÜBER den Inhalt statt darunter — auf
+            390 px liegt die Linie bei x = 12, der Inhalt beginnt bei 16. Heute
+            folgenlos, weil dazwischen nichts steht; die drei anderen Abschnitte
+            der Startseite tragen das `relative` alle. */}
+        <div className="relative max-w-5xl mx-auto text-center">
           <h2 className="font-display uppercase tracking-tight text-3xl md:text-4xl font-black mb-4 text-paper-50">
             Deine nächsten Schritte
           </h2>
@@ -122,7 +128,8 @@ export default function LandingHowItWorks() {
   return (
     <section className="relative bg-navy-950 py-20 px-4">
       <Aussenlinie />
-      <div className="max-w-4xl mx-auto text-center">
+      {/* `relative` – gleiche Begründung wie im angemeldeten Zweig oben. */}
+      <div className="relative max-w-4xl mx-auto text-center">
         <h2 className="font-display uppercase tracking-tight text-3xl md:text-4xl font-black mb-4 text-paper-50">So funktionierts</h2>
         <p className="text-mist-400 mb-16">In 3 einfachen Schritten dabei</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

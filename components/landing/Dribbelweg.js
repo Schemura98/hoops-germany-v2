@@ -29,14 +29,57 @@ import { BallPfade, BALL_PX, BALL_R, rollwinkel } from "@/components/landing/Dri
 // (01 Text links / Karte rechts, 02 umgekehrt); dazwischen steht ein Kanal,
 // den das Flex-Layout erzeugt und den kein Inhalt betreten kann.
 //
-// ⚠️ NACHGEMESSEN, NICHT ANGENOMMEN (21.08.2026, `tmp/vivien-kanal/messen.mjs`,
-// gezeichnete Flächen statt Kästen, alle sechs Zeilen):
-//     768–860 px : 107 px schmalste Stelle
-//     900–1024   : 116–153 px
-//     1180–2560  : 227–229 px  (ab 1184 friert `max-w-6xl` das Layout ein,
-//                               danach ändert sich nur noch die Fenstermitte)
-// Der Ball ist 20 px breit. Selbst an der schmalsten gemessenen Stelle bleiben
-// ihm 43 px Luft auf JEDER Seite. Der alte Apparat hat um 2,65 px gestritten.
+// ══ ⚠️ ES GIBT ZWEI KANÄLE, UND HIER STAND DER FALSCHE (21.08.2026) ════════
+//
+// Hier stand: „768–860 px: 107 px schmalste Stelle … dem 20-px-Ball bleiben an
+// der engsten Stelle 43 px Luft auf JEDER Seite." Beide Gate-Prüfer haben
+// nachgemessen und sind auf verschiedene Zahlen gekommen — Kai auf 107, Tobias
+// auf 64. Beide hatten recht, weil sie VERSCHIEDENE GRÖSSEN gemessen haben:
+//
+//   Kanal (gezeichnet) — von der gezeichneten Textkante zur Grafik.
+//                        Auf 768–860 px: 107 px. Kai hat das gemessen.
+//   Kanal (Layout)     — von der SPALTENKANTE zur Grafik.
+//                        Auf 768–860 px: 64 px. Tobias hat das gemessen.
+//                        ⚠️ UND NUR DIESE GRÖSSE BENUTZT DER CODE UNTEN.
+//
+// Die Differenz ist der ausgefranste rechte Rand der Textspalte: Die Zeilen
+// enden im Mittel 43 px vor der Spaltenkante. Der Code misst `offsetWidth` der
+// Spalte, nicht die Zeilen — bewusst, denn Zeilenlängen ändern sich mit jedem
+// Umbruch, und genau daran hing der Apparat aus Roadmap 20–20h.
+//
+// ⚠️ Der Fehler war nicht die Messung, sondern die ABLEITUNG — und er ist ein
+// Musterfall für `docs/MUSTER-ZAHLEN-DIE-LUEGEN`: eine richtig gemessene Zahl,
+// aus der eine falsche Folgerung gezogen wird. Zwei Schritte gingen schief:
+//   1. Die 107 (gezeichnet) wurde auf eine Geometrie angewandt, die mit 64
+//      (Layout) rechnet.
+//   2. „43 px auf JEDER Seite" unterstellt einen mittig laufenden Ball. Der
+//      Ball läuft aber bei `NEIGUNG` = 0,35 des Kanals, also ABSICHTLICH
+//      außermittig, zur Textseite hin.
+// Der wahre Wert war 12,85 px — nicht 43.
+//
+// ⚠️ Was den Fehler unsichtbar gemacht hat, ist ein Zahlenzufall: 107 − 64 = 43
+// (der Ausfransungs-Rest) und (107 − 20) / 2 = 43,5 (die falsche Ableitung).
+// Zwei verschiedene 43. Wer die Zeile las, fand sie bestätigt.
+//
+// ── Und Tobias' 9,6 px? Auch richtig, und auch eine andere Größe. ──────────
+// Der Ball ist ein gedrehtes `<g>`. `getBoundingClientRect()` liefert davon die
+// achsparallele HÜLLBOX des gedrehten Inhalts — gemessen bis 25,45 px breit,
+// während der Ball 20 px hat. Wer `bbox.width / 2` als Radius nimmt, misst
+// 3,2 px zu wenig Luft: 12,85 − 3,2 = 9,65. Das ist Roadmap 20d (b) im neuen
+// Kostüm — Hüllkörper statt Kontur.
+//
+// ══ DER STAND NACH DER KORREKTUR ═══════════════════════════════════════════
+// Der Flex-Abstand ist von `md:gap-16` auf `md:gap-20` gegangen (Entscheidung
+// Vivien, 21.08.2026). ⚠️ WICHTIG FÜR JEDEN, DER DAS LAYOUT ANFASST: Solange
+// die Grafik ihre Spalte ausfüllt, IST der Kanal genau dieser Abstand — wer
+// `md:gap-*` in `LandingFeatures.js` ändert, ändert den Kanal.
+// Nachgemessen (`tmp/vivien-nach/kontur-messen.mjs`, Kontur gegen gezeichnete
+// Fläche, 81 Scrollpunkte je Breite):
+//     768 / 800 / 860 px : Kanal 80  → 18,57 px Luft   (vorher 64 → 12,85)
+//     900                : Kanal 85  → 20,26 px
+//     1024               : Kanal 120 → 32,28 px
+//     1280 / 1440 / 1920 : Kanal 200 → 59,79 px
+// Der alte Apparat hat um 2,65 px gestritten.
 //
 // ── Und was passiert, wenn der Kanal doch einmal zu schmal wird? ───────────
 // Dann wird der Weg NICHT GEZEICHNET (`KANAL_MIN`). Kein Ausweichen, kein
@@ -69,9 +112,6 @@ import { BallPfade, BALL_PX, BALL_R, rollwinkel } from "@/components/landing/Dri
 // `innerHeight / 2`.
 const NAVBAR_HOEHE = 64;
 
-// Unter diesem Kanal wird gar nicht gezeichnet. Drei Balldurchmesser — der
-// Ball soll in seiner Spur stehen, nicht sie ausfüllen.
-const KANAL_MIN = 3 * BALL_PX;
 
 // Vor der ersten und nach der letzten Station läuft der Weg noch ein Stück
 // weiter, damit der Ball nicht aus dem Nichts einsetzt und nicht im Nichts
@@ -81,16 +121,73 @@ const VORLAUF = 48;
 const klemm = (v, min, max) => Math.min(max, Math.max(min, v));
 
 // Wie weit im Kanal die Station liegt, von der TEXT-Seite aus gemessen.
-// 0,5 wäre die Kanalmitte — angesehen war das auf 1440 px ein fast gerader
-// Strich mit einer Andeutung von S: Der Kanal ist auf jeder Breite gleich
-// breit, seine Mitte wandert also nur um ±32 px. Ein Dribbling ist das nicht.
 // 0,35 zieht den Ball an die Seite, auf der gerade der Text steht — also
-// dorthin, wo der Leser ohnehin hinsieht — und verdoppelt den Ausschlag auf
-// ±61 px, ohne den Sicherheitsabstand anzutasten: Bei 192 px Kanal bleiben
-// zwischen Ballrand und Textkante 57 px.
+// dorthin, wo der Leser ohnehin hinsieht.
 // ⚠️ Der Wert ist ein ANTEIL des Kanals, keine Pixelzahl. Damit schrumpft der
-// Ausschlag auf schmalen Fenstern von selbst mit, statt in den Text zu laufen.
+// Abstand zum Text auf schmalen Fenstern nicht ins Negative, sondern mit.
+//
+// ⚠️ WAS HIER STAND, WAR EINE ZAHL ZU VIEL UND EINE EINHEIT DANEBEN
+// (21.08.2026): „verdoppelt den Ausschlag auf ±61 px". Nachgemessen ist der
+// Ausschlag Spitze-zu-Spitze und breitenabhängig, und die 61 war die halbe
+// Wahrheit in doppelter Bedeutung — sie meinte den ganzen Ausschlag, nicht die
+// Auslenkung nach jeder Seite.
+//
+// Gemessen (`tmp/vivien-nach/ausschlag.mjs`, Ballmitte über den ganzen Weg):
+//     768 px  : 24 px Spitze-zu-Spitze  (±12)
+//     900 px  : 20 px                   (±10)
+//    1024 px  : 12 px                   (±6)   ← praktisch eine Gerade
+//    1440 px  : 116 px                  (±58)
+//
+// ⚠️ UND DAS IST NICHT MONOTON — das ist der eigentliche Befund. Der Ausschlag
+// setzt sich aus ZWEI Beträgen zusammen, die gegeneinander laufen:
+//   1. Die Auslenkung IM Kanal: 0,3 · Kanalbreite (Station bei 0,35 bzw. bei
+//      0,65, je nachdem, auf welcher Seite der Text steht). Wächst mit der
+//      Breite.
+//   2. Die Verschiebung DES Kanals: Sobald `max-w-md` der Textspalte greift
+//      (ab rund 1000 px), ist die Zeile nicht mehr symmetrisch — die gespiegelte
+//      Zeile schiebt den ganzen Kanal zur anderen Seite. Wirkt der ersten
+//      entgegen.
+// Bei rund 1024 px heben sich beide fast auf. Nur (1) ist eine Stellschraube,
+// (2) fällt aus dem Layout an — dieselbe Unterscheidung, an der sich Roadmap
+// 20b schon einmal aufgehängt hat („eine Stellschraube und ein Restbetrag als
+// dieselbe Größe behandeln"). Wer den Ausschlag bei 1024 vergrößern will, muss
+// `NEIGUNG` senken und dafür Luft zum Text bezahlen — bei 0,25 wären es auf
+// 768 px genau die 10 px Untergrenze, also kein Spielraum mehr.
+// Bewusst so gelassen: Ein gerader Strich auf einer Breite ist eine schwächere
+// Aussage, ein Ball an der Textkante wäre ein Defekt.
 const NEIGUNG = 0.35;
+
+// ⚠️ Hier stand `KANAL_MIN = 3 * BALL_PX` (60 px) mit der Begründung „der Ball
+// soll in seiner Spur stehen, nicht sie ausfüllen". Die Zahl war gegriffen, und
+// sie hat gegen die falsche Größe geprüft:
+//   · Kai las den Kommentar (107 px Kanal) und schloss, die Regel könne auf
+//     KEINER Breite feuern — tote Sicherheit.
+//   · Tobias maß den echten Wert (64 px) und sah 4 px Abstand zur Schwelle —
+//     eine Regel mit Haarauslöser, die bei jeder Layout-Änderung den GANZEN
+//     Weg stumm verschwinden lässt.
+// Beide Schlüsse stimmten für die Zahl, die sie vor sich hatten.
+//
+// Geprüft wird jetzt die Größe, die tatsächlich klemmt: die LUFT zwischen
+// Ballkontur und Textkante. Sie ist es, die den Defekt beschreibt, den die
+// Regel verhindern soll — „der Ball berührt Text" —, und sie fällt nicht vom
+// Himmel, sondern aus der Geometrie:
+//     Luft = NEIGUNG · Kanal − Ballradius   ≥   LUFT_MIN
+// nach Kanal aufgelöst ergibt sich die Schwelle von selbst. Wer `NEIGUNG`
+// ändert, ändert sie mit — es gibt keine zweite Stelle nachzuziehen.
+//
+// ⚠️ Bindend ist immer die TEXTSEITE, weil `NEIGUNG` < 0,5 den Ball dorthin
+// zieht; zur Grafik bleibt bei 0,65 · Kanal ohnehin mehr. Wer `NEIGUNG` über
+// 0,5 setzt, dreht das um und muss diese Zeile mitdrehen.
+//
+// LUFT_MIN = 10 px ist keine neue Zahl, sondern das Prüfmaß, das für den
+// Hero-Ball schon gilt (CLAUDE.md Roadmap 20d (b): „kürzester Abstand der
+// KONTUREN ≥ 10 px"). Zwei Bälle auf einer Seite, ein Maß.
+const LUFT_MIN = 10;
+// Ballradius als KONTUR: der gezeichnete Kreis hat r = 9, die Naht trägt an den
+// Polen 0,55 halbe Strichbreite auf. `BALL_R` (= 10, die halbe Kastenbreite)
+// ist der konservativere Wert und wird deshalb genommen — die Schwelle feuert
+// dadurch rund 1,3 px früher als nötig, nie später.
+const KANAL_MIN = (LUFT_MIN + BALL_R) / NEIGUNG;
 
 // Weiche Überblendung zwischen zwei Stationen. Bewusst kein linearer Zickzack:
 // Ein Ball, der die Richtung in einem Punkt bricht, sieht aus, als sei er
@@ -328,19 +425,22 @@ export default function Dribbelweg({ labels = [] }) {
       requestAnimationFrame(setzen);
     };
 
-    const neuVermessen = () => {
-      vermessen();
-      anstossen();
-    };
-
-    vermessen();
-    setzen();
-
     // ⚠️ Bei reduzierter Bewegung wird NICHT gescrollt-mitgerechnet, aber der
     // Weg wird trotzdem vollständig gezeichnet und der Ball an sein Ende
     // gesetzt: Ein Standbild, das den ganzen Weg zeigt und den Ball dort, wo
     // er ankommt. Ein leerer Weg wäre eine Zeichnung ohne Aussage.
-    if (ruhig) {
+    //
+    // ⚠️ DASS DAS EINE EIGENE FUNKTION IST, IST DER FIX ZU KAIS BEFUND B6.
+    // Vorher stand dieser Block als Einmal-Zweig direkt im Effekt, und
+    // `neuVermessen` rief in JEDEM Fall `anstossen()` — also die
+    // Scroll-Rechnung. Folge: Bei reduzierter Bewegung sprang der Ball nach
+    // einer Fenster-Größenänderung (mobil: nach dem Drehen) auf die Lesehöhe,
+    // bekam eine Drehung, und der Weg war nur zum Teil gezeichnet — und blieb
+    // so, FÜR IMMER, weil in diesem Modus kein Scroll-Zuhörer läuft.
+    // Genau dasselbe Muster war in `BallPass.js` abgesichert (dort fragt die
+    // Setz-Funktion `ruhig` selbst ab). Derselbe Autor, dieselbe Datei-Familie,
+    // einmal abgesichert und einmal nicht.
+    const standbild = () => {
       const geo = geoRef.current;
       if (geo && ballRef.current) {
         const y = geo.yBis;
@@ -357,9 +457,31 @@ export default function Dribbelweg({ labels = [] }) {
         const b = bahnRef.current.offsetWidth || 0;
         ballMobilRef.current.style.transform = `translate3d(${(b - BALL_R).toFixed(1)}px, -50%, 0)`;
       }
+      // ⚠️ Und die Beschriftung muss mit. Der Balken steht auf 100 %, der Ball
+      // am Ende — daneben „1 / 6 · Aufstellung" zu schreiben, wäre eine Zahl,
+      // die lügt (`docs/MUSTER-ZAHLEN-DIE-LUEGEN`): volle Anzeige, erster
+      // Schritt. Das Standbild zeigt den GANZEN Weg, also nennt es auch dessen
+      // Ende. Beim mitlaufenden Ball macht `setzen()` das schrittweise.
+      if (beschriftungRef.current && labels.length > 0) {
+        beschriftungRef.current.textContent =
+          `${labels.length} / ${labels.length} · ${labels[labels.length - 1]}`;
+        aktivRef.current = labels.length - 1;
+      }
+    };
+
+    const neuVermessen = () => {
+      vermessen();
+      if (ruhig) standbild();
+      else anstossen();
+    };
+
+    vermessen();
+    if (ruhig) {
+      standbild();
       window.addEventListener("resize", neuVermessen);
       return () => window.removeEventListener("resize", neuVermessen);
     }
+    setzen();
 
     window.addEventListener("scroll", anstossen, { passive: true });
     window.addEventListener("resize", neuVermessen);

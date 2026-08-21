@@ -4812,3 +4812,146 @@ Anmelde-Ausweis liegt im Browser, nicht in einem Cookie.
 
 **Live nachgemessen (21.08.2026):** 19 Feldelemente über volle Bildbreite · Wortmarke 123 px ·
 Seitenbreite = Fensterbreite · 16 Routen je 200 · 0 Laufzeitfehler.
+
+---
+
+## 21.08.2026 — Der Dribbelweg, der Pass und die Zahl, die zwei Prüfer gegeneinander stellte
+
+**Commits:** `0da80c7` (Bau) und die Nacharbeit dieses Eintrags. **Nicht gepusht, nicht
+deployt** — beides war nicht beauftragt. Live läuft weiterhin `7da3905` (18.08.2026).
+
+**Auftrag Patrick:** „Beim Runterscrollen mit dem orangenen Ball an den Funktionen
+vorbeidribbeln, die feinen weißen Außenlinien des Feldes über die ganze Seite ziehen, am Ende
+wird der Ball zur Registrierung gepasst — bei eingeloggten Nutzern zum Profil oder Team."
+
+**Neu:** `components/landing/Dribbelweg.js` (der Weg im Mittelkanal), `DribbelBall.js` (der
+Ball als reine Geometrie), `BallPass.js` (der Pass am Abschluss), `Aussenlinie.js` (die
+Seitenlinien über alle Abschnitte). **Entfallen:** `FeatureProgressRail.js`, `HeroGlyphs.js`
+und vier Testdateien. `endmarke-einpassung.spec.mjs` hat den Gegenstand gewechselt, nicht den
+Zweck. Netto 315 Zeilen weniger.
+
+**Die Regel, die alles trägt:** Der Ball läuft weder vor noch hinter dem Text. Er läuft in
+einer Spur, die das Flex-Layout selbst frei hält. Damit entfällt der Ausweich-Apparat, der die
+Vorgängerin acht Roadmap-Punkte gekostet hat (20 bis 20h).
+
+### Was die beiden Gates gefunden haben — und was daraus wurde
+
+**1. Der Blocker: „im Bild" ist nicht „erreichbar"** (Tobias B1).
+Der Pass wird in Anteilen der Fensterhöhe gefahren (Ziel-Oberkante von 88 % auf 58 %), damit
+die Landung per Konstruktion im Bild liegt. Sie liegt auch im Bild — sie wird nur nicht
+erreicht: Damit die Taste auf 58 % steigt, muss unter ihr genug Seite zum Scrollen übrig sein.
+Gemessen sind das **385 px** (Rest des Abschlussblocks plus Fußzeile), und diese Zahl wächst
+nicht mit dem Fenster. Ab rund **917 px Fensterhöhe** endet die Seite mitten im Flug.
+Auf dem iPad Pro 12,9" (1024×1366) blieb der Pass bei 54 % stehen, der Ball überlappte die
+Taste um 15,8 px (angemeldet 12,7).
+- ⚠️ Zum dritten Mal dieselbe Achse: Breiten geprüft, der Ausfall hing an der Höhe.
+- Behoben, ohne die Bühne wieder ins Dokument zu verlegen: Die Endmarke ist die tiefere von
+  „58 % der Fensterhöhe" und „so hoch, wie die Taste am Seitenende überhaupt kommt" (plus
+  24 px Reserve, damit der Pass nicht auf dem letzten Scrollpixel fertig wird).
+- Nachgemessen: **24 von 24** Fenster-/Anmeldekombinationen, Lücke 14,2–16,1 px, Deckkraft 1,
+  bis hinauf zu 1024×2200. Gegenprobe mit abgeklemmter Klemmung reproduziert Tobias' Zahlen
+  auf die Nachkommastelle: 820×1180 → 6,1 · 834×1194 → 5,4 · 1024×1366 → Überlappung.
+- ⚠️ Die Messung darf ihre eigene Stellgröße nicht verändern: Der Ball liegt `absolute` in
+  einem Abschnitt mit `overflow-hidden` und trägt zur Dokumenthöhe nichts bei. Beobachtet wird
+  zusätzlich der ganze Seitenkörper — die Dokumenthöhe ändert sich auch, wenn weiter oben der
+  Nachrichten-Block nachlädt.
+
+**2. Die Zahl, in der sich die beiden Gates widersprachen — und beide hatten recht.**
+Im Kopf von `Dribbelweg.js` stand: „Kanal nie schmaler als 107 px; dem 20-px-Ball bleiben
+43 px Luft auf jeder Seite." Kai maß 107 nach und schrieb „stimmt auf den Pixel", Tobias maß
+64. Es sind **zwei verschiedene Größen**:
+- **Kanal (gezeichnet)** = von der gezeichneten Textkante zur Grafik → 107 px.
+- **Kanal (Layout)** = von der Spaltenkante zur Grafik → 64 px. **Nur damit rechnet der Code.**
+
+Der Fehler war nicht die Messung, sondern die **Ableitung** — Musterfall für
+`docs/MUSTER-ZAHLEN-DIE-LUEGEN-2026-08-13.md`. Zwei Schritte gingen schief: die 107 wurde auf
+eine Geometrie angewandt, die mit 64 rechnet; und „43 px auf jeder Seite" unterstellt einen
+mittig laufenden Ball, obwohl er absichtlich außermittig läuft (35 % des Kanals, zur
+Textseite). Der wahre Wert war **12,85 px**.
+
+> ⚠️ **Was den Fehler unsichtbar gemacht hat, ist ein Zahlenzufall:** 107 − 64 = 43 (der
+> ausgefranste Textrand) und (107 − 20) / 2 = 43,5 (die falsche Ableitung). Zwei verschiedene
+> 43. Wer die Zeile las, fand sie bestätigt.
+
+Und Tobias' dritte Zahl (9,6 px kleinster Abstand Ball ↔ Schrift) war ebenfalls richtig und
+ebenfalls etwas anderes: Der Ball ist eine **gedrehte** Zeichnung, seine achsparallele
+Hüllbox misst bis **25,45 px** statt 20. Wer die halbe Hüllbox als Radius nimmt, misst 3,2 px
+zu wenig Luft — 12,85 − 3,2 = 9,65. **Hüllkörper statt Kontur**, Roadmap 20d (b) im neuen
+Kostüm.
+
+**3. `KANAL_MIN` — eine gegriffene Zahl mit Haarauslöser.**
+60 px gegen einen echten Kanal von 64. Kai hielt die Regel für unerreichbar (er las 107),
+Tobias sah 4 px Abstand zur Schwelle. Beide Schlüsse stimmten für die Zahl, die sie vor sich
+hatten — und beide Zustände sind schlecht: Eine Regel, die nie feuert, ist tote Sicherheit;
+eine, die bei 4 px Layout-Änderung feuert, lässt den **ganzen Weg stumm verschwinden**.
+Die Schwelle wird jetzt aus der Größe **gerechnet, die tatsächlich klemmt**:
+`(LUFT_MIN + Ballradius) / NEIGUNG`, mit `LUFT_MIN` = 10 px — dasselbe Prüfmaß, das für den
+Hero-Ball schon gilt. Wer die Neigung ändert, ändert die Schwelle mit.
+- Gegenprobe: mit `LUFT_MIN` = 25 (Schwelle 100) wird auf 768/900 px **kein** Weg gezeichnet,
+  auf 1024/1440 schon. Die Regel ist erreichbar.
+- Dazu eine Layout-Entscheidung (Vivien): Spaltenabstand `md:gap-16` → `md:gap-20`.
+  ⚠️ **Solange die Grafik ihre Spalte ausfüllt, IST der Kanal genau dieser Abstand.** Luft
+  zum Text auf 768–860 px damit **12,85 → 18,57 px**; Abstand zur Abschalt-Schwelle 4 → 23 px.
+
+**4. Der Pass flog durch Überschrift und Fließtext** (Kai B1) — 18–23 % des Fluges auf
+Desktop-Breiten, 43–48 % mobil. Damit galt die Regel, die den ganzen Umbau trägt, ausgerechnet
+am **Ziel** der Reise nicht. Kai stellte es zur Wahl: Ausnahme hinschreiben oder umbauen.
+**Entschieden: umbauen** — eine Ausnahme an der Stelle, an der der Ball am längsten liegen
+bleibt, hätte die Zusicherung entwertet.
+Der Ball kommt jetzt **waagerecht von links** ins Bild und bleibt in dem Band, in dem er
+ohnehin zur Ruhe kommt: neben der mittig gesetzten Tastenreihe (Desktop) bzw. in den 40 px
+Abstand über der Taste (mobil). Beide Bänder hält das Layout frei.
+- Nachgemessen **0 von 40** Textberührungen auf fünf von sechs Fenstern.
+- ⚠️ **Eine Ausnahme bleibt, gemessen und benannt:** 390×844 angemeldet, 2 von 40 — der Absatz
+  darüber steht dann noch in seiner Einblendung und damit 6–18 px tiefer als sein Layoutkasten.
+  Nach ~200 ms vorbei. Nicht behoben: Die Abhilfe würde den Ball an den Laufzeitzustand einer
+  fremden Animation koppeln.
+- Mitgeändert: Die Ruhelage entscheidet sich jetzt am **Anlauf** (≥ 200 px), nicht am Platz —
+  auf 768 px blieben links der Taste 57 px sichtbarer Weg, ein Antippen statt eines Passes.
+- Die Drehung folgt `rollwinkel()` statt einer freien Zahl (`e * 200`) — dieselbe Rechnung wie
+  auf dem Dribbelweg, die ganze Seite spricht eine Bewegungssprache.
+- Die Bewegungskurve ist quadratisch statt kubisch: kubisch legte **91 % der Strecke in die
+  erste Hälfte** des Scrollfensters, die Ankunft fand in einer Phase ohne sichtbare Bewegung
+  statt.
+- ⚠️ Nebenbefund: Der Kommentar behauptete, der Ball komme „von der Seite, aus der Richtung,
+  in die der Dribbelweg zuletzt zeigte". Er startete mittig auf der Taste — und zwischen
+  letztem Dribbelpunkt und Abschluss-Block liegen zwei ganze Abschnitte.
+
+**5. Reduzierte Bewegung plus Größenänderung = dauerhaft kaputt** (Kai B6). Wer „Bewegung
+reduzieren" eingestellt hat und das Fenster ändert (mobil: das Gerät dreht), bekam den Ball
+auf die Lesehöhe gesetzt, mit Drehung, den Weg nur zum Teil gezeichnet — **und das blieb so**,
+weil in diesem Modus kein Scroll-Zuhörer läuft. `BallPass.js` war gegen dasselbe Muster
+abgesichert, `Dribbelweg.js` nur für den mobilen Teil.
+- Gegenprobe mit zurückgedrehtem Fix: Ball springt von y = 2183 auf y = 218, Deckkraft 0, Weg
+  ungezeichnet, Beschriftung zurück auf „1 / 6". Mit Fix: unverändert.
+- Mitgefunden: Im Standbild stand der mobile Fortschrittsbalken auf 100 % und daneben
+  „1 / 6 · Aufstellung" — volle Anzeige, erster Schritt. Jetzt „6 / 6 · Nachspielzeit".
+
+**6. Kleinigkeiten.** `LandingHowItWorks.js` fehlte in beiden Zweigen das `relative` an der
+Inhaltsfläche — die Außenlinie malte dort über den Inhalt statt darunter (Kai B9, heute
+folgenlos); dazu eine verrutschte Einrückung. `app/page.js` trug den Kommentar „CTA – nur für
+ausgeloggte Besucher", obwohl der Block seit dem Umbau in beiden Anmeldezuständen steht.
+Neles Vorgabe `docs/ABSCHLUSS-BLOCK-EINGELOGGT-2026-08-21.md` war nicht eingecheckt, obwohl
+`LandingCTA.js` sie als Quelle zitiert — ein Kommentar, der ins Leere zeigt, wäre live
+gegangen. Jetzt mit committet.
+
+### Was der Ausschlag des Balls wirklich ist — und warum er nicht monoton ist
+
+Im Code stand „verdoppelt den Ausschlag auf ±61 px". Gemessen (Ballmitte über den ganzen Weg):
+768 px → 24 px Spitze-zu-Spitze · 900 → 20 · **1024 → 12** · 1440 → 116.
+Der Ausschlag setzt sich aus zwei Beträgen zusammen, die **gegeneinander laufen**: die
+Auslenkung im Kanal (wächst mit der Breite) und die Verschiebung des Kanals, sobald `max-w-md`
+der Textspalte greift und die gespiegelte Zeile den ganzen Kanal zur anderen Seite schiebt.
+Bei rund 1024 px heben sich beide fast auf — dort ist der „Dribbelweg" praktisch eine Gerade.
+Nur der erste Betrag ist eine Stellschraube, der zweite fällt aus dem Layout an
+(Fehlerklasse „Stellschraube gegen Restbetrag", Roadmap 20b). Bewusst so gelassen: Ein gerader
+Strich auf einer Breite ist eine schwächere Aussage, ein Ball an der Textkante wäre ein Defekt.
+
+### Offen
+
+- **Bei Kai (Testnachträge, in dieser Runde bewusst nicht gebaut):** der Drehpunkt-Wächter
+  (dritte Löschung, s. `tests/e2e/README.md`), das ungedeckte Ein-/Ausblenden am Streckenrand
+  (B2), die zu lockere Ehrlichkeitsschranke „> 6 von 15" gegen gemessene 14 von 15 (B7).
+- **Bei Vivien/Patrick:** der 58-px-Auftakt der Außenlinie und der Schnitt zwischen Hero und
+  Seite (Tobias' Einwand angenommen: gleicher Hintergrund auf beiden Seiten, es ändert sich
+  nur der Abstand zweier Striche). Roadmap 30.

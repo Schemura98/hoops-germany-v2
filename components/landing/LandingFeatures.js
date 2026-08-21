@@ -214,7 +214,7 @@ export default function LandingFeatures() {
               <div
                 key={f.title}
                 data-feature-zeile
-                className={`flex flex-col md:flex-row items-center gap-8 md:gap-16 ${
+                className={`flex flex-col md:flex-row items-center gap-8 md:gap-20 ${
                   reversed ? "md:flex-row-reverse" : ""
                 }`}
               >

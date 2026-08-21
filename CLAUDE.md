@@ -3,7 +3,7 @@
 
 ---
 
-## 0. AKTUELLER STAND (Überblick · Stand 19.08.2026)
+## 0. AKTUELLER STAND (Überblick · Stand 21.08.2026)
 
 > 🟢 **v2 IST LIVE auf https://hoopsgermany.de** (seit 24.06.2026). Hostinger-VPS `92.113.25.249`
 > (Ubuntu 24.04), Code in `/root/hoops-v2` (Branch **`redesign`**), PM2-Prozess **`hoops-v2` auf Port 3001**,
@@ -11,6 +11,98 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
+> ⚠️ **NICHT DEPLOYT, NUR COMMITTET (21.08.2026): DER BALL DRIBBELT DIE SEITE HINUNTER —
+> und die Zahl im Kopf des neuen Bauteils war richtig gemessen und falsch abgeleitet.**
+> Kein Push, kein Deploy; beides war nicht beauftragt. Patricks Auftrag: „beim Runterscrollen
+> mit dem orangenen Ball an den Funktionen vorbeidribbeln, die Außenlinie über die ganze Seite,
+> am Ende ein Pass an die Anmeldung." Gebaut in `0da80c7`, nachgearbeitet nach beiden Gates.
+> Neue Bauteile: `components/landing/Dribbelweg.js`, `DribbelBall.js`, `BallPass.js`,
+> `Aussenlinie.js`; entfallen `FeatureProgressRail.js` und `HeroGlyphs.js`.
+>
+> **(1) DER BLOCKER (Tobias B1): Der Pass kam auf hohen Fenstern nie an.** Im Bild sein und
+> erreichbar sein ist nicht dasselbe. Der Pass wurde in Anteilen der Fensterhöhe gefahren
+> (Ziel-Oberkante von 88 % auf 58 %) — dafür muss unter der Taste aber noch genug Seite zum
+> Scrollen übrig sein. Gemessen sind das **385 px, und diese Zahl wächst nicht mit dem
+> Fenster**. Folge: ab rund **917 px Fensterhöhe** endet die Seite mitten im Flug. Auf dem
+> iPad Pro 12,9" (1024×1366) kam der Pass bei 54 % zum Stehen und der Ball **überlappte die
+> Taste um 15,8 px** — genau das Bild, das die Datei ausschließen wollte („ein Ball, der in
+> einer Taste verschwindet, ist keine Aussage, es ist ein Verschwinden").
+> ⚠️ **Zum dritten Mal dieselbe Achse: Breiten geprüft, der Ausfall hing an der HÖHE**
+> (Roadmap 20b, 20f). Behoben, ohne die Bühne wieder ins Dokument zu verlegen: Die Endmarke
+> wird gegen das gehalten, was die Seite hergibt. Nachgemessen kommt der Pass jetzt auf
+> **24 von 24** Fenster-/Anmeldekombinationen vollständig an (Lücke 14,2–16,1 px, Deckkraft 1),
+> bis hinauf zu 1024×2200. Gegenprobe mit abgeklemmter Klemmung reproduziert Tobias' Zahlen
+> auf die Nachkommastelle (820×1180: 6,1 · 834×1194: 5,4 · 1024×1366: Überlappung).
+>
+> **(2) DIE ZAHL, DIE ZWEI PRÜFER GEGENEINANDER GESTELLT HAT — und beide hatten recht.**
+> Im Kopf von `Dribbelweg.js` stand „Kanal nie schmaler als 107 px, dem 20-px-Ball bleiben
+> 43 px Luft auf jeder Seite". Kai maß 107 nach, Tobias maß 64. **Es sind zwei verschiedene
+> Größen:** 107 ist der Abstand zwischen der GEZEICHNETEN Textkante und der Grafik, 64 der
+> zwischen der SPALTENKANTE und der Grafik — und nur mit der zweiten rechnet der Code.
+> Der Fehler war nicht die Messung, sondern die **Ableitung**: Die 107 wurde auf eine
+> Geometrie angewandt, die mit 64 rechnet, und „43 px auf jeder Seite" unterstellt einen
+> mittig laufenden Ball, obwohl er absichtlich außermittig läuft (35 % des Kanals, zur
+> Textseite). Der wahre Wert war **12,85 px**.
+> ⚠️ **Unsichtbar geblieben ist der Fehler durch einen Zahlenzufall:** 107 − 64 = 43 (der
+> ausgefranste Textrand) und (107 − 20) / 2 = 43,5 (die falsche Ableitung). Zwei verschiedene
+> 43 — wer die Zeile las, fand sie bestätigt. Musterfall für
+> `docs/MUSTER-ZAHLEN-DIE-LUEGEN-2026-08-13.md`.
+> ⚠️ **Und Tobias' dritte Zahl (9,6 px) war auch richtig und auch etwas anderes:** Der Ball
+> ist eine gedrehte Zeichnung; seine achsparallele Hüllbox misst bis **25,45 px** statt 20.
+> Wer die halbe Hüllbox als Radius nimmt, misst 3,2 px zu wenig Luft. Hüllkörper statt Kontur —
+> Roadmap 20d (b) im neuen Kostüm.
+>
+> **(3) `KANAL_MIN` war eine gegriffene Zahl mit Haarauslöser.** 60 px gegen einen echten
+> Kanal von 64 — vier Pixel, und der GANZE Weg verschwindet stumm. Kai hielt die Regel für
+> unerreichbar (er las 107), Tobias sah 4 px Abstand. Beide Schlüsse stimmten für die Zahl,
+> die sie vor sich hatten. Die Schwelle wird jetzt aus der Größe **gerechnet, die tatsächlich
+> klemmt**: `(LUFT_MIN + Ballradius) / NEIGUNG`, mit `LUFT_MIN` = 10 px — dasselbe Prüfmaß,
+> das für den Hero-Ball schon gilt (Roadmap 20d). Wer die Neigung ändert, ändert die Schwelle
+> mit; es gibt keine zweite Stelle nachzuziehen. Gegenprobe: mit `LUFT_MIN` = 25 wird auf
+> 768/900 px kein Weg mehr gezeichnet, auf 1024/1440 schon — die Regel ist erreichbar, nicht
+> tote Sicherheit.
+> **Dazu eine Layout-Entscheidung (Vivien):** Der Spaltenabstand geht von `md:gap-16` auf
+> `md:gap-20`. ⚠️ **Solange die Grafik ihre Spalte ausfüllt, IST der Kanal genau dieser
+> Abstand** — wer ihn in `LandingFeatures.js` ändert, ändert den Kanal. Luft zum Text
+> auf 768–860 px damit **12,85 → 18,57 px**, Abstand zur Abschalt-Schwelle 4 → 23 px.
+>
+> **(4) Der Pass flog durch Überschrift und Fließtext (Kai B1) — das ist behoben, nicht
+> begründet.** Gemessen kreuzte er auf Desktop-Breiten 18–23 %, mobil 43–48 % des Fluges
+> gezeichneten Text. Damit galt die Regel, die den ganzen Umbau trägt („der Ball läuft weder
+> vor noch hinter dem Text"), ausgerechnet am Ziel der Reise nicht. Kai stellte es zur Wahl:
+> Ausnahme hinschreiben oder umbauen. **Entschieden: umbauen.** Der Ball kommt jetzt
+> waagerecht von links ins Bild und bleibt in dem Band, in dem er ohnehin liegen bleibt —
+> neben der mittig gesetzten Tastenreihe bzw. in den 40 px Abstand über der Taste. Beide
+> Bänder hält das Layout frei, es gibt also nichts, dem er ausweichen müsste. Nachgemessen
+> **0 von 40** Textberührungen auf fünf von sechs Fenstern.
+> ⚠️ **Eine Ausnahme bleibt, gemessen und benannt:** 390×844 angemeldet, 2 von 40 — der Absatz
+> darüber steht in diesem Moment noch in seiner Einblendung und damit 6–18 px tiefer als sein
+> Layoutkasten. Nach ~200 ms ist es vorbei. Nicht behoben, weil die Abhilfe den Ball an den
+> Laufzeitzustand einer fremden Animation koppeln würde — genau die Kopplung, die dieser Umbau
+> losgeworden ist.
+> ⚠️ **Nebenbefund:** Der Kommentar behauptete, der Ball komme „von der Seite, aus der
+> Richtung, in die der Dribbelweg zuletzt zeigte". Er startete mittig auf der Taste, und
+> zwischen letztem Dribbelpunkt und Abschluss-Block liegen **zwei ganze Abschnitte**.
+>
+> **(5) Bei reduzierter Bewegung war die Zeichnung nach einer Größenänderung dauerhaft
+> kaputt** (Kai B6). Wer „Bewegung reduzieren" eingestellt hat und das Fenster ändert (mobil:
+> das Gerät dreht), bekam den Ball auf die Lesehöhe gesetzt, mit Drehung, den Weg nur zum Teil
+> gezeichnet — **und das blieb so, für immer**, weil in diesem Modus kein Scroll-Zuhörer läuft.
+> Gegenprobe mit zurückgedrehtem Fix: Ball springt von y = 2183 auf y = 218, Deckkraft 0, Weg
+> ungezeichnet, Beschriftung zurück auf „1 / 6". Behoben; das Standbild ist jetzt eine eigene
+> Funktion, die auch bei Größenänderung läuft.
+> ⚠️ Dabei mitgefunden: Im Standbild stand der mobile Fortschrittsbalken auf 100 % und daneben
+> „1 / 6 · Aufstellung" — volle Anzeige, erster Schritt. Jetzt „6 / 6 · Nachspielzeit".
+>
+> **⚠️ OFFEN UND WICHTIG — ZUM DRITTEN MAL DIESELBE LÖSCHUNG** (Kai B3, gehört ihm):
+> `tests/e2e/rail-ball-drehpunkt.spec.mjs` wurde am 19.08. gelöscht, am 20.08. eigens
+> wiederhergestellt, und dieser Umbau löscht sie **wieder**. Der Gegenstand lebt: Der mobile
+> Ball dreht in `Dribbelweg.js` um einen gesetzten Drehpunkt. `grep -rn transformOrigin tests/`
+> → wieder **null**. Kai hat den Ausfall nachgemessen: **6,9 → 14,5 → 27,4 → 24,3 px** Versatz,
+> mehr als ein Balldurchmesser, kein Test wird rot. Sein Satz: *„beim dritten Mal ist ‚ist uns
+> durchgerutscht' keine Erklärung mehr."* In `tests/e2e/README.md` protokolliert; der Test
+> selbst ist bewusst NICHT von Vivien gebaut worden (Testnachträge sind Kais Gebiet).
+>
 > ⚠️ **NICHT DEPLOYT, NUR COMMITTET (20.08.2026): DIE WÄCHTER ZUM HERO — und drei davon
 > haben bisher etwas anderes geprüft, als draufstand.** Kein Push, kein Deploy; beides war
 > nicht beauftragt. Volle Suite **251 grün + 1 übersprungen** (252 laut `--list`, 29 Dateien)
@@ -1419,6 +1511,33 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     8-Sekunden-Limit sieht ein Angemeldeter „Anmelden · Registrieren" – falsch, nur verzögert
     statt sofort; verschoben, nicht gelöst. **(d)** Der Kommentar zur Lücke für Ausgeloggte
     („nur ein Bild") ist über den Nutzer falsch – gemessen 1115 ms auf 3G.
+
+30. **Offen aus der Dribbelweg-Nacharbeit (21.08.2026) — drei Testnachträge bei KAI, zwei
+    Gestaltungsfragen bei Vivien/Patrick.**
+    **Bei Kai (ausdrücklich nicht von Vivien gebaut):**
+    (a) ⚠️ **Der Drehpunkt des rollenden Balls hat zum dritten Mal keinen Wächter**
+    (s. Abschnitt 0 und `tests/e2e/README.md`). Nachfolger muss den `transform-origin` im
+    Browser MESSEN, nicht im Quelltext lesen.
+    (b) **Das Ein- und Ausblenden des Balls an den Streckenenden ist ungedeckt** (Kai B2):
+    Man kann es ersatzlos entfernen, ohne dass ein Test rot wird. Der Kommentar im Code nennt
+    den Defekt, der dann zurückkommt („Ball klebt an der Klemmgrenze, Anzeige läuft weiter") —
+    ein behobener, namentlich bekannter Defekt ohne Wächter.
+    (c) **Die Ehrlichkeitsschranke in `dribbelweg.spec.mjs` ist zu locker** (Kai B7): Sie
+    verlangt „mehr als 6 von 15", gemessen sind im gesunden Fall 14 von 15. Sie fängt den
+    Totalausfall, nicht den Ausfall auf halber Strecke. Kais Vorschlag: 12.
+    ⚠️ **Hinweis von Vivien:** Die Nacharbeit hat an (b) und (c) nichts verschoben. An (a)
+    auch nicht — der Drehpunkt des mobilen Balls ist unverändert.
+    **Bei Vivien/Patrick:**
+    (d) **Der Auftakt der Außenlinie ist auf jeder Breite nur 58 px lang**, dann kommt die
+    Unterbrechung an der randlosen Kapitelmarke (1440 px: 58 | 212 | 2206). Tobias: liest sich
+    als Rest, nicht als Anfang. Die Unterbrechung selbst ist sauber — 22 px oben und unten auf
+    allen neun geprüften Breiten. Entscheidung offen: Auftakt weglassen, verlängern oder so
+    lassen.
+    (e) **Der Schnitt zwischen Hero und Seite trägt nicht** (Tobias' Frage 5, von Vivien
+    angenommen): An der Nahtstelle ist der Hintergrund auf beiden Seiten identisch
+    (`navy-950` über `navy-950`), es ändert sich nur der Abstand zweier Striche. *„Ein
+    Filmschnitt ist lesbar, weil sich das Bild ändert."* Liest sich als Versatz in derselben
+    Linie, nicht als Kamerafahrt. Gehört in dieselbe Runde wie (d).
 
 29. **CLAUDE.md führt einen Roadmap-Block doppelt** (Befund Kai). „Weitere UX-Feinschliffe"
     steht zweimal (Z. ~1386 und ~1558), ebenso Roadmap 20/20a. Altbestand, beim nächsten

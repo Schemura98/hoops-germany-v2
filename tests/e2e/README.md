@@ -116,7 +116,8 @@ harten Abbruch etwas liegen, räumt der nächste Lauf es über die Registry mit 
 | `global-teardown.mjs` | Löscht nur selbst angelegte Wegwerf-Accounts |
 | `auth.spec.mjs` | 8 Tests: 3× Login, 2× Signup, 3× Dual-Auth |
 | `sicherer-pfad.spec.mjs` | Offene Weiterleitung über `?next=` (Kai K4): das Modul, die echte Kette im Browser, und dass die Prüfung an **einer** Stelle steht |
-| `rail-ball-drehpunkt.spec.mjs` | Drehpunkt des Streckenballs, gemessen auf beiden Aufrufstellen (wiederhergestellt, s. Korrektur unten) |
+| `dribbelweg.spec.mjs` | Der Dribbelweg und der Pass (seit 21.08.2026): Berührungsfreiheit des Balls auf 6 Breiten × 15 Scrollpunkten, „mobil wird kein Weg gezeichnet", Ankunft des Passes auf 6 Fenstern × 2 Anmeldezuständen, Abschluss-Block für Angemeldete, Aussenlinie samt Unterbrechung |
+| `endmarke-einpassung.spec.mjs` | ⚠️ **Gegenstand gewechselt, Zweck gleich** (21.08.2026): prüfte die Korb-Endmarke der alten Fortschritts-Leiste, prüft jetzt den haftenden Streifen selbst |
 | `hero-standbild.spec.mjs` | Der Hero als Standbild: Anker, Kontrastfall, Rahmen, Server-Blatt — **und seit 20.08. auch angemeldet** (P5) |
 | `hero-einblendung.spec.mjs` | Dass die Zeichnung sich wirklich zeichnet (E1), ihre Längen (E2), Vollständigkeit auf jedem Maßstab (E3), das Versteck (E4), `non-scaling-stroke` (E5) |
 | `helpers/env.mjs` | .env-Parser + Dev-DB-Guard |
@@ -155,9 +156,12 @@ vier** Fälle jener Datei zutraf. Der vierte prüfte einen anderen Gegenstand, d
 dort nur einquartiert war: **den Drehpunkt des Streckenballs** (ursprünglich
 Befund Kai B1 vom 15.08.2026).
 
-Dieser Gegenstand **lebt**: `RailBallGlyph` in `components/landing/HeroGlyphs.js`,
-eingesetzt an zwei Stellen in `components/landing/FeatureProgressRail.js`, mit
-aktiver Rollbewegung bis 1965°. Nach der Löschung fand
+Dieser Gegenstand **lebte** — Stand 20.08.2026: `RailBallGlyph` in
+`components/landing/HeroGlyphs.js`, eingesetzt an zwei Stellen in
+`components/landing/FeatureProgressRail.js`, mit aktiver Rollbewegung bis 1965°.
+(⚠️ Beide Dateien sind am 21.08.2026 entfallen; der rollende Ball steht jetzt in
+`components/landing/Dribbelweg.js` und `DribbelBall.js`. Die Frage ist dieselbe
+geblieben — siehe die Korrektur weiter unten.) Nach der Löschung fand
 `grep -rn transformOrigin tests/` **null** Treffer — der Wächter war weg, sein
 Gegenstand nicht.
 
@@ -167,6 +171,37 @@ Gegenstand nicht.
 > ist nach Dateien geordnet — das ist bequem und genau deshalb die Stelle, an der
 > ein Fall unter dem Namen eines anderen verschwindet.
 
+### ⚠️⚠️ Korrektur 21.08.2026: DIESELBE LÖSCHUNG ZUM DRITTEN MAL — und diesmal stand die Warnung schon da
+
+`rail-ball-drehpunkt.spec.mjs` ist mit dem Dribbelweg-Umbau (`0da80c7`) **wieder
+gelöscht** worden. Der genannte Grund war richtig für die Hälfte: `RailBallGlyph`
+und `FeatureProgressRail.js` gibt es tatsächlich nicht mehr. Der **Gegenstand**
+des Tests ist aber nicht das Glyph, sondern der **Drehpunkt eines rollenden
+Balls** — und der lebt weiter: `components/landing/Dribbelweg.js` setzt für den
+mobilen Ball `transformOrigin: "10px 10px"` und dreht ihn über
+`rollwinkel()`. Nach der Löschung findet `grep -rn transformOrigin tests/`
+wieder **null** Treffer.
+
+Kai hat den Ausfall nachgemessen (Drehpunkt umgeklemmt): Versatz **6,9 → 14,5 →
+27,4 → 24,3 px** über den Scrollweg — mehr als ein Balldurchmesser daneben, und
+kein Test wird rot. Sein Satz dazu: *„beim dritten Mal ist ‚ist uns
+durchgerutscht' keine Erklärung mehr."*
+
+> **Was daran neu ist:** Die zwei Korrekturen darüber beschreiben genau diesen
+> Vorgang, und der Abschnitt trägt seit dem 19.08. den Satz „ein stumm
+> gelöschter Wächter ist die gefährlichste Änderung eines Umbaus". Es hat nicht
+> gereicht, ihn aufzuschreiben. Was gefehlt hat, ist eine Prüfung, die **nicht
+> in derselben Datei wohnt wie das Versprechen** — ein Wächter über den Wächter.
+
+**Status: offen, und zwar bei Kai** (Testnachträge sind sein Gebiet; Vivien hat
+in dieser Runde ausdrücklich keinen Test gebaut). Was der Nachfolger können muss:
+den `transform-origin` des mobilen Balls **im Browser messen**, nicht im
+Quelltext lesen — der Quelltext-Fall der Urfassung hätte den Desktop-Ausfall mit
+halber Wahrscheinlichkeit durchgelassen.
+
+---
+
+Historisch, zur Fassung vom 20.08.2026:
 Wiederhergestellt und dabei verschärft in `rail-ball-drehpunkt.spec.mjs`: Der
 alte Fall las nur Quelltext. Der neue **misst** zusätzlich den tatsächlichen
 `transform-origin` im Browser, und zwar auf **beiden** Aufrufstellen (mobil und
