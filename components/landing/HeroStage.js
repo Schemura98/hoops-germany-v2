@@ -131,6 +131,76 @@ const ZEICHNUNG =
   "pointer-events-none absolute inset-x-0 top-0 " +
   "h-[35rem] sm:h-[38rem] lg:h-[40rem]";
 
+// ══ DER SCHNITT ZUR SEITE — DAS FELD LÄUFT AUS, STATT ABGESCHNITTEN ZU WERDEN
+//
+// Befund Tobias, 21.08.2026, sein Wort: „im Vergleich der auffälligste Punkt
+// der Seite". Die Seitenlinie des Heros endete hart an der Bühnenunterkante,
+// und **auf derselben Höhe** begann die Außenlinie der Seite — nur 24 bis
+// 212 px weiter außen. Zwei ähnlich helle senkrechte Striche, ein Wechsel auf
+// einer Zeile: das liest sich als Sprung, nicht als Schnitt.
+// Nachgemessen am ausgelieferten Stand (`scripts/messungen/hero-naht.mjs`),
+// Versatz Hero-Seitenlinie → Außenlinie:
+//   768 → −24 px · 820 → 2 · 900 → 42 · 1024 → 84 · 1100 → 110 · 1280 → 132 ·
+//   1440 → 152 · 1600 → 172 · 1920 → 212.   (Mobil gibt es ihn nicht: dort
+//   liegt die Hero-Seitenlinie außerhalb des Bildes, siehe `Aussenlinie.js`.)
+// ⚠️ Auf 1920 wurde zusätzlich der **Bogenscheitel der Dreipunktlinie** hart
+// durchgeschnitten — der Bogen kam von beiden Seiten herunter und hörte
+// mitten in der Luft auf, mit einer Lücke in der Mitte. Angesehen, nicht
+// gerechnet.
+//
+// ⚠️ WARUM DER NAHELIEGENDE FIX AUSGESCHLOSSEN WAR — UND WARUM DIE ZAHL, MIT
+// DER ER AUSGESCHLOSSEN WURDE, NICHT STIMMTE. In `CLAUDE.md` stand, ein
+// Ausblendpunkt in viewBox-Koordinaten sei unmöglich, weil die Bühnenunterkante
+// „auf 1440 bei y ≈ 533, mobil bei y = 720" liege und ein früh genug greifender
+// Punkt mobil den Bogenscheitel (y = 543,5) lösche.
+// **Die 533 ist die Unterkante des ZEICHNUNGSKASTENS, nicht die der BÜHNE.**
+// Weil das SVG `overflow: visible` trägt, zeichnet es über den Kasten hinaus
+// bis dorthin, wo die Bühne beschneidet — und die Bühne ist höher als der
+// Kasten, weil ihr Inhalt sie treibt. Gemessen liegt die Naht auf 1440 bei
+// y = 649,8, nicht bei 533.
+// Die SCHLUSSFOLGERUNG bleibt trotzdem richtig, nur aus einem anderen Grund:
+// Die Naht liegt je nach Fenster bei **8,29 m** (1920) bis **12,82 m** (768)
+// Feldtiefe. Es gibt keine EINE Feldtiefe, die überall vor der Naht liegt.
+//
+// DESHALB WIRD NICHT IN FELDTIEFE AUSGEBLENDET, SONDERN IN DER WÄHRUNG DES
+// SCHNITTS: die letzten 7 rem der BÜHNE. Damit misst die Abhilfe dieselbe
+// Größe, gegen die sie sich behaupten muss — keine gesetzte Zahl gegen einen
+// Restbetrag (CLAUDE.md, Roadmap 20b, dort inzwischen in fünfter Auflage).
+//
+// ⚠️ DIE SCHRANKE IST DIE MOBILE, UND MEINE ERSTE FASSUNG DAVON WAR
+// UNERFÜLLBAR. Hier stand, das Ausblenden dürfe den Bogenscheitel (viewBox
+// y = 543,5) auf KEINER Breite erfassen. Nachgemessen fällt sein Abstand zur
+// Naht mit wachsender Breite monoton — 1440: 269,6 px · 1600: 226,0 · 1920:
+// 138,8 · 2560: er liegt unter der Naht. Es gibt also keine Ausblendlänge, die
+// ihn überall freihält; irgendwann liegt der Scheitel selbst an der Naht, und
+// dort war er vorher **hart abgeschnitten** (auf 1920 sichtbar: der Bogen kam
+// von beiden Seiten herunter und hörte mit einer Lücke in der Mitte auf).
+// An dieser Stelle ist das Auslaufen keine Einbuße, sondern genau die Abhilfe.
+//
+// Was wirklich gilt: **Auf Telefonbreiten ist der Bogen das einzige
+// Feldelement der unteren Bildhälfte** — dort muss das Ausblenden vollständig
+// unter ihm beginnen. Auf 360 px (ausgeloggt, engster Fall) steht der Scheitel
+// 422,7 px unter der Bühnenoberkante, die Bühne ist 560 px hoch: es bleiben
+// **137,3 px**, die 7 rem = 112 px beginnen also **25,3 px unter dem
+// Scheitel**. Dazu decken die ersten 33,6 px des Bandes unter 8 % — bis zur
+// ersten messbaren Verdunkelung sind es rund 59 px.
+// ⚠️ Wer die Höhenleiter der Bühne kürzt oder diesen Wert erhöht, verbraucht
+// diese Reserve. `scripts/messungen/hero-naht.mjs` prüft genau das (Sollwert:
+// 0 verletzte Fälle) — nachmessen, nicht schätzen.
+//
+// ⚠️ ES IST EINE DECKENDE FLÄCHE, KEINE MASKE, und beides war eine Abwägung.
+// Eine Maske entfernt statt zu überdecken und wäre unabhängig vom Grund —
+// aber sie legt die Zeichnung in eine eigene Ebene, und in dieser Ebene läuft
+// beim Laden 900 ms lang die Einblendung (`hero-court-zeichnen`). Ein
+// bildschirmbreiter Layer, der eine Sekunde lang je Bild neu gerastert wird,
+// ist genau die Rechnung, die auf einem Mittelklasse-Android nicht aufgeht.
+// Die deckende Fläche kostet einen Verlauf und sonst nichts.
+// ⚠️ Der Preis: Der Grundton steht zweimal — hier und in `STAGE` oben. Er ist
+// deshalb NICHT als Hex geschrieben, sondern zieht in `app/globals.css` über
+// `theme("colors.navy.950")` denselben Token wie `bg-navy-950`. Wer den Token
+// ändert, ändert beide.
+const NAHT = "pointer-events-none absolute inset-x-0 bottom-0 h-28 hero-naht";
+
 // Der Rhythmus. `pt` ist die einzige Zahl, die die Komposition wirklich
 // steuert — sie entscheidet, wo die Überschrift anfängt. Die Überschrift muss
 // UNTER dem Korb beginnen: Weißer Text auf dem einen orangen Element ist der
@@ -194,6 +264,20 @@ export default function HeroStage({ className = "", children }) {
       <div className={ZEICHNUNG} aria-hidden="true">
         <HeroCourt />
       </div>
+      {/* Das Auslaufen an der Naht. Steht NACH der Zeichnung und VOR dem
+          Inhalt: Der Inhalt trägt `z-10` und liegt damit darüber — die
+          Fläche verdunkelt ausschließlich das Feld, nie eine Textzeile.
+          Nachgesehen auf 360/900/1440/1920, beide Anmeldezustände. */}
+      <div className={NAHT} aria-hidden="true" data-hero-naht />
+      {/* ⚠️ Der Auftakt der Außenlinie bleibt offen (CLAUDE.md, Roadmap 30 d).
+          Sie beginnt weiterhin abrupt im nächsten Abschnitt, mit 58 px vor der
+          ersten Unterbrechung. Sie hier beginnen zu lassen wäre der andere
+          Weg — er scheitert daran, dass `Aussenlinie` ihren Bezug über
+          `closest("section")` sucht und diese Bühne ein `<div>` rendert, und
+          er wäre gestalterisch auch nicht richtig: Der Hero ist die
+          NAHAUFNAHME, die Seite darunter die TOTALE (`Aussenlinie.js`). Zwei
+          Einstellungen sollen sich unterscheiden — sie sollen nur nicht
+          aussehen, als sei eine Linie verrutscht. */}
       {/* ⚠️ `data-hero-inhalt` IST NICHT DEKORATION, SONDERN DIE ANTWORT AUF
           EINEN BLINDEN TEST (Befund Kai H2, 20.08.2026).
           `hero-standbild.spec.mjs` P1 maß bis dahin den Abstand zwischen

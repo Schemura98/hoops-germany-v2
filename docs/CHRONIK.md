@@ -5227,3 +5227,128 @@ versetzt auf derselben Höhe — laut Tobias der auffälligste Punkt der Seite.
 **Live nachgemessen (21.08.2026):** alle fünf Bauteile · 0 Ellipsen / 1 Kreis · Pass-Lücke 13,4 px
 (1440) und 13,8 px (360) · 16 Routen je 200 · 0 Laufzeitfehler. Vor dem Deploy selbst gezählt:
 300 grün / 5 rot (vorbestehend, namentlich geprüft) / 1 übersprungen.
+
+---
+
+## 21.08.2026 — Der Hero läuft aus, statt abgeschnitten zu werden (Vivien, committet, NICHT deployt)
+
+Tobias' zwei Auflagen zum gespiegelten Feldende, von Patrick freigegeben. Beide sind
+Gestaltungsentscheidungen, beide sind hier entschieden — die eine mit „bleibt", die andere
+mit „gelöst, nur anders als ausgeschlossen".
+
+**Sweep:** Stufe **S** (`design-trend-recherche`), Registerzeile im
+`referenz-register.md`. Begründung: zwei Detailentscheidungen an zwei abgenommenen Bauteilen
+innerhalb einer dreimal entschiedenen Formensprache; beide Fragen sind am gebauten Stück zu
+**messen**, nicht in einer Galerie zu finden.
+
+### (1) Die Dreipunktlinie über dem Hero-Text — sie bleibt, die Begründung geht
+
+Tobias meldete: `HeroCourt.js` sagt, die Linie sei dort „nicht mehr laut", gemessen kreuzt sie
+mit **Deckkraft 0,85**. Beide Sätze stimmen. Der Widerspruch löst sich an der Frage, **woran
+Lautstärke hängt**: Die Deckkraft der fernen Gruppe ist überall 0,85 und wird nie schwächer;
+leise wird die Linie über die **Farbe** (Verlauf #5E79B8 → #2C3A66) und über die
+**Strichbreite** (1,1 Einheiten — auf schmalen Fenstern schmaler als ein Bildpunkt).
+
+An echten Bildpunkten gemessen (`scripts/messungen/hero-kontrast.mjs`), Kontrast der Linie
+gegen die Fläche navy-950:
+
+| Ort | Kontrast Linie : Fläche | paper-50 über der Linie |
+|---|---|---|
+| über „Deine Basketball-" | 1,67–1,85 : 1 | 10,06–9,41 : 1 |
+| über „Community" | 1,63–1,77 : 1 | 10,70–9,86 : 1 |
+| über „in NRW" | 1,61–1,67 : 1 | 10,83–10,47 : 1 |
+
+Durchweg unterhalb der Grenze von rund 2 : 1, ab der sich ein Strich in diesem Projekt als
+Zeichnung liest — dieselbe Einordnung wie am Seitenende (#28355E, 1,45 : 1). Der Text verliert
+wenig: paper-50 fällt von 17,45 auf 9,41–10,83 : 1, weit über AA. Am **dreifach vergrößerten
+Standbild angesehen** (900 px „COMMUNITY", 1100 px „IN NRW"): ein dunkler, flacher Bogen hinter
+den Buchstaben. Ein Tonwert, kein Strich.
+
+**Entschieden: (b).** Die Linie bleibt bei 0,85, der Satz bekommt seinen Beleg. Sie leiser zu
+machen hieße, sie unsichtbar zu machen — und die untere Bildhälfte zu leeren, wofür das zweite
+Gefälle überhaupt eingeführt wurde.
+
+⚠️ **Der Satz, der wirklich falsch war, ist ein anderer**, und er stand daneben: „Die
+Dreipunkt-Geraden stehen bei ± 6,60 m … **Sie kreuzen den Text nicht** und dürfen deshalb ruhig
+durchlaufen." Die Rechnung stimmt für 1440 und beweist nichts, weil sie den **Bogen** auslässt
+(die Geraden stehen neben dem Text, der Bogen läuft quer hinein) und den **Maßstabswechsel**
+unter ~1200 px (dort treibt die Zeichnungshöhe den Maßstab, die Geraden rücken nach innen —
+768 px: ± 334 px gegen eine ± 336 px breite Textspalte). Nachgemessen kreuzt die Linie den Text
+auf **768, 820, 900, 1024 und 1100 px**, genau Tobias' Band.
+
+⚠️ **Zwei Korrekturen an Tobias' Befund, beide klein:** Er nennt die *Tastenbeschriftungen*.
+In diesem Band kreuzt die Linie die **Überschrift**; die einzige geometrisch getroffene Taste
+ist die orange „Profil anlegen", und die ist deckend. Durch eine Tastenbeschriftung läuft sie
+nur **angemeldet auf 1920 px** (die durchsichtigen Ghost-Tasten „Mein Profil"/„Mein Team").
+
+⚠️ **Und zwei Korrekturen an mir selbst, dieselbe Fehlerform zweimal in einer Runde.** Mein
+erstes Messwerkzeug griff den Vergleichsgrund 14 px neben der Linie ab — über einer Textzeile
+steht dort oft ein **Buchstabe**; gemessen wurde „Linie gegen paper-50" statt „Linie gegen
+Fläche" (10,06 statt 1,63 : 1). Das zweite nahm die Linie „über freier Fläche" und landete bei
+Tiefe 0, wo sie mit der **Grundlinie zusammenfällt** — und meldete einen Kontrastabfall von
+6,69 auf 1,65, den es nicht gibt. **Beide Male richtig gemessen, am falschen Gegenstand.**
+Das echte Tiefenprofil (1920/1440 px): 1 m 3,04/2,56 · 3 m 2,25/2,24 · 5 m 1,97/1,95 ·
+7 m 1,82/1,80. Das Gefälle wirkt (rund −40 %), es fängt nur niedrig an.
+
+### (2) Der Schnitt Hero ↔ Seite (Roadmap 30 e) — gelöst
+
+Der Befund war richtig und **größer als gemeldet**. Gemessen (`scripts/messungen/hero-naht.mjs`)
+endete die Hero-Seitenlinie hart an der Bühnenunterkante, und auf **derselben Höhe** begann die
+Außenlinie: Versatz 768 → −24 px · 820 → 2 · 900 → 42 · 1024 → 84 · 1100 → 110 · 1280 → 132 ·
+1440 → 152 · 1600 → 172 · 1920 → 212. Auf **1920 px** wurde zusätzlich der **Bogenscheitel der
+Dreipunktlinie** durchgeschnitten — der Bogen kam von beiden Seiten herunter und hörte mit einer
+Lücke in der Mitte auf. Angesehen, nicht gerechnet.
+
+⚠️ **Die Zahl, mit der der Fix ausgeschlossen worden war, stimmte nicht.** In CLAUDE.md stand,
+die Bühnenunterkante liege „auf 1440 bei y ≈ 533, mobil bei y = 720". **Die 533 ist die
+Unterkante des ZEICHNUNGSKASTENS, nicht die der BÜHNE.** Weil das SVG `overflow: visible`
+trägt, zeichnet es über den Kasten hinaus bis dorthin, wo die Bühne beschneidet — und die Bühne
+ist höher, weil ihr Inhalt sie treibt. Gemessen: **y = 649,8**.
+
+Die **Folgerung** bleibt trotzdem richtig, nur aus anderem Grund: Die Naht liegt je nach Fenster
+bei **8,29 m** (1920) bis **12,82 m** (768) Feldtiefe. Es gibt keine eine Feldtiefe, die überall
+vor der Naht liegt.
+
+**Deshalb wird nicht in Feldtiefe ausgeblendet, sondern in der Währung des Schnitts: die letzten
+7 rem der Bühne laufen aus.** Die Abhilfe misst damit dieselbe Größe, gegen die sie sich
+behaupten muss — keine gesetzte Zahl gegen einen Restbetrag. Gebaut als deckende Fläche
+(`.hero-naht` in `app/globals.css`, Farbe über `theme("colors.navy.950")`, also derselbe Token
+wie `bg-navy-950`), nicht als Maske: Eine Maske legt die Zeichnung in eine eigene Ebene, in der
+beim Laden 900 ms lang die Einblendung läuft — ein bildschirmbreiter Layer, der eine Sekunde
+lang je Bild neu gerastert wird, ist die Rechnung, die auf einem Mittelklasse-Android nicht
+aufgeht.
+
+⚠️ **Meine erste Schranke war unerfüllbar.** Ich hatte formuliert, das Ausblenden dürfe den
+Bogenscheitel auf keiner Breite erfassen. Nachgemessen fällt sein Abstand zur Naht monoton
+(1440: 269,6 px · 1600: 226,0 · 1920: 138,8 · 2560: er liegt unter der Naht) — es gibt keine
+Ausblendlänge, die ihn überall freihält, weil er irgendwann selbst an der Naht liegt. Dort war
+er vorher **hart abgeschnitten**; ein Auslaufen ist an dieser Stelle die Abhilfe, nicht der
+Schaden. **Was wirklich gilt, ist die mobile Schranke:** Auf Telefonbreiten ist der Bogen das
+einzige Feldelement der unteren Bildhälfte; dort beginnt das Ausblenden **25,3 px unter ihm**,
+und die ersten 33,6 px des Bandes decken unter 8 %.
+
+⚠️ **Die Außenlinie wurde dafür bewusst nicht angefasst.** Sie zu verschieben hätte den Versatz
+auf einer Breite geschlossen und auf allen anderen geöffnet — die Hero-Seitenlinie steht je nach
+Breite bei x = −170 bis +240.
+
+### Offen geblieben
+
+- **Roadmap 30 (d), der 58-px-Auftakt der Außenlinie** — nicht mitgenommen, und zwar bewusst.
+  Der naheliegende Weg (die Linie im Hero beginnen lassen) scheitert weiterhin an
+  `closest("section")` gegen ein `<div>`, und er wäre gestalterisch falsch: Der Hero ist die
+  Nahaufnahme, die Seite darunter die Totale. (d) ist eine Frage an die Außenlinie selbst.
+- **Für Kai: `[data-hero-naht]` hat keinen Wächter.** Wer das eine `<div>` löscht, bekommt den
+  harten Schnitt zurück, und die Suite bleibt vollständig grün. Prüfmaß: an der Bühnenunterkante
+  darf kein `[data-court-path]` mit sichtbarer Deckkraft enden; das Muster steht in
+  `scripts/messungen/hero-naht.mjs`.
+- **Roadmap 34 (b) nachgemessen und bestätigt:** Der latente Anker-Fehler des Heros ist wirklich
+  latent. Die Zonenlinien kreuzen die Zeilenkästen der Überschrift auf 430–1920 px (3,03–3,23 m,
+  rechnerisch 0,61–0,76 Deckkraft), laufen am dreifach vergrößerten Standbild aber **neben** der
+  Tinte vorbei. Es ist Glück, keine Konstruktion — nicht geändert, weil der Hero abgenommen ist.
+
+**Geprüft:** Build durch · Playwright **300 grün / 5 rot / 1 übersprungen** (die 5 unverändert
+die vorbestehenden aus Roadmap 26) · `npm run design-audit -- --check` ohne Abweichung ·
+28 Fenster-/Anmeldekombinationen von 320 bis 1920 px ohne Querlauf und ohne Konsolenfehler ·
+`prefers-reduced-motion` alle 16 Pfade vorhanden, dasselbe Bild · Standbilder auf 360, 768, 900,
+1440, 1600 und 1920 px angesehen, ausgeloggt und angemeldet.
+**Gates: keine** — Kai und Tobias haben diesen Stand nicht gesehen. Kein Push, kein Deploy.

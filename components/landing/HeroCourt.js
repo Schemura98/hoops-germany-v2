@@ -88,12 +88,64 @@ import {
 //     Bildes. Eine gesetzte Groesse und ein Restbetrag, wieder einmal.
 //
 // GELOEST WIRD DAS NICHT UEBER DIE LAGE, SONDERN UEBER DIE TIEFE: Die Linien
-// duerfen den Text kreuzen — sie sind dort nur nicht mehr laut. Die Zeichnung
-// hat ein Helligkeitsgefaelle nach hinten (`#tiefe`), das an der Grundlinie
-// beginnt und zum Bildende hin auslaeuft. Oben, ueber der Ueberschrift, steht
-// der Korbbereich in voller Staerke; auf Hoehe des Textes ist das Feld nur
-// noch angedeutet. Das ist nicht Dekoration, sondern die Antwort auf Patricks
-// Frage nach Betonung: „nicht alles gleich stark".
+// duerfen den Text kreuzen — sie sind dort nur nicht mehr laut. Oben, ueber der
+// Ueberschrift, steht der Korbbereich in voller Staerke; auf Hoehe des Textes
+// ist das Feld nur noch angedeutet. Das ist nicht Dekoration, sondern die
+// Antwort auf Patricks Frage nach Betonung: „nicht alles gleich stark".
+//
+// ⚠️ DIESER ABSATZ WAR EINE ZUSICHERUNG OHNE BELEG, UND ER STAND DREIFACH
+// SCHIEF (Befund Tobias 21.08., nachgemessen und korrigiert 21.08.).
+// (1) Er nannte einen Verlauf `#tiefe`, den es seit der Aufteilung in
+//     `hero-court-nah` und `hero-court-fern` nicht mehr gibt.
+// (2) Er sagte „Die Linien" ohne Unterschied — es gelten aber zwei verschiedene
+//     Regeln, siehe den Block „ZWEI GEFAELLE" weiter unten.
+// (3) Er sagte, das Gefaelle laufe „zum Bildende hin aus". Das tat NUR das
+//     nahe; das ferne endete bei voller Deckkraft an der Buehnenkante. Genau
+//     daraus wurde der harte Schnitt zur Seite — behoben in `HeroStage.js`
+//     (`NAHT`), wo der Satz jetzt fuer beide gilt.
+//
+// ⚠️ WORAN DIE LEISE WIRKUNG HAENGT — und es ist NICHT die Deckkraft.
+// Tobias hat gemessen, dass die Dreipunktlinie den Text mit Deckkraft **0,85**
+// kreuzt, und daraus geschlossen, „nicht mehr laut" trage nicht. Die Deckkraft
+// stimmt: Die ferne Gruppe steht ueberall auf 0,85, sie wird nie schwaecher.
+// Leise wird die Linie ueber die FARBE — der Verlauf laeuft von #5E79B8 an der
+// Grundlinie nach #2C3A66 in der Tiefe.
+// An echten Bildpunkten gemessen (`scripts/messungen/hero-kontrast.mjs`),
+// Kontrast der Linie gegen die Flaeche navy-950:
+//   ueber „Deine Basketball-"           1,67–1,85 : 1
+//   ueber „Community"                   1,63–1,77 : 1
+//   ueber „in NRW"                      1,61–1,67 : 1
+// Das ist unterhalb der Grenze von rund 2 : 1, ab der sich ein Strich in
+// diesem Projekt ueberhaupt als Zeichnung liest — dieselbe Einordnung, die am
+// Seitenende fuer denselben Bogen gilt (CLAUDE.md, #28355E bei 1,45 : 1).
+// Was der Text dabei verliert, ist nachgerechnet und klein: paper-50 faellt von
+// 17,45 : 1 auf **9,41 bis 10,83 : 1** — beides weit ueber AA.
+//
+// ⚠️ WIE STARK IST SIE DENN SONST? Ein Tiefenprofil derselben Linie, gemessen
+// dort, wo kein Text im Weg ist (1920 bzw. 1440 px, je Feldtiefe):
+//   1 m 3,04 / 2,56 · 2 m 2,61 / 2,29 · 3 m 2,25 / 2,24 · 4 m 2,04 / 2,04 ·
+//   5 m 1,97 / 1,95 · 6 m 1,89 / 1,87 · 7 m 1,82 / 1,80
+// Das Gefaelle wirkt also — rund 40 % weniger Kontrast von der Grundlinie zum
+// Textband — aber es faengt schon niedrig an. Der zweite Grund steht in der
+// Zeichnung selbst: Der Strich ist 1,1 Einheiten breit, auf schmalen Fenstern
+// also SCHMALER ALS EIN BILDPUNKT. Diese Linie war nie ein Strich, an keiner
+// Stelle.
+// ⚠️ MEINE EIGENE ERSTE ZAHL WAR HIER FALSCH, und sie ist es aus dem Grund, der
+// in diesem Projekt am haeufigsten vorkommt: Hier stand „an der Grundlinie
+// 6,69 : 1". Das ist gemessen — nur nicht an dieser Linie. Bei Tiefe 0 faellt
+// die Dreipunktlinie mit der GRUNDLINIE zusammen (nahe Gruppe, doppelte
+// Strichstaerke); die Sonde hat den falschen Gegenstand erwischt und daraus
+// einen Kontrastabfall von 6,69 auf 1,65 gemacht, den es nicht gibt. Richtig
+// gemessen, am falschen Objekt. Das Messwerkzeug schliesst Tiefen unter 1 m
+// seither aus.
+// ⚠️ Und angesehen, nicht nur gerechnet: am 3-fach vergroesserten Standbild
+// (900 px, „COMMUNITY"; 1100 px, „IN NRW") laeuft dort ein dunkler, flacher
+// Bogen hinter den Buchstaben durch. Es ist ein Tonwert, kein Strich.
+// ⚠️ DER UNTERSCHIED ZUM FALL AM SEITENENDE, damit niemand beides in einen Topf
+// wirft: Dort liefen ZONENLINIEN durch eine Textzeile — nahe Gruppe, hellere
+// Farbe, senkrecht, kurz, mitten durch eine Unterstreichung. Das war eine
+// Panne. Hier ist es die ferne Gruppe: lang, flach, dunkel, quer. Nicht die
+// Deckkraft entscheidet, sondern welche Gruppe kreuzt.
 // ⚠️ Der Verlauf liegt auf einem DARGESTELLTEN GEGENSTAND, nicht auf einer
 // Flaeche der Oberflaeche — dieselbe Grenze, die fuer den Ball schon gilt
 // (CLAUDE.md, Roadmap 20b c). Auf Panels bleibt es bei Flaechenstufe +
@@ -203,12 +255,25 @@ export default function HeroCourt() {
               breit, die Textspalte ist auf jedem Gerät breiter oder ähnlich
               breit — siehe die Zwangslage oben). Er muss also weg sein, bevor
               der Text beginnt: volle Stärke bis 2,9 m, ab 4,2 m nichts mehr.
-            · Das FERNE FELD liegt NEBEN der Textspalte: Die
-              Dreipunkt-Geraden stehen bei ± 6,60 m, die Seitenlinien bei
-              ± 7,50 m — auf 1440 px sind das ± 475 bzw. ± 540 px, die
-              Textspalte ist ± 384 px breit. Sie kreuzen den Text nicht und
-              dürfen deshalb ruhig durchlaufen. Nur so bleibt unten etwas
-              stehen, statt dass die untere Bildhälfte leer wird. */}
+            · Das FERNE FELD darf durchlaufen. Nur so bleibt unten etwas
+              stehen, statt dass die untere Bildhälfte leer wird.
+              ⚠️ HIER STAND DER GRUND DAFÜR FALSCH, und er las sich wie eine
+              Zusicherung: „Die Dreipunkt-Geraden stehen bei ± 6,60 m, die
+              Seitenlinien bei ± 7,50 m — auf 1440 px sind das ± 475 bzw.
+              ± 540 px, die Textspalte ist ± 384 px breit. Sie kreuzen den
+              Text nicht."
+              Die Rechnung stimmt und beweist nichts, weil sie zwei Dinge
+              auslässt. **(a) Den BOGEN.** Die Geraden stehen senkrecht neben
+              dem Text — der Bogen läuft quer und kommt auf jeder Breite in
+              die Textspalte. **(b) Den Maßstabswechsel.** Unterhalb von
+              ~1200 px treibt nicht mehr die Breite den Maßstab, sondern die
+              Zeichnungshöhe; die Geraden rücken damit nach innen
+              (768 px → ± 334 px gegen eine ± 336 px breite Textspalte).
+              NACHGEMESSEN kreuzt die Dreipunktlinie den Text auf **768, 820,
+              900, 1024 und 1100 px** — genau in dem Band, das Tobias gemeldet
+              hat. Sie DARF das; sie tut es nur nicht deshalb, weil sie es
+              nicht täte. Die tragfähige Begründung ist der gemessene
+              Kontrast — sie steht oben im Kopf dieser Datei. */}
         <linearGradient
           id="hero-court-nah"
           gradientUnits="userSpaceOnUse"

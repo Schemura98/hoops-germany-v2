@@ -242,3 +242,31 @@ body {
     animation: hero-court-korb 420ms ease-out 960ms both;
   }
 }
+
+/* ══ DER SCHNITT ZUR SEITE ═══════════════════════════════════════════════════
+   Das Feld des Heros laeuft an der Buehnenunterkante aus, statt dort hart
+   abgeschnitten zu werden. Begruendung, Messwerte und die eine Schranke
+   (der Bogenscheitel auf dem Telefon) stehen vollstaendig in
+   `components/landing/HeroStage.js` beim Kasten `NAHT` — hier steht nur die
+   Farbe, weil sie hierher gehoert.
+
+   ⚠️ `theme("colors.navy.950")` UND NICHT `#0B1220`. Der Grundton der Buehne
+   wird eine Zeile weiter oben in HeroStage.js als `bg-navy-950` gesetzt; ein
+   zweites Mal als Hex geschrieben waere er zwei Werte, die nur zufaellig
+   gleich sind. Wer den Token in `tailwind.config.js` aendert, aendert beide.
+
+   ⚠️ Die Stopps sind NICHT gleichmaessig verteilt, und das ist der Punkt: Ein
+   linearer Verlauf faengt sofort an zu decken, und eine Linie, die ueber ihre
+   ganze letzte Strecke gleichmaessig schwaecher wird, liest sich wieder als
+   Ende — nur als weiches. Hier bleibt die Linie ueber das erste Drittel fast
+   unangetastet und geht dann schnell; das liest sich als Entfernung. */
+.hero-naht {
+  background-image: linear-gradient(
+    to bottom,
+    theme("colors.navy.950 / 0") 0%,
+    theme("colors.navy.950 / 0.08") 30%,
+    theme("colors.navy.950 / 0.34") 58%,
+    theme("colors.navy.950 / 0.74") 82%,
+    theme("colors.navy.950") 100%
+  );
+}

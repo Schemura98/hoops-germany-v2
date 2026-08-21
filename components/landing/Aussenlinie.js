@@ -55,10 +55,25 @@ import { useEffect, useRef } from "react";
 // ⚠️ WAS DIE KORREKTUR NICHT UMSTOESST: Der Grund GEGEN die massstabsgetreue
 // Fortsetzung steht in der Tabelle und gilt unveraendert — es gibt keinen
 // Massstab, der auf dem Telefon UND auf dem Notebook funktioniert. Der Entwurf
-// bleibt richtig; falsch war die Beruhigung hinterher. Der Preis des Schnitts
-// ist also hoeher als hier behauptet, er ist auf breiten Fenstern SICHTBAR.
-// Wer ihn senken will, faengt an der Hero-Unterkante an (Roadmap 30 e) — nicht
-// in dieser Datei, und nicht damit, die Aussenlinie zu verschieben.
+// bleibt richtig; falsch war die Beruhigung hinterher.
+//
+// ✅ ERLEDIGT 21.08.2026 (Roadmap 30 e), UND ZWAR AUF DER ANDEREN SEITE DER
+// NAHT. Die Zahlen oben bleiben als Messwerte gueltig — die Aussenlinie steht
+// unveraendert dort, wo sie stand. Geaendert hat sich, was ihr GEGENUEBER
+// steht: Das Feld des Heros laeuft an der Buehnenunterkante jetzt aus, statt
+// dort hart abgeschnitten zu werden (`components/landing/HeroStage.js`,
+// Kasten `NAHT`). Damit endet an der Naht keine Linie mehr — es gibt also
+// keine Fortsetzung, die verrutscht aussehen koennte, sondern eine
+// Einstellung, die verschwindet, und eine neue, die anfaengt.
+// ⚠️ Diese Datei ist dafuer bewusst NICHT angefasst worden. Die Aussenlinie zu
+// verschieben haette den Versatz auf einer Breite geschlossen und auf allen
+// anderen geoeffnet — die Hero-Seitenlinie steht je nach Breite bei
+// x = −170 bis +240.
+// ⚠️ OFFEN BLEIBT DER AUFTAKT (Roadmap 30 d): Diese Linie faengt weiterhin
+// abrupt an, mit 58 px vor der ersten Unterbrechung. Das ist eine Frage an
+// DIESE Datei und nicht an den Hero — und sie ist nicht dieselbe Frage: Dort
+// ging es um zwei Linien, die einander widersprechen, hier um eine, die ohne
+// Anlauf beginnt.
 //
 // ══ DIE UNTERBRECHUNG ═══════════════════════════════════════════════════════
 // Die Linie endet vor einem Block, der sie kreuzt, und beginnt darunter neu.
