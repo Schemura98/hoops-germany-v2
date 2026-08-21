@@ -72,7 +72,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
+              className="w-full bg-brand-500 hover:bg-brand-400 disabled:bg-navy-600 disabled:text-mist-300 text-navy-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
             >
               {loading ? "Anmelden…" : "Anmelden"}
             </button>

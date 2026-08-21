@@ -631,7 +631,7 @@ export default function EinstellungenTab({ team, reload }) {
             disabled={recruitSaving}
             role="switch"
             aria-checked={recruiting}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:bg-navy-600 disabled:text-mist-300 ${
               recruiting ? "bg-brand-500" : "bg-navy-600"
             }`}
           >
@@ -722,7 +722,7 @@ export default function EinstellungenTab({ team, reload }) {
               disabled={notifySaving}
               role="switch"
               aria-checked={notifyAllAdmins}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:bg-navy-600 disabled:text-mist-300 ${
                 notifyAllAdmins ? "bg-brand-500" : "bg-navy-600"
               }`}
             >

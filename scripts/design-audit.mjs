@@ -32,15 +32,19 @@ const TOKEN_FILE = path.join(REPO, "lib", "ui.js");
 // Der Hero-Umbau selbst hat die Zahl der handgebauten Panels GESENKT
 // (143→141 strikt, 184→182 weit), weil er zwei Komponenten gelöscht hat.
 const BASELINE = {
-  datum: "19.08.2026",
+  datum: "22.08.2026",
   importe: {
     Button: 25, Card: 2, ConfirmAction: 3, CountUp: 5, EmptyState: 15,
     FormAlert: 9, LinkTabs: 1, Loading: 19, Reveal: 11, ScrollTable: 3,
     Skeleton: 13, SplitFlap: 3, Tabs: 6,
   },
   tokens: { cardClass: 0 },
-  panelsStrikt: 141,
-  panelsWeit: 182,
+  // ⚠️ 141 -> 140 / 182 -> 181 am 22.08.2026, und die Richtung ist die gute:
+  // Der aufgeklappte Beitrags-Composer baute dieselbe Klassenkette von Hand,
+  // die die eingeklappte Fassung zwei Zeilen darueber ueber `Card` bezieht.
+  // Eine Flaeche, zwei Wege, in einer Datei – jetzt einer.
+  panelsStrikt: 140,
+  panelsWeit: 181,
 };
 
 const ARGS = new Set(process.argv.slice(2));

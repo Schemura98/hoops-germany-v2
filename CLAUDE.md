@@ -1617,12 +1617,17 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
   Spinner, kein `window.confirm`). **Rollout abgeschlossen (Wellen 1–5 + Welle 2b für das
   Team-Admin-Panel, Commits in der Chronik)** – **mit einer Ausnahme, nachgemessen am 15.08.2026:**
   `Card` hat **2 Importe** (`components/feed/FollowSuggestions.js`,
-  `components/posts/PostComposer.js` — nachgemessen 19.08.2026; die dritte Fundstelle
+  `components/posts/PostComposer.js` — nachgemessen 22.08.2026; die dritte Fundstelle
   `components/feed/SpieltagStrip.js` existiert nicht mehr) und `cardClass` **0 Verwendungen** (nur die Definition in
-  `lib/ui.js:22`); stattdessen bauen **141 Stellen** die Panel-Fläche von Hand (`bg-navy-800` +
-  `border-navy-600`). Die **141 ist eine Untergrenze**: Zeilen mit `bg-navy-800` gibt es **180** –
-  die übrigen 39 sind ebenfalls handgebaute Panels, nur mit abweichender Rahmenfarbe
-  (`signal-ok`, `brand-500`, dynamisch) oder ganz ohne. Betroffen sind **78 Dateien**. Alle übrigen
+  `lib/ui.js:22`); stattdessen bauen **140 Stellen** die Panel-Fläche von Hand (`bg-navy-800` +
+  `border-navy-600`). Die **140 ist eine Untergrenze**: Zeilen mit `bg-navy-800` gibt es **181** –
+  die übrigen 41 sind ebenfalls handgebaute Panels, nur mit abweichender Rahmenfarbe
+  (`signal-ok`, `brand-500`, dynamisch) oder ganz ohne. Betroffen sind **79 Dateien**.
+  ⚠️ **Nachgezogen am 22.08.2026, und ausnahmsweise nach UNTEN** (141 → 140 strikt,
+  182 → 181 weit): `PostComposer.js` baute im aufgeklappten Zustand dieselbe
+  Klassenkette von Hand, die es zwei Zeilen darüber über `Card` bezieht — eine
+  Fläche, zwei Wege, in einer Datei. Genau der Nebenbefund, der für
+  `FollowSuggestions.js` schon seit dem 15.08. hier steht. Alle übrigen
   Primitive sind echt im Einsatz (Button 25, Loading 19, EmptyState 15, Skeleton 13, Reveal 11,
   FormAlert 9, Tabs 6, CountUp 5, ConfirmAction/ScrollTable/SplitFlap je 3, Card 2, LinkTabs 1).
   ⚠️ **Stand 19.08.2026 nachgezogen — und der größte Teil der Drift war schon da**, bevor der

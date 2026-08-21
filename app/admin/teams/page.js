@@ -133,7 +133,7 @@ export default function AdminTeamsPage() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Suche nach Name oder E-Mail…"
-        className="mb-4 w-full sm:w-80 rounded-sm border border-navy-600 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+        className="mb-4 w-full sm:w-80 rounded-sm border border-navy-600 bg-navy-700 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 placeholder:text-mist-400"
       />
 
       {!loading && pending.length > 0 && (
@@ -295,7 +295,7 @@ export default function AdminTeamsPage() {
                 <select
                   value={selPlayer}
                   onChange={(e) => setSelPlayer(e.target.value)}
-                  className="w-full rounded-sm border border-navy-600 px-3 py-2.5 text-sm outline-none focus:border-brand-500"
+                  className="w-full rounded-sm border border-navy-600 bg-navy-700 px-3 py-2.5 text-sm outline-none focus:border-brand-500 placeholder:text-mist-400"
                 >
                   <option value="">– Mitglied auswählen –</option>
                   {manage.members.map((m) => (
@@ -323,7 +323,7 @@ export default function AdminTeamsPage() {
                   <button
                     onClick={transferAdmin}
                     disabled={!selPlayer || mBusy}
-                    className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-4 py-2 text-sm font-medium"
+                    className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 disabled:bg-navy-600 disabled:text-mist-300 text-navy-950 rounded-sm px-4 py-2 text-sm font-medium"
                   >
                     <PiUserGearBold className="text-xs" /> Als Admin übertragen
                   </button>

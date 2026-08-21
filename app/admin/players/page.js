@@ -114,7 +114,7 @@ export default function AdminPlayersPage() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Suche nach Name oder E-Mail…"
-        className="mb-4 w-full sm:w-80 rounded-sm border border-navy-600 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+        className="mb-4 w-full sm:w-80 rounded-sm border border-navy-600 bg-navy-700 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 placeholder:text-mist-400"
       />
 
       {loading ? (
@@ -179,7 +179,7 @@ export default function AdminPlayersPage() {
                           onChange={(e) =>
                             setPicked((s) => ({ ...s, [p._id]: e.target.value }))
                           }
-                          className="rounded-sm border border-navy-600 px-2 py-1 text-xs outline-none focus:border-brand-500"
+                          className="rounded-sm border border-navy-600 bg-navy-700 px-2 py-1 text-xs outline-none focus:border-brand-500 placeholder:text-mist-400"
                         >
                           <option value="">Team wählen…</option>
                           {teams.map((t) => (
@@ -191,7 +191,7 @@ export default function AdminPlayersPage() {
                         <button
                           onClick={() => assignAdmin(p._id)}
                           disabled={busyId === p._id || !picked[p._id]}
-                          className="text-xs bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-3 py-1 font-medium"
+                          className="text-xs bg-brand-500 hover:bg-brand-400 disabled:bg-navy-600 disabled:text-mist-300 text-navy-950 rounded-sm px-3 py-1 font-medium"
                         >
                           Setzen
                         </button>

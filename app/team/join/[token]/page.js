@@ -235,7 +235,7 @@ export default function TeamJoinTokenPage({ params }) {
             <button
               onClick={joinTeam}
               disabled={joining}
-              className="w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
+              className="w-full bg-brand-500 hover:bg-brand-400 disabled:bg-navy-600 disabled:text-mist-300 text-navy-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
             >
               {joining ? "Wechsle…" : `Zu ${team?.teamName} wechseln`}
             </button>
@@ -251,7 +251,7 @@ export default function TeamJoinTokenPage({ params }) {
           <button
             onClick={joinTeam}
             disabled={joining}
-            className="mt-6 w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
+            className="mt-6 w-full bg-brand-500 hover:bg-brand-400 disabled:bg-navy-600 disabled:text-mist-300 text-navy-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
           >
             {joining ? "Trete bei…" : "Dem Team beitreten"}
           </button>
@@ -319,7 +319,7 @@ export default function TeamJoinTokenPage({ params }) {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
+            className="w-full bg-brand-500 hover:bg-brand-400 disabled:bg-navy-600 disabled:text-mist-300 text-navy-950 rounded-sm px-4 py-2.5 font-medium transition-colors"
           >
             {submitting ? "Konto wird erstellt…" : "Konto erstellen & beitreten"}
           </button>

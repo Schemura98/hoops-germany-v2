@@ -153,7 +153,7 @@ export default function AdminLeagueRequestsPage() {
                       <button
                         onClick={() => review(r._id, false)}
                         disabled={busyId === r._id}
-                        className="inline-flex items-center gap-1.5 bg-signal-error/10 hover:bg-signal-error/15 disabled:opacity-60 text-signal-error rounded-sm px-4 py-2 text-sm font-medium"
+                        className="inline-flex items-center gap-1.5 bg-signal-error/10 hover:bg-signal-error/15 disabled:bg-navy-600 disabled:text-mist-300 text-signal-error rounded-sm px-4 py-2 text-sm font-medium"
                       >
                         <PiXBold className="text-xs" /> Ablehnen
                       </button>

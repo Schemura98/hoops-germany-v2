@@ -94,7 +94,7 @@ function ReplyItem({ reply, postId, commentId, currentPlayerId }) {
         <Avatar player={reply.player} className="h-7 w-7" />
       </Link>
       <div className="flex-1">
-        <div className="bg-navy-950 rounded-md px-3 py-2">
+        <div className="bg-navy-700 rounded-sm px-3 py-2">
           <Link
             href={authorLink(reply.player)}
             className="text-sm font-medium text-paper-50 hover:text-brand-400"
@@ -176,7 +176,7 @@ function CommentItem({ comment, postId, currentPlayerId }) {
         <Avatar player={comment.player} className="h-8 w-8" />
       </Link>
       <div className="flex-1 min-w-0">
-        <div className="bg-navy-950 rounded-md px-3 py-2">
+        <div className="bg-navy-700 rounded-sm px-3 py-2">
           <Link
             href={authorLink(comment.player)}
             className="text-sm font-medium text-paper-50 hover:text-brand-400"
@@ -225,12 +225,12 @@ function CommentItem({ comment, postId, currentPlayerId }) {
               onEnter={addReply}
               placeholder="Antworten…"
               wrapperClassName="relative flex-1"
-              className="w-full rounded-full border border-navy-600 px-4 py-1.5 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              className="w-full rounded-sm border border-navy-600 bg-navy-700 px-4 py-1.5 text-sm text-paper-50 placeholder:text-mist-400 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
             <button
               onClick={addReply}
               disabled={replying || !replyText.trim()}
-              className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-full px-4 py-1.5 text-sm font-medium"
+              className="bg-brand-500 hover:bg-brand-400 disabled:bg-navy-600 disabled:text-mist-300 text-navy-950 rounded-sm px-4 py-1.5 text-sm font-medium transition-colors"
             >
               Senden
             </button>
@@ -309,23 +309,48 @@ export default function PostCard({ post, currentPlayerId }) {
     ? `/team/team-detail/${teamAuthor.slug}`
     : "#";
 
-  // Zwei Ränge statt einer Schachtel (Entwurf Vivien, 15.08.2026, §3.4).
+  // GLEICHE KACHEL, UNGLEICHES LICHT (Vivien, 22.08.2026 – ersetzt die zwei
+  // Ränge aus §3.4 vom 15.08.2026).
   //
-  // Bis heute lagen ein beidseitig bestätigtes 80:94 und „Game Day! Heute
-  // zählt's." in exakt derselben Fläche, mit demselben Rahmen und demselben
-  // Gewicht. Das war der zweitgrößte Beitrag zum „alles gleich"-Eindruck.
+  // Die Absicht von damals bleibt richtig und bleibt bestehen: Ein beidseitig
+  // bestätigtes 80:94 und „Game Day! Heute zählt's." dürfen nicht dasselbe
+  // Gewicht haben. Falsch war nur der TRÄGER dieses Unterschieds. Rang A war
+  // eine Kachel, Rang B gar keine – im laufenden Feed gemessen ergab das die
+  // Folge Kachel · Kachel · nackt · Kachel · nackt · nackt · nackt · nackt ·
+  // Kachel · nackt. Nicht zwei Ränge, sondern ein ausgefranster Rand.
   //
-  // Rang A – Ereignis (`kind === "auto"`): eine Tatsache. Bleibt ein
-  //   Tafel-Segment mit Fläche und Rahmen.
-  // Rang B – Wort (`kind === "user"`): ein Gespräch. Kein Kasten, nur eine
-  //   Trennlinie.
+  // ⚠️ Vivien hatte genau das im eigenen Risiko-Register stehen
+  // (`docs/NEWSFEED-DESKTOP-2026-08-15.md`, Zeile „Zwei Ränge werden als
+  // Abwertung gelesen … Am echten Bild zu prüfen, nicht theoretisch").
+  // Befund Patrick am echten Bild, 22.08.2026: „mir gefällt nicht, dass manche
+  // Posts runde Kacheln haben und manche nicht."
   //
-  // ⚠️ Das ist ein GEWICHTS-Unterschied, keine Abwertung: Rang B wird ruhiger,
-  // nicht kleiner – die Textgröße bleibt unverändert. Was verschwindet, ist der
-  // Rahmen, der einem Halbsatz das Gewicht einer Meldung gab.
+  // Vereinheitlicht wird deshalb die GEOMETRIE, nicht die Fläche – beide Ränge
+  // sind dieselbe Kachel (`rounded-md`, `border-navy-600`, `p-4`), und der Rang
+  // trägt sich über die FLÄCHENSTUFE:
+  //   Rang A – Ereignis (`kind === "auto"`): das BELEUCHTETE Segment (navy-800).
+  //   Rang B – Wort (`kind === "user"`): das unbeleuchtete – ohne eigene
+  //     Fläche, der navy-950-Grund scheint durch.
+  //
+  // Das ist wörtlich der Tiefenmechanismus der visuellen Richtung
+  // („Tiefe entsteht aus Flächenstufe + 1px-Haarlinie", keine Schatten,
+  // keine Verläufe) und weiterhin ein GEWICHTS-Unterschied, keine Abwertung:
+  // Die Textgröße bleibt unverändert.
+  //
+  // ⚠️ VERWORFEN, mit Begründung, damit es niemand nachträglich „verbessert":
+  // eine 2-px-Akzentkante in brand-500 nur bei Ereignissen. Die Signaturleiste
+  // ist laut Spezifikation auf GENAU DREI Stellen limitiert; auf jedem zweiten
+  // Feed-Element wird die Signatur zur Tapete. Ebenso verworfen: der Rang über
+  // die Rahmenfarbe – navy-600 ist die eine Rahmenfarbe, und 1 px Farbunter-
+  // schied auf dunklem Grund trägt keinen Rangunterschied.
   const rang = isAuto
     ? "bg-navy-800 rounded-md border border-navy-600 p-4"
-    : "border-b border-navy-600 pb-5";
+    : "rounded-md border border-navy-600 p-4";
+
+  // Der Fokusring braucht den Grund, auf dem er wirklich liegt – auf der
+  // unbeleuchteten Kachel ist das navy-950, nicht navy-800. Sonst steht ein
+  // heller Ring auf der falschen Fläche.
+  const ringGrund = isAuto ? "focus-visible:ring-offset-navy-800" : "focus-visible:ring-offset-navy-950";
 
   return (
     <div className={rang}>
@@ -470,11 +495,27 @@ export default function PostCard({ post, currentPlayerId }) {
           ein Tippen am Rand trifft den falschen Knopf. Beim Bauen genau so
           passiert und nur aufgefallen, weil der Abstand mitgemessen wurde.
           Mit gap-5 bleiben 20 − 16 = 4 px echter Zwischenraum. */}
-      <div className="mt-3 flex items-center gap-5 text-sm text-mist-400 border-t border-navy-600 pt-3">
+      {/* ⚠️ DIE INNENLINIE GILT NUR AUF DER BELEUCHTETEN KACHEL (22.08.2026).
+          Auf der unbeleuchteten Kachel stehen sonst zwei Haarlinien derselben
+          Farbe wenige Pixel übereinander – die Trennlinie und der Kachelrahmen.
+          Am Stück Feed angesehen (390 px, drei Wort-Beiträge hintereinander)
+          las sich das als leerer Drahtrahmen statt als ruhiger Beitrag.
+          Die Korrektur ist WENIGER LINIE, nicht mehr Fläche: Eine zweite
+          Flächenstufe für Rang B gäbe es im System nicht (navy-900 ist die
+          Rolle der Navigationsleiste), und sie würde genau den Rangunterschied
+          wieder einebnen, um den es hier geht.
+          Auf der beleuchteten Kachel bleibt die Linie – dort trennt sie Inhalt
+          von Aktion INNERHALB einer gefüllten Fläche und hat keinen Rahmen
+          direkt daneben. */}
+      <div
+        className={`mt-3 flex items-center gap-5 text-sm text-mist-400 ${
+          isAuto ? "border-t border-navy-600 pt-3" : "pt-1"
+        }`}
+      >
         <button
           onClick={toggleLike}
           aria-pressed={liked}
-          className={`inline-flex items-center gap-1.5 -my-1.5 -mx-2 px-2 py-1.5 rounded-sm transition-colors hover:bg-navy-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-800 ${
+          className={`inline-flex items-center gap-1.5 -my-1.5 -mx-2 px-2 py-1.5 rounded-sm transition-colors hover:bg-navy-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 ${ringGrund} ${
             liked ? "text-brand-400" : "hover:text-brand-400"
           }`}
         >
@@ -489,7 +530,7 @@ export default function PostCard({ post, currentPlayerId }) {
         <button
           onClick={() => setShowComments((v) => !v)}
           aria-expanded={showComments}
-          className="inline-flex items-center gap-1.5 -my-1.5 -mx-2 px-2 py-1.5 rounded-sm transition-colors hover:bg-navy-700 hover:text-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-800"
+          className={`inline-flex items-center gap-1.5 -my-1.5 -mx-2 px-2 py-1.5 rounded-sm transition-colors hover:bg-navy-700 hover:text-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 ${ringGrund}`}
         >
           <PiChatCircleBold aria-hidden="true" />{" "}
           <span className="sr-only">Kommentare: </span>
@@ -517,12 +558,12 @@ export default function PostCard({ post, currentPlayerId }) {
               onEnter={addComment}
               placeholder="Kommentieren…"
               wrapperClassName="relative flex-1"
-              className="w-full rounded-full border border-navy-600 px-4 py-2 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              className="w-full rounded-sm border border-navy-600 bg-navy-700 px-4 py-2 text-sm text-paper-50 placeholder:text-mist-400 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
             />
             <button
               onClick={addComment}
               disabled={commenting || !commentText.trim()}
-              className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-full px-4 py-2 text-sm font-medium"
+              className="bg-brand-500 hover:bg-brand-400 disabled:bg-navy-600 disabled:text-mist-300 text-navy-950 rounded-sm px-4 py-2 text-sm font-medium transition-colors"
             >
               Senden
             </button>

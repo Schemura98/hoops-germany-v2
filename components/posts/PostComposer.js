@@ -94,9 +94,14 @@ export default function PostComposer({ player, onCreated, collapsible = false })
     );
   }
 
+  // ⚠️ `Card` statt derselben Klassen von Hand: Die eingeklappte Fassung oben
+  // benutzt bereits `Card`, die aufgeklappte hat die identische Klassenkette
+  // dupliziert. Eine Fläche, zwei Wege, in einer Datei – dieselbe Doppelung, die
+  // in CLAUDE.md als größter offener Konsistenz-Posten des Designsystems geführt
+  // wird (141 handgebaute Panels). Hier ist sie einen Einzeiler wert.
   return (
-    <div
-      className="bg-navy-800 rounded-md border border-navy-600 p-4"
+    <Card
+      padding="p-4"
       onFocusCapture={() => setFocused(true)}
       onBlurCapture={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget)) setFocused(false);
@@ -111,11 +116,11 @@ export default function PostComposer({ player, onCreated, collapsible = false })
         <div className="flex-1">
           {/* Autorenwahl (nur Team-Admins) */}
           {team && (
-            <div className="mb-2 inline-flex rounded-sm bg-navy-700 p-0.5 text-sm">
+            <div className="mb-2 inline-flex rounded-md bg-navy-700 p-0.5 text-sm">
               <button
                 type="button"
                 onClick={() => setAsTeam(false)}
-                className={`px-3 py-1 rounded-md font-medium transition-colors ${
+                className={`px-3 py-1 rounded-sm font-medium transition-colors ${
                   !asTeam ? "bg-navy-800 text-paper-50" : "text-mist-400"
                 }`}
               >
@@ -124,7 +129,7 @@ export default function PostComposer({ player, onCreated, collapsible = false })
               <button
                 type="button"
                 onClick={() => setAsTeam(true)}
-                className={`px-3 py-1 rounded-md font-medium transition-colors ${
+                className={`px-3 py-1 rounded-sm font-medium transition-colors ${
                   asTeam ? "bg-navy-800 text-brand-400" : "text-mist-400"
                 }`}
               >
@@ -133,6 +138,21 @@ export default function PostComposer({ player, onCreated, collapsible = false })
             </div>
           )}
 
+          {/* ⚠️ `bg-navy-700` IST DER FIX, NICHT DIE DEKORATION (Befund Patrick,
+              22.08.2026: „die Farbe / das Design des Textfeldes … passt nicht
+              zum Rest").
+              Hier stand KEINE Flächenklasse. Ein Textfeld ohne eigene Fläche
+              bekommt die des Browsers, und weil `app/globals.css`
+              `color-scheme: dark` setzt, ist das ein neutrales Dunkelgrau –
+              am laufenden Browser gemessen `rgb(59,59,59)`. Dieser Wert kommt
+              in `tailwind.config.js` NICHT VOR: Er ist kein falsch gewählter
+              Token, er ist gar keiner. Auf der navy-800-Karte las er sich als
+              warmer grauer Fleck in einer durchweg blauen Fläche.
+              navy-700 (`rgb(34,48,88)`) ist die Eingabefeld-Stufe der visuellen
+              Richtung und derselbe Wert, den `inputClass` in `lib/ui.js` für
+              JEDES andere Formularfeld der Plattform setzt.
+              ⚠️ Dieselbe Auslassung stand an zwei weiteren Stellen und ist dort
+              mitbehoben: Kommentar- und Antwort-Eingabe in `PostCard.js`. */}
           <MentionTextarea
             value={content}
             onChange={setContent}
@@ -141,7 +161,7 @@ export default function PostComposer({ player, onCreated, collapsible = false })
             }
             rows={2}
             autoFocus={collapsible}
-            className="w-full resize-none rounded-sm border border-navy-600 px-3 py-2 text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+            className="w-full resize-none rounded-sm border border-navy-600 bg-navy-700 px-3 py-2 text-paper-50 placeholder:text-mist-400 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
           />
 
           {/* Kurzer Hinweis auf die Post-Funktionen – erst beim Schreiben,
@@ -198,16 +218,32 @@ export default function PostComposer({ player, onCreated, collapsible = false })
             >
               <PiImageBold /> Bild
             </button>
+            {/* ⚠️ Kein `opacity-60` mehr: Deckkraft auf brand-500 über navy-800
+                mischt ein stumpfes Braun – gemessen war der Ruhezustand des
+                „Posten"-Knopfes damit eine Farbe, die es im System nicht gibt,
+                und Braun ist genau die Familie, die beim Farbentscheid vom
+                12.08.2026 verworfen wurde. Der Ruhezustand benutzt jetzt
+                Systemflächen statt einer durchscheinenden Marke.
+                ⚠️ navy-600 und NICHT navy-700, obwohl navy-700 die ruhigere
+                Wahl wäre: Der gleichnamige Knopf neben dem Kommentarfeld stünde
+                sonst in derselben Fläche wie das Feld selbst (beide navy-700,
+                direkt nebeneinander) und läse sich als dessen rechte Hälfte.
+                navy-600 trennt ihn mit 1,63 : 1 vom Feld ab und trägt mist-300
+                mit 4,99 : 1 – beides gerechnet, nicht geschätzt.
+                ⚠️ Hier stand 4,50 : 1. Nachgerechnet von Tobias im Gate vom
+                22.08.2026 sind es 4,99 – die Aussage trug, die Zahl war um 11 %
+                daneben. In diesem Projekt ist eine gesetzte Zahl eine
+                Zusicherung, also wird sie korrigiert und nicht gerundet. */}
             <button
               onClick={submit}
               disabled={posting || (!content.trim() && !image.trim())}
-              className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-5 py-2 text-sm font-medium transition-colors"
+              className="bg-brand-500 hover:bg-brand-400 disabled:bg-navy-600 disabled:text-mist-300 text-navy-950 rounded-sm px-5 py-2 text-sm font-medium transition-colors"
             >
               {posting ? "Posten…" : "Posten"}
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

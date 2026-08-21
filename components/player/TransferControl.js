@@ -56,7 +56,7 @@ export default function TransferControl({ player }) {
           disabled={saving}
           role="switch"
           aria-checked={available}
-          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${
+          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:bg-navy-600 disabled:text-mist-300 ${
             available ? "bg-brand-500" : "bg-navy-600"
           }`}
         >
@@ -109,7 +109,7 @@ export default function TransferControl({ player }) {
             <button
               onClick={() => save(true)}
               disabled={saving}
-              className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-5 py-2 text-sm font-medium"
+              className="bg-brand-500 hover:bg-brand-400 disabled:bg-navy-600 disabled:text-mist-300 text-navy-950 rounded-sm px-5 py-2 text-sm font-medium"
             >
               {saving ? "Speichern…" : "Speichern"}
             </button>

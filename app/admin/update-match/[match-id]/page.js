@@ -160,7 +160,7 @@ export default function AdminUpdateMatchPage({ params }) {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="w-full rounded-sm border border-navy-600 px-4 py-2.5 text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+            className="w-full rounded-sm border border-navy-600 bg-navy-700 px-4 py-2.5 text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 placeholder:text-mist-400"
           >
             <option value="scheduled">Geplant (Ergebnis zurücksetzen)</option>
             <option value="completed">Beendet (Ergebnis setzen)</option>
@@ -202,7 +202,7 @@ export default function AdminUpdateMatchPage({ params }) {
           <button
             onClick={save}
             disabled={saving}
-            className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-6 py-2.5 font-medium"
+            className="bg-brand-500 hover:bg-brand-400 disabled:bg-navy-600 disabled:text-mist-300 text-navy-950 rounded-sm px-6 py-2.5 font-medium"
           >
             {saving ? "Speichern…" : "Speichern"}
           </button>

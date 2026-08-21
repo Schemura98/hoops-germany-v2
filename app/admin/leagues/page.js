@@ -291,7 +291,7 @@ export default function AdminLeaguesPage() {
           <button
             onClick={createLeague}
             disabled={creating || !newLeague.name.trim()}
-            className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-4 py-2 text-sm font-medium"
+            className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 disabled:bg-navy-600 disabled:text-mist-300 text-navy-950 rounded-sm px-4 py-2 text-sm font-medium"
           >
             <PiPlusBold className="text-xs" /> {creating ? "…" : "Liga erstellen"}
           </button>
@@ -517,7 +517,7 @@ export default function AdminLeaguesPage() {
                   <button
                     onClick={() => save(l._id)}
                     disabled={busyId === l._id}
-                    className="text-xs bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-4 py-2 font-medium"
+                    className="text-xs bg-brand-500 hover:bg-brand-400 disabled:bg-navy-600 disabled:text-mist-300 text-navy-950 rounded-sm px-4 py-2 font-medium"
                   >
                     Speichern
                   </button>

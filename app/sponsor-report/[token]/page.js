@@ -83,7 +83,7 @@ export default function PublicSponsorReportPage() {
           <button
             type="submit"
             disabled={loading || !password}
-            className="mt-4 w-full inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 font-semibold rounded-md px-4 py-3"
+            className="mt-4 w-full inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 disabled:bg-navy-600 disabled:text-mist-300 text-navy-950 font-semibold rounded-md px-4 py-3"
           >
             {loading ? <PiBasketballBold className="animate-bounce" /> : "Report ansehen"}
           </button>

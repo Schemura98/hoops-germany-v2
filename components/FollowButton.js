@@ -80,7 +80,7 @@ export default function FollowButton({ type, targetId, onCountChange }) {
     <button
       onClick={toggle}
       disabled={busy}
-      className={`inline-flex items-center gap-2 rounded-sm px-5 py-2.5 text-sm font-medium transition-colors disabled:opacity-60 ${
+      className={`inline-flex items-center gap-2 rounded-sm px-5 py-2.5 text-sm font-medium transition-colors disabled:bg-navy-600 disabled:text-mist-300 ${
         following
           ? "border border-navy-600 text-mist-300 hover:border-signal-error hover:text-signal-error"
           : "bg-brand-500 hover:bg-brand-400 text-navy-950"

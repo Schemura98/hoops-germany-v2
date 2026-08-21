@@ -125,9 +125,20 @@ export default function PostFeed({ player, compactComposer = false }) {
         />
       ) : (
         <>
-          {posts.map((post) => (
-            <PostCard key={post._id} post={post} currentPlayerId={player?._id} />
-          ))}
+          {/* ⚠️ Eigener, ENGERER Abstand für die Beitragsliste (22.08.2026).
+              Solange Wort-Beiträge nur eine Trennlinie hatten, musste der
+              Abstand die Kastengrenze ersetzen – 24 px waren die Trennung.
+              Seit jeder Beitrag dieselbe Kachel trägt (`PostCard.js`, „gleiche
+              Kachel, ungleiches Licht"), leistet der Rahmen diese Arbeit, und
+              24 px lassen die Liste in Einzelteile zerfallen. 16 px binden sie
+              wieder zu einer Strecke.
+              Die 24 px BLEIBEN für den Rahmen darum (Eingabe → Umschalter →
+              Liste): Das sind drei verschiedene Dinge, keine drei Beiträge. */}
+          <div className="space-y-4">
+            {posts.map((post) => (
+              <PostCard key={post._id} post={post} currentPlayerId={player?._id} />
+            ))}
+          </div>
 
           {hasMore ? (
             <div ref={sentinelRef} className="flex justify-center py-2">

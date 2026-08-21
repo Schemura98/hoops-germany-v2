@@ -204,7 +204,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
               <button
                 onClick={join}
                 disabled={joining}
-                className="bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-navy-950 rounded-sm px-5 py-2.5 text-sm font-medium transition-colors"
+                className="bg-brand-500 hover:bg-brand-400 disabled:bg-navy-600 disabled:text-mist-300 text-navy-950 rounded-sm px-5 py-2.5 text-sm font-medium transition-colors"
               >
                 {joining ? "Senden…" : "Team beitreten"}
               </button>
