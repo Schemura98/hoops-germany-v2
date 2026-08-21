@@ -11,9 +11,20 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> ⚠️ **NICHT DEPLOYT, NUR COMMITTET (21.08.2026): DIE SEITE HAT JETZT ZWEI KÖRBE —
-> und der Ball fliegt bewusst NICHT in den zweiten.** Kein Push, kein Deploy; beides war
-> nicht beauftragt. Patricks Auftrag: „wie wäre es denn, wenn das Spielfeld aus der Hero unten
+> ✅ **DEPLOYT: `ea982c4`** (21.08.2026) — **DIE SEITE HAT JETZT ZWEI KÖRBE, und der Ball
+> fliegt bewusst NICHT in den zweiten.** Vier Commits: `34dd22f` (Vivien, das gespiegelte
+> Feldende), `492e465` (Kai, Wächter neu gebaut), `cdb8065` + `ea982c4` (zwei Prüfmaß-Korrekturen
+> und die beruhigte Außenlinie).
+> ✅ **Live nachgemessen (21.08.2026):** alle fünf Bauteile stehen (`drei`·`zone`·`brett`·`lade`·
+> `marke`) · **0 Ellipsen / 1 Kreis** — der Draufsicht-Fingerabdruck hält · Pass-Lücke 13,4 px
+> auf 1440, 13,8 px auf 360 · 16 Routen je 200 · 0 Laufzeitfehler.
+> ✅ **Selbst gezählt vor dem Deploy:** Playwright **300 grün / 5 rot / 1 übersprungen** — die 5
+> sind namentlich die vorbestehenden aus Roadmap 26 (3× `analytics-ehrlichkeit`, 2×
+> `sponsor-report`), keiner berührt die Startseite. `design-audit -- --check` ohne Abweichung.
+> ✅ **Beide Gates durch:** Kai über die Testarbeit (Wächter neu, 21 Fälle, grün), Tobias mit dem
+> Augenurteil — **freigabefähig mit Auflage**; die zwei Auflagen sind Gestaltung und liegen bei
+> Vivien (Roadmap 34 g/h).
+> Patricks Auftrag: „wie wäre es denn, wenn das Spielfeld aus der Hero unten
 > auf der Seite gespiegelt dargestellt wird und somit die ganze Seite ein Spielfeld ergibt und
 > somit am Ende der Pass an die Funktion/den Button zu einem Wurf in den gegnerischen
 > minimalistischen Korb landet." Neu: `components/landing/AbschlussFeld.js` (das gespiegelte
@@ -1109,7 +1120,8 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `17bb00a` (aktuell live) → `8e63cf6` (nur Doku) → `c4982bd` → `c5cbf6f` → `fb23317` → `0da80c7` (Dribbelweg,
+> **Rollback-Kette:** `ea982c4` (aktuell live) → `cdb8065` → `492e465` → `34dd22f` (Feldende,
+> vor den Wächtern) → `0f2a933` (nur Doku) → `17bb00a` → `8e63cf6` (nur Doku) → `c4982bd` → `c5cbf6f` → `fb23317` → `0da80c7` (Dribbelweg,
 > vor den Gate-Befunden) → `70c36ba` (letzter Stand vor der Ball-Reise) → `76406fb` → `571931c` (Feld) → `b3487a8` →
 > `d4c847a` (Leiste, erster Schritt) → `070a1e7` (letzter Stand vor Feld und Leiste) → `04ba621` → `07150cf` (nur Werkzeug) → `d2cfa47` → `35b8bc0` → `d841c4b` → `bd99263` (Dunk, vor den
 > Gate-Befunden) → `062989e` (letzter Stand vor dem Hero-Umbau) → `a4c6811` → `cf02293` →
@@ -1893,6 +1905,22 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     und sie ist der einzige Weg zurück zur Startseite. Vorbestehend, gehört zu 32 (b). (→ Vivien)
 
 34. **Offen aus der Feldende-Runde (21.08.2026)** — nichts davon blockiert:
+    ⚠️ **(g) und (h) liegen seit dem Deploy von `ea982c4` bei Vivien** (Tobias' Auflage zum
+    Augenurteil, von Patrick freigegeben):
+    **(g) Die Dreipunktlinie kreuzt die Tastenbeschriftungen bei Deckkraft 0,85** auf 768–1100 px.
+    Das Kreuzen ist erlaubt und begründet — kühle Linien dürfen hinter Text durchlaufen, der Hero
+    macht dasselbe. **Das Problem ist die Begründung im Code:** `HeroCourt.js` sagt, die Linie sei
+    dort „nicht mehr laut". **Bei 0,85 trägt der Satz nicht.** Zwei ehrliche Wege: die Linie wird
+    dort tatsächlich leiser, oder der Satz wird durch das ersetzt, was gilt. ⚠️ Es geht über die
+    Tasten — die **einzige Handlungsaufforderung der Seite**; der Kontrast der Beschriftung gehört
+    nachgerechnet, nicht geschätzt.
+    **(h) Der Hero-Schnitt (identisch mit 30 e), laut Tobias „im Vergleich der auffälligste Punkt
+    der Seite":** Seitenlinie endet hart, Außenlinie beginnt **152 px versetzt auf derselben
+    Höhe**. Am Feldende ist es gelöst, weil das ferne Feld vor der Naht auf Deckkraft null fällt —
+    dort gibt es nichts zu beschneiden. Am Hero geht dasselbe nicht (s. 30 e): Die Bühnenunterkante
+    fällt je nach Breite auf eine ANDERE Koordinate der Zeichnung, ein früh genug greifender
+    Ausblendpunkt löscht mobil den Bogenscheitel. **Ein begründetes Nein ist zulässig** — dann
+    bleibt der Befund protokolliert statt behoben.
     **(a)** ⚠️ **`tests/e2e/abschluss-korb.spec.mjs` ist rot und muss neu geschrieben werden**
     (→ Kai). Der Gegenstand (`KorbRuhe.js`) ist ersetzt; zwei der drei Zusicherungen leben
     weiter. Vollständige Prüfmaße samt Gegenproben stehen oben im Deploy-Block.

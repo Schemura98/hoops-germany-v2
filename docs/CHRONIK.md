@@ -5163,3 +5163,67 @@ weil die Tinte der mittigen Überschrift schmaler ist als die Zone. Roadmap 34 (
 `scripts/messungen/` (im Repo, NICHT in `tmp/` — Roadmap 32 e): `shot.mjs`, `ausschnitt.mjs` (3-fache Vergrößerung),
 `messen.mjs` (Leiter, Ring, Pass), `tinte.mjs` (sichtbare Berührung der Tinte),
 `ankunft.mjs` (der Moment der Ankunft gegen die haftende Leiste).
+
+#### Update (21.08.2026, Nachtrag) — Die Seite hat zwei Körbe
+
+**Deploy:** `ea982c4` (aus `34dd22f` → `492e465` → `cdb8065` → `ea982c4`), am Server verifiziert.
+
+**Patricks Idee:** *„wie wäre es denn, wenn das Spielfeld aus der Hero unten auf der Seite
+gespiegelt dargestellt wird und somit die ganze Seite ein Spielfeld ergibt und somit am Ende der
+Pass an die Funktion/den Button zu einem Wurf in den gegnerischen minimalistischen Korb landet."*
+
+Neu: `components/landing/AbschlussFeld.js`, `components/landing/feldmasse.js` (die FIBA-Maße als
+EINE Quelle für beide Enden). Entfallen: `components/landing/KorbRuhe.js`.
+
+**Zwei begründete Neins — beide von Patrick angenommen**
+- **Kein Wurf in den Korb, sondern der Assist.** ⚠️ **Eine Draufsicht kann keinen Wurf zeigen.**
+  Was einen Wurf ausmacht, ist der Bogen — und der liegt in genau der Ebene, die eine Ansicht von
+  senkrecht oben auf null projiziert. Von oben sind ein Wurf und ein Rollen dasselbe Bild: eine
+  gerade Linie zum Ring, dann ist der Ball weg; das liest sich nicht als Korb, sondern als Loch.
+  Den Bogen zeichnen ginge nur in Schrägansicht — und zwei Projektionen auf einer Seite ist der
+  Befund, mit dem Patrick am 19.08. die alte Hero-Choreografie zurückgenommen hat.
+  Dazu: Unter der Taste liegen 385 px, die nicht mit dem Fenster wachsen (der Blocker der
+  Vorrunde), und der Ball ist die einzige gefüllte Fläche der Seite — ihn an der einzigen
+  Handlungsaufforderung vorbeizuschicken gibt den stärksten Blickfang für Dekoration aus.
+  **Gebaut:** Ring **unter** der Tastenreihe, in Laufrichtung dahinter. Ball → Taste (deine Hand)
+  → Ring (wofür). *Der letzte Pass vor dem Abschluss ist der Assist. Die Seite spielt den Assist;
+  der Wurf gehört dem Leser, und der Klick ist er.* — Patrick hat den Satz zurückgegeben.
+  ⚠️ Auch „Ring über der Taste" abgelehnt: Das wäre eine Wiederholung des Heros, und ein zweiter
+  oranger Ring unmittelbar über einer orangen Taste ist der Fall vom 20.08.
+- **Kein durchgehendes Feld — Arithmetik.** Ein Feld ist 28 × 15 m (quer, 1,87 : 1), eine
+  Startseite mobil ~360 × 6.000 px (hochkant, 1 : 16,7). Maßstabsgetreu bliebe ein 118-px-Feld
+  oder ein verzerrtes. Gebaut sind **zwei gezeichnete Enden plus die durchlaufende Außenlinie**;
+  was die Seite zu einem Feld macht, ist gleiche Projektion, gleiche Maße, gleiche Farbrolle.
+  *So sieht auch ein Spieler das Feld — die Markierungen um sich herum scharf, die Seitenlinien
+  in die Ferne, nicht den Grundriss.*
+
+**Tobias' „Radarschirm" ist erledigt — durch das Element, das er selbst benannt hatte.** Was einen
+Ring eindeutig macht, ist das **Brett**; es ist maßstabsgetreu 4 Ringradien breit und brauchte
+statt 1 : 1 ein Verhältnis von 3 : 1. In einem Feldstück ist der Platz da.
+
+**⚠️ Der Fehler, den nur das Hinsehen fand — und er steckt auch im Hero.** Der Textabstand hing
+zuerst am selben Anker wie im Hero (Unterkante der Ladezone). Alle Zahlen waren konstant. Die
+**Zonenlinien reichen aber doppelt so tief** und liefen mit Deckkraft **0,47–0,69** durch „Du
+organisierst dein Team? Team gründen". Der Anker ist jetzt die **Sichtbarkeitsgrenze** (4,2 m)
+statt der Gegenstand — 0,000 Berührungen auf 20 von 20 Kombinationen.
+⚠️ **Der Hero trägt denselben Anker und denselben latenten Fehler.** Er fällt dort nicht auf, weil
+eine mittige, kurze Überschrift schmaler ist als die Zone. *Das ist Glück, keine Konstruktion.*
+Wer die Hero-Überschrift verbreitert, bekommt den Befund sofort, und kein Test meldet es
+(Roadmap 34 b).
+
+**Der Wächter neu gebaut** (`492e465`, Kai): `abschluss-korb.spec.mjs` von 6 auf **21 Fälle**
+(Projektion · freie Tinte · gesetzter Abstand · gleicher Ring). Jede der vier Zusicherungen wurde
+mindestens einmal durch eine Gegenprobe rot gesehen — ein grüner Test, der nicht rot werden kann,
+sichert nichts. Zwei Prüfmaße im Deploy-Block waren dabei **Messartefakte** und wurden korrigiert
+(`cdb8065`): Die „20 von 20"-Trefferzahl zählte auch die Dreipunktlinie mit, die hinter Text
+durchlaufen darf; und der befürchtete 2-px-Sprung zwischen den Anmeldezuständen existiert nicht —
+er entstand durch Messen der Element-Kästen statt der Zeilenkästen.
+
+**Offen, bei Vivien** (Tobias' Auflage, von Patrick freigegeben): Die Dreipunktlinie kreuzt die
+Tastenbeschriftungen bei **0,85** — erlaubt, aber die Begründung im Code („dort nicht mehr laut")
+trägt bei 0,85 nicht. Und der Hero-Schnitt: Seitenlinie endet hart, Außenlinie beginnt 152 px
+versetzt auf derselben Höhe — laut Tobias der auffälligste Punkt der Seite.
+
+**Live nachgemessen (21.08.2026):** alle fünf Bauteile · 0 Ellipsen / 1 Kreis · Pass-Lücke 13,4 px
+(1440) und 13,8 px (360) · 16 Routen je 200 · 0 Laufzeitfehler. Vor dem Deploy selbst gezählt:
+300 grün / 5 rot (vorbestehend, namentlich geprüft) / 1 übersprungen.
