@@ -91,7 +91,13 @@
 > **(4)** Mit bestehendem Konto landet man auf `/team/admin` statt `/team/create` — **kein
 > Fehler**: `app/team/create/page.js:33` leitet Team-Admins weiter, damit niemand versehentlich
 > einen Zweitverein gründet. Tobias ist über dieselbe Stelle gestolpert.
-> ⚠️ **Offene Rückfrage an Patrick:** Kam dabei ein **Hinweis**, oder war die Weiterleitung stumm?
+> ⚠️ **BEANTWORTET (22.08.2026, Patrick): „es gab keinen wirklichen Hinweis" — die Weiterleitung
+> ist STUMM.** Damit ist es doch ein Befund: Ein Nutzer klickt „Team gründen", landet ohne ein
+> Wort in einer Vereinsverwaltung und muss selbst schließen, dass er schon einen Verein hat.
+> `app/team/create/page.js:33` leitet ohne Meldung um. ⚠️ **Der Hinweis war ausdrücklich gebaut
+> worden** — CLAUDE.md führt ihn seit dem 15.08. als erledigt („Hinweis auf `/team/create` für
+> alle, die dort landen, obwohl sie im Kader stehen, sonst versehentlich ein Zweitverein").
+> Entweder greift er im Google-Weg nicht, oder er ist verlorengegangen. → **Roadmap 35**.
 > ✅ **Zusätzlich live geprüft (nur lesend):** Die Weiterleitungs-Absicherung greift auch im
 > Google-Weg — das Ziel liegt im Cookie `g_oauth_next`, und `https://evil.com`, `//evil.com`,
 > `/\evil.com`, `javascript:` werden **verworfen**, während `/team/create` und
@@ -2059,6 +2065,15 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     zurückgeht. Tobias' Testvorschlag für danach: von der untersten Position auf eine Detailseite
     und zurück, Rückkehrposition gegen Ausgangsposition — **mit Ehrlichkeitsschranke „war ich
     vorher überhaupt unten?"**, sonst ist der Test grün, ohne gemessen zu haben.
+
+35. ⚠️ **Die Weiterleitung von `/team/create` nach `/team/admin` ist STUMM** (Befund Patrick,
+    22.08.2026, beim Google-Test). Wer bereits einen Verein verwaltet und „Team gründen" klickt,
+    landet ohne jede Meldung in der Vereinsverwaltung. Fundstelle `app/team/create/page.js:33`.
+    ⚠️ **Der Hinweis war gebaut und ist in CLAUDE.md seit dem 15.08. als erledigt geführt** — er
+    greift also nicht (mehr) oder nicht auf diesem Weg. **Erst nachsehen, ob er noch existiert,
+    bevor er neu gebaut wird.** Klein, aber es trifft jeden Team-Admin, der über einen
+    Flyer-Link kommt — und Tobias ist über dieselbe Stelle gestolpert und hätte sie beinahe als
+    Fehler gemeldet.
 
 33. **Offen aus der Logo-Runde (21.08.2026)**, keiner blockierend:
     **(a)** ⚠️ `scripts/logo-leiste-bauen.mjs` **behauptet eine Sicherung, die er nicht hat** —

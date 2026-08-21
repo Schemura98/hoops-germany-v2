@@ -70,7 +70,10 @@ Vier Ergebnisse, von Patrick selbst geklickt (ich kann keine Zugangsdaten eingeb
 4. Mit bestehendem Konto landet er auf `/team/admin` statt `/team/create`. **Kein Fehler:**
    `app/team/create/page.js:33` leitet Team-Admins weiter, damit niemand versehentlich einen
    Zweitverein gründet. Tobias ist über dieselbe Stelle gestolpert.
-   ⚠️ **Offene Rückfrage an Patrick:** Kam dabei ein HINWEIS, oder war die Weiterleitung stumm?
+   ⚠️ **BEANTWORTET (Patrick): „es gab keinen wirklichen Hinweis" — die Weiterleitung ist
+   STUMM.** Damit ist es ein Befund → **Roadmap 35**. Der Hinweis war gebaut und steht seit dem
+   15.08. als erledigt in CLAUDE.md; er greift also nicht mehr oder nicht auf diesem Weg.
+   **Erst nachsehen, ob er existiert, bevor er neu gebaut wird.**
 
 **Zusätzlich von mir live geprüft (nur lesend, Prod):** Die Weiterleitungs-Absicherung greift auch
 im Google-Weg — das Ziel landet im Cookie `g_oauth_next`, und `https://evil.com`, `//evil.com`,
