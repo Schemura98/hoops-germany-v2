@@ -116,7 +116,15 @@ export default function PlayerNav({ player }) {
           hing, nicht am Bildschirm. */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-4 h-16">
         <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
-          <img src="/images/logo.svg" alt="Hoops Germany" className="h-9 w-auto object-contain" />
+          {/* Dieselbe Leisten-Fassung wie in `components/layout/Navbar.js` —
+              Begründung steht dort. Hier ist sie NICHT wegen Platzmangels
+              nötig (diese Leiste hat reichlich Luft), sondern weil zwei
+              Leisten mit unterschiedlich gesetzter Wortmarke eine sichtbare
+              Inkonsistenz wären: Wer sich anmeldet, wechselt von der einen
+              zur anderen und sähe das Logo die Form wechseln.
+              `h-9` (36 px) ist unverändert; die Versalhöhe steigt allein
+              durch die Fassung von 11,65 auf 16,22 px. */}
+          <img src="/images/logo-leiste.svg" alt="Hoops Germany" className="h-9 w-auto object-contain" />
         </Link>
 
         {/* Inline-Navigation ab großen Screens, sonst Hamburger */}

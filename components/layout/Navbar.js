@@ -624,8 +624,35 @@ export default function Navbar() {
             href="/"
             className="flex shrink-0 items-center hover:opacity-80 transition-opacity"
           >
+            {/* ⚠️ `logo-leiste.svg`, NICHT `logo.svg` — das ist die
+                Leisten-Fassung der Wortmarke, erzeugt von
+                `scripts/logo-leiste-bauen.mjs` aus derselben Zeichnung.
+                Ball und Buchstaben sind exakt dieselben Pfade; nur der Claim
+                „BASKETBALL 4 EVERYONE" fehlt und der Name steht zweizeilig.
+                Befund Patrick 21.08.2026 („zu klein, Schrift schlecht lesbar").
+                Gemessen an der GERENDERTEN Leiste, nicht in der Datei:
+                    HOOPS GERMANY   Versalhöhe 14,24 px
+                    der Claim        Versalhöhe  5,38 px  (mobil 4,39)
+                    Nav-Punkt        Versalhöhe  9,94 px
+                Die Hauptzeile war also nie zu klein — sie ist die GRÖSSTE
+                Schrift der Leiste. Unlesbar war nur der Claim, und das Logo
+                WIRKTE klein, weil zwei Drittel seiner Höhe an den Ball und an
+                eine Zeile gingen, die niemand entziffert.
+                ⚠️ „Einfach größer" war ausgeschlossen: Die Leiste hat auf JEDEM
+                Bildschirm nur 1104 px (`max-w-6xl` + `px-6`), angemeldet davon
+                ~28 px Reserve — und die einzeilige Wortmarke ist 7,00× so breit
+                wie hoch. Jeder Pixel Versalhöhe kostet sieben in der Breite.
+                Zweizeilig regiert statt „HOOPS GERMANY" (566,4 Einheiten) nur
+                noch „GERMANY" (327,3): −42 % bestimmende Breite, und genau die
+                wird zu Größe. Ergebnis 134,1 × 44 statt 149,9 × 44 —
+                Versalhöhe 19,82 px (+39 %) bei 15,8 px WENIGER Breite.
+                Die Leiste gibt hier also Platz ab, statt welchen zu fordern;
+                deshalb blieb die Navigationsstruktur unangetastet.
+                ⚠️ Die Höhenklassen bleiben bewusst unverändert (`h-9 sm:h-11`):
+                Der vertikale Rhythmus der Leiste ist unberührt, getauscht wird
+                ausschließlich die Datei. */}
             <img
-              src="/images/logo.svg"
+              src="/images/logo-leiste.svg"
               alt="Hoops Germany"
               className="h-9 sm:h-11 w-auto object-contain"
             />
