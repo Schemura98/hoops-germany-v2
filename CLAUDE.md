@@ -228,6 +228,106 @@
 > ⚠️ **Nebenbefund, nicht mein Auftrag:** `data-spur="desktop"` in der Feature-Strecke liefert
 > `d=""` — ein leerer Pfad mit `pathLength="1"` im ausgelieferten Blatt.
 >
+> ✅ **DEPLOYT: `c4982bd`** (21.08.2026) – **Der Ball dribbelt durch die Seite, und die Landung
+> ist zum ersten Mal sichtbar.** Vier Commits: `0da80c7` (Vivien, Dribbelweg + Außenlinie + Pass),
+> `fb23317` (Vivien, beide Gate-Blocker), `c5cbf6f` + `c4982bd` (Kai, vier Wächter + ein echter Fix).
+>
+> **Patricks Auftrag:** „beim Runterscrollen mit dem orangenen Ball an den Funktionen
+> vorbeidribbeln, die Außenlinie über die ganze Seite, am Ende ein Pass an die Anmeldung."
+> Neue Bauteile: `components/landing/Dribbelweg.js` (ersetzt `FeatureProgressRail.js`),
+> `DribbelBall.js`, `BallPass.js`, `Aussenlinie.js`. Entfallen: `FeatureProgressRail.js`,
+> `HeroGlyphs.js` und die Korb-Endmarke in Schrägansicht (sie war der **dritte** Korb der Seite).
+>
+> ⚠️ **DER KANAL WAR PATRICKS EIGENE IDEE, und sie hat den Umbau billig gemacht.** Er sah im
+> Screenshot den leeren Streifen zwischen Text- und Grafikspalte: *„zwischen dem Text und der
+> Grafik ist doch perfekt platz für einen minimalistischen Dribbler."* Weil die Abschnitte die
+> Seiten wechseln, **kreuzt der Ball dort keinen Buchstaben** – der ganze Ausweich-Apparat, der
+> beim Vorgänger 1.350 Zeilen kostete, entfällt. **Netto 315 Zeilen WENIGER als vorher.**
+> Regel dazu: **Ist der Kanal zu schmal, wird der Weg gar nicht gezeichnet** – eine Layout-Frage
+> mit binärer Antwort, einmal je Fenstergröße, statt einer Verhandlung pro Bild.
+> ⚠️ **Patricks zweite Idee hat Vivien BEGRÜNDET ABGELEHNT** („der Ball dribbelt um die
+> Buchstaben"): Der eingeloggte Eyebrow ist 179,8 px breit, der ausgeloggte 239,5 – ein fest
+> gezeichneter Weg um eine Überschrift bricht bei jedem Textwechsel. *„Einen Weg um Buchstaben zu
+> zeichnen, deren Text sich diese Woche ändert, ist die teure Variante von Zeitverschwendung."*
+> Stattdessen: **Der Hero ist der Anwurf, nicht das Dribbling.**
+>
+> ⚠️ **DER BLOCKER (Tobias): Der Pass kam auf hohen Fenstern nie an.** Er wird in Anteilen der
+> **Fensterhöhe** gefahren (Ziel-Oberkante 88 % → 58 %) – dafür muss unter der Taste noch Seite
+> zum Scrollen übrig sein. Gemessen sind das **385 px, und die Zahl wächst nicht mit dem
+> Fenster**: ab ~917 px Fensterhöhe endet die Seite mitten im Flug. Auf dem **iPad Pro 12,9"**
+> kam der Pass bei 54 % zum Stehen, der Ball **überlappte die Taste um 16,8 px** – genau das
+> Bild, das die Datei ausschließen wollte („ein Ball, der in einer Taste verschwindet, ist keine
+> Aussage, es ist ein Verschwinden").
+> ⚠️ **Zum dritten Mal dieselbe Achse: Breiten geprüft, der Ausfall hing an der HÖHE**
+> (Roadmap 20b, 20f). Behoben: Die Endmarke wird gegen das gehalten, was die Seite hergibt.
+> **Live nachgemessen: 1024×1366 → 14,0 px Abstand, Ball vollständig sichtbar.**
+> ✅ **UND DAMIT IST ROADMAP 20 (d) EINGELÖST:** Tobias hat gemessen, dass der Moment der Ankunft
+> auf **allen zehn geprüften Fenstern frei sichtbar** ist. Sein Satz: *„Das war der Kern von
+> Roadmap 20 (d) – die Landung hat noch nie jemand gesehen. Sie ist jetzt zu sehen."*
+>
+> ⚠️ **DIE ZAHL, DIE ZWEI PRÜFER GEGENEINANDER STELLTE — und beide hatten recht.**
+> Im Kopf von `Dribbelweg.js` stand „Kanal nie schmaler als 107 px, dem 20-px-Ball bleiben 43 px
+> Luft auf jeder Seite". Kai maß 107 nach, Tobias maß 64. **Es sind drei verschiedene Größen:**
+> **107** = Abstand der GEZEICHNETEN Textkante zur Grafik · **64** = Abstand der SPALTENKANTE zur
+> Grafik, und **nur mit der zweiten rechnet der Code** · **9,6** = Tobias nahm die achsparallele
+> Hüllbox des gedrehten Balls (**25,45 px** statt 20) als Radius.
+> Der Fehler war die **Ableitung**: „43 px auf jeder Seite" unterstellt einen mittig laufenden
+> Ball, obwohl er absichtlich außermittig läuft (35 % des Kanals). Wahrer Wert: **12,85 px**.
+> ⚠️ **Unsichtbar blieb es durch einen Zahlenzufall:** 107 − 64 = 43 (der ausgefranste Textrand)
+> und (107 − 20) / 2 = 43,5 (die falsche Ableitung). **Zwei verschiedene 43** – wer die Zeile las,
+> fand sie bestätigt. Musterfall für `docs/MUSTER-ZAHLEN-DIE-LUEGEN-2026-08-13.md`.
+> **`KANAL_MIN` war eine gegriffene Zahl mit Haarauslöser** (60 gegen echte 64 – vier Pixel, und
+> der GANZE Weg verschwindet stumm). Sie rechnet sich jetzt aus der Größe, **die tatsächlich
+> klemmt**: `(LUFT_MIN + Ballradius) / NEIGUNG`, `LUFT_MIN` = 10 px. Dazu `md:gap-16` → `md:gap-20`:
+> Luft **12,85 → 18,57 px**, Abstand zur Schwelle **4 → 23 px**.
+> ⚠️ **Solange die Grafik ihre Spalte ausfüllt, IST der Kanal genau dieser Spaltenabstand** – wer
+> ihn in `LandingFeatures.js` ändert, ändert den Kanal.
+>
+> ⚠️ **DER PASS FLOG DURCH ÜBERSCHRIFT UND FLIESSTEXT (Kai) – umgebaut, nicht begründet.**
+> Gemessen kreuzte er auf Desktop 18–23 %, mobil 43–48 % des Fluges gezeichneten Text. Damit galt
+> die Regel, die den ganzen Umbau trägt („der Ball läuft weder vor noch hinter dem Text"),
+> ausgerechnet **am Ziel der Reise** nicht. **Entschieden: umbauen** – eine Ausnahme dort hätte
+> die Regel entwertet, die den Umbau billig macht. Der Ball kommt jetzt **waagerecht von links**
+> und bleibt in Bändern, die das Layout ohnehin frei hält. **0 von 40** Textberührungen.
+> ⚠️ **Eine Ausnahme bleibt, und der Kommentar dazu war ZU ENG** (Befund Tobias): Vivien schrieb,
+> es treffe „nur das eine Fenster 390×844". Gemessen hängt es an **zwei** Dingen, keines davon
+> ein Fenster: an der **Ruhelage über der Taste** (360/375/390/430 in beiden Zuständen, 768
+> ausgeloggt) und an der **Ankunftsart** – beim gleitenden Scrollen **nie**, beim Sprung ans
+> Seitenende 12–14 von 73 Bildern (166–184 ms). *„Wer die Zeile liest, prüft auf 390×844 nach,
+> findet nichts und hält die Sache für erledigt."* Kommentar korrigiert.
+>
+> ⚠️ **BEI REDUZIERTER BEWEGUNG WAR DIE ZEICHNUNG NACH EINER INHALTSÄNDERUNG DAUERHAFT FALSCH**
+> (Kai B10, echter Defekt, behoben). Der ruhige Zweig hörte nur auf `resize` des **Fensters**,
+> nie auf Änderungen des **Inhalts** – und weil dort kein Scroll-Zuhörer läuft, blieb es so.
+> Gemessen ohne die Abhilfe: Weg endet **56 px zu früh**, Pass-Ball liegt **120 px neben der
+> Taste**. Auslöser im Alltag: der Nachrichten-Block holt seine Meldungen erst nach dem Laden.
+> ⚠️ Dieselbe Fehlerform hatte Vivien **eine Datei weiter im selben Commit** bereits behoben.
+> ✅ Tobias' Gegenprobe: Beobachter im Browser abgeklemmt → Weg 28 px zu kurz, Ball 80 px
+> versetzt. **Live nachgemessen im ruhigen Zweig: 14,3 px, Sollwert 14.**
+>
+> ⚠️ **DIE ABSICHERUNG WAR FAST WERTLOS — von 8 zurückgedrehten Fehlern wurde 1 rot.**
+> Kai hat jede Behebung dieser Runde künstlich zurückgebaut und gemessen, welcher Test anschlägt.
+> **Sieben von acht liefen durch eine vollständig grüne Suite**, darunter der Blocker der Runde
+> und der Pass-über-Text-Rückbau. Ursache bei letzterem stand **wörtlich im Code**: „Wer hier eine
+> Fallhöhe einbaut, holt Befund B1 zurück – und zwar ohne dass ein Test rot wird."
+> ⚠️ Und beim Blocker: Die Fenstermatrix des Tests hörte bei **1024 px Höhe** auf, der Defekt
+> beginnt bei ~917. Kais Satz: **„Die Lehre steht im Kommentar und nicht in der Testmatrix."**
+> ✅ **Behoben mit vier Wächtern: jetzt 7 von 8 rot**, Suite **266 → 291 Tests** (285 grün,
+> 5 rot vorbestehend, 1 übersprungen). ⚠️ Kais eigener Wächter war dabei zuerst **grün, auch mit
+> zurückgedrehter Abhilfe** – `reducedMotion` kam im Browser nicht an, beide Fälle liefen im
+> normalen Zweig. **Gefunden hat es die Mutationsmatrix, nicht das Lesen.**
+>
+> ⚠️ **OFFEN (Roadmap 31): Die Leseposition geht beim Zurückgehen verloren.** Von ganz unten auf
+> `/signup` und zurück landet man **571–624 px** zu hoch, auf `/spieler` **673–2.581 px**.
+> **Vorbestehend, von BEIDEN Prüfern unabhängig reproduziert**, auch auf unveränderten Seiten.
+> Der Browser stellt die Position wieder her, während das Dokument noch kürzer ist, klemmt am
+> damaligen Maximum – und danach korrigiert niemand nach. **Der einzige echte Produktfehler
+> dieser Runde**, und er trifft jeden, der auf einer langen Liste stöbert.
+>
+> ✅ **Live nachgemessen (21.08.2026):** Pass kommt an – 1440×900 → 13,4 px · 1024×1366 → 14,0 px,
+> Ball jeweils vollständig sichtbar · ruhiger Zweig nachweislich aktiv, 14,3 px · 16 Routen je 200
+> · 0 Laufzeitfehler.
+>
 > ✅ **DEPLOYT: `70c36ba`** (21.08.2026) – **Das Spielfeld im Hero ist maßstabsgetreu, und die
 > Navigationsleiste war auf JEDER Desktop-Breite zu voll.** Fünf Commits: `d4c847a` + `b3487a8`
 > + `76406fb` (Vivien/Kai, Leiste) und `571931c` (Vivien, Feld), zusammengeführt in `70c36ba`.
@@ -789,7 +889,8 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `70c36ba` (aktuell live) → `76406fb` → `571931c` (Feld) → `b3487a8` →
+> **Rollback-Kette:** `c4982bd` (aktuell live) → `c5cbf6f` → `fb23317` → `0da80c7` (Dribbelweg,
+> vor den Gate-Befunden) → `70c36ba` (letzter Stand vor der Ball-Reise) → `76406fb` → `571931c` (Feld) → `b3487a8` →
 > `d4c847a` (Leiste, erster Schritt) → `070a1e7` (letzter Stand vor Feld und Leiste) → `04ba621` → `07150cf` (nur Werkzeug) → `d2cfa47` → `35b8bc0` → `d841c4b` → `bd99263` (Dunk, vor den
 > Gate-Befunden) → `062989e` (letzter Stand vor dem Hero-Umbau) → `a4c6811` → `cf02293` →
 > `7da3905` → `96eba14` → `da7756b` → `aff17e6` → `787d760` → `cc128ed` → `dba7baa` → `f4c2d15` → `e00b64a` → `f27736a` → `40dff48` → `f5b1b3f` → `f46a783` → `84cb7ba` → `75f2c3a` → `bc7ccad` → `6e2fbe1` → `1bcf854` →
@@ -1512,32 +1613,57 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     statt sofort; verschoben, nicht gelöst. **(d)** Der Kommentar zur Lücke für Ausgeloggte
     („nur ein Bild") ist über den Nutzer falsch – gemessen 1115 ms auf 3G.
 
-30. **Offen aus der Dribbelweg-Nacharbeit (21.08.2026) — drei Testnachträge bei KAI, zwei
-    Gestaltungsfragen bei Vivien/Patrick.**
-    **Bei Kai (ausdrücklich nicht von Vivien gebaut):**
-    (a) ⚠️ **Der Drehpunkt des rollenden Balls hat zum dritten Mal keinen Wächter**
-    (s. Abschnitt 0 und `tests/e2e/README.md`). Nachfolger muss den `transform-origin` im
-    Browser MESSEN, nicht im Quelltext lesen.
-    (b) **Das Ein- und Ausblenden des Balls an den Streckenenden ist ungedeckt** (Kai B2):
-    Man kann es ersatzlos entfernen, ohne dass ein Test rot wird. Der Kommentar im Code nennt
-    den Defekt, der dann zurückkommt („Ball klebt an der Klemmgrenze, Anzeige läuft weiter") —
-    ein behobener, namentlich bekannter Defekt ohne Wächter.
-    (c) **Die Ehrlichkeitsschranke in `dribbelweg.spec.mjs` ist zu locker** (Kai B7): Sie
-    verlangt „mehr als 6 von 15", gemessen sind im gesunden Fall 14 von 15. Sie fängt den
-    Totalausfall, nicht den Ausfall auf halber Strecke. Kais Vorschlag: 12.
-    ⚠️ **Hinweis von Vivien:** Die Nacharbeit hat an (b) und (c) nichts verschoben. An (a)
-    auch nicht — der Drehpunkt des mobilen Balls ist unverändert.
-    **Bei Vivien/Patrick:**
-    (d) **Der Auftakt der Außenlinie ist auf jeder Breite nur 58 px lang**, dann kommt die
-    Unterbrechung an der randlosen Kapitelmarke (1440 px: 58 | 212 | 2206). Tobias: liest sich
-    als Rest, nicht als Anfang. Die Unterbrechung selbst ist sauber — 22 px oben und unten auf
-    allen neun geprüften Breiten. Entscheidung offen: Auftakt weglassen, verlängern oder so
-    lassen.
-    (e) **Der Schnitt zwischen Hero und Seite trägt nicht** (Tobias' Frage 5, von Vivien
-    angenommen): An der Nahtstelle ist der Hintergrund auf beiden Seiten identisch
-    (`navy-950` über `navy-950`), es ändert sich nur der Abstand zweier Striche. *„Ein
-    Filmschnitt ist lesbar, weil sich das Bild ändert."* Liest sich als Versatz in derselben
-    Linie, nicht als Kamerafahrt. Gehört in dieselbe Runde wie (d).
+30. ✅ **GRÖSSTENTEILS ERLEDIGT (21.08.2026, `c5cbf6f`/`c4982bd`).** Kais vier Wächter stehen,
+    die Mutationsmatrix geht von **1 auf 7 von 8** gefangene Rückschritte, Suite 266 → 291.
+    Erledigt: (a) Drehpunkt des Balls — **im Browser gemessen, nicht im Quelltext gelesen**, neue
+    Datei `tests/e2e/ball-drehpunkt.spec.mjs`. ⚠️ Der Dateiname ist die eigentliche Lehre: Er
+    heißt nach der **Eigenschaft**, nicht nach dem Bauteil — alle drei früheren Löschungen waren
+    damit begründet, dass das Bauteil im Namen weg war. (c) Ehrlichkeitsschranke von 6 auf 12,
+    plus eine zweite Fensterhöhe. Dazu neu: Berührungsfreiheit über den **ganzen Flug** (nicht
+    nur die Ruhelage) und Ankunft auf **hohen Fenstern** bis 1024×1366.
+    ⚠️ **(b) BLEIBT OFFEN:** Das Ein-/Ausblenden des Balls an den Streckenenden ist der **eine
+    von acht**, der weiter grün durchläuft. Ein behobener, namentlich bekannter Defekt ohne
+    Wächter („Ball klebt an der Klemmgrenze, Anzeige läuft weiter"). Kai: der Wächter wäre klein.
+    ⚠️ **Nachtrag Tobias:** Kais neue B10-Wächter prüfen, dass sich die Zeichnung **verändert**
+    hat — nicht, dass sie **richtig gelandet** ist. Ein halb gelungenes Nachrechnen käme grün
+    durch. Und sie laufen nur auf 1280×900 und nur ausgeloggt; **mobil nimmt der Ball die obere
+    statt der seitlichen Ruhelage**, also einen anderen Codeweg, den kein Wächter berührt.
+    **Bei Vivien/Patrick offen:** (d) Der Auftakt der Außenlinie ist auf jeder Breite nur **58 px**
+    lang, dann kommt die Unterbrechung (1440: 58 | 212 | 2206) — liest sich als Rest, nicht als
+    Anfang. Die Unterbrechung selbst ist sauber: **22 px oben und unten auf allen neun Breiten**.
+    (e) Der Schnitt zwischen Hero und Seite trägt nicht (Tobias, von Vivien angenommen): An der
+    Nahtstelle ist der Hintergrund beidseits identisch (`navy-950` über `navy-950`), es ändert
+    sich nur der Abstand zweier Striche. *„Ein Filmschnitt ist lesbar, weil sich das Bild
+    ändert."* (f) Bei reduzierter Bewegung zeigt der mobile Streifen dauerhaft „6 / 6 ·
+    Nachspielzeit" mit vollem Balken, während der Besucher noch bei Station 01 liest — im Code
+    als Absicht begründet, liest sich aber wie eine falsch stehende Fortschrittsanzeige.
+
+31. ⚠️ **Die Leseposition geht beim Zurückgehen verloren** (21.08.2026, **von Kai UND Tobias
+    unabhängig reproduziert**, vorbestehend). Von ganz unten auf der Startseite → `/signup` →
+    zurück: **571–624 px zu hoch**, man landet mitten in der Nachrichtenliste. Auf `/spieler` →
+    `/teams` → zurück: **673–2.581 px**. Auf `/ligen`: 0 px.
+    **Mechanismus:** `history.scrollRestoration = "auto"` — der Browser stellt die Position
+    wieder her, während das Dokument noch kürzer ist, klemmt am damaligen Maximum, und danach
+    korrigiert niemand nach. Es ist **keine** Nachlade-Verschiebung: Die Seitenhöhe ist beim
+    Zurückkommen dieselbe.
+    **Das ist ein Produktfehler, keine Testfrage** — Kai hat ihn deshalb gemeldet und bewusst
+    nicht umgebaut. Er trifft jeden, der auf einer langen Liste stöbert, eine Seite öffnet und
+    zurückgeht. Tobias' Testvorschlag für danach: von der untersten Position auf eine Detailseite
+    und zurück, Rückkehrposition gegen Ausgangsposition — **mit Ehrlichkeitsschranke „war ich
+    vorher überhaupt unten?"**, sonst ist der Test grün, ohne gemessen zu haben.
+
+32. **Kleinere offene Punkte aus den Gates vom 21.08.2026**, keiner blockierend:
+    **(a)** Fällt die Nachrichtenquelle aus, bleibt ein leeres Band von **160 px** stehen — keine
+    Meldung, kein Ausblenden (Tobias, vorbestehend → Vivien/Nele für den Text, Kai für das
+    Verhalten). **(b)** Drei Bedienflächen in der Kopfzeile sind **36×36 px** — über der
+    Pflichtgrenze von 24, unter der Empfehlung von 44 (vorbestehend → Vivien). **(c)** Die
+    Überschrift heißt **„So funktionierts"** ohne Apostroph, schon im Live-Stand `70c36ba`
+    (→ Nele). **(d)** Der Abschluss-Block fehlt im **ausgelieferten Server-HTML** (`if (!checked)
+    return null`) — er entsteht erst im Browser. Vorbestehend, aber er ist seit diesem Umbau das
+    **Ziel der Ballreise** und die letzte Handlungsaufforderung; für Suchmaschinen und ohne
+    JavaScript ist er nicht da. Gleiche Familie wie Roadmap 22 (→ Vivien/Nele).
+    **(e)** Die Messskripte, auf die sich die neuen Zahlen im Code berufen, sind **nicht
+    eingecheckt** — genau so hat die falsche „107 px / 43 px"-Zeile zwei Runden überlebt (→ Kai).
 
 29. **CLAUDE.md führt einen Roadmap-Block doppelt** (Befund Kai). „Weitere UX-Feinschliffe"
     steht zweimal (Z. ~1386 und ~1558), ebenso Roadmap 20/20a. Altbestand, beim nächsten

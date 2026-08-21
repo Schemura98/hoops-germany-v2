@@ -4955,3 +4955,81 @@ Strich auf einer Breite ist eine schwächere Aussage, ein Ball an der Textkante 
 - **Bei Vivien/Patrick:** der 58-px-Auftakt der Außenlinie und der Schnitt zwischen Hero und
   Seite (Tobias' Einwand angenommen: gleicher Hintergrund auf beiden Seiten, es ändert sich
   nur der Abstand zweier Striche). Roadmap 30.
+
+#### Update (21.08.2026) — Der Ball dribbelt durch die Seite
+
+**Deploy:** `c4982bd` (aus `0da80c7` → `fb23317` → `c5cbf6f` → `c4982bd`), am Server verifiziert.
+
+**Patricks Auftrag, in vier Nachrichten gewachsen:** Ball dribbelt beim Scrollen an den Funktionen
+vorbei · Außenlinie über die ganze Seite · am Ende ein **Pass** an Anmeldung/Registrierung (bei
+Angemeldeten an ein anderes Ziel) · die Außenlinie **unterbricht** am Text statt zu verblassen.
+
+**1. Der Dribbelweg** (`0da80c7`, Vivien). Neu: `components/landing/Dribbelweg.js` (ersetzt
+`FeatureProgressRail.js`), `DribbelBall.js`, `BallPass.js`, `Aussenlinie.js`, dazu Neles
+Abschluss-Block für Angemeldete (`docs/ABSCHLUSS-BLOCK-EINGELOGGT-2026-08-21.md`). Entfallen:
+`FeatureProgressRail.js`, `HeroGlyphs.js`, die Korb-Endmarke in Schrägansicht.
+- ⚠️ **Der Mittelkanal war Patricks eigene Idee** — er sah im Screenshot den leeren Streifen
+  zwischen Text- und Grafikspalte. Weil die Abschnitte die Seiten wechseln, kreuzt der Ball dort
+  keinen Buchstaben; der Ausweich-Apparat des Vorgängers (1.350 Zeilen) entfällt. **Netto 315
+  Zeilen weniger.** Regel: Kanal zu schmal → Weg gar nicht zeichnen.
+- ⚠️ **Patricks zweite Idee wurde begründet abgelehnt** („Ball dribbelt um die Buchstaben"):
+  Eyebrow angemeldet 179,8 px, ausgeloggt 239,5 — ein fest gezeichneter Weg um eine Überschrift
+  bricht bei jedem Textwechsel. Der Hero ist stattdessen der Anwurf.
+- Der Pass landet **an** der Taste, nicht darin: *„Ein Pass endet in den Händen eines
+  Mitspielers — man sieht beide."*
+
+**2. Beide Gate-Blocker** (`fb23317`, Vivien).
+- **Tobias:** Der Pass kam auf hohen Fenstern nie an. Er wird in Anteilen der Fensterhöhe
+  gefahren; unter der Taste bleiben 385 px, und die Zahl wächst nicht mit dem Fenster → ab
+  ~917 px endet die Seite mitten im Flug. iPad Pro 12,9": Pass bei 54 %, Ball überlappt die Taste
+  um 16,8 px. **Dritte Runde derselben Achse: Breiten geprüft, Ausfall an der Höhe.**
+  Behoben; 24 von 24 Kombinationen kommen an. ✅ **Damit ist Roadmap 20 (d) eingelöst** — die
+  Landung ist erstmals auf allen geprüften Fenstern sichtbar.
+- **Kai:** Der Pass flog durch Überschrift und Fließtext (18–23 % Desktop, 43–48 % mobil).
+  **Umgebaut statt begründet** — eine Ausnahme am Ziel der Reise hätte die Regel entwertet, die
+  den Umbau billig macht. 0 von 40 Berührungen.
+
+**3. Die Zahl, die zwei Prüfer gegeneinander stellte — drei Größen, alle korrekt gemessen.**
+107 = gezeichnete Textkante → Grafik (Kai) · 64 = Spaltenkante → Grafik, **und nur damit rechnet
+der Code** (Tobias) · 9,6 = Hüllbox des gedrehten Balls (25,45 px) statt Kontur (Tobias).
+Der Fehler war die **Ableitung**: „43 px auf jeder Seite" unterstellt einen mittigen Ball, der
+absichtlich außermittig läuft. Wahrer Wert 12,85 px.
+⚠️ **Zahlenzufall, der es verdeckte:** 107 − 64 = 43 und (107 − 20)/2 = 43,5. Zwei verschiedene 43.
+`KANAL_MIN` (60 gegen echte 64 — vier Pixel bis zum stummen Totalausfall) rechnet sich jetzt aus
+der klemmenden Größe; `md:gap-16` → `md:gap-20` bringt 12,85 → 18,57 px.
+
+**4. Vier Wächter und ein echter Fix** (`c5cbf6f`, `c4982bd`, Kai).
+- ⚠️ **Die Absicherung war fast wertlos: von 8 zurückgedrehten Fehlern wurde 1 rot.** Darunter
+  der Blocker der Runde und der Pass-über-Text-Rückbau — dessen Lücke stand **wörtlich im Code**.
+  Ursache beim Blocker: Die Testmatrix hörte bei 1024 px Höhe auf, der Defekt beginnt bei ~917.
+  **„Die Lehre steht im Kommentar und nicht in der Testmatrix."**
+- Jetzt **7 von 8**, Suite 266 → 291 (285 grün, 5 rot vorbestehend, 1 übersprungen).
+- ⚠️ **Kais eigener Wächter war zuerst grün, auch mit zurückgedrehter Abhilfe** — `reducedMotion`
+  kam im Browser nicht an. Gefunden hat es die Mutationsmatrix, nicht das Lesen.
+- **B10 behoben (echter Defekt):** Bei reduzierter Bewegung wurde die Zeichnung nur bei Fenster-,
+  nicht bei Inhaltsänderungen neu gerechnet — und blieb dauerhaft falsch, weil dort kein
+  Scroll-Zuhörer nachkorrigiert. Ohne Abhilfe: Weg 56 px zu früh, Ball 120 px daneben.
+  Dieselbe Fehlerform hatte Vivien eine Datei weiter im selben Commit behoben.
+- Neuer Dateiname `ball-drehpunkt.spec.mjs` statt `rail-ball-drehpunkt.spec.mjs`: **benannt nach
+  der Eigenschaft, nicht nach dem Bauteil** — alle drei früheren Löschungen waren damit begründet,
+  dass das Bauteil im Namen weg war.
+
+**Methodik-Lehren**
+- ⚠️ **Eine Lücke aufzuschreiben ist keine Absicherung** (Kai). In `BallPass.js` stand wörtlich,
+  dass ein zurückgebauter Befund keinen Test rot macht — genau das trat ein.
+- ⚠️ **Ein Kommentar darf die Reichweite einer Ausnahme nicht zu eng angeben** (Tobias). Vivien
+  band die verbliebene Textberührung an ein Fenster; sie hängt an der **Ankunftsart** (Sprung ans
+  Seitenende) und an der Ruhelage. *„Wer die Zeile liest, prüft auf 390×844 nach, findet nichts
+  und hält die Sache für erledigt."*
+- ⚠️ **Eine hochgerechnete Zahl darf nicht dieselbe Form haben wie eine abgelesene** (Vivien, über
+  sich selbst). Sie meldete „260 grün / 5 rot", bevor sie die Zeile gesehen hatte — die Zahl
+  stimmte. *„Dass es stimmt, ist Glück, kein Verfahren."*
+- ⚠️ **Meine eigene Live-Sonde zählte das Logo statt des Feldes** und meldete „1 Element" —
+  ersetzt statt gemeldet. Und ich habe einmal „die Gates laufen jetzt" geschrieben, ohne sie
+  gestartet zu haben; korrigiert und nachgeholt.
+- ⚠️ Beide Prüfer sind je einmal **zu früh gemessen** (Skip-Link im 150-ms-Übergang; Ball
+  stillstehend, während die Taste noch einblendete) und haben es selbst kassiert.
+
+**Live nachgemessen (21.08.2026):** Pass 1440×900 → 13,4 px · 1024×1366 → 14,0 px, Ball jeweils
+vollständig sichtbar · ruhiger Zweig nachweislich aktiv, 14,3 px bei Sollwert 14 · 16 Routen je
+200 · 0 Laufzeitfehler.
