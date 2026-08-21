@@ -5416,3 +5416,76 @@ eine lebendige Seite sehen, und Likes/Kommentare zeigen die Funktion. ⚠️ Roa
 
 **Live nachgemessen (22.08.2026):** Naht auf 360/1440/1920 vorhanden, Ausblendband konstant
 112 px, 16 Feldpfade, 16 Routen je 200, 0 Laufzeitfehler.
+
+---
+
+## 22.08.2026 – Newsfeed: „Gleiche Kachel, ungleiches Licht" (`e9a8ef3`, deployt)
+
+**Auslöser (Patrick, am echten Bild):** *„mir gefällt nicht, dass manche Posts runde Kacheln
+haben und manche nicht. Außerdem finde ich die Farbe / das Design des Textfeldes um selbst
+etwas zu posten nicht schön. Die Farbe passt nicht zum Rest."* Beide Befunde bestätigt und
+behoben, dazu zwei plattformweite Fehlerformen derselben Familie.
+
+### Geändert
+- `components/posts/PostCard.js` – Kachelgeometrie vereinheitlicht (`rang`), Innentrennlinie nur
+  noch auf der beleuchteten Kachel, `ringGrund` für den rangabhängigen Fokusring-Untergrund,
+  Kommentar-/Antwortblasen `navy-950 rounded-md` → `navy-700 rounded-sm`, Kommentar- und
+  Antwortfeld auf `bg-navy-700` + `rounded-sm`, Senden-Knöpfe Ruhezustand.
+- `components/posts/PostComposer.js` – Textfeld auf `bg-navy-700`, Autorenwahl-Radien
+  (innen war runder als außen), Ruhezustand „Posten", aufgeklappte Fassung nutzt `Card`.
+- `components/feed/PostFeed.js` – Beitragsliste in eigenem `space-y-4`.
+- `components/ui/Button.js` – Ruhezustand von der gemeinsamen Kette in die **Variante** verschoben.
+- `lib/ui.js` – Platzhalterfarbe `navy-500` → `mist-400` in `inputClass`/`inputClassSm`.
+- 9 Eingabefelder ohne Flächenklasse + 22 handgebaute gefüllte Knöpfe in 16 Dateien nachgezogen.
+- `tests/e2e/feed-kachel-gleichheit.spec.mjs` – **neu** (Kai, 3 Fälle).
+- `scripts/design-audit.mjs` – Baseline 141 → 140 (Folge der `Card`-Umstellung im Composer).
+
+### Die vier Befunde
+1. **Das Textfeld hatte keine Farbe, keine falsche.** Keine Flächenklasse ⇒ Browser-Vorgabe
+   `rgb(59,59,59)`, ein Wert außerhalb der Palette. Plattformweit **zwölf** solche Felder,
+   jedes einzeln nachgemessen; zwei davon auf Nutzerseiten (`LeagueReportLink`).
+2. **Die Kacheln.** Gemessene Folge `Kachel·Kachel·nackt·Kachel·nackt·nackt·nackt·nackt·Kachel·nackt`.
+   Vereinheitlicht wurde die Geometrie, der Rang trägt sich über die Flächenstufe (1,23 : 1).
+   Auf neun Breiten 320–1920 px: **genau eine** Kachelgeometrie (vorher zwei).
+   ⚠️ Vier unbeleuchtete Kacheln am Stück lasen sich zuerst als leerer Drahtrahmen – Korrektur
+   war **weniger Linie, nicht mehr Fläche**.
+3. **Knopf-Ruhezustand (Entscheidung Patrick: zentral).** `disabled:opacity-60` auf einer
+   **gefüllten** Fläche mischt sich mit dem Grund: brand-500 → `#9A5832`, signal-error →
+   `#90534F`. `opacity-60` wurde **entfernt statt überschrieben**, sonst entschiede die
+   Reihenfolge im erzeugten Stylesheet. Die drei flachen Varianten blieben unverändert.
+4. **Platzhalterfarbe – und der Befund war kleiner, als ich ihn erzählt habe.** Ich meldete
+   „143 Felder bei 2,38 : 1". Falsch: **`lib/` steht nicht in Tailwinds `content`-Globs**, eine
+   nur dort stehende Klasse erzeugt **kein CSS**. Am Live-Stylesheet belegt – die 143 Felder
+   trugen die Browser-Vorgabe `#9CA3AF` = **5,07 : 1**. Bei 2,38 : 1 standen **genau die drei
+   Felder, in die ich die Klasse selbst geschrieben hatte**. Befund von Kai. → Roadmap 36.
+
+### Methodik-Lehren
+- **Die Suite war über den gesamten Umbau blind** – belegt durch zwei volle Läufe (mit und ohne
+  Umbau) mit identischen Zahlen **und** per `diff` identischer Fehlerliste.
+- **„Richtige Größe, falscher Gegenstand", dritte Auflage:** `newsfeed-mobil.spec.mjs:304` misst
+  die Beitragshöhe und trägt sogar die passende Zahl im Kommentar, greift aber nicht, weil
+  `querySelector` nur den ersten Beitrag nimmt – und der ist ein Ereignis-Beitrag.
+  Der neue Wächter misst grundsätzlich **alle** Beitragswurzeln.
+- **Ein Wächter, der sich für wertlos erklärt, ist besser als einer, der grün wird:** Liegen
+  nicht beide Ränge im Feed, schlägt `feed-kachel-gleichheit` fehl statt zu bestehen.
+- **Zwei Prüfungen, die füreinander blind sind, sind keine Redundanz:** `mist-400` auf dem
+  Browser-Grau hält 5,37 : 1 (Kontrast-Test blind für die Palette), `navy-500` ist ein legitimer
+  Token (Paletten-Test blind für den Kontrast).
+- **Parallele Gates brauchen eigene Bäume** (Methodik-Lehre 0): Der Knopf-/Feld-Eingriff entstand
+  im Worktree `../hoops-knopf`, damit sich der geprüfte Stand nicht unter den Prüfern bewegt.
+- **Nicht schätzen, zählen:** Kais gerechnete „315" waren gezählt **317**.
+
+### Gates
+Tobias **freigabefähig mit Auflage** (Platzhalterkontrast – umgesetzt), Kai **freigabefähig**.
+⚠️ Beide Gates brachen **fünfmal** an API-Überlastung (529) ab, kein einziges Mal an einem
+Befund; die Aufträge wurden verkleinert, bis sie durchliefen.
+⚠️ Zwei Korrekturen an den Prüfern: Tobias meldete zwei Testdatensätze, in der DB lag einer
+(sein Kommentar war nie angekommen – Locator-Fehler); sein Vergleich „eingeklappt/ausgeklappt"
+maß die umgebende Karte statt des Feldes. Der Kommentar-Weg wurde daraufhin selbst durchgespielt
+und in der Datenbank nachgeprüft.
+
+### Verifikation
+Build durch · Playwright **315 / 5 / 1** im Hauptbaum (die 5 vorbestehend, Roadmap 26) ·
+`design-audit -- --check` ohne Abweichung · neun Breiten ohne Querlauf und ohne Konsolenfehler ·
+live: Server auf `e9a8ef3`, **16 Routen je 200**, `placeholder:text-mist-400` im ausgelieferten
+Stylesheet belegt.

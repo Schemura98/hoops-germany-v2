@@ -29,6 +29,125 @@
 > 📄 **ÜBERGABE: `docs/UEBERGABE-2026-08-21.md`** — Stand am Ende des 21.08., Patricks
 > Entscheidungen dieses Tages und die offene Liste vor den Flyern. **Zuerst lesen.**
 >
+> ✅ **DEPLOYT: `e9a8ef3`** (22.08.2026) — **GLEICHE KACHEL, UNGLEICHES LICHT: Der Newsfeed
+> hat keine zwei Beitragsformen mehr — und drei Eingabefelder hatten gar keine Farbe.**
+> Befund Patrick am echten Bild: *„mir gefällt nicht, dass manche Posts runde Kacheln haben und
+> manche nicht. Außerdem finde ich die Farbe / das Design des Textfeldes um selbst etwas zu
+> posten nicht schön. Die Farbe passt nicht zum Rest."* Beides bestätigt, beides behoben.
+>
+> **(1) DAS TEXTFELD HATTE KEINE FARBE, KEINE FALSCHE.** Im Code stand für das Beitragsfeld
+> **gar keine Flächenklasse**. Ein Feld ohne eigene Fläche bekommt die des Browsers — am
+> laufenden Browser gemessen **`rgb(59,59,59)`**, ein Wert, der in `tailwind.config.js` NICHT
+> VORKOMMT. Es war also kein falsch gewählter Token, sondern gar keiner.
+> Plattformweit gesucht: **zwölf** Felder mit derselben Auslassung, jedes einzeln nachgemessen,
+> alle `rgb(59,59,59)`. Drei im Newsfeed, **zwei auf Nutzerseiten** (`LeagueReportLink` auf
+> `/team/create` und in zwei Team-Admin-Reitern), sieben im internen Panel. Alle auf `navy-700`.
+>
+> **(2) DIE KACHELN: Die Absicht war richtig, der TRÄGER war falsch.** Auto-Beiträge trugen eine
+> Kachel, Wort-Beiträge nur eine Trennlinie (Viviens „zwei Ränge", 15.08.). Gemessen ergab das
+> die Folge **Kachel · Kachel · nackt · Kachel · nackt · nackt · nackt · nackt · Kachel · nackt** —
+> keine zwei Ränge, sondern ein ausgefranster Rand. ⚠️ **Vivien hatte genau das im eigenen
+> Risiko-Register** (`docs/NEWSFEED-DESKTOP-2026-08-15.md`): *„Zwei Ränge werden als Abwertung
+> gelesen … Am echten Bild zu prüfen, nicht theoretisch."*
+> Vereinheitlicht ist jetzt die **GEOMETRIE**, der Rang trägt sich über die **Flächenstufe**:
+> Ereignis = beleuchtetes Tafelsegment (`navy-800`), Wort = unbeleuchtet (`navy-950` scheint
+> durch), gerechnet **1,23 : 1** — Gewicht, nicht Existenz.
+> **Auf neun Breiten von 320 bis 1920 px gemessen: genau EINE Kachelgeometrie** (`10px|1px|16px`),
+> vorher zwei. Das ist der eigentliche Beleg für Patricks Befund.
+> ⚠️ Die Innentrennlinie über der Aktionsleiste gilt nur noch auf der **beleuchteten** Kachel:
+> Auf der unbeleuchteten standen zwei Haarlinien wenige Pixel übereinander, und vier Kacheln am
+> Stück lasen sich als **leerer Drahtrahmen**. Korrektur war **weniger Linie, nicht mehr Fläche** —
+> eine zweite Flächenstufe gibt es im System nicht (navy-900 ist die Rolle der Leiste).
+> ⚠️ **Verworfen, damit es niemand „verbessert":** eine 2-px-Akzentkante nur bei Ereignissen. Die
+> Signaturleiste ist laut Spezifikation auf **genau drei Stellen** limitiert; auf jedem zweiten
+> Feed-Element wird die Signatur zur Tapete.
+>
+> **(3) RUHEZUSTAND DER KNÖPFE — ZENTRAL (Entscheidung Patrick).** `disabled:opacity-60` stand in
+> der **gemeinsamen** Kette von `components/ui/Button.js`. Für die drei Varianten **ohne** Fläche
+> ist das richtig (dort dimmt Deckkraft nur Text). Für die zwei **gefüllten** mischt sie sich mit
+> dem Grund zu einer Farbe, die niemand gewählt hat: brand-500 → **`#9A5832`**, signal-error →
+> **`#90534F`** — Braun und Rost, also genau die Familie, die beim Farbentscheid vom 12.08.2026
+> verworfen wurde. Die Regel sitzt jetzt **in der Variante statt im Grundsatz**.
+> ⚠️ `opacity-60` wurde **entfernt statt überschrieben**: Bliebe es stehen, dimmte es die neue
+> Fläche gleich wieder mit, und welche Regel gewinnt, hinge an der Reihenfolge im erzeugten
+> Stylesheet — also an etwas, das man beim Lesen des Codes nicht sieht. 22 handgebaute gefüllte
+> Knöpfe in 16 Dateien nachgezogen, **25 flache bewusst nicht**.
+>
+> ⚠️ **(4) DIE PLATZHALTERFARBE — UND HIER HABE ICH DEN BEFUND ZU GROSS ERZÄHLT.**
+> Tobias' Auflage war richtig: Der Platzhalter der **drei Newsfeed-Felder** stand bei **2,38 : 1**
+> (navy-500 auf navy-700), die Grenze liegt bei 4,5. Ich habe daraus gefolgert, das gelte über
+> `inputClass` für **rund 143 Felder der Plattform** — und **das war falsch**.
+> **`lib/` steht NICHT in Tailwinds `content`-Globs** (nur `pages/`, `components/`, `app/`).
+> Eine Klasse, die ausschließlich in `lib/ui.js` steht, erzeugt deshalb **keine CSS-Regel**.
+> Am ausgelieferten Live-Stylesheet nachgesehen: `placeholder:text-navy-500` kommt dort **gar
+> nicht vor**. Die 143 Felder trugen also die **Browser-Vorgabe `#9CA3AF`** — nachgerechnet
+> **5,07 : 1**, bereits über AA. Bei 2,38 : 1 standen **genau die drei Felder**, in die ich die
+> Klasse selbst hineingeschrieben hatte. **Befund gefunden von Kai.**
+> Umgestellt auf `mist-400` = **6,16 : 1**, jetzt einheitlich und über beiden Vorwerten.
+> ⚠️ **DIE FALLE BLEIBT UND IST DOKUMENTIERT:** Die Regel existiert nur, weil **sieben Dateien
+> unter `components/`/`app/` dieselbe Klasse wörtlich hinschreiben**. Wer diese sieben Stellen auf
+> `inputClass` konsolidiert — also genau die Aufräumarbeit macht, die diese Datei für die 140
+> handgebauten Panels fordert —, nimmt der Plattform die Platzhalterfarbe, **und nichts sieht
+> kaputt aus** (Rückfall auf die Browser-Vorgabe, 5,07 : 1 — gemessen, also kein
+> Zugänglichkeitsabsturz, aber ungewollt und uneinheitlich). Sauber wäre `./lib/**/*.{js,mjs}`
+> in den `content`-Globs → **Roadmap 36**.
+> ⚠️ Nebenwirkung, die eine zweite Ungereimtheit miterledigt: Die Beschriftung des Beitragsfeldes
+> wurde beim Antippen bisher **blasser** (6,16 → 2,38). Nachgemessen sind eingeklappte Attrappe
+> und ausgeklapptes Feld jetzt **identisch** (Fläche, Radius, Schriftfarbe).
+>
+> ⚠️ **(5) DIE SUITE WAR ÜBER DEN GESAMTEN UMBAU BLIND — belegt von Kai, nicht vermutet.**
+> Zwei vollständige Läufe, mit und ohne den Umbau: **beide 312 / 5 / 1**, und die Liste der roten
+> Fälle war per `diff` **identisch**. Man konnte die Form jedes Beitrags ändern, eine Trennlinie
+> entfernen und drei Feldfarben tauschen, ohne dass etwas rot wurde.
+> ⚠️ **Ein Test hätte es beinahe gesehen, und das ist der eigentliche Befund.**
+> `newsfeed-mobil.spec.mjs:304` misst die Beitragshöhe gegen 160 px und trägt im Kommentar sogar
+> wörtlich die Zahl, um die es geht („wächst jeder Beitrag um 12px"). Er greift nicht, weil er
+> über `querySelector` nur den **ersten** Beitrag nimmt — und der ist gemessen ein **Transfer**,
+> also ein Ereignis-Beitrag, dessen Geometrie sich nie geändert hat.
+> **Die richtige Größe, am falschen Gegenstand** — dritte Auflage dieser Fehlerform (nach
+> Roadmap 20a und Roadmap 27).
+> ✅ **Zwei Wächter neu, beide mit roten Gegenproben:**
+> `tests/e2e/feed-kachel-gleichheit.spec.mjs` (3 Fälle) misst **alle** Beitragswurzeln, nie eine.
+> ⚠️ Liegen nicht beide Ränge im Feed, erklärt er sich für **wertlos statt bestanden** — ein Feed
+> aus lauter Ereignissen könnte den Rückfall sonst per Konstruktion nicht sehen.
+> `tests/e2e/eingabefelder-lesbarkeit.spec.mjs` (2 Fälle) prüft **zwei** Eigenschaften, und das ist
+> keine Redundanz: `mist-400` auf dem Browser-Grau hält **5,37 : 1**, ein reiner Kontrast-Test
+> hätte den grauen Fleck also durchgewinkt; `navy-500` ist ein legitimer Token, eine reine
+> Paletten-Prüfung wäre für Tobias' Befund blind. **Jede der beiden ist für den Defekt der anderen
+> blind.**
+>
+> ✅ **Beide Gates durch.** Tobias **freigabefähig mit Auflage** (die Auflage — Platzhalterkontrast
+> — ist umgesetzt); Kai **freigabefähig**.
+> ⚠️ **Zwei Korrekturen an den Prüfern:** Tobias meldete **zwei** Testdatensätze auf der Dev-DB,
+> in der Datenbank lag **einer** — sein Kommentar war nie angekommen (Locator-Fehler beim
+> Absenden; dieselbe Falle ist mir danach selbst passiert). Damit stand sein Haken „Kommentar
+> absenden ✓" in der Luft, also **selbst durchgespielt**: geschrieben, abgeschickt, in der DB
+> nachgesehen — angekommen, kein Streu-Beitrag (14 Beiträge vorher wie nachher), Spur entfernt.
+> Und seine Beobachtung „eingeklappt und ausgeklappt sind zwei verschiedene Felder" maß die
+> **umgebende Karte**, nicht das Feld; der inhaltliche Kern (Schrift wird blasser) ist behoben.
+> ⚠️ **Eine Zahl in meinem eigenen Code war falsch:** „4,50 : 1" statt gerechnet **4,99 : 1**,
+> von Tobias nachgerechnet. Korrigiert, nicht gerundet.
+> ✅ **Vor dem Deploy gezählt, nicht geschätzt:** Build durch · Playwright **315 grün / 5 rot /
+> 1 übersprungen** im Hauptbaum (Kai zählt mit seinem zweiten Wächter **317 / 5 / 1** bei 323
+> Fällen in 32 Dateien; seine eigene Schätzung „315" war um zwei daneben — *nicht schätzen,
+> zählen*) · `design-audit -- --check` ohne Abweichung, Baseline **141 → 140** nachgezogen
+> (der Composer nutzt jetzt `Card` statt derselben Klassen von Hand) · neun Breiten 320–1920 px
+> ohne Querlauf und ohne Konsolenfehler.
+> ✅ **Live nachgemessen (22.08.2026):** Server auf `e9a8ef3`, keine lokalen Änderungen,
+> **16 Routen je 200**, `placeholder:text-mist-400` im ausgelieferten Stylesheet belegt.
+> ⚠️ **Methodik, weil beide Gates parallel liefen:** Der Knopf- und Feld-Eingriff entstand in
+> einem eigenen `git worktree` (`../hoops-knopf`), damit sich der geprüfte Baum nicht unter Kai
+> und Tobias bewegt (Methodik-Lehre 0). ⚠️ Beide Gates sind **fünfmal an API-Überlastung (529)
+> abgebrochen**, kein einziges Mal an einem Befund — die Aufträge wurden verkleinert und auf
+> „früh und knapp berichten" umgestellt, bis sie durchliefen.
+>
+> ⚠️ **OFFEN aus dieser Runde:** **Roadmap 36** (`lib/` in den `content`-Globs) · kein Weg,
+> einen **eigenen Beitrag oder Kommentar zu löschen** (Befund Tobias, vorbestehend, nur
+> Super-Admins können es) → Roadmap 37 · Tippziele im Kommentarbereich 34–38 px statt 44
+> (vorbestehend, gehört zu Roadmap 32 b) → Vivien · auf 1440 px wirken vier unbeleuchtete
+> Kacheln in Folge luftig (**Gestaltungsbeobachtung, kein Defekt**, tritt mobil nicht auf)
+> → Vivien.
+>
 > ✅ **DEPLOYT: `3181ad2`** (22.08.2026) — **Der Schnitt zwischen Hero und Seite ist weg.**
 > Zwei Commits: `6348625` (Vivien, Tobias' zwei Auflagen) und `3181ad2` (Kai, der Wächter dazu).
 > **(1) Die Dreipunktlinie über dem Hero-Text bleibt**, der falsche Kommentar geht — gemessen
@@ -1291,7 +1410,7 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `3181ad2` (aktuell live) → `6348625` → `b88bbd3` (nur Doku) → `ea982c4` → `cdb8065` → `492e465` → `34dd22f` (Feldende,
+> **Rollback-Kette:** `e9a8ef3` (aktuell live) → `108fbc7` (nur Doku) → `3181ad2` → `6348625` → `b88bbd3` (nur Doku) → `ea982c4` → `cdb8065` → `492e465` → `34dd22f` (Feldende,
 > vor den Wächtern) → `0f2a933` (nur Doku) → `17bb00a` → `8e63cf6` (nur Doku) → `c4982bd` → `c5cbf6f` → `fb23317` → `0da80c7` (Dribbelweg,
 > vor den Gate-Befunden) → `70c36ba` (letzter Stand vor der Ball-Reise) → `76406fb` → `571931c` (Feld) → `b3487a8` →
 > `d4c847a` (Leiste, erster Schritt) → `070a1e7` (letzter Stand vor Feld und Leiste) → `04ba621` → `07150cf` (nur Werkzeug) → `d2cfa47` → `35b8bc0` → `d841c4b` → `bd99263` (Dunk, vor den
@@ -2079,6 +2198,29 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     bevor er neu gebaut wird.** Klein, aber es trifft jeden Team-Admin, der über einen
     Flyer-Link kommt — und Tobias ist über dieselbe Stelle gestolpert und hätte sie beinahe als
     Fehler gemeldet.
+
+36. ⚠️ **`lib/` steht nicht in Tailwinds `content`-Globs — eine Klasse dort erzeugt kein CSS**
+    (Befund Kai, 22.08.2026, am ausgelieferten Live-Stylesheet belegt). `tailwind.config.js`
+    scannt nur `pages/`, `components/`, `app/`. `lib/ui.js` ist aber die **zentrale** Quelle für
+    `inputClass`/`inputClassSm` und speist rund 143 Formularfelder.
+    **Folge heute:** Die Platzhalterfarbe `placeholder:text-mist-400` wirkt nur, weil **sieben
+    Dateien unter `components/`/`app/` dieselbe Klasse wörtlich hinschreiben**. Wer sie auf
+    `inputClass` konsolidiert — also genau die Aufräumarbeit macht, die diese Datei für die 140
+    handgebauten Panels fordert —, nimmt der Plattform die Platzhalterfarbe, **und nichts sieht
+    kaputt aus**. Gemessen ist der Rückfall die Browser-Vorgabe `#9CA3AF` = **5,07 : 1**, also
+    kein Zugänglichkeitsabsturz, aber ungewollt und uneinheitlich.
+    **Und die andere Richtung wiegt schwerer:** Wer künftig in `lib/ui.js` einen Token setzt, der
+    sonst nirgends vorkommt, ändert **gar nichts** — stumm.
+    Abhilfe wäre `./lib/**/*.{js,mjs}` in den `content`-Globs. **Nicht getan**, weil es ein
+    Eingriff in die Bau-Konfiguration mit plattformweiter Reichweite ist. → Vivien, Freigabe
+    Patrick.
+
+37. ⚠️ **Ein eigener Beitrag oder Kommentar lässt sich nicht löschen** (Befund Tobias,
+    22.08.2026, **vorbestehend**). In `components/posts/` und `components/feed/` gibt es keinen
+    Lösch-Weg; nur der Super-Admin hat `/api/admin/deletepost`. Wer sich vertippt oder etwas
+    bereut, wird es über die Oberfläche nicht mehr los — auf einer Plattform, deren Beiträge
+    unter Klarnamen stehen und Benachrichtigungen auslösen. → Ronja/Nele für die Nutzensicht,
+    Kai/Vivien für den Bau.
 
 33. **Offen aus der Logo-Runde (21.08.2026)**, keiner blockierend:
     **(a)** ⚠️ `scripts/logo-leiste-bauen.mjs` **behauptet eine Sicherung, die er nicht hat** —
