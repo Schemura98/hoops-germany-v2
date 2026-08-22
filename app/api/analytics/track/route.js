@@ -3,6 +3,7 @@ import AnalyticsEvent from "@/models/AnalyticsEvent";
 import { verifyToken } from "@/lib/auth";
 import { parseUserAgent } from "@/lib/userAgent";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
+import { SIGNUP_SOURCE_RE } from "@/lib/constants";
 
 // POST /api/analytics/track – Seitenaufruf erfassen (öffentlich, leichtgewichtig).
 async function handler(req) {
@@ -18,6 +19,19 @@ async function handler(req) {
   if (body.token) {
     const decoded = verifyToken(body.token);
     playerId = decoded?.id || decoded?.playerId || undefined;
+  }
+
+  // ⚠️ Kanal-Landungen streng validieren (22.08.2026): Dieser Endpunkt ist
+  // oeffentlich und unauthentifiziert — richtig so, er zaehlt anonyme
+  // Besucher. Aber `src_landing` speist den Kampagnen-Trichter im Admin, und
+  // dessen Kanalliste ist die VEREINIGUNG aller je gesehenen Werte. Ohne
+  // Formatpruefung koennte jeder per curl beliebige "Kanaele" erfinden und
+  // die Auswertung fluten. Dieselbe Regel wie beim Registrieren
+  // (SIGNUP_SOURCE_RE); was nicht passt, wird verworfen statt gespeichert.
+  if (body.eventType === "src_landing") {
+    const m = String(body.meta || "").toLowerCase().trim();
+    if (!SIGNUP_SOURCE_RE.test(m)) return fail("Ungültige Quelle", 400);
+    body.meta = m;
   }
 
   await connectDB();

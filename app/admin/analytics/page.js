@@ -396,6 +396,21 @@ export default function AdminAnalyticsPage() {
       ) : tab === "intern" ? (
         /* ===================== INTERNE PLATTFORM-ANALYTICS ===================== */
         <div className="space-y-6">
+          {/* ⚠️ Der CSV-Export wohnt HIER und nicht im Sponsor-Reiter — Auflage
+              Tobias vom 19.08.2026, umgesetzt am 22.08.: Die Datei enthält die
+              beliebtesten Spielerprofile mit KLARNAMEN. Im Sponsor-Reiter stand
+              der Knopf eine Knopfbreite neben „Sponsoring-Report öffnen" — der
+              Reflex, einem Sponsor „schnell die CSV" zu schicken statt des
+              gefilterten Links, war eingebaut. Intern (Super-Admin) ist die
+              Datei in Ordnung; nach außen geht nur der Positivlisten-Link. */}
+          <div className="flex justify-end">
+            <button
+              onClick={exportCsv}
+              className="inline-flex items-center gap-2 bg-navy-800 border border-navy-600 hover:border-brand-300 text-mist-300 font-semibold rounded-md px-4 py-2.5 text-sm"
+            >
+              <PiFileCsvBold /> CSV exportieren (interne Rohdaten)
+            </button>
+          </div>
           <Card title="Plattform-Wachstum" hint={`Bestand & Neuzugänge · Wachstum = letzte 30 Tage ggü. Vormonatsfenster`}>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               <StatCard icon={PiUsersBold} label="Registrierte Nutzer" value={summary.platform.users.total} growth={summary.platform.users.growth} sub={`+${summary.platform.users.newThisMonth} diesen Monat`} />
@@ -458,14 +473,63 @@ export default function AdminAnalyticsPage() {
             </Card>
           </div>
 
+          {/* Verlauf gab es bisher NUR im Sponsor-Reiter — der interne hatte
+              lauter Summen und keine einzige Kurve. Hier zusätzlich mit der
+              Registrierungs-Linie (eigene Skala), die der Sponsor-Reiter
+              bewusst NICHT bekommt (Vorschau = geteilter Link, Befund H2). */}
+          <Card title="Verlauf" hint={`Seitenaufrufe, Besucher & Registrierungen · ${periodLabel}`}>
+            <LineChart data={summary.timeseries} mitRegistrierungen />
+          </Card>
+
+          {/* ⚠️ IMMER sichtbar, auch ohne Daten (22.08.2026). Vorher wurde die
+              Quellen-Karte erst gerendert, wenn die erste Registrierung über
+              einen Kanal da war — während einer Kampagne ist die 0 aber selbst
+              die Information: Sie trennt „Kanal bringt nichts" nicht von
+              „Messung kaputt", und wer die Fläche nicht findet, prüft gar
+              nichts. Der Trichter je Kanal: Landungen (Scan/Klick mit ?src=)
+              → Registrierungen → Team-Gründungen. */}
+          <Card
+            title="Kampagnen-Kanäle"
+            hint={`Landungen im Zeitraum (gezählt seit 22.08.2026) · Registrierungen & Team-Gründungen allzeit · nur echte Konten`}
+          >
+            {summary.kanalTrichter?.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-xs font-semibold uppercase tracking-wide text-mist-400 border-b border-navy-600">
+                      <th className="py-2 pr-4">Kanal (?src=)</th>
+                      <th className="py-2 pr-4 text-right">Landungen</th>
+                      <th className="py-2 pr-4 text-right">Registrierungen</th>
+                      <th className="py-2 text-right">Teams gegründet</th>
+                    </tr>
+                  </thead>
+                  <tbody className="font-mono tabular-nums">
+                    {summary.kanalTrichter.map((k) => (
+                      <tr key={k.src} className="border-b border-navy-600/50">
+                        <td className="py-2 pr-4 font-sans text-paper-50">{k.src}</td>
+                        <td className="py-2 pr-4 text-right">{k.landungen}</td>
+                        <td className="py-2 pr-4 text-right">{k.registrierungen}</td>
+                        <td className="py-2 text-right">{k.teams}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-sm text-mist-400">
+                Noch keine Kanal-Daten. Gezählt wird, sobald jemand über einen Link
+                oder QR-Code mit <code className="text-mist-300">?src=…</code> landet
+                (z.&nbsp;B. <code className="text-mist-300">vereinsmail</code>,{" "}
+                <code className="text-mist-300">flyer-test</code>) — Landungen ab der
+                ersten Sitzung, Registrierungen und Team-Gründungen, sobald daraus
+                Konten werden.
+              </p>
+            )}
+          </Card>
+
           <EngagementCards eng={summary.engagement} period={periodLabel} />
           <RegionCard region={summary.region} />
           <ContentCard content={summary.content} period={periodLabel} />
-          {summary.signupSources?.length > 0 && (
-            <Card title="Registrierungen nach Quelle" hint="Aus ?src= beim Registrieren (z.B. Flyer-QR-Codes) · allzeit, nur echte Accounts">
-              <Bars items={summary.signupSources.map((s) => ({ label: s.src, value: s.count }))} />
-            </Card>
-          )}
 
           <OnboardingCard ob={summary.onboarding} period={periodLabel} />
           <OwnStatsCard os={summary.ownStats} period={periodLabel} />
@@ -495,12 +559,6 @@ export default function AdminAnalyticsPage() {
             >
               <PiFilePdfBold /> Sponsoring-Report öffnen
             </Link>
-            <button
-              onClick={exportCsv}
-              className="inline-flex items-center gap-2 bg-navy-800 border border-navy-600 hover:border-brand-300 text-mist-300 font-semibold rounded-md px-4 py-2.5 text-sm"
-            >
-              <PiFileCsvBold /> CSV exportieren
-            </button>
           </div>
 
           <Card title="Teilbare Sponsor-Reports" hint="Passwortgeschützte Links zum Versenden an (potenzielle) Sponsoren – zeigen nur aggregierte Zahlen">

@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import axios from "axios";
 import { SIGNUP_SOURCE_KEY, SIGNUP_SOURCE_RE } from "@/lib/constants";
+import { sendeAnalyticsEreignis } from "@/lib/analyticsClient";
 
 // Kampagnen-Quelle auf JEDER Route auffangen, nicht nur auf /signup.
 //
@@ -23,32 +23,26 @@ import { SIGNUP_SOURCE_KEY, SIGNUP_SOURCE_RE } from "@/lib/constants";
 // ueber eine Karte kam und danach intern weiterklickt, soll die Karte als
 // Quelle behalten. (/signup ueberschreibt bewusst weiterhin — ein Flyer-Link
 // direkt auf die Registrierung ist die juengere, gezieltere Angabe.)
+// Rückgabe: die JETZT neu gefangene Quelle, sonst null. Aus der Rückgabe wird
+// unten das Landungs-Ereignis — deshalb nur beim ERSTEN Fang der Sitzung, nie
+// bei einer schon gepufferten Quelle (sonst zählte jeder Routenwechsel als
+// neuer „Scan").
 function quelleAuffangen() {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") return null;
   try {
-    if (window.sessionStorage.getItem(SIGNUP_SOURCE_KEY)) return;
+    if (window.sessionStorage.getItem(SIGNUP_SOURCE_KEY)) return null;
     const src = new URLSearchParams(window.location.search)
       .get("src")
       ?.toLowerCase()
       .trim();
     if (src && SIGNUP_SOURCE_RE.test(src)) {
       window.sessionStorage.setItem(SIGNUP_SOURCE_KEY, src);
+      return src;
     }
   } catch {
     /* sessionStorage kann blockiert sein – dann eben keine Quelle */
   }
-}
-
-function getSessionId() {
-  if (typeof window === "undefined") return "";
-  let sid = window.localStorage.getItem("analyticsSessionId");
-  if (!sid) {
-    sid =
-      window.crypto?.randomUUID?.() ||
-      `${Date.now()}-${Math.floor(Math.random() * 1e9)}`;
-    window.localStorage.setItem("analyticsSessionId", sid);
-  }
-  return sid;
+  return null;
 }
 
 // Erfasst Seitenaufrufe bei jedem Routenwechsel (Admin-Bereich ausgenommen).
@@ -58,37 +52,22 @@ export default function AnalyticsTracker() {
   useEffect(() => {
     // Vor der Bereichsprüfung: Die Quelle soll auch dann erhalten bleiben,
     // wenn der Aufruf selbst nicht gezählt wird.
-    quelleAuffangen();
+    const neueQuelle = quelleAuffangen();
 
     if (!pathname || pathname.startsWith("/admin") || pathname.startsWith("/sponsor-report")) return;
-    // ⚠️ GESTEUERTE BROWSER ZAEHLEN NICHT MIT (Roadmap 26, 22.08.2026).
-    // `navigator.webdriver` ist der Standard-Marker fuer automatisierte
-    // Browser (Playwright, Selenium, Headless-Bots). Zwei Gruende, der erste
-    // ist der akute:
-    // (1) DIE TESTSUITE VERGIFTETE IHRE EIGENE DATENBANK. Jeder Lauf legte
-    //     ~1.600 Analytics-Eintraege nach; gemessen wuchs die Dev-Sammlung
-    //     auf 83.856 Eintraege (davon 15.175 an EINEM Tag), und die Zahl
-    //     der roten Tests hing davon ab, wie oft die Suite gelaufen war.
-    // (2) EHRLICHKEIT DER ZAHLEN: Ein Bot ist kein Besucher. Der
-    //     Sponsor-Report rechnet mit diesen Werten; automatisierter Verkehr
-    //     hat darin nichts verloren (dieselbe Familie wie die Seed-Likes aus
-    //     Roadmap 2).
-    // Echte Nutzer setzen den Marker nie; wer ihn faelscht, will nicht
-    // gezaehlt werden.
-    if (typeof navigator !== "undefined" && navigator.webdriver) return;
-    // Player-Token mitsenden (falls eingeloggt) → Server leitet daraus „aktive Nutzer" ab.
-    const token =
-      (typeof window !== "undefined" &&
-        window.localStorage.getItem("playerAuthToken")) ||
-      undefined;
-    axios
-      .post("/api/analytics/track", {
-        eventType: "pageview",
-        path: pathname,
-        sessionId: getSessionId(),
-        token,
-      })
-      .catch(() => {});
+    // Der Riegel selbst sitzt seit Roadmap 39 in `lib/analyticsClient.js` —
+    // EINE geteilte Stelle für beide Sendewege (Tracker + trackEvent).
+    sendeAnalyticsEreignis("pageview", pathname);
+
+    // KANAL-LANDUNG (22.08.2026): Wer mit `?src=` ankommt, wird EINMAL je
+    // Sitzung als Landung gezählt — das ist die obere Stufe des
+    // Kanal-Trichters im Admin-Analytics (Scans → Registrierungen → Teams).
+    // Vorher zählte erst die Registrierung; zwischen „niemand scannt den QR"
+    // und „Leute scannen und springen ab" konnte niemand unterscheiden —
+    // zwei völlig verschiedene Probleme mit derselben Null.
+    if (neueQuelle) {
+      sendeAnalyticsEreignis("src_landing", pathname, neueQuelle);
+    }
   }, [pathname]);
 
   return null;

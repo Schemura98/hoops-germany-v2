@@ -29,6 +29,46 @@
 > 📄 **ÜBERGABE: `docs/UEBERGABE-2026-08-21.md`** — Stand am Ende des 21.08., Patricks
 > Entscheidungen dieses Tages und die offene Liste vor den Flyern. **Zuerst lesen.**
 >
+> ⚠️ **NICHT DEPLOYT, NUR COMMITTET (22.08.2026): ANALYTICS-AUSBAU — KANAL-TRICHTER, VERLAUF
+> INTERN, UND ROADMAP 39 IST ERLEDIGT.** Kein Push-/Deploy-Auftrag zum Zeitpunkt des Baus;
+> Gate Kai: **freigabefähig mit einer Auflage (umgesetzt, sein Wächter davor rot gesehen)**.
+> Anlass: Patricks Prüfauftrag zum Admin-Analytics plus Freigabe der Vorschläge.
+> **(1) Kampagnen-Kanäle** (`/admin/analytics`, interner Reiter): je `?src=`-Kanal der Trichter
+> **Landungen → Registrierungen → Team-Gründungen** — Landungen zählt ein neues Ereignis
+> `src_landing` (EINMAL je Sitzung, beim ersten Fang der Quelle; Routenwechsel erzeugt keine
+> zweite). Die Karte ist **immer sichtbar**, auch leer: Während einer Kampagne ist die 0 selbst
+> die Information. ⚠️ Landungen werden erst seit dem 22.08.2026 gezählt — die Karte sagt das.
+> **(2) Verlauf im internen Reiter** (vorher nur im Sponsor-Reiter), mit dritter Linie
+> Registrierungen auf **eigener Skala**. ⚠️ Der Sponsor-Reiter ist NACHWEISLICH unverändert
+> (`mitRegistrierungen` ist opt-in) — Vorschau muss gleich dem geteilten Link bleiben (H2-Lehre).
+> **(3) Roadmap 39 erledigt:** `lib/analyticsClient.js` ist die EINE geteilte Stelle
+> (Session-Id + webdriver-Riegel + Senden); Tracker und `lib/trackEvent.js` delegieren.
+> ✅ Kai hat BEIDE Richtungen gemessen: voller Suite-Lauf → **Delta 0** Ereignisse in der Dev-DB
+> (voriges Gate: +81); simulierter echter Browser → pageview, src_landing UND tour_step laufen.
+> **(4) Härtungen:** `track`-Route weist `src_landing` mit ungültigem meta ab (öffentlicher
+> Endpunkt — sonst flutet jeder per curl erfundene Kanäle in den Trichter; beidseitig gemessen
+> inkl. `{"$ne":null}`). Quellen-Zählung von `isDemo` auf **NUR_ECHT** angeglichen.
+> ⚠️ **Auflage Kai (umgesetzt):** Der Echtheitsfilter fehlte am GRÜNDER der Team-Spalte — ein
+> internes Testkonto zählte rechts als Team-Gründung, während es links korrekt nicht als
+> Registrierung zählt („0 Registrierungen, 1 Team", Teilmenge größer als Menge). Sein Wächter
+> `tests/e2e/kanal-trichter.spec.mjs` (6 Fälle, Mutationsmatrix 6/6) war darauf gebaut und
+> VOR dem Fix rot.
+> **(5) Tobias' CSV-Auflage vom 19.08. umgesetzt:** Export-Knopf vom Sponsor- in den internen
+> Reiter (die Datei enthält Klarnamen; neben „Sponsoring-Report öffnen" war der falsche Reflex
+> eingebaut).
+> ⚠️ **Skalierungsfrage beantwortet (Kai, gemessen):** `teamsBySrcAgg` hat KEINE Sortierstufe
+> (die 32-MB-Grenze war eine Sortiergrenze) — 5.000 Teams 0,51 s, 25.000 Teams 2,5 s, linear.
+> ⚠️ **Mein eigener Fehler beim Bau:** Die Chart-Erweiterung griff auf `x` vor der
+> Initialisierung zu — die ganze Admin-Seite starb. Beim Ansehen gefunden; Falle steht als
+> Kommentar in `LineChart.js`.
+> ⚠️ **Ein unbenannter Einzelflackerer:** Von drei vollen Suite-Läufen hatte der erste 1 roten
+> Fall, dessen Name in einer gefilterten Ausgabe verloren ging; Lauf 2 und 3 komplett grün
+> (**349 / 0 / 1 von 350 in 36 Dateien**, gezählt). Ehrlich benannt statt verschwiegen — falls
+> er wieder auftritt, ist er ein echtes Signal.
+> ✅ Suite **349 grün / 0 rot / 1 übersprungen** · design-audit ohne Abweichung · Sponsor-Reiter
+> im Browser gegengeprüft (kein CSV-Knopf, keine Registrierungs-Legende) · Gate-Bericht:
+> `docs/GATE-KAI-ANALYTICS-KANAL-2026-08-22.md`.
+>
 > 📣 **TESTPHASEN-PLANUNG & VEREINSANSPRACHE KREIS NIERS (22.08.2026) — alles versandFERTIG,
 > nichts versandFREI.** Kein Produktcode; vier Dokumente, zwei PDFs, eine Präsentation.
 > **(1) Entscheidungsvorlage für Patrick & Jonatan** („Spielplan zur Liveschaltung",
@@ -2580,7 +2620,12 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     ⚠️ Randnotiz aus der Recherche: TSV Kaldenkirchen, TV Lobberich und Rheydter TV stehen
     26/27 in keiner Kreisliga und sind deshalb NICHT auf der Liste — bei Bedarf gesondert.
 
-39. ⚠️ **`lib/trackEvent.js` hat den webdriver-Riegel nicht** (Auflage Kai aus dem Gate zu
+39. ✅ **ERLEDIGT (22.08.2026, committet — Details im ⚠️-Block oben in Abschnitt 0).**
+    `lib/analyticsClient.js` ist die eine geteilte Stelle; beide Sendewege delegieren, die
+    `getSessionId`-Duplikate sind zusammengezogen. Kai hat beide Richtungen gemessen: voller
+    Suite-Lauf → Delta 0 Ereignisse (vorher +81); echter Browser simuliert → Tour-Ereignisse
+    laufen. **Historischer Befund:**
+    ~~⚠️ `lib/trackEvent.js` hat den webdriver-Riegel nicht~~ (Auflage Kai aus dem Gate zu
     Roadmap 26, 22.08.2026 — für den NÄCHSTEN Deploy-Stapel, keine Bremse). Der Pageview-Tracker
     filtert gesteuerte Browser seit `70fd2d1`; die **Tour-Ereignisse** (`tour_step` u. a.) laufen
     aber über `lib/trackEvent.js` und gehen weiter raus — gemessen **+81 Einträge je
