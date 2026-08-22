@@ -109,6 +109,27 @@
 > ⚠️ **Kanal-Kennzeichen vereinheitlicht:** Neles Plan sagte `verein-mail`, der gebaute QR
 > trägt `vereinsmail` — EIN Wert je Kanal, sonst zählt die Auswertung zwei halbe Kanäle.
 > Der Plan wurde an den QR angepasst (`4293c43`).
+> 📐 **WIEDERKEHR-RATE FÜR DEN GO/NO-GO-ENTSCHEID IST DEFINIERT — VOR DER MESSUNG**
+> (Ronja, 23.08.2026, `docs/WIEDERKEHR-RATE-DEFINITION-2026-08-23.md`; Freigabe der
+> Schwellen durch Patrick steht noch aus). Kern: **Wiederkehr-Quote** = Anteil der
+> Spieler OHNE Admin-Rolle (Admins messen Pflicht, nicht Produktzug; Echtheitsfilter
+> zwingend), die in ≥ 2 verschiedenen SPIELwochen nach ihrer Registrierungswoche
+> eingeloggt da waren. Spielfreie Wochen existieren für die Messung nicht; Messstrecke
+> beginnt mit dem ersten echten Spieltag (Kreis Niers: 03.10.). **Schwellen: Grün ≥ 40 % ·
+> Gelb 20–39 % · Rot < 20 %** — begründete SETZUNGEN (es gibt keine übertragbaren
+> Branchenwerte; der Sinn der Vorab-Setzung ist die Bindung). **Mindest-n = 20**, darunter
+> keine Prozentzahl, sondern „X von Y" plus vier belegpflichtige qualitative Signale.
+> Vorbedingungs-Ampel: Tragen Admins < 50 % der Ergebnisse ein, misst eine rote Quote
+> „es gab nichts zu sehen", nicht „Spieler wollen nicht". Ronjas eigene These
+> („Verbindungen statt Funktionen") ist mit drei Falsifikationskriterien versehen.
+> ✅ **Vorab-Punkt sofort erledigt (23.08.2026):** Patricks und Jonatans Konten auf
+> `hoops_prod` waren NICHT als intern markiert — sie zählten in „Echte Beteiligung" und
+> hätten in der eigenen Wiederkehr-Quote mitgezählt. Beide jetzt `isInternal: true`
+> (nur dieses Feld, umkehrbar); externe Nutzer auf Prod damit ehrlich **8**.
+> ✅ Co-Admin-Frage geklärt: erkennbar über `Team.coAdmins` (`lib/teamPermissions.js`) —
+> der Messjob kann sie ausschließen. ⚠️ Offen vor dem 14.09.: Spielwochen-Kalender mit
+> Quelle je Woche · Messjob bauen (Kai oder Ben — Zuordnung Patrick/Ole).
+>
 > ⚠️ **Offen vor der ersten Mail (Roadmap 40):** QR einmal echt mit dem Handy scannen (Viviens
 > Matrix-Prüfung ersetzt den Scan nicht — ehrlich benannt) · Betreiber-Anschrift eintragen ·
 > **Anwaltstermin F7/F8** — der einzige unumkehrbare Punkt des Plans.
