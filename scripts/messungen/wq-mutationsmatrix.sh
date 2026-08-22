@@ -3,7 +3,7 @@
 # Ablage: scripts/messungen/ (Roadmap 32 e: Messskripte einchecken). Läuft aus jedem
 # Arbeitsbaum: patchen → Spec laufen → Ergebnis notieren → Original wiederherstellen.
 cd "$(dirname "$0")/../.." || exit 1
-LIB=lib/wiederkehrRate.js
+LIB=lib/wiederkehrRate.mjs
 SKRIPT=scripts/wiederkehr-rate.mjs
 cp "$LIB" tmp/_wq_lib_orig.js
 cp "$SKRIPT" tmp/_wq_skript_orig.mjs

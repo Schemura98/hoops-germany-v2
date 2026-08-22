@@ -2,7 +2,7 @@
 
 **Recherche vom 23.08.2026** für die Wiederkehr-Messung
 (`docs/WIEDERKEHR-RATE-DEFINITION-2026-08-23.md`, §2.4). Maschinenlesbare Fassung
-für den Messjob: `lib/spielwochenNiers2026.js` — beide Dateien müssen inhaltsgleich
+für den Messjob: `lib/spielwochenNiers2026.mjs` — beide Dateien müssen inhaltsgleich
 bleiben; wer eine ändert, ändert die andere mit.
 
 ## Datengrundlage — gemessen, nicht angenommen

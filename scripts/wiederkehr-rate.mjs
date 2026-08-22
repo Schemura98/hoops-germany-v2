@@ -1,7 +1,7 @@
 // Messjob: Wiederkehr-Quote (WQ) — die Go/No-Go-Zahl der Testphase.
 //
 // Bindende Spezifikation: docs/WIEDERKEHR-RATE-DEFINITION-2026-08-23.md (Ronja).
-// Rechenkern (rein, ohne DB): lib/wiederkehrRate.js — dort stehen auch die
+// Rechenkern (rein, ohne DB): lib/wiederkehrRate.mjs — dort stehen auch die
 // Fundstellen-Kommentare je Regel. Wächter: tests/e2e/wiederkehr-rate.spec.mjs.
 //
 // Aufruf (Ampel-Lauf, §1.4):        node scripts/wiederkehr-rate.mjs --stichtag 2026-12-14
@@ -27,7 +27,7 @@
 import { readFileSync } from "fs";
 import mongoose from "mongoose";
 import { NUR_ECHT, NUR_ECHTE_TEAMS } from "../lib/echteZahlen.js";
-import { SPIELWOCHEN_NIERS_2026 } from "../lib/spielwochenNiers2026.js";
+import { SPIELWOCHEN_NIERS_2026 } from "../lib/spielwochenNiers2026.mjs";
 import {
   rechneWiederkehr,
   berlinMitternachtUtc,
@@ -35,7 +35,7 @@ import {
   ZWISCHENSTAND_STICHTAG,
   P2_START_ISO,
   MIN_N,
-} from "../lib/wiederkehrRate.js";
+} from "../lib/wiederkehrRate.mjs";
 
 function leseEnv(key) {
   try {

@@ -11,7 +11,7 @@ Rechtfertigung.
 geändert außer mit ausdrücklicher Entscheidung von Patrick, und jede Änderung wird hier mit
 Datum und Begründung protokolliert. Der Spielwochen-Kalender (§2.4) ist am 23.08.2026 aus
 öffentlichen Terminquellen **gemessen und eingetragen** (`docs/SPIELWOCHEN-KREIS-NIERS-2026.md`,
-maschinenlesbar `lib/spielwochenNiers2026.js`) — nicht aus unseren Nutzungsdaten. Die
+maschinenlesbar `lib/spielwochenNiers2026.mjs`) — nicht aus unseren Nutzungsdaten. Die
 verbleibenden Vorab-Punkte stehen in §8.
 
 **Keine erfundenen Zahlen:** Alle Schwellen in §3 sind **Setzungen** und als solche
@@ -217,7 +217,7 @@ Fehlerform, CLAUDE.md-Merksatz).
 Regeln:
 - **Der Kalender ist gefüllt — gemessen am 23.08.2026, nicht angenommen:**
   `docs/SPIELWOCHEN-KREIS-NIERS-2026.md` (Herleitung, Quelle + Abrufdatum je Woche) und
-  `lib/spielwochenNiers2026.js` (maschinenlesbar für den Messjob; beide Dateien müssen
+  `lib/spielwochenNiers2026.mjs` (maschinenlesbar für den Messjob; beide Dateien müssen
   inhaltsgleich bleiben). Quellen: TeamSL-Spielplan KLH Niers 2026/27 (Liga-ID 56045,
   vollständig: 9 Teams × 8 Paarungen = 72 Spiele, exakt 72 angesetzt) + offizielle
   NRW-Ferienordnung (Herbstferien Sa 17.10.–Sa 31.10.2026).
@@ -238,7 +238,7 @@ Regeln:
 
 ```
 0. stichtag  = Mo 14.12.2026, 00:00 Europe/Berlin (Daten bis So 13.12., 24:00);
-   Spielwochen = die ersten 7 Einträge aus lib/spielwochenNiers2026.js (§2.4)
+   Spielwochen = die ersten 7 Einträge aus lib/spielwochenNiers2026.mjs (§2.4)
 1. kohorte   = players.find(NUR_ECHT ∧ createdAt ≤ stichtag)
 2. je Konto:  rolle = (isTeamAdmin ∨ teamAdminOf ∨ [co-admin, falls identifizierbar])
               ? ADMIN : SPIELER
@@ -462,7 +462,7 @@ Phase-3-Abgleich laut Kampagnenplan bauen darauf auf).
   Patrick/Ole, die Vorlage funktioniert für beide. Offene Bau-Punkte:
   `isInternal`-Verifikation auf Prod (§2.2 Punkt 3), Co-Admin-Klärung (§1.2),
   Kalender-Gegenprobe gegen TeamSL kurz vor Messbeginn (§2.4). Der Spielwochen-Kalender
-  selbst ist seit 23.08.2026 gefüllt (`lib/spielwochenNiers2026.js`).
+  selbst ist seit 23.08.2026 gefüllt (`lib/spielwochenNiers2026.mjs`).
 - **Lina:** Ihre Onboarding-Befunde aus echten Testern (P2) sind Teil der qualitativen
   Signale (§4) und der Gelb-Diagnose (§3.1).
 - **Nele:** Kanal-Lesarten (`signupSource`) für ihre Phase-3-Kampagnenauswertung — mit

@@ -3,7 +3,7 @@
 **Kai (test-automatisierung) · 23.08.2026 · Auftrag: der Messjob zur Go/No-Go-Zahl der Testphase**
 
 **Bindende Spezifikation:** `docs/WIEDERKEHR-RATE-DEFINITION-2026-08-23.md` (Ronja).
-**Gebaut:** `scripts/wiederkehr-rate.mjs` (der Job, rein lesend) · `lib/wiederkehrRate.js`
+**Gebaut:** `scripts/wiederkehr-rate.mjs` (der Job, rein lesend) · `lib/wiederkehrRate.mjs`
 (der Rechenkern, ohne Datenbank — damit alles heute prüfbar ist) ·
 `tests/e2e/wiederkehr-rate.spec.mjs` (der Wächter, 10 Fälle).
 
@@ -112,7 +112,7 @@ Der Wächter selbst wirft im Aufräumschritt, falls je eine übrig bliebe.
 ## 6. Gemeldete Punkte an Ronja (Spezifikation) — kein Blocker darunter
 
 1. **Interner Widerspruch §2.5 ↔ §2.4:** §2.5 Schritt 0 sagt „die ersten 7 **Einträge**
-   aus `lib/spielwochenNiers2026.js`" — die ersten 7 Array-Einträge enthalten aber drei
+   aus `lib/spielwochenNiers2026.mjs`" — die ersten 7 Array-Einträge enthalten aber drei
    Leerwochen und endeten am 23.11. Bindend ist erkennbar §2.4 („die ersten 7
    **Spielwochen**, 28.09. bis einschließlich Woche 07.12."); so ist es gebaut, und der
    Wächter prüft das Wertungsfenster wörtlich gegen diese 7 Montage. §2.5 sollte bei

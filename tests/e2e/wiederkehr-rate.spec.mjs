@@ -35,7 +35,7 @@ import {
   berlinMitternachtUtc,
   pruefeKalender,
   rechneWiederkehr,
-} from "../../lib/wiederkehrRate.js";
+} from "../../lib/wiederkehrRate.mjs";
 
 const execFileP = promisify(execFile);
 const wurzel = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
