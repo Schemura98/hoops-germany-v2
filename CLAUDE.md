@@ -137,8 +137,26 @@
 > Teilrechte, und KEIN Eintrag heißt Vollzugriff). Richtig ist: **Jeder Admin —
 > Haupt- wie Co- — trägt `Player.isTeamAdmin` + `teamAdminOf`**
 > (`set-member-admin/route.js:11`). Der Messjob schließt schlicht alle Spieler
-> mit gesetztem `teamAdminOf` aus — ein Feld, beide Rollen. ⚠️ Offen vor dem 14.09.: Spielwochen-Kalender mit
-> Quelle je Woche · Messjob bauen (Kai oder Ben — Zuordnung Patrick/Ole).
+> mit gesetztem `teamAdminOf` aus — ein Feld, beide Rollen.
+> ✅ **MESSSTRECKE KOMPLETT (23.08.2026, deployt `3bfd64f`):** Spielwochen-Kalender GEMESSEN
+> (`docs/SPIELWOCHEN-KREIS-NIERS-2026.md` + `lib/spielwochenNiers2026.mjs` — 8 Spielwochen /
+> 4 spielfrei, Vollständigkeitsbeleg 72 von 72 Spielen im TeamSL-Plan; die NRW-Herbstferien
+> schlucken drei Wochen am Stück). ⚠️ **Deshalb Stichtag verschoben (Ronja, mit Protokollzeile):
+> Wertung am Mo 14.12.** (erste 7 Spielwochen; gewertet, wer bis So 08.11. registriert war) —
+> bis zum alten Stichtag 29.11. wären es nur 5 Spielwochen gewesen. Zwei Bindungen: Die
+> 8. Spielwoche zählt NICHT in die Ampel; am 30.11. läuft ein Zwischenstand OHNE Ampel.
+> ✅ **Messjob gebaut und deployt (Kai):** `scripts/wiederkehr-rate.mjs` (rein lesend) +
+> `lib/wiederkehrRate.mjs` + Wächter (10 Fälle) + Mutationsmatrix (16/16, einzeln gefahren).
+> Synthetische 25er-Kohorte mit handgerechneten Sollwerten inkl. beider Seiten der
+> Zeitumstellung 25.10.; gegen echte DBs (Dev UND Prod) der ehrliche ABBRUCH mit Exit 1.
+> ⚠️ **DER FUND, DEN NUR DIE SERVER-PROBE FINDEN KONNTE:** Der Job starb auf dem VPS vor der
+> ersten Zeile — Node 20 liest `.js` ohne Modul-Kennzeichnung als CommonJS; lokal (Node 26)
+> war der Fehler PRINZIPIELL unsichtbar. Fix: `wiederkehrRate`, `spielwochenNiers2026` und
+> **`echteZahlen`** auf `.mjs` (letzteres mit allen fünf Importstellen statt einer Kopie).
+> **Regel: Ein Skript, das im Ernstfall auf dem Server läuft, wird VOR dem Ernstfall einmal
+> auf dem Server ausgeführt.** Suite **359 / 0 / 1** (360 in 37 Dateien). Kais Bericht:
+> `docs/MESSJOB-WIEDERKEHR-RATE-2026-08-23.md`. ⚠️ Offen vor dem 30.11.: Kalender-Gegenprobe
+> gegen TeamSL kurz vor Saisonstart · `isInternal`-Kontrolle auf Prod vor dem 14.09. wiederholen.
 >
 > ⚠️ **Offen vor der ersten Mail (Roadmap 40):** QR einmal echt mit dem Handy scannen (Viviens
 > Matrix-Prüfung ersetzt den Scan nicht — ehrlich benannt) · Betreiber-Anschrift eintragen ·
