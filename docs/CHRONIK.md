@@ -5669,3 +5669,37 @@ Verein, nichts automatisiert.
 ### Offen (Roadmap 40)
 Anwaltstermin F7/F8 vor der ersten Mail · QR einmal echt scannen (Matrix-Prüfung ersetzt den
 Scan nicht) · Betreiber-Anschrift in den Pflichtblock.
+
+---
+
+## 22.08.2026 – Analytics-Ausbau: Kanal-Trichter, Verlauf intern, Roadmap 39 (`d1d9517`, committet, NICHT deployt)
+
+**Anlass:** Patricks Prüfauftrag zum Super-Admin-Analytics und die Freigabe der Vorschläge —
+Priorität auf allem, was vor dem Vereinsmail-Versand stehen sollte.
+
+### Gebaut
+- **Kampagnen-Kanäle** (`/admin/analytics`, intern): Trichter je `?src=`-Kanal — Landungen
+  (neues Ereignis `src_landing`, einmal je Sitzung) → Registrierungen → Team-Gründungen.
+  Karte **immer sichtbar**, auch leer.
+- **Verlauf** im internen Reiter, dritte Linie Registrierungen auf eigener Skala; Sponsor-Reiter
+  nachweislich unverändert (Vorschau = geteilter Link, H2-Lehre).
+- **Roadmap 39 erledigt:** `lib/analyticsClient.js` als die eine geteilte Sendestelle.
+  Kai maß beide Richtungen: Suite-Lauf → Delta 0 Ereignisse (vorher +81).
+- **Härtungen:** öffentliche `track`-Route validiert `src_landing`-meta; Quellen-Zählung auf
+  `NUR_ECHT`; Auflage Kai — Echtheitsfilter auch am Team-GRÜNDER (sonst „0 Registrierungen,
+  1 Team"). **Tobias' CSV-Auflage vom 19.08. umgesetzt** (Knopf in den internen Reiter).
+- Wächter `kanal-trichter.spec.mjs` (Kai, 6 Fälle, Mutationsmatrix 6/6, vor dem Auflage-Fix rot).
+
+### Lehren
+- **Eine Trichterspalte mit anderem Filter als ihre Nachbarspalte ist eine Lüge in Tabellenform**
+  — Teilmenge größer als Menge, dieselbe Familie wie analytics-ehrlichkeit.
+- **Ein öffentlicher Zähl-Endpunkt, dessen Werte eine Admin-Auswertung speisen, braucht
+  Format-Validierung** — sonst ist der Trichter per curl flutbar.
+- **`const` kennt keinen Vorgriff:** Chart-Erweiterung vor der Abhängigkeit eingefügt → ganze
+  Seite tot. Beim Ansehen gefunden, als Kommentar in `LineChart.js` hinterlassen.
+- Ein unbenannter Einzelflackerer (1 von 3 Läufen, Name in gefilterter Ausgabe verloren) ist
+  offen protokolliert statt verschwiegen.
+
+### Stand
+Suite **349 / 0 / 1** (350 in 36 Dateien) · design-audit ohne Abweichung · Gate Kai
+freigabefähig mit einer Auflage (umgesetzt) · **nicht deployt** — live ist `0ecd593`.
