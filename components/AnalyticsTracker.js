@@ -61,6 +61,21 @@ export default function AnalyticsTracker() {
     quelleAuffangen();
 
     if (!pathname || pathname.startsWith("/admin") || pathname.startsWith("/sponsor-report")) return;
+    // ⚠️ GESTEUERTE BROWSER ZAEHLEN NICHT MIT (Roadmap 26, 22.08.2026).
+    // `navigator.webdriver` ist der Standard-Marker fuer automatisierte
+    // Browser (Playwright, Selenium, Headless-Bots). Zwei Gruende, der erste
+    // ist der akute:
+    // (1) DIE TESTSUITE VERGIFTETE IHRE EIGENE DATENBANK. Jeder Lauf legte
+    //     ~1.600 Analytics-Eintraege nach; gemessen wuchs die Dev-Sammlung
+    //     auf 83.856 Eintraege (davon 15.175 an EINEM Tag), und die Zahl
+    //     der roten Tests hing davon ab, wie oft die Suite gelaufen war.
+    // (2) EHRLICHKEIT DER ZAHLEN: Ein Bot ist kein Besucher. Der
+    //     Sponsor-Report rechnet mit diesen Werten; automatisierter Verkehr
+    //     hat darin nichts verloren (dieselbe Familie wie die Seed-Likes aus
+    //     Roadmap 2).
+    // Echte Nutzer setzen den Marker nie; wer ihn faelscht, will nicht
+    // gezaehlt werden.
+    if (typeof navigator !== "undefined" && navigator.webdriver) return;
     // Player-Token mitsenden (falls eingeloggt) → Server leitet daraus „aktive Nutzer" ab.
     const token =
       (typeof window !== "undefined" &&
