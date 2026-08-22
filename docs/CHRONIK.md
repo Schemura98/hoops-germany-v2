@@ -5489,3 +5489,65 @@ Build durch · Playwright **315 / 5 / 1** im Hauptbaum (die 5 vorbestehend, Road
 `design-audit -- --check` ohne Abweichung · neun Breiten ohne Querlauf und ohne Konsolenfehler ·
 live: Server auf `e9a8ef3`, **16 Routen je 200**, `placeholder:text-mist-400` im ausgelieferten
 Stylesheet belegt.
+
+---
+
+## 22.08.2026 – Löschen eigener Beiträge (Roadmap 37) + `lib/` in den Tailwind-Globs (Roadmap 36) (`d649127`, deployt)
+
+**Auslöser:** Tobias' Nebenbefund aus dem Newsfeed-Gate desselben Tages — in der ganzen
+Oberfläche gab es keinen Weg, einen eigenen Beitrag loszuwerden; für Kommentare gar keinen,
+auch nicht für Super-Admins.
+
+### Neu
+- `app/api/posts/deletepost/route.js` · `app/api/posts/deletecomment/route.js`
+- Löschweg in `components/posts/PostCard.js` (über `ConfirmAction`), `components/feed/PostFeed.js`
+- `tailwind.config.js`: `./lib/**/*.{js,mjs}` in `content` (Roadmap 36)
+- Wächter (Kai): `beitrag-loeschen.spec.mjs`, `eingabefelder-lesbarkeit.spec.mjs`,
+  `lib-wird-gescannt.spec.mjs` · Gate-Bericht `docs/GATE-KAI-ROADMAP-37-2026-08-22.md`
+
+### Die gesetzten Regeln
+1. **Ereignis-Beiträge sind nicht löschbar**, auch nicht vom Verfasser. Der Beitrag ist die
+   *Anzeige* einer belegten Tatsache, die Aufzeichnung liegt in `matches`. Löschen versteckt den
+   Beleg, ohne die Tatsache zu ändern — die schlechteste aller Kombinationen.
+2. **Nur was mir gehört.** Fremde Kommentare unter dem eigenen Beitrag ausdrücklich nicht: Das
+   ist Moderation und eine eigene Entscheidung.
+3. Hart gelöscht — `/post/[id]` fängt einen fehlenden Beitrag bereits ab. Ein Lösch-Kennzeichen
+   müsste von jeder Abfrage berücksichtigt werden; eine vergessene Stelle zeigt den Beitrag
+   weiter, und das fällt niemandem auf.
+
+### Der Blocker
+Die Bestätigungs-Rückfrage lag auf dem Telefon **außerhalb des Bildschirms** — bei einer Antwort
+zu 100 %, und die Seite wird dabei nicht breiter. `max-w-[calc(100vw-2rem)]` half nicht: Es
+begrenzt die **Breite**, nicht die **Lage**. Behoben in `ConfirmAction`, nicht an der
+Aufrufstelle — eine Ausrichtung je Aufrufer zu setzen hieße, die Falle beim nächsten Einsatz
+erneut zu stellen. Tobias nahm die Behebung über **vier echte Mausklicks** ab, nicht über Zahlen.
+
+### Methodik-Lehren
+- **Eine gedruckte Zusicherung ohne Deckung:** Der Kopf von `ConfirmAction` behauptete seit dem
+  11.08.2026 die Fokusrückgabe. Sie fand nie statt — die Fokusquelle wurde im Effekt gemerkt,
+  also nachdem `autoFocus` den Fokus schon gezogen hatte. **Eine Reihenfolge, kein Tippfehler.**
+- **Eine Zahl, die vor einer endgültigen Löschung log:** Der Kommentarzähler sah Änderungen an
+  Antworten nie, und genau er speiste den Warntext der Rückfrage.
+- **Wahrheitswert statt Vorhandensein:** `if (body.replyId)` ließ `null` durchfallen und machte
+  aus einem gelöschten Kommentar ein gelöschtes Gespräch. Keine Rechte-, aber eine
+  Wirkungsausweitung — bei unumkehrbaren Aktionen genauso schlimm.
+- **Wer den Artikel aus einer Zahl ableitet, muss das Geschlecht mitführen.** Mein Textfix ergab
+  „Die eine Kommentar und eine Antwort". Gefangen hat es der eigene Trockenlauf, nicht das Lesen.
+- **Eine Auswertung, die Abwesenheit von Messung als bestandene Messung liest** (Kais
+  Selbstbefund): Sein erster Matrixlauf meldete acht saubere Ergebnisse für acht Läufe, die nie
+  stattgefunden hatten — die `BUILD_ID`-Sperre brach sie ab, und sein Parser las „kein `N failed`"
+  als „0 failed".
+- **Tailwind liest rohen Text, also auch Kommentare.** Seit `lib/` gescannt wird, erzeugt ein dort
+  zitierter Klassenname eine echte, tote CSS-Regel.
+
+### Verifikation
+Build durch · Playwright **332 grün / 10 rot / 1 übersprungen** (343 in 34 Dateien). Fünf rote
+sind die vorbestehenden aus Roadmap 26, die anderen fünf **Prüfdaten-Themen** (→ Roadmap 38) —
+belegt dadurch, dass dieselben Fälle am damals live laufenden Stand `e9a8ef3` gegen dieselbe
+Datenbank ebenfalls rot sind. `design-audit -- --check` ohne Abweichung.
+Live: Server auf `d649127`, **16 Routen je 200**, beide Löschendpunkte weisen unangemeldete
+Aufrufe ab, auch die Einschleusungs-Nutzlast `{"$ne": null}`.
+
+### Gates
+Kai **freigabefähig mit einer Auflage** (umgesetzt), Tobias erst **nicht freigabefähig
+(1 Blocker)**, nach der Nacharbeit **freigabefähig ohne Auflagen**.

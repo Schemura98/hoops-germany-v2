@@ -29,6 +29,125 @@
 > 📄 **ÜBERGABE: `docs/UEBERGABE-2026-08-21.md`** — Stand am Ende des 21.08., Patricks
 > Entscheidungen dieses Tages und die offene Liste vor den Flyern. **Zuerst lesen.**
 >
+> ✅ **DEPLOYT: `d649127`** (22.08.2026) — **MAN KANN SEINE EIGENEN BEITRÄGE UND KOMMENTARE
+> LÖSCHEN (Roadmap 37) — und `lib/` wird endlich von Tailwind gelesen (Roadmap 36).**
+> Sechs Commits seit `e9a8ef3`. Anlass war Tobias' Nebenbefund aus dem Newsfeed-Gate: In der
+> ganzen Oberfläche gab es **keinen Weg**, einen eigenen Beitrag loszuwerden — nur
+> `/api/admin/deletepost`, Super-Admins vorbehalten; für **Kommentare gab es gar keinen**, auch
+> nicht für Admins. Auf einer Plattform, deren Beiträge unter Klarnamen stehen und
+> Benachrichtigungen an fremde Menschen auslösen.
+>
+> **(1) DIE WICHTIGSTE ZEILE IST EINE SPERRE: Ereignis-Beiträge sind NICHT löschbar**, auch nicht
+> vom Verfasser. Ein Spielergebnis ist keine Äußerung, sondern die **Anzeige** einer belegten
+> Tatsache; die Aufzeichnung liegt in `matches`. Ein Löschweg würde den **Beleg verstecken, ohne
+> die Tatsache zu ändern** — und damit genau die Belegbarkeit aushöhlen, die das Produkt verkauft.
+> Server **und** Oberfläche. ⚠️ Ebenfalls bewusst NICHT gebaut: dass der Verfasser eines Beitrags
+> **fremde** Kommentare darunter löscht. Das ist Moderation, nicht Aufräumen — die Funktion, mit
+> der man unbequeme Antworten verschwinden lässt. Eigene Entscheidung (Patrick/Nora).
+>
+> ⚠️ **(2) DER BLOCKER (Tobias): DIE RÜCKFRAGE LAG AUSSERHALB DES BILDSCHIRMS.** Auf dem Telefon
+> war ein eigener Kommentar oder eine eigene Antwort **nicht löschbar**. Das Bestätigungs-Panel
+> richtet sich am Auslöser aus; bei Kommentar und Antwort sitzt der weit links, und ein 288 px
+> breites, rechtsbündiges Panel an einem Knopf bei x = 141 beginnt zwangsläufig bei **−115**.
+> Gemessen lag „Löschen" bei einer Antwort zu **100 %** draußen — und die Seite wird dabei nicht
+> breiter, man kann nicht einmal hinscrollen. Tobias' Satz: *„Ein sichtbarer Papierkorb, dessen
+> Bestätigung man nicht erreichen kann, ist schlechter als kein Papierkorb."*
+> ⚠️ `max-w-[calc(100vw-2rem)]` half nicht — es begrenzt die **Breite**, nicht die **Lage**. Und
+> `align="left"` allein auch nicht, dann ragt dasselbe Panel rechts hinaus.
+> **Behoben in `components/ui/ConfirmAction.js`, NICHT an der Aufrufstelle:** Das Panel wird nach
+> dem Öffnen gemessen und waagerecht ausgeglichen. Eine Ausrichtung je Aufrufer zu setzen hieße,
+> die Falle beim nächsten Einsatz erneut zu stellen.
+> ✅ **Tobias hat die Behebung nicht über Zahlen abgenommen, sondern über VIER ECHTE MAUSKLICKS**
+> auf 320 und 390 px, an Kommentar *und* Antwort, auf Permalink *und* Newsfeed — jeder hat
+> gelöscht, was er sollte. Dazu `elementFromPoint` in der Knopfmitte (8 von 8) und zwei Proben,
+> die niemand beauftragt hatte: **Fenster bei offenem Panel** von 1440 auf 360 verkleinert (Panel
+> wandert mit) und **Auslöser am unteren Bildrand**. Auf 1440 px greift der Ausgleich gar nicht
+> ein — er fasst nur an, was klemmt.
+>
+> ⚠️ **(3) EINE ZUSICHERUNG, DIE SEIT DEM 11.08.2026 IM CODE STAND UND NIE STATTFAND** (Tobias
+> B2, vorbestehend): Der Kopf von `ConfirmAction` sagt, der Fokus kehre beim Schließen zum
+> Auslöser zurück. Er tat es nicht — gemessen landete er auf `BODY`, wer nur mit der Tastatur
+> arbeitet, wurde an den Seitenanfang zurückgeworfen. Ursache ist eine **Reihenfolge**: Die
+> Fokusquelle wurde im Effekt gemerkt, also **nachdem** `autoFocus` den Fokus längst auf den
+> Bestätigen-Knopf gezogen hatte. Gemerkt wurde damit der Knopf IM Panel, und der ist beim
+> Schließen weg. Jetzt synchron beim Öffnen. Belegt an **zwei** Aufrufstellen (Beitrag löschen,
+> Kader-Mitglied entfernen).
+>
+> ⚠️ **(4) EINE ZAHL, DIE VOR EINER ENDGÜLTIGEN LÖSCHUNG LOG** (Tobias B3): `commentTotal` zählte
+> Antworten mit, sah deren Änderungen aber nie — `replies` lagen im Zustand des jeweiligen
+> `CommentItem`. Gemessen blieb der Zähler nach dem Löschen einer Antwort bei 3. Schlimmer als
+> die schiefe Anzeige war die **Folge**: Genau dieser Wert speiste den Warntext der
+> Lösch-Rückfrage. Eine Zahl, die im Sinne des Codes stimmt und im Sinne des Lesers falsch ist
+> (`docs/MUSTER-ZAHLEN-DIE-LUEGEN-2026-08-13.md`), unmittelbar vor einer unumkehrbaren Aktion.
+>
+> ⚠️ **(5) DIE AUFLAGE (Kai), und sie war mein Fehler: `replyId` mit leerem Wert löschte den
+> GANZEN Kommentar.** `if (body.replyId)` ließ `null` durchfallen und traf den Zweig darunter —
+> **200 „Kommentar gelöscht"**, Kommentar samt beider Antworten weg. Keine Rechte-, sondern eine
+> **Wirkungsausweitung**, und die ist bei einer unumkehrbaren Aktion genauso schlimm. Jetzt
+> `"replyId" in body`. Tobias hat fünf leere Werte nachgeprüft (`null`, `""`, `0`, `false`,
+> `"   "`) — alle **404**, Kommentar überlebt.
+> ⚠️ **Zwei Härtungen dazu (Kai):** Die **Kennungen wurden nie geprüft** — `{"$ne": null}` wirft
+> nicht, Mongoose baut daraus eine gültige Abfrage, und `findById` liefert einen **beliebigen**
+> Beitrag; gestoppt hat das allein die Berechtigungsprüfung, also **eine einzige `if`-Zeile**.
+> Kai hat vorgeführt, was daran hängt: mit entfernter Prüfung löschte diese Nutzlast einen echten
+> Dev-Beitrag, den der Aufruf nie benannt hatte. Jetzt `mongoose.isValidObjectId` **vor** der
+> Datenbank. Und die **Ereignis-Sperre hing an einem Zeichenvergleich** (`kind === "auto"`); ein
+> Beitrag mit `autoType`, dem `kind` fehlt, war löschbar — auf `hoops_prod` nur lesend nachgezählt
+> und heute nicht auslösbar (188 ohne `kind`, davon **0** mit `autoType`), aber eine Annahme über
+> künftige Schreiber. Jetzt `kind === "auto" || autoType`.
+>
+> ⚠️ **(6) EIN FEHLER IN DER KORREKTUR, vom eigenen Trockenlauf gefangen.** Mein erster Textfix
+> ergab **„Die eine Kommentar und eine Antwort"** — ein Helfer stellte stur „eine" voran, aber
+> *Kommentar* ist männlich und *Antwort* weiblich. **Wer den Artikel aus einer Zahl ableitet, muss
+> das Geschlecht mitführen.** Der Satz beginnt jetzt mit „Damit …" und braucht gar keinen; Tobias
+> hat **sieben** Lagen nachgelesen, alle sauber.
+>
+> ✅ **Roadmap 36 ging mit raus:** `./lib/**/*.{js,mjs}` steht in den `content`-Globs. Das gebaute
+> Stylesheet ist dabei **bitgleich** — die Zeile ändert heute nichts und ist Vorsorge für den Tag,
+> an dem in `lib/ui.js` eine Klasse steht, die sonst nirgends vorkommt. Beidseitig gegengeprobt
+> (Sonde nur in `lib/`: mit Zeile entsteht die Regel, ohne nicht).
+> ⚠️ **Nebeneffekt, der bleibt: Tailwind liest rohen Text, also auch KOMMENTARE.** Ein in `lib/`
+> zitierter Klassenname erzeugt jetzt eine echte, tote CSS-Regel. Zwei solche Fälle sind beim
+> ersten Anlauf entstanden und umformuliert worden.
+>
+> ✅ **Drei neue Wächter (Kai):** `beitrag-loeschen.spec.mjs` (18 Fälle, Mutationsmatrix **8 von
+> 8** gefangen), `eingabefelder-lesbarkeit.spec.mjs`, `lib-wird-gescannt.spec.mjs` — letzterer
+> misst am **Probebaum außerhalb des Projekts** mit dem echten Tailwind, weil die Glob-Zeile heute
+> **null** zusätzliche Regeln erzeugt und damit jeder CSS-basierte Test strukturell blind wäre.
+> ⚠️ **Befund am Bauteil, behoben:** Die Beitragskarte hatte **keine Kennung** — jeder Test musste
+> über den Beitragstext gehen. Jetzt `data-post-id`.
+>
+> ⚠️ **KAIS EIGENER SELBSTBEFUND, und er ist lehrreich:** Sein erster Matrixlauf meldete **acht
+> saubere Ergebnisse für acht Läufe, die nie stattgefunden haben.** Auf seinem Port lief noch ein
+> Server mit älterem Build, die `BUILD_ID`-Sperre brach jeden Lauf ab, und sein Auswerter las
+> „kein `N failed` in der Ausgabe" als **„0 failed"**. *Eine Auswertung, die Abwesenheit von
+> Messung als bestandene Messung liest.* Die Zombie-Sperre aus Roadmap 23 hat sich damit an ihrem
+> eigenen Erfinder bewährt.
+>
+> ✅ **Beide Gates durch.** Kai **freigabefähig mit einer Auflage** (umgesetzt), Tobias erst
+> **nicht freigabefähig (1 Blocker)**, nach der Nacharbeit **freigabefähig ohne Auflagen**.
+> ✅ **Gate-Bericht im Repo:** `docs/GATE-KAI-ROADMAP-37-2026-08-22.md` (Roadmap 25).
+> ⚠️ **Suite vor dem Deploy: 332 grün / 10 rot / 1 übersprungen** (343 Fälle in 34 Dateien).
+> **Die 10 sind KEINE Produktfehler, und das ist belegt statt behauptet:** 5 sind die
+> vorbestehenden aus Roadmap 26; die übrigen 5 sind **Prüfdaten-Themen** → Roadmap 38. Beweis:
+> Dieselben Fälle laufen auch am Stand **`e9a8ef3` rot, also an dem Commit, der zu diesem
+> Zeitpunkt live lief** (eigener Worktree, gleiche Datenbank, `y = 650` statt der erwarteten 554).
+> ✅ **Live nachgemessen (22.08.2026):** Server auf `d649127`, keine lokalen Änderungen,
+> **16 Routen je 200**, und beide Löschendpunkte weisen unangemeldete Aufrufe ab — auch die
+> Einschleusungs-Nutzlast `{"$ne": null}`.
+>
+> ⚠️ **OFFEN aus dieser Runde:** **Roadmap 38** (die Prüfdatenlage) · ein Wächter für den
+> B1-Ausgleich in der Währung, in der es klemmt — *„bei offener Rückfrage liegt der
+> Bestätigen-Knopf vollständig im Fenster, und `elementFromPoint` in seiner Mitte liefert genau
+> ihn"*, mit der Auslöser-Achse Beitrag/Kommentar/**Antwort**, sonst blind (→ Kai) · gemischte
+> Schreibweise „ein Kommentar und **3** Antworten" (→ Nele) · auf 390×640 endet das Panel bei 623
+> von 640 Bildpunkten, bedienbar aber ohne Reserve (→ Vivien) · Tippziele 32×32 gegen 45×32 der
+> Nachbarn, vorbestehende Familie Roadmap 32 b (→ Vivien).
+> ⚠️ **Tobias hat `welcomeSeen` auf den zwei Dev-Testkonten dauerhaft auf `true` gesetzt** (über
+> die Produkt-Route, entspricht einem Klick auf „Überspringen"), weil die Tour bei jedem Aufruf
+> über dem Beitrag lag. Wer einen Test baut, der auf den Auto-Start der Tour zählt, muss das
+> zurücksetzen.
+>
 > ✅ **DEPLOYT: `e9a8ef3`** (22.08.2026) — **GLEICHE KACHEL, UNGLEICHES LICHT: Der Newsfeed
 > hat keine zwei Beitragsformen mehr — und drei Eingabefelder hatten gar keine Farbe.**
 > Befund Patrick am echten Bild: *„mir gefällt nicht, dass manche Posts runde Kacheln haben und
@@ -1425,7 +1544,7 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `e9a8ef3` (aktuell live) → `108fbc7` (nur Doku) → `3181ad2` → `6348625` → `b88bbd3` (nur Doku) → `ea982c4` → `cdb8065` → `492e465` → `34dd22f` (Feldende,
+> **Rollback-Kette:** `d649127` (aktuell live) → `6f02a9b` → `6c79ec4` (nur Tests) → `b62d511` → `57da148` (nur Tests) → `a320c9e` (nur Doku) → `e9a8ef3` → `108fbc7` (nur Doku) → `3181ad2` → `6348625` → `b88bbd3` (nur Doku) → `ea982c4` → `cdb8065` → `492e465` → `34dd22f` (Feldende,
 > vor den Wächtern) → `0f2a933` (nur Doku) → `17bb00a` → `8e63cf6` (nur Doku) → `c4982bd` → `c5cbf6f` → `fb23317` → `0da80c7` (Dribbelweg,
 > vor den Gate-Befunden) → `70c36ba` (letzter Stand vor der Ball-Reise) → `76406fb` → `571931c` (Feld) → `b3487a8` →
 > `d4c847a` (Leiste, erster Schritt) → `070a1e7` (letzter Stand vor Feld und Leiste) → `04ba621` → `07150cf` (nur Werkzeug) → `d2cfa47` → `35b8bc0` → `d841c4b` → `bd99263` (Dunk, vor den
@@ -2252,12 +2371,37 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     Eingriff in die Bau-Konfiguration mit plattformweiter Reichweite ist. → Vivien, Freigabe
     Patrick.
 
-37. ⚠️ **Ein eigener Beitrag oder Kommentar lässt sich nicht löschen** (Befund Tobias,
-    22.08.2026, **vorbestehend**). In `components/posts/` und `components/feed/` gibt es keinen
-    Lösch-Weg; nur der Super-Admin hat `/api/admin/deletepost`. Wer sich vertippt oder etwas
-    bereut, wird es über die Oberfläche nicht mehr los — auf einer Plattform, deren Beiträge
-    unter Klarnamen stehen und Benachrichtigungen auslösen. → Ronja/Nele für die Nutzensicht,
-    Kai/Vivien für den Bau.
+37. ✅ **ERLEDIGT und DEPLOYT (22.08.2026, `d649127`).** Eigene Beiträge, Kommentare und
+    Antworten sind löschbar; Team-Admins können einen Beitrag ihres Vereins zurücknehmen.
+    Ereignis-Beiträge (Ergebnisse, Transfers) ausdrücklich **nicht** — Begründung im Kopf von
+    `app/api/posts/deletepost/route.js`. Details im ✅-Block oben.
+    ⚠️ **Nicht gebaut und weiterhin offen: fremde Kommentare unter dem eigenen Beitrag löschen.**
+    Das ist Moderation, nicht Aufräumen — die Funktion, mit der man unbequeme Antworten
+    verschwinden lässt. Eigene Entscheidung → Patrick/Nora.
+
+38. ⚠️ **DIE TESTSUITE IST AUF EINE DATENBANK EINGESTELLT, DIE NIEMAND HERSTELLEN KANN**
+    (Befund 22.08.2026, beim Nachziehen der Prüfdaten aufgefallen). Wer den **dokumentierten**
+    Weg geht, um eine funktionierende Entwicklungsumgebung zu bekommen — `node
+    scripts/seed-demo.mjs`, in dieser Datei als „Dev-Basis" geführt —, bekommt **fünf rote Tests
+    geschenkt**, die mit dem Produkt nichts zu tun haben:
+    · `newsfeed-mobil.spec.mjs` (4 Fälle): „Der Feed beginnt erst bei y ≈ 650 px statt ~554".
+      Die 554 wurden am 18.08.2026 an einem **damaligen** Datenstand gemessen; mit frischen
+      Seed-Daten ist der Kopfbereich schlicht höher, weil die Anzeigetafel Inhalt hat.
+    · `beitrag-loeschen.spec.mjs` (1 Fall): Kais Ehrlichkeitsschranke meldet, dass im gerankten
+      „Für dich"-Feed von `max@test.de` **kein einziger fremder Beitrag** steht — der Fall kann
+      seine Aussage dann nicht prüfen und erklärt sich für **wertlos statt bestanden**.
+    ⚠️ **Belegt, nicht vermutet:** Dieselben Fälle laufen auch am Stand `e9a8ef3` rot — also an
+    dem Commit, der zum Zeitpunkt der Messung **live** war (eigener Worktree, gleiche Datenbank).
+    Es ist kein Rückschritt, sondern eine Drift der Prüfdaten.
+    **Die eigentliche Frage dahinter:** Eine Suite, deren Sollwerte an einem Datenstand hängen,
+    den der Aufsetzbefehl nicht herstellt, ist auf einem neuen Rechner sofort rot — und niemand
+    weiß dann, ob es am Code liegt. Entweder die Schranken werden datenunabhängig formuliert,
+    oder es braucht einen Seed, der genau die Lage herstellt, die die Tests brauchen (mehrere
+    Konten mit Beiträgen, Ereignis- UND Wortbeiträge im gerankten Feed). → **Kai**, gemeinsam
+    mit der Frage, ob `seed-feed-lebendig.mjs` dafür Teil des Standard-Aufsetzens werden muss.
+    ⚠️ Dazu: Tobias hat am 22.08. `welcomeSeen` auf `max@test.de` und `sven.adler@test.de`
+    dauerhaft auf `true` gesetzt (über die Produkt-Route). Wer einen Test baut, der auf den
+    Auto-Start der Tour zählt, muss das zurücksetzen.
 
 33. **Offen aus der Logo-Runde (21.08.2026)**, keiner blockierend:
     **(a)** ⚠️ `scripts/logo-leiste-bauen.mjs` **behauptet eine Sicherung, die er nicht hat** —
