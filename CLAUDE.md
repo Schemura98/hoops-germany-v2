@@ -126,8 +126,12 @@
 > `hoops_prod` waren NICHT als intern markiert — sie zählten in „Echte Beteiligung" und
 > hätten in der eigenen Wiederkehr-Quote mitgezählt. Beide jetzt `isInternal: true`
 > (nur dieses Feld, umkehrbar); externe Nutzer auf Prod damit ehrlich **8**.
-> ✅ Co-Admin-Frage geklärt: erkennbar über `Team.coAdmins` (`lib/teamPermissions.js`) —
-> der Messjob kann sie ausschließen. ⚠️ Offen vor dem 14.09.: Spielwochen-Kalender mit
+> ✅ Co-Admin-Frage geklärt — und meine erste Antwort war falsch: NICHT über ein
+> `coAdmins`-Feld (das existiert nicht; `team.adminPermissions` listet nur
+> Teilrechte, und KEIN Eintrag heißt Vollzugriff). Richtig ist: **Jeder Admin —
+> Haupt- wie Co- — trägt `Player.isTeamAdmin` + `teamAdminOf`**
+> (`set-member-admin/route.js:11`). Der Messjob schließt schlicht alle Spieler
+> mit gesetztem `teamAdminOf` aus — ein Feld, beide Rollen. ⚠️ Offen vor dem 14.09.: Spielwochen-Kalender mit
 > Quelle je Woche · Messjob bauen (Kai oder Ben — Zuordnung Patrick/Ole).
 >
 > ⚠️ **Offen vor der ersten Mail (Roadmap 40):** QR einmal echt mit dem Handy scannen (Viviens
