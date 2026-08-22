@@ -2385,11 +2385,29 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     scripts/seed-demo.mjs`, in dieser Datei als „Dev-Basis" geführt —, bekommt **fünf rote Tests
     geschenkt**, die mit dem Produkt nichts zu tun haben:
     · `newsfeed-mobil.spec.mjs` (4 Fälle): „Der Feed beginnt erst bei y ≈ 650 px statt ~554".
-      Die 554 wurden am 18.08.2026 an einem **damaligen** Datenstand gemessen; mit frischen
-      Seed-Daten ist der Kopfbereich schlicht höher, weil die Anzeigetafel Inhalt hat.
+      Die 554 wurden am 18.08.2026 an einem **damaligen** Datenstand gemessen.
+      ⚠️ **Nachgemessen, was oberhalb des Feeds steht** (390 px, angemeldet, frische Seed-Daten):
+      Kopfzeile 43 px · **Anzeigetafel 212 px** · Onboarding-Streifen 39 px. Die Anzeigetafel ist
+      der Treiber: Mit frischen Daten hat sie ein *nächstes Spiel* zu zeigen, mit der
+      ausgedünnten Datenbank hatte sie weniger Inhalt. **Ein Nutzer mit angesetztem Spiel sieht
+      mehr Kopf als einer ohne — das ist richtiges Produktverhalten, kein Defekt.** Die Schranke
+      ist damit konstruktionsbedingt datenabhängig.
+      Die **Absicht** des Falls bleibt gültig (kein 192-px-Akkordeonblock oberhalb des Feeds);
+      sie gehört nur strukturell formuliert statt in einer absoluten Pixelzahl.
     · `beitrag-loeschen.spec.mjs` (1 Fall): Kais Ehrlichkeitsschranke meldet, dass im gerankten
       „Für dich"-Feed von `max@test.de` **kein einziger fremder Beitrag** steht — der Fall kann
       seine Aussage dann nicht prüfen und erklärt sich für **wertlos statt bestanden**.
+      ⚠️ **KORREKTUR (22.08.2026, noch am selben Tag): DIESER FALL GEHÖRT NICHT HIERHER.**
+      Ich hatte ihn als Prüfdaten-Thema eingeordnet; nachgemessen ist er **keins**:
+      Der Bestand hat 7 fremde Wortbeiträge, die API liefert für `max` auf Seite 1 **6** davon
+      (im Zweig „Folge ich" 5), und die Datenbank ist vor und nach dem Dateilauf **identisch**
+      (14 / 1 / 7) — Kais Fälle räumen sauber auf. Entscheidend: Der Fall ist **allein grün**
+      und **in der Datei rot**. Gleiche Daten, gleicher Code, andere Position im Lauf.
+      Es liegt also an etwas, das die vorangehenden Fälle **während** ihres Laufs verändern
+      und was auf das Ranking wirkt — nicht am Seed.
+      ⚠️ Und die Fehlermeldung des Falls schlägt `seed-demo.mjs` als Abhilfe vor. **Das behebt
+      es nicht** und schickt den nächsten Leser auf die falsche Spur — eine Meldung, die eine
+      falsche Abhilfe nennt, kostet mehr Zeit als eine, die nur sagt „ich konnte nicht messen".
     ⚠️ **Belegt, nicht vermutet:** Dieselben Fälle laufen auch am Stand `e9a8ef3` rot — also an
     dem Commit, der zum Zeitpunkt der Messung **live** war (eigener Worktree, gleiche Datenbank).
     Es ist kein Rückschritt, sondern eine Drift der Prüfdaten.
