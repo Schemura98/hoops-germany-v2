@@ -5707,3 +5707,37 @@ freigabefähig mit einer Auflage (umgesetzt).
 Härtung greift (erfundene Kanäle → „Ungültige Quelle"), Landungszählung einmal echt
 durchgespielt (`?src=flyer-test` → pageview + src_landing, beide 200; der Kanal trägt
 dadurch eine Kontroll-Landung).
+
+---
+
+## 23.08.2026 – Wiederkehr-Messung komplett: Definition, Kalender, Stichtag-Entscheidung, Messjob (`3bfd64f`, deployt)
+
+**Kette eines Tages:** Ronja definierte die Wiederkehr-Quote VOR der Messung
+(`docs/WIEDERKEHR-RATE-DEFINITION-2026-08-23.md`; Schwellen 40/20 als begründete Setzungen,
+Mindest-n 20, Vorbedingungs-Ampel, drei Falsifikationskriterien für ihre eigene These). Der
+gemessene Spielwochen-Kalender (72 von 72 Spielen im TeamSL-Plan, NRW-Herbstferien mit Quelle)
+traf die Definition: nur 5 Spielwochen bis zum alten Stichtag. Ronja entschied Option (a):
+**Wertung am 14.12.** (7 Spielwochen, gewertet wer bis 08.11. registriert), mit zwei Bindungen
+gegen das Hintertürchen (8. Spielwoche zählt nicht; Zwischenstand 30.11. ohne Ampel). Kai baute
+den Messjob mit synthetischer 25er-Kohorte, handgerechneten Sollwerten (inkl. Zeitumstellung
+25.10.) und Mutationsmatrix 16/16.
+
+### Der Fund, den nur die Server-Probe finden konnte
+Der Job starb auf dem VPS vor der ersten Zeile: **Node 20 liest `.js` ohne Modul-Kennzeichnung
+als CommonJS**, lokal (Node 26) wird die Syntax automatisch erkannt — der Fehler war auf dem
+Entwicklungsrechner prinzipiell unsichtbar. Zweimal dieselbe Klasse (`wiederkehrRate`, dann
+`echteZahlen` als importierte zentrale Filterdatei). Fix per `.mjs`-Endung; `echteZahlen`
+mit allen fünf Importstellen umgezogen statt kopiert — die Regel der Datei selbst verbietet
+Kopien. **Regel daraus: Ein Skript, das im Ernstfall auf dem Server läuft, wird VOR dem
+Ernstfall einmal auf dem Server ausgeführt.**
+
+### Kleinere Ehrlichkeiten
+Mein „Exit: 0" bei der ersten Kontrolle war der Exit von `tail` in der Pipeline, nicht des
+Jobs — richtig gemessen, am falschen Gegenstand, in klein. Kais drei eigene Fehler stehen in
+seinem Bericht (`docs/MESSJOB-WIEDERKEHR-RATE-2026-08-23.md`), darunter ein von ihm beendeter
+Server, der kein Zombie war.
+
+### Verifikation
+Suite **359 / 0 / 1** (360 in 37 Dateien, unabhängig gezählt) · Build ok · live: 16 Routen je
+200, Job auf dem Server gegen `hoops_prod` → ehrlicher ABBRUCH mit Exit 1 an beiden Stichtagen ·
+Betreiberkonten auf Prod als intern markiert (externe Nutzer ehrlich 8).
