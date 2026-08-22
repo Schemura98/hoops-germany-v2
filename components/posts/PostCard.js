@@ -42,6 +42,22 @@ function authorLink(player) {
     : "#";
 }
 
+// Zählt Dinge in lesbarem Deutsch (Befund Tobias B4, 22.08.2026).
+//
+// ⚠️ Hier stand `Die ${n} Kommentar${n === 1 ? "" : "e"} … verschwinden mit` –
+// bei n = 1 ergab das **„Die 1 Kommentar darunter verschwinden mit"**:
+// Zahlwort und Verb im Plural, das Substantiv im Singular. Der Satz kündigt
+// eine ENDGÜLTIGE Löschung an; er ist die letzte Stelle, an der jemand
+// abbrechen kann, und liest sich in genau dem Moment wie ein Fehler.
+// ⚠️ Der bestimmte Artikel ist bewusst NICHT im Satz: „Die eine Kommentar und
+// eine Antwort" – genau das kam bei meinem ersten Anlauf heraus, weil ein
+// Helfer stur „eine" voranstellte. `Kommentar` ist männlich, `Antwort` weiblich;
+// wer den Artikel aus einer Zahl ableitet, muss das Geschlecht mitführen.
+// Der Satz beginnt deshalb mit „Damit …" und braucht gar keinen.
+function zaehlwort(n, einzahl, mehrzahl) {
+  return n === 1 ? einzahl : `${n} ${mehrzahl}`;
+}
+
 // Wiederverwendbarer Löschen-Auslöser (Roadmap 37, 22.08.2026).
 //
 // ⚠️ `ConfirmAction` und NICHT `window.confirm` – das ist Projektstandard und
@@ -185,7 +201,7 @@ function ReplyItem({ reply, postId, commentId, currentPlayerId, onDeleted }) {
 }
 
 // Ein Kommentar inkl. Like, Antworten-Liste und Antwort-Eingabe.
-function CommentItem({ comment, postId, currentPlayerId, onDeleted }) {
+function CommentItem({ comment, postId, currentPlayerId, onDeleted, onRepliesChange }) {
   const [liked, setLiked] = useState(
     (comment.likes || []).some((l) => String(l) === String(currentPlayerId))
   );
@@ -248,7 +264,11 @@ function CommentItem({ comment, postId, currentPlayerId, onDeleted }) {
         commentId: comment._id,
         text: replyText,
       });
-      setReplies((r) => [...r, data.reply]);
+      setReplies((r) => {
+        const next = [...r, data.reply];
+        onRepliesChange?.(comment._id, next);
+        return next;
+      });
       setReplyText("");
       setShowReply(false);
     } catch {
@@ -290,9 +310,9 @@ function CommentItem({ comment, postId, currentPlayerId, onDeleted }) {
               was="Kommentar"
               hinweis={
                 replies.length
-                  ? `Diesen Kommentar löschen? Die ${replies.length} Antwort${
-                      replies.length === 1 ? "" : "en"
-                    } darunter verschwinden mit.`
+                  ? `Diesen Kommentar löschen? Damit ${
+                      replies.length === 1 ? "verschwindet" : "verschwinden"
+                    } auch ${zaehlwort(replies.length, "eine Antwort", "Antworten")}.`
                   : "Diesen Kommentar löschen?"
               }
               busy={loeschBusy}
@@ -312,7 +332,11 @@ function CommentItem({ comment, postId, currentPlayerId, onDeleted }) {
                 commentId={comment._id}
                 currentPlayerId={currentPlayerId}
                 onDeleted={(id) =>
-                  setReplies((liste) => liste.filter((x) => String(x._id) !== String(id)))
+                  setReplies((liste) => {
+                    const next = liste.filter((x) => String(x._id) !== String(id));
+                    onRepliesChange?.(comment._id, next);
+                    return next;
+                  })
                 }
               />
             ))}
@@ -374,9 +398,20 @@ export default function PostCard({
   const [weg, setWeg] = useState(false);
 
   // Gesamtzahl Kommentare inkl. Antworten (für den Zähler).
-  const commentTotal =
-    comments.length +
-    comments.reduce((sum, c) => sum + (c.replies?.length || 0), 0);
+  //
+  // ⚠️ DIESE ZAHL WAR EINE SITZUNG LANG FALSCH (Befund Tobias B3, 22.08.2026).
+  // `comments` liegt hier, die `replies` lagen aber im Zustand des jeweiligen
+  // `CommentItem` – diese Ebene sah eine neue oder gelöschte Antwort also nie.
+  // Gemessen: Antwort gelöscht ⇒ Zähler blieb bei 3; zwei Antworten ergänzt ⇒
+  // Zähler blieb bei 2, bis jemand neu lud.
+  // ⚠️ Schlimmer als die schiefe Anzeige war die FOLGE: Genau dieser Wert
+  // speiste den Warntext der Lösch-Rückfrage („… darunter verschwinden mit").
+  // Eine Zahl, die im Sinne des Codes stimmt und im Sinne des Lesers falsch ist
+  // – `docs/MUSTER-ZAHLEN-DIE-LUEGEN-2026-08-13.md` –, unmittelbar vor einer
+  // ENDGÜLTIGEN Löschung. Deshalb meldet `CommentItem` seine Antworten jetzt
+  // nach oben (`onRepliesChange`), statt sie für sich zu behalten.
+  const antwortAnzahl = comments.reduce((sum, c) => sum + (c.replies?.length || 0), 0);
+  const commentTotal = comments.length + antwortAnzahl;
 
   async function toggleLike() {
     if (liking) return;
@@ -447,6 +482,16 @@ export default function PostCard({
     String(post.authorTeam?._id || post.authorTeam) === String(currentTeamAdminOf);
   const darfLoeschen = Boolean(eigenerBeitrag || meinVereinsBeitrag);
 
+  // „Der eine Kommentar" / „Die 3 Kommentare und 2 Antworten" – der Satzbau
+  // muss stimmen, weil er das Letzte ist, was jemand vor dem Löschen liest.
+  const beitragsFolgen = (() => {
+    const teile = [];
+    if (comments.length)
+      teile.push(zaehlwort(comments.length, "ein Kommentar", "Kommentare"));
+    if (antwortAnzahl) teile.push(zaehlwort(antwortAnzahl, "eine Antwort", "Antworten"));
+    return teile.join(" und ");
+  })();
+
   async function beitragLoeschen() {
     if (loeschBusy) return;
     setLoeschBusy(true);
@@ -508,7 +553,12 @@ export default function PostCard({
   const ringGrund = isAuto ? "focus-visible:ring-offset-navy-800" : "focus-visible:ring-offset-navy-950";
 
   return (
-    <div className={rang}>
+    // ⚠️ `data-post-id` (Befund Kai, Gate 22.08.2026): Die Karte hatte KEINEN
+    // Griff. Der einzige Anker war der `sr-only`-Text am Löschknopf, die
+    // Zuordnung lief über den Beitragstext — also über etwas, das sich beim
+    // nächsten Textwechsel ändert. Eine Kennung kostet nichts und trägt jeden
+    // künftigen Test.
+    <div className={rang} data-post-id={post._id}>
       {isAuto ? (
         <>
           {/* Kopf (Ereignis) */}
@@ -703,11 +753,16 @@ export default function PostCard({
           <div className="ml-auto">
             <LoeschKnopf
               was="Beitrag"
+              // ⚠️ Kommentare und Antworten werden GETRENNT benannt (Befund
+              // Tobias B4). Vorher stand hier „Die 2 Kommentare", auch wenn es
+              // ein Kommentar und eine Antwort waren: Die Menge stimmte, die
+              // Bezeichnung nicht. Vor einer endgültigen Löschung muss der Satz
+              // beides richtig treffen.
               hinweis={
                 commentTotal
-                  ? `Diesen Beitrag löschen? Die ${commentTotal} Kommentar${
-                      commentTotal === 1 ? "" : "e"
-                    } darunter verschwinden mit.`
+                  ? `Diesen Beitrag löschen? Damit ${
+                      commentTotal === 1 ? "verschwindet" : "verschwinden"
+                    } auch ${beitragsFolgen}.`
                   : "Diesen Beitrag löschen?"
               }
               busy={loeschBusy}
@@ -728,6 +783,13 @@ export default function PostCard({
               currentPlayerId={currentPlayerId}
               onDeleted={(id) =>
                 setComments((liste) => liste.filter((x) => String(x._id) !== String(id)))
+              }
+              onRepliesChange={(id, next) =>
+                setComments((liste) =>
+                  liste.map((x) =>
+                    String(x._id) === String(id) ? { ...x, replies: next } : x
+                  )
+                )
               }
             />
           ))}

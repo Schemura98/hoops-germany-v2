@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Post from "@/models/Post";
 import { getPlayerFromToken } from "@/lib/serverAuth";
 import { ok, fail, withErrorHandling } from "@/lib/apiResponse";
+import mongoose from "mongoose";
 
 // POST /api/posts/deletepost – einen EIGENEN Beitrag löschen (Roadmap 37).
 //
@@ -39,12 +40,22 @@ async function handler(req) {
   const player = await getPlayerFromToken(getTokenFromRequest(req, body.token));
   if (!player) return fail("Nicht authentifiziert", 401);
   if (!body.postId) return fail("Beitrags-ID fehlt", 400);
+  // ⚠️ Siehe `deletecomment/route.js`: `{"$ne": null}` wirft nicht, sondern
+  // liefert einen beliebigen Beitrag. Zweite Schranke vor der Datenbank
+  // (Befund Kai B1).
+  if (!mongoose.isValidObjectId(body.postId)) return fail("Ungültige Kennung", 400);
 
   await connectDB();
-  const post = await Post.findById(body.postId).select("player authorTeam kind");
+  const post = await Post.findById(body.postId).select("player authorTeam kind autoType");
   if (!post) return fail("Beitrag nicht gefunden", 404);
 
-  if (post.kind === "auto") {
+  // ⚠️ Nicht nur `kind === "auto"` (Befund Kai B2). Die Sperre hing an einem
+  // einzigen Zeichenvergleich: Ein Beitrag mit gesetztem `autoType`, dem aber
+  // `kind` fehlt, war löschbar. Auf `hoops_prod` nur lesend nachgezählt und
+  // heute NICHT auslösbar (188 Beiträge ohne `kind`, davon 0 mit `autoType`) —
+  // aber es ist eine Annahme über künftige Schreiber, und die trägt nicht.
+  // `autoType` ist das Merkmal, das ein Ereignis wirklich ausmacht.
+  if (post.kind === "auto" || post.autoType) {
     return fail(
       "Ergebnisse und Transfers sind belegte Ereignisse und lassen sich nicht löschen.",
       403
