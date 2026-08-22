@@ -29,6 +29,70 @@
 > 📄 **ÜBERGABE: `docs/UEBERGABE-2026-08-21.md`** — Stand am Ende des 21.08., Patricks
 > Entscheidungen dieses Tages und die offene Liste vor den Flyern. **Zuerst lesen.**
 >
+> ✅ **DEPLOYT: `0ecd593`** (22.08.2026) — **DIE ANALYTICS-AUSWERTUNG BRICHT NICHT MEHR AB
+> (Roadmap 26), DIE ALTE ABFRAGE ZÄHLTE FALSCH, UND DIE SUITE IST ERSTMALS KOMPLETT GRÜN.**
+> Zwei Commits Produktivcode (`70fd2d1`) + Kais Gate (`0ecd593`).
+>
+> **(1) DER ABBRUCH:** `POST /api/analytics/summary` starb ab ~65.000 Einträgen an der
+> 32-MB-Sortiergrenze (Code 292) — zwei `$setWindowFields`-Stufen sortieren den GESAMTEN
+> Treffersatz, und `allowDiskUse` greift auf kleinen Atlas-Tarifen nachweislich nicht. Die
+> Sitzungs-Aggregation in `lib/analyticsSummary.js` ist neu gebaut: Hash-Gruppierung je
+> `sessionId` mit `$sortArray` + `$reduce` (MongoDB ≥ 5.2; Server: 8.0). Gemessen: 75.418
+> Ereignisse in unter 2 s, alle vier Zeiträume 200 OK — vorher tot.
+>
+> ⚠️ **(2) DIE ÜBERRASCHUNG: DIE ALTE ABFRAGE ZÄHLTE BEI ZEITGLEICHEN EREIGNISSEN FALSCH —
+> stabil, nicht als Zufall.** Beide Fensterstufen sortieren nach `createdAt`; bei EXAKT gleichem
+> Zeitstempel ist die Reihenfolge unter Gleichen unbestimmt und darf sich zwischen den Stufen
+> unterscheiden. Ordnet die zweite das isNew=false-Ereignis zuerst, beginnt die laufende Summe
+> bei 0 — eine **Phantom-Gruppe (sid, 0)** entsteht, die Sitzung zählt doppelt. Belegt durch
+> gezieltes Herausfiltern am echten Bestand (12-h-Fenster: alt 8.778, korrekt 8.777).
+> ✅ **Kai hat die Diagnose bestätigt und VERGRÖSSERT:** 12 synthetische Randfälle mit
+> handgerechneten Sollwerten — die neue Pipeline trifft alle 12 exakt (Ein-Ereignis-Sitzung,
+> Lücke von exakt 30 min, Zwillings-Zeitstempel an Anfang UND Ende, leere Treffermenge). Der
+> Fehler der Alten **skaliert**: 3.000 Sitzungen mit Zwillings-Zeitstempeln in durchmischter
+> Ablage → alt zählt **3.231**. Live auf der Dev-DB: 48-h-Fenster alt 19.942 / neu 19.938 —
+> die Differenz sind exakt **4 Phantom-Gruppen**, jede nach dem belegten Muster.
+> ⚠️ Nebenbefund Kai: Auch die neue Abfrage hat eine Decke (`$group`-Arrays, 100-MB-Stufe),
+> rechnerisch erst im Millionenbereich.
+>
+> **(3) DIE SUITE VERGIFTET SICH NICHT MEHR SELBST** (`components/AnalyticsTracker.js`):
+> Gesteuerte Browser (`navigator.webdriver` — Playwright, Selenium, Bots) werden nicht mehr als
+> Besucher gezählt. Vorher legte jeder Suite-Lauf ~1.600 Einträge nach; gemessen wuchs die
+> Dev-Sammlung um 15.175 Einträge an EINEM Tag, und die Zahl der roten Tests hing davon ab, wie
+> oft die Suite gelaufen war. Zweiter Grund, unabhängig: Ein Bot ist kein Besucher — der
+> Sponsor-Report rechnet mit diesen Zahlen (dieselbe Familie wie die Seed-Likes, Roadmap 2).
+> ✅ **Beidseitig belegt (Kai):** gesteuert → 0 Aufrufe; echter Browser simuliert
+> (`webdriver=undefined`) → pageviews laufen. Die Analytics sind nicht für alle abgeschaltet.
+>
+> ✅ **(4) DIE SUITE IST ERSTMALS KOMPLETT GRÜN: 343 / 0 / 1** (344 in 35 Dateien; Kai und ich
+> unabhängig gezählt). Die fünf „vorbestehenden" Roten aus Roadmap 26 sind aus dem **richtigen**
+> Grund gekippt: Beim Lauf lagen 83.937 Einträge in der DB — grün durch Reparatur, nicht durch
+> Aufräumen. ⚠️ **DAMIT GILT „5 ROT IST NORMAL" NICHT MEHR.** Wochenlang stand in jedem
+> Gate-Bericht „die 5 sind die vorbestehenden" — diese Gewöhnung an rote Tests war selbst ein
+> Risiko. **Ab jetzt ist jeder rote Test wieder ein echtes Signal, keins zum Wegfiltern.**
+>
+> ✅ **(5) KAIS WÄCHTER FÜR DIE 32-MB-GRENZE** (`tests/e2e/analytics-grossbestand.spec.mjs`) —
+> und mein Angebot „nicht ehrlich testbar wäre ein gültiges Ergebnis" wäre die falsche Antwort
+> gewesen: Kai hat **gemessen statt geurteilt**. Aufblähen der Dokumente zieht nicht (der
+> Optimizer streicht ungenutzte Felder — es zählt die Dokumentzahl); der Kipppunkt liegt real
+> zwischen 40k (läuft) und 60k (Code 292). Der Wächter legt 80.000 markierte Ereignisse an,
+> ruft die echte API, hat eine Ehrlichkeitsschranke (sessions ≥ 8000) und räumt vor UND nach dem
+> Lauf auf (0 Reste). Beide Zusicherungen rot gesehen. Kosten: 25,5 s je Suite-Lauf.
+>
+> ✅ **Gate Kai: freigabefähig** (Bericht `docs/GATE-KAI-ROADMAP-26-2026-08-22.md`, Roadmap 25).
+> Tobias bewusst nicht: keine nutzersichtbare Änderung.
+> ✅ **Live nachgemessen (22.08.2026):** Server auf `0ecd593` · 16 Routen je 200 · **alt gegen
+> neu auf `hoops_prod` NUR LESEND verglichen: IDENTISCH auf 7 Tagen, 30 Tagen und Gesamtbestand**
+> (3.582 Ereignisse, 1.652 Sitzungen — dort existiert kein Zwillings-Zeitstempel-Fall). Der
+> Umbau ändert an den heutigen Live-Zahlen nichts; er ist Vorsorge plus Korrektheitsfix.
+>
+> ⚠️ **OFFEN → Roadmap 39 (Auflage Kai für den NÄCHSTEN Stapel, keine Deploy-Bremse):**
+> `lib/trackEvent.js` hat den webdriver-Riegel NICHT — Tour-Ereignisse aus gesteuerten Browsern
+> gehen weiter raus (+81 je Suite-Lauf statt ~1.600; 7.259 `tour_step` liegen schon in der
+> Dev-DB). Keine Bremse, weil der Onboarding-Trichter auf der Ausschlussliste des
+> Sponsor-Reports steht. Abhilfe: dieselbe Bedingung an EINER geteilten Stelle, die
+> `getSessionId`-Duplikate dabei zusammenziehen, Gegenprobe in beide Richtungen.
+>
 > ✅ **DEPLOYT: `d649127`** (22.08.2026) — **MAN KANN SEINE EIGENEN BEITRÄGE UND KOMMENTARE
 > LÖSCHEN (Roadmap 37) — und `lib/` wird endlich von Tailwind gelesen (Roadmap 36).**
 > Sechs Commits seit `e9a8ef3`. Anlass war Tobias' Nebenbefund aus dem Newsfeed-Gate: In der
@@ -1544,7 +1608,7 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `d649127` (aktuell live) → `6f02a9b` → `6c79ec4` (nur Tests) → `b62d511` → `57da148` (nur Tests) → `a320c9e` (nur Doku) → `e9a8ef3` → `108fbc7` (nur Doku) → `3181ad2` → `6348625` → `b88bbd3` (nur Doku) → `ea982c4` → `cdb8065` → `492e465` → `34dd22f` (Feldende,
+> **Rollback-Kette:** `0ecd593` (aktuell live) → `70fd2d1` → `1a57be5` (nur Doku) → `38f2d20` (nur Doku/Tests) → `d649127` → `6f02a9b` → `6c79ec4` (nur Tests) → `b62d511` → `57da148` (nur Tests) → `a320c9e` (nur Doku) → `e9a8ef3` → `108fbc7` (nur Doku) → `3181ad2` → `6348625` → `b88bbd3` (nur Doku) → `ea982c4` → `cdb8065` → `492e465` → `34dd22f` (Feldende,
 > vor den Wächtern) → `0f2a933` (nur Doku) → `17bb00a` → `8e63cf6` (nur Doku) → `c4982bd` → `c5cbf6f` → `fb23317` → `0da80c7` (Dribbelweg,
 > vor den Gate-Befunden) → `70c36ba` (letzter Stand vor der Ball-Reise) → `76406fb` → `571931c` (Feld) → `b3487a8` →
 > `d4c847a` (Leiste, erster Schritt) → `070a1e7` (letzter Stand vor Feld und Leiste) → `04ba621` → `07150cf` (nur Werkzeug) → `d2cfa47` → `35b8bc0` → `d841c4b` → `bd99263` (Dunk, vor den
@@ -2254,7 +2318,16 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     ist von keinem Test bewacht – wer sie vergrößert, bekommt Tobias' B2 zurück und eine grüne
     Suite) und **ein Signup-Fall durchs Formular** (beide Prüfer kamen nur über `/login`).
 
-26. ⚠️ **Die Analytics-Auswertung bricht ab einer Datenmenge ab** (Befund Kai, 20.08.2026).
+26. ✅ **ERLEDIGT und DEPLOYT (22.08.2026, `0ecd593`, Gate Kai freigabefähig).** Die
+    Sitzungs-Aggregation ist neu gebaut (Hash-Gruppierung statt `$setWindowFields`), läuft bei
+    83.937 Einträgen in unter 2 s, und der Tracker zählt gesteuerte Browser nicht mehr —
+    **die Suite ist damit erstmals komplett grün (343/0/1)**. Details im ✅-Block oben in
+    Abschnitt 0. ⚠️ **Die wichtigste Nebenerkenntnis: Die alte Abfrage zählte bei exakt
+    zeitgleichen Ereignissen FALSCH** (Phantom-Gruppen durch instabile Sortierung unter
+    Gleichen) — der Umbau war also auch ein Korrektheitsfix, nicht nur Vorsorge. Auf
+    `hoops_prod` nachgemessen: alt und neu dort identisch, kein sichtbarer Effekt.
+    **Historischer Befund zur Einordnung:**
+    ~~⚠️ Die Analytics-Auswertung bricht ab einer Datenmenge ab~~ (Befund Kai, 20.08.2026).
     `POST /api/analytics/summary` antwortet mit „Interner Serverfehler", sobald zu viele
     Besucher-Einträge da sind: MongoDB bricht eine Sortierung über 32 MB ab
     (`QueryExceededMemoryLimitNoDiskUseAllowed`, Code 292). Fundstelle: die **zweite**
@@ -2458,6 +2531,17 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     **Die Regel, die daraus bleibt: Vorbedingungen darf man seeden, Sollwerte nie.**
     Der zweite Aufsetz-Befehl steht jetzt im Abschnitt „Projektort & Umgebung"; ein eigener Seed
     nur für die Suite wurde verworfen (er driftet von dem, den Entwickler benutzen).
+
+39. ⚠️ **`lib/trackEvent.js` hat den webdriver-Riegel nicht** (Auflage Kai aus dem Gate zu
+    Roadmap 26, 22.08.2026 — für den NÄCHSTEN Deploy-Stapel, keine Bremse). Der Pageview-Tracker
+    filtert gesteuerte Browser seit `70fd2d1`; die **Tour-Ereignisse** (`tour_step` u. a.) laufen
+    aber über `lib/trackEvent.js` und gehen weiter raus — gemessen **+81 Einträge je
+    Suite-Lauf** statt ~1.600 (95 % weniger, nicht null); 7.259 `tour_step` liegen bereits in
+    der Dev-DB. Nicht blockierend, weil der Onboarding-Trichter auf der Ausschlussliste des
+    Sponsor-Reports steht — betroffen ist nur die interne Diagnose.
+    **Abhilfe (Kai):** dieselbe Bedingung an EINER geteilten Stelle statt je Datei — und die
+    `getSessionId`-Duplikate dabei gleich zusammenziehen. Gegenprobe in beide Richtungen
+    (gesteuert → nichts; echter Browser → Ereignisse laufen). → Kai/Vivien.
 
 33. **Offen aus der Logo-Runde (21.08.2026)**, keiner blockierend:
     **(a)** ⚠️ `scripts/logo-leiste-bauen.mjs` **behauptet eine Sicherung, die er nicht hat** —

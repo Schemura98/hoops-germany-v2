@@ -5551,3 +5551,68 @@ Aufrufe ab, auch die Einschleusungs-Nutzlast `{"$ne": null}`.
 ### Gates
 Kai **freigabefähig mit einer Auflage** (umgesetzt), Tobias erst **nicht freigabefähig
 (1 Blocker)**, nach der Nacharbeit **freigabefähig ohne Auflagen**.
+
+---
+
+## 22.08.2026 – Analytics-Auswertung: Abbruch behoben, Zählfehler entdeckt, Suite erstmals komplett grün (`0ecd593`, deployt)
+
+**Roadmap 26.** Zwei Commits Produktivcode (`70fd2d1`: `lib/analyticsSummary.js`,
+`components/AnalyticsTracker.js`) plus Kais Gate (`0ecd593`).
+
+### Was kaputt war
+`POST /api/analytics/summary` starb ab ~65.000 Einträgen an der 32-MB-Sortiergrenze
+(Code 292) — zwei `$setWindowFields`-Stufen sortieren den gesamten Treffersatz, und
+`allowDiskUse` greift auf kleinen Atlas-Tarifen nachweislich nicht. Auf der Dev-DB
+(83.856 Einträge) waren `/admin/analytics` und der Sponsor-Report tot; Prod (3.582)
+wuchs darauf zu. Dazu vergiftete die Testsuite ihre eigene Datenbank: ~1.600
+Analytics-Einträge je Lauf, +15.175 an einem einzigen Tag, und die Zahl der roten
+Tests hing davon ab, wie oft die Suite gelaufen war.
+
+### Was gebaut wurde
+- **Sitzungs-Aggregation neu:** Hash-Gruppierung je `sessionId` mit `$sortArray` +
+  `$reduce` statt globaler Sortierung. 75.418 Ereignisse in unter 2 s.
+- **Tracker:** `navigator.webdriver` ⇒ kein Tracking. Beidseitig belegt (gesteuert →
+  0 Aufrufe; simulierter echter Browser → pageviews laufen).
+- **Kais Wächter** `tests/e2e/analytics-grossbestand.spec.mjs`: 80.000 markierte
+  Ereignisse, echte API, Ehrlichkeitsschranke, Aufräumen vor und nach dem Lauf,
+  beide Zusicherungen rot gesehen. Kosten 25,5 s je Suite-Lauf.
+
+### Die Überraschung: die alte Abfrage zählte falsch
+Bei EXAKT zeitgleichen Ereignissen ist die Sortierreihenfolge unter Gleichen
+unbestimmt und darf sich zwischen den zwei Fensterstufen unterscheiden. Ordnet die
+zweite Stufe das isNew=false-Ereignis zuerst, beginnt die laufende Summe bei 0 —
+eine **Phantom-Gruppe (sid, 0)** entsteht, die Sitzung zählt doppelt. Am echten
+Bestand belegt (12-h-Fenster: alt 8.778, korrekt 8.777; die Phantom-Gruppe gezielt
+herausgefiltert). Kai hat es vergrößert: 3.000 synthetische Zwillings-Sitzungen →
+alt zählt 3.231; live im 48-h-Fenster exakt 4 Phantom-Gruppen nachgewiesen.
+**Auf `hoops_prod` nur lesend verglichen: alt und neu identisch** — dort existiert
+der Zwillingsfall (noch) nicht, der Umbau ändert an den Live-Zahlen nichts.
+
+### Methodik-Lehren
+- **Instabile Sortierung unter Gleichen ist eine eigene Fehlerklasse.** Zwei Stufen,
+  die „nach demselben Feld" sortieren, sortieren bei Gleichstand nicht zwangsläufig
+  gleich — und ein Fehler daraus ist stabil reproduzierbar und sieht wie eine
+  Datenlaune aus.
+- **„Nicht ehrlich testbar" wäre die falsche Antwort gewesen.** Ich hatte Kai
+  angeboten, das als gültiges Ergebnis zu akzeptieren. Er hat stattdessen GEMESSEN:
+  Dokumente aufblähen zieht nicht (der Optimizer streicht ungenutzte Felder, es
+  zählt die Dokumentzahl), der Kipppunkt liegt real zwischen 40k und 60k, der
+  Insert kostet ~5 s — also ist der Wächter bezahlbar.
+- **Grün durch Reparatur, nicht durch Aufräumen:** Beim finalen Lauf lagen 83.937
+  Einträge in der DB. Die fünf „vorbestehenden" Roten sind aus dem richtigen Grund
+  gekippt.
+- **„5 rot ist normal" gilt nicht mehr.** Wochenlang stand in jedem Gate-Bericht
+  „die 5 sind die vorbestehenden" — diese Gewöhnung an rote Tests war selbst ein
+  Risiko. Ab jetzt ist jeder rote Test wieder ein echtes Signal.
+
+### Offen
+**Roadmap 39** (Auflage Kai, nächster Stapel): `lib/trackEvent.js` hat den
+webdriver-Riegel nicht — Tour-Ereignisse laufen weiter (+81 je Suite-Lauf statt
+~1.600). Nicht blockierend (Onboarding-Trichter steht auf der Ausschlussliste des
+Sponsor-Reports).
+
+### Verifikation
+Suite **343 grün / 0 rot / 1 übersprungen** (344 in 35 Dateien), Kai und ich
+unabhängig gezählt · Gate Kai freigabefähig
+(`docs/GATE-KAI-ROADMAP-26-2026-08-22.md`) · live: Server auf `0ecd593`, 16 Routen
+je 200, Prod-Vergleich alt/neu identisch auf 7/30 Tagen und Gesamtbestand.
