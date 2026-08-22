@@ -136,7 +136,15 @@ export default function PostFeed({ player, compactComposer = false }) {
               Liste): Das sind drei verschiedene Dinge, keine drei Beiträge. */}
           <div className="space-y-4">
             {posts.map((post) => (
-              <PostCard key={post._id} post={post} currentPlayerId={player?._id} />
+              <PostCard
+                key={post._id}
+                post={post}
+                currentPlayerId={player?._id}
+                currentTeamAdminOf={player?.teamAdminOf}
+                onDeleted={(id) =>
+                  setPosts((liste) => liste.filter((p) => String(p._id) !== String(id)))
+                }
+              />
             ))}
           </div>
 

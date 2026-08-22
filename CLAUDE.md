@@ -1763,7 +1763,8 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
   Fläche, zwei Wege, in einer Datei. Genau der Nebenbefund, der für
   `FollowSuggestions.js` schon seit dem 15.08. hier steht. Alle übrigen
   Primitive sind echt im Einsatz (Button 25, Loading 19, EmptyState 15, Skeleton 13, Reveal 11,
-  FormAlert 9, Tabs 6, CountUp 5, ConfirmAction/ScrollTable/SplitFlap je 3, Card 2, LinkTabs 1).
+  FormAlert 9, Tabs 6, CountUp 5, ConfirmAction 4 (seit Roadmap 37), ScrollTable/SplitFlap je 3,
+  Card 2, LinkTabs 1).
   ⚠️ **Stand 19.08.2026 nachgezogen — und der größte Teil der Drift war schon da**, bevor der
   Hero-Umbau begann: Am unveränderten Stand `062989e` gemessen Card 3→2, Reveal 12→11,
   strikt 141→143, weit 180→184. Es wurde seit dem 15.08. mehrfach an Panels gebaut, ohne die

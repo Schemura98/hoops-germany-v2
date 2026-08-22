@@ -34,7 +34,10 @@ const TOKEN_FILE = path.join(REPO, "lib", "ui.js");
 const BASELINE = {
   datum: "22.08.2026",
   importe: {
-    Button: 25, Card: 2, ConfirmAction: 3, CountUp: 5, EmptyState: 15,
+    // ConfirmAction 3 -> 4 am 22.08.2026: Der Loeschweg fuer eigene Beitraege
+    // und Kommentare (Roadmap 37) benutzt das Primitiv, statt eine eigene
+    // Rueckfrage zu bauen. `window.confirm` ist im Projekt verboten.
+    Button: 25, Card: 2, ConfirmAction: 4, CountUp: 5, EmptyState: 15,
     FormAlert: 9, LinkTabs: 1, Loading: 19, Reveal: 11, ScrollTable: 3,
     Skeleton: 13, SplitFlap: 3, Tabs: 6,
   },

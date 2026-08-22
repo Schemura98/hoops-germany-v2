@@ -7,6 +7,7 @@ import {
   PiHeartBold,
   PiHeartFill,
   PiChatCircleBold,
+  PiTrashBold,
   PiBasketballBold,
   PiArrowsLeftRightBold,
   PiUsersBold,
@@ -22,6 +23,7 @@ import RichText from "./RichText";
 import PostEmbed from "./PostEmbed";
 import MentionTextarea from "./MentionTextarea";
 import ErgebnisInhalt from "./ErgebnisInhalt";
+import ConfirmAction from "@/components/ui/ConfirmAction";
 
 // Darstellung der automatischen Ereignis-Beiträge (Icon + Badge je Typ).
 const AUTO = {
@@ -38,6 +40,46 @@ function authorLink(player) {
   return player?.slug || player?._id
     ? `/player/view-player/${player.slug || player._id}`
     : "#";
+}
+
+// Wiederverwendbarer Löschen-Auslöser (Roadmap 37, 22.08.2026).
+//
+// ⚠️ `ConfirmAction` und NICHT `window.confirm` – das ist Projektstandard und
+// hier besonders wichtig: Löschen ist unumkehrbar, und der Auslöser sitzt
+// mitten in einer Liste, durch die gewischt wird.
+//
+// ⚠️ Bewusst nur ein Symbol ohne Beschriftung, in `mist-400`, das erst beim
+// Zeigen auf `signal-error` anspringt. Ein dauerhaft rotes Element neben jedem
+// eigenen Beitrag würde die Liste zur Warnanzeige machen – und die Handlung,
+// die hier zählt, ist Lesen, nicht Löschen. Für Vorleseprogramme trägt der
+// Knopf trotzdem einen vollen Namen.
+function LoeschKnopf({ was, hinweis, busy, onConfirm, className = "" }) {
+  return (
+    <ConfirmAction
+      trigger={({ onClick }) => (
+        /* ⚠️ `min-h-8 min-w-8` ist GEMESSEN, nicht dekorativ: Ohne diese Angabe
+           ist das Klickziel 30x26 px, während Like und Kommentar daneben 45x32
+           messen. Der Grund ist unscheinbar – die beiden Nachbarn tragen eine
+           sichtbare Zahl und damit eine volle Zeilenbox, dieser Knopf nur ein
+           Symbol und `sr-only`-Text, der keine Höhe erzeugt. Ein Ziel, das
+           kleiner ist als seine Nachbarn, ist genau dort gefährlich, wo es das
+           Löschen auslöst. */
+        <button
+          type="button"
+          onClick={onClick}
+          disabled={busy}
+          className={`inline-flex min-h-8 min-w-8 items-center justify-center gap-1.5 -my-1.5 -mx-2 px-2 py-1.5 rounded-sm text-mist-400 transition-colors hover:bg-navy-700 hover:text-signal-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 ${className}`}
+        >
+          <PiTrashBold aria-hidden="true" />
+          <span className="sr-only">{was} löschen</span>
+        </button>
+      )}
+      message={hinweis}
+      confirmLabel="Löschen"
+      busy={busy}
+      onConfirm={onConfirm}
+    />
+  );
 }
 
 // Wiederverwendbarer Like-Button für Kommentare und Antworten.
@@ -57,12 +99,33 @@ function LikeButton({ liked, count, busy, onToggle }) {
 }
 
 // Eine Antwort auf einen Kommentar (eingerückt, ebenfalls likebar).
-function ReplyItem({ reply, postId, commentId, currentPlayerId }) {
+function ReplyItem({ reply, postId, commentId, currentPlayerId, onDeleted }) {
   const [liked, setLiked] = useState(
     (reply.likes || []).some((l) => String(l) === String(currentPlayerId))
   );
   const [likeCount, setLikeCount] = useState((reply.likes || []).length);
   const [busy, setBusy] = useState(false);
+  const [loeschBusy, setLoeschBusy] = useState(false);
+  const meins = String(reply.player?._id || reply.player) === String(currentPlayerId);
+
+  async function loeschen() {
+    if (loeschBusy) return;
+    setLoeschBusy(true);
+    try {
+      await axios.post("/api/posts/deletecomment", {
+        token: getPlayerToken(),
+        postId,
+        commentId,
+        replyId: reply._id,
+      });
+      onDeleted?.(reply._id);
+    } catch {
+      // Bleibt stehen – der Nutzer sieht, dass nichts passiert ist, und kann
+      // es erneut versuchen. Eine Fehlermeldung an dieser Stelle wäre ein
+      // vierter Text in einer ohnehin dichten Zeile.
+      setLoeschBusy(false);
+    }
+  }
 
   async function toggleLike() {
     if (busy) return;
@@ -105,8 +168,16 @@ function ReplyItem({ reply, postId, commentId, currentPlayerId }) {
             <RichText text={reply.text} mentions={reply.mentions} />
           </p>
         </div>
-        <div className="mt-1 pl-3">
+        <div className="mt-1 pl-3 flex items-center gap-4">
           <LikeButton liked={liked} count={likeCount} busy={busy} onToggle={toggleLike} />
+          {meins && (
+            <LoeschKnopf
+              was="Antwort"
+              hinweis="Diese Antwort löschen?"
+              busy={loeschBusy}
+              onConfirm={loeschen}
+            />
+          )}
         </div>
       </div>
     </div>
@@ -114,7 +185,7 @@ function ReplyItem({ reply, postId, commentId, currentPlayerId }) {
 }
 
 // Ein Kommentar inkl. Like, Antworten-Liste und Antwort-Eingabe.
-function CommentItem({ comment, postId, currentPlayerId }) {
+function CommentItem({ comment, postId, currentPlayerId, onDeleted }) {
   const [liked, setLiked] = useState(
     (comment.likes || []).some((l) => String(l) === String(currentPlayerId))
   );
@@ -125,6 +196,23 @@ function CommentItem({ comment, postId, currentPlayerId }) {
   const [showReply, setShowReply] = useState(false);
   const [replyText, setReplyText] = useState("");
   const [replying, setReplying] = useState(false);
+  const [loeschBusy, setLoeschBusy] = useState(false);
+  const meins = String(comment.player?._id || comment.player) === String(currentPlayerId);
+
+  async function loeschen() {
+    if (loeschBusy) return;
+    setLoeschBusy(true);
+    try {
+      await axios.post("/api/posts/deletecomment", {
+        token: getPlayerToken(),
+        postId,
+        commentId: comment._id,
+      });
+      onDeleted?.(comment._id);
+    } catch {
+      setLoeschBusy(false);
+    }
+  }
 
   async function toggleLike() {
     if (likeBusy) return;
@@ -197,6 +285,20 @@ function CommentItem({ comment, postId, currentPlayerId }) {
           >
             Antworten
           </button>
+          {meins && (
+            <LoeschKnopf
+              was="Kommentar"
+              hinweis={
+                replies.length
+                  ? `Diesen Kommentar löschen? Die ${replies.length} Antwort${
+                      replies.length === 1 ? "" : "en"
+                    } darunter verschwinden mit.`
+                  : "Diesen Kommentar löschen?"
+              }
+              busy={loeschBusy}
+              onConfirm={loeschen}
+            />
+          )}
         </div>
 
         {/* Antworten */}
@@ -209,6 +311,9 @@ function CommentItem({ comment, postId, currentPlayerId }) {
                 postId={postId}
                 commentId={comment._id}
                 currentPlayerId={currentPlayerId}
+                onDeleted={(id) =>
+                  setReplies((liste) => liste.filter((x) => String(x._id) !== String(id)))
+                }
               />
             ))}
           </div>
@@ -241,7 +346,15 @@ function CommentItem({ comment, postId, currentPlayerId }) {
   );
 }
 
-export default function PostCard({ post, currentPlayerId }) {
+export default function PostCard({
+  post,
+  currentPlayerId,
+  // Roadmap 37: Damit ein Verein seinen eigenen Beitrag zurücknehmen kann,
+  // muss die Karte wissen, welchen Verein ich verwalte. Optional – fehlt der
+  // Wert, entfällt nur der Vereins-Fall, der eigene Beitrag bleibt löschbar.
+  currentTeamAdminOf,
+  onDeleted,
+}) {
   const initialLiked = (post.likes || []).some(
     (l) => String(l) === String(currentPlayerId)
   );
@@ -252,6 +365,13 @@ export default function PostCard({ post, currentPlayerId }) {
   const [commentText, setCommentText] = useState("");
   const [liking, setLiking] = useState(false);
   const [commenting, setCommenting] = useState(false);
+  const [loeschBusy, setLoeschBusy] = useState(false);
+  // ⚠️ Die Karte entfernt sich notfalls SELBST aus dem Bild. Grund: `PostCard`
+  // wird an fünf Stellen eingebunden, und nur der Feed führt eine Liste, die er
+  // nachziehen kann. Ohne diesen Eigenzustand hätte die Funktion auf vier von
+  // fünf Flächen stumm nichts getan – genau die Sorte Lücke, die in diesem
+  // Projekt regelmäßig als Befund auftaucht.
+  const [weg, setWeg] = useState(false);
 
   // Gesamtzahl Kommentare inkl. Antworten (für den Zähler).
   const commentTotal =
@@ -308,6 +428,41 @@ export default function PostCard({ post, currentPlayerId }) {
   const teamLink = teamAuthor?.slug
     ? `/team/team-detail/${teamAuthor.slug}`
     : "#";
+
+  // ⚠️ EREIGNIS-BEITRÄGE SIND NICHT LÖSCHBAR, und zwar auch nicht vom eigenen
+  // Verfasser (Roadmap 37). Ein Spielergebnis ist keine Äußerung, sondern die
+  // Anzeige einer belegten Tatsache – die eigentliche Aufzeichnung liegt in
+  // `matches`. Ein Löschweg würde den BELEG verstecken, ohne die Tatsache zu
+  // ändern, und damit genau die Belegbarkeit aushöhlen, die das Produkt
+  // verkauft. Die Serverroute weist es zusätzlich ab; hier fehlt nur der Knopf.
+  const eigenerBeitrag =
+    !isAuto &&
+    !post.authorTeam &&
+    currentPlayerId &&
+    String(author?._id || author) === String(currentPlayerId);
+  const meinVereinsBeitrag =
+    !isAuto &&
+    post.authorTeam &&
+    currentTeamAdminOf &&
+    String(post.authorTeam?._id || post.authorTeam) === String(currentTeamAdminOf);
+  const darfLoeschen = Boolean(eigenerBeitrag || meinVereinsBeitrag);
+
+  async function beitragLoeschen() {
+    if (loeschBusy) return;
+    setLoeschBusy(true);
+    try {
+      await axios.post("/api/posts/deletepost", {
+        token: getPlayerToken(),
+        postId: post._id,
+      });
+      onDeleted?.(post._id);
+      setWeg(true);
+    } catch {
+      setLoeschBusy(false);
+    }
+  }
+
+  if (weg) return null;
 
   // GLEICHE KACHEL, UNGLEICHES LICHT (Vivien, 22.08.2026 – ersetzt die zwei
   // Ränge aus §3.4 vom 15.08.2026).
@@ -536,6 +691,30 @@ export default function PostCard({ post, currentPlayerId }) {
           <span className="sr-only">Kommentare: </span>
           {commentTotal}
         </button>
+
+        {/* ⚠️ `ml-auto` und nicht ein weiterer Platz in der `gap-5`-Reihe:
+            Der Löschknopf soll NICHT neben den Like-Knopf rutschen. Die beiden
+            linken Knöpfe sind das, was man oft tut; dieser ist das, was man
+            selten tut und nie versehentlich. Der Abstand ist die Sicherung.
+            Er trägt denselben negativen Außenabstand wie die anderen, damit die
+            Aktionszeile ihre Höhe behält (bewacht in
+            `tests/e2e/newsfeed-mobil.spec.mjs`: Zeile ≤ 34 px, Karte ≤ 160). */}
+        {darfLoeschen && (
+          <div className="ml-auto">
+            <LoeschKnopf
+              was="Beitrag"
+              hinweis={
+                commentTotal
+                  ? `Diesen Beitrag löschen? Die ${commentTotal} Kommentar${
+                      commentTotal === 1 ? "" : "e"
+                    } darunter verschwinden mit.`
+                  : "Diesen Beitrag löschen?"
+              }
+              busy={loeschBusy}
+              onConfirm={beitragLoeschen}
+            />
+          </div>
+        )}
       </div>
 
       {/* Kommentare */}
@@ -547,6 +726,9 @@ export default function PostCard({ post, currentPlayerId }) {
               comment={c}
               postId={post._id}
               currentPlayerId={currentPlayerId}
+              onDeleted={(id) =>
+                setComments((liste) => liste.filter((x) => String(x._id) !== String(id)))
+              }
             />
           ))}
 
