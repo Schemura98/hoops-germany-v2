@@ -29,6 +29,45 @@
 > 📄 **ÜBERGABE: `docs/UEBERGABE-2026-08-21.md`** — Stand am Ende des 21.08., Patricks
 > Entscheidungen dieses Tages und die offene Liste vor den Flyern. **Zuerst lesen.**
 >
+> 📣 **TESTPHASEN-PLANUNG & VEREINSANSPRACHE KREIS NIERS (22.08.2026) — alles versandFERTIG,
+> nichts versandFREI.** Kein Produktcode; vier Dokumente, zwei PDFs, eine Präsentation.
+> **(1) Entscheidungsvorlage für Patrick & Jonatan** („Spielplan zur Liveschaltung",
+> Claude-Artefakt https://claude.ai/code/artifact/5dfeb8e7-8eef-4e68-8cea-3f960ee0c24d, privat
+> bis Patrick teilt): 6 Phasen, Taktgeber Saisonstart ≈ 12./13.09.2026 (WBV-Rahmenterminplan
+> 25/26, für 26/27 analog angenommen — vor Terminfixierung gegenprüfen), **Cutover in der
+> Weihnachtspause** als einzigem Fenster ohne Spielbetrieb. Grundlagen:
+> `docs/KAMPAGNENPLAN-TESTPHASE-LIVE-2026-08-22.md` (Nele) und
+> `docs/RECHT-ZEITACHSE-LIVE-2026-08-22.md` (Nora — KI-Vorprüfung, KEINE Rechtsberatung).
+> ⚠️ **Noras Kernsatz:** Alles auf der Liste lässt sich vorher billig und nachher teuer
+> erledigen — **nur eine verschickte E-Mail ist unwiderruflich.** „Ich schicke von Hand"
+> ändert die Rechtslage praktisch nicht (§ 7 UWG kennt keine Versandart); es senkt das
+> Risiko, macht die Mail aber nicht erlaubt. Für Gedrucktes braucht es KEINE Einwilligung —
+> deshalb: Druck sofort, Kalt-Mail erst nach Anwaltstermin F7/F8.
+> **(2) Kreis Niers als Start** (Patricks Entscheidung; Jonatan ist Mitgründer der
+> Mönchengladbach Scorpions, die dort spielen):
+> · `docs/VEREINE-KREIS-NIERS-2026-08-22.md` — **Saison 2026/27 bereits veröffentlicht,
+>   gemessen statt angenommen** (TeamSL; erste Spieltermine ab 03.10.2026). KLH Niers: 9 Teams
+>   aus 6 Vereinen; 4 Jugend-Staffeln bringen 5 weitere Vereine. **10 anzuschreibende Vereine,
+>   davon 9 mit öffentlicher E-Mail** (8 mit eigener Basketball-Abteilungsadresse); ehrliche
+>   Lücke: SG Dülken hat nur ein Kontaktformular. Jede Adresse mit Quelle + Abrufdatum.
+>   ⚠️ Es gibt 26/27 **keine Damen- und keine 2. Kreisliga** im Kreis Niers (gemessen).
+> · `docs/VEREINSMAIL-KREIS-NIERS-2026-08-22.md` (Nele) — Sie/Du auf einem Rumpf, drei
+>   Einsetzstellen (&lt; 2 Min je Verein, Patrick versendet von Hand), Scorpions-Anker sofort
+>   eingegrenzt („Jonatan schreibt als Spieler, nicht für den Scorpions-Vorstand"), Noras
+>   Pflichtblock eingebaut. ⚠️ Platzhalter **Betreiber-Anschrift** muss Patrick einmal füllen.
+> · `~/Projekte/Hoops-Marketing/Vereins-Paket/` (Vivien) — `Hoops_Germany_Idee_A4.pdf` +
+>   `Hoops_Germany_TeamAdmin_A4.pdf`, Anzeigetafel-Design, dunkle Kopfzone + heller Rumpf
+>   (Druckentscheidung), **Beweispunkt ist der MECHANISMUS statt einer Zahl** (Nutzerzahlen für
+>   außen gesperrt — Seed-Anteil), bewusst keine Screenshots in der 3-Schritte-Anleitung
+>   (veralten; stattdessen „Danach passiert…"-Zeilen). QR offline erzeugt, Ziel
+>   `hoopsgermany.de/?next=/team/create&src=vereinsmail`.
+> ⚠️ **Kanal-Kennzeichen vereinheitlicht:** Neles Plan sagte `verein-mail`, der gebaute QR
+> trägt `vereinsmail` — EIN Wert je Kanal, sonst zählt die Auswertung zwei halbe Kanäle.
+> Der Plan wurde an den QR angepasst (`4293c43`).
+> ⚠️ **Offen vor der ersten Mail (Roadmap 40):** QR einmal echt mit dem Handy scannen (Viviens
+> Matrix-Prüfung ersetzt den Scan nicht — ehrlich benannt) · Betreiber-Anschrift eintragen ·
+> **Anwaltstermin F7/F8** — der einzige unumkehrbare Punkt des Plans.
+>
 > ✅ **DEPLOYT: `0ecd593`** (22.08.2026) — **DIE ANALYTICS-AUSWERTUNG BRICHT NICHT MEHR AB
 > (Roadmap 26), DIE ALTE ABFRAGE ZÄHLTE FALSCH, UND DIE SUITE IST ERSTMALS KOMPLETT GRÜN.**
 > Zwei Commits Produktivcode (`70fd2d1`) + Kais Gate (`0ecd593`).
@@ -2531,6 +2570,15 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     **Die Regel, die daraus bleibt: Vorbedingungen darf man seeden, Sollwerte nie.**
     Der zweite Aufsetz-Befehl steht jetzt im Abschnitt „Projektort & Umgebung"; ein eigener Seed
     nur für die Suite wurde verworfen (er driftet von dem, den Entwickler benutzen).
+
+40. ⚠️ **Vereinsansprache Kreis Niers: versandfertig, wartet auf drei Dinge** (22.08.2026).
+    Liste (10 Vereine), Mailvorlagen und beide PDF-Anhänge stehen — Fundorte im 📣-Block in
+    Abschnitt 0. **Vor der ersten Mail:** (a) Anwaltstermin zur Vereinsansprache (Noras F7/F8 —
+    der einzige unumkehrbare Punkt; für GEDRUCKTES gilt die Sperre nicht), (b) QR-Code einmal
+    echt mit dem Handy scannen, (c) Betreiber-Anschrift in den Pflichtblock der Mailvorlage.
+    Versand macht Patrick selbst, von Hand, einzeln — nichts ist automatisiert.
+    ⚠️ Randnotiz aus der Recherche: TSV Kaldenkirchen, TV Lobberich und Rheydter TV stehen
+    26/27 in keiner Kreisliga und sind deshalb NICHT auf der Liste — bei Bedarf gesondert.
 
 39. ⚠️ **`lib/trackEvent.js` hat den webdriver-Riegel nicht** (Auflage Kai aus dem Gate zu
     Roadmap 26, 22.08.2026 — für den NÄCHSTEN Deploy-Stapel, keine Bremse). Der Pageview-Tracker

@@ -5616,3 +5616,56 @@ Suite **343 grün / 0 rot / 1 übersprungen** (344 in 35 Dateien), Kai und ich
 unabhängig gezählt · Gate Kai freigabefähig
 (`docs/GATE-KAI-ROADMAP-26-2026-08-22.md`) · live: Server auf `0ecd593`, 16 Routen
 je 200, Prod-Vergleich alt/neu identisch auf 7/30 Tagen und Gesamtbestand.
+
+---
+
+## 22.08.2026 – Testphasen-Planung & Vereinsansprache Kreis Niers (kein Deploy — Planung, Recherche, Material)
+
+**Auftrag Patrick:** Präsentation für ihn und Jonatan (Weg Testphase → deutschlandweite
+Liveschaltung, Datumsbereiche am Saisonstart, Pflichttermine Anwalt/Steuerberater/Gewerbe,
+Flyer-oder-digital-Entscheidung, Agenda-Punkt gemeinsame Vereinsrecherche) — und direkt danach
+der Start: Kreisliga-Teams Kreis Niers heraussuchen, Mails mit visuellen PDF-Anhängen bauen.
+Kreis Niers zuerst, weil Jonatan Mitgründer der Mönchengladbach Scorpions ist, die dort spielen.
+Präzisierung Patrick: **Er versendet die Mails selbst, von Hand, einzeln** — nur angepasst je
+Verein, nichts automatisiert.
+
+### Entstanden
+- **Präsentation „Spielplan zur Liveschaltung"** (Claude-Artefakt, Anzeigetafel-Design):
+  6 Phasen, Taktgeber Saisonstart ≈ 12./13.09.2026, Cutover in der Weihnachtspause; Beschlüsse
+  als letzte Folie. Artefakt-URL im 📣-Block von CLAUDE.md Abschnitt 0.
+- `docs/KAMPAGNENPLAN-TESTPHASE-LIVE-2026-08-22.md` (Nele) — Phasenplan, Kanalabwägung
+  Druck/Mail, NRW-als-Startblock-Positionierung, Paket-Struktur, Arbeitsteilung.
+- `docs/RECHT-ZEITACHSE-LIVE-2026-08-22.md` (Nora, KI-Vorprüfung, keine Rechtsberatung) —
+  Zeitachse Gewerbe/Steuerberater/Anwalt, § 7 UWG zur Vereinsansprache, was zum Live-Gang weg
+  muss, zehn Punkte „was schiefgeht, wenn zu spät". Kernsätze: *nur eine verschickte E-Mail ist
+  unwiderruflich* · *Handversand ändert die Rechtslage praktisch nicht* · *für Gedrucktes braucht
+  es keine Einwilligung*.
+- `docs/VEREINE-KREIS-NIERS-2026-08-22.md` — **Saison 2026/27 bereits veröffentlicht, gemessen
+  statt angenommen** (TeamSL, erste Spieltermine 03.10.2026). 11 Vereine (KLH Niers 9 Teams /
+  6 Vereine + 5 aus vier Jugend-Staffeln), 10 anzuschreibend, 9 mit öffentlicher E-Mail, jede
+  mit Quelle + Abrufdatum; ehrliche Lücke SG Dülken (nur Kontaktformular). Gemessen: keine
+  Damen- und keine 2. Kreisliga im Kreis 26/27.
+- `docs/VEREINSMAIL-KREIS-NIERS-2026-08-22.md` (Nele) — versandfertige Vorlagen, Sie/Du auf
+  einem Rumpf, drei Einsetzstellen, Scorpions-Anker sofort eingegrenzt, Pflichtblock nach Noras
+  Liste. Vorbehalt als erster Block: **versandfertig ≠ versandfrei.**
+- `~/Projekte/Hoops-Marketing/Vereins-Paket/` (Vivien) — zwei A4-PDFs samt Quellen, QR offline
+  erzeugt (`src=vereinsmail`), Kontraste nachgerechnet, Seiten als Bild angesehen.
+
+### Entscheidungen und Lehren
+- **Beweispunkt ist der Mechanismus, nicht eine Zahl:** Nutzerzahlen sind für Außenkommunikation
+  gesperrt (Seed-Anteil, § 5 UWG) — PDF A zeigt stattdessen als Diagramm, WIE ein belegtes
+  Ergebnis entsteht. Das stärkere Argument ohnehin.
+- **Dunkle Kopfzone + heller Rumpf** statt vollflächigem Navy: Mail-Anhänge werden am Bildschirm
+  gelesen und allenfalls auf Bürodruckern gedruckt — Marken-Identität ohne Toner-Strafe.
+- **Keine Screenshots in Anleitungen** — sie veralten mit jedem Umbau; stattdessen je Schritt
+  eine „Danach passiert…"-Zeile.
+- **EIN Kennzeichen je Kanal:** Neles Plan sagte `verein-mail`, der gebaute QR `vereinsmail` —
+  von Vivien gefunden, auf den QR vereinheitlicht (`4293c43`). Zwei Schreibweisen hätten in der
+  Auswertung zwei halbe Kanäle ergeben.
+- **Ehrlichkeit als Verkaufsargument:** Der Testphasen-Absatz steht in der Mail VOR dem
+  Anhang-Verweis — ein prüfender Vorstand sieht Beispieldaten, der Text sagt es ihm vorher
+  („euer Verein ersetzt sie durch echte").
+
+### Offen (Roadmap 40)
+Anwaltstermin F7/F8 vor der ersten Mail · QR einmal echt scannen (Matrix-Prüfung ersetzt den
+Scan nicht) · Betreiber-Anschrift in den Pflichtblock.
