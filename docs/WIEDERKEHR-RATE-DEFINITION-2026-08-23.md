@@ -9,9 +9,10 @@ Rechtfertigung.
 
 **Festschreibung:** Ab Beginn von Phase 2 (14.09.2026) wird an dieser Definition nichts mehr
 geändert außer mit ausdrücklicher Entscheidung von Patrick, und jede Änderung wird hier mit
-Datum und Begründung protokolliert. Zwei Stellen sind ausdrücklich als „vor Messbeginn zu
-füllen" markiert (Spielwochen-Kalender, §2.4) — das ist Teil der Definition, kein Hintertürchen:
-sie werden aus öffentlichen Terminquellen gefüllt, nicht aus unseren Nutzungsdaten.
+Datum und Begründung protokolliert. Der Spielwochen-Kalender (§2.4) ist am 23.08.2026 aus
+öffentlichen Terminquellen **gemessen und eingetragen** (`docs/SPIELWOCHEN-KREIS-NIERS-2026.md`,
+maschinenlesbar `lib/spielwochenNiers2026.js`) — nicht aus unseren Nutzungsdaten. Die
+verbleibenden Vorab-Punkte stehen in §8.
 
 **Keine erfundenen Zahlen:** Alle Schwellen in §3 sind **Setzungen** und als solche
 gekennzeichnet. Es gibt keine belastbaren Vergleichswerte für dieses Produkt (§3.3) —
@@ -107,20 +108,43 @@ Kern-Aufruf, und welche Pfade führen?
 
 - **Gewertet** ist ein Konto, wenn es (a) den Echtheitsfilter besteht (§2.2), (b) NICHT
   zur Admin-Gruppe gehört (§1.2) und (c) zum Stichtag mindestens **4 mögliche Spielwochen**
-  hatte (d. h. zwischen dem Ende seiner Registrierungswoche und dem 29.11.2026 liegen ≥4
-  Spielwochen laut Kalender §2.4). Wer später registriert wurde, hatte schlicht nicht
-  genug Gelegenheit, zweimal wiederzukommen — er fällt nicht durch, er wird gesondert
-  als „zu jung für Wertung" ausgewiesen (mit Rohaktivität).
+  hatte (d. h. zwischen dem Ende seiner Registrierungswoche und dem 13.12.2026 liegen ≥4
+  Spielwochen laut Kalender §2.4 — praktisch: Registrierung bis So 08.11.2026). Wer später
+  registriert wurde, hatte schlicht nicht genug Gelegenheit, zweimal wiederzukommen — er
+  fällt nicht durch, er wird gesondert als „zu jung für Wertung" ausgewiesen (mit
+  Rohaktivität).
 - **Warum zwei Wochen und nicht eine:** Ein einmaliges Wiederkommen kann Höflichkeit
   sein („Jonatan hat gefragt, ob ich reingeschaut habe"). Zwei Besuche in zwei
   verschiedenen Spielwochen sind das kleinste ehrliche Signal, dass das Produkt einen
   Platz im Saisonrhythmus hat. Mehr zu verlangen (z. B. „in der Hälfte aller Wochen")
-  wäre bei einer 8-wöchigen Messstrecke und Dutzenden Nutzern eine Schwelle, an der
+  wäre bei 7 gewerteten Spielwochen und Dutzenden Nutzern eine Schwelle, an der
   Rauschen entscheidet.
 - **Registrierungswoche zählt nicht mit:** Aktivität in der Woche der Kontoerstellung ist
   Onboarding, keine Wiederkehr.
-- **Stichtag der Auswertung: Montag, 30.11.2026** (erster Tag von Phase 3). Gemessen wird
-  der Zeitraum bis einschließlich Sonntag, 29.11.2026, 24:00 Europe/Berlin.
+- **Stichtag der Wertung: Montag, 14.12.2026.** Gemessen wird der Zeitraum bis
+  einschließlich Sonntag, 13.12.2026, 24:00 Europe/Berlin — das sind **7 vollständige
+  Spielwochen** (Kalender §2.4). Die Go/No-Go-**Besprechung** bleibt im Phase-3-Fenster
+  (30.11.–18.12.); nur der Datenstand, auf dem die Ampel rechnet, ist der 14.12.
+  ⚠️ **Geändert am 23.08.2026 gegenüber der Erstfassung (dort: 30.11.), VOR Messbeginn**
+  — Anlass ist der gemessene Kalender: Die NRW-Herbstferien schlucken drei Wochen am
+  Stück, bis zum 29.11. lägen nur **5 Spielwochen**, und gewertet wäre nur, wer sich bis
+  zum 04.10. registriert — bei Vereinsmails ab Mitte September fiele ein Großteil der
+  Kampagnen-Kohorte aus **Kalendergründen** aus der Wertung, nicht aus Produktgründen.
+  Verworfen wurde die Alternative, das Wertungsfenster je Spieler zu relativieren
+  („mindestens 3 mögliche Wochen"): Sie stellt ungleiche Latten in dieselbe Quote —
+  wer genau 3 mögliche Wochen hat, bräuchte Anwesenheit in 2 von 3 (67 %), ein früh
+  Registrierter nur 2 von 7 (~29 %); die Quote hinge dann daran, WANN Leute registrieren,
+  nicht OB sie wiederkommen.
+- **Zwei Bindungen zur Stichtagsverschiebung, damit sie kein Hintertürchen wird:**
+  (1) Die 8. Spielwoche des Kalenders (Mo 14.12., endet So 20.12.) zählt **NICHT** in
+  die Ampel — sie endet nach dem Entscheidungstermin (Fr 18.12.); wer sie „noch
+  mitnimmt", wählt den Datenstand nach Wunschergebnis. Sie wird nach dem 20.12. als
+  Nachlese für Phase 4 berichtet, ändert die Ampel aber nicht mehr.
+  (2) Am **30.11.** erzeugt der Messjob einen **Zwischenstand ohne Ampel** (Datenstand
+  5 Spielwochen) — damit die Auswertung im engen Fenster 14.–18.12. der routinierte
+  x-te Lauf eines erprobten Jobs ist, kein Erstlauf unter Zeitdruck. Der Zwischenstand
+  trägt keine Ampelfarben und keine Empfehlung; er dient der Job-Erprobung und der
+  Vorbereitung der Bericht-Struktur.
 
 ### 1.5 Begleitmetriken (erklären die WQ, entscheiden nichts)
 
@@ -191,22 +215,30 @@ Metrik messen soll, wäre eine Messung, die ihre eigene Stellgröße verändert 
 Fehlerform, CLAUDE.md-Merksatz).
 
 Regeln:
-- Quelle: WBV-Rahmenterminplan 2026/27 + TeamSL-Spieltermine der KLH Niers
-  (erste Termine ab **03.10.2026**, gemessen in `docs/VEREINE-KREIS-NIERS-2026-08-22.md`)
-  + NRW-Ferienkalender (Herbstferien) + Pokal-/spielfreie Wochenenden laut Verband.
-- **Die Kernmetrik-Strecke beginnt mit der Spielwoche des ersten echten Spieltermins der
-  Ziel-Kohorte** (Woche ab Mo 28.09.2026, wenn der 03.10. der erste Termin bleibt) und
-  endet am 29.11.2026. Die Wochen 14.09.–27.09. sind Onboarding-Vorlauf: Registrierungen
-  zählen dort für die Kohorte, aber es sind keine Spielwochen — niemand kann in ihnen
-  „wiederkommen versäumen".
-- **Vor Messbeginn zu füllen** (Kai trägt ein, Quelle + Abrufdatum je Woche daneben,
-  Gegenlesen durch mich): welche der Kalenderwochen 28.09.–29.11. Spielwochen sind.
-  Erwartbar sind ~7–9 Spielwochen. Nach dem 14.09. wird die Liste nur noch geändert,
-  wenn der Verband Termine verlegt — mit Protokollzeile hier in dieser Datei.
+- **Der Kalender ist gefüllt — gemessen am 23.08.2026, nicht angenommen:**
+  `docs/SPIELWOCHEN-KREIS-NIERS-2026.md` (Herleitung, Quelle + Abrufdatum je Woche) und
+  `lib/spielwochenNiers2026.js` (maschinenlesbar für den Messjob; beide Dateien müssen
+  inhaltsgleich bleiben). Quellen: TeamSL-Spielplan KLH Niers 2026/27 (Liga-ID 56045,
+  vollständig: 9 Teams × 8 Paarungen = 72 Spiele, exakt 72 angesetzt) + offizielle
+  NRW-Ferienordnung (Herbstferien Sa 17.10.–Sa 31.10.2026).
+- **Ergebnis: 8 Spielwochen** im Messfenster — Mo **28.09. · 05.10. · 02.11. · 09.11. ·
+  23.11. · 30.11. · 07.12. · 14.12.** — und 4 spielfreie Wochen (12.10., 19.10., 26.10.
+  rund um die Herbstferien; 16.11. Totensonntags-Wochenende). Die Leerwochen sind
+  Verbands-Setzungen, keine Datenlücken.
+- **Wertungsfenster der Kernmetrik: die ersten 7 Spielwochen** (28.09. bis einschließlich
+  Woche 07.12., endet So 13.12.) — siehe Stichtagsregel §1.4. Die 8. Spielwoche (14.12.)
+  ist Nachlese, keine Ampel-Woche.
+- Die Wochen 14.09.–27.09. sind Onboarding-Vorlauf: Registrierungen zählen dort für die
+  Kohorte, aber es sind keine Spielwochen — niemand kann in ihnen „wiederkommen versäumen".
+- Nach dem 14.09. wird die Liste nur noch geändert, wenn der Verband Termine verlegt —
+  mit Protokollzeile hier in dieser Datei. Vor Messbeginn einmal gegen TeamSL
+  gegenprüfen (Verlegungen bis Saisonstart bleiben möglich).
 
 ### 2.5 Pipeline-Skizze (Pseudocode für den Messjob)
 
 ```
+0. stichtag  = Mo 14.12.2026, 00:00 Europe/Berlin (Daten bis So 13.12., 24:00);
+   Spielwochen = die ersten 7 Einträge aus lib/spielwochenNiers2026.js (§2.4)
 1. kohorte   = players.find(NUR_ECHT ∧ createdAt ≤ stichtag)
 2. je Konto:  rolle = (isTeamAdmin ∨ teamAdminOf ∨ [co-admin, falls identifizierbar])
               ? ADMIN : SPIELER
@@ -353,7 +385,7 @@ entscheiden tun es die beiden.
    Kanäle) funktioniert — das ist eine andere Kohorte mit anderem Funnel.
 2. **Keine Kanal-Kausalität.** `signupSource` sagt, woher jemand kam, nicht warum er
    blieb. Aufschlüsselungen nach Kanal sind bei diesem n Anekdoten.
-3. **Neugier-Effekt nicht abtrennbar.** 8–9 Spielwochen reichen nicht, um „schaut es
+3. **Neugier-Effekt nicht abtrennbar.** 7 gewertete Spielwochen reichen nicht, um „schaut es
    sich noch an, weil es neu ist" von „hat es in seinen Alltag eingebaut" zu trennen.
    Ein grünes Ergebnis ist ein Indiz für Produkt-Zug, kein Beweis für Dauer-Retention
    über eine ganze Saison.
@@ -427,8 +459,10 @@ Phase-3-Abgleich laut Kampagnenplan bauen darauf auf).
   Community-Recherche und den P2-Beobachtungen gehen offen an Patrick.
 - **Kai (Messjob):** §2 ist seine Bauvorlage. Der Auftrag nennt ihn als Umsetzer; laut
   Rollenverteilung liegt Analytics-Implementierung bei Ben — die Zuordnung entscheidet
-  Patrick/Ole, die Vorlage funktioniert für beide. Offene Bau-Punkte: Spielwochen-Kalender
-  füllen (§2.4), `isInternal`-Verifikation auf Prod (§2.2 Punkt 3), Co-Admin-Klärung (§1.2).
+  Patrick/Ole, die Vorlage funktioniert für beide. Offene Bau-Punkte:
+  `isInternal`-Verifikation auf Prod (§2.2 Punkt 3), Co-Admin-Klärung (§1.2),
+  Kalender-Gegenprobe gegen TeamSL kurz vor Messbeginn (§2.4). Der Spielwochen-Kalender
+  selbst ist seit 23.08.2026 gefüllt (`lib/spielwochenNiers2026.js`).
 - **Lina:** Ihre Onboarding-Befunde aus echten Testern (P2) sind Teil der qualitativen
   Signale (§4) und der Gelb-Diagnose (§3.1).
 - **Nele:** Kanal-Lesarten (`signupSource`) für ihre Phase-3-Kampagnenauswertung — mit
@@ -438,8 +472,9 @@ Phase-3-Abgleich laut Kampagnenplan bauen darauf auf).
   Diese Einschätzung ist meine, nicht ihre; falls der Messjob doch neue Ereignistypen
   einführt, gilt die bestehende Konvention (Feedback/Analytics-Skill) und im Zweifel ihr Blick.
 - **Ole:** keine Prioritätsverschiebung vorgeschlagen — bewusst: Diese Definition kostet
-  vor dem 14.09. nur zwei kleine Bau-Punkte (§2.2/2.4), der Messjob selbst kann während
-  P2 entstehen, ausgewertet wird erst am 30.11.
+  vor dem 14.09. nur kleine Vorab-Punkte (§2.2/2.4), der Messjob selbst kann während
+  P2 entstehen; erster Pflichtlauf ist der Zwischenstand am 30.11., die Ampel rechnet
+  auf dem Stand vom 14.12. (§1.4).
 - **Vivien:** nicht einbezogen — kein Retention-Hebel mit Designbedarf in diesem Auftrag
   (es wird definiert, nicht gebaut).
 - **Hanna:** Ergebnis-Nachtrag ins Backoffice steht als Folgeschritt aus (nicht Teil
@@ -458,3 +493,4 @@ und genau die sind gebaut.
 | Datum | Änderung | Begründung | Entschieden von |
 |---|---|---|---|
 | 23.08.2026 | Erstfassung, festgeschrieben | Auftrag Patrick: Definition vor Messung | Ronja (Vorlage), Freigabe Patrick offen |
+| 23.08.2026 | Wertungsstichtag 30.11. → **14.12.2026** (§1.4, §2.4, §2.5); Kalender-Verweise auf die gemessenen Dateien; 8. Spielwoche (14.12.) ausdrücklich von der Ampel ausgeschlossen; Zwischenstand 30.11. ohne Ampel eingeführt | Gemessener Spielwochen-Kalender (`docs/SPIELWOCHEN-KREIS-NIERS-2026.md`): Herbstferien-Lücke lässt bis 29.11. nur 5 Spielwochen — gewertet wäre nur, wer bis 04.10. registriert; die Kampagnen-Kohorte fiele aus Kalender-, nicht aus Produktgründen aus der Wertung. Alternative „Wertungsfenster je Spieler relativieren" verworfen (ungleiche Latten in einer Quote). Änderung VOR Messbeginn, noch ohne Nutzungsdaten. | Ronja, Freigabe Patrick offen |
