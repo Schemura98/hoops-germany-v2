@@ -1713,9 +1713,24 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
 - Next.js **14.2.35**, App Router, JavaScript (kein TS), Tailwind.
 - `.env` lokal vorhanden (MongoDB-Atlas, `SECRET_KEY`, `CRON_SECRET`, `NEXTAUTH_URL=http://localhost:3000`). SMTP/Google noch leer.
 - Start: `npm run dev` → http://localhost:3000. DB-Test: `node scripts/dbcheck.mjs`.
-- **Demo-Daten befüllen: `node scripts/seed-demo.mjs`** (4 Teams, 18 Spieler + 2 Super-Admins,
-  Liga 2025/26 + Vorsaison-Transfer für Max, abgeschlossene Spiele + Box-Scores, Posts, Follower,
+- **Dev-Datenbank aufsetzen — ZWEI Befehle, nicht einer** (präzisiert 22.08.2026, Roadmap 38):
+  ```bash
+  node scripts/seed-demo.mjs && node scripts/seed-feed-lebendig.mjs
+  ```
+  `seed-demo.mjs` legt die Grundlage (4 Teams, 18 Spieler + 2 Super-Admins, Liga 2025/26 +
+  Vorsaison-Transfer für Max, abgeschlossene Spiele + Box-Scores, Posts, Follower,
   Bundesländer/Städte → Stats/Topscorer/Tabelle/Spielplan/Stationen/Geo-Filter gefüllt).
+  ⚠️ **`seed-feed-lebendig.mjs` ist KEINE Kür, sondern Voraussetzung** — und es stand hier
+  bisher nicht. Ohne es hat der Feed nur **eine** Flächenstufe (also nur Wort- oder nur
+  Ereignis-Beiträge), und **drei Fälle in `feed-kachel-gleichheit.spec.mjs` sowie zwei in
+  `eigene-zahlen.spec.mjs` sind rot** — letzteres nennt das Skript sogar in seiner eigenen
+  Fehlermeldung. Wer nur den ersten Befehl ausführte, bekam auf einem frischen Rechner rote
+  Tests, ohne dass am Code etwas fehlte.
+  ⚠️ **Die Regel dahinter, und sie gilt über diesen Fall hinaus (Kai, Roadmap 38):**
+  **Vorbedingungen darf man seeden, Sollwerte nie.** Eine Zusicherung muss über das *Produkt*
+  wahr sein, nicht über eine Momentaufnahme einer Datenbank. Ein eigener Seed **nur** für die
+  Testsuite wurde ausdrücklich verworfen: Er driftet vom Seed, den Entwickler benutzen, und dann
+  prüft die Suite eine Konfiguration, die niemand zu sehen bekommt.
 - **Test-Accounts (alle PW `test123`) – wirksam NUR NOCH auf der Dev-DB `hoopsgermany`:**
   Spieler `max@test.de` (= Team-Admin „Test Baskets",
   hat FIBA/Instagram + Vorsaison-Transfer), weitere `@test.de`, Free Agents `sven.adler@test.de`/`jay.carter@test.de`.
@@ -2252,6 +2267,19 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     ⚠️ **Nebenwirkung ab sofort:** Die Testsuite vergiftet sich selbst – jeder Lauf legt ~1.600
     Einträge nach, derselbe Commit lief einmal grün und einmal mit 5 roten Tests. Das ist „ein
     Test, der seinen eigenen Ausgangszustand verändert", auf Ebene der ganzen Suite.
+    ⚠️ **ESKALATION 22.08.2026 (Befund Kai, von mir nachgezählt): ES WIRD MESSBAR SCHLIMMER, UND
+    DIE FÜNF ROTEN SIND KEINE FESTE ZAHL MEHR.** Die Dev-Sammlung steht bei **83.856** Einträgen
+    gegen die oben protokollierten 63.859 – **+19.997**, davon **15.175 allein aus den letzten
+    24 Stunden**, also aus den Testläufen dieses einen Tages. In einem Zwischenlauf ist bereits
+    ein **SECHSTER** Fall an derselben Sortiergrenze gescheitert.
+    **Damit ist Roadmap 26 nicht mehr nur eine Backoffice-Frage.** Bisher galt: „Wir wachsen
+    darauf zu" (Prod 3.474). Auf dem Entwicklungsrechner ist der Punkt längst überschritten, und
+    die Zahl der roten Tests hängt jetzt davon ab, **wie oft die Suite an einem Tag lief** – eine
+    Kennzahl, die niemand liest und die jeden Gate-Bericht verwässert.
+    ⚠️ **Zwei Dinge sind zu trennen:** Die **Abfrage** muss umgebaut werden (der Einzeiler
+    `allowDiskUse` hilft nachweislich nicht). Unabhängig davon braucht die **Suite** einen Weg,
+    ihre eigenen Analytics-Spuren wieder loszuwerden – sonst verschiebt jede Woche Entwicklung
+    die Grenze weiter, egal wie die Abfrage aussieht.
 
 27. **Drei Testlücken am Hero-Feld** (Kai, 11 Mutationen). Die schwerste:
     ⚠️ **Der KOMPLETTE Korbbereich lässt sich um 3 Meter verschieben – alle 58 Hero-Tests bleiben
@@ -2379,47 +2407,57 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     Das ist Moderation, nicht Aufräumen — die Funktion, mit der man unbequeme Antworten
     verschwinden lässt. Eigene Entscheidung → Patrick/Nora.
 
-38. ⚠️ **DIE TESTSUITE IST AUF EINE DATENBANK EINGESTELLT, DIE NIEMAND HERSTELLEN KANN**
-    (Befund 22.08.2026, beim Nachziehen der Prüfdaten aufgefallen). Wer den **dokumentierten**
-    Weg geht, um eine funktionierende Entwicklungsumgebung zu bekommen — `node
-    scripts/seed-demo.mjs`, in dieser Datei als „Dev-Basis" geführt —, bekommt **fünf rote Tests
-    geschenkt**, die mit dem Produkt nichts zu tun haben:
-    · `newsfeed-mobil.spec.mjs` (4 Fälle): „Der Feed beginnt erst bei y ≈ 650 px statt ~554".
-      Die 554 wurden am 18.08.2026 an einem **damaligen** Datenstand gemessen.
-      ⚠️ **Nachgemessen, was oberhalb des Feeds steht** (390 px, angemeldet, frische Seed-Daten):
-      Kopfzeile 43 px · **Anzeigetafel 212 px** · Onboarding-Streifen 39 px. Die Anzeigetafel ist
-      der Treiber: Mit frischen Daten hat sie ein *nächstes Spiel* zu zeigen, mit der
-      ausgedünnten Datenbank hatte sie weniger Inhalt. **Ein Nutzer mit angesetztem Spiel sieht
-      mehr Kopf als einer ohne — das ist richtiges Produktverhalten, kein Defekt.** Die Schranke
-      ist damit konstruktionsbedingt datenabhängig.
-      Die **Absicht** des Falls bleibt gültig (kein 192-px-Akkordeonblock oberhalb des Feeds);
-      sie gehört nur strukturell formuliert statt in einer absoluten Pixelzahl.
-    · `beitrag-loeschen.spec.mjs` (1 Fall): Kais Ehrlichkeitsschranke meldet, dass im gerankten
-      „Für dich"-Feed von `max@test.de` **kein einziger fremder Beitrag** steht — der Fall kann
-      seine Aussage dann nicht prüfen und erklärt sich für **wertlos statt bestanden**.
-      ⚠️ **KORREKTUR (22.08.2026, noch am selben Tag): DIESER FALL GEHÖRT NICHT HIERHER.**
-      Ich hatte ihn als Prüfdaten-Thema eingeordnet; nachgemessen ist er **keins**:
-      Der Bestand hat 7 fremde Wortbeiträge, die API liefert für `max` auf Seite 1 **6** davon
-      (im Zweig „Folge ich" 5), und die Datenbank ist vor und nach dem Dateilauf **identisch**
-      (14 / 1 / 7) — Kais Fälle räumen sauber auf. Entscheidend: Der Fall ist **allein grün**
-      und **in der Datei rot**. Gleiche Daten, gleicher Code, andere Position im Lauf.
-      Es liegt also an etwas, das die vorangehenden Fälle **während** ihres Laufs verändern
-      und was auf das Ranking wirkt — nicht am Seed.
-      ⚠️ Und die Fehlermeldung des Falls schlägt `seed-demo.mjs` als Abhilfe vor. **Das behebt
-      es nicht** und schickt den nächsten Leser auf die falsche Spur — eine Meldung, die eine
-      falsche Abhilfe nennt, kostet mehr Zeit als eine, die nur sagt „ich konnte nicht messen".
-    ⚠️ **Belegt, nicht vermutet:** Dieselben Fälle laufen auch am Stand `e9a8ef3` rot — also an
-    dem Commit, der zum Zeitpunkt der Messung **live** war (eigener Worktree, gleiche Datenbank).
-    Es ist kein Rückschritt, sondern eine Drift der Prüfdaten.
-    **Die eigentliche Frage dahinter:** Eine Suite, deren Sollwerte an einem Datenstand hängen,
-    den der Aufsetzbefehl nicht herstellt, ist auf einem neuen Rechner sofort rot — und niemand
-    weiß dann, ob es am Code liegt. Entweder die Schranken werden datenunabhängig formuliert,
-    oder es braucht einen Seed, der genau die Lage herstellt, die die Tests brauchen (mehrere
-    Konten mit Beiträgen, Ereignis- UND Wortbeiträge im gerankten Feed). → **Kai**, gemeinsam
-    mit der Frage, ob `seed-feed-lebendig.mjs` dafür Teil des Standard-Aufsetzens werden muss.
-    ⚠️ Dazu: Tobias hat am 22.08. `welcomeSeen` auf `max@test.de` und `sven.adler@test.de`
-    dauerhaft auf `true` gesetzt (über die Produkt-Route). Wer einen Test baut, der auf den
-    Auto-Start der Tour zählt, muss das zurücksetzen.
+38. ✅ **ERLEDIGT (22.08.2026, Kai). Die Suite läuft jetzt gegen eine Datenbank, die der
+    dokumentierte Aufsetzweg herstellt** — **337 grün / 5 rot / 1 übersprungen** (343 in 34
+    Dateien), unabhängig nachgezählt; die 5 sind unverändert die vorbestehenden aus Roadmap 26.
+    Vorher waren es 10 rot.
+
+    **(a) DIE SCHWELLE WAR UNRETTBAR, NICHT NUR SCHLECHT EINGESTELLT.** `newsfeed-mobil` erwartete
+    „der Feed beginnt bei ~554 px". Die Anzeigetafel stapelt mobil **ein Register je vorhandener
+    Aussage**: 3 Register → 650 px · 2 → 554 px · 0 → 414 px. **Schwankung allein durch Daten:
+    236 px. Der bewachte Defekt kostet 192 px.** Keine Schwelle kann die beiden trennen — Kais
+    Gegenprobe: ausgeliefert und fehlerfrei mit 3 Registern → 650 (wäre **rot**), Defekt vorhanden
+    mit 0 Registern → 622 (wäre **grün**). **Der gute Wert liegt über dem schlechten.**
+    ⚠️ **Das ist die HERO-NAHT in neuem Kostüm** (dort 1,180 gegen 1,178) — **sechste Auflage von
+    „gesetzte Zahl gegen Restbetrag"**. Die Schranke ist deshalb **ersatzlos entfallen**, nicht
+    nachjustiert. Gemessen wird jetzt **strukturell**: welche Blöcke über dem Feed stehen, plus
+    eine Gegenrichtung (drei Pflichtblöcke müssen da sein) und **eine** datenunabhängige
+    Höhenmessung — die Anzeigetafel darf **pro Register** nicht über 110 px (gemessen 58–71).
+    Die vier Breiten bleiben: Tippziele und Querlauf sind echte Breitenaussagen.
+
+    **(b) DER FEED-FALL WAR KEIN DATENTHEMA, SONDERN KAIS EIGENE DATEI.** Die vorangehenden Fälle
+    ließen **16 erfundene Beiträge** liegen, 11 davon von `max` und sekundenalt. Der „Für
+    dich"-Feed rankt mit `base / (Alter + 2)^1.5`, Beiträge mit Kommentaren mit `base 7` — die
+    Rückstände verdrängen alles: **ohne sie 6 fremde Beiträge auf Seite 1, mit ihnen 0.**
+    Ursache: Der Dateikopf sagte seit Tag eins „jeder Fall bekommt frische Daten", umgesetzt war
+    nur die Hälfte — aufgeräumt wurde erst in `afterAll`. Jetzt `afterEach`.
+    ⚠️ **Kais eigene Vorhersage war dabei falsch, und die Messung hat sie korrigiert:** Er hielt
+    `limit: 50` für ausreichend; ohne `afterEach` fand der Fall nicht einmal seine **eigenen**
+    Kulissen mehr (30 s Zeitüberschreitung).
+
+    **(c) ZWEI WEITERE FÄLLE, die erst der frische Seed sichtbar machte** — beide waren nur grün,
+    weil frühere Läufe Spuren hinterlassen hatten:
+    · `newsfeed-mobil`, dritter Fall: Kais eigene Schranke `karteH <= 160` aus dem 18.08.-Gate.
+      Kartenhöhe ausgeliefert 146–170 px je nach Textlänge, im Defekt 158–182 — **Schwankung
+      24 px, Defekt 12 px**, eine defekte Karte mit kurzem Text wäre grün gewesen. ⚠️ Sein erster
+      Ersatz war ebenfalls falsch („Zeile niedriger als der Knopf" gilt nur für Wortbeiträge,
+      Ereignisbeiträge haben eine 33-px-Zeile) — er hätte eine Datenabhängigkeit durch eine andere
+      ersetzt. Jetzt wird der **Kniff selbst** gelesen (`padding 6 / margin −6` aus
+      `getComputedStyle`), über **alle** Karten statt der ersten.
+    · `navigationsleiste-breite`: **null** Treffer auf `hg_welcome_token` — als einzige
+      Leisten-Datei ungeschützt gegen den Auto-Start der Willkommens-Tour. Deren Overlay ließ
+      Playwright 120 s auf ein „stabiles" Element warten. Grün war der Fall nur, weil frühere
+      Läufe `welcomeSeen` gesetzt hatten. **Auf einem neuen Rechner sofort rot, ohne dass am
+      Produkt etwas fehlt.**
+
+    ⚠️ **Drei Fehlermeldungen nannten eine falsche Abhilfe** („`seed-demo.mjs` ausführen"), die
+    das jeweilige Problem gar nicht behebt. Alle korrigiert. **Eine Meldung mit falscher Fährte
+    kostet mehr Zeit als eine, die nur sagt „ich konnte nicht messen"** — ich bin dieser Fährte
+    selbst gefolgt und habe Patrick daraufhin eine falsche Ursache gemeldet.
+
+    **Die Regel, die daraus bleibt: Vorbedingungen darf man seeden, Sollwerte nie.**
+    Der zweite Aufsetz-Befehl steht jetzt im Abschnitt „Projektort & Umgebung"; ein eigener Seed
+    nur für die Suite wurde verworfen (er driftet von dem, den Entwickler benutzen).
 
 33. **Offen aus der Logo-Runde (21.08.2026)**, keiner blockierend:
     **(a)** ⚠️ `scripts/logo-leiste-bauen.mjs` **behauptet eine Sicherung, die er nicht hat** —

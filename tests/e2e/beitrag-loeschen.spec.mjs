@@ -78,6 +78,31 @@ test.beforeAll(async () => {
   await posts.deleteMany({ kaiMarke: MARKE });
 });
 
+// ⚠️ NACH JEDEM FALL AUFRÄUMEN, NICHT ERST AM ENDE (Befund Tobias,
+// Roadmap 38b, 22.08.2026). Der Kopf dieser Datei sagt seit dem ersten Tag
+// „JEDER FALL BEKOMMT EIGENE, FRISCHE DATEN" — umgesetzt war davon nur die
+// eine Hälfte: Jeder Fall LEGT eigene an, weggeräumt wurde erst in `afterAll`.
+//
+// Gemessen liegen dadurch zum Zeitpunkt des letzten Falls **16** erfundene
+// Beiträge im Bestand, 11 davon von max, alle Sekunden alt. Der „Für dich"-Feed
+// rankt mit `base / (Alter + 2)^1.5` — sekundenfrische Beiträge verdrängen also
+// alles andere, und Beiträge MIT Kommentaren (base 7 statt 1) ganz besonders.
+// Ergebnis auf Seite 1 (10 Einträge), am 22.08.2026 gemessen:
+//
+//   ohne die Rückstände (= Einzellauf):  6 fremde Beiträge
+//   mit den Rückständen (= Dateilauf):   0 fremde Beiträge → der letzte Fall
+//                                        findet keinen fremden Autor und
+//                                        erklärt sich für wertlos
+//
+// Der Fall war also allein grün und in der Datei rot, bei identischer
+// Datenbank. Ein löschender Test, der seine Kulissen stehen lässt, misst nicht
+// nur beim zweiten Lauf etwas anderes — er verändert die Seite, die ein
+// SPÄTERER Fall betrachtet. Dieselbe Familie wie „eine Messung darf ihren
+// eigenen Gegenstand nicht mitmessen", nur über Fallgrenzen hinweg.
+test.afterEach(async () => {
+  if (posts) await posts.deleteMany({ kaiMarke: MARKE });
+});
+
 test.afterAll(async () => {
   if (posts) await posts.deleteMany({ kaiMarke: MARKE });
   await mongoose.disconnect();
@@ -423,8 +448,16 @@ test.describe("Oberfläche: der Löschknopf steht nur an den eigenen Beiträgen"
     // Derselbe Endpunkt und dieselbe Nutzlast wie in `PostFeed.js` (Zweig
     // "discover" = "Für dich"). Wer hier einen anderen Weg nimmt, misst einen
     // anderen Feed als den, der auf dem Bildschirm steht.
+    // ⚠️ `limit: 50` STATT DER ERSTEN SEITE (Befund Tobias, Roadmap 38b).
+    // Hier stand nur `offset: 0`, also die ersten ZEHN gerankten Beiträge.
+    // Das ist eine Auswahl, keine Bestandsaufnahme: Gesucht ist irgendein
+    // fremder Autor, dem der Feed überhaupt Platz gibt — ob er auf Rang 3 oder
+    // Rang 34 steht, ist für diese Frage gleichgültig. An der Beschränkung auf
+    // Seite 1 hing der Fall aber davon ab, wie viele frische eigene Beiträge
+    // gerade oben liegen, und ist deshalb in der Datei rot gewesen und allein
+    // grün. 50 ist das Maximum, das die Route zulässt (`MAX_LIMIT`).
     const feed = await request.post("/api/posts/feed", {
-      data: { token, offset: 0 },
+      data: { token, offset: 0, limit: 50 },
       failOnStatusCode: false,
     });
     const feedJson = await feed.json().catch(() => ({}));
@@ -434,10 +467,18 @@ test.describe("Oberfläche: der Löschknopf steht nur an den eigenen Beiträgen"
       .find((id) => id && String(id) !== String(maxId));
     expect(
       fremderAutor,
-      `Im Feed von ${MAX} steht kein einziger fremder Beitrag. Dann kann ` +
-        `dieser Fall die Aussage "kein FREMDER Beitrag trägt einen Löschknopf" ` +
-        `nicht prüfen — er wäre grün, ohne etwas gesehen zu haben. ` +
-        `Abhilfe: node scripts/seed-demo.mjs`,
+      `Im Feed von ${MAX} steht unter ${liste.length} gerankten Beiträgen kein ` +
+        `einziger mit einem fremden Autor. Dann kann dieser Fall die Aussage ` +
+        `"kein FREMDER Beitrag trägt einen Löschknopf" nicht prüfen — er wäre ` +
+        `grün, ohne etwas gesehen zu haben.\n` +
+        `⚠️ Diese Meldung nannte bis zum 22.08.2026 „Abhilfe: node ` +
+        `scripts/seed-demo.mjs". Das war eine falsche Fährte und hat Zeit ` +
+        `gekostet: Der Bestand hatte, was gebraucht wird, und die Route lieferte ` +
+        `es auch — verdrängt haben die fremden Beiträge die RÜCKSTÄNDE der ` +
+        `vorangehenden Fälle dieser Datei (siehe "afterEach" oben). Erst also ` +
+        `nachsehen, wie viele Beiträge mit "kaiMarke" gerade im Bestand liegen; ` +
+        `neu zu seeden hilft nur, wenn max@test.de tatsächlich allein auf der ` +
+        `Plattform ist.`,
     ).toBeTruthy();
     for (let i = 0; i < 3; i++) {
       const t = `${MARKE}-fremd-${i}`;

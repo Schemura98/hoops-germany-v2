@@ -99,6 +99,29 @@ async function anmelden(page, request) {
   expect(res.status(), `Login ${KONTO.email} auf der Dev-DB`).toBe(200);
   const { token } = await res.json();
   expect(token, "Login lieferte keinen Token").toBeTruthy();
+  // ⚠️ DIE WILLKOMMENS-TOUR STILLLEGEN (Befund Roadmap 38, 22.08.2026).
+  // Diese Datei hatte KEINEN einzigen Treffer auf `hg_welcome_token` und war
+  // damit als einzige Leisten-Datei ungeschützt gegen den Auto-Start der Tour.
+  // Aufgefallen ist es erst nach einem frischen `node scripts/seed-demo.mjs`:
+  // Der Seed setzt bei max@test.de KEIN `welcomeSeen`, die Tour startet also
+  // von selbst, legt ihr Overlay über die Seite und ANIMIERT es. Playwright
+  // wartet vor jedem Klick darauf, dass ein Element zur Ruhe kommt — der
+  // Menü-Knopf kam nie zur Ruhe, und der Fall lief in die Zeitüberschreitung
+  // („element is not stable", 120s).
+  //
+  // ⚠️ Und das ist der eigentliche Befund, nicht der Ausfall: Der Fall war
+  // vorher GRÜN, weil frühere Läufe `welcomeSeen` auf true gesetzt hatten. Er
+  // hing damit nicht an den Prüfdaten, sondern an den NEBENWIRKUNGEN früherer
+  // Läufe — auf einem frisch aufgesetzten Rechner wäre er sofort rot gewesen,
+  // ohne dass am Produkt etwas fehlt. Genau die Fehlerform, die CLAUDE.md seit
+  // dem 14.08.2026 führt: „Erst den Zustand deterministisch machen, dann an
+  // Wartezeiten denken."
+  //
+  // Der Schlüssel ist der Wächter der Tour selbst (`WelcomeTour.js`), die
+  // Datenbank bleibt dadurch unberührt.
+  await page.addInitScript((t) => {
+    sessionStorage.setItem("hg_welcome_token", t);
+  }, token);
   await page.goto("/spieler");
   await page.evaluate((t) => localStorage.setItem("playerAuthToken", t), token);
   return token;

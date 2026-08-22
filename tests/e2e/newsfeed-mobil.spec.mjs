@@ -98,14 +98,59 @@ test.describe("Newsfeed mobil", () => {
         });
         // Der Feed-Umschalter markiert den Beginn der Beitragsliste.
         const umschalter = q("button, a").find((e) => e.textContent.trim() === "Für dich");
+        const grenze = umschalter
+          ? umschalter.getBoundingClientRect().top + window.scrollY
+          : null;
+
+        // ── Die Blöcke oberhalb des Feeds einsammeln ───────────────────────
+        // Gesucht ist die OBERSTE Schicht: jedes Element, das vollständig über
+        // der Grenze liegt und dessen Elternteil das nicht tut. Damit ist die
+        // Messung unabhängig davon, wie tief jemand einen neuen Block einhängt
+        // – ein Block als Geschwister des Kopfes und ein Block drei Ebenen
+        // tiefer erscheinen beide genau einmal.
+        const bloecke = [];
+        const hauptteil = document.querySelector("main");
+        const laufe = (el) => {
+          for (const k of el.children) {
+            const b = k.getBoundingClientRect();
+            if (b.height === 0) continue;
+            const oben = b.top + window.scrollY;
+            const unten = b.bottom + window.scrollY;
+            if (unten <= grenze + 1) bloecke.push(k); // ganz drüber
+            else if (oben < grenze) laufe(k); // enthält die Grenze
+            // ganz drunter: gehört zum Feed, nicht zum Vorbau
+          }
+        };
+        if (grenze !== null && hauptteil) laufe(hauptteil);
+
+        // Jeder bekannte Block wird an einer EIGENSCHAFT erkannt, nicht an
+        // einer CSS-Klasse: Klassen ändert eine Gestaltungsrunde, die Rolle
+        // eines Blocks nicht.
+        const erkenne = (e) => {
+          const t = (e.textContent || "").replace(/\s+/g, " ").trim();
+          if (e.tagName === "HEADER" && e.querySelector("h1")) return "Kopf";
+          if (e.matches('section[aria-label="Deine Anzeigetafel"]')) return "Anzeigetafel";
+          if (e.matches('nav[aria-label="Weitere Bereiche"]')) return "Wegweiser";
+          if (e.querySelector('[aria-label="Ausblenden"]')) return "Onboarding-Streifen";
+          if (e.querySelector("textarea") || /Was gibt.?s Neues/.test(t)) return "Composer";
+          return null;
+        };
+
+        const tafel = document.querySelector('section[aria-label="Deine Anzeigetafel"]');
         return {
           ziele,
           navHoehe: nav ? Math.round(nav.getBoundingClientRect().height) : null,
-          umschalterY: umschalter
-            ? Math.round(umschalter.getBoundingClientRect().top + window.scrollY)
-            : null,
+          umschalterY: grenze === null ? null : Math.round(grenze),
           quer: document.documentElement.scrollWidth > window.innerWidth,
           fensterBreite: window.innerWidth,
+          vorbau: bloecke.map((e) => ({
+            art: erkenne(e),
+            tag: e.tagName,
+            hoehe: Math.round(e.getBoundingClientRect().height),
+            text: (e.textContent || "").replace(/\s+/g, " ").trim().slice(0, 60),
+          })),
+          tafelHoehe: tafel ? Math.round(tafel.getBoundingClientRect().height) : 0,
+          tafelRegister: tafel ? tafel.querySelectorAll("a").length : 0,
         };
       });
 
@@ -137,30 +182,106 @@ test.describe("Newsfeed mobil", () => {
       ).toBe(false);
 
       // Der Feed muss oben beginnen – das war der ganze Zweck des Umbaus.
-      // 900 px ist bewusst großzügig: Der Test soll die RÜCKKEHR der vier
-      // Kästen fangen (die kosteten ~192 px), nicht jede Verschiebung um
-      // zwanzig Pixel melden und dadurch bei jeder Textänderung rot werden.
       expect(
         mess.umschalterY,
         `Der Feed-Umschalter („Für dich") wurde nicht gefunden.`,
       ).not.toBeNull();
-      // ⚠️ SCHWELLE KORRIGIERT (Befund Kai, Gate 18.08.2026).
-      // Hier stand `toBeLessThan(900)` – und die Fehlermeldung nannte „~888px"
-      // als den kaputten Zustand. 888 ist kleiner als 900: Der Test wäre im
-      // ausdrücklich benannten Fehlerfall GRÜN gewesen. Kai hat es gegengeprobt
-      // und zusätzlich gezeigt, dass selbst 334 px zusätzlicher Vorbau
-      // durchgingen – mehr als die vier Kästen überhaupt kosteten.
+
+      // ═══════════════════════════════════════════════════════════════════
+      // ⚠️ DIE PIXELSCHWELLE IST ERSATZLOS ENTFALLEN — und der Grund ist
+      // gemessen, nicht abgewogen (Befund Tobias + Gegenprobe Kai,
+      // Roadmap 38a, 22.08.2026).
+      // ═══════════════════════════════════════════════════════════════════
+      // Hier stand `toBeLessThan(650)`, begründet mit „Ist-Wert ~554 px".
+      // Beide Zahlen waren richtig gemessen und beide beschreiben einen
+      // DATENSTAND, nicht das Produkt:
       //
-      // Der Ist-Wert liegt bei ~554 px. Die Schwelle 650 lässt Raum für
-      // Textänderungen und wachsende Anzeigetafel, greift aber lange bevor
-      // wieder ein Kastenblock davorpasst (die kosteten ~192 px).
+      //   Anzeigetafel mit 3 Registern → Feed beginnt bei 650 px
+      //   Anzeigetafel mit 2 Registern → 554 px   ← daher die 554
+      //   Anzeigetafel mit 0 Registern → 414 px
+      //
+      // Die Anzeigetafel stapelt mobil ein Register je vorhandener Aussage
+      // (nächstes Spiel · letztes Ergebnis · deine Zahlen). Wie viele davon
+      // stehen, hängt daran, ob ein Spiel angesetzt ist — also an der
+      // Datenbank. Gemessen ist die Schwankung **236 px**.
+      //
+      // ⚠️ DAS IST MEHR, ALS DER BEWACHTE DEFEKT KOSTET (die vier Kästen:
+      // ~192 px). Damit kann es keine Schwelle geben, die beides trennt.
+      // Gegenprobe gefahren (`/api/player/my-matches` im Browser
+      // abgefangen, Datenbank unberührt, vier Kästen nachgestellt):
+      //
+      //   ausgeliefert, KEIN Defekt, 3 Register → 650 px → wäre ROT
+      //   Defekt vorhanden,          0 Register → 622 px → wäre GRÜN
+      //
+      // Der gute Wert liegt ÜBER dem schlechten. Dieselbe Form wie bei der
+      // Hero-Naht (CLAUDE.md, 22.08.2026: ausgeliefert 1,180 gegen Defekt
+      // 1,178) — es ist die sechste Auflage von „gesetzte Zahl gegen
+      // Restbetrag". Gemessen wird deshalb nicht mehr die LAGE des Feeds,
+      // sondern das, was die Lage erzeugt: WELCHE Blöcke über ihm stehen.
+      //
+      // Ein gewachsener Block wird dadurch nicht mehr rot — das ist keine
+      // Lücke, sondern die Abgrenzung: Ein Nutzer mit angesetztem Spiel
+      // sieht mehr Kopf als einer ohne, und das ist richtiges Verhalten.
+      // Ein NEUER Block wird rot, egal wie hoch er ist und egal wie tief
+      // jemand ihn einhängt.
+      const BEKANNT = [
+        "Kopf",
+        "Anzeigetafel",
+        "Onboarding-Streifen",
+        "Wegweiser",
+        "Composer",
+      ];
+      const unbekannt = mess.vorbau.filter((b) => !BEKANNT.includes(b.art));
       expect(
-        mess.umschalterY,
-        `Der Feed beginnt erst bei y=${mess.umschalterY}px (Ist-Wert nach dem ` +
-          `Umbau: ~554px). Vor dem 18.08.2026 stand hier ein Block aus vier ` +
-          `Akkordeon-Kästen, der ~192px kostete. Sind sie zurück – oder ist ` +
-          `oberhalb des Feeds etwas anderes dazugekommen?`,
-      ).toBeLessThan(650);
+        unbekannt.map((b) => `<${b.tag}> ${b.hoehe}px „${b.text}"`),
+        `Oberhalb des Feeds steht ein Block, den dieser Test nicht kennt. ` +
+          `Vor dem 18.08.2026 stand hier ein Block aus vier Akkordeon-Kästen, ` +
+          `der den ersten Beitrag auf y≈888 gedrückt hat – auf dem Gerät, das ` +
+          `der Hauptfall ist. Bekannt und erlaubt sind: ${BEKANNT.join(" · ")}. ` +
+          `Ist ein Block dazugekommen, gehört er in diese Liste – und zwar ` +
+          `bewusst, mit einem Satz dazu, warum der Feed dafür nach unten rückt.`,
+      ).toEqual([]);
+
+      // Gegenrichtung. Ohne sie wäre eine Seite, auf der oberhalb des Feeds
+      // GAR NICHTS mehr steht, vollständig grün – der Test hätte dann null
+      // unbekannte Blöcke gefunden, weil er null Blöcke gesehen hat.
+      const arten = mess.vorbau.map((b) => b.art);
+      for (const pflicht of ["Kopf", "Wegweiser", "Composer"]) {
+        expect(
+          arten,
+          `Der Block „${pflicht}" steht nicht mehr über dem Feed. Gesehen: ` +
+            `${arten.join(", ") || "nichts"}. Entweder ist er weg, oder er ist ` +
+            `unter den Feed gerutscht – beides ist eine Aussage über die Seite, ` +
+            `keine Kleinigkeit.`,
+        ).toContain(pflicht);
+      }
+      // Anzeigetafel und Onboarding-Streifen stehen bewusst NICHT in dieser
+      // Liste: Beide dürfen datenabhängig fehlen (kein Spiel angesetzt bzw.
+      // Checkliste erledigt). Sie hier zu fordern wäre genau der Fehler, den
+      // die Pixelschwelle gemacht hat – eine Zusicherung über die Datenbank
+      // statt über das Produkt.
+
+      // ── Die eine Höhe, die trotzdem gemessen gehört ─────────────────────
+      // Der strukturelle Test oben sagt „kein NEUER Block". Er sagt nichts
+      // darüber, ob ein bekannter Block ins Unermessliche wächst. Für den
+      // größten und einzigen datengetriebenen Block wird das nachgehalten –
+      // und zwar in SEINER Währung, nicht in Seitenkoordinaten: Ein Register
+      // ist eine Zeile, also skaliert die Höhe mit der Zahl der Register.
+      // Gemessen 22.08.2026: 212 px bei 3 Registern (70,7 je Register),
+      // 116 px bei 2 (58,0). Die Grenze 110 ist großzügig, greift aber, wenn
+      // sich ein Register verdoppelt. Sie hängt an keiner Datenlage: mit
+      // weniger Registern sinkt der Sollwert mit.
+      if (mess.tafelRegister > 0) {
+        expect(
+          mess.tafelHoehe,
+          `Die Anzeigetafel ist ${mess.tafelHoehe}px hoch bei ` +
+            `${mess.tafelRegister} Registern (${Math.round(
+              mess.tafelHoehe / mess.tafelRegister,
+            )}px je Register, gemessen waren 58–71). Der Feed rutscht damit ` +
+            `nach unten, ohne dass ein neuer Block dazugekommen wäre – der ` +
+            `strukturelle Test oben kann das nicht sehen.`,
+        ).toBeLessThanOrEqual(110 * mess.tafelRegister);
+      }
     });
   }
 
@@ -244,68 +365,150 @@ test.describe("Newsfeed mobil", () => {
     // Auf einen Beitrag mit Aktionsleiste warten – nicht auf eine feste Zeit.
     await page.waitForSelector("main button[aria-pressed]", { timeout: 30_000 });
 
-    const m = await page.evaluate(() => {
-      const like = document.querySelector("main button[aria-pressed]");
-      const zeile = like.parentElement;
-      const kommentar = zeile.querySelector("button[aria-expanded]");
-      const karte = zeile.parentElement;
+    // ⚠️ ALLE Aktionsleisten, nicht die erste (Roadmap 38c, 22.08.2026).
+    // Bis zum 22.08. griff dieser Fall `querySelector` — also den ersten
+    // Beitrag, den das Ranking gerade nach oben spült. Welche Bauform das ist,
+    // entscheidet damit die Datenbank, und die beiden Bauformen messen sich
+    // unterschiedlich (gemessen: Aktionsleiste 24px im Wort-Beitrag, 33px im
+    // Ereignis-Beitrag — beide heil). Ein Fall, der eine von zwei Bauformen
+    // per Zufall auswählt, ist genau die Datenabhängigkeit, um die es in
+    // dieser Runde geht. Jetzt wird jede Karte im Bild einzeln beurteilt.
+    const karten = await page.evaluate(() => {
       const r = (el) => el.getBoundingClientRect();
-      return {
-        like: { h: Math.round(r(like).height), w: Math.round(r(like).width) },
-        kommentar: kommentar
-          ? { h: Math.round(r(kommentar).height), w: Math.round(r(kommentar).width) }
-          : null,
-        abstand: kommentar ? Math.round(r(kommentar).left - r(like).right) : null,
-        zeileH: Math.round(r(zeile).height),
-        karteH: Math.round(r(karte).height),
-        vorleseLike: like.textContent.replace(/\s+/g, " ").trim(),
-        vorleseKommentar: kommentar?.textContent.replace(/\s+/g, " ").trim() || "",
-      };
+      const zahl = (s) => parseFloat(s) || 0;
+      return [...document.querySelectorAll("main button[aria-pressed]")].map((like) => {
+        const zeile = like.parentElement;
+        const kommentar = zeile.querySelector("button[aria-expanded]");
+        const masse = (el) => {
+          const cs = getComputedStyle(el);
+          return {
+            h: Math.round(r(el).height),
+            w: Math.round(r(el).width),
+            // Der Kniff in seinen eigenen Größen: Innenabstand macht das Ziel
+            // groß, ein gleich großer NEGATIVER Außenabstand zieht das Layout
+            // zurück. `getComputedStyle` liest, was der Browser am Ende
+            // wirklich anwendet – nicht, was eine Klasse behauptet.
+            pt: zahl(cs.paddingTop), pb: zahl(cs.paddingBottom),
+            mt: zahl(cs.marginTop), mb: zahl(cs.marginBottom),
+          };
+        };
+        return {
+          like: masse(like),
+          kommentar: kommentar ? masse(kommentar) : null,
+          abstand: kommentar ? Math.round(r(kommentar).left - r(like).right) : null,
+          zeileH: Math.round(r(zeile).height),
+          vorleseLike: like.textContent.replace(/\s+/g, " ").trim(),
+          vorleseKommentar: kommentar?.textContent.replace(/\s+/g, " ").trim() || "",
+        };
+      });
     });
 
+    expect(
+      karten.length,
+      `Keine einzige Aktionsleiste im Feed – dann prüft dieser Fall nichts.`,
+    ).toBeGreaterThan(0);
+
+    // Die Aussagen, die für JEDE Karte gelten müssen, an der ERSTEN Karte
+    // ausgewertet und danach für alle wiederholt. `m` bleibt als Name stehen,
+    // damit die Meldungen unten unverändert lesbar sind.
+    const m = karten[0];
     expect(m.kommentar, "Kein Kommentar-Knopf in der Aktionsleiste gefunden").not.toBeNull();
 
     // 24 ist die Norm (AA). Geprüft wird gegen 30, damit eine stille
     // Rückstufung auffällt, nicht erst der Bruch der Mindestnorm.
-    for (const [name, z] of [["Like", m.like], ["Kommentar", m.kommentar]]) {
+    // Über ALLE Karten, nicht nur die erste – der Rest der Schleife ebenso.
+    for (const [i, k] of karten.entries()) {
+      const wo = `Karte ${i + 1} von ${karten.length} („${k.vorleseLike.slice(0, 24)}")`;
+      expect(k.kommentar, `${wo}: kein Kommentar-Knopf in der Aktionsleiste`).not.toBeNull();
+
+      for (const [name, z] of [["Like", k.like], ["Kommentar", k.kommentar]]) {
+        expect(
+          z.h,
+          `${wo}: ${name}-Knopf ist ${z.h}px hoch. Vor dem 18.08.2026 waren es ` +
+            `20px – unter dem WCAG-Mindestmaß von 24. Wurde der Innenabstand ` +
+            `entfernt?`,
+        ).toBeGreaterThanOrEqual(30);
+        expect(z.w, `${wo}: ${name}-Knopf ist nur ${z.w}px breit.`).toBeGreaterThanOrEqual(24);
+      }
+
       expect(
-        z.h,
-        `${name}-Knopf ist ${z.h}px hoch. Vor dem 18.08.2026 waren es 20px – ` +
-          `unter dem WCAG-Mindestmaß von 24. Wurde der Innenabstand entfernt?`,
-      ).toBeGreaterThanOrEqual(30);
-      expect(z.w, `${name}-Knopf ist nur ${z.w}px breit.`).toBeGreaterThanOrEqual(24);
+        k.abstand,
+        `${wo}: Die beiden Klickziele überlappen sich (${k.abstand}px). Ein ` +
+          `Tippen am Rand trifft dann den falschen Knopf – und ein Like ` +
+          `verschickt eine Benachrichtigung an einen echten Menschen. Ursache ` +
+          `ist fast immer ein zu kleines \`gap\` in der Aktionsleiste: die ` +
+          `Knöpfe ziehen sich je 6px nach außen, es braucht also genug \`gap\`.`,
+      ).toBeGreaterThan(0);
     }
 
-    expect(
-      m.abstand,
-      `Die beiden Klickziele überlappen sich (${m.abstand}px). Ein Tippen am ` +
-        `Rand trifft dann den falschen Knopf – und ein Like verschickt eine ` +
-        `Benachrichtigung an einen echten Menschen. Ursache ist fast immer ein ` +
-        `zu kleines \`gap\` in der Aktionsleiste: die Knöpfe ziehen sich je 8px ` +
-        `nach außen, es braucht also mindestens gap-5 (20px).`,
-    ).toBeGreaterThan(0);
-
-    // Die Zusage: das Layout bleibt stehen.
-    expect(
-      m.zeileH,
-      `Die Aktionsleiste ist ${m.zeileH}px hoch statt 33. Der negative ` +
-        `Außenabstand fehlt – die größeren Ziele strecken jetzt jeden Beitrag.`,
-    ).toBeLessThanOrEqual(34);
-
-    // ⚠️ DIE ZUSAGE, UM DIE ES GEHT – und sie fehlte (Befund Kai, Gate 18.08.).
-    // Der Kommentar oben sagt „genau diese Zusage kann später still gebrochen
-    // werden – deshalb steht sie hier". `karteH` wurde erhoben und danach NIE
-    // geprüft: eine Übergabe an nichts, in dem Test, der sie sichern soll.
-    // Gemessen sind 155 px; die Grenze lässt Raum für unterschiedlich lange
-    // Beiträge, greift aber sofort, wenn der negative Außenabstand fehlt
-    // (dann 167 px, von Kai gegengeprobt).
-    expect(
-      m.karteH,
-      `Der Beitrag ist ${m.karteH}px hoch. Die größeren Klickziele dürfen die ` +
-        `Karte NICHT strecken – das ist der ganze Kniff (Innenabstand vergrößert ` +
-        `das Ziel, ein gleich großer negativer Außenabstand zieht das Layout ` +
-        `zurück). Fehlt der negative Außenabstand, wächst jeder Beitrag um 12px.`,
-    ).toBeLessThanOrEqual(160);
+    // ═════════════════════════════════════════════════════════════════════
+    // DIE ZUSAGE: das Ziel wächst, das Layout bleibt stehen.
+    //
+    // ⚠️ HIER STAND EINE ZAHL, DIE VON DEN DATEN ABHING — mein eigener Fehler
+    // aus dem Gate vom 18.08.2026, aufgefallen am 22.08.2026 nach einem
+    // frischen `node scripts/seed-demo.mjs` (Roadmap 38, Anstoß Tobias).
+    //
+    // Sie hieß `karteH <= 160` und sollte heißen „die Karte wird nicht
+    // gestreckt". Gemessen (390px, alle Karten im Bild, mit und ohne den
+    // negativen Außenabstand):
+    //
+    //   Kartenhöhe ausgeliefert:  146px (kurzer Text) … 170px (langer Text)
+    //   Kartenhöhe im Defekt:     158px              … 182px
+    //
+    // Die Schwankung ALLEIN DURCH DEN BEITRAGSTEXT ist 24px, der Defekt kostet
+    // 12. Eine defekte Karte mit kurzem Text (158) wäre GRÜN gewesen, eine
+    // heile mit langem Text (170) ROT — der gute Wert liegt über dem
+    // schlechten. Dieselbe Form wie die entfallene Pixelschwelle weiter oben
+    // in dieser Datei und wie die Hero-Naht in CLAUDE.md.
+    //
+    // ⚠️ UND MEIN ERSTER ERSATZ WAR AUCH FALSCH — er ist nur nicht in die
+    // Übergabe gekommen, weil die Messung ihn vorher erwischt hat. Er lautete
+    // „die Aktionsleiste ist niedriger als der Knopf darin" und stimmte für
+    // den Wort-Beitrag (Zeile 24, Knopf 32). Es gibt aber ZWEI Bauformen, und
+    // im Ereignis-Beitrag steht neben den Knöpfen ein höheres Element:
+    //
+    //                      ausgeliefert   ohne negativen Außenabstand
+    //   Wort-Beitrag       Zeile 24        36
+    //   Ereignis-Beitrag   Zeile 33        45
+    //
+    // 33 > 32 — der Ersatz wäre auf jedem Ergebnis-Beitrag falsch rot gewesen.
+    // Welche Bauform ein Test sieht, entscheidet das Ranking, also die
+    // Datenbank: Ich hätte eine Datenabhängigkeit durch eine andere ersetzt.
+    //
+    // Was in BEIDEN Bauformen gilt, ist der Kniff selbst, und er steht in
+    // seinen eigenen Größen: Der Innenabstand macht das Ziel groß, ein GLEICH
+    // GROSSER negativer Außenabstand zieht das Layout um genau diesen Betrag
+    // zurück (gemessen: padding 6px, margin −6px, oben wie unten; die 12px
+    // Unterschied in der Tabelle sind exakt diese zweimal 6). Das hängt an
+    // keiner Textlänge, an keiner Bauform, an keinem Datenstand.
+    //
+    // Gelesen wird mit `getComputedStyle` — also das, was der Browser am Ende
+    // wirklich anwendet, nicht das, was eine Klasse behauptet. Das ist
+    // derselbe Anspruch wie im Kopf dieser Datei („behaupten und messen sind
+    // zweierlei"): Eine Klasse kann von einer späteren Regel überschrieben
+    // werden, der berechnete Wert nicht.
+    //
+    // Gegenprobe gefahren (Außenabstand per Stylesheet auf 0 gesetzt):
+    // rot auf ALLEN Karten, in beiden Bauformen.
+    for (const [i, k] of karten.entries()) {
+      const wo = `Karte ${i + 1} von ${karten.length} („${k.vorleseLike.slice(0, 24)}")`;
+      for (const [name, z] of [["Like", k.like], ["Kommentar", k.kommentar]]) {
+        expect(
+          z.pt,
+          `${wo}: Der ${name}-Knopf hat oben gar keinen Innenabstand. Genau der ` +
+            `macht aus einem 20px-Symbol ein tippbares Ziel.`,
+        ).toBeGreaterThan(0);
+        expect(
+          { oben: z.mt, unten: z.mb },
+          `${wo}: Der ${name}-Knopf hat einen Innenabstand von ${z.pt}/${z.pb}px ` +
+            `(oben/unten), aber einen Außenabstand von ${z.mt}/${z.mb}px. Der ` +
+            `Kniff dieser Leiste ist, dass beide sich aufheben: Der Innenabstand ` +
+            `vergrößert das Tippziel, ein gleich großer NEGATIVER Außenabstand ` +
+            `zieht das Layout zurück. Heben sie sich nicht auf, wächst jeder ` +
+            `einzelne Beitrag im Feed – bei −0px um ${z.pt + z.pb}px.`,
+        ).toEqual({ oben: -z.pt, unten: -z.pb });
+      }
+    }
 
     // Vorleseprogramme: die Zahl allein ist keine Information.
     expect(

@@ -171,8 +171,14 @@ test.describe("Beitragskacheln im Feed", () => {
         `Alle ${m.kacheln.length} Beiträge haben dieselbe Fläche ` +
           `(${flaechen[0]}). Dann liegen entweder nur Ereignisse oder nur ` +
           `Worte im Feed, und dieser Test misst den Unterschied nicht, um den ` +
-          `es geht. Prüfdaten reparieren (\`scripts/seed-demo.mjs\`), nicht ` +
-          `die Schranke senken.`,
+          `es geht. Prüfdaten reparieren, nicht die Schranke senken — und ` +
+          `zwar mit \`node scripts/seed-feed-lebendig.mjs\`.\n` +
+          `⚠️ Hier stand bis zum 22.08.2026 \`scripts/seed-demo.mjs\`. Das ist ` +
+          `die falsche Abhilfe und kostet den nächsten Leser Zeit: seed-demo ` +
+          `legt NUR Wort-Beiträge an, dieser Fall braucht zusätzlich ` +
+          `EREIGNISSE (bestätigte Ergebnisse, Transfers). Am 22.08.2026 ` +
+          `gemessen: nach seed-demo allein 8 Beiträge und EINE Flächenstufe ` +
+          `(dieser Fall rot), nach seed-feed-lebendig zwei Stufen (grün).`,
       ).toBeGreaterThanOrEqual(2);
 
       // ── Die eigentliche Zusicherung ─────────────────────────────────────
