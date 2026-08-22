@@ -30,7 +30,7 @@ export default function AdminTeamsPage() {
   }, [load]);
 
   // Interner Testaccount: real angelegt, aber von uns selbst – zaehlt nicht in
-  // Beteiligungszahlen (siehe lib/echteZahlen.js).
+  // Beteiligungszahlen (siehe lib/echteZahlen.mjs).
   async function toggleIntern(t) {
     setBusyId(t._id);
     try {

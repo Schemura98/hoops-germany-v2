@@ -26,7 +26,7 @@
 
 import { readFileSync } from "fs";
 import mongoose from "mongoose";
-import { NUR_ECHT, NUR_ECHTE_TEAMS } from "../lib/echteZahlen.js";
+import { NUR_ECHT, NUR_ECHTE_TEAMS } from "../lib/echteZahlen.mjs";
 import { SPIELWOCHEN_NIERS_2026 } from "../lib/spielwochenNiers2026.mjs";
 import {
   rechneWiederkehr,
@@ -251,7 +251,7 @@ try {
     }
   }
   z.push("");
-  z.push("Hinweise: Kohorte NUR_ECHT-gefiltert (lib/echteZahlen.js, importiert). Grenzen der");
+  z.push("Hinweise: Kohorte NUR_ECHT-gefiltert (lib/echteZahlen.mjs, importiert). Grenzen der");
   z.push("Aussagekraft: §5 der Definition (warm geworbene Kohorte, Seite mit Beispieldaten,");
   z.push("ausgeloggte Nutzung unsichtbar — die Zahl untertreibt eher, als dass sie übertreibt).");
 

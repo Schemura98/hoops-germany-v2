@@ -24,7 +24,7 @@
 //     Landungen und null Registrierungen muss sichtbar sein — genau der Fall,
 //     den man während einer Kampagne sehen will) und der ECHTHEITSFILTER
 //     (`isInternal`-Konten zählen nicht als Kampagnenerfolg,
-//     `lib/echteZahlen.js`).
+//     `lib/echteZahlen.mjs`).
 //
 // Dazu die beiden Richtungen von Roadmap 39 (Bot-Riegel an der EINEN
 // geteilten Stelle `lib/analyticsClient.js`):
@@ -359,7 +359,7 @@ test.describe("Trichter-Aggregation zählt richtig", () => {
         zeileA.registrierungen,
         "Kanal A: genau 2 — die zwei echten Konten. Steht hier 3, zählt das " +
           "isInternal-Konto als Kampagnenerfolg mit (Filter-Rückfall auf nur " +
-          "isDemo; lib/echteZahlen.js verlangt NUR_ECHT)."
+          "isDemo; lib/echteZahlen.mjs verlangt NUR_ECHT)."
       ).toBe(2);
       expect.soft(
         zeileA.teams,

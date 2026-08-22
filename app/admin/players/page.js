@@ -36,7 +36,7 @@ export default function AdminPlayersPage() {
   }, [load]);
 
   // Internes Testkonto: real angelegt, aber uns selbst gehoerend - zaehlt nicht
-  // in Beteiligungszahlen (siehe lib/echteZahlen.js).
+  // in Beteiligungszahlen (siehe lib/echteZahlen.mjs).
   async function toggleIntern(p) {
     setBusyId(p._id);
     try {
