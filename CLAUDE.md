@@ -110,8 +110,14 @@
 > trägt `vereinsmail` — EIN Wert je Kanal, sonst zählt die Auswertung zwei halbe Kanäle.
 > Der Plan wurde an den QR angepasst (`4293c43`).
 > 📐 **WIEDERKEHR-RATE FÜR DEN GO/NO-GO-ENTSCHEID IST DEFINIERT — VOR DER MESSUNG**
-> (Ronja, 23.08.2026, `docs/WIEDERKEHR-RATE-DEFINITION-2026-08-23.md`; Freigabe der
-> Schwellen durch Patrick steht noch aus). Kern: **Wiederkehr-Quote** = Anteil der
+> (Ronja, 23.08.2026, `docs/WIEDERKEHR-RATE-DEFINITION-2026-08-23.md`).
+> ✅ **SCHWELLEN FESTGESCHRIEBEN (23.08.2026, Entscheidung an Claude delegiert):** Die
+> Werte gelten wie von Ronja gesetzt — jede Nachbesserung wäre genau das
+> Schwellen-Shopping, das die Definition verhindern soll. **Ab jetzt nicht mehr anfassen,
+> bis gemessen ist.** Messjob-Zuordnung: **Kai** (Ben existiert nur als Roster-Rolle,
+> nicht als einsatzfähiger Mitarbeiter dieses Projekts; ein Besitzer für Messung und
+> deren Absicherung). Bewusst NUR ein Skript, keine Admin-Karte — vor dem 03.10. gibt
+> es nichts anzuzeigen. Kern: **Wiederkehr-Quote** = Anteil der
 > Spieler OHNE Admin-Rolle (Admins messen Pflicht, nicht Produktzug; Echtheitsfilter
 > zwingend), die in ≥ 2 verschiedenen SPIELwochen nach ihrer Registrierungswoche
 > eingeloggt da waren. Spielfreie Wochen existieren für die Messung nicht; Messstrecke
