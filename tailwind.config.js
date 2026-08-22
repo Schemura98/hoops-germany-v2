@@ -3,10 +3,30 @@
 // (docs/VISUELLE-RICHTUNG-2026-08-12.md, Vivien, 12.08.2026).
 // Alle Kontrastwerte in den Kommentaren sind gerechnet, nicht geschätzt.
 module.exports = {
+  // ⚠️ `lib/` GEHOERT HIER HINEIN, UND ZWAR SEIT DEM ANFANG (Roadmap 36,
+  // Befund Kai am 22.08.2026, am ausgelieferten Live-Stylesheet belegt).
+  //
+  // Tailwind erzeugt eine Regel nur fuer Klassennamen, die es in den hier
+  // gelisteten Dateien FINDET. `lib/ui.js` ist aber die zentrale Quelle fuer
+  // `inputClass`/`inputClassSm` und speist rund 143 Formularfelder — und stand
+  // nicht in dieser Liste. Eine Klasse, die AUSSCHLIESSLICH dort steht, erzeugt
+  // deshalb **kein CSS**. Sie steht im Markup, sieht richtig aus, und tut nichts.
+  //
+  // Belegt am 22.08.2026: `placeholder:text-navy-500` stand nur in `lib/ui.js`
+  // und kam im ausgelieferten Stylesheet **gar nicht vor** — die 143 Felder
+  // trugen die Browser-Vorgabe `#9CA3AF`. Die Nachfolgefarbe `mist-400` wirkt
+  // heute nur, weil sieben Dateien unter `components/`/`app/` dieselbe Klasse
+  // zufaellig noch einmal woertlich hinschreiben. Wer diese sieben Stellen auf
+  // `inputClass` konsolidiert — also genau die Aufraeumarbeit macht, die
+  // CLAUDE.md fuer die handgebauten Panels fordert —, nimmt der Plattform die
+  // Platzhalterfarbe, **und nichts sieht kaputt aus**.
+  //
+  // ⚠️ Wer diese Zeile wieder entfernt, baut genau diese stille Falle zurueck.
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./lib/**/*.{js,mjs}",
   ],
   theme: {
     extend: {

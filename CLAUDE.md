@@ -2214,10 +2214,31 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     Flyer-Link kommt — und Tobias ist über dieselbe Stelle gestolpert und hätte sie beinahe als
     Fehler gemeldet.
 
-36. ⚠️ **`lib/` steht nicht in Tailwinds `content`-Globs — eine Klasse dort erzeugt kein CSS**
-    (Befund Kai, 22.08.2026, am ausgelieferten Live-Stylesheet belegt). `tailwind.config.js`
-    scannt nur `pages/`, `components/`, `app/`. `lib/ui.js` ist aber die **zentrale** Quelle für
-    `inputClass`/`inputClassSm` und speist rund 143 Formularfelder.
+36. ✅ **ERLEDIGT (22.08.2026, Entscheidung Patrick): `./lib/**/*.{js,mjs}` steht jetzt in den
+    `content`-Globs.** Befund Kai, am ausgelieferten Live-Stylesheet belegt: Tailwind erzeugt eine
+    Regel nur für Klassen, die es in den gelisteten Dateien FINDET — `lib/` war nicht dabei,
+    obwohl `lib/ui.js` die **zentrale** Quelle für `inputClass`/`inputClassSm` ist und rund 143
+    Formularfelder speist. Eine Klasse, die ausschließlich dort steht, tat **nichts**.
+    ✅ **Beidseitige Gegenprobe gefahren, nicht behauptet:** Eine Sonde
+    (`placeholder:text-signal-ok`, kommt sonst nirgends im Projekt vor) nur in `lib/ui.js` gesetzt
+    → **mit** der neuen Glob-Zeile entsteht die CSS-Regel, **ohne** sie nicht. Damit ist die
+    Konfigurationszeile nachweislich die Ursache, nicht ein Nebeneffekt.
+    ✅ **Am Bild ändert sich heute nichts, und das ist gemessen:** Das gebaute Stylesheet ist nach
+    dem Eingriff **bitgleich** mit dem live ausgelieferten (`07b8a7ec207aeb5a.css`) — Regel für
+    Regel, in derselben Reihenfolge. Deshalb **kein erneuter Deploy**: Er würde die Live-Seite
+    neu starten und exakt dieselbe Datei ausliefern.
+    ⚠️ **DER LEHRREICHE NEBENEFFEKT: Tailwind liest rohen Text, also auch KOMMENTARE.** Der erste
+    Anlauf erzeugte zwei zusätzliche, tote Regeln — aus Klassennamen, die in `lib/ui.js` und
+    `lib/useMenuHoehe.js` nur **zitiert** wurden, um einen verworfenen Weg zu beschreiben. Keine
+    davon hing an einem Element. Beide Kommentare sind so umformuliert, dass sie den Sachverhalt
+    weiter erklären, ohne den Klassennamen auszuschreiben — daher die Bitgleichheit oben.
+    ⚠️ **Wer ab jetzt in `lib/` einen Klassennamen in einen Kommentar schreibt, erzeugt CSS.**
+    ⚠️ **OFFEN: Es gibt keinen Wächter dafür, dass die Glob-Zeile bleibt.** Wer sie entfernt, baut
+    die stille Falle zurück, und die Suite bleibt grün — die Platzhalterfarbe fiele auf die
+    Browser-Vorgabe `#9CA3AF` (gemessen 5,07 : 1, also kein Zugänglichkeitsabsturz, aber
+    ungewollt). Ein Prüfmaß an der **Eigenschaft** wäre: eine Klasse, die es nur in `lib/` gibt,
+    muss im gebauten Stylesheet ankommen. → Kai.
+    **Historischer Befund, zur Einordnung:**
     **Folge heute:** Die Platzhalterfarbe `placeholder:text-mist-400` wirkt nur, weil **sieben
     Dateien unter `components/`/`app/` dieselbe Klasse wörtlich hinschreiben**. Wer sie auf
     `inputClass` konsolidiert — also genau die Aufräumarbeit macht, die diese Datei für die 140
