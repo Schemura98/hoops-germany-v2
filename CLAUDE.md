@@ -115,6 +115,19 @@
 > hätte den grauen Fleck also durchgewinkt; `navy-500` ist ein legitimer Token, eine reine
 > Paletten-Prüfung wäre für Tobias' Befund blind. **Jede der beiden ist für den Defekt der anderen
 > blind.**
+> ⚠️ **NEUE METHODIK-LEHRE (Kai, 22.08.2026): Zwei Gegenproben in EINEM Lauf beweisen nur eine.**
+> Sein erster Versuch setzte beide Mutationen gleichzeitig; beide treffen denselben Testfall, und
+> der **bricht bei der ersten fehlschlagenden Zusicherung ab**. Es fiel nur die Paletten-Prüfung,
+> die Kontrast-Prüfung lief nie. Ein Lauf mit „1 failed" hätte wie ein Beleg für **beide**
+> ausgesehen und war keiner. Gegenproben, die denselben Fall treffen, gehören einzeln gefahren.
+> ⚠️ **Und eine Falle für den nächsten Prüfer, die in der Datei steht:** Wer die Gegenprobe in
+> `lib/ui.js` fährt, bekommt zu Recht **Grün** — `lib/` steht nicht in den `content`-Globs, die
+> Klasse wird nie erzeugt, die Mutation hat keine Wirkung. Wer daraus schließt, der Wächter tauge
+> nichts, irrt: Die Gegenprobe muss in einer Datei stattfinden, die Tailwind einliest (Roadmap 36).
+> ⚠️ **Diese Datei ging einmal verloren, und das war mein Fehler:** Ich habe Kais Arbeitsbaum mit
+> `git worktree remove --force` entfernt, nachdem ich nur den *ersten* Wächter übernommen hatte.
+> Neu erzeugt und frisch gegengeprobt statt aus dem Gedächtnis behauptet. **Regel daraus: erst
+> übernehmen, dann aufräumen** — und bei Prüfarbeit eine Zweitkopie außerhalb des Worktrees.
 >
 > ✅ **Beide Gates durch.** Tobias **freigabefähig mit Auflage** (die Auflage — Platzhalterkontrast
 > — ist umgesetzt); Kai **freigabefähig**.
@@ -127,10 +140,12 @@
 > **umgebende Karte**, nicht das Feld; der inhaltliche Kern (Schrift wird blasser) ist behoben.
 > ⚠️ **Eine Zahl in meinem eigenen Code war falsch:** „4,50 : 1" statt gerechnet **4,99 : 1**,
 > von Tobias nachgerechnet. Korrigiert, nicht gerundet.
-> ✅ **Vor dem Deploy gezählt, nicht geschätzt:** Build durch · Playwright **315 grün / 5 rot /
-> 1 übersprungen** im Hauptbaum (Kai zählt mit seinem zweiten Wächter **317 / 5 / 1** bei 323
-> Fällen in 32 Dateien; seine eigene Schätzung „315" war um zwei daneben — *nicht schätzen,
-> zählen*) · `design-audit -- --check` ohne Abweichung, Baseline **141 → 140** nachgezogen
+> ✅ **Gezählt, nicht geschätzt:** Build durch · Playwright zum Deploy-Zeitpunkt **315 / 5 / 1**,
+> **nach dem Nachtrag des zweiten Wächters 317 grün / 5 rot / 1 übersprungen** — Summe 323, und
+> `npx playwright test --list` zählt unabhängig ebenfalls **323 Fälle in 32 Dateien**.
+> ⚠️ Kais gerechnete Schätzung lautete „315" und war um zwei daneben (er hatte nur den ersten
+> Wächter mitgerechnet) — *nicht schätzen, zählen*, zum wiederholten Mal.
+> · `design-audit -- --check` ohne Abweichung, Baseline **141 → 140** nachgezogen
 > (der Composer nutzt jetzt `Card` statt derselben Klassen von Hand) · neun Breiten 320–1920 px
 > ohne Querlauf und ohne Konsolenfehler.
 > ✅ **Live nachgemessen (22.08.2026):** Server auf `e9a8ef3`, keine lokalen Änderungen,
