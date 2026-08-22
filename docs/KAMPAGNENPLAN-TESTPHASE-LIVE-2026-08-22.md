@@ -114,7 +114,7 @@ das Pionier-Argument.
 ### Messbarkeit (Ben)
 
 - Je Flyer-Charge/Turnier ein eigener `?src=` (z. B. `flyer-t01`, `flyer-t02`),
-  Visitenkarten `karte-01`, Vereins-Mail `verein-mail`. Das Logging ist produktiv,
+  Visitenkarten `karte-01`, Vereins-Mail `vereinsmail` (⚠️ vereinheitlicht 22.08.2026: hier stand `verein-mail`, der gebaute QR trägt `vereinsmail` — EIN Wert je Kanal, sonst zählt die Auswertung zwei halbe Kanäle). Das Logging ist produktiv,
   hat aber noch keine Daten [BELEGT] — H5 (Registrierungs-Spikes nach Turnieren) wird
   damit erstmals prüfbar.
 - Ohne diese Trennung ist die Druck-vs.-digital-Frage auch nach der Testphase
@@ -284,7 +284,7 @@ Standard und bleibt unangetastet; die Tiefe liegt im Anhang/Link.
      Vorzugsweg (H6, Bedarfsanalyse).
    - **Link zur Idee-Vorstellung** (eine Web-Seite oder PDF — die „Präsentation der
      Idee", die stehen bleibt und nie je Verein angepasst wird), verlinkt mit
-     `?src=verein-mail`.
+     `?src=vereinsmail`.
 8. **Abschluss (Standard):** persönliche Grußformel Patrick, echte Antwortadresse,
    kein „no-reply", kein Marketing-Footer.
 
