@@ -29,10 +29,15 @@
 > 📄 **ÜBERGABE: `docs/UEBERGABE-2026-08-21.md`** — Stand am Ende des 21.08., Patricks
 > Entscheidungen dieses Tages und die offene Liste vor den Flyern. **Zuerst lesen.**
 >
-> ⚠️ **NICHT DEPLOYT, NUR COMMITTET (22.08.2026): ANALYTICS-AUSBAU — KANAL-TRICHTER, VERLAUF
-> INTERN, UND ROADMAP 39 IST ERLEDIGT.** Kein Push-/Deploy-Auftrag zum Zeitpunkt des Baus;
-> Gate Kai: **freigabefähig mit einer Auflage (umgesetzt, sein Wächter davor rot gesehen)**.
-> Anlass: Patricks Prüfauftrag zum Admin-Analytics plus Freigabe der Vorschläge.
+> ✅ **DEPLOYT: `b23888c`** (23.08.2026) — **ANALYTICS-AUSBAU: KANAL-TRICHTER, VERLAUF INTERN,
+> UND ROADMAP 39 IST ERLEDIGT.** Gate Kai: **freigabefähig mit einer Auflage (umgesetzt, sein
+> Wächter davor rot gesehen)**. Anlass: Patricks Prüfauftrag zum Admin-Analytics plus Freigabe
+> der Vorschläge.
+> ✅ **Live nachgemessen (23.08.2026):** Server auf `b23888c` · 16 Routen je 200 · Härtung
+> greift live (erfundener Kanal und `{"$ne":null}` → „Ungültige Quelle") · **Landungszählung
+> einmal echt auf der Live-Seite durchgespielt** (simulierter echter Browser, `?src=flyer-test`):
+> pageview + src_landing, beide 200. ⚠️ Der Kanal `flyer-test` trägt dadurch genau EINE
+> Landung aus dieser Kontrollmessung — wer die Zahl liest, soll das wissen.
 > **(1) Kampagnen-Kanäle** (`/admin/analytics`, interner Reiter): je `?src=`-Kanal der Trichter
 > **Landungen → Registrierungen → Team-Gründungen** — Landungen zählt ein neues Ereignis
 > `src_landing` (EINMAL je Sitzung, beim ersten Fang der Quelle; Routenwechsel erzeugt keine
@@ -1687,7 +1692,7 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `0ecd593` (aktuell live) → `70fd2d1` → `1a57be5` (nur Doku) → `38f2d20` (nur Doku/Tests) → `d649127` → `6f02a9b` → `6c79ec4` (nur Tests) → `b62d511` → `57da148` (nur Tests) → `a320c9e` (nur Doku) → `e9a8ef3` → `108fbc7` (nur Doku) → `3181ad2` → `6348625` → `b88bbd3` (nur Doku) → `ea982c4` → `cdb8065` → `492e465` → `34dd22f` (Feldende,
+> **Rollback-Kette:** `b23888c` (aktuell live, nur Doku über `d1d9517`) → `d1d9517` → `45de921` (nur Doku) → `4293c43` (nur Doku) → `a64ef92` (nur Doku) → `0ecd593` → `70fd2d1` → `1a57be5` (nur Doku) → `38f2d20` (nur Doku/Tests) → `d649127` → `6f02a9b` → `6c79ec4` (nur Tests) → `b62d511` → `57da148` (nur Tests) → `a320c9e` (nur Doku) → `e9a8ef3` → `108fbc7` (nur Doku) → `3181ad2` → `6348625` → `b88bbd3` (nur Doku) → `ea982c4` → `cdb8065` → `492e465` → `34dd22f` (Feldende,
 > vor den Wächtern) → `0f2a933` (nur Doku) → `17bb00a` → `8e63cf6` (nur Doku) → `c4982bd` → `c5cbf6f` → `fb23317` → `0da80c7` (Dribbelweg,
 > vor den Gate-Befunden) → `70c36ba` (letzter Stand vor der Ball-Reise) → `76406fb` → `571931c` (Feld) → `b3487a8` →
 > `d4c847a` (Leiste, erster Schritt) → `070a1e7` (letzter Stand vor Feld und Leiste) → `04ba621` → `07150cf` (nur Werkzeug) → `d2cfa47` → `35b8bc0` → `d841c4b` → `bd99263` (Dunk, vor den

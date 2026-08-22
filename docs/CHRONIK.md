@@ -5702,4 +5702,8 @@ Priorität auf allem, was vor dem Vereinsmail-Versand stehen sollte.
 
 ### Stand
 Suite **349 / 0 / 1** (350 in 36 Dateien) · design-audit ohne Abweichung · Gate Kai
-freigabefähig mit einer Auflage (umgesetzt) · **nicht deployt** — live ist `0ecd593`.
+freigabefähig mit einer Auflage (umgesetzt).
+**Nachtrag 23.08.2026: deployt als `b23888c`.** Live nachgemessen: 16 Routen je 200,
+Härtung greift (erfundene Kanäle → „Ungültige Quelle"), Landungszählung einmal echt
+durchgespielt (`?src=flyer-test` → pageview + src_landing, beide 200; der Kanal trägt
+dadurch eine Kontroll-Landung).
