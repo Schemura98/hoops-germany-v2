@@ -11,9 +11,14 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> ⚠️ **NICHT DEPLOYT, NUR COMMITTET: `248d5e3` (23.08.2026) — DIE SPIELER- UND VEREINSSEITEN
-> SIND IN EINER RUNDE REPARIERT, ANGEGLICHEN UND VERBUNDEN (Pakete A–D).** Kein Push, kein
-> Deploy; beides war nicht beauftragt. Anlass: Patricks Auftrag „ganzes Team analysiert die
+> ✅ **DEPLOYT: `248d5e3` (23.08.2026, Freigabe Patrick) — DIE SPIELER- UND VEREINSSEITEN
+> SIND IN EINER RUNDE REPARIERT, ANGEGLICHEN UND VERBUNDEN (Pakete A–D).**
+> ✅ **Live nachgemessen (23.08.2026):** Server auf `d9e2605` (= Code-Stand `248d5e3`,
+> Abstand zu origin 0, am Server per `git log` verifiziert) · 16 Routen + Team-/Spielerdetail
+> je 200 · die neuen Untertitel („Spielerprofile mit echten Zahlen…", „…gemeldeten
+> Ergebnissen…") und der Prüfhinweis („kurzen Prüfung durch das Hoops-Team") stehen im
+> ausgelieferten HTML · PM2 online, Fehlerlog leer · kein `npm install` nötig (kein
+> Dependency-Diff, vorher geprüft). Anlass: Patricks Auftrag „ganzes Team analysiert die
 > Spieler-/Vereinsseiten" → Vier-Prüfer-Analyse (Vivien · Tobias · Ronja · Nele,
 > `docs/TEAM-ANALYSE-SPIELER-VEREINSSEITEN-2026-08-23.md`) → Freigabe aller vier Pakete durch
 > Patrick → Umsetzung → beide Gates durch (`docs/GATE-SPIELER-VEREINSSEITEN-2026-08-23.md`).
@@ -1804,8 +1809,9 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `248d5e3` (NICHT deployt — Spieler-/Vereinsseiten-Pakete A–D) →
-> `3bfd64f` (aktuell live; dazwischen nur Doku `90b7901`, `3093b51`, `78781f3`) → `2c23489` → `4fcc4c0` → `89579d4` (nur Doku) → `df92274` → `d72ba15` (nur Doku) → `f6cbbf2` (nur Doku) → `f2d2be3` (nur Doku) → `b23888c` (nur Doku) → `d1d9517` → `45de921` (nur Doku) → `4293c43` (nur Doku) → `a64ef92` (nur Doku) → `0ecd593` → `70fd2d1` → `1a57be5` (nur Doku) → `38f2d20` (nur Doku/Tests) → `d649127` → `6f02a9b` → `6c79ec4` (nur Tests) → `b62d511` → `57da148` (nur Tests) → `a320c9e` (nur Doku) → `e9a8ef3` → `108fbc7` (nur Doku) → `3181ad2` → `6348625` → `b88bbd3` (nur Doku) → `ea982c4` → `cdb8065` → `492e465` → `34dd22f` (Feldende,
+> **Rollback-Kette:** `248d5e3` (aktuell live seit 23.08.2026 — Spieler-/Vereinsseiten-
+> Pakete A–D; Server-Zeiger `d9e2605`, reiner Doku-Commit auf demselben Code) →
+> `3bfd64f` (Stand davor; dazwischen nur Doku `90b7901`, `3093b51`, `78781f3`) → `2c23489` → `4fcc4c0` → `89579d4` (nur Doku) → `df92274` → `d72ba15` (nur Doku) → `f6cbbf2` (nur Doku) → `f2d2be3` (nur Doku) → `b23888c` (nur Doku) → `d1d9517` → `45de921` (nur Doku) → `4293c43` (nur Doku) → `a64ef92` (nur Doku) → `0ecd593` → `70fd2d1` → `1a57be5` (nur Doku) → `38f2d20` (nur Doku/Tests) → `d649127` → `6f02a9b` → `6c79ec4` (nur Tests) → `b62d511` → `57da148` (nur Tests) → `a320c9e` (nur Doku) → `e9a8ef3` → `108fbc7` (nur Doku) → `3181ad2` → `6348625` → `b88bbd3` (nur Doku) → `ea982c4` → `cdb8065` → `492e465` → `34dd22f` (Feldende,
 > vor den Wächtern) → `0f2a933` (nur Doku) → `17bb00a` → `8e63cf6` (nur Doku) → `c4982bd` → `c5cbf6f` → `fb23317` → `0da80c7` (Dribbelweg,
 > vor den Gate-Befunden) → `70c36ba` (letzter Stand vor der Ball-Reise) → `76406fb` → `571931c` (Feld) → `b3487a8` →
 > `d4c847a` (Leiste, erster Schritt) → `070a1e7` (letzter Stand vor Feld und Leiste) → `04ba621` → `07150cf` (nur Werkzeug) → `d2cfa47` → `35b8bc0` → `d841c4b` → `bd99263` (Dunk, vor den

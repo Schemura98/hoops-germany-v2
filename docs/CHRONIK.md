@@ -5820,3 +5820,5 @@ design-audit-Blindstelle für gleichnamige lokale Variablen (→ Kai) · Ronjas 
 M1–M3 vertagt · Roadmap 31 präzisiert (nur Seiten-zu-Seiten-Wechsel) und 35 unverändert.
 **Dev-DB-Spuren der Gates:** Spiele 13.07. + 19.07. tragen `notifiedStatsPlayers` (je 8);
 unbenachrichtigt bleiben 25.07., 05.08., 17.08., 20.08.
+
+**Nachtrag 23.08.2026:** `248d5e3` ist nach Freigabe durch Patrick deployt (Server-Zeiger `d9e2605`, am Server verifiziert; 16+ Routen 200, neue Texte im ausgelieferten HTML, PM2 online, Fehlerlog leer, kein npm install nötig).
