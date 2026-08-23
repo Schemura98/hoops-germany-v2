@@ -8,7 +8,9 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageHeader from "@/components/layout/PageHeader";
 import CityRadiusFilter from "@/components/CityRadiusFilter";
-import { inputClassSm } from "@/lib/ui";
+import Reveal from "@/components/ui/Reveal";
+import Button from "@/components/ui/Button";
+import { inputClassSm, staffel } from "@/lib/ui";
 import EmptyState from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import {
@@ -99,7 +101,7 @@ export default function SpielerPage() {
       <PageHeader
         eyebrow="Community"
         title="Spieler entdecken"
-        subtitle="Finde Spieler, folge ihnen und bleib vernetzt."
+        subtitle="Spielerprofile mit echten Zahlen aus eingetragenen Liga-Spielen – finde Spieler aus deiner Region."
       />
 
       <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
@@ -113,7 +115,7 @@ export default function SpielerPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Name, Team oder Stadt suchen…"
-              className="w-full border border-navy-600 rounded-md pl-9 pr-4 py-3 text-sm text-paper-50 outline-none focus:border-brand-400 bg-navy-800"
+              className={`${inputClassSm} pl-9`}
             />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -173,24 +175,45 @@ export default function SpielerPage() {
         ) : error ? (
           <EmptyState title="Spieler konnten nicht geladen werden." />
         ) : filtered.length === 0 ? (
+          // Der Leerzustand darf bei AKTIVEM Filter nicht „Noch keine Spieler
+          // registriert" behaupten – es sind welche da, der Filter blendet sie
+          // aus (Befund Tobias M3: „Passau +100 km" zeigte den Satz über 20
+          // registrierten Spielern). Und er braucht einen Weg zurück.
           <EmptyState
             icon={PiBasketballBold}
             title="Keine Spieler gefunden"
             text={
-              query || position ? "Versuche einen anderen Filter." : "Noch keine Spieler registriert."
+              query || position || land || geo.center
+                ? "Keine Spieler für diese Suche oder Filter."
+                : "Noch keine Spieler registriert."
+            }
+            action={
+              (query || position || land || geo.center) && (
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setQuery("");
+                    setPosition("");
+                    setLand("");
+                    setGeo({ center: null, radiusKm: 50 });
+                  }}
+                >
+                  Filter zurücksetzen
+                </Button>
+              )
             }
           />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {filtered.map((p) => (
+            {filtered.map((p, i) => (
+              <Reveal key={p._id} delay={staffel(i)} className="h-full">
               <Link
-                key={p._id}
                 href={`/player/view-player/${p.slug || p._id}`}
                 // data-vt: weicher Seitenwechsel. Gleiche Kopplung wie bei der
                 // Team-Karte – PageTransition.js stoppt hier die Weitergabe des
                 // Klicks, ein eigener onClick würde nicht mehr feuern.
                 data-vt
-                className="bg-navy-800 rounded-md border border-navy-600 hover:border-brand-500 hover:bg-navy-700 transition-[background-color,border-color] duration-200 ease-out-strong group overflow-hidden"
+                className="block h-full bg-navy-800 rounded-md border border-navy-600 hover:border-brand-500 hover:bg-navy-700 transition-[background-color,border-color] duration-200 ease-out-strong group overflow-hidden"
               >
                 <div className="aspect-square flex items-center justify-center overflow-hidden">
                   {p.profileImage ? (
@@ -218,17 +241,17 @@ export default function SpielerPage() {
                       15.08.2026 – er hat zu Recht gemeldet, dass die Fläche in
                       Commit und Doku fälschlich als erledigt geführt war).
                       Diese Liste zeigt die Position als CHIP, nicht als
-                      Unterzeile: eine orange Fläche in `brand-500`. Ein
-                      Abzeichen mit „Keine Angabe" verbraucht den
-                      EINEN Akzent der Anzeigetafel-Sprache für eine
-                      Nicht-Information – dieselbe Begründung, mit der Vivien
-                      das Positions-Chip von der Kaderkarte entfernt hat.
-                      Und ein fehlendes Abzeichen ist nicht mehrdeutig: Die
-                      Karte zeigt schlicht keins. Mehrdeutig war der
-                      Gedankenstrich in einer Unterzeile, nicht das Weglassen
-                      einer Auszeichnung. */}
+                      Unterzeile. Ein Abzeichen mit „Keine Angabe" wäre eine
+                      Nicht-Information; ein fehlendes Abzeichen ist nicht
+                      mehrdeutig – die Karte zeigt schlicht keins.
+                      ⚠️ FARBE seit 23.08.2026 NEUTRAL statt brand (Entscheidung
+                      Patrick, Befund Vivien): Bei 20 Karten trat der EINE
+                      Akzent der Anzeigetafel 20-mal als Nicht-Auszeichnung auf
+                      – eine Position ist keine Auszeichnung. Die EXISTENZ des
+                      Chips bleibt bewusst entschieden (einzige Darstellung der
+                      Position in dieser Kachelansicht, doppelt nichts). */}
                   {p.position && (
-                    <span className="inline-block text-xs font-semibold text-brand-400 bg-brand-500/10 px-1.5 py-0.5 rounded-md mt-1">
+                    <span className="inline-block text-xs font-semibold text-mist-300 bg-navy-700 px-1.5 py-0.5 rounded-sm mt-1">
                       {positionLabel(p.position)}
                     </span>
                   )}
@@ -253,6 +276,7 @@ export default function SpielerPage() {
                   )}
                 </div>
               </Link>
+              </Reveal>
             ))}
           </div>
         )}

@@ -17,6 +17,8 @@ import Navbar from "@/components/layout/Navbar";
 import DemoBadge from "@/components/DemoBadge";
 import Footer from "@/components/layout/Footer";
 import Tabs from "@/components/ui/Tabs";
+import Button from "@/components/ui/Button";
+import CountUp from "@/components/ui/CountUp";
 import { Skeleton, SkeletonList } from "@/components/ui/Skeleton";
 import FollowButton from "@/components/FollowButton";
 import PostCard from "@/components/posts/PostCard";
@@ -52,17 +54,17 @@ function TeamDetailSkeleton() {
       <Navbar />
       <div className="bg-navy-900">
         <div className="max-w-3xl mx-auto px-4 py-10 flex flex-col sm:flex-row items-center sm:items-end gap-5">
-          <div className="h-24 w-24 rounded-md bg-navy-800/10 animate-pulse motion-reduce:animate-none flex-shrink-0" />
+          <div className="h-24 w-24 rounded-md bg-navy-800 animate-pulse motion-reduce:animate-none flex-shrink-0" />
           <div className="min-w-0 flex-1 w-full text-center sm:text-left">
-            <div className="h-8 w-48 mx-auto sm:mx-0 rounded bg-navy-800/10 animate-pulse motion-reduce:animate-none mb-3" />
-            <div className="h-4 w-56 mx-auto sm:mx-0 rounded bg-navy-800/10 animate-pulse motion-reduce:animate-none" />
+            <div className="h-8 w-48 mx-auto sm:mx-0 rounded bg-navy-800 animate-pulse motion-reduce:animate-none mb-3" />
+            <div className="h-4 w-56 mx-auto sm:mx-0 rounded bg-navy-800 animate-pulse motion-reduce:animate-none" />
           </div>
         </div>
       </div>
       <main id="hauptinhalt" tabIndex={-1} className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
         <div className="flex gap-2 mb-5">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-9 w-24 rounded-full" />
+            <Skeleton key={i} className="h-9 w-24 rounded-sm" />
           ))}
         </div>
         <SkeletonList rows={6} />
@@ -195,7 +197,22 @@ export default function TeamTeamDetailSlugPage({ params }) {
                 </span>
               )}
               <span>{followerCount} Follower</span>
-              <span>{members.length} Spieler</span>
+              {/* Die Kopfzahl muss zur Liste darunter passen: Der Kader-Tab
+                  zeigt Konten UND offene Plätze. „5 Spieler" über 9 Namen war
+                  ein Widerspruch, den jeder Gegner-Admin nachzählen konnte
+                  (Befund Nele, 23.08.2026). Die ehrliche Trennung macht die
+                  Bestätigungs-Logik nebenbei sichtbar. */}
+              {(() => {
+                const offen = (team.rosterSlots || []).filter((s) => !s.claimedBy).length;
+                const gesamt = members.length + offen;
+                return (
+                  <span>
+                    {offen > 0
+                      ? `${gesamt} im Kader, davon ${offen} noch nicht bestätigt`
+                      : `${gesamt} Spieler`}
+                  </span>
+                );
+              })()}
             </div>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3 sm:ml-auto">
@@ -209,12 +226,13 @@ export default function TeamTeamDetailSlugPage({ params }) {
                 {joining ? "Senden…" : "Team beitreten"}
               </button>
             ) : (
-              <Link
-                href="/login"
-                className="bg-navy-800/10 hover:bg-navy-700/20 text-paper-50 rounded-sm px-5 py-2.5 text-sm font-medium transition-colors"
-              >
+              // Button-Primitiv (secondary) statt handgebautem Link: Die alte
+              // Fläche navy-800/10 auf navy-900 stand bei 1,01:1 – neben dem
+              // orangen „Folgen" war die Beitritts-Handlung nackter Text
+              // (Befund Vivien, 23.08.2026, am Screenshot bestätigt).
+              <Button href="/login" variant="secondary">
                 Zum Beitreten anmelden
-              </Link>
+              </Button>
             )}
           </div>
         </div>
@@ -233,11 +251,17 @@ export default function TeamTeamDetailSlugPage({ params }) {
           </div>
         )}
 
-        {/* Liga + Platzierung */}
+        {/* Liga + Platzierung – die EINE hervorgehobene Karte dieser Seite.
+            „2. von 4" ist die Zahl, für die ein Verein die Seite besucht; bis
+            zum 23.08.2026 war sie das leiseste Element (Befund Vivien). Die
+            2px-Brand-Oberkante ist Signaturstelle 2 der Anzeigetafel-Spez
+            („eigenes Team in der Tabelle"), die Platzierung zählt bei Ankunft
+            hoch – dasselbe Muster wie die Nächstes-Spiel-Karte des Profils.
+            Bewegung heißt hier Ankunft, nie Reise (Registerregel). */}
         {league && (
           <Link
             href={`/ligen/${league._id}`}
-            className="mb-6 block bg-navy-800 rounded-md border border-navy-600 p-5 hover:border-brand-500/50 transition-all"
+            className="mb-6 block bg-navy-800 rounded-md border border-navy-600 border-t-2 border-t-brand-500 p-5 hover:bg-navy-700 transition-[background-color,border-color]"
           >
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
@@ -253,22 +277,22 @@ export default function TeamTeamDetailSlugPage({ params }) {
                 </span>
               ) : league.rank ? (
                 <div className="shrink-0 text-right">
-                  <p className="text-xl font-black text-paper-50 leading-none">
-                    {league.rank}.
+                  <p className="font-display text-3xl font-black tabular-nums text-paper-50 leading-none">
+                    <CountUp value={league.rank} />.
                   </p>
                   <p className="text-[11px] text-mist-400">von {league.totalTeams}</p>
                 </div>
               ) : null}
             </div>
             {league.record && league.record.games > 0 && (
-              <p className="mt-2 text-xs text-mist-400">
+              <p className="mt-2 text-xs text-mist-400 font-mono tabular-nums">
                 {league.record.wins}S · {league.record.losses}N
                 <span className="text-mist-400">
                   {" "}
                   · Korbdiff {league.record.diff > 0 ? `+${league.record.diff}` : league.record.diff}
                 </span>
                 {league.finished && (
-                  <span className="ml-2 text-signal-wait font-medium">Saison abgeschlossen</span>
+                  <span className="ml-2 font-sans text-signal-wait font-medium">Saison abgeschlossen</span>
                 )}
               </p>
             )}
@@ -436,9 +460,16 @@ export default function TeamTeamDetailSlugPage({ params }) {
                     const won = score && own > opp;
                     const isPlayoff = m.stage === "Playoffs";
                     return (
-                      <div
+                      // Jede Spielzeile führt zum Spielbericht. Vorher war sie
+                      // ein totes <div>: Wer hier „78:65" sah, kam nicht zum
+                      // Box-Score mit seinen eigenen Zahlen und nicht zum
+                      // Beleg-Abzeichen – der Weg riss beim nackten Score ab
+                      // (Befund Ronja, 23.08.2026; das Spielerprofil verlinkt
+                      // seine Einzelspiele längst).
+                      <Link
                         key={m._id}
-                        className="bg-navy-800 rounded-md border border-navy-600 p-4 flex items-center justify-between gap-4"
+                        href={`/match/${m._id}`}
+                        className="bg-navy-800 rounded-md border border-navy-600 p-4 flex items-center justify-between gap-4 hover:bg-navy-700 transition-colors"
                       >
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-paper-50 truncate">
@@ -458,7 +489,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
                         </div>
                         {score ? (
                           <span
-                            className={`text-lg font-bold flex-shrink-0 ${
+                            className={`font-mono tabular-nums text-lg font-bold flex-shrink-0 ${
                               won ? "text-signal-ok" : "text-paper-50"
                             }`}
                           >
@@ -469,7 +500,7 @@ export default function TeamTeamDetailSlugPage({ params }) {
                             Anstehend
                           </span>
                         )}
-                      </div>
+                      </Link>
                     );
                   })
                 )}
@@ -512,20 +543,20 @@ export default function TeamTeamDetailSlugPage({ params }) {
                               h.leagueName || "—"
                             )}
                           </td>
-                          <td className="py-3 text-center text-mist-300">
+                          <td className="py-3 text-center font-mono tabular-nums text-mist-300">
                             {h.champion ? (
-                              <span className="inline-flex items-center gap-1 text-signal-wait font-semibold">
+                              <span className="inline-flex items-center gap-1 font-sans text-signal-wait font-semibold">
                                 <PiCrownBold className="text-xs" /> Meister
                               </span>
                             ) : (
                               h.placement ?? "—"
                             )}
                           </td>
-                          <td className="py-3 text-center text-mist-400">
+                          <td className="py-3 text-center font-mono tabular-nums text-mist-400">
                             {h.wins}–{h.losses}
                           </td>
                           <td
-                            className={`py-3 text-center font-medium ${
+                            className={`py-3 text-center font-mono tabular-nums font-medium ${
                               h.diff > 0 ? "text-signal-ok" : h.diff < 0 ? "text-signal-error" : "text-mist-400"
                             }`}
                           >

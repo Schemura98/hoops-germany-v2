@@ -401,12 +401,49 @@ export default function SpielplanTab({ team }) {
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
                   {match.status === "completed" &&
-                    match.winningTeamPoints != null && (
-                      <span className="text-sm font-semibold text-mist-300">
-                        {match.winningTeamPoints}:{match.losingTeamPoints}
-                      </span>
-                    )}
-                  <span className={`text-xs font-medium rounded-full px-3 py-1 ${badge.cls}`}>
+                    match.winningTeamPoints != null &&
+                    (() => {
+                      // Reihenfolge IMMER „dein Team : Gegner" – wie im
+                      // Ergebnisse-Tab und auf der öffentlichen Teamseite.
+                      // Bis zum 23.08.2026 stand hier „Sieger : Verlierer":
+                      // In einer Zeile, die „vs. Gegner" heißt, liest jeder
+                      // die erste Zahl als die eigene – drei verlorene Spiele
+                      // lasen sich als Siege (Befund Tobias). Bei Siegen fiel
+                      // es nie auf, weil dort beide Lesarten zusammenfallen.
+                      const gewonnen =
+                        String(match.winningTeam?._id || match.winningTeam) ===
+                        String(teamId);
+                      const eigene = gewonnen
+                        ? match.winningTeamPoints
+                        : match.losingTeamPoints;
+                      const gegner = gewonnen
+                        ? match.losingTeamPoints
+                        : match.winningTeamPoints;
+                      // Kürzel nur bei GESETZTEM Sieger: app/api/admin/updatematch
+                      // kennt ein Unentschieden (winningTeamPoints gesetzt,
+                      // winningTeam leer) – dort wäre „N" für beide Teams eine
+                      // Falschaussage; der Score selbst ist symmetrisch und
+                      // bleibt richtig (Randfall-Befund Kai, 23.08.2026).
+                      const siegerBekannt = Boolean(match.winningTeam);
+                      return (
+                        <span className="flex items-center gap-1.5 text-sm">
+                          {siegerBekannt && (
+                            <span
+                              className={`text-[11px] font-semibold ${
+                                gewonnen ? "text-signal-ok" : "text-mist-400"
+                              }`}
+                              title={gewonnen ? "Gewonnen" : "Verloren"}
+                            >
+                              {gewonnen ? "S" : "N"}
+                            </span>
+                          )}
+                          <span className="font-mono tabular-nums font-semibold text-mist-300">
+                            {eigene}:{gegner}
+                          </span>
+                        </span>
+                      );
+                    })()}
+                  <span className={`text-xs font-medium rounded-sm px-2.5 py-1 ${badge.cls}`}>
                     {badge.label}
                   </span>
                   {match.status === "scheduled" && (

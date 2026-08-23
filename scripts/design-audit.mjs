@@ -32,13 +32,17 @@ const TOKEN_FILE = path.join(REPO, "lib", "ui.js");
 // Der Hero-Umbau selbst hat die Zahl der handgebauten Panels GESENKT
 // (143→141 strikt, 184→182 weit), weil er zwei Komponenten gelöscht hat.
 const BASELINE = {
-  datum: "22.08.2026",
+  datum: "23.08.2026",
   importe: {
     // ConfirmAction 3 -> 4 am 22.08.2026: Der Loeschweg fuer eigene Beitraege
     // und Kommentare (Roadmap 37) benutzt das Primitiv, statt eine eigene
     // Rueckfrage zu bauen. `window.confirm` ist im Projekt verboten.
-    Button: 25, Card: 2, ConfirmAction: 4, CountUp: 5, EmptyState: 15,
-    FormAlert: 9, LinkTabs: 1, Loading: 19, Reveal: 11, ScrollTable: 3,
+    // Button 25 -> 27, CountUp 5 -> 6, Reveal 11 -> 13 am 23.08.2026:
+    // Spieler-/Vereinsseiten-Runde (Pakete A–D) – Beitritts-Link der
+    // Teamseite auf Button, Liga-Karte mit CountUp, Listenkarten auf
+    // /spieler und /teams mit Reveal-Einblendung.
+    Button: 27, Card: 2, ConfirmAction: 4, CountUp: 6, EmptyState: 15,
+    FormAlert: 9, LinkTabs: 1, Loading: 19, Reveal: 13, ScrollTable: 3,
     Skeleton: 13, SplitFlap: 3, Tabs: 6,
   },
   tokens: { cardClass: 0 },
@@ -46,8 +50,13 @@ const BASELINE = {
   // Der aufgeklappte Beitrags-Composer baute dieselbe Klassenkette von Hand,
   // die die eingeklappte Fassung zwei Zeilen darueber ueber `Card` bezieht.
   // Eine Flaeche, zwei Wege, in einer Datei – jetzt einer.
-  panelsStrikt: 140,
-  panelsWeit: 181,
+  // ⚠️ 140 -> 139 / 181 -> 177 am 23.08.2026, wieder nach unten: Die zwei
+  // handgebauten Suchfelder der Listenseiten nutzen jetzt inputClassSm, der
+  // Einlade-Kasten im KaderTab traegt statt des vollen Orange-Rahmens die
+  // sanktionierte navy-600 + border-t-brand-Form (zaehlt jetzt strikt statt
+  // weit), und der Beitritts-Link der Teamseite kommt vom Button-Primitiv.
+  panelsStrikt: 139,
+  panelsWeit: 177,
 };
 
 const ARGS = new Set(process.argv.slice(2));

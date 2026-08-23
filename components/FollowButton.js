@@ -31,9 +31,19 @@ export default function FollowButton({ type, targetId, onCountChange }) {
           token,
           [keyField]: targetId,
         });
-        if (active) setFollowing(data.following);
+        if (active) {
+          setFollowing(data.following);
+          // Ein Token kann ABGELAUFEN sein: Dann hielt sich der Knopf für
+          // angemeldet, und der Klick lief in eine stumme 401-Abweisung –
+          // die Oberfläche reagierte gar nicht (Befund Tobias H2, 23.08.2026).
+          // checkfollowing wirft dafür KEIN 401, sondern antwortet 200 mit
+          // authenticated:false (Auflage Kai: die erste Fassung dieses Fixes
+          // wartete auf ein 401, das hier nie kommt). Bei ungültiger Sitzung
+          // wird der Knopf sofort wieder zum Login-Link.
+          if (data.authenticated === false) setLoggedIn(false);
+        }
       } catch {
-        /* ignorieren */
+        /* Netzfehler: Zustand unverändert lassen – der Klick-Pfad fängt 401 ab. */
       } finally {
         if (active) setReady(true);
       }
@@ -52,8 +62,18 @@ export default function FollowButton({ type, targetId, onCountChange }) {
       const { data } = await axios.post(`/api/player/${endpoint}`, payload);
       setFollowing(data.following);
       onCountChange?.(data.followersCount);
-    } catch {
-      /* ignorieren */
+    } catch (err) {
+      // Sitzung abgelaufen: nicht stumm schlucken, sondern zum Login führen –
+      // ein Knopf, der auf den Klick sichtbar NICHT reagiert, ist ein toter
+      // Knopf (Befund Tobias H2). Andere Fehler bleiben bewusst still.
+      // Mit ?next= zurück auf die Seite, von der der Klick kam – geprüft wird
+      // das Ziel serverseitig ohnehin über lib/sichererPfad.js.
+      if (err?.response?.status === 401) {
+        window.location.assign(
+          `/login?next=${encodeURIComponent(window.location.pathname)}`
+        );
+        return;
+      }
     } finally {
       setBusy(false);
     }

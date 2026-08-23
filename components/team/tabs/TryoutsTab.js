@@ -230,7 +230,7 @@ export default function TryoutsTab() {
         <EmptyState
           icon={PiMegaphoneBold}
           title="Noch keine Tryouts ausgeschrieben"
-          text="Lege das erste an – es erscheint dann öffentlich unter /tryouts, damit Spieler sich bewerben können."
+          text="Lege das erste an – es erscheint dann öffentlich auf der Tryouts-Seite, wo Spieler sich direkt bewerben können."
           action={
             !showAdd && (
               <Button onClick={() => setShowAdd(true)}>
@@ -274,7 +274,7 @@ export default function TryoutsTab() {
 
                   <div className="flex flex-col items-end gap-2 flex-shrink-0">
                     <span
-                      className={`text-xs font-medium rounded-full px-3 py-1 ${
+                      className={`text-xs font-medium rounded-sm px-2.5 py-1 ${
                         t.status === "active"
                           ? "bg-signal-ok/15 text-signal-ok"
                           : "bg-navy-700 text-mist-400"

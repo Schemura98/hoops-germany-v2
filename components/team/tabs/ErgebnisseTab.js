@@ -15,10 +15,19 @@ import EmptyState from "@/components/ui/EmptyState";
 import TabAlert from "@/components/team/tabs/TabAlert";
 import { inputClassNum, inputClassStat } from "@/lib/ui";
 import { positionLabel } from "@/lib/constants";
+import { beidseitigBelegt } from "@/lib/matchScore";
 
 // Breiten lokal, Feld-Tokens zentral (lib/ui.js) – s. Kommentar dort.
 const numInput = `w-20 ${inputClassNum}`;
 const statInput = `w-14 ${inputClassStat}`;
+
+// Statistik-Formular vergleichbar machen: Zahlen als Zeichenketten, damit die
+// getippte "27" und die gespeicherte 27 als DIESELBE Angabe gelten.
+function statsKanon(f) {
+  return JSON.stringify(f, (schluessel, wert) =>
+    typeof wert === "number" ? String(wert) : wert
+  );
+}
 
 function formatDate(d) {
   try {
@@ -218,8 +227,21 @@ export default function ErgebnisseTab({ team }) {
     setMsg(null);
     try {
       const token = getTeamAuthToken();
-      await axios.post("/api/team/match-stats/save", { token, matchId, stats });
-      setMsg({ type: "ok", text: "Statistiken gespeichert." });
+      const { data } = await axios.post("/api/team/match-stats/save", { token, matchId, stats });
+      // Der Ertrag der Eingabe wird sichtbar: Wie viele Spieler haben durch
+      // genau dieses Speichern ihre „Deine Zahlen stehen"-Nachricht bekommen?
+      // Nur die ECHTE Zahl der Erst-Benachrichtigungen (vom Server gemeldet);
+      // bei 0 – etwa einer Korrektur – bleibt die schlichte Meldung.
+      const n = data?.benachrichtigt || 0;
+      setMsg({
+        type: "ok",
+        text:
+          n > 0
+            ? `Statistiken gespeichert – ${n} ${
+                n === 1 ? "Spieler wurde" : "Spieler wurden"
+              } über die eigenen Zahlen benachrichtigt.`
+            : "Statistiken gespeichert.",
+      });
       await loadMatches();
     } catch (err) {
       setMsg({ type: "err", text: err.response?.data?.message || "Speichern fehlgeschlagen." });
@@ -242,7 +264,7 @@ export default function ErgebnisseTab({ team }) {
       <h2 className="text-lg font-semibold text-paper-50">Ergebnisse</h2>
       <p className="text-sm text-mist-400 -mt-2">
         Beide Teams melden ihr Ergebnis. Stimmen die Angaben überein, wird das Spiel
-        bestätigt. Spieler-Statistiken könnt ihr jederzeit erfassen.
+        bestätigt. Spieler-Statistiken kannst du jederzeit erfassen.
       </p>
 
       <TabAlert msg={msg} />
@@ -251,7 +273,7 @@ export default function ErgebnisseTab({ team }) {
         <EmptyState
           icon={PiBasketballBold}
           title="Noch keine Spiele vorhanden"
-          text="Trage zuerst Spiele im Spielplan ein – danach könnt ihr hier Ergebnisse und Statistiken melden."
+          text="Trage zuerst Spiele im Spielplan ein – danach kannst du hier Ergebnisse und Statistiken melden."
         />
       ) : (
         <div className="space-y-3">
@@ -282,8 +304,17 @@ export default function ErgebnisseTab({ team }) {
                     <p className="text-xs text-mist-400">{formatDate(match.date)}</p>
                   </div>
                   {confirmed && (
+                    // „Bestätigt" NUR bei echter beidseitiger Meldung: Der
+                    // Einleitungssatz oben definiert das Wort als „beide Teams
+                    // haben übereinstimmend gemeldet". resultStatus:"confirmed"
+                    // setzt aber auch die Admin-Korrektur, bei der EINE Person
+                    // beide Punktzahlen tippt (Muster-Fall 3, 13.08.2026).
+                    // Ein so festgeschriebenes Ergebnis heißt „Ergebnis steht" –
+                    // wahr, ohne eine Übereinstimmung zu behaupten, die es
+                    // nicht gab (Befund Nele P6, Entscheidung Patrick: Weg b;
+                    // dieselbe Quelle wie im Newsfeed: lib/matchScore.js).
                     <span className="inline-flex items-center gap-1.5 text-signal-ok text-sm font-semibold">
-                      <PiCheckCircleBold /> Bestätigt
+                      <PiCheckCircleBold /> {beidseitigBelegt(match) ? "Bestätigt" : "Ergebnis steht"}
                     </span>
                   )}
                   {mismatch && (
@@ -303,7 +334,7 @@ export default function ErgebnisseTab({ team }) {
                 {/* Score */}
                 {confirmed ? (
                   <div className="mt-3 rounded-sm bg-signal-ok/10 border border-signal-ok/50 px-4 py-3 text-center">
-                    <span className="text-2xl font-bold text-paper-50">
+                    <span className="font-mono tabular-nums text-2xl font-bold text-paper-50">
                       {own.ownPoints} : {own.opponentPoints}
                     </span>
                     <p className="text-xs text-mist-400 mt-1">Endstand (dein Team : Gegner)</p>
@@ -312,7 +343,7 @@ export default function ErgebnisseTab({ team }) {
                   <>
                     {mismatch && (
                       <div className="mt-3 rounded-sm bg-signal-error/10 border border-signal-error/50 px-4 py-2 text-xs text-signal-error">
-                        Eure Meldung: <strong>{own?.ownPoints}:{own?.opponentPoints}</strong>
+                        Deine Meldung: <strong>{own?.ownPoints}:{own?.opponentPoints}</strong>
                         {otherSubmitted && (
                           <>
                             {" · "}Gegner meldet:{" "}
@@ -321,7 +352,7 @@ export default function ErgebnisseTab({ team }) {
                             </strong>
                           </>
                         )}
-                        . Bitte abstimmen und korrigiert erneut einreichen.
+                        . Klärt das Ergebnis miteinander und reicht es danach neu ein.
                       </div>
                     )}
                     {!mismatch && ownSubmitted && !otherSubmitted && (
@@ -331,7 +362,7 @@ export default function ErgebnisseTab({ team }) {
                     )}
                     {!mismatch && !ownSubmitted && otherSubmitted && (
                       <div className="mt-3 rounded-sm bg-navy-700 border border-navy-600 px-4 py-2 text-xs text-mist-300">
-                        Der Gegner hat bereits gemeldet. Trage jetzt euer Ergebnis ein.
+                        Der Gegner hat bereits gemeldet. Trag jetzt das Ergebnis eures Spiels ein.
                       </div>
                     )}
 
@@ -402,7 +433,7 @@ export default function ErgebnisseTab({ team }) {
                     <div className="mt-3">
                       {rosterList.length === 0 ? (
                         <p className="text-sm text-mist-400">
-                          Kein Kader erfasst. Lege Slots im Kader-Tab an oder nimm Spieler auf.
+                          Kein Kader erfasst. Leg im Kader-Tab Spieler an oder lade welche ein.
                         </p>
                       ) : (
                         <>
@@ -492,7 +523,27 @@ export default function ErgebnisseTab({ team }) {
                             </table>
                           </div>
                           <div className="mt-3 flex justify-end">
+                            {/* Primär (orange) NUR bei ungespeicherten Änderungen:
+                                Vorher stapelten sich sechs identische orange
+                                Knöpfe untereinander – einer je Spiel-Karte.
+                                Primär ist per Spezifikation DIE Handlung;
+                                sechsmal primär ist keinmal primär (Befund
+                                Vivien, 23.08.2026). Der Vergleich läuft gegen
+                                den aus den gespeicherten playerStats gebauten
+                                Ausgangszustand – beide Objekte entstehen aus
+                                derselben rosterList-Schleife, die
+                                Schlüsselreihenfolge ist deshalb stabil.
+                                ⚠️ Typ normalisieren (Kai/Tobias, 23.08.2026):
+                                Eingaben liegen als Zeichenketten vor ("27"),
+                                gespeicherte Werte als Zahlen (27) – ohne die
+                                Angleichung blieb der Knopf nach Ändern und
+                                Zurücktippen fälschlich primär. */}
                             <Button
+                              variant={
+                                statsKanon(sForm) !== statsKanon(buildStatsForm(match))
+                                  ? "primary"
+                                  : "secondary"
+                              }
                               onClick={() => saveStats(match._id)}
                               disabled={savingStatsId === match._id}
                               className="px-5"

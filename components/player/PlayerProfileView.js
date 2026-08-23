@@ -137,7 +137,10 @@ function NextMatchCard({ match, teamId }) {
             square
           />
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-mist-600">
+            {/* mist-400 statt mist-600: Auf der navy-800-Panelfläche stand
+                mist-600 bei 3,98:1 – unter der AA-Grenze von 4,5 für 11px.
+                Der Token war für den dunkleren 950er-Grund gerechnet. */}
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-mist-400">
               {heim ? "Heimspiel gegen" : "Auswärts bei"}
             </p>
             <p className="truncate font-display text-xl font-bold uppercase tracking-tight text-paper-50">
@@ -215,6 +218,11 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
   const [loadingGames, setLoadingGames] = useState(false);
 
   const fullName = `${player?.firstName || ""} ${player?.lastName || ""}`.trim();
+  // Sieht hier jemand das EIGENE Profil? Entscheidet über „deine Werte" vs.
+  // „Werte von {Vorname}" – dieselbe Komponente rendert beide Fälle, und bis
+  // zum 23.08.2026 stand auf jedem fremden Profil „deine Werte" über fremden
+  // Zahlen (Befund Nele, live belegt; Muster „Zahlen, die lügen").
+  const eigenesProfil = Boolean(viewerId && String(viewerId) === String(player?._id));
   const rawTeam = player?.team || player?.teamId;
   const team = rawTeam && typeof rawTeam === "object" ? rawTeam : null;
   const ig = player?.instagram ? player.instagram.replace(/^@/, "") : null;
@@ -466,7 +474,9 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
 
         {/* Tabs */}
         <div className="bg-navy-800 border-b border-navy-600">
-          <div className="max-w-4xl mx-auto px-4 py-3 overflow-x-auto">
+          {/* Der frühere overflow-x-auto-Wrapper ist entfallen – seit dem
+              23.08.2026 bringt das Tabs-Primitiv seinen Scroll-Rahmen selbst mit. */}
+          <div className="max-w-4xl mx-auto px-4 py-3">
             <Tabs
               value={tab}
               onChange={setTab}
@@ -544,10 +554,15 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                       dessen Ergebnis nach einem Streitfall ein Admin eintraegt,
                       hat trotzdem stattgefunden – dem Spieler dafuer Statistik
                       wegzunehmen waere die schlechtere Loesung. */}
+                  {/* Der Satz führt mit der STÄRKE (keine Selbstauskunft) statt
+                      als Kleingedrucktes zu klingen – der zweite Satz bleibt
+                      wörtlich die abgesicherte Aussage: careerstats prüft NICHT
+                      auf beidseitiges submittedBy, der Beleg-Status steht am
+                      jeweiligen Spiel (s. Kommentar oben). */}
                   <p className="mb-4 text-xs text-mist-400">
-                    Zählt, sobald das Spiel als beendet eingetragen ist. Ob beide
-                    Teams das Ergebnis unabhängig gemeldet haben, steht am
-                    jeweiligen Spiel.
+                    Diese Zahlen stammen aus eingetragenen Spielen – keine
+                    Selbstauskunft. Ob beide Teams das Ergebnis unabhängig
+                    bestätigt haben, siehst du am jeweiligen Spiel.
                   </p>
                   <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {[
@@ -560,7 +575,8 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                         <p className="font-mono text-2xl font-bold tabular-nums text-paper-50">
                           <CountUp value={x.v} />
                         </p>
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-mist-600">
+                        {/* mist-400 statt mist-600 – Kontrast auf Panel, s. Nächstes-Spiel-Karte. */}
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-mist-400">
                           {x.l}
                         </p>
                       </div>
@@ -581,6 +597,23 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                       </div>
                     ))}
                   </div>
+                  {/* Der Weg von der eigenen Bilanz zum eigenen Rang: /topscorer
+                      steht standardmäßig auf „meine Liga" und markiert die
+                      eigene Zeile – es fehlte nur der Weg dorthin (Befund
+                      Ronja, 23.08.2026). Nur auf dem EIGENEN Profil: „Wo
+                      stehst du?" wäre auf einem fremden Profil die falsche
+                      Anrede an den falschen Leser. */}
+                  {eigenesProfil && (
+                    <p className="mt-4 text-xs text-mist-400">
+                      Wo stehst du im Vergleich?{" "}
+                      <Link
+                        href="/topscorer"
+                        className="underline decoration-navy-500 underline-offset-2 hover:text-brand-400 hover:decoration-brand-500"
+                      >
+                        Zur Topscorer-Liste deiner Liga
+                      </Link>
+                    </p>
+                  )}
                 </>
               )}
             </SectionCard>
@@ -695,7 +728,13 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                                   ) : (
                                     <>
                                       <p className="px-2 pt-1 pb-1.5 text-[11px] text-mist-400">
-                                        Endstand · deine Werte als{" "}
+                                        Endstand ·{" "}
+                                        {eigenesProfil
+                                          ? "deine Werte"
+                                          : player?.firstName
+                                          ? `Werte von ${player.firstName}`
+                                          : "Werte des Profils"}{" "}
+                                        als{" "}
                                         <span className="font-medium text-mist-400">PKT·AST·REB</span>
                                       </p>
                                       <div className="space-y-0.5">

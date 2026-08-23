@@ -39,10 +39,16 @@ export default function PlayerViewPlayerSlugPage({ params }) {
   }, [slug]);
 
   if (state === "loading") {
+    // Ladezustand MIT stehender Navigationsleiste: Vorher ersetzte der Spinner
+    // die ganze Seite inklusive Chrome – beim Wechsel „blinkte" die Leiste
+    // (Befund Vivien B6, 23.08.2026; Muster der Team-Detailseite).
     return (
-      <main id="hauptinhalt" tabIndex={-1} className="min-h-screen flex items-center justify-center">
-        <Loading />
-      </main>
+      <div className="min-h-screen bg-navy-950 flex flex-col">
+        <Navbar />
+        <main id="hauptinhalt" tabIndex={-1} className="flex-1 flex items-center justify-center">
+          <Loading />
+        </main>
+      </div>
     );
   }
 

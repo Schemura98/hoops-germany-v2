@@ -233,7 +233,13 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
       const token = getTeamAuthToken();
       await axios.post("/api/team/invite-player", { token, playerId: p.playerId });
       setInvitedIds((ids) => [...ids, p.playerId]);
-      flash("ok", `Einladung an ${p.name} gesendet – sie wird per Glocke & Mail gefragt.`);
+      // Kein „sie wird gefragt": Das Pronomen bezog sich grammatisch auf die
+      // EINLADUNG (und war bei männlichen Eingeladenen zusätzlich die falsche
+      // Person). Der Name zweimal ist eindeutig (Befund Nele P4, 23.08.2026).
+      flash(
+        "ok",
+        `Einladung an ${p.name} gesendet – ${p.name} bekommt eine Benachrichtigung per Glocke und E-Mail und entscheidet selbst.`
+      );
     } catch (err) {
       flash("err", err.response?.data?.message || "Einladung fehlgeschlagen.");
     } finally {
@@ -272,7 +278,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
       flash("ok", "Platz angelegt – schick den persönlichen Link unten an den Spieler.");
       reload?.();
     } catch (err) {
-      flash("err", err.response?.data?.message || "Slot konnte nicht angelegt werden.");
+      flash("err", err.response?.data?.message || "Platz konnte nicht angelegt werden.");
     } finally {
       setAdding(false);
     }
@@ -286,7 +292,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
       await axios.post("/api/team/roster/remove-slot", { token, slotId });
       reload?.();
     } catch (err) {
-      flash("err", err.response?.data?.message || "Slot konnte nicht entfernt werden.");
+      flash("err", err.response?.data?.message || "Platz konnte nicht entfernt werden.");
     } finally {
       setBusyId(null);
     }
@@ -362,8 +368,13 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
       <TabAlert msg={msg} />
 
       {/* 1) Bestehenden Account direkt einladen – der häufigste Fall, deshalb
-          optisch führend (Welle 2b: vorher drei gleichwertige Blöcke ohne Führung). */}
-      <div className="bg-navy-800 rounded-md border-2 border-brand-500/50 p-5">
+          optisch führend (Welle 2b: vorher drei gleichwertige Blöcke ohne Führung).
+          Hervorhebung über die 2px-Brand-OBERKANTE (die sanktionierte Form der
+          Anzeigetafel) statt eines vollen Orange-Rahmens: Direkt darüber trägt
+          die Aufgaben-Leiste dieselbe Kante – zwei volle Orange-Rahmen
+          übereinander betonten einander weg (Befund Vivien, 23.08.2026;
+          dieselbe Regel wie beim zweiten orangen Ring am 20.08.). */}
+      <div className="bg-navy-800 rounded-md border border-navy-600 border-t-2 border-t-brand-500 p-5">
         <div className="flex flex-wrap items-center gap-2 mb-1">
           <PiUserPlusBold className="text-brand-400" />
           <h3 className="text-base font-semibold text-paper-50">Bestehenden Spieler einladen</h3>
@@ -371,9 +382,13 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
             Schnellster Weg
           </span>
         </div>
+        {/* Anrede über die zweite Person statt „Er…ihn…er": Der Katalog führt
+            16 Damen-Ligen – eine Damen-Team-Admin las hier konsequent die
+            falsche Anrede (Befund Nele K3). */}
         <p className="text-xs text-mist-400 mb-3">
-          Er ist <strong>schon bei Hoops Germany registriert?</strong> Such ihn und lade ihn ein – er wird
-          per Glocke &amp; E-Mail gefragt und ist nach seiner Zustimmung im Kader (mit Karriere-Eintrag).
+          <strong>Schon bei Hoops Germany registriert?</strong> Such nach dem Namen und lade direkt
+          ein – die Einladung kommt per Glocke &amp; E-Mail an, und nach der Zustimmung steht der
+          Neuzugang im Kader (mit Karriere-Eintrag).
         </p>
         <div className="relative">
           <PiMagnifyingGlassBold className="absolute left-3 top-1/2 -translate-y-1/2 text-navy-500 text-xs" />
@@ -488,9 +503,9 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
           <h3 className="text-sm font-semibold text-paper-50">Neuen Spieler anlegen</h3>
         </div>
         <p className="text-xs text-mist-400 mb-3">
-          Er hat <strong>noch keinen Account?</strong> Leg ihm hier einen Platz an – du erhältst seinen
-          <strong> persönlichen Einladungslink</strong>, den du ihm per Kopieren, WhatsApp oder E-Mail schickst.
-          Er registriert sich darüber und ist sofort im Kader. (Erscheint unten unter „Eingeladene &amp; offene Plätze“.)
+          <strong>Noch kein Account?</strong> Leg hier einen Platz an – du bekommst einen
+          <strong> persönlichen Einladungslink</strong> zum Kopieren, für WhatsApp oder E-Mail.
+          Wer sich darüber registriert, steht sofort im Kader. (Erscheint unten unter „Eingeladene &amp; offene Plätze“.)
         </p>
         <form
           onSubmit={addSlot}
@@ -818,7 +833,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                     </span>
                     <div className="min-w-0">
                       <p className="font-medium text-paper-50 truncate">
-                        {slot.name || "Unbenannter Slot"}
+                        {slot.name || "Unbenannter Platz"}
                       </p>
                       <p className="text-xs text-mist-400">
                         {positionLabel(slot.position) || POSITION_FEHLT}
@@ -827,7 +842,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className={`text-xs font-medium rounded-full px-3 py-1 ${badge.cls}`}>
+                    <span className={`text-xs font-medium rounded-sm px-2.5 py-1 ${badge.cls}`}>
                       {badge.label}
                     </span>
                     {slot.status === "pending" && (
@@ -846,7 +861,7 @@ export default function KaderTab({ team, reload, isMainAdmin = true }) {
                           onClick={onClick}
                           disabled={isBusy}
                           className="text-mist-400 hover:text-signal-error disabled:opacity-60 p-1.5"
-                          title="Slot entfernen"
+                          title="Platz entfernen"
                           aria-label={`Platz von ${slot.name || "unbenanntem Slot"} entfernen`}
                         >
                           <PiTrashBold className="text-sm" />

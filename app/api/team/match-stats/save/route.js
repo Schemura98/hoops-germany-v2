@@ -131,13 +131,22 @@ async function handler(req) {
   // Spieler über ihre eigenen Werte informieren (nur beim ersten Mal je Spieler –
   // eine Korrektur löst keine zweite Nachricht aus, s. lib/statsNotify.js).
   // Fire-and-forget in der Wirkung: ein Fehler hier darf das Speichern nie kippen.
+  //
+  // Die Anzahl geht an die Oberfläche zurück: Der Ehrenamtliche, der den
+  // Box-Score einträgt, erfuhr bisher nie, dass seine Eingabe gerade Spielern
+  // eine Nachricht ausgelöst hat (Befund Ronja H2, 23.08.2026 – „sichtbar
+  // belohnen statt nur kürzer machen"). Ehrlichkeitsregel: Die Zahl ist die
+  // ECHTE Zahl der Erst-Benachrichtigungen dieses Aufrufs (Rückgabewert von
+  // notifyOwnStats) – bei einer Korrektur ohne neue Empfänger ist sie 0, und
+  // dann behauptet die Oberfläche auch nichts.
+  let benachrichtigt = 0;
   try {
-    await notifyOwnStats(match);
+    benachrichtigt = await notifyOwnStats(match);
   } catch (err) {
     console.error("[OWN STATS NOTIFY ERROR]", err);
   }
 
-  return ok({ message: "Statistiken gespeichert." });
+  return ok({ message: "Statistiken gespeichert.", benachrichtigt });
 }
 
 export const POST = withErrorHandling(handler);

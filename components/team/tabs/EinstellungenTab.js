@@ -237,7 +237,7 @@ export default function EinstellungenTab({ team, reload }) {
     try {
       const token = getTeamAuthToken();
       await axios.post("/api/team/request-league-change", { token, requestedLeagueId: leagueId, note: requestNote });
-      setLeagueMsg({ type: "ok", text: "Anfrage gesendet – ein Super-Admin prüft sie." });
+      setLeagueMsg({ type: "ok", text: "Anfrage gesendet – das Hoops-Team prüft sie." });
       setLeagueId("");
       setRequestNote("");
       await loadLeagueRequests();
@@ -449,7 +449,7 @@ export default function EinstellungenTab({ team, reload }) {
               Angefragt: <strong>{pendingRequest.requestedLeagueId?.name}</strong>
               {pendingRequest.requestedLeagueId?.season ? ` · Saison ${pendingRequest.requestedLeagueId.season}` : ""}
             </p>
-            <p className="text-xs text-mist-400">Ein Super-Admin prüft die Anfrage.</p>
+            <p className="text-xs text-mist-400">Das Hoops-Team prüft die Anfrage.</p>
             <button
               type="button"
               onClick={() => onCancelRequest(pendingRequest._id)}
@@ -464,7 +464,7 @@ export default function EinstellungenTab({ team, reload }) {
           <>
             <p className="text-sm text-mist-400">
               Ligazuordnung ändern? Wähle die gewünschte Liga aus dem offiziellen Katalog –
-              ein Super-Admin prüft die Anfrage, bevor sie wirksam wird.
+              das Hoops-Team prüft die Anfrage, bevor sie wirksam wird.
             </p>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -597,8 +597,12 @@ export default function EinstellungenTab({ team, reload }) {
               {historyRequests.map((r) => (
                 <li key={r._id} className="flex items-center justify-between gap-3 text-xs text-mist-400">
                   <span className="truncate">{r.requestedLeagueId?.name || "Liga"}</span>
+                  {/* Beschriftung statt rohem DB-Wert (vorher stand der Status
+                      kleingeschrieben da – alle anderen Abzeichen der Plattform
+                      sind großgeschrieben); rounded-sm wie die übrigen
+                      Status-Etiketten der Anzeigetafel. */}
                   <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 font-medium ${
+                    className={`shrink-0 rounded-sm px-2 py-0.5 font-medium ${
                       r.status === "genehmigt"
                         ? "bg-signal-ok/10 text-signal-ok"
                         : r.status === "abgelehnt"
@@ -606,7 +610,11 @@ export default function EinstellungenTab({ team, reload }) {
                         : "bg-navy-700 text-mist-400"
                     }`}
                   >
-                    {r.status}
+                    {r.status === "genehmigt"
+                      ? "Genehmigt"
+                      : r.status === "abgelehnt"
+                      ? "Abgelehnt"
+                      : "Ausstehend"}
                   </span>
                 </li>
               ))}

@@ -25,6 +25,16 @@ export default function CityRadiusFilter({ value, onChange }) {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
+  // Wird der Filter von AUSSEN zurückgesetzt (value.center → null, z. B. über
+  // den „Filter zurücksetzen"-Knopf der Listenseite), muss auch der angezeigte
+  // Stadtname verschwinden – sonst steht „Passau" im Feld, während der Filter
+  // nicht mehr wirkt, und der Umkreisfilter wirkt kaputt (Befund Tobias B2,
+  // 23.08.2026). Während des Tippens ändert sich value.center nicht, der
+  // Effekt greift also nur beim echten Reset.
+  useEffect(() => {
+    if (!value?.center) setTerm("");
+  }, [value?.center]);
+
   const suggestions = useMemo(() => {
     const q = normalizeCity(term);
     if (q.length < 2 || !list.length) return [];

@@ -98,9 +98,13 @@ export default function TeamCreatePage() {
             <PiUsersBold className="text-2xl" />
           </span>
           <h1 className="font-display uppercase tracking-tight text-2xl font-black text-paper-50">Team gründen</h1>
+          {/* Kein „automatisch": Das Team entsteht mit approved:false und ist
+              erst nach Freigabe öffentlich sichtbar – das gehört VOR das
+              Absenden, nicht erst in den Wartehinweis danach (Befund Nele P3). */}
           <p className="text-sm text-mist-400 mt-1">
-            Erstelle dein Team – du wirst automatisch Team-Admin und kannst Kader,
-            Spiele, Ergebnisse und Tryouts verwalten.
+            Erstelle dein Team – du wirst Team-Admin und kannst sofort Kader, Spiele,
+            Ergebnisse und Tryouts einrichten. Öffentlich sichtbar wird das Team nach
+            einer kurzen Prüfung durch das Hoops-Team.
           </p>
         </div>
 

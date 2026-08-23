@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PiMapPinBold } from "react-icons/pi";
 import { loadCities, normalizeCity } from "@/lib/geo";
+import { inputClass } from "@/lib/ui";
 
 // Stadt-Eingabe mit Typeahead aus dem deutschen Städte-Datensatz.
 // onChange(name): freier/gewählter Ortsname. onPick(city): vollständiges
@@ -39,9 +40,13 @@ export default function CityInput({ value = "", onChange, onPick, placeholder = 
     return [...starts, ...incl].slice(0, 8);
   }, [value, list]);
 
-  const inputClass =
-    className ||
-    "w-full rounded-sm border border-navy-600 px-4 py-2.5 text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+  // Vorgabe ist das ECHTE inputClass-Token aus lib/ui – keine lokale Kopie.
+  // Hier stand bis zum 23.08.2026 ein handgeschriebener Klassen-String OHNE
+  // Flächenfarbe und ohne Platzhalterfarbe: Das Feld fiel auf das Browser-Grau
+  // rgb(59,59,59) zurück – das 13. Feld der Familie aus dem Deploy e9a8ef3.
+  // Die damalige Suche hat es verfehlt, weil die lokale Variable denselben
+  // Namen trug wie das Token und jede Textsuche sie als Token-NUTZUNG las.
+  const feldKlasse = className || inputClass;
 
   function pick(c) {
     onChange?.(c.n);
@@ -60,7 +65,7 @@ export default function CityInput({ value = "", onChange, onPick, placeholder = 
         }}
         onFocus={() => setOpen(true)}
         placeholder={placeholder}
-        className={`${inputClass} pl-9`}
+        className={`${feldKlasse} pl-9`}
         autoComplete="off"
       />
       {open && suggestions.length > 0 && (

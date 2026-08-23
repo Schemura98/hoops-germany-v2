@@ -125,7 +125,7 @@ export default function TeamAdminPage() {
             <p className="text-sm font-semibold text-signal-wait">⏳ Dein Team wird gerade geprüft</p>
             <p className="text-sm text-signal-wait mt-1">
               Du kannst dein Team schon einrichten (Kader, Logo, Spiele vorbereiten). Öffentlich
-              sichtbar wird es, sobald ein Administrator es freigegeben hat – du bekommst dann eine
+              sichtbar wird es, sobald das Hoops-Team es freigegeben hat – du bekommst dann eine
               Benachrichtigung.
             </p>
           </div>
@@ -138,8 +138,16 @@ export default function TeamAdminPage() {
           onSpringen={wechsle}
         />
 
-        {/* Tab-Navigation (einheitlicher Pill-Stil; Refs für Auto-Scroll/Deeplink bleiben) */}
-        <div ref={tabBarRef} className="relative flex gap-1 overflow-x-auto bg-navy-700 rounded-md p-1 mb-6">
+        {/* Tab-Navigation im Unterstreichungs-Stil des Tabs-Primitivs
+            (components/ui/Tabs.js): Ein Umschalter ist eine Anzeige, keine
+            schwebende Karte – die frühere Pillen-Wanne widersprach genau dem
+            Kopfkommentar des eigenen Primitivs (Befund Vivien, 23.08.2026).
+            Bewusst KEIN direkter Einsatz von <Tabs>: Auto-Scroll über die
+            tabRefs, der ?tab=-Deeplink und die Aufgaben-Zähler brauchen je Tab
+            eine Ref und einen Badge-Knoten, die das Primitiv nicht kennt –
+            die KLASSEN sind deshalb mit Tabs.js identisch gehalten, nur um
+            py-2.5 erhöht (Tippziel > 40 px statt 32, Familie Roadmap 32 b). */}
+        <div ref={tabBarRef} className="relative flex gap-1 overflow-x-auto border-b border-navy-600 mb-6">
           {visibleTabs.map((t) => {
             const Icon = t.icon;
             const isActive = t.key === active;
@@ -161,10 +169,10 @@ export default function TeamAdminPage() {
                     ? `${t.label}, ${offen} ${offen === 1 ? "offene Aufgabe" : "offene Aufgaben"}`
                     : undefined
                 }
-                className={`flex items-center gap-1.5 whitespace-nowrap px-3 sm:px-4 py-1.5 rounded-sm text-sm font-medium transition ${
+                className={`flex items-center gap-1.5 whitespace-nowrap -mb-px border-b-2 px-3 sm:px-4 py-2.5 text-sm font-semibold tracking-tight transition-[color,border-color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950 ${
                   isActive
-                    ? "bg-navy-800 text-paper-50"
-                    : "text-mist-400 hover:text-paper-50"
+                    ? "border-brand-500 text-paper-50"
+                    : "border-transparent text-mist-400 hover:text-paper-50 hover:border-navy-500"
                 }`}
               >
                 <Icon className="text-xs" />

@@ -71,7 +71,7 @@ export default function AnfragenTab() {
         <EmptyState
           icon={PiUsersThreeBold}
           title="Keine offenen Anfragen"
-          text="Spieler können dein Team über das öffentliche Profil anfragen."
+          text="Spieler können dein Team über deine öffentliche Teamseite anfragen."
         />
       ) : (
         <div className="bg-navy-800 rounded-md border border-navy-600 divide-y divide-navy-600">
