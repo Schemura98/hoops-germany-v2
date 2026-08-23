@@ -5741,3 +5741,82 @@ Server, der kein Zombie war.
 Suite **359 / 0 / 1** (360 in 37 Dateien, unabhängig gezählt) · Build ok · live: 16 Routen je
 200, Job auf dem Server gegen `hoops_prod` → ehrlicher ABBRUCH mit Exit 1 an beiden Stichtagen ·
 Betreiberkonten auf Prod als intern markiert (externe Nutzer ehrlich 8).
+
+#### Update (23.08.2026) — Team-Analyse Spieler-/Vereinsseiten + Umsetzung der Pakete A–D (Commit `248d5e3`, NICHT deployt)
+
+**Anlass:** Patricks Auftrag, Design und Funktionalität der Spieler- und Vereinsseiten mit
+dem ganzen Team zu analysieren und Verbesserungen im minimalistischen Stil der Startseite
+vorzuschlagen. Vier Prüfer parallel am Production-Build (Vivien Design · Tobias Funktion ·
+Ronja Retention · Nele Texte); Gesamtauswertung:
+`docs/TEAM-ANALYSE-SPIELER-VEREINSSEITEN-2026-08-23.md`. Patrick gab **alle vier Pakete**
+frei (inkl. der empfohlenen Wege: P6 Weg b, Positions-Chip neutral; Avatar-Kacheln bewusst
+NICHT angefasst — eigene Richtungsentscheidung).
+
+**Paket A — Fehler (alle umgesetzt):**
+- `components/team/tabs/SpielplanTab.js`: Punkte als „dein Team : Gegner" mit S/N-Kürzel
+  statt „Sieger : Verlierer" — drei verlorene Spiele lasen sich als Siege (Befund Tobias H1).
+  Kürzel nur bei gesetztem `winningTeam` (Unentschieden-Randfall aus `updatematch`, Kai).
+- `components/player/PlayerProfileView.js`: Beleg-Zeile betrachterabhängig — „deine Werte"
+  nur auf dem eigenen Profil, sonst „Werte von {Vorname}" (Befund Nele P1, live belegt);
+  `text-mist-600`→`mist-400` an zwei Panel-Kleinstschriften (3,98→7,2:1, Vivien A9).
+- `components/ui/Tabs.js`: `overflow-x-auto`-Rahmen IN der Komponente — behebt 20 px
+  Querlauf der Teamseite auf 360/320 px an der Wurzel (Vivien+Tobias unabhängig); die
+  redundante Hülle im Spielerprofil entfällt.
+- `components/CityInput.js`: echtes `inputClass`-Token statt lokaler Kopie ohne
+  Flächenfarbe („13. graues Feld"; lokale Variable hieß wie das Token und täuschte jede
+  Suche — jetzt `feldKlasse`). Wirkt auf edit-profile, Einstellungen-Tab, /team/create.
+- `app/team/team-detail/[slug]/page.js`: Kaderzahl konsistent zur Liste („X im Kader,
+  davon Y noch nicht bestätigt", Nele P2); „Zum Beitreten anmelden" auf Button secondary
+  (vorher Kontrast 1,01:1, Vivien A5).
+- `components/FollowButton.js`: ungültige Sitzung → Login statt stummem 401-Schlucken
+  (Tobias H2); Lade-Effekt wertet `authenticated:false` aus (Auflage Kai — `checkfollowing`
+  antwortet 200, nie 401); Weiterleitung mit `?next=`-Rücksprungziel.
+- `app/spieler/page.js`: Leerzustand lügt bei aktivem Filter nicht mehr + „Filter
+  zurücksetzen"-Knopf (Tobias M3); `components/CityRadiusFilter.js` leert den Stadttext
+  beim externen Reset (Tobias B2).
+- Texte P3–P5 (Nele): Freigabe-Hinweis VOR dem Teamgründen (`app/teams/page.js`,
+  `app/team/create/page.js`), Einladungs-Meldung ohne Bezugsfehler (`KaderTab.js`),
+  „das Hoops-Team" statt „Super-Admin"/„ein Administrator" (`EinstellungenTab.js`,
+  `app/team/admin/page.js`).
+
+**Paket B — Design-Angleichung (Vivien):** Mono-Ziffern (`font-mono tabular-nums`) auf
+Spielstand, Saison-Tabelle, Bilanz der Teamseite + SpielplanTab/ErgebnisseTab-Endstand ·
+Liga-Karte als die EINE hervorgehobene Karte (border-t-2 brand + `CountUp`-Platzierung,
+hover:bg statt transition-all) · Admin-Tab-Leiste (`app/team/admin/page.js`) vom
+Pillen-Stil auf den Unterstreichungs-Stil des Tabs-Primitivs, Tipphöhe 42 px (Klassen
+identisch zu Tabs.js; kein direkter Primitiv-Einsatz wegen tabRefs/Deeplink/Zähler) ·
+„Statistiken speichern" nur bei Änderung primär (`statsKanon()`-Typnormalisierung — "27"
+vs. 27, Kai E3/Tobias B1) · Einlade-Kasten von border-2-orange auf border-t-2-Form ·
+Status-Pillen auf rounded-sm (SpielplanTab, KaderTab, TryoutsTab, EinstellungenTab, dort
+auch Beschriftung statt rohem DB-Status) · Verlauf von den /teams-Logokacheln entfernt ·
+Reveal+staffel auf beiden Listenseiten · Suchfelder auf `inputClassSm` · Positions-Chip
+auf /spieler neutral (mist-300/navy-700) · view-player-Ladezustand mit stehender Navbar.
+
+**Paket C — Verbindungen (Ronja):** Spielplan-Zeilen der Teamseite als Links auf
+`/match/[id]` · `app/api/team/match-stats/save/route.js` gibt `benachrichtigt`
+(Rückgabewert von `notifyOwnStats`) zurück, `ErgebnisseTab.js` meldet „… N Spieler wurden
+über die eigenen Zahlen benachrichtigt" (nur echte Erst-Benachrichtigungen, bei 0 die
+schlichte Meldung) · eigenes Profil verweist unter der Karriere-Bilanz auf `/topscorer`.
+
+**Paket D — Texte (Nele):** Untertitel /spieler + /teams erzählen die Belegbarkeit ·
+Herkunftssatz der Karriere-Bilanz führt mit der Stärke („keine Selbstauskunft") ·
+„Bestätigt" im Ergebnisse-Tab hängt an `beidseitigBelegt()` aus `lib/matchScore.js`,
+Admin-gesetzte Ergebnisse heißen „Ergebnis steht" (P6 Weg b) · Du/Ihr vereinheitlicht ·
+Slot→Platz · Anrede über zweite Person statt „Er…ihn" (16 Damen-Ligen) · Tryouts-/
+Anfragen-Leerzustände.
+
+**Gates** (`docs/GATE-SPIELER-VEREINSSEITEN-2026-08-23.md`): Kai **freigabefähig mit
+einer Auflage** (umgesetzt), Gegenproben im eigenen Worktree am Vor-Fix-Stand; Tobias
+**freigabefähig ohne Auflagen**, alle acht Vormittagsbefunde am Produkt nachgemessen.
+Neuer Wächter `tests/e2e/spieler-vereinsseiten.spec.mjs` (6 Fälle, am Vor-Fix-Stand 6/6
+rot gesehen). **Suite 365 grün / 0 rot / 1 übersprungen** (366 in 38 Dateien) ·
+`design-audit -- --check` ohne Abweichung (Baseline 23.08.2026: strikt 139, weit 177,
+Button 27/CountUp 6/Reveal 13 — erneut nach unten).
+
+**Offen aus dieser Runde:** A8-Zweig am Server ungesehen (Dev-DB hat keine offenen
+rosterSlots) · Ladezustände mit stehendem Chrome auf player-detail/edit-profile/team-admin
+(Nav braucht den geladenen Spieler) · W/L vs. S/N (zwei Kürzelsysteme, → Nele/Vivien) ·
+design-audit-Blindstelle für gleichnamige lokale Variablen (→ Kai) · Ronjas Mittel-Hebel
+M1–M3 vertagt · Roadmap 31 präzisiert (nur Seiten-zu-Seiten-Wechsel) und 35 unverändert.
+**Dev-DB-Spuren der Gates:** Spiele 13.07. + 19.07. tragen `notifiedStatsPlayers` (je 8);
+unbenachrichtigt bleiben 25.07., 05.08., 17.08., 20.08.

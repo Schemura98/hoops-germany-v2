@@ -11,6 +11,69 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
+> ⚠️ **NICHT DEPLOYT, NUR COMMITTET: `248d5e3` (23.08.2026) — DIE SPIELER- UND VEREINSSEITEN
+> SIND IN EINER RUNDE REPARIERT, ANGEGLICHEN UND VERBUNDEN (Pakete A–D).** Kein Push, kein
+> Deploy; beides war nicht beauftragt. Anlass: Patricks Auftrag „ganzes Team analysiert die
+> Spieler-/Vereinsseiten" → Vier-Prüfer-Analyse (Vivien · Tobias · Ronja · Nele,
+> `docs/TEAM-ANALYSE-SPIELER-VEREINSSEITEN-2026-08-23.md`) → Freigabe aller vier Pakete durch
+> Patrick → Umsetzung → beide Gates durch (`docs/GATE-SPIELER-VEREINSSEITEN-2026-08-23.md`).
+> **Die vier schwersten Fixes:** (1) Der Admin-Spielplan druckte Punkte als „Sieger:Verlierer"
+> — **Niederlagen lasen sich als Siege**; jetzt „dein Team:Gegner" + S/N-Kürzel
+> (`SpielplanTab.js`, Kürzel nur bei gesetztem `winningTeam` — Unentschieden-Randfall Kai).
+> (2) Auf fremden Profilen stand **„deine Werte" über fremden Zahlen**; jetzt
+> betrachterabhängig (`PlayerProfileView.js`, `eigenesProfil`). (3) `components/ui/Tabs.js`
+> bringt den **Scroll-Rahmen jetzt selbst** mit — 20 px Querlauf der Teamseite auf 360 px weg,
+> Fix in der Komponente statt an der Aufrufstelle. (4) **Das 13. graue Feld**: `CityInput.js`
+> hatte eine lokale Variable NAMENS `inputClass` ohne Flächenfarbe — jede Textsuche las sie
+> als Token-Nutzung; jetzt echtes Token, Variable heißt `feldKlasse`. ⚠️ Die
+> design-audit-Blindstelle (gleichnamige lokale Variablen zählen als Token-Nutzung) besteht
+> am ZÄHLER weiter → Kai.
+> **Design (Vivien):** Mono-Ziffern auf Vereinsseite + Admin-Tabs · Liga-Karte ist die EINE
+> hervorgehobene Karte der Teamseite (border-t-brand + CountUp) · Admin-Tab-Leiste vom
+> Pillen-Stil auf den Unterstreichungs-Stil des Tabs-Primitivs (Tipphöhe 42 px, Klassen
+> identisch zu Tabs.js gehalten — bewusst kein direkter Primitiv-Einsatz wegen tabRefs/
+> Deeplink/Zähler, Begründung im Code) · „Statistiken speichern" nur bei Änderung primär
+> (Vergleich über `statsKanon()` typnormalisiert — "27" vs. 27, Befund Kai+Tobias) ·
+> Einlade-Kasten von border-2-orange auf border-t-2-Form · Status-Pillen auf rounded-sm ·
+> Verlauf von den `/teams`-Kacheln entfernt (wörtlicher Spez-Verstoß) · Reveal+staffel auf
+> beiden Listen · Positions-Chip neutral (Entscheidung Patrick). **Bewusst NICHT gebaut:**
+> Spielfeldlinien auf Datenseiten (Register-Regel: dort Tapete statt Erzählung),
+> Scroll-Choreografie auf Gebrauchsflächen, der 140-Panels-Umbau, Avatar-Kacheln.
+> **Verbindungen (Ronja, zahlen auf die Wiederkehr-Quote ein):** Spielplan-Zeilen der
+> Teamseite verlinken `/match/[id]` · `match-stats/save` gibt `benachrichtigt` zurück und der
+> Ergebnisse-Tab meldet „… N Spieler wurden über die eigenen Zahlen benachrichtigt" (nur die
+> ECHTE Erst-Versand-Zahl; bei 0 die schlichte Meldung) · eigenes Profil verweist auf
+> `/topscorer` („Wo stehst du?", nur eigenes Profil).
+> **Texte (Nele):** Untertitel beider Listen erzählen jetzt die Belegbarkeit · **„Bestätigt"
+> im Ergebnisse-Tab hängt an `beidseitigBelegt()`**, Admin-gesetzte Ergebnisse heißen
+> „Ergebnis steht" (P6 Weg b, Entscheidung Patrick; Dev-DB: 2× Bestätigt / 4× Ergebnis steht,
+> deckungsgleich mit der DB gemessen) · „das Hoops-Team" statt „Super-Admin"/„ein
+> Administrator" (4 Stellen) · Freigabe-Hinweis VOR dem Teamgründen statt danach
+> (`/teams`, `/team/create`) · Kaderzahl der Teamseite passt zur Liste („X im Kader, davon Y
+> noch nicht bestätigt") · FollowButton führt bei ungültiger Sitzung zum Login mit `?next=`
+> (Auflage Kai: `checkfollowing` antwortet 200+`authenticated:false`, NIE 401 — die erste
+> Fassung wartete auf ein 401, das nie kommt) · Leerzustände lügen nicht mehr bei aktivem
+> Filter (+ Zurücksetzen-Knopf; `CityRadiusFilter` leert den Stadttext beim externen Reset).
+> ✅ **Beide Gates durch:** Kai **freigabefähig mit einer Auflage (umgesetzt)**, Tobias
+> **freigabefähig ohne Auflagen** — alle acht Vormittagsbefunde am Produkt nachgemessen behoben.
+> Neuer Wächter `tests/e2e/spieler-vereinsseiten.spec.mjs` (6 Fälle: A1 über DREI Flächen nur
+> an VERLORENEN Spielen mit Wertlos-statt-bestanden-Schranke · A2 gefährliche Richtung zuerst ·
+> A3 fensterbreit UND letzter Reiter erreichbar), am Vor-Fix-Stand **6/6 rot** gesehen.
+> Suite **365 grün / 0 rot / 1 übersprungen** (366 in 38 Dateien) · `design-audit -- --check`
+> ohne Abweichung (Baseline nachgezogen: strikt 139, weit 177, Button 27/CountUp 6/Reveal 13 —
+> Richtung erneut nach unten).
+> ⚠️ **Dev-DB-Spuren der Gates (gewollt, offengelegt):** Die Spiele vom 13.07. UND 19.07.
+> tragen jetzt `notifiedStatsPlayers` (je 8) — wer Benachrichtigungs-Tests baut: 25.07.,
+> 05.08., 17.08., 20.08. sind noch unbenachrichtigt.
+> ⚠️ **Offen aus dieser Runde:** A8-Zweig („X im Kader, davon Y…") mit der Dev-DB nicht
+> auslösbar (kein Team hat offene rosterSlots) — Code konsistent, am Server ungesehen ·
+> Ladezustände mit stehendem Chrome fehlen noch auf player-detail/edit-profile/team-admin
+> (deren Nav-Bauteile brauchen den geladenen Spieler; nur view-player umgestellt) · zwei
+> Kürzelsysteme W/L (Profil) vs. S/N (Admin) → Nele/Vivien · Ronjas Mittel-Hebel M1–M3
+> (Letztes-Spiel-Karte, Liga auf Teamkarten, TransferControl-Weiterweg) bewusst vertagt ·
+> Roadmap 31/35 unverändert offen (Tobias hat 31 präzisiert: nur Seiten-zu-Seiten-Wechsel
+> betroffen, Liste→Detail→zurück stellt exakt wieder her).
+>
 > ⚠️ **NICHT DEPLOYT, NUR COMMITTET (21.08.2026): DAS FELD DES HEROS LÄUFT AUS, STATT
 > ABGESCHNITTEN ZU WERDEN — und die Zahl, mit der das für unmöglich gehalten wurde, war die
 > Unterkante des falschen Kastens.** Kein Push, kein Deploy; beides war nicht beauftragt.
@@ -1741,7 +1804,8 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `3bfd64f` (aktuell live, danach nur Doku `90b7901`) → `2c23489` → `4fcc4c0` → `89579d4` (nur Doku) → `df92274` → `d72ba15` (nur Doku) → `f6cbbf2` (nur Doku) → `f2d2be3` (nur Doku) → `b23888c` (nur Doku) → `d1d9517` → `45de921` (nur Doku) → `4293c43` (nur Doku) → `a64ef92` (nur Doku) → `0ecd593` → `70fd2d1` → `1a57be5` (nur Doku) → `38f2d20` (nur Doku/Tests) → `d649127` → `6f02a9b` → `6c79ec4` (nur Tests) → `b62d511` → `57da148` (nur Tests) → `a320c9e` (nur Doku) → `e9a8ef3` → `108fbc7` (nur Doku) → `3181ad2` → `6348625` → `b88bbd3` (nur Doku) → `ea982c4` → `cdb8065` → `492e465` → `34dd22f` (Feldende,
+> **Rollback-Kette:** `248d5e3` (NICHT deployt — Spieler-/Vereinsseiten-Pakete A–D) →
+> `3bfd64f` (aktuell live; dazwischen nur Doku `90b7901`, `3093b51`, `78781f3`) → `2c23489` → `4fcc4c0` → `89579d4` (nur Doku) → `df92274` → `d72ba15` (nur Doku) → `f6cbbf2` (nur Doku) → `f2d2be3` (nur Doku) → `b23888c` (nur Doku) → `d1d9517` → `45de921` (nur Doku) → `4293c43` (nur Doku) → `a64ef92` (nur Doku) → `0ecd593` → `70fd2d1` → `1a57be5` (nur Doku) → `38f2d20` (nur Doku/Tests) → `d649127` → `6f02a9b` → `6c79ec4` (nur Tests) → `b62d511` → `57da148` (nur Tests) → `a320c9e` (nur Doku) → `e9a8ef3` → `108fbc7` (nur Doku) → `3181ad2` → `6348625` → `b88bbd3` (nur Doku) → `ea982c4` → `cdb8065` → `492e465` → `34dd22f` (Feldende,
 > vor den Wächtern) → `0f2a933` (nur Doku) → `17bb00a` → `8e63cf6` (nur Doku) → `c4982bd` → `c5cbf6f` → `fb23317` → `0da80c7` (Dribbelweg,
 > vor den Gate-Befunden) → `70c36ba` (letzter Stand vor der Ball-Reise) → `76406fb` → `571931c` (Feld) → `b3487a8` →
 > `d4c847a` (Leiste, erster Schritt) → `070a1e7` (letzter Stand vor Feld und Leiste) → `04ba621` → `07150cf` (nur Werkzeug) → `d2cfa47` → `35b8bc0` → `d841c4b` → `bd99263` (Dunk, vor den
@@ -2096,6 +2160,15 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
   Primitive sind echt im Einsatz (Button 25, Loading 19, EmptyState 15, Skeleton 13, Reveal 11,
   FormAlert 9, Tabs 6, CountUp 5, ConfirmAction 4 (seit Roadmap 37), ScrollTable/SplitFlap je 3,
   Card 2, LinkTabs 1).
+  ✅ **Nachgezogen 23.08.2026 (`248d5e3`), erneut nach UNTEN: strikt 139, weit 177**
+  (Button 25→27, CountUp 5→6, Reveal 11→13): Die zwei handgebauten Suchfelder der
+  Listenseiten nutzen `inputClassSm`, der Beitritts-Link der Teamseite das Button-Primitiv,
+  der Einlade-Kasten im KaderTab die sanktionierte navy-600+border-t-brand-Form.
+  ⚠️ **Blindstelle des Zählers, von Kai belegt:** Eine LOKALE Variable mit demselben Namen
+  wie ein Token (`CityInput.js` hatte ein eigenes `inputClass` OHNE Flächenfarbe) zählt als
+  Token-Nutzung — genau so hat das „13. graue Feld" die Zwölf-Felder-Reparatur vom 22.08.
+  überlebt. Die Instanz ist behoben (Variable heißt jetzt `feldKlasse`), der Zähler selbst
+  bleibt dafür blind. → Kai.
   ⚠️ **Stand 19.08.2026 nachgezogen — und der größte Teil der Drift war schon da**, bevor der
   Hero-Umbau begann: Am unveränderten Stand `062989e` gemessen Card 3→2, Reveal 12→11,
   strikt 141→143, weit 180→184. Es wurde seit dem 15.08. mehrfach an Panels gebaut, ohne die
