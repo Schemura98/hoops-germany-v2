@@ -149,6 +149,65 @@ function OnboardingCard({ ob, period }) {
   );
 }
 
+// Trichter der Team-Admin-Tour (components/onboarding/AdminTour.js). Eigene
+// Karte statt Anbau an die Plattform-Tour: zwei Touren in einer Kurve wären
+// zwei Gruppen in einer Zahl (Konzept §6). Die Spalte „→ Reiter" zählt den
+// „Zeig mir das"-Ausstieg – wer zur Fläche springt, ist kein Abbrecher.
+function AdminTourCard({ at, period }) {
+  if (!at) return null;
+  const max = at.steps.reduce((m, s) => Math.max(m, s.erreicht), 0) || 1;
+  const leer = at.started === 0;
+
+  return (
+    <Card
+      title="Einstieg: Team-Admin-Tour"
+      hint={`Wie weit kommen Team-Admins? · ${period} · gezählt werden Sitzungen`}
+      right={
+        at.completionRate !== null && (
+          <span className="font-mono text-xs tabular-nums text-brand-400">
+            {at.completionRate}% abgeschlossen
+          </span>
+        )
+      }
+    >
+      {leer ? (
+        <p className="text-sm text-mist-400">
+          Im gewählten Zeitraum hat noch kein Team-Admin die Tour gesehen.
+        </p>
+      ) : (
+        <div className="space-y-2.5">
+          {at.steps.map((s) => (
+            <div key={s.key} className="flex items-center gap-3">
+              <span className="w-36 sm:w-52 truncate text-xs text-mist-400">{s.label}</span>
+              <div className="h-3 flex-1 overflow-hidden rounded-full bg-navy-700">
+                <div
+                  className="h-full rounded-full bg-brand-500"
+                  style={{ width: `${(s.erreicht / max) * 100}%` }}
+                />
+              </div>
+              <span className="w-10 text-right text-xs font-semibold text-paper-50">
+                {nf(s.erreicht)}
+              </span>
+              <span
+                className="w-16 text-right text-xs text-mist-400"
+                title="Hier wurde die Tour abgebrochen"
+              >
+                {s.abgebrochen ? `−${nf(s.abgebrochen)} ab` : "—"}
+              </span>
+              <span
+                className="w-16 text-right text-xs text-mist-400"
+                title="Über „Zeig mir das“ zum echten Reiter gesprungen"
+              >
+                {s.gezeigt ? `${nf(s.gezeigt)} → Reiter` : "—"}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}
+
 // „Deine Zahlen stehen" – trägt der Wiederaufrufgrund aus Ronjas Befund R1?
 // Versendet vs. geöffnet. Bewusst nur diese zwei Zahlen: eine Öffnungsquote ohne
 // Versand wäre erfunden, deshalb wird sie bei 0 gar nicht gezeigt.
@@ -532,6 +591,7 @@ export default function AdminAnalyticsPage() {
           <ContentCard content={summary.content} period={periodLabel} />
 
           <OnboardingCard ob={summary.onboarding} period={periodLabel} />
+          <AdminTourCard at={summary.adminTour} period={periodLabel} />
           <OwnStatsCard os={summary.ownStats} period={periodLabel} />
 
           <Card title="Beliebteste Seiten" hint={`Im Zeitraum: ${periodLabel}`}>

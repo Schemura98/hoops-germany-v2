@@ -137,6 +137,12 @@ const playerSchema = new mongoose.Schema(
     onboardingDismissed: { type: Boolean, default: false },
     // Willkommens-Tour nach der Registrierung gesehen (Auto-Start nur einmal).
     welcomeSeen: { type: Boolean, default: false },
+    // Team-Admin-Tour auf /team/admin gesehen (Auto-Start nur einmal).
+    // Am SPIELER, nicht am Team: Die Tour gehört der Person – Co-Admins
+    // (gleiches Feld `teamAdminOf` wie der Haupt-Admin) sollen sie ebenso
+    // sehen; ein Team-Feld würde sie nur dem ersten zeigen
+    // (docs/TEAMADMIN-TOUR-KONZEPT-2026-08-23.md, Abschnitt 3).
+    adminTourSeen: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

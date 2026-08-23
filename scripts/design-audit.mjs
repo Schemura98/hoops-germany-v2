@@ -52,13 +52,18 @@ const BASELINE = {
     // Tafel ein, und genau das ist per Konzept-Grenzwert verboten.
     // CountUp 6 -> 4: Profil-Bilanz und
     // Liga-Karte beziehen ihr CountUp jetzt über Tafel.Fenster.
-    BelegLampe: 2, Button: 28, Card: 2, ConfirmAction: 4, CountUp: 4,
+    // Button 28 -> 29, SplitFlap 2 -> 3 am 23.08.2026: Team-Admin-Tour
+    // (components/onboarding/AdminTour.js) – derselbe abgenommene
+    // Dialog-Rahmen wie WelcomeTour (Button im Fuß, SplitFlap als
+    // Schrittzähler; die Ein-Stelle-je-Seite-Regel des Flaps hält, es ist
+    // die eine Kapitelziffer des Dialogs).
+    BelegLampe: 2, Button: 29, Card: 2, ConfirmAction: 4, CountUp: 4,
     EmptyState: 15, FormAlert: 9, LinkTabs: 1, Loading: 19, Reveal: 13,
     // SplitFlap 3 -> 2 (Tobias-Auflage 23.08.2026): /match importiert den
     // Flap nicht mehr selbst – SegmentZahl klappt die Zellen-Wertreihe als
     // Ganzes (flap-Prop, ui-interner Import). Die Ein-Stelle-je-Seite-Regel
     // des Flaps gilt unverändert.
-    ScrollTable: 3, SegmentZahl: 1, Skeleton: 13, SplitFlap: 2, Tabs: 6,
+    ScrollTable: 3, SegmentZahl: 1, Skeleton: 13, SplitFlap: 3, Tabs: 6,
     Tafel: 2,
   },
   tokens: { cardClass: 0 },
@@ -75,8 +80,12 @@ const BASELINE = {
   // Tafel-Gehäuse des Match-Kopfs und die Letztes-Spiel-Karte des Profils
   // sind neue, BEWUSST handgesetzte Flächen im Gehäuse-Muster – kein Drift
   // durch Nachlässigkeit, sondern zwei neue Karten.
-  panelsStrikt: 141,
-  panelsWeit: 180,
+  // 141 -> 143 / 180 -> 182 am 23.08.2026 (Team-Admin-Tour): das Dialog-Panel
+  // und die Zitat-Karte in AdminTour.js – wörtlich dieselbe abgenommene Form,
+  // die WelcomeTour/StepFeed schon tragen (dort zählen sie ebenfalls von
+  // Hand). Bewusste Zitate, kein Drift durch Nachlässigkeit.
+  panelsStrikt: 143,
+  panelsWeit: 182,
 };
 
 const ARGS = new Set(process.argv.slice(2));

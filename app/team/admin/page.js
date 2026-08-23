@@ -15,6 +15,7 @@ import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { useTeamAufgaben } from "@/lib/useTeamAufgaben";
 import { hasTeamPermission, TAB_PERMISSION } from "@/lib/teamPermissions";
 import AufgabenLeiste from "@/components/team/AufgabenLeiste";
+import AdminTour from "@/components/onboarding/AdminTour";
 import TeamNav from "@/components/layout/TeamNav";
 import Footer from "@/components/layout/Footer";
 import Loading from "@/components/ui/Loading";
@@ -192,7 +193,32 @@ export default function TeamAdminPage() {
 
         {/* Tab-Inhalt */}
         <ActiveComp team={team} reload={reload} isMainAdmin={isMainAdmin} />
+
+        {/* Wiederaufruf der Admin-Tour – unaufdringlich unter den Inhalten.
+            Bewusst NICHT der Footer-TourLink: Der öffnet die Spieler-Tour, und
+            ein Link, der je nach Rolle etwas anderes öffnet, ist eine Falle
+            (Konzept §3). */}
+        <div className="mt-10 border-t border-navy-600 pt-4">
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent("hg:open-admin-tour"))}
+            className="text-sm text-mist-400 hover:text-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+          >
+            Kurz erklärt: deine Aufgaben als Team-Admin
+          </button>
+        </div>
       </main>
+
+      {/* Erst hier (Status "ready") gemountet, damit der Auto-Start nie über
+          einem Skeleton aufgeht – Bedingung (c) aus Konzept §3.
+          `sichtbareTabs`: Der „Zeig mir das"-Knopf darf nur auf Reiter zeigen,
+          die DIESE Person sehen darf – ein Co-Admin ohne Spielrecht landete
+          sonst wortlos auf dem ersten erlaubten Reiter (Befund Lina M1). */}
+      <AdminTour
+        player={player}
+        onTab={wechsle}
+        sichtbareTabs={visibleTabs.map((t) => t.key)}
+      />
 
       <Footer />
     </div>
