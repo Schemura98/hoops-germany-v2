@@ -5939,3 +5939,14 @@ die Tryout-Dedup.
   `adminTourSeen: true` (Produkt-Route, durch Gates/Funktionsprobe); Tobias' Sitzung
   lief ohne webdriver-Kennung und hat echte `admin_tour_*`-Ereignisse in der Dev-DB
   hinterlassen — wer die Abbruchkurve dort liest, soll das wissen.
+
+#### Nachtrag (23.08.2026, nachts) — Deploy `614e01f` + Live-Nachmessung
+
+- Deployt per `git pull && npm run build && pm2 restart hoops-v2` (kein
+  Dependency-Diff, kein npm install). Server am Server verifiziert auf `614e01f`.
+- **Live nachgemessen:** 16 Routen je 200 · `/signup` liefert die Feldzeichnung im
+  Server-HTML (`data-auth-court` 1×, Foto-Verweis 0×, 6 Eingabefelder) · `/login`
+  unverändert (Foto 1×, Feldzeichnung 0×) · `POST /api/player/mark-admin-tour-seen`
+  weist Unangemeldete live mit 401 ab · PM2 online; kein neuer Fehlerlog-Eintrag seit
+  dem Neustart (Log-Zeitstempel 2,5 h vor dem Deploy — Altbestand des vorherigen
+  Deploy-Fensters).

@@ -3,26 +3,82 @@
 
 ---
 
-## 0. AKTUELLER STAND (Überblick · Stand 21.08.2026)
+## 0. AKTUELLER STAND (Überblick · Stand 23.08.2026 abends)
 
-> 🟢 **v2 IST LIVE auf https://hoopsgermany.de** (seit 24.06.2026). Hostinger-VPS `92.113.25.249`
+> 🟢 **v2 IST LIVE auf https://hoopsgermany.de** (seit 24.06.2026, aktueller Live-Stand
+> **`614e01f`** vom 23.08.2026 abends). Hostinger-VPS `92.113.25.249`
 > (Ubuntu 24.04), Code in `/root/hoops-v2` (Branch **`redesign`**), PM2-Prozess **`hoops-v2` auf Port 3001**,
 > DB **`hoops_prod`** (Atlas). Alte Seite läuft als Rollback-Fallback weiter (PM2 `sports`, Port 3000,
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
-> 📄 **ÜBERGABE FÜR DIE NÄCHSTE SITZUNG: `docs/UEBERGABE-2026-08-23.md` — ZUERST LESEN.**
-> Patrick hat den Kontext geleert; dort stehen die zwei Startaufträge (Team-Admin-Tour
-> bauen nach `docs/TEAMADMIN-TOUR-KONZEPT-2026-08-23.md`; Signup-Feldmotiv durch beide
-> Gates und deployen) und alle offenen Fragen.
+> ✅ **Beide Startaufträge der Übergabe `docs/UEBERGABE-2026-08-23.md` sind ERLEDIGT
+> und DEPLOYT** (Team-Admin-Tour gebaut; Signup-Feldmotiv durch beide Gates) — s. den
+> ✅-Block direkt hierunter. Die Übergabe-Datei ist damit Historie.
 >
-> ⚠️ **NICHT DEPLOYT, NUR COMMITTET: `89f0de8` (23.08.2026)** — (1) `/signup` zeigt auf
-> Desktop statt des hellen Fotos die eigene FIBA-Feldzeichnung (`AuthCourt.js`, dritte
-> Zeichnung aus `feldmasse.js`; `AuthShell` mit `motiv`-Weg, /login bitgleich —
-> Wächter-Fall prüft das; signup-ohne-js 2/2 grün, design-audit sauber). Gates + Deploy
-> stehen aus. (2) Neles Team-Admin-Tour-Konzept (6 Schritte, finale Wortlaute,
-> `Player.adminTourSeen`-Vorschlag, Negativliste: kein Live-Ticker-Versprechen) — Bau
-> offen, danach update-feedback-analytics + update-onboarding-surfaces + Lina-Check.
+> ✅ **DEPLOYT: `614e01f` (23.08.2026 abends) — DIE TEAM-ADMIN-TOUR „DER
+> SPIELBERICHTSBOGEN" IST LIVE, UND DAS SIGNUP-FELDMOTIV IST MIT AUSGELIEFERT.**
+> Beide Gates freigabefähig über den GESAMTEN Stapel `89f0de8`+`1110fdf`+`614e01f`
+> (Kai OHNE Auflagen, Tobias freigabefähig — Berichte
+> `docs/GATE-KAI-ADMIN-TOUR-2026-08-23.md` / `docs/GATE-TOBIAS-ADMIN-TOUR-2026-08-23.md`).
+> **(1) Die Tour** (`components/onboarding/AdminTour.js`, Konzept Nele
+> `docs/TEAMADMIN-TOUR-KONZEPT-2026-08-23.md`, Wortlaute wortgleich): 6 Dialog-Folien
+> mit „Beispiel"-Zitat-Karten, Auto-Start auf `/team/admin` NUR bei
+> `adminTourSeen=false` UND `welcomeSeen=true` (Vorrang-Regel — die Spieler-Tour geht
+> vor, keine gestapelten Dialoge), Wiederaufruf-Link „Kurz erklärt: deine Aufgaben als
+> Team-Admin" unten im Panel (`hg:open-admin-tour`), „Zeig mir das" auf Schritt 2
+> springt in den Ergebnisse-Reiter. Merkfeld `Player.adminTourSeen` + Route
+> `mark-admin-tour-seen` (jedes Schließen setzt es). **Rechte-gefiltert (Lina M2 →
+> Entscheidung Nele, Option a):** Schritte mit `brauchtTab` erscheinen nur bei
+> sichtbarem Reiter, Tryouts-Fußzeile nur mit Tryouts-Recht, Schlussfolie ohne
+> Ergebnisse-Reiter in eigener Fassung — kein Satz verspricht eine Fläche, die DIESER
+> Leser nicht hat; ein „je nach deinen Rechten"-Einschub wurde ausdrücklich verworfen.
+> ⚠️ **Der Fehler, den die Funktionsprobe fing:** Der Dialog hing unter dem
+> `animate-page-in`-Wrapper von `PageTransition` — dessen Transform verankert
+> `position: fixed` am DOKUMENT, der Weiter-Knopf lag mobil 227 px unter dem
+> Bildschirmrand (Familie ConfirmAction-B1 vom 22.08.). Behoben per
+> `createPortal(document.body)`; **wer je einen weiteren Dialog auf einer Seite
+> mountet statt im Root-Layout, braucht dasselbe Portal.** Kais Wächter
+> `tests/e2e/admin-tour.spec.mjs` (7 Fälle, Mutationsmatrix 5/5 einzeln) misst dazu
+> die Overlay-VERANKERUNG — die reine Knopf-Lage war für die Portal-Mutation auf
+> mobil zufällig blind (784,5 px, gemessen).
+> **(2) Analytics:** eigene Ereignisse `admin_tour_step/completed/skipped` (Versand
+> über `lib/trackEvent.js` → webdriver-Riegel), eigener Trichter in
+> `lib/analyticsSummary.js` + AdminTourCard in `/admin/analytics` („Zeig mir
+> das"-Ausstieg wird als „→ Reiter" GETRENNT gezählt, nicht als Abbruch);
+> Sponsor-Report per Positivliste unberührt (Kai nachgesehen). ⚠️ **Altfund
+> mitbehoben:** Der Trichter der SPIELER-Tour kannte den „feed"-Schritt (seit 18.08.)
+> nicht — seine Ereignisse fielen lautlos aus der Auswertung; nachgetragen
+> (TOUR_SCHRITTE 5→6).
+> **(3) Signup-Feldmotiv live** (`89f0de8`, Tobias erstmals im Gate): Desktop
+> 1280/1440/1920 Feldzeichnung ohne Foto-Nachladung, mobil einspaltig intakt,
+> /login unverändert Foto.
+> ✅ Suite **376 grün / 0 rot / 1 übersprungen** (377 in 40 Dateien; Kai im Worktree
+> und Hauptbaum-Lauf identisch) · design-audit ohne Abweichung (Baseline: Button 29,
+> SplitFlap 3, Panels 143/182 — die neuen Zeilen sind bewusste Zitate der
+> WelcomeTour-Dialogform).
+> ✅ **Live nachgemessen (23.08.2026, nach Deploy):** Server auf `614e01f` (am Server
+> verifiziert) · 16 Routen je 200 · `/signup` liefert die Feldzeichnung im
+> Server-HTML (`data-auth-court` 1, Foto-Verweis 0, 6 Eingabefelder) · `/login`
+> unverändert (Foto 1, Feldzeichnung 0) · `mark-admin-tour-seen` weist
+> Unangemeldete live mit 401 ab · PM2 online, **kein neuer Fehlerlog-Eintrag seit dem
+> Neustart** (die Einträge im Log sind 2,5 h älter als der Deploy) · kein
+> `npm install` nötig (kein Dependency-Diff, vorher geprüft).
+> ⚠️ **Offen aus dieser Runde:** Drei Konzept-§7-Fragen an Patrick (Bestands-Admins
+> sehen die Tour beim nächsten Besuch EINMAL — Neles Empfehlung ist so live, per
+> Skript stummschaltbar; trägt „zehn Minuten" für den vollen Box-Score?; Tryouts als
+> Fußzeile umgesetzt) · Tobias-Nebenbefund: 5 `mark-admin-tour-seen`-POSTs in seiner
+> DEFEKTEN Werkzeug-Sitzung, kontrolliert war es genau einer — Wächter-Vorschlag „je
+> Schließweg genau EIN POST" (→ Kai, niedrig) · Prüfbetrieb: Kai-Suite und
+> Tobias-Browser-Gate beschrieben sich gegenseitig `adminTourSeen` auf der geteilten
+> Dev-DB — zeitlich oder per DB trennen (→ Ole/Kai) · Lina N1: Im Gründer-Pfad
+> (Spieler-Tour-Schluss „Team gründen" → stille Weiterleitung) kann der Auto-Start
+> timing-bedingt erst beim ÜBERnächsten Besuch kommen — hingenommen, kein Verlust ·
+> Kai-Empfehlung ohne Dringlichkeit: eventType-Weißliste an der track-Route · Nele-
+> Notiz: Beispiele der Schritt-1-Karte ggf. nach Rechten filtern (Lina-Folgerunde).
+> ⚠️ **Dev-DB-Spuren (gewollt):** `max@test.de` trägt `adminTourSeen: true`; Tobias'
+> Gate-Sitzung lief OHNE webdriver-Kennung und hat echte `admin_tour_*`-Ereignisse in
+> der Dev-DB hinterlassen — die dortige Abbruchkurve der Admin-Tour ist Prüf-Artefakt.
 > 📣 **Tester-Drucksachen erneuert (23.08.2026, außerhalb des Repos):** Flyer/
 > Testerkarte/Visitenkarte in `~/Projekte/Hoops-Marketing/Tester-Akquise/` jetzt im
 > Anzeigetafel-/Linien-Design; QR-Kanäle `flyer`/`karte` wörtlich unverändert; alte
@@ -1894,8 +1950,9 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `89f0de8` (NICHT deployt — Signup-Motiv + Tour-Konzept; dazwischen nur Doku `5204569`) →
-> `f8c67b4` (aktuell live seit 23.08.2026 — Anzeigetafel-Runde) →
+> **Rollback-Kette:** `614e01f` (aktuell live seit 23.08.2026 abends — Admin-Tour-Wächter + Gate-Berichte) →
+> `1110fdf` (Team-Admin-Tour) → `89f0de8` (Signup-Feldmotiv + Tour-Konzept; dazwischen nur Doku `5204569`, `98e95c2`, `ebdbae2`) →
+> `f8c67b4` (Stand davor, live bis 23.08.2026 abends — Anzeigetafel-Runde) →
 > `248d5e3` (Spieler-/Vereinsseiten-Pakete A–D; dazwischen nur Doku `d9e2605`, `907d436`) →
 > `3bfd64f` (Stand davor; dazwischen nur Doku `90b7901`, `3093b51`, `78781f3`) → `2c23489` → `4fcc4c0` → `89579d4` (nur Doku) → `df92274` → `d72ba15` (nur Doku) → `f6cbbf2` (nur Doku) → `f2d2be3` (nur Doku) → `b23888c` (nur Doku) → `d1d9517` → `45de921` (nur Doku) → `4293c43` (nur Doku) → `a64ef92` (nur Doku) → `0ecd593` → `70fd2d1` → `1a57be5` (nur Doku) → `38f2d20` (nur Doku/Tests) → `d649127` → `6f02a9b` → `6c79ec4` (nur Tests) → `b62d511` → `57da148` (nur Tests) → `a320c9e` (nur Doku) → `e9a8ef3` → `108fbc7` (nur Doku) → `3181ad2` → `6348625` → `b88bbd3` (nur Doku) → `ea982c4` → `cdb8065` → `492e465` → `34dd22f` (Feldende,
 > vor den Wächtern) → `0f2a933` (nur Doku) → `17bb00a` → `8e63cf6` (nur Doku) → `c4982bd` → `c5cbf6f` → `fb23317` → `0da80c7` (Dribbelweg,
