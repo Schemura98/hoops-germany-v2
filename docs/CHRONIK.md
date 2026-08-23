@@ -5878,3 +5878,64 @@ die Tryout-Dedup.
 - **Übergabe vor Patricks /clear:** `docs/UEBERGABE-2026-08-23.md`. ⚠️ Klarstellung:
   „einen clear vorbereiten" meinte das Kontextmenü, NICHT den Demo-Purge — Roadmap 2
   unverändert vertagt, kein Purge-Runbook erstellt.
+
+#### Update (23.08.2026, nachts) — Team-Admin-Tour „Der Spielberichtsbogen" gebaut, beide Gates freigabefähig (Commit `1110fdf` + Wächter)
+
+- **Team-Admin-Tour gebaut** nach `docs/TEAMADMIN-TOUR-KONZEPT-2026-08-23.md` (Nele):
+  `components/onboarding/AdminTour.js` (neu) — 6 Dialog-Folien mit Zitat-Karten
+  (Aufgaben-Leiste beide Zustände · Ergebnis-Meldung 74:68 mit Beleg-Lampe · Box-Score
+  mit Benachrichtigt-Zeile · Einladewege-Liste), alle mit „Beispiel"-Band; Wortlaute
+  wortgleich aus dem Konzept. Auto-Start auf `/team/admin` nur bei
+  `adminTourSeen=false` UND `welcomeSeen=true` (Vorrang-Regel gegen Dialog-Stapel);
+  Wiederaufruf-Link „Kurz erklärt: deine Aufgaben als Team-Admin" unten im Panel
+  (eigenes Event `hg:open-admin-tour`); „Zeig mir das" auf Schritt 2 springt in den
+  Ergebnisse-Reiter. Merkfeld `Player.adminTourSeen` +
+  `app/api/player/mark-admin-tour-seen/route.js`; Analytics `admin_tour_step/
+  completed/skipped` mit eigenem Trichter (`lib/analyticsSummary.js`,
+  AdminTourCard in `app/admin/analytics/page.js`; Sponsor-Report per Positivliste
+  unberührt). BELEG-AUSSAGE-PRINZIP-Marker in der Datei (Wächter hatte die neue
+  Verfahrens-Fläche korrekt angehalten).
+- **Der Fehler, den die eigene Funktionsprobe fing:** In der ersten Fassung lag der
+  Weiter-Knopf auf 360×800 gemessen 227 px UNTER dem Bildschirmrand — der
+  `animate-page-in`-Wrapper von `PageTransition` verankerte `position: fixed` am
+  Dokument statt am Fenster (WelcomeTour entgeht dem nur, weil sie im Root-Layout
+  AUSSERHALB des Wrappers sitzt). Behoben per `createPortal(document.body)`;
+  Begründung im Code.
+- **Lina-Check** (onboarding-referentin): keine Blocker; M1 („Zeig mir das" führte
+  Co-Admins ohne Spielrecht ins Leere) behoben — Knopf nur bei sichtbarem
+  Ziel-Reiter (`sichtbareTabs`-Prop). M2 → **Entscheidung Nele (Option a):**
+  Schritte nach Reiter-Rechten des Lesers gefiltert (`brauchtTab`), Tryouts-Fußzeile
+  nur mit Tryouts-Recht (`fusszeileTab`), Schlussfolie ohne Ergebnisse-Reiter in
+  eigener Fassung (`textOhneErgebnisse`) — kein Satz verspricht eine Fläche, die
+  dieser Leser nicht hat. Ein „je nach deinen Rechten"-Einschub wurde ausdrücklich
+  verworfen. Linas N1 (Timing-Race: Gründer-Pfad kann den Auto-Start um einen Besuch
+  verschieben) bewusst hingenommen und dokumentiert; N3 (Bestands-Admins sehen die
+  Tour einmal) = Konzept-Empfehlung, Entscheidung liegt weiter bei Patrick.
+- **Altfund mitbehoben:** Der Onboarding-Trichter der SPIELER-Tour kannte den
+  „feed"-Schritt (seit 18.08. in der Tour) nicht — seine Ereignisse fielen lautlos
+  aus der Auswertung (`lib/analyticsSummary.js`, TOUR_SCHRITTE 5→6 Einträge).
+- **Beide Gates durch, beide freigabefähig** — über den GESAMTEN nicht-deployten
+  Stapel (Signup-Feldmotiv `89f0de8` + Tour `1110fdf`):
+  Kai **ohne Auflagen** (`docs/GATE-KAI-ADMIN-TOUR-2026-08-23.md`): Security der
+  neuen Route sauber (nur eigenes Konto, ein Boolean), Rechte-Filterung hält, neuer
+  Wächter `tests/e2e/admin-tour.spec.mjs` (7 Fälle, Mutationsmatrix **5/5** einzeln
+  gefahren — inkl. Portal-Mutation, die erst nach Nachschärfung um die
+  Overlay-Verankerung auch mobil rot wurde), Suite-Hygiene-Patch in
+  `spieler-vereinsseiten.spec.mjs` (Tour deterministisch stumm, als Vorsorge
+  ausgewiesen). Tobias **freigabefähig** (`docs/GATE-TOBIAS-ADMIN-TOUR-2026-08-23.md`):
+  alle 6 Schritte auf 4 Breiten, Erreichbarkeit je Knopf per elementFromPoint,
+  Signup-Motiv auf 1280/1440/1920 + mobil, /login unverändert, 0 Konsolen-/
+  Serverfehler. ⚠️ Sein Klick-Werkzeug war defekt (programmatische Klicks statt
+  echter) — seine eine Auflage „ein Durchlauf mit echten Eingabe-Events" ist durch
+  Kais Playwright-Klicks erfüllt. ⚠️ Befund an den Prüfbetrieb: Beide Gates teilten
+  sich die Dev-DB und beschrieben sich gegenseitig `adminTourSeen` — künftig zeitlich
+  oder per DB trennen (→ Ole/Kai).
+- **Suite nach Übernahme der Wächter: 376 grün / 0 rot / 1 übersprungen** (377 in 40
+  Dateien, von Kai im Worktree und im Hauptbaum unabhängig gezählt) ·
+  `design-audit -- --check` ohne Abweichung (Baseline nachgezogen: Button 29,
+  SplitFlap 3, Panels strikt 143 / weit 182 — die neuen Zeilen sind die bewussten
+  Zitate der abgenommenen WelcomeTour-Dialogform).
+- ⚠️ **Dev-DB-Spuren (gewollt, offengelegt):** `max@test.de` trägt
+  `adminTourSeen: true` (Produkt-Route, durch Gates/Funktionsprobe); Tobias' Sitzung
+  lief ohne webdriver-Kennung und hat echte `admin_tour_*`-Ereignisse in der Dev-DB
+  hinterlassen — wer die Abbruchkurve dort liest, soll das wissen.

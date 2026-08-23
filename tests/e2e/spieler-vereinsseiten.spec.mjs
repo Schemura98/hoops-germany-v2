@@ -61,6 +61,29 @@ async function alsSpieler(page, { token, player }) {
   );
 }
 
+// Team-Admin-Tour stummschalten (23.08.2026): /team/admin startet die
+// Admin-Tour von selbst, sobald welcomeSeen=true und adminTourSeen=false
+// gilt – je nach Dev-DB-Stand mal so, mal so. Dieser Test prüft den
+// Spielplan, nicht die Tour; die getmyinfo-Antwort wird deshalb
+// deterministisch auf „schon gesehen" gestellt, statt vom DB-Zufallsstand
+// abzuhängen (dieselbe Falle wie hg_welcome_token, Roadmap 38).
+// ⚠️ Ehrlich benannt: HEUTE ist A1 auch OHNE diese Zeile grün (gemessen
+// 23.08.2026, Auto-Start-Zustand erzwungen) – der Fall liest nur Text und
+// klickt auf /team/admin nichts, und toBeVisible stört sich nicht an einem
+// darüberliegenden Overlay. Die Stummschaltung ist VORSORGE: Der erste
+// Klick, den jemand diesem Test hinzufügt, träfe sonst die Overlay-Rückwand.
+// Bewusst KEIN Schreibzugriff auf die DB: Der würde einen vorbereiteten
+// Auto-Start-Zustand (Tobias' Browser-Gate) dauerhaft kippen. Die Tour
+// selbst bewacht tests/e2e/admin-tour.spec.mjs.
+async function adminTourStumm(page) {
+  await page.route("**/api/player/getmyinfo", async (route) => {
+    const res = await route.fetch();
+    const json = await res.json().catch(() => null);
+    if (json?.player) json.player.adminTourSeen = true;
+    await route.fulfill({ response: res, json });
+  });
+}
+
 // Verlorene, abgeschlossene Spiele des eigenen Teams aus der API – die EINE
 // Quelle für die Sollwerte aller drei Flächen. winningTeam kommt hier
 // unpopuliert (rohe Kennung); die Zeile deckt beide Formen ab.
@@ -109,6 +132,7 @@ test.describe("Spieler-/Vereinsseiten (Pakete A–D, 23.08.2026)", () => {
     const falsch = `${gegner}:${eigene}`;
 
     await alsSpieler(page, konto);
+    await adminTourStumm(page);
 
     // Fläche 1: Admin-Spielplan – eigene:Gegner plus N-Kürzel.
     await page.goto("/team/admin?tab=spielplan");
