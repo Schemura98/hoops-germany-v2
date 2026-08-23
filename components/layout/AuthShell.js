@@ -42,6 +42,11 @@ export default function AuthShell({
   // liegendem Motiv faellt genau das Wesentliche heraus. Deshalb je Seite
   // ausrichtbar statt fest mittig.
   imagePosition = "center",
+  // Seit 23.08.2026: Statt eines Fotos kann eine Seite ein GEZEICHNETES Motiv
+  // stellen (React-Knoten, z. B. <AuthCourt />). /signup nutzt das — das helle
+  // Hallenfoto biss sich mit dem dunklen Design (Befund Patrick). Der Foto-Weg
+  // darunter bleibt unveraendert; /login rendert bitgleich weiter.
+  motiv = null,
   title,
   subtitle,
   children,
@@ -96,6 +101,13 @@ export default function AuthShell({
       </main>
 
       <div className="hidden lg:block lg:w-1/2 relative">
+        {motiv ? (
+          // Gezeichnetes Motiv: kein <picture>, keine Bilddatei — unterhalb
+          // von lg versteckt dasselbe `hidden` wie beim Foto, es laedt dort
+          // ohnehin nichts nach (Inline-SVG, keine Netzwerkanfrage).
+          motiv
+        ) : (
+        <>
         {/* Das Motiv ist unter lg gar nicht sichtbar. Über `media` an den <source>-
             Elementen lädt es unterhalb von 1024px deshalb GAR NICHT (Telefone –
             u.a. der QR-Landepunkt /signup – sparen die volle Bilddatei), oberhalb
@@ -113,6 +125,8 @@ export default function AuthShell({
             style={{ objectPosition: imagePosition }}
           />
         </picture>
+        </>
+        )}
       </div>
     </div>
   );

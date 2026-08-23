@@ -7,6 +7,7 @@ import axios from "axios";
 import { PiGoogleLogoBold } from "react-icons/pi";
 import { setPlayerToken, setStoredPlayer } from "@/lib/clientAuth";
 import AuthShell from "@/components/layout/AuthShell";
+import AuthCourt from "@/components/layout/AuthCourt";
 import Button from "@/components/ui/Button";
 import FormAlert from "@/components/ui/FormAlert";
 import { inputClass } from "@/lib/ui";
@@ -143,11 +144,12 @@ function SignupForm() {
 
   return (
     <AuthShell
-      image="/images/signup-halle-1880.jpg"
-      imageAlt="Wurf in einer Vereinshalle mit Sprossenwänden"
-      // Der Werfer steht links der Bildmitte; ein mittiger Beschnitt im hohen
-      // Halbbild würde ihn abschneiden.
-      imagePosition="35% center"
+      // Gezeichnetes Feldmotiv statt Foto (23.08.2026, Auftrag Patrick): Das
+      // helle Hallenfoto biss sich mit dem dunklen Design. /signup ist der
+      // QR-Landepunkt der Flyer, deren Vorderseite dieselbe dunkle
+      // Feldzeichnung traegt — wer scannt, landet jetzt in derselben Welt.
+      // Begruendung der Bauart im Kopf von components/layout/AuthCourt.js.
+      motiv={<AuthCourt />}
       title="Registrieren"
       // Die Altersgrenze steht seit 14.08.2026 VOR den Feldern, nicht erst am
       // Häkchen darunter (Befund Lina, Wortlaut Nele). Vorher füllte ein
