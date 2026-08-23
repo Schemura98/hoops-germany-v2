@@ -75,7 +75,14 @@ const FLAECHEN = [
   ["lib/autoPost.js", "Ergebnis-Beitrag im Feed (öffentlich teilbar)", "praedikat"],
   ["components/feed/Anzeigetafel.js", "Anzeigetafel auf dem Newsfeed", "praedikat"],
   ["lib/statsNotify.js", "Benachrichtigung „Deine Zahlen stehen“", "praedikat"],
-  [join("app", "match", "[id]", "page.js"), "Spiel-Detailseite", "praedikat"],
+  // Seit der Anzeigetafel-Runde (23.08.2026) trifft die Spiel-Detailseite ihre
+  // Beleg-Aussage über das BelegLampe-Primitiv – die Seite selbst ruft das
+  // Prädikat nicht mehr auf, die Lampe tut es (und NUR sie darf es; sie nimmt
+  // das Match entgegen und rechnet nichts selbst nach). Der Eintrag wandert
+  // deshalb von der Seite auf die Lampe; der Ergebnisse-Tab steht zusätzlich
+  // drauf, weil er das Wort „Bestätigt" seit dem P6-Gate selbst rendert.
+  [join("components", "ui", "BelegLampe.js"), "Beleg-Lampe (Spielseite, Teamseite, Admin)", "praedikat"],
+  [join("components", "team", "tabs", "ErgebnisseTab.js"), "Ergebnisse-Tab im Admin", "praedikat"],
   [join("components", "posts", "ErgebnisInhalt.js"), "Ergebnis-Karte im Feed", "belegStufe"],
 ];
 

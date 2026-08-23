@@ -426,6 +426,9 @@ export default function SpielplanTab({ team }) {
                       // bleibt richtig (Randfall-Befund Kai, 23.08.2026).
                       const siegerBekannt = Boolean(match.winningTeam);
                       return (
+                        // Mini-Fenster (Konzept Fläche D): eingelassene
+                        // Ziffernfläche wie auf /match/[id], Geist Mono
+                        // (unter der Segment-Mindestgröße).
                         <span className="flex items-center gap-1.5 text-sm">
                           {siegerBekannt && (
                             <span
@@ -437,7 +440,7 @@ export default function SpielplanTab({ team }) {
                               {gewonnen ? "S" : "N"}
                             </span>
                           )}
-                          <span className="font-mono tabular-nums font-semibold text-mist-300">
+                          <span className="rounded-sm bg-navy-950 ring-1 ring-inset ring-navy-600/40 px-2 py-1 font-mono tabular-nums font-semibold text-mist-300 whitespace-nowrap">
                             {eigene}:{gegner}
                           </span>
                         </span>

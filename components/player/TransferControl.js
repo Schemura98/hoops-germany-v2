@@ -1,15 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import axios from "axios";
-import { PiArrowsLeftRightBold } from "react-icons/pi";
+import { PiArrowsLeftRightBold, PiArrowRightBold } from "react-icons/pi";
 import { getPlayerToken } from "@/lib/clientAuth";
 import { LEAGUE_LEVELS } from "@/lib/constants";
-
-const inputClass =
-  "w-full rounded-sm border border-navy-600 px-3 py-2 text-sm text-paper-50 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500";
+import { inputClassSm } from "@/lib/ui";
+import Button from "@/components/ui/Button";
 
 // Transfer-Status & -Infos im eigenen Profil verwalten.
+//
+// Seit dem 23.08.2026 sitzt dieser Kasten im STECKBRIEF-Reiter des eigenen
+// Profils statt unterhalb der Reiter (Befund Patrick: Er stand unter allen
+// drei Reitern und las sich wie dreimal dieselbe Funktion). Der Steckbrief
+// ist der thematische Ort – dort stehen Position und bevorzugte Liga.
+//
+// ⚠️ Die Eingabefelder nutzen das echte inputClassSm-Token: Die frühere
+// lokale Klassen-Kopie hatte KEINE Flächenfarbe – Felder Nr. 14 und 15 der
+// grauen Familie aus e9a8ef3 (Browser-Grau rgb(59,59,59)).
 export default function TransferControl({ player }) {
   const [available, setAvailable] = useState(
     player?.transferStatus === "verfuegbar"
@@ -83,7 +92,7 @@ export default function TransferControl({ player }) {
             <select
               value={league}
               onChange={(e) => setLeague(e.target.value)}
-              className={inputClass}
+              className={inputClassSm}
             >
               <option value="">– keine Angabe –</option>
               {LEAGUE_LEVELS.map((lv) => (
@@ -101,18 +110,40 @@ export default function TransferControl({ player }) {
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={2}
-              className={`${inputClass} resize-none`}
+              className={`${inputClassSm} resize-none`}
               placeholder="Worauf legst du Wert? Verfügbarkeit, Region…"
             />
           </div>
           <div className="flex justify-end">
-            <button
-              onClick={() => save(true)}
-              disabled={saving}
-              className="bg-brand-500 hover:bg-brand-400 disabled:bg-navy-600 disabled:text-mist-300 text-navy-950 rounded-sm px-5 py-2 text-sm font-medium"
-            >
+            <Button onClick={() => save(true)} disabled={saving} size="sm" className="px-5">
               {saving ? "Speichern…" : "Speichern"}
-            </button>
+            </Button>
+          </div>
+
+          {/* Der Weiterweg (Ronja M3): Nach dem Umschalten auf „verfügbar" war
+              hier Schluss – kein „so sehen dich Vereine", kein Weg zu offenen
+              Probetrainings. Für Vereinslose (Z3) ist genau das der nächste
+              Schritt; bedient im Produkt statt über einen eigenen Kanal
+              (Zielgruppen-Entscheid). */}
+          <div className="mt-1 border-t border-navy-600 pt-3 space-y-1.5">
+            <p className="text-xs text-mist-400">Und so geht es weiter:</p>
+            <p className="text-sm">
+              <Link
+                href="/transfermarkt"
+                className="inline-flex items-center gap-1.5 text-paper-50 hover:text-brand-400"
+              >
+                So sehen dich Vereine – zum Transfermarkt{" "}
+                <PiArrowRightBold className="text-xs" />
+              </Link>
+            </p>
+            <p className="text-sm">
+              <Link
+                href="/tryouts"
+                className="inline-flex items-center gap-1.5 text-paper-50 hover:text-brand-400"
+              >
+                Offene Probetrainings ansehen <PiArrowRightBold className="text-xs" />
+              </Link>
+            </p>
           </div>
         </div>
       )}

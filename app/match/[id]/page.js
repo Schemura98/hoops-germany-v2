@@ -5,7 +5,6 @@ import Link from "next/link";
 import axios from "axios";
 import {
   PiBasketballBold,
-  PiCheckCircleBold,
   PiMapPinBold,
   PiStarFill,
   PiUsersBold,
@@ -16,10 +15,11 @@ import {
 import Navbar from "@/components/layout/Navbar";
 import Loading from "@/components/ui/Loading";
 import Footer from "@/components/layout/Footer";
-import Avatar from "@/components/Avatar";
-import SplitFlap from "@/components/ui/SplitFlap";
+import Avatar, { initialsFor } from "@/components/Avatar";
+import SegmentZahl from "@/components/ui/SegmentZahl";
 import Reveal from "@/components/ui/Reveal";
-import { teamScores, matchVerification, beidseitigBelegt } from "@/lib/matchScore";
+import BelegLampe from "@/components/ui/BelegLampe";
+import { teamScores, matchVerification } from "@/lib/matchScore";
 
 function formatDate(d) {
   try {
@@ -212,7 +212,6 @@ export default function MatchIdPage({ params }) {
   // Seit dem 15.08.2026 aus `lib/matchScore.js` (s. Kommentar dort). Die
   // Bedingung war hier richtig – sie stand nur an drei Stellen abgeschrieben,
   // und die vierte Fläche hat sie deshalb nicht mitbekommen.
-  const bestaetigt = beidseitigBelegt(match);
   const verify = matchVerification(match);
   const statsA = (match.playerStats || []).filter(
     (s) => String(s.team) === String(match.teamA?._id)
@@ -252,53 +251,91 @@ export default function MatchIdPage({ params }) {
               </span>
             </p>
           )}
-          <div className="flex items-start gap-4">
-            <TeamBadge team={match.teamA} />
-            <div className="text-center px-2 pt-3">
-              {score ? (
-                // Anzeigetafel: Monospace mit Tabellenziffern, damit der Doppelpunkt
-                // nicht wandert, und die 2px-Markenleiste als Unterkante – die
-                // dritte und letzte Stelle, an der dieses Signaturelement steht.
-                // Der aeussere Block erzwingt den Zeilenumbruch: Ohne ihn stand
-                // die inline-block-Anzeigetafel auf 390px in derselben Zeile wie
-                // das Status-Etikett und quetschte die Teamnamen auf "Esse…".
-                <div>
-                <div className="inline-block border-b-2 border-brand-500 pb-1">
-                  <div className="font-mono tabular-nums text-4xl sm:text-5xl font-bold whitespace-nowrap">
-                    <SplitFlap delay={0} className={score.a >= score.b ? "text-paper-50" : "text-mist-400"}>
-                      {score.a}
-                    </SplitFlap>
-                    <span className="text-mist-600 mx-1.5">:</span>
-                    <SplitFlap delay={140} className={score.b >= score.a ? "text-paper-50" : "text-mist-400"}>
-                      {score.b}
-                    </SplitFlap>
+          {/* Die Tafel dieser Seite (Konzept ANZEIGETAFEL-KONZEPT-2026-08-23,
+              Fläche A): Der Spielstand sitzt in zwei eingelassenen
+              Ziffernfenstern eines Gehäuses – Segment-Ziffern, Plaketten mit
+              den Team-Kürzeln (die vollen Namen + Wappen stehen darunter, das
+              Kürzel ist Zitat, kein Ersatz), darunter das Status-Register mit
+              der Beleg-Lampe. Die 2px-Markenkante wandert von der
+              Score-Unterkante auf die Tafel-Oberkante – sie bleibt die EINE
+              Signaturstelle dieser Seite. SplitFlap bleibt an dieser einen
+              Stelle (der Flap IST die Ankunft; ein zusätzlicher
+              Einschalt-Moment wäre eine Ankunfts-Animation zu viel) – seit der
+              Tobias-Auflage vom 23.08. klappt er die ZELLENWEISE gebaute
+              Wertreihe als Ganzes um (SegmentZahl flap): Auch hier sitzt jede
+              Ziffer mittig auf ihrer eigenen Geist-Acht, wie in jedem anderen
+              Fenster der Plattform.
+              Sieg/Niederlage weiter über Helligkeit, nie über Farbe allein. */}
+          {score ? (
+            <>
+              <div className="mx-auto max-w-sm overflow-hidden rounded-md border border-navy-600 border-t-2 border-t-brand-500 bg-navy-800 px-4 pt-4 pb-3">
+                <div className="flex items-end justify-center gap-2.5">
+                  <div className="flex-1 text-center">
+                    <p className="mb-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-mist-400">
+                      {initialsFor(match.teamA?.teamName)}
+                    </p>
+                    <div className="rounded-sm bg-navy-950 ring-1 ring-inset ring-navy-600/40 px-2 py-3">
+                      <SegmentZahl
+                        wert={score.a}
+                        gedimmt={score.a < score.b}
+                        flap
+                        flapDelay={0}
+                        groesse="clamp(2.25rem, 8vw, 3.25rem)"
+                      />
+                    </div>
+                  </div>
+                  <span
+                    aria-hidden="true"
+                    className="pb-4 font-display font-extrabold text-mist-600"
+                    style={{ fontSize: "clamp(1.5rem, 5vw, 2rem)" }}
+                  >
+                    :
+                  </span>
+                  <div className="flex-1 text-center">
+                    <p className="mb-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-mist-400">
+                      {initialsFor(match.teamB?.teamName)}
+                    </p>
+                    <div className="rounded-sm bg-navy-950 ring-1 ring-inset ring-navy-600/40 px-2 py-3">
+                      <SegmentZahl
+                        wert={score.b}
+                        gedimmt={score.b < score.a}
+                        flap
+                        flapDelay={140}
+                        groesse="clamp(2.25rem, 8vw, 3.25rem)"
+                      />
+                    </div>
                   </div>
                 </div>
+                {/* Status-Register: aufs Gehäuse gedruckt. KEINE erfundene
+                    Perioden-Zahl (wir kennen keine Viertelstände) – dort steht
+                    der Spielstatus. Rechts die Beleg-Lampe; bei „noch nicht
+                    bestätigt"/„strittig" übernimmt weiterhin das auffälligere
+                    Etikett unter dem Datum (keine doppelte Statusanzeige). */}
+                <div className="mt-3 flex items-center justify-center gap-3 border-t border-navy-600 pt-2.5">
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-mist-400">
+                    {completed ? "Beendet" : "Angesetzt"}
+                  </span>
+                  {verify && verify.state !== "unverified" && verify.state !== "mismatch" && (
+                    <BelegLampe match={match} />
+                  )}
                 </div>
-              ) : (
+              </div>
+              <div className="mt-5 flex items-start justify-center gap-4">
+                <TeamBadge team={match.teamA} />
+                <TeamBadge team={match.teamB} />
+              </div>
+            </>
+          ) : (
+            <div className="flex items-start gap-4">
+              <TeamBadge team={match.teamA} />
+              <div className="text-center px-2 pt-3">
                 <div className="text-xl font-semibold text-mist-400 pt-3">vs</div>
-              )}
-              <span
-                className={`mt-3 inline-block text-xs font-medium rounded-full px-3 py-1 ${
-                  completed
-                    ? "bg-signal-ok/20 text-signal-ok"
-                    : "bg-navy-600/20 text-mist-300"
-                }`}
-              >
-                {completed ? "Beendet" : "Geplant"}
-              </span>
+                <span className="mt-3 inline-block text-xs font-medium rounded-sm px-3 py-1 bg-navy-600/20 text-mist-300">
+                  Geplant
+                </span>
+              </div>
+              <TeamBadge team={match.teamB} />
             </div>
-            <TeamBadge team={match.teamB} />
-          </div>
-
-          {/* Bewusst UNTER der Teamzeile, nicht in der Mittelspalte: Dort machte
-              der Satz die Spalte so breit, dass die Teamnamen auf 390px zu
-              "Essen En…" abgeschnitten wurden. */}
-          {bestaetigt && (
-            <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-mist-400">
-              <PiCheckCircleBold className="text-signal-ok" />
-              Von beiden Teams bestätigt
-            </p>
           )}
 
           <div className="mt-6 flex flex-col items-center gap-1 text-sm text-mist-400">

@@ -18,7 +18,8 @@ import DemoBadge from "@/components/DemoBadge";
 import Footer from "@/components/layout/Footer";
 import Tabs from "@/components/ui/Tabs";
 import Button from "@/components/ui/Button";
-import CountUp from "@/components/ui/CountUp";
+import Tafel from "@/components/ui/Tafel";
+import BelegLampe from "@/components/ui/BelegLampe";
 import { Skeleton, SkeletonList } from "@/components/ui/Skeleton";
 import FollowButton from "@/components/FollowButton";
 import PostCard from "@/components/posts/PostCard";
@@ -276,12 +277,20 @@ export default function TeamTeamDetailSlugPage({ params }) {
                   <PiTrophyBold className="text-[10px]" /> Meister
                 </span>
               ) : league.rank ? (
-                <div className="shrink-0 text-right">
-                  <p className="font-display text-3xl font-black tabular-nums text-paper-50 leading-none">
-                    <CountUp value={league.rank} />.
-                  </p>
-                  <p className="text-[11px] text-mist-400">von {league.totalTeams}</p>
-                </div>
+                // Das RANG-Fenster der Tafel (Konzept Fläche C): Die eine Zahl,
+                // für die ein Verein die Seite besucht, als eingelassene
+                // Segment-Ziffer – die Karte selbst ist das Gehäuse (Meister-
+                // Fall behält die Trophäen-Pille; ein „1."-Fenster daneben
+                // wäre doppelt).
+                <Tafel.Fenster
+                  label="Rang"
+                  wert={league.rank}
+                  groesse="haupt"
+                  betont
+                  countUp
+                  unterzeile={`von ${league.totalTeams}`}
+                  className="w-24 shrink-0"
+                />
               ) : null}
             </div>
             {league.record && league.record.games > 0 && (
@@ -488,12 +497,21 @@ export default function TeamTeamDetailSlugPage({ params }) {
                           </p>
                         </div>
                         {score ? (
-                          <span
-                            className={`font-mono tabular-nums text-lg font-bold flex-shrink-0 ${
-                              won ? "text-signal-ok" : "text-paper-50"
-                            }`}
-                          >
-                            {own} : {opp}
+                          // Mini-Fenster (Konzept Fläche D): Dasselbe
+                          // eingelassene Ziffernfenster, das groß auf
+                          // /match/[id] steht, als Zitat in der Zeile – die
+                          // Zeile verlinkt die große Tafel. Geist Mono statt
+                          // Segment (unter der Segment-Mindestgröße), dazu die
+                          // Beleg-Lampe in Miniatur.
+                          <span className="flex items-center gap-2 flex-shrink-0">
+                            <BelegLampe match={m} kompakt />
+                            <span
+                              className={`rounded-sm bg-navy-950 ring-1 ring-inset ring-navy-600/40 px-2.5 py-1.5 font-mono tabular-nums text-base font-bold whitespace-nowrap ${
+                                won ? "text-signal-ok" : "text-paper-50"
+                              }`}
+                            >
+                              {own} : {opp}
+                            </span>
                           </span>
                         ) : (
                           <span className="text-xs font-medium text-signal-wait bg-signal-wait/10 rounded-sm px-3 py-1 flex-shrink-0">

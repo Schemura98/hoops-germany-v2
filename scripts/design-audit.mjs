@@ -41,9 +41,25 @@ const BASELINE = {
     // Spieler-/Vereinsseiten-Runde (Pakete A–D) – Beitritts-Link der
     // Teamseite auf Button, Liga-Karte mit CountUp, Listenkarten auf
     // /spieler und /teams mit Reveal-Einblendung.
-    Button: 27, Card: 2, ConfirmAction: 4, CountUp: 6, EmptyState: 15,
-    FormAlert: 9, LinkTabs: 1, Loading: 19, Reveal: 13, ScrollTable: 3,
-    Skeleton: 13, SplitFlap: 3, Tabs: 6,
+    // 23.08.2026, Anzeigetafel-Runde (docs/ANZEIGETAFEL-KONZEPT-2026-08-23.md):
+    // Drei neue Primitive Tafel/SegmentZahl/BelegLampe. SegmentZahl 0 -> 1
+    // (Mittelweg-Runde, 23.08.2026): Der Match-Kopf (Fläche A) bezog seine
+    // Fenster-Ziffern bisher aus HANDGEBAUTEM font-segment-Markup – das sah
+    // dieser Zähler gar nicht. Jetzt läuft er über das Primitiv (SplitFlap
+    // als children), damit die Wertschrift der Tafel EINE Quelle hat. Die 1
+    // ist also die sanktionierte Tafel-Fenster-Stelle des Match-Kopfs; jeder
+    // Wert > 1 heißt weiterhin: jemand setzt Fenster-Ziffern außerhalb einer
+    // Tafel ein, und genau das ist per Konzept-Grenzwert verboten.
+    // CountUp 6 -> 4: Profil-Bilanz und
+    // Liga-Karte beziehen ihr CountUp jetzt über Tafel.Fenster.
+    BelegLampe: 2, Button: 28, Card: 2, ConfirmAction: 4, CountUp: 4,
+    EmptyState: 15, FormAlert: 9, LinkTabs: 1, Loading: 19, Reveal: 13,
+    // SplitFlap 3 -> 2 (Tobias-Auflage 23.08.2026): /match importiert den
+    // Flap nicht mehr selbst – SegmentZahl klappt die Zellen-Wertreihe als
+    // Ganzes (flap-Prop, ui-interner Import). Die Ein-Stelle-je-Seite-Regel
+    // des Flaps gilt unverändert.
+    ScrollTable: 3, SegmentZahl: 1, Skeleton: 13, SplitFlap: 2, Tabs: 6,
+    Tafel: 2,
   },
   tokens: { cardClass: 0 },
   // ⚠️ 141 -> 140 / 182 -> 181 am 22.08.2026, und die Richtung ist die gute:
@@ -55,8 +71,12 @@ const BASELINE = {
   // Einlade-Kasten im KaderTab traegt statt des vollen Orange-Rahmens die
   // sanktionierte navy-600 + border-t-brand-Form (zaehlt jetzt strikt statt
   // weit), und der Beitritts-Link der Teamseite kommt vom Button-Primitiv.
-  panelsStrikt: 139,
-  panelsWeit: 177,
+  // 139 -> 141 / 177 -> 180 am 23.08.2026 (Anzeigetafel-Runde): Das
+  // Tafel-Gehäuse des Match-Kopfs und die Letztes-Spiel-Karte des Profils
+  // sind neue, BEWUSST handgesetzte Flächen im Gehäuse-Muster – kein Drift
+  // durch Nachlässigkeit, sondern zwei neue Karten.
+  panelsStrikt: 141,
+  panelsWeit: 180,
 };
 
 const ARGS = new Set(process.argv.slice(2));

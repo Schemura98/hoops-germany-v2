@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import {
   PiBasketballBold,
-  PiCheckCircleBold,
   PiWarningBold,
   PiChartBarBold,
 } from "react-icons/pi";
@@ -313,8 +312,28 @@ export default function ErgebnisseTab({ team }) {
                     // wahr, ohne eine Übereinstimmung zu behaupten, die es
                     // nicht gab (Befund Nele P6, Entscheidung Patrick: Weg b;
                     // dieselbe Quelle wie im Newsfeed: lib/matchScore.js).
-                    <span className="inline-flex items-center gap-1.5 text-signal-ok text-sm font-semibold">
-                      <PiCheckCircleBold /> {beidseitigBelegt(match) ? "Bestätigt" : "Ergebnis steht"}
+                    // Beleg-Lampe (Konzept Fläche D): gefüllt nur bei ECHTER
+                    // beidseitiger Meldung – dieselbe Form wie auf /match/[id]
+                    // und der öffentlichen Teamseite. Wortlaute aus dem P6-Gate.
+                    // ⚠️ Grün NUR beim belegten Fall: „Ergebnis steht" in Grün
+                    // neben einer UNGEFÜLLTEN Lampe waren gemischte Signale
+                    // (Empfehlung Kai, 23.08.2026). Die Lampe ist hier bewusst
+                    // von Hand gesetzt statt über das BelegLampe-Primitiv:
+                    // Dessen Langtext würde den knappen Tab-Wortlaut doppeln –
+                    // der Text daneben trägt die Information, der Punkt ist
+                    // Kulisse (aria-hidden).
+                    <span
+                      className={`inline-flex items-center gap-1.5 text-sm font-semibold ${
+                        beidseitigBelegt(match) ? "text-signal-ok" : "text-mist-300"
+                      }`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`h-2 w-2 shrink-0 rounded-full ${
+                          beidseitigBelegt(match) ? "bg-signal-ok" : "border border-mist-600"
+                        }`}
+                      />
+                      {beidseitigBelegt(match) ? "Bestätigt" : "Ergebnis steht"}
                     </span>
                   )}
                   {mismatch && (

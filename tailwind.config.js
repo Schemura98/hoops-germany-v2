@@ -130,12 +130,22 @@ module.exports = {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         display: ["var(--font-display)", "var(--font-sans)", "sans-serif"],
         mono: ["var(--font-mono)", "ui-monospace", "monospace"],
+        // Segment-Ziffern der Anzeigetafel – NUR ueber SegmentZahl in Tafel-Fenstern.
+        segment: ["var(--font-segment)", "ui-monospace", "monospace"],
       },
       borderRadius: {
         // Gestuft statt überall 16px: Radius ist wieder ein Hierarchie-Signal.
-        sm: "6px", // Chips, Eingaben, Tabellenzellen
-        md: "10px", // Standard-Panel, Buttons
-        lg: "16px", // nur große Flächen (Hero-Panel, Dialog)
+        // Entscheidung Patrick 23.08.2026 („weg vom abgerundeten
+        // KI-Standard-Kachel-Design, die Linien-Sprache des Hero-Spielfelds
+        // überall"): die Leiter wird scharf – 2/4/6 statt 6/10/16. Die Stufung
+        // bleibt (Hierarchie-Signal), die Kante liest sich als technische
+        // Zeichnung statt als Kachel. rounded-full (Avatare, Lampen,
+        // Schalter) bleibt bewusst rund – ein Kreis ist eine Form, keine
+        // Weichzeichnung. Überschreibt die Radien-Zeile der Spezifikation
+        // vom 12.08. (Eigentümer-Entscheidung).
+        sm: "2px", // Chips, Eingaben, Tabellenzellen
+        md: "4px", // Standard-Panel, Buttons
+        lg: "6px", // nur große Flächen (Hero-Panel, Dialog)
       },
       transitionTimingFunction: {
         "out-strong": "cubic-bezier(0.23, 1, 0.32, 1)",

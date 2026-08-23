@@ -1,5 +1,5 @@
 import "./globals.css";
-import { display, sans, mono } from "@/lib/fonts";
+import { display, sans, mono, segment } from "@/lib/fonts";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import TestPhaseBanner from "@/components/TestPhaseBanner";
 import WelcomeTour from "@/components/onboarding/WelcomeTour";
@@ -26,7 +26,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="de">
       <body
-        className={`${sans.variable} ${display.variable} ${mono.variable} font-sans antialiased bg-navy-950 text-paper-50`}
+        className={`${sans.variable} ${display.variable} ${mono.variable} ${segment.variable} font-sans antialiased bg-navy-950 text-paper-50`}
       >
         {/* ══ SPRUNGMARKE ZUM INHALT — WCAG 2.4.1 „Bypass Blocks" (A) ═════════
             Befund Tobias (17.08.2026, live gegen hoopsgermany.de, 375×812):

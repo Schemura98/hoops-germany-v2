@@ -52,12 +52,11 @@ export default function PlayerPlayerDetailPage() {
             </Button>
           </>
         }
+        // Transfermarkt-Kasten im Steckbrief-Reiter statt unterhalb der
+        // Reiter – er stand sonst unter allen drei Reitern und las sich wie
+        // dreimal dieselbe Funktion (Befund Patrick, 23.08.2026).
+        steckbriefExtra={<TransferControl player={player} />}
       />
-
-      {/* Eigentümer-Extra: Transfermarkt-Status */}
-      <div className="max-w-4xl mx-auto px-4 pb-10 -mt-2">
-        <TransferControl player={player} />
-      </div>
 
       <Footer />
     </div>

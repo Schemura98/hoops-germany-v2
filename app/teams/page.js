@@ -214,6 +214,11 @@ export default function TeamsPage() {
                       <span className="truncate">{t.region}</span>
                     </div>
                   )}
+                  {/* Liga-Zeile (Ronja M2): „Wer aus meiner Liga ist schon
+                      hier?" war auf der Liste bisher nicht beantwortbar. */}
+                  {t.leagueName && (
+                    <p className="mt-0.5 text-xs text-mist-400 truncate">{t.leagueName}</p>
+                  )}
                 </div>
               </Link>
               </Reveal>

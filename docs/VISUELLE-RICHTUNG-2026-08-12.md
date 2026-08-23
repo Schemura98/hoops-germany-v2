@@ -283,6 +283,15 @@ radius-md   10px  Standard-Panels/Karten, Buttons
 radius-lg   16px  reserviert für wirklich große Flächen (Hero-Panel, Modal) –
                    NICHT die Standard-Karte
 ```
+> ⚠️ **ÜBERSCHRIEBEN am 23.08.2026 (Eigentümer-Entscheidung Patrick):** Die
+> Leiter steht seither auf **2/4/6 px** („weg vom abgerundeten
+> KI-Standard-Kachel-Design – die minimalistische Linien-Sprache des
+> Hero-Spielfelds soll sich durch jede Unterseite ziehen"). Vivien hat 2/4/6
+> gegen 0/2/4 am gerenderten Bild verglichen: Bei 0 px wäre `rounded-sm` ein
+> Token ohne Wirkung, die 2-px-Kante liest sich als gefaste Maschinenkante
+> statt als ungestyltes HTML. Die STUFUNG als Hierarchie-Signal bleibt;
+> `rounded-full` (Avatare, Schalter, Lampen) bleibt rund. Quelle der Werte:
+> `tailwind.config.js` (dort auch die Begründung).
 Heute ist `rounded-2xl` (16px) der Wert für *alles* – Audit-Punkt „Uniform
 border-radius on everything". Die neue Stufung macht Radius wieder zu
 einem Hierarchie-Signal statt zu einem Reflex.
@@ -531,6 +540,17 @@ referenzieren, wechseln:
   Zahlenwerte (Punkte, Tabellenplätze). Nicht übernommen: reine
   Broadcast-Overlay-Optik (LED-Segment-Schriften u. Ä. – zu kostümhaft für
   ein Alltagsprodukt).
+  > ⚠️ **PRÄZISIERT am 23.08.2026 (Entscheidung Patrick, Konzept
+  > `docs/ANZEIGETAFEL-KONZEPT-2026-08-23.md`):** Die 7-Segment-Schrift
+  > (DSEG7, `font-segment`) ist seither erlaubt – aber AUSSCHLIESSLICH als
+  > unbeleuchteter „888"-Geist hinter den Werten der Tafel-Fenster
+  > (`components/ui/SegmentZahl.js`, zellenweise: jede Ziffer auf ihrer
+  > eigenen Geist-Acht). Die WERTSCHRIFT der Fenster ist Big Shoulders
+  > (Mittelweg-Entscheidung Patrick). Segment-Schrift außerhalb von
+  > Tafel-Fenstern, für Wörter oder in Tabellen bleibt verboten. Neu als
+  > wiederkehrendes Zeichen freigegeben: die **Beleg-Lampe**
+  > (`components/ui/BelegLampe.js`) – gefüllt NUR bei beidseitig belegtem
+  > Ergebnis (`lib/matchScore.js`), drei Zustände, nie Farbe allein.
 - **Recherche zu Scoreboard-/Sport-Dashboard-Konventionen** (u. a. zu
   chroma-tauglichen dunklen Anzeigetafel-Hintergründen für Broadcast/Beamer):
   Befund, dass ein dunkler Grund für Sport-Statistik-Flächen eine

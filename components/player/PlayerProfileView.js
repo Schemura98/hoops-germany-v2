@@ -20,7 +20,7 @@ import PlayerPosts from "@/components/posts/PlayerPosts";
 import Avatar from "@/components/Avatar";
 import ScrollHintRow from "@/components/ScrollHintRow";
 import Tabs from "@/components/ui/Tabs";
-import CountUp from "@/components/ui/CountUp";
+import Tafel from "@/components/ui/Tafel";
 import { ageFromBirthdate, formatBirthdate } from "@/lib/age";
 import { positionLabel } from "@/lib/constants";
 
@@ -160,6 +160,84 @@ function NextMatchCard({ match, teamId }) {
   );
 }
 
+// Das jüngste Spiel MIT eigenen Zahlen – nur auf dem EIGENEN Profil (Ronja M1,
+// 23.08.2026): Die own_stats-Glocke fängt den Moment nur, wenn der Spieler die
+// Nachricht sieht; wer Tage später direkt sein Profil öffnet, fand das frische
+// Spiel bisher zwei Klicks tief in einer eingeklappten Station. Bewusst OHNE
+// die 2px-Brand-Oberkante – die trägt auf dieser Seite allein die
+// Nächstes-Spiel-Karte (eine hervorgehobene Karte je Fläche).
+// Ohne Box-Score-Eintrag rendert die Karte nichts (kein leerer Kasten).
+function LastMatchCard({ match }) {
+  if (!match?.matchId) return null;
+
+  const kontext =
+    match.stage === "Playoffs" ? match.playoffRound || "Playoffs" : match.leagueName || "";
+
+  return (
+    <div className="overflow-hidden rounded-md border border-navy-600 bg-navy-800">
+      <div className="flex items-center justify-between gap-3 bg-navy-900 px-5 py-3">
+        <h2 className="flex shrink-0 items-center gap-2 text-sm font-bold uppercase tracking-wide text-paper-50">
+          <PiBasketballBold className="text-sm text-brand-400" /> Dein letztes Spiel
+        </h2>
+        {kontext && <span className="min-w-0 truncate text-xs text-mist-400">{kontext}</span>}
+      </div>
+
+      <Link
+        href={`/match/${match.matchId}`}
+        className="block px-5 py-4 transition-colors duration-150 hover:bg-navy-700"
+      >
+        <p className="font-mono text-xs uppercase tracking-wide tabular-nums text-mist-300">
+          {spielDatum(match.date)}
+        </p>
+
+        <div className="mt-2.5 flex items-center gap-3">
+          <Avatar
+            name={match.gegner?.teamName}
+            src={match.gegner?.logo}
+            className="h-11 w-11 flex-shrink-0"
+            textClass="text-sm"
+            square
+          />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-paper-50">
+              vs. {match.gegner?.teamName || "Unbekannt"}
+            </p>
+            {match.eigenePunkte != null && (
+              <p className="font-mono tabular-nums text-lg font-bold text-paper-50">
+                {/* Kürzel nur bei bekanntem Sieger – dieselbe Schranke wie im
+                    Admin-Spielplan (Unentschieden-Randfall). */}
+                {match.gewonnen != null && (
+                  <span
+                    className={`mr-1.5 text-[11px] font-semibold ${
+                      match.gewonnen ? "text-signal-ok" : "text-mist-400"
+                    }`}
+                  >
+                    {match.gewonnen ? "S" : "N"}
+                  </span>
+                )}
+                {match.eigenePunkte}
+                <span className="mx-0.5 text-navy-500">:</span>
+                {match.gegnerPunkte}
+              </p>
+            )}
+          </div>
+          {match.werte && (
+            <div className="shrink-0 text-right">
+              <p className="font-mono tabular-nums text-lg font-bold text-paper-50">
+                {match.werte.points}·{match.werte.assists}·{match.werte.rebounds}
+              </p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-mist-400">
+                Deine PKT·AST·REB
+              </p>
+            </div>
+          )}
+          <PiCaretRightBold className="shrink-0 text-xs text-mist-400" />
+        </div>
+      </Link>
+    </div>
+  );
+}
+
 function StatCell({ label, value, sub, small }) {
   return (
     <div className="px-4 py-3 text-center min-w-[84px]">
@@ -206,11 +284,17 @@ const TABS = [
   { key: "beitraege", label: "Beiträge", icon: PiNewspaperClippingBold },
 ];
 
-export default function PlayerProfileView({ player, viewerId, actions }) {
+// steckbriefExtra: Einschub am Ende des Steckbrief-Reiters (heute: der
+// Transfermarkt-Kasten des eigenen Profils). Er stand vorher UNTERHALB der
+// Reiter und blieb damit bei jedem Reiterwechsel stehen – Patrick las das als
+// „dieselbe Funktion dreimal auf einer Seite" (23.08.2026). Der Steckbrief ist
+// der thematische Ort: Dort stehen Position und bevorzugte Liga.
+export default function PlayerProfileView({ player, viewerId, actions, steckbriefExtra }) {
   const [stats, setStats] = useState(null);
   const [stations, setStations] = useState([]);
   const [nextMatch, setNextMatch] = useState(null);
   const [nextMatchTeamId, setNextMatchTeamId] = useState(null);
+  const [lastMatch, setLastMatch] = useState(null);
   const [tab, setTab] = useState("stats");
   const [season, setSeason] = useState(""); // "" = alle
   const [openStation, setOpenStation] = useState(null); // key der ausgeklappten Station
@@ -271,6 +355,27 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
       active = false;
     };
   }, [player?._id]);
+
+  // „Dein letztes Spiel" NUR auf dem eigenen Profil laden (Ronja M1) –
+  // eigener Aufruf aus demselben Grund wie next-match: Fällt er aus, bleibt
+  // schlicht die Karte weg, der Rest des Profils lädt unabhängig.
+  useEffect(() => {
+    if (!player?._id || !eigenesProfil) return;
+    let active = true;
+    (async () => {
+      try {
+        const { data } = await axios.post("/api/player/last-match", {
+          playerId: player._id,
+        });
+        if (active) setLastMatch(data.lastMatch || null);
+      } catch {
+        /* ohne Eintrag bleibt die Karte weg */
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [player?._id, eigenesProfil]);
 
   // Verfügbare Saisons (für den Filter)
   const seasons = useMemo(() => {
@@ -429,9 +534,9 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                   </>
                 )}
               </div>
-              <StatCell label="PPG" value={stats ? stats.ppg.toFixed(1) : "–"} />
-              <StatCell label="APG" value={stats ? stats.apg.toFixed(1) : "–"} />
-              <StatCell label="RPG" value={stats ? stats.rpg.toFixed(1) : "–"} />
+              <StatCell label="PPG" value={stats && stats.games > 0 ? stats.ppg.toFixed(1) : "–"} />
+              <StatCell label="APG" value={stats && stats.games > 0 ? stats.apg.toFixed(1) : "–"} />
+              <StatCell label="RPG" value={stats && stats.games > 0 ? stats.rpg.toFixed(1) : "–"} />
               <div className="grid grid-cols-1 divide-y divide-paper-50/10 min-w-[120px]">
                 <StatCell label="Größe" value={player?.height} small />
                 <StatCell label="Alter" value={ageFromBirthdate(player?.birthdate) ?? player?.age} small />
@@ -497,10 +602,26 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
         {tab === "stats" && (
           <>
             <NextMatchCard match={nextMatch} teamId={nextMatchTeamId} />
+            {eigenesProfil && <LastMatchCard match={lastMatch} />}
 
-            <SectionCard
-              title="Karriere-Bilanz"
-              action={
+            {/* Die Tafel dieser Seite (Konzept ANZEIGETAFEL-KONZEPT-2026-08-23,
+                Fläche B): Die Karriere-Bilanz als echtes Tafel-Gehäuse mit
+                eingelassenen Ziffernfenstern. Zeile 1 sind die SCOUTING-Zahlen
+                (PPG/APG/RPG) und darum die GRÖSSTEN – das Shot-Clock-Prinzip
+                der FIBA-Ausrüstungsnorm: Die dringlichste Zahl ist die größte,
+                nicht die kategorisch „wichtigste" Summe. PPG ist die eine
+                betonte Zahl (Topscorer-Währung der Plattform). Bewusst OHNE
+                akzent: Die brand-Oberkante der Seite trägt die
+                Nächstes-Spiel-Karte (eine hervorgehobene Karte je Fläche).
+                Der Herkunftssatz wird die „Hersteller-Plakette" der Tafel –
+                wo auf einer echten Tafel der Herstellername steht, steht bei
+                uns die Herkunft der Zahlen: keine Selbstauskunft.
+                (Systemregel unverändert: careerstats/Stationen prüfen NICHT
+                auf beidseitiges submittedBy – der Beleg-Status steht am
+                jeweiligen Spiel; Befund Nele 12.08., Wortlaut 23.08.2026.) */}
+            <Tafel
+              titel="Karriere-Bilanz"
+              aktion={
                 seasons.length > 0 && (
                   <select
                     value={season}
@@ -518,15 +639,25 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                   </select>
                 )
               }
+              fusszeile={
+                <>
+                  Diese Zahlen stammen aus eingetragenen Spielen – keine
+                  Selbstauskunft. Ob beide Teams das Ergebnis unabhängig
+                  bestätigt haben, siehst du am jeweiligen Spiel.
+                </>
+              }
             >
               {bilanz.games === 0 ? (
-                // Die Herkunftsangabe gehoert AUCH hierher, nicht nur zu
-                // gefuellten Zahlen: Wer noch nichts hat, ist genau der, der
-                // wissen muss, wofuer sich das Eintragen lohnt. Sie stand
-                // zuerst nur im gefuellten Zweig - auf der Live-Seite war sie
-                // dadurch fuer ein frisches Konto unsichtbar (nachgemessen,
-                // nicht vermutet: tmp/profil-live-check.mjs).
+                // Leere Tafel: „—"-Fenster plus die ehrlichen Erklärtexte –
+                // die Tafel ersetzt keine Erklärung durch Ästhetik
+                // (Grenzwert 6 des Konzepts). Die Herkunftsangabe steht auch
+                // hier (Fußzeile), nicht nur bei gefüllten Zahlen.
                 <>
+                  <Tafel.Zeile spalten={3} className="mb-4">
+                    <Tafel.Fenster label="PPG" wert={null} groesse="haupt" />
+                    <Tafel.Fenster label="APG" wert={null} groesse="haupt" />
+                    <Tafel.Fenster label="RPG" wert={null} groesse="haupt" />
+                  </Tafel.Zeile>
                   <p className="text-sm text-mist-400">
                     {season ? "Keine Spiele in dieser Saison." : "Noch keine Spiele erfasst."}
                   </p>
@@ -538,71 +669,44 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                 </>
               ) : (
                 <>
-                  {/* Karriere-Summen als Anzeigetafel statt als Fließtext-Zeile:
-                      Das sind die Zahlen, für die ein Spieler wiederkommt
-                      (Bedarf 1 der Bedarfsanalyse, von Ronja am gebauten Produkt
-                      bestätigt). Sie zählen hoch, sobald sie ins Bild kommen –
-                      und zwar mit echten Werten, nicht mit Platzhaltern. */}
-                  {/* Woher die Zahlen kommen. Bewusst als SYSTEMREGEL formuliert
-                      und nicht als Guetesiegel fuer die konkret angezeigten
-                      Werte: `careerstats` filtert auf `status: "completed"` und
-                      prueft NICHT auf beidseitiges `submittedBy` – ein vom
-                      Admin aufgeloestes Ergebnis zaehlt also mit. "Jede Zahl
-                      hier ist von beiden Teams bestaetigt" waere damit
-                      schlicht falsch (Befund Nele, 12.08.2026).
-                      Die Zahlen bleiben absichtlich vollstaendig: Ein Spiel,
-                      dessen Ergebnis nach einem Streitfall ein Admin eintraegt,
-                      hat trotzdem stattgefunden – dem Spieler dafuer Statistik
-                      wegzunehmen waere die schlechtere Loesung. */}
-                  {/* Der Satz führt mit der STÄRKE (keine Selbstauskunft) statt
-                      als Kleingedrucktes zu klingen – der zweite Satz bleibt
-                      wörtlich die abgesicherte Aussage: careerstats prüft NICHT
-                      auf beidseitiges submittedBy, der Beleg-Status steht am
-                      jeweiligen Spiel (s. Kommentar oben). */}
-                  <p className="mb-4 text-xs text-mist-400">
-                    Diese Zahlen stammen aus eingetragenen Spielen – keine
-                    Selbstauskunft. Ob beide Teams das Ergebnis unabhängig
-                    bestätigt haben, siehst du am jeweiligen Spiel.
-                  </p>
-                  <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    {[
-                      { v: bilanz.games, l: "Spiele" },
-                      { v: bilanz.points, l: "Punkte" },
-                      { v: bilanz.assists, l: "Assists" },
-                      { v: bilanz.rebounds, l: "Rebounds" },
-                    ].map((x) => (
-                      <div key={x.l} className="border-b-2 border-navy-600 pb-1.5">
-                        <p className="font-mono text-2xl font-bold tabular-nums text-paper-50">
-                          <CountUp value={x.v} />
-                        </p>
-                        {/* mist-400 statt mist-600 – Kontrast auf Panel, s. Nächstes-Spiel-Karte. */}
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-mist-400">
-                          {x.l}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    {[
-                      { v: bilanz.ppg, l: "PPG", s: "Punkte/Spiel" },
-                      { v: bilanz.apg, l: "APG", s: "Assists/Spiel" },
-                      { v: bilanz.rpg, l: "RPG", s: "Rebounds/Spiel" },
-                    ].map((x) => (
-                      <div key={x.l} className="bg-navy-950 rounded-md py-4 text-center">
-                        <p className="font-mono text-3xl font-bold tabular-nums text-paper-50">
-                          <CountUp value={x.v} decimals={1} />
-                        </p>
-                        <p className="text-xs font-bold text-brand-400 mt-1">{x.l}</p>
-                        <p className="text-[11px] text-mist-400">{x.s}</p>
-                      </div>
-                    ))}
-                  </div>
+                  <Tafel.Zeile spalten={3} className="mb-4">
+                    <Tafel.Fenster
+                      label="PPG"
+                      unterzeile="Punkte/Spiel"
+                      wert={bilanz.ppg}
+                      dezimalen={1}
+                      groesse="haupt"
+                      betont
+                      countUp
+                    />
+                    <Tafel.Fenster
+                      label="APG"
+                      unterzeile="Assists/Spiel"
+                      wert={bilanz.apg}
+                      dezimalen={1}
+                      groesse="haupt"
+                      countUp
+                    />
+                    <Tafel.Fenster
+                      label="RPG"
+                      unterzeile="Rebounds/Spiel"
+                      wert={bilanz.rpg}
+                      dezimalen={1}
+                      groesse="haupt"
+                      countUp
+                    />
+                  </Tafel.Zeile>
+                  <Tafel.Zeile spalten={4}>
+                    <Tafel.Fenster label="Spiele" wert={bilanz.games} groesse="neben" countUp />
+                    <Tafel.Fenster label="Punkte" wert={bilanz.points} groesse="neben" countUp />
+                    <Tafel.Fenster label="Assists" wert={bilanz.assists} groesse="neben" countUp />
+                    <Tafel.Fenster label="Rebounds" wert={bilanz.rebounds} groesse="neben" countUp />
+                  </Tafel.Zeile>
                   {/* Der Weg von der eigenen Bilanz zum eigenen Rang: /topscorer
                       steht standardmäßig auf „meine Liga" und markiert die
-                      eigene Zeile – es fehlte nur der Weg dorthin (Befund
-                      Ronja, 23.08.2026). Nur auf dem EIGENEN Profil: „Wo
-                      stehst du?" wäre auf einem fremden Profil die falsche
-                      Anrede an den falschen Leser. */}
+                      eigene Zeile (Befund Ronja, 23.08.2026). Nur auf dem
+                      EIGENEN Profil – „Wo stehst du?" wäre auf einem fremden
+                      Profil die falsche Anrede an den falschen Leser. */}
                   {eigenesProfil && (
                     <p className="mt-4 text-xs text-mist-400">
                       Wo stehst du im Vergleich?{" "}
@@ -616,7 +720,7 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                   )}
                 </>
               )}
-            </SectionCard>
+            </Tafel>
 
             <SectionCard title="Spielerhistorie">
               {filteredStations.length === 0 ? (
@@ -865,6 +969,8 @@ export default function PlayerProfileView({ player, viewerId, actions }) {
                 )}
               </SectionCard>
             )}
+
+            {steckbriefExtra}
           </>
         )}
 

@@ -70,7 +70,10 @@ async function handler(req) {
     status: { $ne: "cancelled" },
   })
     .select(
-      "teamA teamB date location status winningTeam winningTeamPoints losingTeamPoints stage playoffRound leagueId"
+      // resultStatus + teamXResult zusätzlich für die Beleg-Lampe der
+      // Spielplan-Zeilen (beidseitigBelegt braucht submittedBy beider Seiten;
+      // dieselben Felder liefert die öffentliche /api/match/[id] längst).
+      "teamA teamB date location status winningTeam winningTeamPoints losingTeamPoints stage playoffRound leagueId resultStatus teamAResult teamBResult"
     )
     .populate("teamA", "teamName slug logo")
     .populate("teamB", "teamName slug logo")
