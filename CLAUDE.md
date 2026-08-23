@@ -11,6 +11,74 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
+> ✅ **DEPLOYT: `f8c67b4` (23.08.2026, Auftrag Patrick „nach den Gates deployen") — DIE
+> ANZEIGETAFEL-RUNDE: DIE ECHTE HALLENTAFEL IST DAS STILMITTEL DER DATENSEITEN, DIE
+> LINIEN-SPRACHE ZIEHT DURCH JEDE UNTERSEITE, UND RONJAS M1–M3 SIND EINGELÖST.**
+> Drei Aufträge Patrick in einer Runde; Konzept Vivien
+> `docs/ANZEIGETAFEL-KONZEPT-2026-08-23.md` (Kernidee: Die Startseite ist der Blick auf den
+> Hallenboden, die Datenseiten sind der Blick hoch zur Anzeigetafel).
+> **(1) Tafel-Bausystem:** Neue Primitive `components/ui/Tafel.js` (Gehäuse · Kopfleiste ·
+> eingelassene navy-950-Fenster mit Glaskante · Plaketten · Hersteller-Fußzeile),
+> `SegmentZahl.js`, `BelegLampe.js`. Die **Beleg-Lampe** ist das neue vierte Signaturzeichen
+> (Freigabe Patrick): gefüllt NUR bei beidseitig belegtem Ergebnis, Quelle ausschließlich
+> `lib/matchScore.js` — die Kernpositionierung als wiederkehrendes visuelles Zeichen.
+> Flächen: `/match/[id]`-Kopf (Tafel, TB/RB-Plaketten, Status-Register, Lampe; die
+> 2px-Brand-Kante wanderte von der Score-Unterkante auf die Tafel-Oberkante) ·
+> Karriere-Bilanz als Tafel (PPG die eine betonte Zahl; Herkunftssatz als
+> Hersteller-Plakette) · Liga-Karte mit RANG-Fenster · Mini-Fenster + Mini-Lampen in allen
+> Ergebniszeilen (Teamseite, SpielplanTab, ErgebnisseTab — dafür liefert
+> `fetchsingleteaminfo` jetzt resultStatus/teamXResult, dieselben Felder wie /api/match).
+> **(2) Mittelweg + Zellen-Geist (zwei Feedback-Schleifen Patrick):** Wertschrift **Big
+> Shoulders**, die 7-Segment-Schrift (DSEG7 Classic Bold, OFL 1.1, selbst gehostet —
+> `scripts/fetch-segment-font.sh`, Lizenz in public/fonts/) lebt NUR im unbeleuchteten
+> „888"-Geist — und der ist **zellenweise**: jede Ziffer mittig auf ihrer eigenen
+> Geist-Acht, in jedem Fenster identisch. ⚠️ Der children-Sonderpfad ist ABGESCHAFFT
+> (Auflage Tobias: Der /match-Kopf zeigte sonst genau das versetzte Bild, dessen Korrektur
+> Patrick beauftragt hatte); /match klappt die Zellen-Wertreihe als Ganzes um
+> (SegmentZahl-Props flap/flapDelay/gedimmt, SplitFlap jetzt ui-intern). **Einschalt-Moment:**
+> Gehäuse+Geist sofort, Werte blenden gestaffelt (300 ms/60 ms) und zählen hoch;
+> 250-ms-Sichtbarkeits-Haltezeit gegen den 1-px-Beobachter-Frühstart (Fund Vivien);
+> reduced-motion: alles sofort. Screenreader hören den nackten Wert, die Achten sind stumm
+> (gemessen Kai).
+> **(3) Linien-Sprache (Direktive Patrick „weg vom KI-Kachel-Design"):** Radien-Token
+> plattformweit **6/10/16 → 2/4/6 px** (`tailwind.config.js`; Spez-Nachtrag in
+> `docs/VISUELLE-RICHTUNG-2026-08-12.md` — auch die Segment-Präzisierung steht dort).
+> Vivien hat 2/4/6 gegen 0/2/4 am Bild verglichen (0 px: rounded-sm wäre ein Token ohne
+> Wirkung). rounded-full (Avatare/Schalter/Pillen) bleibt rund — ob Pillen zur kantigen
+> Sprache passen, ist als offene Frage notiert.
+> **(4) Ronjas M1–M3 + Tryout-Dedup:** Neue API `app/api/player/last-match` + „Dein letztes
+> Spiel"-Karte NUR auf dem eigenen Profil (Suche über den Box-Score, nicht den heutigen
+> Verein — nach Wechseln ehrlich) · `fetchteams` liefert `leagueName` (eine Abfrage, linear,
+> 28 ms) + Liga-Zeile auf den /teams-Karten · TransferControl mit Weiterwegen zu
+> /transfermarkt und /tryouts. ⚠️ Der Transfermarkt-Kasten sitzt NUR noch im
+> Steckbrief-Reiter (Befund Patrick: unter den Reitern wirkte er wie dreimal dieselbe
+> Funktion; Prop `steckbriefExtra`); seine Felder waren die **grauen Felder Nr. 14+15**
+> (lokale inputClass-Kopie ohne Fläche — dieselbe Familie wie CityInput) → inputClassSm.
+> ✅ **Beide Gates durch:** Kai **freigabefähig ohne Auflage** (Security sauber; sein
+> textContent-Verdacht real aber folgenlos — kein bestehender Test liest die Geist-Achten
+> mit; Wächter übernommen: `tests/e2e/anzeigetafel.spec.mjs`, 4 Fälle, Mutationsmatrix 4/4),
+> Tobias **freigabefähig mit einer Auflage (umgesetzt**, /match-Kopf zellenweise; seine
+> Messung: Versatz je Zelle exakt 0 auf Bilanz+Liga-Karte, Lampen auf drei Flächen
+> deckungsgleich mit der DB). Kais Empfehlung umgesetzt: „Ergebnis steht" im ErgebnisseTab
+> nicht mehr grün neben ungefüllter Lampe. Berichte:
+> `docs/GATE-KAI-ANZEIGETAFEL-2026-08-23.md`, `docs/GATE-TOBIAS-ANZEIGETAFEL-2026-08-23.md`.
+> Suite **369 grün / 0 rot / 1 übersprungen** (370 in 39 Dateien) · design-audit ohne
+> Abweichung (neue Primitive in der Baseline; ⚠️ SegmentZahl steht bewusst auf **1** — ein
+> Wert > 1 hieße Fenster-Ziffern außerhalb einer Tafel, per Grenzwert verboten; SplitFlap
+> 3→2, jetzt ui-intern).
+> ✅ **Live nachgemessen (23.08.2026):** Server auf `f8c67b4` (am Server verifiziert) · 16
+> Routen je 200 · Segment-Font wird ausgeliefert (200, 5.132 Bytes = exakt die Datei) · die
+> neuen Radius-Token 2/4/6 stehen im Live-CSS · PM2 online, Fehlerlog leer · kein npm
+> install nötig (kein Dependency-Diff — der Font ist eine statische Datei).
+> ⚠️ **Offen aus dieser Runde:** Einschalt-Moment an /match-Kopf und Liga-Karte nicht einzeln
+> gemessen (nur Karriere-Bilanz; Tobias) · „Dein letztes Spiel" lädt asynchron und schiebt
+> die Bilanz-Tafel nach dem Scroll — reservierter Ladeplatz nähme den Sprung (Kai b, →
+> Vivien, niedrig) · rounded-full-Pillen vs. kantige Sprache (→ Vivien/Patrick) · Fläche E
+> (Listen-Kopf-Zähler) bewusst NICHT gebaut, hängt an Roadmap 2/Nora (Seed-Zahl) · Tafel-
+> Wächter für Geist-Versatz über alle drei Flächen (Tobias-Vorschlag → Kai) · Vivien-
+> Nebenbefund 8.3: `NextMatchCard` leitet „Heimspiel/Auswärts" aus teamA ab — die
+> Feed-Anzeigetafel verbietet genau diese Ableitung (→ Kai/Nele, Prüfauftrag).
+>
 > ✅ **DEPLOYT: `248d5e3` (23.08.2026, Freigabe Patrick) — DIE SPIELER- UND VEREINSSEITEN
 > SIND IN EINER RUNDE REPARIERT, ANGEGLICHEN UND VERBUNDEN (Pakete A–D).**
 > ✅ **Live nachgemessen (23.08.2026):** Server auf `d9e2605` (= Code-Stand `248d5e3`,
@@ -1809,8 +1877,8 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `248d5e3` (aktuell live seit 23.08.2026 — Spieler-/Vereinsseiten-
-> Pakete A–D; Server-Zeiger `d9e2605`, reiner Doku-Commit auf demselben Code) →
+> **Rollback-Kette:** `f8c67b4` (aktuell live seit 23.08.2026 — Anzeigetafel-Runde) →
+> `248d5e3` (Spieler-/Vereinsseiten-Pakete A–D; dazwischen nur Doku `d9e2605`, `907d436`) →
 > `3bfd64f` (Stand davor; dazwischen nur Doku `90b7901`, `3093b51`, `78781f3`) → `2c23489` → `4fcc4c0` → `89579d4` (nur Doku) → `df92274` → `d72ba15` (nur Doku) → `f6cbbf2` (nur Doku) → `f2d2be3` (nur Doku) → `b23888c` (nur Doku) → `d1d9517` → `45de921` (nur Doku) → `4293c43` (nur Doku) → `a64ef92` (nur Doku) → `0ecd593` → `70fd2d1` → `1a57be5` (nur Doku) → `38f2d20` (nur Doku/Tests) → `d649127` → `6f02a9b` → `6c79ec4` (nur Tests) → `b62d511` → `57da148` (nur Tests) → `a320c9e` (nur Doku) → `e9a8ef3` → `108fbc7` (nur Doku) → `3181ad2` → `6348625` → `b88bbd3` (nur Doku) → `ea982c4` → `cdb8065` → `492e465` → `34dd22f` (Feldende,
 > vor den Wächtern) → `0f2a933` (nur Doku) → `17bb00a` → `8e63cf6` (nur Doku) → `c4982bd` → `c5cbf6f` → `fb23317` → `0da80c7` (Dribbelweg,
 > vor den Gate-Befunden) → `70c36ba` (letzter Stand vor der Ball-Reise) → `76406fb` → `571931c` (Feld) → `b3487a8` →

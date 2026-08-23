@@ -5822,3 +5822,40 @@ M1–M3 vertagt · Roadmap 31 präzisiert (nur Seiten-zu-Seiten-Wechsel) und 35 
 unbenachrichtigt bleiben 25.07., 05.08., 17.08., 20.08.
 
 **Nachtrag 23.08.2026:** `248d5e3` ist nach Freigabe durch Patrick deployt (Server-Zeiger `d9e2605`, am Server verifiziert; 16+ Routen 200, neue Texte im ausgelieferten HTML, PM2 online, Fehlerlog leer, kein npm install nötig).
+
+#### Update (23.08.2026, abends) — Anzeigetafel-Runde (Commit `f8c67b4`, DEPLOYT)
+
+Drei Aufträge Patrick: (1) echte Basketball-Anzeigetafel als Stilmittel der
+Spieler-/Vereins-/Spielseiten (Konzept Vivien `docs/ANZEIGETAFEL-KONZEPT-2026-08-23.md`),
+(2) Mittelweg zwischen Retro-Segment und modernem Design + Bewegung beim Aufrufen,
+(3) Linien-Sprache statt abgerundeter Kacheln plattformweit. Dazu Ronjas M1–M3 und
+die Tryout-Dedup.
+
+- **Neue Primitive:** `components/ui/Tafel.js` (+Zeile/Fenster), `SegmentZahl.js`
+  (zellenweiser „888"-Geist, interner Zähler, flap/gedimmt), `BelegLampe.js`
+  (viertes Signaturzeichen, Quelle `lib/matchScore.js`). Font DSEG7 Classic Bold
+  selbst gehostet (`public/fonts/` + `scripts/fetch-segment-font.sh`, OFL 1.1);
+  `lib/fonts.js` + `tailwind.config.js` (`font-segment`), eingehängt in `app/layout.js`.
+- **Flächen:** `/match/[id]`-Kopf als Tafel (Zellen-Wertreihe klappt als Ganzes um;
+  Brand-Kante auf Tafel-Oberkante) · Karriere-Bilanz als Tafel (`PlayerProfileView.js`) ·
+  Liga-Karte mit RANG-Fenster (`team-detail`) · Mini-Fenster + Mini-Lampen in
+  Ergebniszeilen (team-detail, `SpielplanTab.js`, `ErgebnisseTab.js`;
+  `fetchsingleteaminfo` liefert dafür resultStatus/teamXResult).
+- **Radien-Token 6/10/16 → 2/4/6 px** (`tailwind.config.js`); Spez-Nachträge (Radien +
+  Segment-Präzisierung + Beleg-Lampe) in `docs/VISUELLE-RICHTUNG-2026-08-12.md`.
+- **M1–M3:** `app/api/player/last-match/route.js` + „Dein letztes Spiel"-Karte (nur
+  eigenes Profil) · `fetchteams` mit leagueName + Liga-Zeile auf /teams ·
+  TransferControl-Weiterwege; Kasten nur noch im Steckbrief-Reiter
+  (`steckbriefExtra`), Felder 14+15 der grauen Familie auf inputClassSm.
+- **Gates:** Kai freigabefähig ohne Auflage (`docs/GATE-KAI-ANZEIGETAFEL-2026-08-23.md`;
+  Wächter `tests/e2e/anzeigetafel.spec.mjs`, 4 Fälle, Mutationsmatrix 4/4), Tobias
+  freigabefähig mit einer Auflage — umgesetzt: /match-Kopf zellenweise, der
+  children-Sonderpfad in SegmentZahl ist abgeschafft
+  (`docs/GATE-TOBIAS-ANZEIGETAFEL-2026-08-23.md`). Kai-Empfehlung umgesetzt
+  („Ergebnis steht" nicht mehr grün neben ungefüllter Lampe).
+- **Suite 369/0/1** (370 in 39 Dateien) · design-audit ohne Abweichung (SegmentZahl-
+  Baseline bewusst 1; SplitFlap 3→2 ui-intern).
+- **Live nachgemessen:** Server auf `f8c67b4`, 16 Routen 200, Segment-Font ausgeliefert
+  (5.132 Bytes), Radius-Token 2/4/6 im Live-CSS, PM2 online, Fehlerlog leer.
+- Offene Punkte in Abschnitt 0 (u. a. NextMatchCard-Heimspiel-Ableitung → Kai/Nele,
+  rounded-full-Pillen-Frage → Vivien, Geist-Versatz-Wächter über drei Flächen → Kai).
