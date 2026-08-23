@@ -5859,3 +5859,22 @@ die Tryout-Dedup.
   (5.132 Bytes), Radius-Token 2/4/6 im Live-CSS, PM2 online, Fehlerlog leer.
 - Offene Punkte in Abschnitt 0 (u. a. NextMatchCard-Heimspiel-Ableitung → Kai/Nele,
   rounded-full-Pillen-Frage → Vivien, Geist-Versatz-Wächter über drei Flächen → Kai).
+
+#### Update (23.08.2026, spät) — Tester-Drucksachen erneuert · Signup-Feldmotiv · Team-Admin-Tour-Konzept (Commit `89f0de8`, NICHT deployt) · Übergabe vor /clear
+
+- **Tester-Drucksachen** (Vivien, `~/Projekte/Hoops-Marketing/Tester-Akquise/`, kein
+  Repo-Code): Flyer A6 / Testerkarte A6 / Visitenkarte neu im Anzeigetafel-/Linien-
+  Design (Flyer-Rückseite = echtes Tafel-Gehäuse mit Segment-Spielstand + Beleg-Lampe).
+  QR-Codes modulweise identisch übernommen (Kanäle `flyer`/`karte`). Alt-Fassungen in
+  `_archiv-2026-08-15/`. Zwei Alt-Fehler behoben: Visitenkarten-Tagline lief in den
+  Beschnitt; Testerkarte behauptete „ab U16" statt „ab 16 Jahren".
+- **`/signup`-Desktop** (Befund Patrick „helles Foto beißt sich"): eigene FIBA-
+  Feldzeichnung statt Foto — `components/layout/AuthCourt.js` (neu), `AuthShell.js`
+  `motiv`-Weg, `app/signup/page.js`. /login unverändert (Wächter-Fall). Vorgeprüft
+  (signup-ohne-js 2/2, design-audit sauber, kein Querlauf); **Gates + Deploy offen.**
+- **Team-Admin-Tour:** Konzept `docs/TEAMADMIN-TOUR-KONZEPT-2026-08-23.md` (Nele) —
+  6 Schritte, Aufwands-Dramaturgie, Punktezettel-Tipp am Code verifiziert (statsNotify
+  versendet vor Spielende nichts). **Bau = Hauptauftrag der nächsten Sitzung.**
+- **Übergabe vor Patricks /clear:** `docs/UEBERGABE-2026-08-23.md`. ⚠️ Klarstellung:
+  „einen clear vorbereiten" meinte das Kontextmenü, NICHT den Demo-Purge — Roadmap 2
+  unverändert vertagt, kein Purge-Runbook erstellt.
