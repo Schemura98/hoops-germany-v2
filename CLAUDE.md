@@ -11,6 +11,24 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
+> 📄 **ÜBERGABE FÜR DIE NÄCHSTE SITZUNG: `docs/UEBERGABE-2026-08-23.md` — ZUERST LESEN.**
+> Patrick hat den Kontext geleert; dort stehen die zwei Startaufträge (Team-Admin-Tour
+> bauen nach `docs/TEAMADMIN-TOUR-KONZEPT-2026-08-23.md`; Signup-Feldmotiv durch beide
+> Gates und deployen) und alle offenen Fragen.
+>
+> ⚠️ **NICHT DEPLOYT, NUR COMMITTET: `89f0de8` (23.08.2026)** — (1) `/signup` zeigt auf
+> Desktop statt des hellen Fotos die eigene FIBA-Feldzeichnung (`AuthCourt.js`, dritte
+> Zeichnung aus `feldmasse.js`; `AuthShell` mit `motiv`-Weg, /login bitgleich —
+> Wächter-Fall prüft das; signup-ohne-js 2/2 grün, design-audit sauber). Gates + Deploy
+> stehen aus. (2) Neles Team-Admin-Tour-Konzept (6 Schritte, finale Wortlaute,
+> `Player.adminTourSeen`-Vorschlag, Negativliste: kein Live-Ticker-Versprechen) — Bau
+> offen, danach update-feedback-analytics + update-onboarding-surfaces + Lina-Check.
+> 📣 **Tester-Drucksachen erneuert (23.08.2026, außerhalb des Repos):** Flyer/
+> Testerkarte/Visitenkarte in `~/Projekte/Hoops-Marketing/Tester-Akquise/` jetzt im
+> Anzeigetafel-/Linien-Design; QR-Kanäle `flyer`/`karte` wörtlich unverändert; alte
+> Fassungen in `_archiv-2026-08-15/`. Vor Druck: Handy-Scan, Proof, „57 Ligen"
+> gegenprüfen; Kanalfrage `testerkarte` offen (Details EMPFEHLUNG.md §10 + Übergabe).
+>
 > ✅ **DEPLOYT: `f8c67b4` (23.08.2026, Auftrag Patrick „nach den Gates deployen") — DIE
 > ANZEIGETAFEL-RUNDE: DIE ECHTE HALLENTAFEL IST DAS STILMITTEL DER DATENSEITEN, DIE
 > LINIEN-SPRACHE ZIEHT DURCH JEDE UNTERSEITE, UND RONJAS M1–M3 SIND EINGELÖST.**
@@ -162,8 +180,7 @@
 > Anmeldekombinationen ohne Querlauf und ohne Konsolenfehler. Details in den beiden ✅-Blöcken
 > weiter unten. **Gates: noch keine** — Kai und Tobias haben diesen Stand nicht gesehen.
 >
-> 📄 **ÜBERGABE: `docs/UEBERGABE-2026-08-21.md`** — Stand am Ende des 21.08., Patricks
-> Entscheidungen dieses Tages und die offene Liste vor den Flyern. **Zuerst lesen.**
+> 📄 Ältere Übergabe: `docs/UEBERGABE-2026-08-21.md` (Stand 21.08., historisch).
 >
 > ✅ **DEPLOYT: `b23888c`** (23.08.2026) — **ANALYTICS-AUSBAU: KANAL-TRICHTER, VERLAUF INTERN,
 > UND ROADMAP 39 IST ERLEDIGT.** Gate Kai: **freigabefähig mit einer Auflage (umgesetzt, sein
@@ -1877,7 +1894,8 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `f8c67b4` (aktuell live seit 23.08.2026 — Anzeigetafel-Runde) →
+> **Rollback-Kette:** `89f0de8` (NICHT deployt — Signup-Motiv + Tour-Konzept; dazwischen nur Doku `5204569`) →
+> `f8c67b4` (aktuell live seit 23.08.2026 — Anzeigetafel-Runde) →
 > `248d5e3` (Spieler-/Vereinsseiten-Pakete A–D; dazwischen nur Doku `d9e2605`, `907d436`) →
 > `3bfd64f` (Stand davor; dazwischen nur Doku `90b7901`, `3093b51`, `78781f3`) → `2c23489` → `4fcc4c0` → `89579d4` (nur Doku) → `df92274` → `d72ba15` (nur Doku) → `f6cbbf2` (nur Doku) → `f2d2be3` (nur Doku) → `b23888c` (nur Doku) → `d1d9517` → `45de921` (nur Doku) → `4293c43` (nur Doku) → `a64ef92` (nur Doku) → `0ecd593` → `70fd2d1` → `1a57be5` (nur Doku) → `38f2d20` (nur Doku/Tests) → `d649127` → `6f02a9b` → `6c79ec4` (nur Tests) → `b62d511` → `57da148` (nur Tests) → `a320c9e` (nur Doku) → `e9a8ef3` → `108fbc7` (nur Doku) → `3181ad2` → `6348625` → `b88bbd3` (nur Doku) → `ea982c4` → `cdb8065` → `492e465` → `34dd22f` (Feldende,
 > vor den Wächtern) → `0f2a933` (nur Doku) → `17bb00a` → `8e63cf6` (nur Doku) → `c4982bd` → `c5cbf6f` → `fb23317` → `0da80c7` (Dribbelweg,
