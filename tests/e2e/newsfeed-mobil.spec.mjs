@@ -68,6 +68,60 @@ test.describe("Newsfeed mobil", () => {
       const wegweiser = page.locator('nav[aria-label="Weitere Bereiche"] a');
       await wegweiser.first().waitFor({ state: "visible", timeout: 30_000 });
 
+      // ── Einschwingen abwarten, DANN messen (Mess-Race, 27.08.2026) ──────
+      // Der Wegweiser ist sichtbar, BEVOR die Anzeigetafel fertig geladen
+      // hat: Im Ladezustand rendert sie ein nacktes `div` mit
+      // `aria-hidden="true"` und Skeleton-Pulsen — OHNE ihren
+      // Erkennungs-Marker `section[aria-label="Deine Anzeigetafel"]`
+      // (components/feed/Anzeigetafel.js, Skeleton-Zweig). Wer in diesem
+      // Moment den Vorbau scannt, sieht einen „unbekannten" ~188-px-Block
+      // mit leerem Text und wird rot — obwohl das Produkt heil ist. Das ist
+      // die Fehlerklasse „die Messung kommt zu früh" (Nachrichten-Karten-
+      // Lehre vom 20.08.2026: auf das Element warten reicht nicht, es muss
+      // zur RUHE gekommen sein).
+      //
+      // Gewartet wird deshalb auf die EIGENSCHAFT „kein Skeleton-Block mehr
+      // im Inhalt", nicht auf die Anzeigetafel-Sektion selbst: Ob die
+      // Sektion überhaupt erscheint, hängt an der Datenlage (kein Team /
+      // keine Spiele → sie fehlt zu Recht), und eine Zusicherung über die
+      // Datenbank ist genau der Fehler, den diese Datei zweimal beerdigt
+      // hat. Ein Skeleton dagegen löst sich IMMER auf: `matchesLoading`
+      // endet garantiert im `finally` (app/player/newsfeed/page.js).
+      // Race-frei ist die Absenz-Prüfung, weil der Skeleton-Zweig im SELBEN
+      // React-Commit entsteht wie der Wegweiser — ist der Wegweiser
+      // sichtbar, ist das Skeleton entweder da (noch am Laden) oder schon
+      // aufgelöst; es kann nicht erst danach auftauchen.
+      //
+      // ⚠️ Ehrlichkeitsschranke: KEIN stilles Ewig-Warten. Läuft die Zeit
+      // ab, wird der Fall ROT mit Befund — ein Skeleton, das sich nie
+      // auflöst, wäre ein echter Produktfehler (hängendes matchesLoading),
+      // kein Messproblem.
+      const eingeschwungen = await page
+        .waitForFunction(
+          () => {
+            const inhalt = document.querySelector("main");
+            if (!inhalt) return false;
+            return ![...inhalt.querySelectorAll('[aria-hidden="true"]')].some(
+              (e) =>
+                e.matches(".animate-pulse") || e.querySelector(".animate-pulse"),
+            );
+          },
+          null,
+          { timeout: 20_000 },
+        )
+        .then(() => true)
+        .catch(() => false);
+      expect(
+        eingeschwungen,
+        `Nach 20 s steht immer noch ein Skeleton-Ladeblock (aria-hidden + ` +
+          `animate-pulse) im Inhalt. Entweder löst sich ein Ladezustand nie ` +
+          `auf (echter Produktfehler: hängendes Laden, z. B. my-matches ohne ` +
+          `Antwort) — oder es gibt einen NEUEN dauerhaften Skeleton-Block, ` +
+          `den dieser Test kennen müsste. Gemessen wird erst nach dem ` +
+          `Einschwingen; ohne Einschwingen wird nicht gemessen, sondern ` +
+          `gemeldet.`,
+      ).toBe(true);
+
       // ── Ehrlichkeitsschranke ────────────────────────────────────────────
       // Unter 1024 px darf die Desktop-Schiene gar nicht existieren. Steht sie
       // doch da, misst der Test eine andere Seite als gemeint.

@@ -6006,3 +6006,53 @@ die Tryout-Dedup.
   Nele: Der Mitspieler, der nicht gründen will, wird von der Headline
   freigesprochen; der Gründer kennt danach Rolle, Mini-Aufwand und Ausweg
   (Übergabe). Kein Versand — macht Jonatan selbst.
+
+#### Update (27.08.2026) — Voll-Prüfung der Plattform auf Patricks Auftrag (Funktionen · Onboarding-Schlüssigkeit · Stats-Weg)
+
+- **Suite-Regressionslauf** am unveränderten Live-Code-Stand: 375/1/1 — der eine Rote
+  war KEIN Produktfehler, sondern ein Mess-Race im Wächter `newsfeed-mobil.spec.mjs`
+  (Fall 1 maß den Vorbau, bevor die Anzeigetafel ihr Lade-Skelett aufgelöst hatte;
+  das Skelett rendert ohne den section-Marker und zählte als „unbekannter Block").
+  Produktverhalten am Server verifiziert: /api/player/my-matches 200 in 0,05–0,28 s,
+  `matchesLoading` endet garantiert im finally. **Kai-Fix übernommen** (+54 Zeilen):
+  Vor der Messung wird auf die EIGENSCHAFT „kein aria-hidden-Skeleton-Puls mehr in
+  main" gewartet (bewusst nicht auf die Tafel-Sektion — die hängt an der Datenlage),
+  mit 20-s-Ehrlichkeitsschranke (hängendes Laden → ROT mit Befund, nie stilles
+  Bestehen). Gegenproben einzeln: verzögertes my-matches → grün (wartet aktiv,
+  ohne Fix rot); echter Fremdblock-Mutation → weiter rot 4/4. Keine weiteren
+  Race-Stellen in der Datei/im Scanner gefunden.
+- **Tobias-Rundgang** (echtes Chromium — die Browser-Vorschaufläche hing erneut mit
+  document.hidden=true, dokumentierter Ausweichweg): 8 öffentliche Routen mobil+
+  Desktop je 0 Konsolen-/Netzwerkfehler und 0 Querlauf · angemeldet kompletter
+  Beitrags-Lebenszyklus über die UI (anlegen/liken/kommentieren/löschen, DB
+  verifiziert) · alle 6 Admin-Reiter · Admin-Tour-Wiederaufruf (Portal-Fix hält,
+  Weiter-Knopf im 360er-Fenster) · Glocke, Profil, /signup-Motiv, /login. Serverlog
+  fehlerfrei. **Urteil: funktioniert wie erwartet, keine hohen/blockierenden Befunde.**
+- **⭐ Stats-Weg beidseitig nachgerechnet** (Spiel 19.07., bereits benachrichtigt —
+  bewusst gewählt, keine neuen Benachrichtigungen): Max 10 P → 12 P gespeichert →
+  Spielerseite PPG 17,5 → 17,8 (= 142/8, korrekt gerundet) → Rückbau auf 10 →
+  PPG wieder 17,5, DB-Endzustand identisch mit vorgefunden, notifiedStatsPlayers
+  unverändert 8. Erfolgsmeldung korrekt ohne Benachrichtigt-Zusatz. Die Kette
+  Box-Score → Karriere-Summen → Durchschnitte → Spielerseite greift sofort.
+- **Lina-Redundanzprüfung des Onboardings: Kette schlüssig** — Signup und Tour
+  fragen disjunkte Dinge, Tour+Checkliste rechnen über die eine Quelle computeSteps,
+  hg:player-updated synchronisiert, kein Schritt braucht zwei Bestätigungen,
+  Touren stapeln sich nicht. **Befund M1 (offen, → Vivien/Patrick):** /team/create
+  belegt Stadt/Bundesland NICHT aus dem Profil vor — der Gründer tippt sie im
+  Gründungs-Fluss erneut, und die Liga-Auswahl filtert erst nach Bundesland-Eingabe.
+  M2 (niedrig, → Nele): Footer-„Plattform-Tour" neben dem Panel-Link auf /team/admin
+  kann Erstbesucher zur falschen Tour führen (Mechanik korrekt getrennt,
+  Beschriftungsfrage). N2 Checklisten-Text statisch · N3 Beleg-Prinzip in beiden
+  Touren erklärt (vertretbar) · N4 Doppel-Tipp wählt Position ab (bewusst).
+- **Tobias-Nebenbefunde:** Spiele-Schiene führt das ungemeldete Spiel vom 25.08.
+  unter „Anstehend" trotz Vergangenheitsdatum (→ Ronja/Nele, Wortlaut) · kontrollierter
+  Einzelmess-Beleg: genau EIN mark-admin-tour-seen-POST je Schließweg (entlastet den
+  5-POST-Verdacht vom 23.08. als Werkzeug-Artefakt; Sollwert für Kais Wächter-Idee).
+- **Dev-DB-Spuren:** Max' 2 Benachrichtigungen jetzt „gelesen" (Produktverhalten,
+  nicht rückbaubar); Test-Beitrag+Kommentar vollständig entfernt; Stats exakt
+  zurückgesetzt; Reserve-Spiele 25.07./05.08./17.08./20.08. unangetastet.
+- **Flyer-Nachtrag derselben Runde:** Team-Admin-Sharepic um STATS-Zeile ergänzt
+  (Nele: „Punkte, Assists & Rebounds deiner Spieler — eine Tabelle. Mittippen im
+  Spiel oder danach in Ruhe: Daraus werden ihre Profil-Zahlen."; ERGEBNIS-Zeile
+  gekürzt, Ergebnis- und Box-Score-Botschaft bewusst getrennt; Hauptnachricht
+  unverändert — Mechanik ist eine Admin-Botschaft).
