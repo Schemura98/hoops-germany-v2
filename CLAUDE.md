@@ -79,6 +79,19 @@
 > ⚠️ **Dev-DB-Spuren (gewollt):** `max@test.de` trägt `adminTourSeen: true`; Tobias'
 > Gate-Sitzung lief OHNE webdriver-Kennung und hat echte `admin_tour_*`-Ereignisse in
 > der Dev-DB hinterlassen — die dortige Abbruchkurve der Admin-Tour ist Prüf-Artefakt.
+> 📣 **WhatsApp-Tester-Akquise über Jonatans Gruppe (27.08.2026, außerhalb des Repos):**
+> `~/Projekte/Hoops-Marketing/Tester-Akquise/WHATSAPP-NACHRICHT-2026-08-27.md`
+> (Nele: Haupt- + Kurzfassung, versandfertig; Jonatan verschickt privat selbst — kein
+> § 7-UWG-Fall) + `whatsapp-sharepic.png` (Vivien, 1080×1350, Anzeigetafel-Design,
+> HTML + Render-Skript daneben). Kanal **`whatsapp`** (Link
+> `hoopsgermany.de/?src=whatsapp`, zählt automatisch im Kampagnen-Trichter; EIN Wert,
+> Kanal-Regel). ⚠️ „ENDSTAND" wurde auf Neles Urteil vom Sharepic GESTRICHEN —
+> reservierter Begriff für einseitig gemeldete Ergebnisse, neben gefüllter Beleg-Lampe
+> dieselbe Begriffsmischung wie die am 18.08. korrigierte Tour-Karte. Kreisliga nur als
+> Pionier-Framing („trag dein Team als Erster ein"), keine Nutzerzahlen, kein
+> Scorpions-Bezug. Ein Kontrollklick vor Versand erzeugt EINE Landung auf dem Kanal —
+> dann in der Nachricht-Datei notieren (Präzedenz `flyer-test`).
+>
 > 📣 **Tester-Drucksachen erneuert (23.08.2026, außerhalb des Repos):** Flyer/
 > Testerkarte/Visitenkarte in `~/Projekte/Hoops-Marketing/Tester-Akquise/` jetzt im
 > Anzeigetafel-/Linien-Design; QR-Kanäle `flyer`/`karte` wörtlich unverändert; alte

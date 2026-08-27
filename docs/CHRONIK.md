@@ -5950,3 +5950,30 @@ die Tryout-Dedup.
   weist Unangemeldete live mit 401 ab · PM2 online; kein neuer Fehlerlog-Eintrag seit
   dem Neustart (Log-Zeitstempel 2,5 h vor dem Deploy — Altbestand des vorherigen
   Deploy-Fensters).
+
+#### Update (27.08.2026) — WhatsApp-Tester-Akquise über Jonatans Gruppe (außerhalb des Repos)
+
+- Auftrag Patrick: Text + Flyer/Bild, das Jonatan in seiner WhatsApp-Gruppe (viele
+  Basketballspieler aus der Nähe) teilen kann, um Tester zu gewinnen.
+- **Nele:** Nachricht in Haupt- und Kurzfassung, versandfertig —
+  `~/Projekte/Hoops-Marketing/Tester-Akquise/WHATSAPP-NACHRICHT-2026-08-27.md`.
+  Leitplanken eingehalten: Testphase ehrlich, keine Nutzerzahlen, kein
+  Scorpions-Bezug, kein Live-Versprechen, Kreisliga als Pionier-Framing („trag dein
+  Team als Erster ein" — NICHT „deine Kreisliga ist drin", dieselbe Korrektur wie am
+  Flyer vom 10.08.). Link-Entscheidung: Startseite statt /signup (halb-warmer
+  Kontakt, bessere Link-Vorschau, Kanal zählt auf jeder Seite).
+- **Vivien:** `whatsapp-sharepic.png` (1080×1350, 4:5) + HTML + Render-Skript im
+  selben Ordner — Anzeigetafel-Design (Tafel-Gehäuse, DSEG7 über zellenweisem
+  888-Geist, gefüllte Beleg-Lampe mit „BELEGT"-Label, Feld-Zitat als Tonwert-Tapete),
+  Fonts lokal, Maßstabsregeln für Chat-Thumbnails dokumentiert. Kein QR (in WhatsApp
+  klickt man den Link).
+- ⚠️ **Ein Wortlaut-Fund vor Freigabe:** Viviens Zusatz „ENDSTAND" in der
+  Tafel-Kopfleiste wurde auf Neles Urteil ERSATZLOS gestrichen — „Endstand" ist im
+  Produkt der reservierte Begriff für EINSEITIG gemeldete Ergebnisse
+  (`lib/matchScore.js`, state "final"); neben gefüllter Beleg-Lampe wäre das dieselbe
+  Begriffsmischung, die am 18.08. aus der StepFeed-Tour-Karte entfernt wurde. Das
+  „BELEGT"-Label unter der Lampe bleibt (nie Farbe allein).
+- **Kanal `whatsapp`** (`hoopsgermany.de/?src=whatsapp`): Erfassung Ende-zu-Ende am
+  Code verifiziert (AnalyticsTracker fängt src auf jeder Seite, sessionStorage →
+  playerregister `signupSource`; SIGNUP_SOURCE_RE passt) — zählt automatisch als
+  eigene Zeile im Kampagnen-Trichter. Kein Produktcode geändert.
