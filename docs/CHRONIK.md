@@ -5989,3 +5989,20 @@ die Tryout-Dedup.
   Beleg-Zeile und Subline unangetastet (Neles Platz-Regel). WhatsApp-Nachricht
   (Hauptfassung) um Feed-Satz und Bewerbungsmappen-Brücke erweitert, Kurzfassung
   bewusst unverändert. Dateien wie gehabt in ~/Projekte/Hoops-Marketing/Tester-Akquise/.
+
+#### Nachtrag (27.08.2026) — Zweites Sharepic der Serie: „Team gründen / Team-Admin erklärt"
+
+- Auftrag Patrick: ein Flyer, der die Team-Admin-Rolle für jeden erklärt (gegen
+  Duplikat-Gründungen; Gründer soll wissen, dass er Admin ist, was er kann und dass
+  Rechte übertragbar sind). Nele (Konzept, Fakten am Produkt verifiziert:
+  set-member-admin, transfer-team-admin, KaderTab-Wortlaute, „kurze Prüfung durch
+  das Hoops-Team") + Vivien (Bau):
+  `~/Projekte/Hoops-Marketing/Tester-Akquise/whatsapp-sharepic-teamadmin.png`
+  (1080×1350, Serie zu Bild 1; Tafel „PRO TEAM · 1 · GRÜNDER = TEAM-ADMIN",
+  Headline „EINER GRÜNDET. ALLE SPIELEN.", Block ADMIN-JOB/CO-ADMINS/ÜBERGEBEN,
+  Fußnote Prüfhinweis). `render-sharepic.mjs` parametrisiert (beide Bilder, ein
+  Skript). Begleitzeile für den Folge-Post in WHATSAPP-NACHRICHT-2026-08-27.md
+  ergänzt; Kanal bleibt `whatsapp` (Ein-Wert-je-Kanal-Regel). Perspektiv-Check
+  Nele: Der Mitspieler, der nicht gründen will, wird von der Headline
+  freigesprochen; der Gründer kennt danach Rolle, Mini-Aufwand und Ausweg
+  (Übergabe). Kein Versand — macht Jonatan selbst.
