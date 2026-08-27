@@ -5977,3 +5977,15 @@ die Tryout-Dedup.
   Code verifiziert (AnalyticsTracker fängt src auf jeder Seite, sessionStorage →
   playerregister `signupSource`; SIGNUP_SOURCE_RE passt) — zählt automatisch als
   eigene Zeile im Kampagnen-Trichter. Kein Produktcode geändert.
+
+#### Nachtrag (27.08.2026) — Sharepic-Erweiterung auf Patricks Feedback
+
+- Patrick wollte das ZIEL hinter der Doppelbestätigung und die Community-Seite auf
+  dem Bild. Nele (Wortlaute) + Vivien (Layout): neue Subline „Aus bestätigten
+  Spielen wird dein Profil: Zahlen, die dir ein Verein glauben muss — sichtbar,
+  sobald einer sucht" (die freigegebene Transfermarkt-Ehrlichkeits-Fassung — keine
+  wartenden Scouts versprochen) + Dreizeilen-Block NEWS/POSTEN/FOLGEN im
+  Boxscore-Muster des Flyers. Headline 150→100 px als freigegebene Stellschraube;
+  Beleg-Zeile und Subline unangetastet (Neles Platz-Regel). WhatsApp-Nachricht
+  (Hauptfassung) um Feed-Satz und Bewerbungsmappen-Brücke erweitert, Kurzfassung
+  bewusst unverändert. Dateien wie gehabt in ~/Projekte/Hoops-Marketing/Tester-Akquise/.
