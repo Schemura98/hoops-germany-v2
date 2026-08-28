@@ -28,12 +28,33 @@ export default function TeamCreatePage() {
   const [leagueFilter, setLeagueFilter] = useState({ level: "", gender: "Herren", ageGroup: "Senioren" });
   const [leagueId, setLeagueId] = useState("");
 
-  // Verwaltet der Spieler schon ein Team? → direkt ins Admin-Panel
+  // Verwaltet der Spieler schon ein Team? → direkt ins Admin-Panel.
+  // ⚠️ NICHT mehr wortlos (Roadmap 35, Befund Patrick 22.08.2026): Der
+  // Query-Param sagt der Zielseite, dass sie erklären soll, warum man dort
+  // gelandet ist — vorher musste der Nutzer selbst schließen, dass er schon
+  // einen Verein verwaltet.
   useEffect(() => {
     if (player?.isTeamAdmin && player?.teamAdminOf) {
-      router.replace("/team/admin");
+      router.replace("/team/admin?hinweis=schon-admin");
     }
   }, [player, router]);
+
+  // Stadt/Region und Bundesland aus dem Profil vorbelegen (Befund Lina M1,
+  // Freigabe Patrick 28.08.2026): Der typische Gründer hat beides zwei Minuten
+  // vorher in der Tour angegeben, und die Liga-Auswahl unten filtert nach dem
+  // Bundesland — ohne Vorbelegung sah er den bundesweiten Katalog statt seiner
+  // Ligen. Überschreibbar (Vereins-Ort kann vom Wohnort abweichen), und nur in
+  // LEERE Felder: Während der Spinner steht, kann niemand tippen (das Formular
+  // rendert erst bei status "ready"), aber die Schranke schützt auch gegen
+  // künftige Umbauten der Ladereihenfolge.
+  useEffect(() => {
+    if (!player) return;
+    setForm((f) => ({
+      ...f,
+      region: f.region || player.hometown || "",
+      bundesland: f.bundesland || player.bundesland || "",
+    }));
+  }, [player]);
 
   // Offiziellen Liga-Katalog laden
   useEffect(() => {

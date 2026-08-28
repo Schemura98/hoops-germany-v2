@@ -9,6 +9,7 @@ import {
   PiMegaphoneBold,
   PiGearBold,
   PiBasketballBold,
+  PiXBold,
 } from "react-icons/pi";
 import { useCurrentTeam } from "@/lib/useCurrentTeam";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
@@ -42,6 +43,12 @@ export default function TeamAdminPage() {
   // Was ist offen? – Zahlen aus denselben Endpunkten, die auch die Tabs füttern.
   const { aufgaben, status: aufgabenStatus, reload: reloadAufgaben } = useTeamAufgaben(team);
   const [active, setActive] = useState("kader");
+  // Einmaliger Hinweis, wenn man über „Team gründen" hierher umgeleitet wurde
+  // (Roadmap 35, Befund Patrick 22.08.2026): Die Weiterleitung selbst bleibt —
+  // sie schützt vor versehentlichen Zweitvereinen —, aber sie erklärt sich
+  // jetzt. Nur per Query-Param, wegklickbar, nicht persistent: Wer die Seite
+  // normal aufruft, sieht nichts.
+  const [schonAdminHinweis, setSchonAdminHinweis] = useState(false);
   const tabBarRef = useRef(null);
   const tabRefs = useRef({});
 
@@ -62,8 +69,10 @@ export default function TeamAdminPage() {
 
   // Tab-Deeplink: ?tab=ergebnisse (z.B. aus Mail/Benachrichtigung).
   useEffect(() => {
-    const t = new URLSearchParams(window.location.search).get("tab");
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get("tab");
     if (t && TABS.some((x) => x.key === t)) setActive(t);
+    if (params.get("hinweis") === "schon-admin") setSchonAdminHinweis(true);
   }, []);
 
   // Falls der aktive Tab nicht (mehr) erlaubt ist → ersten erlaubten wählen.
@@ -120,6 +129,35 @@ export default function TeamAdminPage() {
             {team?.region ? ` · ${team.region}` : ""}
           </p>
         </div>
+
+        {/* Wortlaut Nele, 28.08.2026 — bewusst OHNE die Aufzählung
+            „Kader, Spiele, Ergebnisse": Die Umleitung trifft auch Co-Admins
+            mit Teilrechten, und der Kasten darf keine Fläche versprechen, die
+            dieser Leser nicht hat (dieselbe Regel wie die Tour-Filterung). */}
+        {schonAdminHinweis && (
+          <div className="mb-6 flex items-start justify-between gap-3 rounded-md border border-navy-600 border-t-2 border-t-brand-500 bg-navy-800 px-4 py-3.5">
+            <div>
+              <p className="text-sm font-semibold text-paper-50">Du bist hier richtig</p>
+              <p className="mt-1 text-sm text-mist-300">
+                Du verwaltest bereits{" "}
+                <span className="font-semibold text-paper-50">
+                  {team?.teamName || "dein Team"}
+                </span>{" "}
+                – deshalb hat dich &bdquo;Team gründen&ldquo; direkt hierher gebracht, damit
+                nicht versehentlich ein zweites Team entsteht. Alles rund um dein Team
+                erledigst du auf dieser Seite.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSchonAdminHinweis(false)}
+              aria-label="Hinweis schließen"
+              className="-mr-1 -mt-1 flex-shrink-0 rounded-sm p-2 text-mist-400 transition-colors hover:text-paper-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+            >
+              <PiXBold />
+            </button>
+          </div>
+        )}
 
         {team?.approved === false && (
           <div className="mb-6 rounded-md bg-signal-wait/10 border border-signal-wait/50 p-4">
