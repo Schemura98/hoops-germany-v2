@@ -6102,3 +6102,12 @@ die Tryout-Dedup.
   Fenster) + 5 undatierte Entscheidungen (Folge-Post, Admin-Tour-Fragen,
   Anwaltstermin F7/F8, Betreiber-Anschrift, Druck-Checkliste). Je mit
   Kontext-Notiz; Pflege auf Zuruf („aktualisiere meine Hoops-Erinnerungen").
+
+#### Nachtrag (28.08.2026) — Deploy `f4c5d63` + Prod-Seed + Live-Nachmessung
+
+- Deployt (pull/build/restart, kein Dependency-Diff). Server verifiziert auf `f4c5d63`.
+- Prod-Seed KLH Niers: dry (DB-Name hoops_prod kontrolliert) → echt („angelegt") →
+  dry („update") — Idempotenz auf Prod belegt.
+- **Live nachgemessen:** 16 Routen je 200 · /api/leagues liefert die KLH Niers genau
+  EINMAL (Saison 2026/27, official true, 0 Teams) · PM2 online, kein neuer
+  Fehlerlog-Eintrag seit dem Neustart (Log-Zeitstempel 2,5 h vor dem Deploy).

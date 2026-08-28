@@ -3,7 +3,7 @@
 
 ---
 
-## 0. AKTUELLER STAND (Überblick · Stand 23.08.2026 abends)
+## 0. AKTUELLER STAND (Überblick · Stand 28.08.2026)
 
 > 🟢 **v2 IST LIVE auf https://hoopsgermany.de** (seit 24.06.2026, aktueller Live-Stand
 > **`614e01f`** vom 23.08.2026 abends). Hostinger-VPS `92.113.25.249`
@@ -12,6 +12,41 @@
 > DB `test`) → Rollback = Nginx zurück auf 3000. Deploy: `cd /root/hoops-v2 && git pull && npm run build &&
 > pm2 restart hoops-v2` (bei neuen Dependencies vorher `npm install`). Claude-SSH-Key `~/.ssh/hoops_vps`
 > (lokal); VPS-Repo-Zugang via Deploy-Key (SSH-Alias `github-hoops`).
+> ✅ **DEPLOYT: `f4c5d63` (28.08.2026) — DAS VOR-TESTSTART-PAKET IST LIVE (Freigabe
+> Patrick „mach 1–3"), UND DIE ECHTE KLH NIERS LIEGT AUF PROD.** Beide Gates
+> freigabefähig OHNE Auflagen (Chronik-Eintrag 28.08. mit allen Befunden). Die drei
+> Punkte: **(1)** `/team/create` belegt Stadt/Region + Bundesland aus dem Profil vor
+> (Befund Lina M1; nur leere Felder, überschreibbar — die Liga-Auswahl filtert sofort).
+> **(2) Roadmap 35 ERLEDIGT:** Die Weiterleitung Team-gründen→`/team/admin` für
+> bestehende Admins erklärt sich jetzt (`?hinweis=schon-admin`, einmaliger
+> wegklickbarer Kasten „Du bist hier richtig" mit Teamnamen; Wortlaut Nele, bewusst
+> ohne Flächen-Aufzählung wegen Co-Admin-Teilrechten). **(3)** Die ECHTE „Kreisliga
+> Herren (KLH Niers)" 2026/27 im offiziellen Katalog
+> (`scripts/seed-kreisliga-niers-echt.mjs`, TeamSL Liganr. 507200, Quelle
+> `docs/VEREINE-KREIS-NIERS-2026-08-22.md`; ohne Teams — Vereine treten selbst bei,
+> Demo-Ligen unangetastet, league-catalog-Skill durchlaufen).
+> ✅ Suite **380 grün / 0 rot / 1 übersprungen** (381 in 41 Dateien; neuer Wächter
+> `tests/e2e/team-create-vorbelegung.spec.mjs`, 4 Fälle, Mutationsmatrix 5/5) ·
+> design-audit-Baseline 144/183 (die eine bewusste Hinweiskasten-Zeile). Zuvor am
+> selben Tag: Wächter-Fix `newsfeed-mobil` (`c39d756` — Mess-Race, Produkt gesund)
+> und die Voll-Prüfung auf Patricks Auftrag (Chronik 27.08.: Tobias-Rundgang inkl.
+> Stats-Weg beidseitig nachgerechnet, Lina-Onboarding-Urteil „schlüssig").
+> ✅ **Live nachgemessen (28.08.2026):** Server auf `f4c5d63` (am Server verifiziert) ·
+> 16 Routen je 200 · KLH Niers auf `hoops_prod` genau EINMAL (2026/27, official,
+> 0 Teams; Seed dry→echt→dry:update, Idempotenz auf Prod belegt) · PM2 online, kein
+> neuer Fehlerlog-Eintrag seit dem Neustart · kein npm install nötig.
+> ⚠️ **Offen aus dieser Runde (alle niedrig):** KLH Niers fehlt in der kuratierten
+> `/ligen`-STARTANSICHT (nur über Kreisligen-Chip erreichbar — Auffindbarkeit vs.
+> Kuratierung für die Kreis-Niers-Kampagne → Ronja/Nele) · X-Knopf des
+> Hinweiskastens 32×32 px (Familie Roadmap 32 b → Vivien) · `history.replaceState`
+> nach Lesen des hinweis-Params (Kasten kommt bei Reload wieder; sagt nichts
+> Falsches → Kai-Empfehlung) · Leerfall „Konto ohne Profilort" ungeprüft (kein
+> solches Dev-Konto → Kai per Seed-Vorbedingung) · Seed-Randnotiz: `active:true`
+> nur im Insert-Zweig.
+> 📱 **Apple-Erinnerungen für Patrick (28.08.2026):** iCloud-Liste „Hoops Germany",
+> 14 Einträge (9 datierte Meilensteine 30.08.–19.12. + 5 offene Entscheidungen, je
+> mit Kontext-Notiz) — Pflege auf Zuruf („aktualisiere meine Hoops-Erinnerungen").
+>
 > ✅ **Beide Startaufträge der Übergabe `docs/UEBERGABE-2026-08-23.md` sind ERLEDIGT
 > und DEPLOYT** (Team-Admin-Tour gebaut; Signup-Feldmotiv durch beide Gates) — s. den
 > ✅-Block direkt hierunter. Die Übergabe-Datei ist damit Historie.
@@ -1963,7 +1998,9 @@
 > (**Newsfeed-Umbau**: Spieltag-Leiste am Kopf; Footer mit Impressum/Datenschutz, das fehlte dort
 > völlig; `h1`; mobil beginnt der Feed 500 px weiter oben), `27a04fe` (Kaderplatz-Freigabe, acht
 > Wege), `e7a38ce`, `275f124` (Nachtschicht).
-> **Rollback-Kette:** `614e01f` (aktuell live seit 23.08.2026 abends — Admin-Tour-Wächter + Gate-Berichte) →
+> **Rollback-Kette:** `f4c5d63` (aktuell live seit 28.08.2026 — Vor-Teststart-Paket + Wächter) →
+> `46f7384` (Vorbelegung/Weiterleitung/KLH-Niers-Seed) → `c39d756` (Wächter-Fix newsfeed-mobil; dazwischen nur Doku `28ea26f`, `6874666`, `3942a06`, `f4b7860`) →
+> `614e01f` (Stand davor, live bis 28.08.2026 — Admin-Tour-Wächter + Gate-Berichte) →
 > `1110fdf` (Team-Admin-Tour) → `89f0de8` (Signup-Feldmotiv + Tour-Konzept; dazwischen nur Doku `5204569`, `98e95c2`, `ebdbae2`) →
 > `f8c67b4` (Stand davor, live bis 23.08.2026 abends — Anzeigetafel-Runde) →
 > `248d5e3` (Spieler-/Vereinsseiten-Pakete A–D; dazwischen nur Doku `d9e2605`, `907d436`) →
@@ -2798,7 +2835,13 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
     und zurück, Rückkehrposition gegen Ausgangsposition — **mit Ehrlichkeitsschranke „war ich
     vorher überhaupt unten?"**, sonst ist der Test grün, ohne gemessen zu haben.
 
-35. ⚠️ **Die Weiterleitung von `/team/create` nach `/team/admin` ist STUMM** (Befund Patrick,
+35. ✅ **ERLEDIGT (28.08.2026, `46f7384`, deployt mit `f4c5d63`):** Die Weiterleitung trägt
+    jetzt `?hinweis=schon-admin`, und `/team/admin` zeigt einmalig einen wegklickbaren
+    Kasten „Du bist hier richtig" mit dem Teamnamen (Wortlaut Nele; Kai-Wächter V3/V4 in
+    `tests/e2e/team-create-vorbelegung.spec.mjs`). Der 15.08.-Hinweis für KADER-Mitglieder
+    existierte weiter (app/team/create/page.js) — er griff nur nie für ADMINS, weil die vor
+    dem Rendern umgeleitet werden; genau diese Lücke ist jetzt geschlossen.
+    **Historischer Befund:** ~~Die Weiterleitung ist STUMM~~ (Befund Patrick,
     22.08.2026, beim Google-Test). Wer bereits einen Verein verwaltet und „Team gründen" klickt,
     landet ohne jede Meldung in der Vereinsverwaltung. Fundstelle `app/team/create/page.js:33`.
     ⚠️ **Der Hinweis war gebaut und ist in CLAUDE.md seit dem 15.08. als erledigt geführt** — er
