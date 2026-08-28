@@ -6056,3 +6056,49 @@ die Tryout-Dedup.
   Spiel oder danach in Ruhe: Daraus werden ihre Profil-Zahlen."; ERGEBNIS-Zeile
   gekürzt, Ergebnis- und Box-Score-Botschaft bewusst getrennt; Hauptnachricht
   unverändert — Mechanik ist eine Admin-Botschaft).
+
+#### Update (28.08.2026) — Vor-Teststart-Paket (Freigabe Patrick: „mach 1–3") + Apple-Erinnerungen
+
+- **Patricks Frage „was noch vor dem Test-Start?"** → Empfehlung mit drei Punkten,
+  alle freigegeben und umgesetzt (Commit `46f7384`):
+  **(1)** `/team/create` belegt Stadt/Region + Bundesland aus dem Profil vor
+  (Befund Lina M1; nur in leere Felder, überschreibbar — die Liga-Auswahl filtert
+  damit sofort auf die eigenen Ligen). **(2)** Roadmap 35 erledigt: Die
+  Weiterleitung Team-gründen→/team/admin für bestehende Admins erklärt sich jetzt —
+  `?hinweis=schon-admin` + einmaliger wegklickbarer Kasten „Du bist hier richtig"
+  mit Teamnamen (Wortlaut Nele, bewusst ohne Flächen-Aufzählung wegen
+  Co-Admin-Teilrechten). **(3)** `scripts/seed-kreisliga-niers-echt.mjs`: die
+  ECHTE „Kreisliga Herren (KLH Niers)" 2026/27 als official-Katalogeintrag
+  (TeamSL Liganr. 507200, Datenquelle docs/VEREINE-KREIS-NIERS-2026-08-22.md;
+  league-catalog-Skill durchlaufen, idempotenter Upsert, ohne Teams — die Vereine
+  treten selbst bei, Demo-Ligen unangetastet). Auf Dev gelaufen (dry→neu→dry:update).
+- **Beide Gates freigabefähig OHNE Auflagen.** Tobias (echtes Chromium, Vorschau-
+  Fläche hing erneut): Vorbelegung auf 360+1280 exakt wie beauftragt, Überschreib-
+  Probe („Viersen" überlebt Wartezeit und Filterwechsel), Hinweiskasten vollständig
+  im 360er-Fenster inkl. Tastaturweg, KLH Niers auf /ligen korrekt („Saison 2026/27
+  · 0 Teams", In Vorbereitung), 0 Fehler, 0 Schreibspuren. Kai: Security sauber
+  (Vorbelegung überschreibt nie — auch nicht beim echten hg:player-updated-Re-Lauf,
+  gemessen; Query-Param täuschungssicher, Kasten zeigt nur Server-Zustand des
+  eingeloggten Admins; Seed beschädigt nichts, $setOnInsert schützt Bestandsfelder),
+  neuer Wächter `tests/e2e/team-create-vorbelegung.spec.mjs` (4 Fälle,
+  Mutationsmatrix 5/5 einzeln, Sollwerte aus der API, Ehrlichkeitsschranke
+  „wertlos statt bestanden" wenn der Katalog nichts eingrenzt). Suite **380 grün /
+  0 rot / 1 übersprungen** (381 in 41 Dateien) · design-audit-Baseline nachgezogen
+  (Panels 143→144 / 182→183 — die EINE bewusste Kasten-Zeile).
+- **Niedrig offen aus den Gates:** KLH Niers fehlt in der kuratierten
+  /ligen-STARTANSICHT (nur über Kreisligen-Chip; „In Vorbereitung"-Kuratierung —
+  → Ronja/Nele: Auffindbarkeit vs. Kuratierung für die Kreis-Niers-Kampagne) ·
+  X-Knopf des Hinweiskastens 32×32 px (Familie Roadmap 32 b → Vivien) ·
+  Kai-Empfehlung: history.replaceState nach dem Lesen des hinweis-Params (Kasten
+  kommt sonst bei Reload/Zurück wieder — sagt nichts Falsches, niedrig) ·
+  Leerfall „Konto ohne Profilort" ungeprüft (kein solches Dev-Konto; Kai kann per
+  Seed-Vorbedingung nachziehen) · Seed-Randnotiz: active:true nur im Insert-Zweig
+  (Reaktivierung braucht Handarbeit — beim Prod-Lauf wissen).
+- **Apple-Erinnerungen für Patrick angelegt** (Auftrag: Roadmap unterwegs im
+  Blick): iCloud-Liste „Hoops Germany", 14 Einträge — 9 datierte Meilensteine
+  (30.08. Admin-Passwörter · 31.08. WhatsApp-Start · 12.09. isInternal-Kontrolle ·
+  29.09. TeamSL-Gegenprobe · 03.10. Saisonstart/Messstrecke · 08.11. Kohorten-
+  Stichtag · 30.11. Zwischenstand · 14.12. WERTUNG/Go-No-Go · 19.12. Cutover-
+  Fenster) + 5 undatierte Entscheidungen (Folge-Post, Admin-Tour-Fragen,
+  Anwaltstermin F7/F8, Betreiber-Anschrift, Druck-Checkliste). Je mit
+  Kontext-Notiz; Pflege auf Zuruf („aktualisiere meine Hoops-Erinnerungen").

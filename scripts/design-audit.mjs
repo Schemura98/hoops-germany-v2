@@ -32,7 +32,7 @@ const TOKEN_FILE = path.join(REPO, "lib", "ui.js");
 // Der Hero-Umbau selbst hat die Zahl der handgebauten Panels GESENKT
 // (143→141 strikt, 184→182 weit), weil er zwei Komponenten gelöscht hat.
 const BASELINE = {
-  datum: "23.08.2026",
+  datum: "28.08.2026",
   importe: {
     // ConfirmAction 3 -> 4 am 22.08.2026: Der Loeschweg fuer eigene Beitraege
     // und Kommentare (Roadmap 37) benutzt das Primitiv, statt eine eigene
@@ -84,8 +84,13 @@ const BASELINE = {
   // und die Zitat-Karte in AdminTour.js – wörtlich dieselbe abgenommene Form,
   // die WelcomeTour/StepFeed schon tragen (dort zählen sie ebenfalls von
   // Hand). Bewusste Zitate, kein Drift durch Nachlässigkeit.
-  panelsStrikt: 143,
-  panelsWeit: 182,
+  // 143 -> 144 / 182 -> 183 am 28.08.2026 (Gate Kai, Stapel 46f7384):
+  // Der einmalige "Du bist hier richtig"-Hinweiskasten in
+  // app/team/admin/page.js (erklaerte Weiterleitung, Roadmap 35) nutzt die
+  // sanktionierte border-t-brand-Kastenform — EINE bewusste neue
+  // bg-navy-800-Zeile, kein Drift.
+  panelsStrikt: 144,
+  panelsWeit: 183,
 };
 
 const ARGS = new Set(process.argv.slice(2));

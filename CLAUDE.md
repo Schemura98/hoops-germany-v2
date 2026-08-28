@@ -2326,6 +2326,10 @@ Was auf der Plattform steht, folgt weiterhin der Kernpositionierung und Neles To
   (Button 25→27, CountUp 5→6, Reveal 11→13): Die zwei handgebauten Suchfelder der
   Listenseiten nutzen `inputClassSm`, der Beitritts-Link der Teamseite das Button-Primitiv,
   der Einlade-Kasten im KaderTab die sanktionierte navy-600+border-t-brand-Form.
+  ✅ **Nachgezogen 28.08.2026 (Gate Kai, Stapel `46f7384`): strikt 144, weit 183.**
+  Die eine neue Zeile ist der einmalige „Du bist hier richtig"-Hinweiskasten in
+  `app/team/admin/page.js` (erklärte Weiterleitung, Roadmap 35) — bewusste Nutzung
+  der sanktionierten border-t-brand-Kastenform, kein Drift.
   ⚠️ **Blindstelle des Zählers, von Kai belegt:** Eine LOKALE Variable mit demselben Namen
   wie ein Token (`CityInput.js` hatte ein eigenes `inputClass` OHNE Flächenfarbe) zählt als
   Token-Nutzung — genau so hat das „13. graue Feld" die Zwölf-Felder-Reparatur vom 22.08.
