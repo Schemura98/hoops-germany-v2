@@ -6111,3 +6111,32 @@ die Tryout-Dedup.
 - **Live nachgemessen:** 16 Routen je 200 · /api/leagues liefert die KLH Niers genau
   EINMAL (Saison 2026/27, official true, 0 Teams) · PM2 online, kein neuer
   Fehlerlog-Eintrag seit dem Neustart (Log-Zeitstempel 2,5 h vor dem Deploy).
+
+#### Update (07.09.2026) — Sponsoren-Akquise-Deck in Canva (außerhalb des Repos)
+
+- Auftrag Patrick: Präsentation zur Sponsoren-AKQUISE über den Canva-Konnektor, vorher
+  Inspiration aus modernen Basketball-/Sport-Designs. Nele (Inhalt: 10 Folien, Dramaturgie
+  Beweisproblem → Mechanismus → Founding-Partner-Angebot → Spieltag als nächster Schritt;
+  keine Nutzerzahlen, Beweis = Mechanismus + ehrlicher Report) · Vivien (Trend-Sweep Stufe L:
+  Broadcast-Scorebug-Umbau 2025, Unrivaled-Aktivierung im Produkt, Anti-Referenzen
+  Foto-Decks/Gradient-Startup-Decks; Canva-Style-Brief + Prüfliste;
+  `~/Projekte/Hoops-Marketing/Sponsoren-Deck/INSPIRATION-SPONSOREN-DECK-2026-09-07.md`) ·
+  Nora (Vorprüfung: Deck zeigen/Interesse abfragen ja, Rechnung/Zahlung/Vertrag vor
+  Gewerbeanmeldung nein; „Interessensbekundung" statt LOI; Werbeaussagen-Leitplanken;
+  ⚠️ dokumentierte Akquise macht die Gewerbeanmeldung DRINGLICHER — ORANGE; Nebenbefund:
+  Impressum zitiert § 55 RStV statt § 18 MStV → Anwaltstermin).
+- Canva: Gliederung von Patrick im Widget freigegeben → generate-design-structured (4
+  Kandidaten, Entwurf 3 gewählt) → Nachbearbeitung per Edit-Transaktion auf allen Folien:
+  erfundene „95 %"-Statistik, KI-Illustration, Kauderwelsch-Mockups, 6 Orange-Kleckse,
+  Dummy-Kontakte entfernt; alle Texte auf Neles Wortlaut; Anzeigetafel auf der Mechanik-
+  Folie aus Formen nachgebaut (Gehäuse/Kopfleiste/2 Fenster 74:71/Beleg-Lampe/
+  „BEISPIELDATEN · TESTPHASE"); Angebotsfolie mit Noras Rahmentext; Schlussfolie (fehlte)
+  neu angelegt mit Pflicht-Disclaimer. Design-ID DAHUd1XaANI, 11 Folien; Exporte PDF+PPTX
+  im Ordner `~/Projekte/Hoops-Marketing/Sponsoren-Deck/`; Sprechernotizen + Rechtsrahmen
+  in `SPRECHERNOTIZEN-UND-RECHTSRAHMEN-2026-09-07.md`.
+- Offen: Fonts sind Canva-Standard (kein Font-Wechsel per Konnektor; Big Shoulders/Inter/
+  IBM Plex Mono in Canva umstellbar) · Preis/Laufzeit Folie 10 (Patrick) · Logo auf der
+  Titelfolie · Z5-Nachtrag im Zielgruppen-Papier (Gespräch → aktive Akquise; nur mit
+  Patrick) · Report-Link erst nach dem „+100 %"-Fix nach außen (Kai) · Liga-Zahl vor
+  externer Nutzung auf Prod zählen (Kai). Apple-Erinnerung „Gewerbeanmeldung klären — vor
+  dem ersten Sponsoren-Gespräch" angelegt.
