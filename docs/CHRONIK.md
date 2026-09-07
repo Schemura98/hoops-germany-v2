@@ -6140,3 +6140,49 @@ die Tryout-Dedup.
   Patrick) · Report-Link erst nach dem „+100 %"-Fix nach außen (Kai) · Liga-Zahl vor
   externer Nutzung auf Prod zählen (Kai). Apple-Erinnerung „Gewerbeanmeldung klären — vor
   dem ersten Sponsoren-Gespräch" angelegt.
+
+### 07.09.2026 — Sponsoren-Deck: Feinschliff-Runde Nele + Vivien + Nora (kein Produktcode)
+- Auftrag Patrick: „Nele und Vivien sollen die Feinschliff-Runde am Deck machen und gib
+  realistische Preise vor." Nele: alle Folientexte nachgezogen, Preisvorschlag
+  600 €/Saison (= 50 €/Monat), Kategorie-Exklusivität 900 €/Saison, Founding-Preisschutz,
+  Rückfall 300 € „Unterstützer" NUR mündlich; Vorschlag höchstens 5 Founding-Plätze
+  (Marktanker: Kreisliga-Bande 250–500 €, Bezirksliga 400–900 €; Sekundärquellen, keine
+  Hoops-eigenen Daten — wichtigste Frage an Jonatan: Scorpions-Bandenpreis).
+- Vivien: Logo (Asset MAHUdyHAhbk) auf Titel/Schluss, Angebotsfolie neu gesetzt (Preis
+  als Tafelzahl in Brand-Orange, Plaketten LAUFZEIT/START/BEITRAG/OPTION/FOUNDING-PREIS/
+  LEISTUNGEN), Kontraste, Zeilenlängen. Grenze: kein Font-Wechsel über den Konnektor —
+  Big Shoulders/Geist per Brand Kit → Textstile → „Auf alle Seiten anwenden" (Patrick, 5 Min).
+- Nora (2. Runde) → Folie 10 nachgezogen: „dauerhaft eingefroren" als Option des
+  Partners; „Zahlung einmal je Saison" (keine Raten-Lesart); „Gesamtpreis 900 €";
+  Fußzeile mit Umsatzsteuer-Vorbehalt (Kleinunternehmer-Frage → Steuerberater).
+  Committet in Canva DAHUd1XaANI, PDF (11 Seiten) + PPTX neu exportiert nach
+  `~/Projekte/Hoops-Marketing/Sponsoren-Deck/`, Vorfassung in `_archiv-vor-feinschliff/`.
+- Entscheidungen bei Patrick: Preise (600/900, 300 mündlich), Founding-Plätze (5?),
+  ob Preisschutz überhaupt; Viviens offene Fragen F1 (Versalien-Plaketten) und F5
+  („Jonatan" vs. „wir" auf der Team-Folie).
+
+### 07.09.2026 — Monetarisierungspfad durchgerechnet (Mats + Nele, kein Produktcode)
+- Auftrag Patrick nach dem Sponsoren-Deck („dir ist bewusst, dass ich damit Millionär werden
+  will?" → „lass Mats und Nele den Monetarisierungspfad durchrechnen"). Pipeline: erst Mats
+  (Belegbasis), dann Nele (Rechnung auf seinen Zahlen).
+- `docs/MARKT-MONETARISIERUNG-2026-09-07.md` (Mats, 324 Z., jede Zahl mit Quelle+Datum,
+  [BELEGT]/[INDIZ]/[HYPOTHESE]): 288.444 Basketball-Mitgliedschaften DE (1/28 des Fußballs,
+  41 % unter 16) · WBV ~68.000/411 Vereine/22 Kreise, Kreisligen-Zahl NICHT belegbar ·
+  Werbeerlös 0,07–0,51 €/Nutzer/Jahr (FuPa/Sofascore) · Kreisliga-Sponsoring-Anker Bande
+  250–500 €, Trikot 300–800 € · Team-Orga-Apps 0–5 €/Team/Monat (bestätigt „NICHT gebraucht") ·
+  Scouting-Zahlungsbereitschaft nur mit Aufstiegsambition · Exit-Multiplikator je Nutzer nicht
+  belegbar. ⚠️ Korrektur an meinem Briefing: eine FuPa-Übernahme durch Burda/Funke ist NICHT
+  belegbar (nur Anzeigenvermarktung fusioniert) — nirgends verwenden. Ronja-Prüfliste E1–E7,
+  Interview-Vorlage Zahlungsbereitschaft.
+- `docs/MONETARISIERUNGSPFAD-2026-09-07.md` (Nele, 633 Z., Summen nachgerechnet): vier
+  Erlösstufen (Sponsoring → B2B-Datenzugang → Lizenz/Partner → Werbung als Deckel), drei
+  Szenarien Jahr 5: konservativ 8.400 € · plausibel 55.400 € · ambitioniert 254.500 €
+  (letzteres nur mit Fläche ab S4, gegen „Dichte vor Fläche"). Million: als Jahresumsatz im
+  DE-Amateur-Basketball nicht erreichbar; kumulierter Gewinn frühestens Jahr 8–10 ambitioniert;
+  Unternehmenswert ohne belegten Käufer. Vorschlag: Entscheidungs-Gate „Fläche" Sommer 2028
+  mit fünf vorab fixierten Kriterien (Basketball-Fläche / zweite Sportart / Ausland erst dann).
+  90 Tage: Erfassungstreue M3 ≥ 50 % Kreis Niers · Gewerbe/Rechtsform/Steuerberater/Anwalt ·
+  5 Founding-Gespräche (Ziel 3 Interessensbekundungen) + Scorpions-Bandenpreis. NICHT:
+  Paywall, Werbeflächen, Team-Abo, bundesweite Kampagne, B2B-Suchebene.
+- Offen: 8 Entscheidungen Patrick (§6.1), Rechtsfragen R-1–R-6 → Nora, Mess-Ergänzungen → Ronja,
+  Kostenseite → Ines, Backoffice-Nachtrag → Hanna.
