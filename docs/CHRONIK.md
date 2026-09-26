@@ -6186,3 +6186,12 @@ die Tryout-Dedup.
   Paywall, Werbeflächen, Team-Abo, bundesweite Kampagne, B2B-Suchebene.
 - Offen: 8 Entscheidungen Patrick (§6.1), Rechtsfragen R-1–R-6 → Nora, Mess-Ergänzungen → Ronja,
   Kostenseite → Ines, Backoffice-Nachtrag → Hanna.
+
+### 26.09.2026 — Schwesterprojekt „MMA Germany" (Arbeitstitel) angelegt — außerhalb dieses Repos
+- Patrick will die Hoops-Idee auf MMA in Deutschland übertragen (Quereinsteiger aus
+  Kickboxen/BJJ/Ringen/Judo/Boxen suchen Gyms). Eigener Ordner `~/Projekte/mma-germany`
+  (eigenes Git, kein Code, kein Remote) mit Briefing, Herkunfts-Doku, Startauftrag, Chronik —
+  damit die MMA-Ideen in einem eigenen Chat vertieft werden und dieser Chat Hoops bleibt.
+- Für Hoops ändert sich nichts. Einordnung: Neles Gate „zweite Sportart" (Sommer 2028) wird
+  früher erkundet; Konzeptphase, keine Ressourcen-Umschichtung. Hoops-Dateien werden von dort
+  nur gelesen, nie beschrieben.
